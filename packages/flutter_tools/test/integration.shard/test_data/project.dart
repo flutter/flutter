@@ -11,7 +11,7 @@ import '../../src/package_config.dart';
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
-const String _kDefaultHtml = '''
+const _kDefaultHtml = '''
 <html>
     <head>
         <meta charset='utf-8'>

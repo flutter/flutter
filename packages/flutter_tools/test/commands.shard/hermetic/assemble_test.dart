@@ -87,7 +87,7 @@ void main() {
   testUsingContext(
     'flutter assemble can parse inputs',
     () async {
-      final AssembleCommand command = AssembleCommand(
+      final command = AssembleCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -116,9 +116,7 @@ void main() {
   testUsingContext(
     'flutter assemble sets required artifacts from target platform',
     () async {
-      final AssembleCommand command = AssembleCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',
@@ -141,9 +139,7 @@ void main() {
   testUsingContext(
     'flutter assemble sends assemble-deferred-components',
     () async {
-      final AssembleCommand command = AssembleCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',
@@ -174,9 +170,7 @@ void main() {
   testUsingContext(
     'flutter assemble sends usage values correctly with platform',
     () async {
-      final AssembleCommand command = AssembleCommand(
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final command = AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true)));
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       await commandRunner.run(<String>[
         'assemble',
@@ -233,7 +227,7 @@ void main() {
         AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true))),
       );
 
-      final List<String> command = <String>[
+      final command = <String>[
         'assemble',
         '--output',
         'Output',
@@ -413,7 +407,7 @@ void main() {
       expect(inputs.readAsStringSync(), contains('foo'));
       expect(outputs.readAsStringSync(), contains('bar'));
 
-      final DateTime theDistantPast = DateTime(1991, 8, 23);
+      final theDistantPast = DateTime(1991, 8, 23);
       inputs.setLastModifiedSync(theDistantPast);
       outputs.setLastModifiedSync(theDistantPast);
       await commandRunner.run(<String>[
@@ -447,7 +441,7 @@ void main() {
   );
 
   testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
-    final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
+    final performanceMeasurement = <PerformanceMeasurement>[
       PerformanceMeasurement(
         analyticsName: 'foo',
         target: 'hidden',

@@ -31,9 +31,9 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final CCompilerConfig? cCompilerConfigResult;
   final CCompilerConfig? ndkCCompilerConfigResult;
 
-  int buildInvocations = 0;
-  int linkInvocations = 0;
-  int packagesWithNativeAssetsInvocations = 0;
+  var buildInvocations = 0;
+  var linkInvocations = 0;
+  var packagesWithNativeAssetsInvocations = 0;
 
   @override
   Future<BuildResult?> build({
@@ -42,7 +42,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     BuildResult? result = buildResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final BuildInputBuilder input = BuildInputBuilder()
+      final input = BuildInputBuilder()
         ..setupShared(
           packageRoot: Uri.parse('$package/'),
           packageName: package,
@@ -51,10 +51,10 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
         )
         ..setupBuildInput()
         ..config.setupBuild(linkingEnabled: linkingEnabled);
-      for (final ProtocolExtension extension in extensions) {
+      for (final extension in extensions) {
         extension.setupBuildInput(input);
       }
-      final BuildInput buildConfig = BuildInput(input.json);
+      final buildConfig = BuildInput(input.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
@@ -70,7 +70,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final LinkInputBuilder input = LinkInputBuilder()
+      final input = LinkInputBuilder()
         ..setupShared(
           packageRoot: Uri.parse('$package/'),
           packageName: package,
@@ -78,10 +78,10 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
           outputFile: Uri.file('output.json'),
         )
         ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
-      for (final ProtocolExtension extension in extensions) {
+      for (final extension in extensions) {
         extension.setupLinkInput(input);
       }
-      final LinkInput buildConfig = LinkInput(input.json);
+      final buildConfig = LinkInput(input.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }

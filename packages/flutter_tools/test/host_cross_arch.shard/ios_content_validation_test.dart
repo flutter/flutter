@@ -72,7 +72,7 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
         group('build in ${buildMode.cliName} mode', () {
           late Directory outputPath;
           late Directory outputApp;
@@ -195,7 +195,7 @@ void main() {
               '-',
               infoPlistPath,
             ]);
-            final bool localNetworkUsageFound = localNetworkUsage.exitCode == 0;
+            final localNetworkUsageFound = localNetworkUsage.exitCode == 0;
             expect(localNetworkUsageFound, buildMode == BuildMode.debug);
           });
 
@@ -297,12 +297,8 @@ void main() {
         });
       }
 
-      for (final BuildMode buildMode in <BuildMode>[
-        BuildMode.debug,
-        BuildMode.profile,
-        BuildMode.release,
-      ]) {
-        for (final String arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+        for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
           test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
             final String artifactDir;
             switch (buildMode) {
@@ -475,7 +471,7 @@ void main() {
         expect(output.stdout, contains('Sending archive event if usage enabled'));
 
         // The output contains extra time related prefix, so cannot use a single string.
-        const List<String> expectedValidationMessages = <String>[
+        const expectedValidationMessages = <String>[
           '[!] App Settings Validation\n',
           '    • Version Number: 1.0.0\n',
           '    • Build Number: 1\n',

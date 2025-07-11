@@ -27,7 +27,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
-List<Target> _kDefaultTargets = <Target>[
+var _kDefaultTargets = <Target>[
   // Shared targets
   const CopyAssets(),
   const KernelSnapshot(),
@@ -192,10 +192,10 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argumentResults.rest.first;
-    final Map<String, Target> targetMap = <String, Target>{
+    final targetMap = <String, Target>{
       for (final Target target in _kDefaultTargets) target.name: target,
     };
-    final List<Target> results = <Target>[
+    final results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName)) targetMap[targetName]!,
     ];
@@ -236,7 +236,7 @@ class AssembleCommand extends FlutterCommand {
       output = globals.fs.path.join(_flutterProject.directory.path, output);
     }
     final Artifacts artifacts = globals.artifacts!;
-    final Environment result = Environment(
+    final result = Environment(
       outputDir: globals.fs.directory(output),
       buildDir: _flutterProject.directory
           .childDirectory('.dart_tool')
@@ -260,8 +260,8 @@ class AssembleCommand extends FlutterCommand {
   }
 
   Map<String, String> _parseDefines(List<String> values) {
-    final Map<String, String> results = <String, String>{};
-    for (final String chunk in values) {
+    final results = <String, String>{};
+    for (final chunk in values) {
       final int indexEquals = chunk.indexOf('=');
       if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');
@@ -298,9 +298,9 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    final List<Target> nonDeferredTargets = <Target>[];
+    final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
-    for (final Target target in targets) {
+    for (final target in targets) {
       if (deferredComponentsTargets.contains(target.name)) {
         deferredTargets.add(target);
       } else {
@@ -377,7 +377,7 @@ class AssembleCommand extends FlutterCommand {
     }
     if (argumentResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
-      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+      final depfile = Depfile(result.inputFiles, result.outputFiles);
       _environment.depFileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
     return FlutterCommandResult.success();
@@ -387,12 +387,12 @@ class AssembleCommand extends FlutterCommand {
 @visibleForTesting
 void writeListIfChanged(List<File> files, String path) {
   final File file = globals.fs.file(path);
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   // These files are already sorted.
-  for (final File file in files) {
+  for (final file in files) {
     buffer.writeln(file.path);
   }
-  final String newContents = buffer.toString();
+  final newContents = buffer.toString();
   if (!file.existsSync()) {
     file.writeAsStringSync(newContents);
   }
@@ -405,7 +405,7 @@ void writeListIfChanged(List<File> files, String path) {
 /// Output performance measurement data in [outFile].
 @visibleForTesting
 void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File outFile) {
-  final Map<String, Object> jsonData = <String, Object>{
+  final jsonData = <String, Object>{
     'targets': <Object>[
       for (final PerformanceMeasurement measurement in measurements)
         <String, Object>{

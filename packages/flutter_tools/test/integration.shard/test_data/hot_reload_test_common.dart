@@ -18,7 +18,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadProject project = HotReloadProject();
+    final project = HotReloadProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -45,7 +45,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       // Multiple overlapping hot reloads are debounced and queued.
 
       // Capture how many *real* hot reloads occur.
-      int numReloads = 0;
+      var numReloads = 0;
       final StreamSubscription<void> subscription = flutter.stdout
           .map(parseFlutterResponse)
           .where(_isHotReloadCompletionEvent)
@@ -54,8 +54,8 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       // To reduce tests flaking, override the debounce timer to something higher than
       // the default to ensure the hot reloads that are supposed to arrive within the
       // debounce period will even on slower CI machines.
-      const int hotReloadDebounceOverrideMs = 250;
-      const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
+      const hotReloadDebounceOverrideMs = 250;
+      const delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
 
       Future<void> doReload([void _]) => flutter.hotReload(
         debounce: true,
@@ -79,9 +79,9 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('newly added code executes during hot reload', () async {
-      final StringBuffer stdout = StringBuffer();
-      final Completer<void> sawTick1 = Completer<void>();
-      final Completer<void> sawTick2 = Completer<void>();
+      final stdout = StringBuffer();
+      final sawTick1 = Completer<void>();
+      final sawTick2 = Completer<void>();
       final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
         stdout.writeln(e);
         // Initial run should run the build method before we try and hot reload.
@@ -125,8 +125,8 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       'breakpoints are hit after hot reload',
       () async {
         Isolate isolate;
-        final Completer<void> sawTick1 = Completer<void>();
-        final Completer<void> sawDebuggerPausedMessage = Completer<void>();
+        final sawTick1 = Completer<void>();
+        final sawDebuggerPausedMessage = Completer<void>();
         final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
           if (line.contains('((((TICK 1))))')) {
             expect(sawTick1.isCompleted, isFalse);
@@ -171,7 +171,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
         await flutter.resume();
         await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
-        bool reloaded = false;
+        var reloaded = false;
         final Future<void> reloadFuture = flutter.hotReload().then((void value) {
           reloaded = true;
         });
@@ -202,9 +202,9 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     testWithoutContext(
       "hot reload doesn't reassemble if paused",
       () async {
-        final Completer<void> sawTick1 = Completer<void>();
-        final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
-        final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
+        final sawTick1 = Completer<void>();
+        final sawDebuggerPausedMessage1 = Completer<void>();
+        final sawDebuggerPausedMessage2 = Completer<void>();
         final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
           printOnFailure('[LOG]:"$line"');
           if (line.contains('(((TICK 1)))')) {
@@ -232,7 +232,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         await Future<void>.delayed(const Duration(seconds: 1));
         await sawTick1.future;
         await flutter.addBreakpoint(project.buildBreakpointUri, project.buildBreakpointLine);
-        bool reloaded = false;
+        var reloaded = false;
         await Future<void>.delayed(const Duration(seconds: 1));
         final Future<void> reloadFuture = flutter.hotReload().then((void value) {
           reloaded = true;

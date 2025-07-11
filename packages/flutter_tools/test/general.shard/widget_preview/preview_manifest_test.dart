@@ -25,11 +25,11 @@ void main() {
     late Logger logger;
 
     // The version really doesn't matter, just the format.
-    const String kFakeSDKVersion = '2.1.0-dev.8.0.flutter-4312ae32';
+    const kFakeSDKVersion = '2.1.0-dev.8.0.flutter-4312ae32';
 
     setUp(() {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
-      final FlutterManifest manifest = FlutterManifest.empty(logger: BufferLogger.test());
+      final fs = MemoryFileSystem.test();
+      final manifest = FlutterManifest.empty(logger: BufferLogger.test());
       final Directory projectDir = fs.currentDirectory.childDirectory('project')..createSync();
       projectDir.childDirectory('lib/src').createSync(recursive: true);
       rootProject = FlutterProject(projectDir, manifest, manifest);
@@ -48,7 +48,7 @@ void main() {
 
     testUsingContext('generates a valid manifest', () async {
       previewManifest.generate();
-      final PreviewManifestContents manifest =
+      final manifest =
           json.decode(
                 rootProject.widgetPreviewScaffold
                     .childFile(PreviewManifest.previewManifestPath)
@@ -82,7 +82,7 @@ void main() {
         ),
       );
 
-      const String sdkMismatchMessage =
+      const sdkMismatchMessage =
           'The existing Widget Preview Scaffold was generated with Dart SDK '
           'version 2.1.0 (build 2.1.0-dev.8.0 4312ae32), which does not match the current Dart '
           'SDK version (2.1.0 (build 2.1.0-dev.8.0 4312ae32foo)). Regenerating Widget Preview '

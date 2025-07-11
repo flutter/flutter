@@ -19,9 +19,9 @@ import '../../src/fake_process_manager.dart';
 
 void main() {
   group('installation detection on MacOS', () {
-    const String homeMac = '/Users/me';
+    const homeMac = '/Users/me';
 
-    const Map<String, Object> macStudioInfoPlist3_3 = <String, Object>{
+    const macStudioInfoPlist3_3 = <String, Object>{
       'CFBundleGetInfoString':
           'Android Studio 3.3, build AI-182.5107.16.33.5199772. Copyright JetBrains s.r.o., (c) 2000-2018',
       'CFBundleShortVersionString': '3.3',
@@ -34,7 +34,7 @@ void main() {
       },
     };
 
-    const Map<String, Object> macStudioInfoPlist4_1 = <String, Object>{
+    const macStudioInfoPlist4_1 = <String, Object>{
       'CFBundleGetInfoString':
           'Android Studio 4.1, build AI-201.8743.12.41.6858069. Copyright JetBrains s.r.o., (c) 2000-2020',
       'CFBundleShortVersionString': '4.1',
@@ -48,7 +48,7 @@ void main() {
       },
     };
 
-    const Map<String, Object> macStudioInfoPlist2020_3 = <String, Object>{
+    const macStudioInfoPlist2020_3 = <String, Object>{
       'CFBundleGetInfoString':
           'Android Studio 2020.3, build AI-203.7717.56.2031.7583922. Copyright JetBrains s.r.o., (c) 2000-2021',
       'CFBundleShortVersionString': '2020.3',
@@ -62,7 +62,7 @@ void main() {
       },
     };
 
-    const Map<String, Object> macStudioInfoPlist2022_1 = <String, Object>{
+    const macStudioInfoPlist2022_1 = <String, Object>{
       'CFBundleGetInfoString':
           'Android Studio 2022.1, build AI-221.6008.13.2211.9477386. Copyright JetBrains s.r.o., (c) 2000-2023',
       'CFBundleShortVersionString': '2022.1',
@@ -76,7 +76,7 @@ void main() {
       },
     };
 
-    const Map<String, Object> macStudioInfoPlistEap_2022_3_1_11 = <String, Object>{
+    const macStudioInfoPlistEap_2022_3_1_11 = <String, Object>{
       'CFBundleGetInfoString':
           'Android Studio EAP AI-223.8836.35.2231.9848316, build AI-223.8836.35.2231.9848316. Copyright JetBrains s.r.o., (c) 2000-2023',
       'CFBundleShortVersionString': 'EAP AI-223.8836.35.2231.9848316',
@@ -372,9 +372,7 @@ void main() {
           applicationPlistFolder,
           'Info.plist',
         );
-        const Map<String, Object> jetbrainsInfoPlist = <String, Object>{
-          'JetBrainsToolboxApp': 'ignored',
-        };
+        const jetbrainsInfoPlist = <String, Object>{'JetBrainsToolboxApp': 'ignored'};
         plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
         final String homeDirectoryPlistFolder = fileSystem.path.join(
@@ -703,9 +701,7 @@ void main() {
           studioInApplicationPlistFolder,
           'Info.plist',
         );
-        final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(
-          macStudioInfoPlist2022_1,
-        );
+        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
         plistWithoutVersion['CFBundleShortVersionString'] = '';
         plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
@@ -753,9 +749,7 @@ void main() {
           studioInApplicationPlistFolder,
           'Info.plist',
         );
-        final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(
-          macStudioInfoPlist2022_1,
-        );
+        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
         plistWithoutVersion['CFBundleShortVersionString'] = '99999.99.99';
         plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
@@ -1047,7 +1041,7 @@ void main() {
 
         final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-        const String expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
+        const expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
         expect(studio.version, equals(Version(99999, 99, 99)));
         expect(studio.javaPath, equals(expectedJdkLocationFor2022));
       },
@@ -1061,7 +1055,7 @@ void main() {
     testUsingContext(
       'discovers explicitly configured Android Studio',
       () {
-        const String androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+        const androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
         config.setValue('android-studio-dir', androidStudioDir);
         fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
           ..createSync(recursive: true)
@@ -1084,7 +1078,7 @@ void main() {
   });
 
   group('installation detection on Linux', () {
-    const String homeLinux = '/home/me';
+    const homeLinux = '/home/me';
 
     late Config config;
     late FileSystem fileSystem;
@@ -1101,8 +1095,8 @@ void main() {
     testUsingContext(
       'discovers Android Studio <4.1',
       () {
-        const String studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
-        const String studioInstallPath = '$homeLinux/AndroidStudio';
+        const studioHomeFilePath = '$homeLinux/.AndroidStudio4.0/system/.home';
+        const studioInstallPath = '$homeLinux/AndroidStudio';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1127,8 +1121,8 @@ void main() {
     testUsingContext(
       'discovers Android Studio >=4.1',
       () {
-        const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
-        const String studioInstallPath = '$homeLinux/AndroidStudio';
+        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+        const studioInstallPath = '$homeLinux/AndroidStudio';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1153,10 +1147,10 @@ void main() {
     testUsingContext(
       'discovers when installed with Toolbox',
       () {
-        const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
-        const String studioInstallPath =
+        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
+        const studioInstallPath =
             '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
-        const String pluginsInstallPath = '$studioInstallPath.plugins';
+        const pluginsInstallPath = '$studioInstallPath.plugins';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1182,8 +1176,8 @@ void main() {
     testUsingContext(
       'finds Android Studio 2020.3 bundled Java version',
       () {
-        const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
-        const String studioInstallPath = '$homeLinux/AndroidStudio';
+        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
+        const studioInstallPath = '$homeLinux/AndroidStudio';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1206,8 +1200,8 @@ void main() {
     testUsingContext(
       'finds Android Studio 2022.1 bundled Java version',
       () {
-        const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
-        const String studioInstallPath = '$homeLinux/AndroidStudio';
+        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
+        const studioInstallPath = '$homeLinux/AndroidStudio';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1230,7 +1224,7 @@ void main() {
     testUsingContext(
       'finds bundled Java version when Android Studio version is unknown by assuming the latest version',
       () {
-        const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
+        const configuredStudioInstallPath = '$homeLinux/AndroidStudio';
         config.setValue('android-studio-dir', configuredStudioInstallPath);
 
         fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
@@ -1258,8 +1252,8 @@ void main() {
     testUsingContext(
       'when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version',
       () {
-        const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
-        const String studioInstallPath = '$homeLinux/AndroidStudio';
+        const studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
+        const studioInstallPath = '$homeLinux/AndroidStudio';
 
         fileSystem.file(studioHomeFilePath)
           ..createSync(recursive: true)
@@ -1291,9 +1285,9 @@ void main() {
     testUsingContext(
       'pluginsPath extracts custom paths from home dir',
       () {
-        const String installPath = '/opt/android-studio-with-cheese-5.0';
-        const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
-        const String homeFile = '$studioHome/system/.home';
+        const installPath = '/opt/android-studio-with-cheese-5.0';
+        const studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
+        const homeFile = '$studioHome/system/.home';
         fileSystem.directory(installPath).createSync(recursive: true);
         fileSystem.file(homeFile).createSync(recursive: true);
         fileSystem.file(homeFile).writeAsStringSync(installPath);
@@ -1315,9 +1309,9 @@ void main() {
     testUsingContext(
       'discovers explicitly configured Android Studio',
       () {
-        const String androidStudioDir = '/Users/Dash/Desktop/android-studio';
+        const androidStudioDir = '/Users/Dash/Desktop/android-studio';
         config.setValue('android-studio-dir', androidStudioDir);
-        const String studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
+        const studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
         fileSystem.file(studioHome)
           ..createSync(recursive: true)
           ..writeAsStringSync(androidStudioDir);
@@ -1355,9 +1349,9 @@ void main() {
     testUsingContext(
       'chooses the install with the latest version',
       () {
-        const List<String> versions = <String>['4.0', '2022.0', '3.1'];
+        const versions = <String>['4.0', '2022.0', '3.1'];
 
-        for (final String version in versions) {
+        for (final version in versions) {
           fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
             ..createSync(recursive: true)
             ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
@@ -1379,9 +1373,9 @@ void main() {
     testUsingContext(
       'prefers installs with known versions over installs with unknown versions',
       () {
-        const List<String> versions = <String>['3.0', 'unknown'];
+        const versions = <String>['3.0', 'unknown'];
 
-        for (final String version in versions) {
+        for (final version in versions) {
           fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
             ..createSync(recursive: true)
             ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
@@ -1403,9 +1397,9 @@ void main() {
     testUsingContext(
       'chooses install with lexicographically greatest directory if no installs have known versions',
       () {
-        const List<String> versions = <String>['Apple', 'Zucchini', 'Banana'];
+        const versions = <String>['Apple', 'Zucchini', 'Banana'];
 
-        for (final String version in versions) {
+        for (final version in versions) {
           fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
             ..createSync(recursive: true)
             ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
@@ -1452,7 +1446,7 @@ void main() {
     testUsingContext(
       'always chooses the install configured by --android-studio-dir, even if the install is invalid',
       () {
-        const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+        const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
         config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
         // The directory exists, but nothing is inside.
@@ -1461,9 +1455,9 @@ void main() {
           fileSystem.path.join(configuredAndroidStudioDir, 'jbr', 'bin', 'java'),
         );
 
-        const List<String> validVersions = <String>['4.0', '2.0', '3.1'];
+        const validVersions = <String>['4.0', '2.0', '3.1'];
 
-        for (final String version in validVersions) {
+        for (final version in validVersions) {
           fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
             ..createSync(recursive: true)
             ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
@@ -1472,13 +1466,13 @@ void main() {
               .createSync(recursive: true);
         }
 
-        const List<String> validJavaPaths = <String>[
+        const validJavaPaths = <String>[
           r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
           r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
           r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
         ];
 
-        for (final String javaPath in validJavaPaths) {
+        for (final javaPath in validJavaPaths) {
           (globals.processManager as FakeProcessManager).addCommand(
             FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
           );
@@ -1486,7 +1480,7 @@ void main() {
 
         expect(AndroidStudio.allInstalled().length, 4);
 
-        for (final String javaPath in validJavaPaths) {
+        for (final javaPath in validJavaPaths) {
           (globals.processManager as FakeProcessManager).addCommand(
             FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
           );
@@ -1507,7 +1501,7 @@ void main() {
     testUsingContext(
       'throws a ToolExit if --android-studio-dir is configured but the directory does not exist',
       () async {
-        const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+        const configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
         config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
         expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
@@ -1533,7 +1527,7 @@ void main() {
     testUsingContext(
       'handles file system exception when checking for explicitly configured Android Studio install',
       () {
-        const String androidStudioDir = '/Users/Dash/Desktop/android-studio';
+        const androidStudioDir = '/Users/Dash/Desktop/android-studio';
         config.setValue('android-studio-dir', androidStudioDir);
 
         expect(
@@ -1555,7 +1549,7 @@ void main() {
 }
 
 class FakePlistUtils extends Fake implements PlistParser {
-  final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
+  final fileContents = <String, Map<String, Object>>{};
 
   @override
   Map<String, Object> parseFile(String plistFilePath) {

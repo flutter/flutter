@@ -41,13 +41,11 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(
-      branch: 'WestSideStory',
-    ); // an unknown branch
+    final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -66,11 +64,11 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(branch: 'beta');
+    final fakeFlutterVersion = FakeFlutterVersion(branch: 'beta');
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"abcd"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -100,11 +98,11 @@ Channel "master" was previously on: v1.2.3.''',
   });
 
   testUsingContext('Downgrade exits on unknown recorded version', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final fakeFlutterVersion = FakeFlutterVersion();
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -125,12 +123,12 @@ Channel "master" was previously on: v1.2.3.''',
   });
 
   testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final fakeFlutterVersion = FakeFlutterVersion();
     stdio.hasTerminal = true;
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -150,12 +148,12 @@ Channel "master" was previously on: v1.2.3.''',
   });
 
   testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final fakeFlutterVersion = FakeFlutterVersion();
     stdio.hasTerminal = true;
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -175,12 +173,12 @@ Channel "master" was previously on: v1.2.3.''',
   });
 
   testUsingContext('Downgrade does not prompt when there is no terminal', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final fakeFlutterVersion = FakeFlutterVersion();
     stdio.hasTerminal = false;
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -198,12 +196,12 @@ Channel "master" was previously on: v1.2.3.''',
   });
 
   testUsingContext('Downgrade performs correct git commands', () async {
-    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
+    final fakeFlutterVersion = FakeFlutterVersion();
     stdio.hasTerminal = false;
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = DowngradeCommand(
+    final command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -230,7 +228,7 @@ Channel "master" was previously on: v1.2.3.''',
 
 class FakeTerminal extends Fake implements Terminal {
   @override
-  bool usesTerminalUi = false;
+  var usesTerminalUi = false;
 
   void addPrompt(List<String> characters, String selected) {
     _characters = characters;
@@ -255,5 +253,5 @@ class FakeTerminal extends Fake implements Terminal {
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  bool hasTerminal = true;
+  var hasTerminal = true;
 }

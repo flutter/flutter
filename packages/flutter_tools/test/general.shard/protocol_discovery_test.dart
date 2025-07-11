@@ -257,7 +257,7 @@ void main() {
       );
 
       testWithoutContext('uris in the stream are throttled', () async {
-        const Duration kThrottleDuration = Duration(milliseconds: 10);
+        const kThrottleDuration = Duration(milliseconds: 10);
 
         FakeAsync().run((FakeAsync time) {
           discoverer = ProtocolDiscovery.vmService(
@@ -267,7 +267,7 @@ void main() {
             logger: BufferLogger.test(),
           );
 
-          final List<Uri> discoveredUris = <Uri>[];
+          final discoveredUris = <Uri>[];
           discoverer.uris.listen((Uri uri) {
             discoveredUris.add(uri);
           });
@@ -299,7 +299,7 @@ void main() {
       });
 
       testWithoutContext('uris in the stream are throttled when they match the port', () async {
-        const Duration kThrottleTimeInMilliseconds = Duration(milliseconds: 10);
+        const kThrottleTimeInMilliseconds = Duration(milliseconds: 10);
 
         FakeAsync().run((FakeAsync time) {
           discoverer = ProtocolDiscovery.vmService(
@@ -310,7 +310,7 @@ void main() {
             logger: BufferLogger.test(),
           );
 
-          final List<Uri> discoveredUris = <Uri>[];
+          final discoveredUris = <Uri>[];
           discoverer.uris.listen((Uri uri) {
             discoveredUris.add(uri);
           });
@@ -344,8 +344,8 @@ void main() {
 
     group('port forwarding', () {
       testWithoutContext('default port', () async {
-        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-        final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
+        final logReader = FakeDeviceLogReader();
+        final discoverer = ProtocolDiscovery.vmService(
           logReader,
           portForwarder: FakePortForwarder(99),
           ipv6: false,
@@ -366,8 +366,8 @@ void main() {
       });
 
       testWithoutContext('specified port', () async {
-        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-        final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
+        final logReader = FakeDeviceLogReader();
+        final discoverer = ProtocolDiscovery.vmService(
           logReader,
           portForwarder: FakePortForwarder(99),
           hostPort: 1243,
@@ -389,8 +389,8 @@ void main() {
       });
 
       testWithoutContext('specified port zero', () async {
-        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-        final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
+        final logReader = FakeDeviceLogReader();
+        final discoverer = ProtocolDiscovery.vmService(
           logReader,
           portForwarder: FakePortForwarder(99),
           hostPort: 0,
@@ -412,8 +412,8 @@ void main() {
       });
 
       testWithoutContext('ipv6', () async {
-        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-        final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
+        final logReader = FakeDeviceLogReader();
+        final discoverer = ProtocolDiscovery.vmService(
           logReader,
           portForwarder: FakePortForwarder(99),
           hostPort: 54777,
@@ -435,8 +435,8 @@ void main() {
       });
 
       testWithoutContext('ipv6 with Ascii Escape code', () async {
-        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
-        final ProtocolDiscovery discoverer = ProtocolDiscovery.vmService(
+        final logReader = FakeDeviceLogReader();
+        final discoverer = ProtocolDiscovery.vmService(
           logReader,
           portForwarder: FakePortForwarder(99),
           hostPort: 54777,

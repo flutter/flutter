@@ -59,7 +59,7 @@ void main() {
 
         expect(updated.deferredComponents?.length, root.deferredComponents?.length);
         if (root.deferredComponents != null) {
-          for (int i = 0; i < root.deferredComponents!.length; ++i) {
+          for (var i = 0; i < root.deferredComponents!.length; ++i) {
             expect(
               updated.deferredComponents![i].toString(),
               PreviewPubspecBuilder.transformDeferredComponent(
@@ -80,7 +80,7 @@ void main() {
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject({required this.projectRoot, required this.fileSystem, required this.logger});
 
-  static const String complexPubspec = '''
+  static const complexPubspec = '''
 name: test
 dependencies:
   flutter:
@@ -157,5 +157,5 @@ flutter:
   }();
 
   @override
-  final List<FlutterProject> workspaceProjects = <FlutterProject>[];
+  final workspaceProjects = <FlutterProject>[];
 }

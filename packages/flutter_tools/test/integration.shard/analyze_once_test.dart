@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final String analyzerSeparator = platform.isWindows ? '-' : '•';
+final analyzerSeparator = platform.isWindows ? '-' : '•';
 
 void main() {
   late Directory tempDir;
@@ -34,7 +34,7 @@ void main() {
   }
 
   void createDotPackages(String projectPath) {
-    final StringBuffer flutterRootUri = StringBuffer('file://');
+    final flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
       flutterRootUri
@@ -43,7 +43,7 @@ void main() {
     } else {
       flutterRootUri.write(canonicalizedFlutterRootPath);
     }
-    final String dotPackagesSrc =
+    final dotPackagesSrc =
         '''
 {
   "configVersion": 2,
@@ -233,7 +233,7 @@ void bar() {
   });
 
   testWithoutContext('analyze once returns no issues when source is error-free', () async {
-    const String contents = '''
+    const contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
@@ -245,7 +245,7 @@ StringBuffer bar = StringBuffer('baz');
   });
 
   testWithoutContext('analyze once returns no issues for todo comments', () async {
-    const String contents = '''
+    const contents = '''
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
@@ -260,7 +260,7 @@ StringBuffer bar = StringBuffer('baz');
   testWithoutContext(
     'analyze once with default options has info issue finally exit code 1.',
     () async {
-      const String infoSourceCode = '''
+      const infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -277,7 +277,7 @@ void _analyze() {}
   testWithoutContext(
     'analyze once with no-fatal-infos has info issue finally exit code 0.',
     () async {
-      const String infoSourceCode = '''
+      const infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -302,7 +302,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-warnings has info issue finally exit code 0.',
     () async {
-      const String infoSourceCode = '''
+      const infoSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -327,7 +327,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-infos has warning issue finally exit code 0.',
     () async {
-      const String warningSourceCode = '''
+      const warningSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -352,7 +352,7 @@ analyzer:
   testWithoutContext(
     'analyze once only fatal-warnings has warning issue finally exit code 1.',
     () async {
-      const String warningSourceCode = '''
+      const warningSourceCode = '''
 void _analyze() {}
 ''';
 
@@ -377,12 +377,12 @@ analyzer:
 }
 
 void assertContains(String text, List<String> patterns) {
-  for (final String pattern in patterns) {
+  for (final pattern in patterns) {
     expect(text, contains(pattern));
   }
 }
 
-const String mainDartSrc = r'''
+const mainDartSrc = r'''
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -448,7 +448,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ''';
 
-const String pubspecYamlSrc = r'''
+const pubspecYamlSrc = r'''
 name: flutter_project
 environment:
   sdk: ^3.7.0-0

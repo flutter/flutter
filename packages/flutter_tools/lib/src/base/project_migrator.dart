@@ -31,7 +31,7 @@ abstract class ProjectMigrator {
 
   @protected
   bool get migrationRequired => _migrationRequired;
-  bool _migrationRequired = false;
+  var _migrationRequired = false;
 
   @protected
   /// Calls [migrateLine] per line, then [migrateFileContents]
@@ -39,10 +39,10 @@ abstract class ProjectMigrator {
   void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
-    final StringBuffer newProjectContents = StringBuffer();
+    final newProjectContents = StringBuffer();
     final String basename = file.basename;
 
-    for (final String line in lines) {
+    for (final line in lines) {
       final String? newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
@@ -60,7 +60,7 @@ abstract class ProjectMigrator {
       newProjectContents.writeln(newProjectLine);
     }
 
-    final String projectContentsWithMigratedLines = newProjectContents.toString();
+    final projectContentsWithMigratedLines = newProjectContents.toString();
     final String projectContentsWithMigratedContents = migrateFileContents(
       projectContentsWithMigratedLines,
     );

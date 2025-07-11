@@ -56,7 +56,7 @@ void main() {
 
     testWithoutContext('Install and uninstall are no-ops that report success', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
@@ -72,15 +72,15 @@ void main() {
   group('Starting and stopping application', () {
     testWithoutContext('Stop without start is a successful no-op', () async {
       final FakeDesktopDevice device = setUpDesktopDevice();
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       expect(await device.stopApp(package), true);
     });
 
     testWithoutContext('Can run from prebuilt application', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -96,7 +96,7 @@ void main() {
         BuildInfo.debug,
       );
       fileSystem.file(executableName).writeAsStringSync('\n');
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -108,12 +108,12 @@ void main() {
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final DesktopDevice device = setUpDesktopDevice(
         nullExecutablePathForDevice: true,
         logger: logger,
       );
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -125,8 +125,8 @@ void main() {
     });
 
     testWithoutContext('stopApp kills process started by startApp', () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -134,7 +134,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -149,8 +149,8 @@ void main() {
   testWithoutContext(
     'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -180,7 +180,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -211,8 +211,8 @@ void main() {
   testWithoutContext(
     'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
     () async {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['debug'],
           stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -227,7 +227,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
         package,
         prebuiltApplication: true,
@@ -255,8 +255,8 @@ void main() {
   });
 
   testWithoutContext('startApp supports dartEntrypointArgs', () async {
-    final Completer<void> completer = Completer<void>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
@@ -264,7 +264,7 @@ void main() {
       ),
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     final LaunchResult result = await device.startApp(
       package,
       prebuiltApplication: true,
@@ -278,8 +278,8 @@ void main() {
   });
 
   testWithoutContext('Device logger captures all output', () async {
-    final Completer<void> exitCompleter = Completer<void>();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final exitCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['debug', 'arg1', 'arg2'],
         exitCode: -1,
@@ -298,7 +298,7 @@ void main() {
     // Start looking for 'Oops' in the stream before starting the app.
     expect(device.getLogReader().logLines, emits('Oops'));
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -310,7 +310,7 @@ void main() {
   });
 
   testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
@@ -325,7 +325,7 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -338,7 +338,7 @@ void main() {
   });
 
   testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
@@ -353,7 +353,7 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -366,7 +366,7 @@ void main() {
   });
 
   testWithoutContext('Desktop devices pass through the enable-flutter-gpu flag', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
@@ -382,7 +382,7 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
 
-    final FakeApplicationPackage package = FakeApplicationPackage();
+    final package = FakeApplicationPackage();
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -398,15 +398,15 @@ void main() {
   testUsingContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
-      final BufferLogger logger = BufferLogger.test();
-      final FakeMacOSDevice device = FakeMacOSDevice(
+      final logger = BufferLogger.test();
+      final device = FakeMacOSDevice(
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         logger: logger,
       );
 
-      final FakeApplicationPackage package = FakeApplicationPackage();
+      final package = FakeApplicationPackage();
 
       FakeAsync().run((FakeAsync fakeAsync) {
         device.startApp(

@@ -14,7 +14,7 @@ class MultidexRemovalMigration extends ProjectMigrator {
 
   final AndroidProject _project;
 
-  static const String deletionMessage = 'Deleted obsolete FlutterMultiDexApplication.java file.';
+  static const deletionMessage = 'Deleted obsolete FlutterMultiDexApplication.java file.';
 
   File _getMultiDexApplicationFile() {
     return _project.hostAppGradleRoot

@@ -18,7 +18,7 @@ import '../web_template.dart';
 /// be logged as an Error (SEVERE), a warning (WARNING) or a trace
 /// (everything else).
 void log(Logger logger, logging.LogRecord event) {
-  final String error = event.error == null ? '' : 'Error: ${event.error}';
+  final error = event.error == null ? '' : 'Error: ${event.error}';
   if (event.level >= logging.Level.SEVERE) {
     logger.printError('${event.loggerName}: ${event.message}$error', stackTrace: event.stackTrace);
   } else if (event.level == logging.Level.WARNING) {

@@ -10,7 +10,7 @@ import '../persistent_tool_state.dart';
 
 /// This message is displayed on the first run of the Flutter tool, or anytime
 /// that the contents of this string change.
-const String _kFlutterFirstRunMessage = '''
+const _kFlutterFirstRunMessage = '''
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║

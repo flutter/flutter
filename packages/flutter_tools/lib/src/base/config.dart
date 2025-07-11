@@ -138,19 +138,19 @@ class Config {
   /// Configs will be written to the user's config path. If there is already a
   /// file with the name `.${kConfigDir}_$name` in the user's home path, that
   /// file will be used instead.
-  static const String kConfigDir = 'flutter';
+  static const kConfigDir = 'flutter';
 
   /// Environment variable specified in the XDG Base Directory
   /// [specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
   /// to specify the user's configuration directory.
-  static const String kXdgConfigHome = 'XDG_CONFIG_HOME';
+  static const kXdgConfigHome = 'XDG_CONFIG_HOME';
 
   /// Fallback directory in the user's home directory if `XDG_CONFIG_HOME` is
   /// not defined.
-  static const String kXdgConfigFallback = '.config';
+  static const kXdgConfigFallback = '.config';
 
   /// The default name for the Flutter config file.
-  static const String kFlutterSettings = 'settings';
+  static const kFlutterSettings = 'settings';
 
   final Logger _logger;
 
@@ -188,7 +188,7 @@ class Config {
   //
   // This is different from [FileSystemUtils.homeDirPath].
   static String _userHomePath(Platform platform) {
-    final String envKey = platform.isWindows ? 'APPDATA' : 'HOME';
+    final envKey = platform.isWindows ? 'APPDATA' : 'HOME';
     return platform.environment[envKey] ?? '.';
   }
 

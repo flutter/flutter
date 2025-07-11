@@ -46,7 +46,7 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
     testUsingContext(
       'build with assets $buildMode',
       overrides: <Type, Generator>{
@@ -166,7 +166,7 @@ void main() {
             file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
           ),
         ];
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
           onBuild: (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: buildMode == BuildMode.debug
@@ -179,7 +179,7 @@ void main() {
                   codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                 ),
         );
-        final Map<String, String> environmentDefines = <String, String>{
+        final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',

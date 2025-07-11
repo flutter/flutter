@@ -18,7 +18,7 @@ import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
-const String kFlutterWorkspacePubspecYaml = r'''
+const kFlutterWorkspacePubspecYaml = r'''
 name: flutter
 description: A framework for writing Flutter applications
 homepage: http://flutter.dev
@@ -57,7 +57,7 @@ dev_dependencies:
 # PUBSPEC CHECKSUM: u6pfsu
 ''';
 
-const String kWidgetTestPubspecYaml = r'''
+const kWidgetTestPubspecYaml = r'''
 name: widget_preview_scaffold
 description: Scaffolding for Flutter Widget Previews
 publish_to: "none"
@@ -81,7 +81,7 @@ dependencies:
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
-const String kFlutterPubspecYaml = r'''
+const kFlutterPubspecYaml = r'''
 name: flutter
 description: A framework for writing Flutter applications
 homepage: http://flutter.dev
@@ -118,7 +118,7 @@ dev_dependencies:
 ''';
 
 // An example pubspec.yaml, not necessary for it to be up to date.
-const String kFlutterToolsPubspecYaml = r'''
+const kFlutterToolsPubspecYaml = r'''
 name: flutter_tools
 description: Examples for flutter
 homepage: http://flutter.dev
@@ -142,7 +142,7 @@ dependencies:
 ''';
 
 // An example pubspec.yaml, not necessary for it to be up to date.
-const String kExamplesPubspecYaml = r'''
+const kExamplesPubspecYaml = r'''
 name: examples
 description: Examples for flutter
 homepage: http://flutter.dev
@@ -165,7 +165,7 @@ dependencies:
 # PUBSPEC CHECKSUM: ivm9uf
 ''';
 
-const String kVersionJson = '''
+const kVersionJson = '''
 {
   "frameworkVersion": "1.2.3",
   "channel": "[user-branch]",
@@ -241,7 +241,7 @@ void main() {
     testUsingContext(
       'updates packages - only runs pub get',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -259,7 +259,7 @@ void main() {
     testUsingContext(
       '--force-upgrade updates packages',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -281,7 +281,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:2.0.9']);
@@ -306,7 +306,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package with caret',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9']);
@@ -331,7 +331,7 @@ void main() {
     testUsingContext(
       '--cherry-pick-package muliple',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9,meta:1.0.5']);
@@ -359,7 +359,7 @@ void main() {
     testUsingContext(
       '--force-upgrade',
       () async {
-        final UpdatePackagesCommand command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
       },
       overrides: <Type, Generator>{
@@ -376,7 +376,7 @@ void main() {
 class _FakePub extends Fake implements Pub {
   _FakePub();
 
-  Map<String, List<Pubspec>> pubspecs = <String, List<Pubspec>>{};
+  var pubspecs = <String, List<Pubspec>>{};
 
   @override
   Future<void> interactively(
@@ -423,7 +423,7 @@ class _FakePub extends Fake implements Pub {
     final List<String> split = arguments.first.split(':');
     final String packageName = split[0];
     final String packageVersion = split[1];
-    final Pubspec pubspec = Pubspec.parse(project.pubspecFile.readAsStringSync());
+    final pubspec = Pubspec.parse(project.pubspecFile.readAsStringSync());
     pubspec.dependencies[packageName] = HostedDependency(
       version: VersionConstraint.parse(packageVersion),
     );

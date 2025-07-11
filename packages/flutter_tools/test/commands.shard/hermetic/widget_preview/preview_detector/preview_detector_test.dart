@@ -28,12 +28,12 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) {
-    final List<WidgetPreviewSourceFile> initialSources = <WidgetPreviewSourceFile>[];
-    for (final String path in pathsWithPreviews) {
+    final initialSources = <WidgetPreviewSourceFile>[];
+    for (final path in pathsWithPreviews) {
       initialSources.add((path: path, source: _previewContainingFileContents));
       librariesWithPreviews.add(toPreviewPath(path));
     }
-    for (final String path in pathsWithoutPreviews) {
+    for (final path in pathsWithoutPreviews) {
       initialSources.add((path: path, source: _nonPreviewContainingFileContents));
       librariesWithoutPreviews.add(toPreviewPath(path));
     }
@@ -44,7 +44,7 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) async {
-    final BasicProjectWithExhaustivePreviews project = BasicProjectWithExhaustivePreviews._(
+    final project = BasicProjectWithExhaustivePreviews._(
       projectRoot: projectRoot,
       pathsWithPreviews: pathsWithPreviews,
       pathsWithoutPreviews: pathsWithoutPreviews,
@@ -58,8 +58,8 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
         for (final PreviewPath path in librariesWithPreviews) path: _expectedPreviewDetails,
       };
 
-  final Set<PreviewPath> librariesWithPreviews = <PreviewPath>{};
-  final Set<PreviewPath> librariesWithoutPreviews = <PreviewPath>{};
+  final librariesWithPreviews = <PreviewPath>{};
+  final librariesWithoutPreviews = <PreviewPath>{};
 
   /// Adds a file containing previews at [path].
   void addPreviewContainingFile({required String path}) {
@@ -111,7 +111,7 @@ part '$partPath';
     throw UnimplementedError('Not supported for $BasicProjectWithExhaustivePreviews');
   }
 
-  late final List<PreviewDetailsMatcher> _expectedPreviewDetails = <PreviewDetailsMatcher>[
+  late final _expectedPreviewDetails = <PreviewDetailsMatcher>[
     PreviewDetailsMatcher(
       packageName: packageName,
       functionName: 'previews',
@@ -156,7 +156,7 @@ part '$partPath';
     ),
   ];
 
-  static const String _previewContainingFileContents = '''
+  static const _previewContainingFileContents = '''
 @Preview(name: 'Top-level preview')
 Widget previews() => Text('Foo');
 
@@ -227,7 +227,7 @@ class MyWidget extends StatelessWidget {
 }
 ''';
 
-  static const String _nonPreviewContainingFileContents = '''
+  static const _nonPreviewContainingFileContents = '''
 String foo() => 'bar';
 ''';
 }
@@ -323,7 +323,7 @@ void main() {
         pathsWithoutPreviews: <String>[],
       );
       // The initial mapping should be empty as there's no files containing previews.
-      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+      const expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
@@ -360,7 +360,7 @@ void main() {
         pathsWithoutPreviews: <String>[],
       );
       // The initial mapping should be empty as there's no files containing previews.
-      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+      const expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
 
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews, expectedInitialMapping);

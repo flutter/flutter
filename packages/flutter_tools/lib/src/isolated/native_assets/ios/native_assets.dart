@@ -11,7 +11,7 @@ import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const int targetIOSVersion = 12;
+const targetIOSVersion = 12;
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
@@ -32,11 +32,10 @@ Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
 Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<FlutterCodeAsset>> result =
-      <KernelAssetPath, List<FlutterCodeAsset>>{};
-  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  for (final FlutterCodeAsset asset in nativeAssets) {
+  final alreadyTakenNames = <String>{};
+  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
+  final idToPath = <String, KernelAssetPath>{};
+  for (final asset in nativeAssets) {
     // Use same target path for all assets with the same id.
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath path =
@@ -49,10 +48,10 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
 }
 
 Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
-  final Set<String> alreadyTakenNames = <String>{};
-  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  final Map<FlutterCodeAsset, KernelAsset> result = <FlutterCodeAsset, KernelAsset>{};
-  for (final FlutterCodeAsset asset in nativeAssets) {
+  final alreadyTakenNames = <String>{};
+  final idToPath = <String, KernelAssetPath>{};
+  final result = <FlutterCodeAsset, KernelAsset>{};
+  for (final asset in nativeAssets) {
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath path =
         idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
@@ -101,13 +100,13 @@ Future<void> copyNativeCodeAssetsIOS(
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
-  final Map<String, String> oldToNewInstallNames = <String, String>{};
-  final List<(File, String, Directory)> dylibs = <(File, String, Directory)>[];
+  final oldToNewInstallNames = <String, String>{};
+  final dylibs = <(File, String, Directory)>[];
 
   for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
       in assetTargetLocations.entries) {
     final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
-    final List<File> sources = <File>[
+    final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
     ];
@@ -120,9 +119,9 @@ Future<void> copyNativeCodeAssetsIOS(
     await lipoDylibs(dylibFile, sources);
 
     final String dylibFileName = dylibFile.basename;
-    final String newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
-    for (final String oldInstallName in oldInstallNames) {
+    for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
     dylibs.add((dylibFile, newInstallName, frameworkDir));

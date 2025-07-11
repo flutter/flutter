@@ -39,8 +39,8 @@ void main() {
   ///
   /// Each pubspec is stored in `<packagename>/pubspec.yaml`.
   void writePubspecs(List<Package> graph) {
-    final Map<String, Object?> packageConfigMap = <String, Object?>{'configVersion': 2};
-    for (final Package package in graph) {
+    final packageConfigMap = <String, Object?>{'configVersion': 2};
+    for (final package in graph) {
       fileSystem.file(fileSystem.path.join(package.name, 'pubspec.yaml'))
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -102,7 +102,7 @@ ${package.devDependencies.map((String d) => '  $d: {path: ../$d}').join('\n')}
 
     final List<Dependency> dependencies = computeTransitiveDependencies(project, packageConfig);
     expect(dependencies.map((Dependency d) => d.name), graph.map((Package p) => p.name).toSet());
-    for (final Package p in graph) {
+    for (final p in graph) {
       expect(
         dependencies.firstWhere((Dependency d) => d.name == p.name).isExclusiveDevDependency,
         exclusiveDevDependencies.contains(p.name),

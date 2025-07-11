@@ -17,11 +17,7 @@ void main() {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-macos-desktop']);
   });
 
-  for (final BuildMode buildMode in <BuildMode>[
-    BuildMode.debug,
-    BuildMode.profile,
-    BuildMode.release,
-  ]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
     test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
       final String flutterRoot = getFlutterRoot();
 
@@ -114,7 +110,7 @@ void main() {
     });
   }
 
-  for (final String buildMode in <String>['Debug', 'Release']) {
+  for (final buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
     test('flutter build macos --$buildModeLower builds a valid app', () {
@@ -145,7 +141,7 @@ void main() {
       podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
       expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
 
-      final List<String> buildCommand = <String>[
+      final buildCommand = <String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'build',
@@ -287,7 +283,7 @@ void main() {
 }
 
 void _checkFatBinary(File file, String buildModeLower, String expectedType) {
-  final String archs = processManager.runSync(<String>['file', file.path]).stdout as String;
+  final archs = processManager.runSync(<String>['file', file.path]).stdout as String;
 
   final bool containsX64 = archs.contains('Mach-O 64-bit $expectedType x86_64');
   final bool containsArm = archs.contains('Mach-O 64-bit $expectedType arm64');

@@ -34,7 +34,7 @@ void main() {
       await previewDetector.dispose();
     });
 
-    const String simplePreviewSource = '''
+    const simplePreviewSource = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -42,7 +42,7 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Hello world!');
 ''';
 
-    const String noPreviewSource = '''
+    const noPreviewSource = '''
 import 'package:flutter/material.dart';
 
 Widget foo() => Text('Hello world!');

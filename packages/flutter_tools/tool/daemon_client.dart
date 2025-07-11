@@ -93,11 +93,11 @@ Future<void> main() async {
   );
 }
 
-int id = 0;
+var id = 0;
 
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;
-  final String str = '[${json.encode(map)}]';
+  final str = '[${json.encode(map)}]';
   daemon.stdin.writeln(str);
   print('==> $str');
 }

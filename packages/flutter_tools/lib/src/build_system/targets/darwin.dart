@@ -67,7 +67,7 @@ abstract class UnpackDarwin extends Target {
       '-info',
       frameworkBinaryPath,
     ]);
-    final String lipoInfo = infoResult.stdout as String;
+    final lipoInfo = infoResult.stdout as String;
 
     final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
@@ -154,7 +154,7 @@ void printXcodeNote(String note, {String? filePath, int? lineNumber}) {
 /// See Apple's documentation:
 /// https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
 void _printXcodeLog(XcodeLogType logType, String message, {String? filePath, int? lineNumber}) {
-  String linePath = '';
+  var linePath = '';
   if (filePath != null) {
     linePath = '$filePath:';
 

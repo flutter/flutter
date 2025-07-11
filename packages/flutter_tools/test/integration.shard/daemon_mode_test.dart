@@ -28,7 +28,7 @@ void main() {
   });
 
   testWithoutContext('startup events', () async {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     await project.setUpIn(tempDir);
 
     const ProcessManager processManager = LocalProcessManager();
@@ -39,7 +39,7 @@ void main() {
       'daemon',
     ], workingDirectory: tempDir.path);
 
-    final StreamController<String> stdout = StreamController<String>.broadcast();
+    final stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
     final Stream<Map<String, Object?>> stream = stdout.stream
         .map<Map<String, Object?>?>(parseFlutterResponse)
@@ -55,17 +55,17 @@ void main() {
     ]);
 
     // Check the connected message has a version.
-    final Map<String, Object?> connectedParams = connectedEvent['params']! as Map<String, Object?>;
+    final connectedParams = connectedEvent['params']! as Map<String, Object?>;
     expect(connectedParams['version'], isNotNull);
 
     // Check we got the startup message.
-    final Map<String, Object?> logParams = logMessage['params']! as Map<String, Object?>;
+    final logParams = logMessage['params']! as Map<String, Object?>;
     expect(logParams['level'], 'status');
     expect(logParams['message'], 'Device daemon started.');
   });
 
   testWithoutContext('device.getDevices', () async {
-    final BasicProject project = BasicProject();
+    final project = BasicProject();
     await project.setUpIn(tempDir);
 
     const ProcessManager processManager = LocalProcessManager();
@@ -76,7 +76,7 @@ void main() {
       'daemon',
     ], workingDirectory: tempDir.path);
 
-    final StreamController<String> stdout = StreamController<String>.broadcast();
+    final stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
     final Stream<Map<String, Object?>?> stream = stdout.stream
         .map<Map<String, Object?>?>(parseFlutterResponse)

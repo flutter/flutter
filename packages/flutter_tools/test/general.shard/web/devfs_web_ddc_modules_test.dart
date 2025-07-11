@@ -33,7 +33,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/testbed.dart';
 
-const List<int> kTransparentImage = <int>[
+const kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
   0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
   0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
@@ -53,8 +53,8 @@ void main() {
   late Platform windows;
   late FakeHttpServer httpServer;
   late BufferLogger logger;
-  const bool usesDdcModuleSystem = true;
-  const bool canaryFeatures = true;
+  const usesDdcModuleSystem = true;
+  const canaryFeatures = true;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -104,10 +104,10 @@ void main() {
   }
 
   runInTestbed('.log() reports warnings', () {
-    const String unresolvedUriMessage = 'Unresolved uri:';
-    const String otherMessage = 'Something bad happened';
+    const unresolvedUriMessage = 'Unresolved uri:';
+    const otherMessage = 'Something bad happened';
 
-    final List<logging.LogRecord> events = <logging.LogRecord>[
+    final events = <logging.LogRecord>[
       logging.LogRecord(logging.Level.WARNING, unresolvedUriMessage, 'DartUri'),
       logging.LogRecord(logging.Level.WARNING, otherMessage, 'DartUri'),
     ];
@@ -181,7 +181,7 @@ void main() {
   }, overrides: <Type, Generator>{Platform: () => linux});
 
   runInTestbed('serves metadata files from memory cache', () async {
-    const String metadataContents = '{"name":"foo"}';
+    const metadataContents = '{"name":"foo"}';
     final File source = globals.fs.file('source')..writeAsStringSync('main() {}');
     final File sourcemap = globals.fs.file('sourcemap')..writeAsStringSync('{}');
     final File metadata = globals.fs.file('metadata')..writeAsStringSync(metadataContents);
@@ -256,7 +256,7 @@ void main() {
   runInTestbed('serves index.html at the base path', () async {
     webAssetServer.basePath = 'base/path';
 
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -277,7 +277,7 @@ void main() {
   });
 
   runInTestbed('serves index.html at / if href attribute is $kBaseHrefPlaceholder', () async {
-    const String htmlContent =
+    const htmlContent =
         '<html><head><base href ="$kBaseHrefPlaceholder"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
@@ -301,7 +301,7 @@ void main() {
   runInTestbed('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -313,12 +313,11 @@ void main() {
   });
 
   runInTestbed('parses base path from index.html', () async {
-    const String htmlContent =
-        '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
-    final WebAssetServer webAssetServer = WebAssetServer(
+    final webAssetServer = WebAssetServer(
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
@@ -335,11 +334,11 @@ void main() {
   });
 
   runInTestbed('handles lack of base path in index.html', () async {
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
-    final WebAssetServer webAssetServer = WebAssetServer(
+    final webAssetServer = WebAssetServer(
       httpServer,
       packages,
       InternetAddress.loopbackIPv4,
@@ -357,8 +356,7 @@ void main() {
   });
 
   runInTestbed('throws if base path is relative', () async {
-    const String htmlContent =
-        '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -380,8 +378,7 @@ void main() {
   });
 
   runInTestbed('throws if base path does not end with slash', () async {
-    const String htmlContent =
-        '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -427,7 +424,7 @@ void main() {
     final Response response = await webAssetServer.handleRequest(
       Request('GET', Uri.parse('http://foobar/foo.js')),
     );
-    final Map<String, String> requestHeaders = <String, String>{
+    final requestHeaders = <String, String>{
       HttpHeaders.ifNoneMatchHeader: response.headers[HttpHeaders.etagHeader]!,
     };
     final Response cachedResponse = await webAssetServer.handleRequest(
@@ -439,7 +436,7 @@ void main() {
   });
 
   runInTestbed('serves index.html when path is unknown', () async {
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
     final String flutterJsPath = globals.fs.path.join(
@@ -461,7 +458,7 @@ void main() {
   runInTestbed('does not serve outside the base path', () async {
     webAssetServer.basePath = 'base/path';
 
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -473,7 +470,7 @@ void main() {
   });
 
   runInTestbed('does not serve index.html when path is inside assets or packages', () async {
-    const String htmlContent = '<html><head></head><body id="test"></body></html>';
+    const htmlContent = '<html><head></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -786,7 +783,7 @@ void main() {
       final ResidentCompiler residentCompiler = FakeResidentCompiler()
         ..output = const CompilerOutput('a', 0, <Uri>[]);
 
-      final WebDevFS webDevFS = WebDevFS(
+      final webDevFS = WebDevFS(
         hostname: 'localhost',
         port: 0,
         tlsCertPath: null,
@@ -895,7 +892,7 @@ void main() {
         outputFile.parent.childFile('a.map').writeAsStringSync('{}');
         outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-        final WebDevFS webDevFS = WebDevFS(
+        final webDevFS = WebDevFS(
           // if this is any other value, we will do a real ip lookup
           hostname: 'any',
           port: 0,
@@ -932,8 +929,8 @@ void main() {
         );
         webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
-        final FakeAppConnection firstConnection = FakeAppConnection();
-        final FakeAppConnection secondConnection = FakeAppConnection();
+        final firstConnection = FakeAppConnection();
+        final secondConnection = FakeAppConnection();
 
         final Future<void> done = webDevFS.create().then<void>((Uri _) {
           // In non-test mode, webDevFS.create() would have initialized DWDS
@@ -942,7 +939,7 @@ void main() {
             secondConnection,
           ]);
 
-          int vmServiceFactoryInvocationCount = 0;
+          var vmServiceFactoryInvocationCount = 0;
           Future<vm_service.VmService> vmServiceFactory(
             Uri uri, {
             CompressionOptions? compression,
@@ -977,7 +974,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    final WebDevFS webDevFS = WebDevFS(
+    final webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
       tlsCertPath: null,
@@ -1022,7 +1019,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    final WebDevFS webDevFS = WebDevFS(
+    final webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
       tlsCertPath: null,
@@ -1080,7 +1077,7 @@ void main() {
     final String dummyCertPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
     final String dummyCertKeyPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
 
-    final WebDevFS webDevFS = WebDevFS(
+    final webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
       tlsCertPath: dummyCertPath,
@@ -1161,8 +1158,8 @@ void main() {
   test(
     'passes on extra headers',
     () => testbed.run(() async {
-      const String extraHeaderKey = 'hurray';
-      const String extraHeaderValue = 'flutter';
+      const extraHeaderKey = 'hurray';
+      const extraHeaderValue = 'flutter';
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
         'localhost',
@@ -1214,12 +1211,11 @@ void main() {
   });
 
   runInTestbed('WebAssetServer strips leading base href off of asset requests', () async {
-    const String htmlContent =
-        '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
       ..createSync(recursive: true)
       ..writeAsStringSync(htmlContent);
-    final WebAssetServer webAssetServer = WebAssetServer(
+    final webAssetServer = WebAssetServer(
       FakeHttpServer(),
       PackageConfig.empty,
       InternetAddress.anyIPv4,
@@ -1245,8 +1241,7 @@ void main() {
     () async {
       final String path = globals.fs.path.join('lib', 'main.dart');
       final File outputFile = globals.fs.file(path)..createSync(recursive: true);
-      const String htmlContent =
-          '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+      const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
       globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
         ..createSync(recursive: true)
         ..writeAsStringSync(htmlContent);
@@ -1255,7 +1250,7 @@ void main() {
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-      final WebDevFS webDevFS = WebDevFS(
+      final webDevFS = WebDevFS(
         hostname: 'localhost',
         port: 0,
         tlsCertPath: null,
@@ -1301,7 +1296,7 @@ void main() {
 }
 
 class FakeHttpServer extends Fake implements HttpServer {
-  bool closed = false;
+  var closed = false;
 
   @override
   Future<void> close({bool force = false}) async {

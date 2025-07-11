@@ -87,7 +87,7 @@ class CompleterIOSink extends MemoryIOSink {
 
   final bool throwOnAdd;
 
-  final Completer<List<int>> _completer = Completer<List<int>>();
+  final _completer = Completer<List<int>>();
 
   Future<List<int>> get future => _completer.future;
 
@@ -110,7 +110,7 @@ class MemoryIOSink implements IOSink {
   @override
   Encoding encoding = utf8;
 
-  final List<List<int>> writes = <List<int>>[];
+  final writes = <List<int>>[];
 
   @override
   void add(List<int> data) {
@@ -119,7 +119,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     late StreamSubscription<List<int>> sub;
     sub = stream.listen(
       (List<int> data) {
@@ -155,7 +155,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
@@ -197,7 +197,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     _hasTerminal = value;
   }
 
-  bool _hasTerminal = true;
+  var _hasTerminal = true;
 
   @override
   String get lineTerminator => '\n';
@@ -215,7 +215,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     _supportsAnsiEscapes = value;
   }
 
-  bool _supportsAnsiEscapes = true;
+  var _supportsAnsiEscapes = true;
 
   @override
   int get terminalColumns {
@@ -242,9 +242,9 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
 /// A Stdio that collects stdout and supports simulated stdin.
 class FakeStdio extends Stdio {
-  final MemoryStdout _stdout = MemoryStdout()..terminalColumns = 80;
-  final MemoryIOSink _stderr = MemoryIOSink();
-  final FakeStdin _stdin = FakeStdin();
+  final _stdout = MemoryStdout()..terminalColumns = 80;
+  final _stderr = MemoryIOSink();
+  final _stdin = FakeStdin();
 
   @override
   MemoryStdout get stdout => _stdout;
@@ -260,18 +260,18 @@ class FakeStdio extends Stdio {
   }
 
   @override
-  bool hasTerminal = false;
+  var hasTerminal = false;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
 class FakeStdin extends Fake implements Stdin {
-  final StreamController<List<int>> controller = StreamController<List<int>>();
+  final controller = StreamController<List<int>>();
 
   void Function(bool mode)? echoModeCallback;
 
-  bool _echoMode = true;
+  var _echoMode = true;
 
   @override
   bool get echoMode => _echoMode;
@@ -285,10 +285,10 @@ class FakeStdin extends Fake implements Stdin {
   }
 
   @override
-  bool lineMode = true;
+  var lineMode = true;
 
   @override
-  bool hasTerminal = false;
+  var hasTerminal = false;
 
   @override
   Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
@@ -384,7 +384,7 @@ class FakeFlutterVersion implements FlutterVersion {
   final String branch;
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
-  bool _didFetchTagsAndUpdate = false;
+  var _didFetchTagsAndUpdate = false;
 
   /// Will be returned by [fetchTagsAndGetVersion] if not null.
   final FlutterVersion? nextFlutterVersion;
@@ -396,7 +396,7 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
-  bool _didCheckFlutterVersionFreshness = false;
+  var _didCheckFlutterVersionFreshness = false;
 
   @override
   String get channel {
@@ -588,7 +588,7 @@ class TestFeatureFlags implements FeatureFlags {
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({this.hostPlatform = HostPlatform.linux_x64});
 
-  final List<List<String>> chmods = <List<String>>[];
+  final chmods = <List<String>>[];
 
   @override
   void makeExecutable(File file) {}
@@ -632,7 +632,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 class FakeStopwatch implements Stopwatch {
   @override
   bool get isRunning => _isRunning;
-  bool _isRunning = false;
+  var _isRunning = false;
 
   @override
   void start() => _isRunning = true;
@@ -763,7 +763,7 @@ class FakeDartDevelopmentServiceLauncher extends Fake implements DartDevelopment
   @override
   Future<void> shutdown() async => _completer.complete();
 
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
@@ -772,12 +772,12 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> get processStart => _processStarted.future;
 
-  final Completer<void> _processStarted = Completer<void>();
+  final _processStarted = Completer<void>();
 
   @override
   Future<void> get ready => readyCompleter.future;
 
-  Completer<void> readyCompleter = Completer<void>()..complete();
+  var readyCompleter = Completer<void>()..complete();
 
   @override
   DevToolsServerAddress? activeDevToolsServer;
@@ -789,7 +789,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Uri? dtdUri;
 
   @override
-  bool printDtdUri = false;
+  var printDtdUri = false;
 
   final DevToolsServerAddress? _serverAddress;
 
@@ -802,7 +802,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
     return Completer<void>().future;
   }
 
-  bool closed = false;
+  var closed = false;
 
   @override
   Future<void> close() async {

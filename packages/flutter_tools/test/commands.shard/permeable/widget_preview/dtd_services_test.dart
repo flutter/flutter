@@ -35,7 +35,7 @@ void main() {
       () async {
         // Start DTD and register the widget preview DTD services with a custom handler for hot
         // restart requests.
-        final Completer<void> hotRestartRequestCompleter = Completer<void>();
+        final hotRestartRequestCompleter = Completer<void>();
         dtdServer = WidgetPreviewDtdServices(
           logger: logger,
           shutdownHooks: ShutdownHooks(),

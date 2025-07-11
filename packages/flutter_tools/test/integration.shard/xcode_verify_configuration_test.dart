@@ -56,7 +56,7 @@ void main() {
       test(
         'succeeds when Flutter CLI last used configuration matches Xcode configuration',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -71,7 +71,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'ios/Runner.xcworkspace',
@@ -100,7 +100,7 @@ void main() {
       test(
         'fails if Flutter CLI last used configuration does not match Xcode configuration when archiving',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -115,7 +115,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             'archive',
             '-workspace',
@@ -152,7 +152,7 @@ void main() {
       test(
         'warns if Flutter CLI last used configuration does not match Xcode configuration when building',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -167,7 +167,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'ios/Runner.xcworkspace',
@@ -217,7 +217,7 @@ void main() {
             '--project-name=hello',
           ], workingDirectory: projectDir.path);
 
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -250,7 +250,7 @@ void main() {
 
           expect(podResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'Host.xcworkspace',
@@ -288,7 +288,7 @@ void main() {
             '--project-name=hello',
           ], workingDirectory: projectDir.path);
 
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -321,7 +321,7 @@ void main() {
 
           expect(podResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             'archive',
             '-workspace',
@@ -367,7 +367,7 @@ void main() {
             '--project-name=hello',
           ], workingDirectory: projectDir.path);
 
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -399,7 +399,7 @@ void main() {
 
           expect(podResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'Host.xcworkspace',
@@ -440,7 +440,7 @@ void main() {
       test(
         'succeeds when Flutter CLI last used configuration matches Xcode configuration',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -455,7 +455,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'macos/Runner.xcworkspace',
@@ -484,7 +484,7 @@ void main() {
       test(
         'fails if Flutter CLI last used configuration does not match Xcode configuration when archiving',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -499,7 +499,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             'archive',
             '-workspace',
@@ -536,7 +536,7 @@ void main() {
       test(
         'warns if Flutter CLI last used configuration does not match Xcode configuration when building',
         () async {
-          final List<String> flutterCommand = <String>[
+          final flutterCommand = <String>[
             flutterBin,
             ...getLocalEngineArguments(),
             'build',
@@ -551,7 +551,7 @@ void main() {
 
           expect(flutterResult, const ProcessResultMatcher());
 
-          final List<String> xcodeCommand = <String>[
+          final xcodeCommand = <String>[
             'xcodebuild',
             '-workspace',
             'macos/Runner.xcworkspace',

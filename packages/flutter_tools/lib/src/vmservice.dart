@@ -22,27 +22,27 @@ import 'globals.dart' as globals;
 import 'project.dart';
 import 'version.dart';
 
-const String kResultType = 'type';
-const String kResultTypeSuccess = 'Success';
-const String kError = 'error';
+const kResultType = 'type';
+const kResultTypeSuccess = 'Success';
+const kError = 'error';
 
-const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
-const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
-const String kRunInViewMethod = '_flutter.runInView';
-const String kListViewsMethod = '_flutter.listViews';
-const String kScreenshotSkpMethod = '_flutter.screenshotSkp';
-const String kReloadAssetFonts = '_flutter.reloadAssetFonts';
+const kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
+const kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
+const kRunInViewMethod = '_flutter.runInView';
+const kListViewsMethod = '_flutter.listViews';
+const kScreenshotSkpMethod = '_flutter.screenshotSkp';
+const kReloadAssetFonts = '_flutter.reloadAssetFonts';
 
-const String kFlutterToolAlias = 'Flutter Tools';
+const kFlutterToolAlias = 'Flutter Tools';
 
-const String kReloadSourcesServiceName = 'reloadSources';
-const String kHotRestartServiceName = 'hotRestart';
-const String kFlutterVersionServiceName = 'flutterVersion';
-const String kCompileExpressionServiceName = 'compileExpression';
-const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
+const kReloadSourcesServiceName = 'reloadSources';
+const kHotRestartServiceName = 'hotRestart';
+const kFlutterVersionServiceName = 'flutterVersion';
+const kCompileExpressionServiceName = 'compileExpression';
+const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 
 /// The error response code from an unrecoverable compilation failure.
-const int kIsolateReloadBarred = 1005;
+const kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
@@ -100,8 +100,8 @@ Future<io.WebSocket> _defaultOpenChannel(
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   required Logger logger,
 }) async {
-  Duration delay = const Duration(milliseconds: 100);
-  int attempts = 0;
+  var delay = const Duration(milliseconds: 100);
+  var attempts = 0;
   io.WebSocket? socket;
 
   Future<void> handleError(Object? e) async {
@@ -188,7 +188,7 @@ Future<vm_service.VmService> setUpVmService({
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
-  final List<Future<vm_service.Success?>> registrationRequests = <Future<vm_service.Success?>>[];
+  final registrationRequests = <Future<vm_service.Success?>>[];
   if (reloadSources != null) {
     vmService.registerServiceCallback(kReloadSourcesServiceName, (
       Map<String, Object?> params,
@@ -242,18 +242,14 @@ Future<vm_service.VmService> setUpVmService({
     ) async {
       final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
       final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
-      final List<String> definitions = List<String>.from(params['definitions']! as List<Object?>);
-      final List<String> definitionTypes = List<String>.from(
-        params['definitionTypes']! as List<Object?>,
-      );
-      final List<String> typeDefinitions = List<String>.from(
-        params['typeDefinitions']! as List<Object?>,
-      );
-      final List<String> typeBounds = List<String>.from(params['typeBounds']! as List<Object?>);
-      final List<String> typeDefaults = List<String>.from(params['typeDefaults']! as List<Object?>);
-      final String libraryUri = params['libraryUri']! as String;
-      final String? klass = params['klass'] as String?;
-      final String? method = params['method'] as String?;
+      final definitions = List<String>.from(params['definitions']! as List<Object?>);
+      final definitionTypes = List<String>.from(params['definitionTypes']! as List<Object?>);
+      final typeDefinitions = List<String>.from(params['typeDefinitions']! as List<Object?>);
+      final typeBounds = List<String>.from(params['typeBounds']! as List<Object?>);
+      final typeDefaults = List<String>.from(params['typeDefaults']! as List<Object?>);
+      final libraryUri = params['libraryUri']! as String;
+      final klass = params['klass'] as String?;
+      final method = params['method'] as String?;
       final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
 
       try {
@@ -450,7 +446,7 @@ class FlutterView {
   FlutterView({required this.id, required this.uiIsolate});
 
   factory FlutterView.parse(Map<String, Object?> json) {
-    final Map<String, Object?>? rawIsolate = json['isolate'] as Map<String, Object?>?;
+    final rawIsolate = json['isolate'] as Map<String, Object?>?;
     vm_service.IsolateRef? isolate;
     if (rawIsolate != null) {
       rawIsolate['number'] = rawIsolate['number']?.toString();
@@ -819,8 +815,8 @@ class FlutterVmService {
         // with cleaning up.
         return <FlutterView>[];
       }
-      final List<Object?>? rawViews = response.json?['views'] as List<Object?>?;
-      final List<FlutterView> views = <FlutterView>[
+      final rawViews = response.json?['views'] as List<Object?>?;
+      final views = <FlutterView>[
         if (rawViews != null)
           for (final Map<String, Object?> rawView in rawViews.whereType<Map<String, Object?>>())
             FlutterView.parse(rawView),
@@ -856,7 +852,7 @@ class FlutterVmService {
       // Do nothing, since the tool is already subscribed.
     }
 
-    final Completer<vm_service.IsolateRef> extensionAdded = Completer<vm_service.IsolateRef>();
+    final extensionAdded = Completer<vm_service.IsolateRef>();
     late final StreamSubscription<vm_service.Event> isolateEvents;
     isolateEvents = service.onIsolateEvent.listen((vm_service.Event event) {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded &&
@@ -868,7 +864,7 @@ class FlutterVmService {
 
     try {
       final List<vm_service.IsolateRef> refs = await _getIsolateRefs();
-      for (final vm_service.IsolateRef ref in refs) {
+      for (final ref in refs) {
         final vm_service.Isolate? isolate = await getIsolateOrNull(ref.id!);
         if (isolate != null && (isolate.extensionRPCs?.contains(extensionName) ?? false)) {
           return ref;

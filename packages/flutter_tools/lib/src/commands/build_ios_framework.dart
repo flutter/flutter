@@ -152,7 +152,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory outputDirectory,
     ProcessManager processManager,
   ) async {
-    final List<String> xcframeworkCommand = <String>[
+    final xcframeworkCommand = <String>[
       'xcrun',
       'xcodebuild',
       '-create-xcframework',
@@ -213,10 +213,10 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   }
 
   @override
-  final String name = 'ios-framework';
+  final name = 'ios-framework';
 
   @override
-  final String description =
+  final description =
       'Produces .xcframeworks for a Flutter project '
       'and its plugins for integration into existing, plain iOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
@@ -256,7 +256,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)),
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    for (final BuildInfo buildInfo in buildInfos) {
+    for (final buildInfo in buildInfos) {
       // Create the build-mode specific metadata.
       //
       // This normally would be done in the verifyAndRun step of FlutterCommand, but special "meta"
@@ -427,7 +427,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final String licenseSource = license.readAsStringSync();
       final String artifactsMode = FlutterDarwinPlatform.ios.artifactName(mode);
 
-      final String podspecContents =
+      final podspecContents =
           '''
 Pod::Spec.new do |s|
   s.name                  = '${FlutterDarwinPlatform.ios.binaryName}'
@@ -487,9 +487,9 @@ end
     Directory iPhoneBuildOutput,
     Directory simulatorBuildOutput,
   ) async {
-    const String appFrameworkName = 'App.framework';
+    const appFrameworkName = 'App.framework';
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
-    final List<Directory> frameworks = <Directory>[];
+    final frameworks = <Directory>[];
 
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
@@ -498,7 +498,7 @@ end
           EnvironmentType.simulator => simulatorBuildOutput,
         };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
-        final Environment environment = Environment(
+        final environment = Environment(
           projectDir: globals.fs.currentDirectory,
           packageConfigPath: packageConfigPath(),
           outputDir: outputBuildDirectory,
@@ -564,7 +564,7 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
-      List<String> pluginsBuildCommand = <String>[
+      var pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
@@ -624,7 +624,7 @@ end
       final Iterable<Directory> products = iPhoneBuildConfiguration
           .listSync(followLinks: false)
           .whereType<Directory>();
-      for (final Directory builtProduct in products) {
+      for (final builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
           if (globals.fs.path.extension(podFrameworkName) != '.framework') {
@@ -632,7 +632,7 @@ end
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
 
-          final List<Directory> frameworks = <Directory>[
+          final frameworks = <Directory>[
             podProduct as Directory,
             simulatorBuildConfiguration
                 .childDirectory(builtProduct.basename)

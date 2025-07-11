@@ -31,7 +31,7 @@ void main() {
       work: () => project.setUpIn(tempDir),
     );
 
-    final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
+    final flutter = FlutterTestTestDriver(tempDir);
 
     try {
       await _timeoutAfter(
@@ -59,7 +59,7 @@ void main() {
   }
 
   testWithoutContext('breaks when AnimationController listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addListener(() {
           throw 'AnimationController listener';
@@ -71,7 +71,7 @@ void main() {
   });
 
   testWithoutContext('breaks when AnimationController status listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       AnimationController(vsync: TestVSync(), duration: Duration.zero)
         ..addStatusListener((AnimationStatus _) {
           throw 'AnimationController status listener';
@@ -83,7 +83,7 @@ void main() {
   });
 
   testWithoutContext('breaks when ChangeNotifier listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
        ValueNotifier<int>(0)
          ..addListener(() {
            throw 'ValueNotifier listener';
@@ -95,7 +95,7 @@ void main() {
   });
 
   testWithoutContext('breaks when handling a gesture throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -115,7 +115,7 @@ void main() {
   });
 
   testWithoutContext('breaks when platform message callback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       BasicMessageChannel<String>('foo', const StringCodec()).setMessageHandler((_) {
         throw 'platform message callback';
       });
@@ -126,7 +126,7 @@ void main() {
   });
 
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) {
@@ -140,7 +140,7 @@ void main() {
   });
 
   testWithoutContext('breaks when EditableText.onChanged throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -157,7 +157,7 @@ void main() {
   });
 
   testWithoutContext('breaks when EditableText.onEditingComplete throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: TextField(
@@ -176,7 +176,7 @@ void main() {
   });
 
   testWithoutContext('breaks when EditableText.onSelectionChanged throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(MaterialApp(
         home: SelectableText('hello',
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
@@ -191,7 +191,7 @@ void main() {
   });
 
   testWithoutContext('breaks when Action listener throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       CallbackAction<Intent>(onInvoke: (Intent _) { })
         ..addActionListener((_) {
           throw 'action listener';
@@ -203,7 +203,7 @@ void main() {
   });
 
   testWithoutContext('breaks when pointer route throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       PointerRouter()
         ..addRoute(2, (PointerEvent event) {
           throw 'pointer route';
@@ -215,7 +215,7 @@ void main() {
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       const PointerScrollEvent originalEvent = PointerScrollEvent();
       PointerSignalResolver()
         ..register(originalEvent, (PointerSignalEvent event) {
@@ -228,7 +228,7 @@ void main() {
   });
 
   testWithoutContext('breaks when PointerSignalResolver callback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       FocusManager.instance
         ..addHighlightModeListener((_) {
           throw 'highlight mode listener';
@@ -241,7 +241,7 @@ void main() {
   });
 
   testWithoutContext('breaks when GestureBinding.dispatchEvent throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(
         MouseRegion(
           onHover: (_) {
@@ -261,7 +261,7 @@ void main() {
   });
 
   testWithoutContext('breaks when ImageStreamListener.onImage throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
@@ -282,7 +282,7 @@ void main() {
   });
 
   testWithoutContext('breaks when ImageStreamListener.onError throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       final Completer<ImageInfo> completer = Completer<ImageInfo>();
       OneFrameImageStreamCompleter(completer.future)
         ..addListener(ImageStreamListener(
@@ -298,7 +298,7 @@ void main() {
   });
 
   testWithoutContext('breaks when LayoutBuilder.builder throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       await tester.pumpWidget(LayoutBuilder(
         builder: (_, __) {
           throw 'LayoutBuilder.builder';
@@ -310,7 +310,7 @@ void main() {
   });
 
   testWithoutContext('breaks when _CallbackHookProvider callback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       RootBackButtonDispatcher()
         ..addCallback(() {
           throw '_CallbackHookProvider.callback';
@@ -322,7 +322,7 @@ void main() {
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.addTimingsCallback((List<FrameTiming> timings) {
         throw 'TimingsCallback';
       });
@@ -333,7 +333,7 @@ void main() {
   });
 
   testWithoutContext('breaks when TimingsCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.scheduleTask(
         () {
           throw 'scheduled task';
@@ -347,7 +347,7 @@ void main() {
   });
 
   testWithoutContext('breaks when FrameCallback throws', () async {
-    final TestProject project = TestProject(r'''
+    final project = TestProject(r'''
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         throw 'FrameCallback';
       });
@@ -358,7 +358,7 @@ void main() {
   });
 
   testWithoutContext('breaks when attaching to render tree throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -379,7 +379,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performLayout throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
       ''',
@@ -397,7 +397,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performResize throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       TestRender().layout(BoxConstraints());
       ''',
@@ -418,7 +418,7 @@ void main() {
   });
 
   testWithoutContext('breaks when RenderObject.performLayout (without resize) throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       tester.renderObject<TestRender>(find.byType(TestWidget)).layoutThrows = true;
@@ -456,7 +456,7 @@ void main() {
   });
 
   testWithoutContext('breaks when StatelessWidget.build throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -474,7 +474,7 @@ void main() {
   });
 
   testWithoutContext('breaks when StatefulWidget.build throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -497,7 +497,7 @@ void main() {
   });
 
   testWithoutContext('breaks when finalizing the tree throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       ''',
@@ -524,7 +524,7 @@ void main() {
   });
 
   testWithoutContext('breaks when rebuilding dirty elements throws', () async {
-    final TestProject project = TestProject(
+    final project = TestProject(
       r'''
       await tester.pumpWidget(TestWidget());
       tester.element<TestElement>(find.byType(TestWidget)).throwOnRebuild = true;
@@ -580,7 +580,7 @@ Future<void> _timeoutAfter({
   Duration duration = const Duration(minutes: 10),
   required Future<void> Function() work,
 }) async {
-  final Timer timer = Timer(duration, () => fail(message));
+  final timer = Timer(duration, () => fail(message));
   await work();
   timer.cancel();
 }
@@ -593,7 +593,7 @@ class TestProject extends Project {
   final String? classes;
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
     name: test
     environment:
       sdk: ^3.7.0-0
@@ -607,7 +607,7 @@ class TestProject extends Project {
   ''';
 
   @override
-  final String main = '';
+  final main = '';
 
   @override
   String get test => _test
@@ -615,7 +615,7 @@ class TestProject extends Project {
       .replaceFirst('// TEST_BODY', testBody)
       .replaceFirst('// CLASSES', classes ?? '');
 
-  final String _test = r'''
+  final _test = r'''
     import 'dart:async';
     import 'dart:ui' as ui;
 

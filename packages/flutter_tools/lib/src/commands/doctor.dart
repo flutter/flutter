@@ -27,10 +27,10 @@ class DoctorCommand extends FlutterCommand {
   final bool verbose;
 
   @override
-  final String name = 'doctor';
+  final name = 'doctor';
 
   @override
-  final String description = 'Show information about the installed tooling.';
+  final description = 'Show information about the installed tooling.';
 
   @override
   final String category = FlutterCommandCategory.sdk;

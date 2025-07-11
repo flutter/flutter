@@ -40,7 +40,7 @@ import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
-const String kJITCrashFailureMessage =
+const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
 @visibleForTesting
@@ -93,7 +93,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   ///
   /// Separate from `deviceNotifier` since `deviceNotifier` should only contain
   /// connected devices.
-  final Map<String, IOSDevice> _cachedPolledDevices = <String, IOSDevice>{};
+  final _cachedPolledDevices = <String, IOSDevice>{};
 
   /// Maps device id to a map of the device's observed connections. When the
   /// mapped connection is `true`, that means that observed events indicated
@@ -109,8 +109,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   ///     wifi: false,
   ///   },
   /// }
-  final Map<String, Map<XCDeviceEventInterface, bool>> _observedConnectionsByDeviceId =
-      <String, Map<XCDeviceEventInterface, bool>>{};
+  final _observedConnectionsByDeviceId = <String, Map<XCDeviceEventInterface, bool>>{};
 
   @override
   Future<void> startPolling() async {
@@ -190,7 +189,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 
   /// Adds or updates devices in cache. Does not remove devices from cache.
   void _updateCachedDevices(List<Device> devices) {
-    for (final Device device in devices) {
+    for (final device in devices) {
       if (device is! IOSDevice) {
         continue;
       }
@@ -338,16 +337,16 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
-  bool devModeEnabled = false;
+  var devModeEnabled = false;
 
   /// Device has trusted this computer and paired.
-  bool isPaired = false;
+  var isPaired = false;
 
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
   final bool isCoreDevice;
 
-  final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
+  final _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
 
@@ -519,7 +518,7 @@ class IOSDevice extends Device {
     Status startAppStatus = _logger.startProgress('Installing and launching...');
     try {
       ProtocolDiscovery? vmServiceDiscovery;
-      int installationResult = 1;
+      var installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
         vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
@@ -578,7 +577,7 @@ class IOSDevice extends Device {
         defaultTimeout = 30;
       }
 
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
+      final timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError(
           'The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...',
         );
@@ -634,7 +633,7 @@ class IOSDevice extends Device {
         // change the status message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
         // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
-        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
+        final mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
           startAppStatus.stop();
           startAppStatus = _logger.startProgress(
             'Waiting for approval of local network permissions...',
@@ -726,7 +725,7 @@ class IOSDevice extends Device {
     IOSApp? package,
   }) async {
     Timer? maxWaitForCI;
-    final Completer<Uri?> cancelCompleter = Completer<Uri?>();
+    final cancelCompleter = Completer<Uri?>();
 
     // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
     // Afterwards, stop the app from running and upload DerivedData Logs to debug
@@ -781,7 +780,7 @@ class IOSDevice extends Device {
       throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
-    final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
+    final discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
@@ -920,8 +919,8 @@ class IOSDevice extends Device {
         'to run your app. If access is not allowed, you can change this through '
         'your Settings > Privacy & Security > Automation.',
       );
-      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+      final launchTimeout = isWirelesslyConnected ? 45 : 30;
+      final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
         _logger.printError(
           'Xcode is taking longer than expected to start debugging the app. '
           'Ensure the project is opened in Xcode.',
@@ -1067,15 +1066,14 @@ class IOSDevice extends Device {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
 
     if (compatibleWithProtocolDiscovery) {
       return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -1138,13 +1136,13 @@ class IOSDevice extends Device {
 /// See: [vis(3) manpage](https://www.freebsd.org/cgi/man.cgi?query=vis&sektion=3)
 String decodeSyslog(String line) {
   // UTF-8 values for \, M, -, ^.
-  const int kBackslash = 0x5c;
-  const int kM = 0x4d;
-  const int kDash = 0x2d;
-  const int kCaret = 0x5e;
+  const kBackslash = 0x5c;
+  const kM = 0x4d;
+  const kDash = 0x2d;
+  const kCaret = 0x5e;
 
   // Mask for the UTF-8 digit range.
-  const int kNum = 0x30;
+  const kNum = 0x30;
 
   // Returns true when `byte` is within the UTF-8 7-bit digit range (0x30 to 0x39).
   bool isDigit(int byte) => (byte & 0xf0) == kNum;
@@ -1154,8 +1152,8 @@ String decodeSyslog(String line) {
 
   try {
     final List<int> bytes = utf8.encode(line);
-    final List<int> out = <int>[];
-    for (int i = 0; i < bytes.length;) {
+    final out = <int>[];
+    for (var i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);
@@ -1258,17 +1256,17 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Similar to above, but allows ~arbitrary components instead of "Runner"
   // and "Flutter". The regex tries to strike a balance between not producing
   // false positives and not producing false negatives.
-  final RegExp _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
+  final _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
 
   // Logging from native code/Flutter engine is prefixed by timestamp and process metadata:
   // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.
   // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching.
   //
   // Logging from the dart code has no prefixing metadata.
-  final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
+  final _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
   @visibleForTesting
-  late final StreamController<String> linesController = StreamController<String>.broadcast(
+  late final linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
@@ -1287,10 +1285,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
   }
 
   /// Used to track messages prefixed with "flutter:" from the fallback log source.
-  final List<String> _fallbackStreamFlutterMessages = <String>[];
+  final _fallbackStreamFlutterMessages = <String>[];
 
   /// Used to track if a message prefixed with "flutter:" has been received from the primary log.
-  bool primarySourceFlutterLogReceived = false;
+  var primarySourceFlutterLogReceived = false;
 
   /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
   /// and Unified Logging (Dart VM). When using more than one of these logging
@@ -1336,7 +1334,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return false;
   }
 
-  final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
+  final _loggingSubscriptions = <StreamSubscription<void>>[];
 
   @override
   Stream<String> get logLines => linesController.stream;
@@ -1349,7 +1347,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVmService = connectedVmService;
   }
 
-  static const int minimumUniversalLoggingSdkVersion = 13;
+  static const minimumUniversalLoggingSdkVersion = 13;
 
   /// Determine the primary and fallback source for device logs.
   ///
@@ -1534,7 +1532,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
   void Function(String line) _newSyslogLineHandler() {
-    bool printing = false;
+    var printing = false;
 
     return (String line) {
       if (printing) {
@@ -1624,14 +1622,14 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+  var forwardedPorts = <ForwardedPort>[];
 
   @visibleForTesting
   void addForwardedPorts(List<ForwardedPort> ports) {
     ports.forEach(forwardedPorts.add);
   }
 
-  static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
+  static const _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
@@ -1644,7 +1642,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
     Process? process;
 
-    bool connected = false;
+    var connected = false;
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort!, _id);
@@ -1668,7 +1666,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     assert(connected);
     assert(process != null);
 
-    final ForwardedPort forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
+    final forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
     _logger.printTrace('Forwarded port $forwardedPort');
     forwardedPorts.add(forwardedPort);
     return hostPort;

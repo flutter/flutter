@@ -10,10 +10,10 @@ import '../doctor_validator.dart';
 import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
-const String _androidStudioTitle = 'Android Studio';
-const String _androidStudioId = 'AndroidStudio';
-const String _androidStudioPreviewTitle = 'Android Studio Preview';
-const String _androidStudioPreviewId = 'AndroidStudioPreview';
+const _androidStudioTitle = 'Android Studio';
+const _androidStudioId = 'AndroidStudio';
+const _androidStudioPreviewTitle = 'Android Studio Preview';
+const _androidStudioPreviewId = 'AndroidStudioPreview';
 
 class AndroidStudioValidator extends DoctorValidator {
   AndroidStudioValidator(
@@ -28,7 +28,7 @@ class AndroidStudioValidator extends DoctorValidator {
   final FileSystem _fileSystem;
   final UserMessages _userMessages;
 
-  static const Map<String, String> idToTitle = <String, String>{
+  static const idToTitle = <String, String>{
     _androidStudioId: _androidStudioTitle,
     _androidStudioPreviewId: _androidStudioPreviewTitle,
   };
@@ -53,7 +53,7 @@ class AndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
     final String studioVersionText = _studio.version == null
@@ -62,10 +62,7 @@ class AndroidStudioValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidStudioLocation(_studio.directory)));
 
     if (_studio.pluginsPath != null) {
-      final IntelliJPlugins plugins = IntelliJPlugins(
-        _studio.pluginsPath!,
-        fileSystem: _fileSystem,
-      );
+      final plugins = IntelliJPlugins(_studio.pluginsPath!, fileSystem: _fileSystem);
       plugins.validatePackage(
         messages,
         <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -125,9 +122,9 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
 
-    final String? cfgAndroidStudio = _config.getValue('android-studio-dir') as String?;
+    final cfgAndroidStudio = _config.getValue('android-studio-dir') as String?;
     if (cfgAndroidStudio != null) {
       messages.add(ValidationMessage.error(_userMessages.androidStudioMissing(cfgAndroidStudio)));
     }

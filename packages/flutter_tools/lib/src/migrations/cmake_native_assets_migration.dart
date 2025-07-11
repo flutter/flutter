@@ -36,7 +36,7 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
       return;
     }
 
-    final String copyNativeAssetsCommand =
+    final copyNativeAssetsCommand =
         '''
 
 # Copy the native assets provided by the build.dart from all packages.
@@ -47,11 +47,11 @@ install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
 ''';
 
     // Insert the new command after the bundled libraries loop.
-    const String bundleLibrariesCommandEnd = r'''
+    const bundleLibrariesCommandEnd = r'''
 endforeach(bundled_library)
 ''';
 
-    String newProjectContents = originalProjectContents;
+    var newProjectContents = originalProjectContents;
 
     newProjectContents = originalProjectContents.replaceFirst(
       bundleLibrariesCommandEnd,

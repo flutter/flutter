@@ -35,16 +35,14 @@ class ProxyValidator extends DoctorValidator {
       return ValidationResult(ValidationType.success, const <ValidationMessage>[]);
     }
 
-    final List<ValidationMessage> messages = <ValidationMessage>[
-      const ValidationMessage('HTTP_PROXY is set'),
-    ];
+    final messages = <ValidationMessage>[const ValidationMessage('HTTP_PROXY is set')];
     if (_noProxy.isEmpty) {
       messages.add(const ValidationMessage.hint('NO_PROXY is not set'));
     } else {
       messages.add(ValidationMessage('NO_PROXY is $_noProxy'));
       final Set<String> proxyHosts = _noProxy.split(',').map((String e) => e.trim()).toSet();
       final List<String> loopbackAddresses = await _getLoopbackAddresses();
-      for (final String host in loopbackAddresses) {
+      for (final host in loopbackAddresses) {
         if (proxyHosts.contains(host)) {
           messages.add(ValidationMessage('NO_PROXY contains $host'));
         } else {

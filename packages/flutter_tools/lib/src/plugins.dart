@@ -112,13 +112,13 @@ class Plugin {
     required bool isDevDependency,
   }) {
     // SAFETY: This constructor is only invoked from .fromYaml, which validates.
-    final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
+    final platformsYaml = pluginYaml['platforms'] as YamlMap;
     assert(
       _validateMultiPlatformYaml(parentMap: pluginYaml).isEmpty,
       'Invalid multi-platform plugin specification $name.',
     );
 
-    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
+    final platforms = <String, PluginPlatform>{};
 
     if (_providesImplementationForPlatform(platformsYaml, AndroidPlugin.kConfigKey)) {
       platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
@@ -167,17 +167,16 @@ class Plugin {
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
-    final List<String> sharedHandlingPlatforms = <String>[
+    final sharedHandlingPlatforms = <String>[
       AndroidPlugin.kConfigKey,
       IOSPlugin.kConfigKey,
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
     ];
-    final Map<String, String> defaultPackages = <String, String>{};
-    final Map<String, DartPluginClassAndFilePair> dartPluginClasses =
-        <String, DartPluginClassAndFilePair>{};
-    for (final String platform in sharedHandlingPlatforms) {
+    final defaultPackages = <String, String>{};
+    final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
+    for (final platform in sharedHandlingPlatforms) {
       final String? defaultPackage = _getDefaultPackageForPlatform(platformsYaml, platform);
       if (defaultPackage != null) {
         defaultPackages[platform] = defaultPackage;
@@ -216,10 +215,10 @@ class Plugin {
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
-    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
-    final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
+    final platforms = <String, PluginPlatform>{};
+    final pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
-      final String? androidPackage = pluginYaml['androidPackage'] as String?;
+      final androidPackage = pluginYaml['androidPackage'] as String?;
       if (androidPackage != null) {
         platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
           name: name,
@@ -264,8 +263,8 @@ class Plugin {
     String pluginClass,
     String androidPackage,
   ) {
-    final Map<String, dynamic> map = <String, dynamic>{};
-    for (final String platform in platforms) {
+    final map = <String, dynamic>{};
+    for (final platform in platforms) {
       map[platform] = <String, String>{
         'pluginClass': pluginClass,
         ...platform == 'android' ? <String, String>{'package': androidPackage} : <String, String>{},
@@ -288,14 +287,14 @@ class Plugin {
     final bool usesNewPluginFormat = yaml.containsKey('platforms');
 
     if (usesOldPluginFormat && usesNewPluginFormat) {
-      const String errorMessage =
+      const errorMessage =
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/to/pubspec-plugin-platforms';
       return <String>[errorMessage];
     }
     if (!usesOldPluginFormat && !usesNewPluginFormat) {
-      const String errorMessage =
+      const errorMessage =
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
           'An instruction to format the `pubspec.yaml` can be found here: '
           'https://flutter.dev/to/pubspec-plugin-platforms';
@@ -312,7 +311,7 @@ class Plugin {
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
-      const String errorMessage =
+      const errorMessage =
           'flutter.plugin.platforms should be a map with the platform name as the key';
       return <String>[errorMessage];
     }
@@ -387,7 +386,7 @@ class Plugin {
       return null;
     }
     if ((platformsYaml[platformKey] as YamlMap).containsKey(kDartPluginClass)) {
-      final String dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
+      final dartClass = (platformsYaml[platformKey] as YamlMap)[kDartPluginClass] as String;
       final String dartFileName =
           (platformsYaml[platformKey] as YamlMap)[kDartFileName] as String? ?? '$pluginName.dart';
       return (dartClass: dartClass, dartFileName: dartFileName);

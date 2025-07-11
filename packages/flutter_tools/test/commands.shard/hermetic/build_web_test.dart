@@ -111,7 +111,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with default output directory',
     () async {
-      final BuildCommand buildCommand = BuildCommand(
+      final buildCommand = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -163,7 +163,7 @@ void main() {
     'Infers target entrypoint correctly from --target',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final BuildCommand buildCommand = BuildCommand(
+      final buildCommand = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -214,7 +214,7 @@ void main() {
     'Infers target entrypoint correctly from positional argument list',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final BuildCommand buildCommand = BuildCommand(
+      final buildCommand = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -264,7 +264,7 @@ void main() {
   testUsingContext(
     'Does not allow -O0 optimization level',
     () async {
-      final BuildCommand buildCommand = BuildCommand(
+      final buildCommand = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -303,7 +303,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with a user specified output directory',
     () async {
-      final BuildCommand buildCommand = BuildCommand(
+      final buildCommand = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -314,7 +314,7 @@ void main() {
 
       setupFileSystemForEndToEndTest(fileSystem);
 
-      const String newBuildDir = 'new_dir';
+      const newBuildDir = 'new_dir';
       final Directory buildDir = fileSystem.directory(fileSystem.path.join(newBuildDir));
 
       expect(buildDir.existsSync(), false);
@@ -398,7 +398,7 @@ void main() {
   testUsingContext(
     'Defaults to web renderer canvaskit and minify mode when no option is specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub']);
@@ -442,7 +442,7 @@ void main() {
   testUsingContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm']);
@@ -473,7 +473,7 @@ void main() {
   testUsingContext(
     'Passes minify to only wasm when minify-wasm specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-wasm']);
@@ -498,7 +498,7 @@ void main() {
   testUsingContext(
     'Passes no-minify to wasm when no-minify-wasm specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-wasm']);
@@ -523,7 +523,7 @@ void main() {
   testUsingContext(
     'Passes minify to js when minify-js specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--minify-js']);
@@ -548,7 +548,7 @@ void main() {
   testUsingContext(
     'Passes no-minify to js when no-minify-js specified',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-minify-js']);
@@ -573,7 +573,7 @@ void main() {
   testUsingContext(
     'Web build supports build-name and build-number',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
 
@@ -603,7 +603,7 @@ void main() {
   testUsingContext(
     'Does not override custom CanvasKit URL',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>[
@@ -630,7 +630,7 @@ void main() {
   testUsingContext(
     'Rejects --base-href value that does not start with /',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
       await expectLater(
@@ -657,9 +657,9 @@ void main() {
   testUsingContext(
     'flutter build web option visibility',
     () async {
-      final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       createTestCommandRunner(buildCommand);
-      final BuildWebCommand command = buildCommand.subcommands.values.single as BuildWebCommand;
+      final command = buildCommand.subcommands.values.single as BuildWebCommand;
 
       void expectVisible(String option) {
         expect(command.argParser.options.keys, contains(option));
@@ -722,7 +722,7 @@ void main() {
 }
 
 void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
-  final List<String> dependencies = <String>[
+  final dependencies = <String>[
     fileSystem.path.join(
       'packages',
       'flutter_tools',
@@ -737,7 +737,7 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
-  for (final String dependency in dependencies) {
+  for (final dependency in dependencies) {
     fileSystem.file(dependency).createSync(recursive: true);
   }
 
@@ -790,10 +790,10 @@ class TestWebBuildCommand extends FlutterCommand {
   final BuildWebCommand webCommand;
 
   @override
-  final String name = 'build';
+  final name = 'build';
 
   @override
-  final String description = 'Build a test executable app.';
+  final description = 'Build a test executable app.';
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();

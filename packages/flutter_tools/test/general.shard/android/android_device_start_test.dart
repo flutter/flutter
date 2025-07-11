@@ -16,14 +16,14 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const FakeCommand kAdbVersionCommand = FakeCommand(
+const kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
   stdout: 'Android Debug Bridge version 1.0.39',
 );
 
-const FakeCommand kStartServer = FakeCommand(command: <String>['adb', 'start-server']);
+const kStartServer = FakeCommand(command: <String>['adb', 'start-server']);
 
-const FakeCommand kShaCommand = FakeCommand(
+const kShaCommand = FakeCommand(
   command: <String>[
     'adb',
     '-s',
@@ -48,14 +48,14 @@ void main() {
     androidSdk = FakeAndroidSdk();
   });
 
-  for (final TargetPlatform targetPlatform in <TargetPlatform>[
+  for (final targetPlatform in <TargetPlatform>[
     TargetPlatform.android_arm,
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
       final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
-      final AndroidDevice device = AndroidDevice(
+      final device = AndroidDevice(
         '1234',
         modelID: 'TestModel',
         fileSystem: fileSystem,
@@ -65,7 +65,7 @@ void main() {
         androidSdk: androidSdk,
       );
       final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-      final AndroidApk apk = AndroidApk(
+      final apk = AndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,
         launchActivity: 'FlutterActivity',
@@ -129,7 +129,7 @@ void main() {
   }
 
   testWithoutContext('AndroidDevice.startApp forwards all supported debugging options', () async {
-    final AndroidDevice device = AndroidDevice(
+    final device = AndroidDevice(
       '1234',
       modelID: 'TestModel',
       fileSystem: fileSystem,
@@ -139,7 +139,7 @@ void main() {
       androidSdk: androidSdk,
     );
     final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk apk = AndroidApk(
+    final apk = AndroidApk(
       id: 'FlutterApp',
       applicationPackage: apkFile,
       launchActivity: 'FlutterActivity',

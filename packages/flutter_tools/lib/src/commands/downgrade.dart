@@ -189,7 +189,7 @@ class DowngradeCommand extends FlutterCommand {
 
   // Formats an error message that lists the currently stored versions.
   Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {
         continue;

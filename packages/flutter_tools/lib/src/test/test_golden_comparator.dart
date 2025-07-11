@@ -111,7 +111,7 @@ final class TestGoldenComparator {
         _logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
         return null;
       case TestCompilerComplete(:final String outputPath):
-        final List<String> command = <String>[
+        final command = <String>[
           _flutterTesterBinPath,
           '--disable-vm-service',
           '--non-interactive',

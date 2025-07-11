@@ -80,7 +80,7 @@ void main() {
 
   group('Screenshot file validation', () {
     testWithoutContext('successful in pwd', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
       fs.directory('sub_dir').createSync();
       fs.file('sub_dir/test.png').createSync();
@@ -90,7 +90,7 @@ void main() {
     });
 
     testWithoutContext('failed in pwd', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
       fs.directory('sub_dir').createSync();
 
       expect(
@@ -118,7 +118,7 @@ void main() {
 
   group('Screenshot output validation', () {
     testWithoutContext('successful', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
       fs.file('test.png').createSync();
 
       expect(
@@ -128,7 +128,7 @@ void main() {
     });
 
     testWithoutContext('failed', () async {
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final fs = MemoryFileSystem.test();
       fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
 
       expect(
@@ -150,9 +150,9 @@ void main() {
     testUsingContext(
       'should not throw for a single device',
       () async {
-        final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
+        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
-        final _ScreenshotDevice deviceUnsupportedForProject = _ScreenshotDevice(
+        final deviceUnsupportedForProject = _ScreenshotDevice(
           id: '123',
           name: 'Device 1',
           isSupportedForProject: false,
@@ -168,9 +168,9 @@ void main() {
     testUsingContext(
       'should tool exit for multiple devices',
       () async {
-        final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
+        final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
-        final List<_ScreenshotDevice> devicesUnsupportedForProject = <_ScreenshotDevice>[
+        final devicesUnsupportedForProject = <_ScreenshotDevice>[
           _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
           _ScreenshotDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
         ];
@@ -216,7 +216,7 @@ class _ScreenshotDevice extends Fake implements Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  bool supportsScreenshot = true;
+  var supportsScreenshot = true;
 
   @override
   bool get isConnected => true;
@@ -225,7 +225,7 @@ class _ScreenshotDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  bool ephemeral = true;
+  var ephemeral = true;
 
   @override
   DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
@@ -253,11 +253,11 @@ class _ScreenshotDevice extends Fake implements Device {
 
 class _TestDeviceManager extends DeviceManager {
   _TestDeviceManager({required super.logger});
-  List<Device> devices = <Device>[];
+  var devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
-    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    final discoverer = FakePollingDeviceDiscovery();
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }

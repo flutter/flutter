@@ -19,7 +19,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
-const String xcodebuild = '/usr/bin/xcodebuild';
+const xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
   group('MockProcessManager', () {
@@ -29,16 +29,16 @@ void main() {
     });
   });
 
-  const FakeCommand kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
   // x64 host.
-  const FakeCommand kx64CheckCommand = FakeCommand(
+  const kx64CheckCommand = FakeCommand(
     command: <String>['sysctl', 'hw.optional.arm64'],
     exitCode: 1,
   );
 
   // ARM host.
-  const FakeCommand kARMCheckCommand = FakeCommand(
+  const kARMCheckCommand = FakeCommand(
     command: <String>['sysctl', 'hw.optional.arm64'],
     stdout: 'hw.optional.arm64: 1',
   );
@@ -553,14 +553,14 @@ void main() {
   testWithoutContext(
     'xcodebuild -list getInfo returns something when xcodebuild -list succeeds',
     () async {
-      const String workingDirectory = '/';
+      const workingDirectory = '/';
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
         FakeCommand(command: <String>['xcrun', 'xcodebuild', '-list']),
       ]);
 
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
         logger: logger,
         fileSystem: fileSystem,
         platform: platform,
@@ -576,8 +576,8 @@ void main() {
   testWithoutContext(
     'xcodebuild -list getInfo throws a tool exit when it is unable to find a project',
     () async {
-      const String workingDirectory = '/';
-      const String stderr = 'Useful Xcode failure message about missing project.';
+      const workingDirectory = '/';
+      const stderr = 'Useful Xcode failure message about missing project.';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
@@ -589,7 +589,7 @@ void main() {
         ),
       ]);
 
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
         logger: logger,
         fileSystem: fileSystem,
         platform: platform,
@@ -608,8 +608,8 @@ void main() {
   testWithoutContext(
     'xcodebuild -list getInfo throws a tool exit when project is corrupted',
     () async {
-      const String workingDirectory = '/';
-      const String stderr = 'Useful Xcode failure message about corrupted project.';
+      const workingDirectory = '/';
+      const stderr = 'Useful Xcode failure message about corrupted project.';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
@@ -621,7 +621,7 @@ void main() {
         ),
       ]);
 
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
         logger: logger,
         fileSystem: fileSystem,
         platform: platform,
@@ -638,7 +638,7 @@ void main() {
   );
 
   testWithoutContext('Xcode project properties from default project can be parsed', () {
-    const String output = '''
+    const output = '''
 Information about project "Runner":
     Targets:
         Runner
@@ -653,14 +653,14 @@ Information about project "Runner":
         Runner
 
 ''';
-    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
+    final info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
     expect(info.targets, <String>['Runner']);
     expect(info.schemes, <String>['Runner']);
     expect(info.buildConfigurations, <String>['Debug', 'Release']);
   });
 
   testWithoutContext('Xcode project properties from project with custom schemes can be parsed', () {
-    const String output = '''
+    const output = '''
 Information about project "Runner":
     Targets:
         Runner
@@ -678,7 +678,7 @@ Information about project "Runner":
         Paid
 
 ''';
-    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
+    final info = XcodeProjectInfo.fromXcodeBuildOutput(output, logger);
     expect(info.targets, <String>['Runner']);
     expect(info.schemes, <String>['Free', 'Paid']);
     expect(info.buildConfigurations, <String>[
@@ -786,12 +786,9 @@ Information about project "Runner":
   });
 
   testWithoutContext('scheme for default project is Runner', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['Debug', 'Release'],
-      <String>['Runner'],
-      logger,
-    );
+    final info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      'Runner',
+    ], logger);
 
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
@@ -810,7 +807,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
+    final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
       <String>['Runner'],
@@ -823,7 +820,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('scheme for project with custom schemes is matched against flavor', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
+    final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
       <String>['Free', 'Paid'],
@@ -878,9 +875,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('reports default scheme error and exit', () {
-    final XcodeProjectInfo defaultInfo = XcodeProjectInfo(<String>[], <String>[], <String>[
-      'Runner',
-    ], logger);
+    final defaultInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
 
     expect(
       defaultInfo.reportFlavorNotFoundAndExit,
@@ -892,10 +887,7 @@ Information about project "Runner":
   });
 
   testWithoutContext('reports custom scheme error and exit', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>[], <String>[], <String>[
-      'Free',
-      'Paid',
-    ], logger);
+    final info = XcodeProjectInfo(<String>[], <String>[], <String>['Free', 'Paid'], logger);
 
     expect(
       info.reportFlavorNotFoundAndExit,
@@ -908,7 +900,7 @@ Information about project "Runner":
   testWithoutContext(
     'build configuration for project with custom schemes is matched against BuildMode and flavor',
     () {
-      final XcodeProjectInfo info = XcodeProjectInfo(
+      final info = XcodeProjectInfo(
         <String>['Runner'],
         <String>[
           'debug (free)',
@@ -1037,7 +1029,7 @@ Information about project "Runner":
   );
 
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
+    final info = XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
       <String>['Free', 'Paid'],
@@ -1463,7 +1455,7 @@ Build settings for action build and target plugin2:
     testUsingOsxContext(
       'does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false',
       () async {
-        const BuildInfo buildInfo = BuildInfo(
+        const buildInfo = BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
@@ -1591,7 +1583,7 @@ Build settings for action build and target plugin2:
     }
 
     testUsingOsxContext('extract build name and number from pubspec.yaml', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -1600,7 +1592,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         treeShakeIcons: false,
@@ -1615,7 +1607,7 @@ flutter:
     });
 
     testUsingOsxContext('extract build name from pubspec.yaml', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0
 dependencies:
@@ -1623,7 +1615,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         treeShakeIcons: false,
@@ -1638,7 +1630,7 @@ flutter:
     });
 
     testUsingOsxContext('allow build info to override build name', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -1646,7 +1638,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -1664,7 +1656,7 @@ flutter:
     testUsingOsxContext(
       'allow build info to override build name with build number fallback',
       () async {
-        const String manifest = '''
+        const manifest = '''
 name: test
 version: 1.0.0
 dependencies:
@@ -1672,7 +1664,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-        const BuildInfo buildInfo = BuildInfo(
+        const buildInfo = BuildInfo(
           BuildMode.release,
           null,
           buildName: '1.0.2',
@@ -1689,7 +1681,7 @@ flutter:
     );
 
     testUsingOsxContext('allow build info to override build number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -1697,7 +1689,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildNumber: '3',
@@ -1713,7 +1705,7 @@ flutter:
     });
 
     testUsingOsxContext('allow build info to override build name and number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -1721,7 +1713,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -1738,7 +1730,7 @@ flutter:
     });
 
     testUsingOsxContext('allow build info to override build name and set number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0
 dependencies:
@@ -1746,7 +1738,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -1763,14 +1755,14 @@ flutter:
     });
 
     testUsingOsxContext('allow build info to set build name and number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -1787,14 +1779,14 @@ flutter:
     });
 
     testUsingOsxContext('default build name and number when version is missing', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         treeShakeIcons: false,
