@@ -41,6 +41,8 @@ void SemanticsUpdateBuilder::updateNode(
     int platformViewId,
     int scrollChildren,
     int scrollIndex,
+    int overlayPortalChild,
+    int overlayPortalParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -88,6 +90,8 @@ void SemanticsUpdateBuilder::updateNode(
   node.platformViewId = platformViewId;
   node.scrollChildren = scrollChildren;
   node.scrollIndex = scrollIndex;
+  node.overlayPortalChild = overlayPortalChild;
+  node.overlayPortalParent = overlayPortalParent;
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
