@@ -130,10 +130,9 @@ class PathBoundsMatcher extends Matcher {
     );
     final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
     final Iterable<String> descriptions = map.entries.map<String>(
-      (MapEntry<Matcher, dynamic> entry) =>
-          entry.key
-              .describeMismatch(entry.value, StringDescription(), matchState, verbose)
-              .toString(),
+      (MapEntry<Matcher, dynamic> entry) => entry.key
+          .describeMismatch(entry.value, StringDescription(), matchState, verbose)
+          .toString(),
     );
 
     // description is guaranteed to be non-null.
@@ -303,7 +302,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'Test');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -353,7 +354,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'Test');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
@@ -403,7 +406,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'Test');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Long press to put the cursor after the "s".
@@ -1010,7 +1015,9 @@ void main() {
     final TextEditingController controller = TextEditingController(text: 'initial');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     expect(
@@ -1110,7 +1117,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     controller.text = 'controller text';
@@ -1161,7 +1170,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoTextField(placeholder: 'placeholder'))),
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(placeholder: 'placeholder')),
+      ),
     );
 
     final Text placeholder = tester.widget(find.text('placeholder'));
@@ -1312,7 +1323,9 @@ void main() {
 
   testWidgets('can customize padding', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoTextField(padding: EdgeInsets.zero))),
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(padding: EdgeInsets.zero)),
+      ),
     );
 
     expect(
@@ -1570,7 +1583,9 @@ void main() {
 
   testWidgets('font style controls intrinsic height no-strut', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoTextField(strutStyle: StrutStyle.disabled))),
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(strutStyle: StrutStyle.disabled)),
+      ),
     );
 
     expect(tester.getSize(find.byType(CupertinoTextField)).height, 31.0);
@@ -1679,7 +1694,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     await tester.enterText(find.byType(CupertinoTextField), 'abc\ndef');
@@ -1694,7 +1711,9 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        CupertinoApp(home: Column(children: <Widget>[CupertinoTextField(controller: controller)])),
+        CupertinoApp(
+          home: Column(children: <Widget>[CupertinoTextField(controller: controller)]),
+        ),
       );
 
       await tester.longPressAt(tester.getTopRight(find.text("j'aime la poutine")));
@@ -1941,7 +1960,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -1972,7 +1993,9 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset pos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
@@ -2010,7 +2033,9 @@ void main() {
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller, maxLines: 2))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller, maxLines: 2)),
+        ),
       );
 
       final double lineHeight = findRenderEditable(tester).preferredLineHeight;
@@ -2094,7 +2119,9 @@ void main() {
       addTearDown(controller.dispose);
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset vPos = textOffsetToPosition(tester, 29); // Index of 'Bonav|enture'.
@@ -2156,7 +2183,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Long press to select 'Atwater'.
@@ -2399,7 +2428,9 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset ePos = textOffsetToPosition(tester, 6); // Index of 'Atwate|r'.
@@ -2434,7 +2465,9 @@ void main() {
     );
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -2470,7 +2503,9 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'.
@@ -2510,7 +2545,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: ' blah blah  \n  blah');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller, maxLines: 2))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller, maxLines: 2)),
+        ),
       );
 
       expect(controller.value.selection, isNotNull);
@@ -2575,7 +2612,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: ' blah blah');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       expect(controller.value.selection, isNotNull);
@@ -2626,7 +2665,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: ' blah blah');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       expect(controller.value.selection, isNotNull);
@@ -2863,7 +2904,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -2973,7 +3016,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -3104,7 +3149,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final RenderEditable renderEditable = findRenderEditable(tester);
@@ -3282,7 +3329,9 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
@@ -3372,7 +3421,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -3683,7 +3734,9 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           CupertinoApp(
-            home: Center(child: Center(child: CupertinoTextField(controller: controller))),
+            home: Center(
+              child: Center(child: CupertinoTextField(controller: controller)),
+            ),
           ),
         );
 
@@ -3975,7 +4028,9 @@ void main() {
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
         await tester.pumpWidget(
-          CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+          CupertinoApp(
+            home: Center(child: CupertinoTextField(controller: controller)),
+          ),
         );
 
         final Offset firstLinePos =
@@ -4664,7 +4719,9 @@ void main() {
     );
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
@@ -4701,7 +4758,9 @@ void main() {
       // On macOS, we select the precise position of the tap.
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       final Offset pPos = textOffsetToPosition(tester, 9); // Index of 'P|eel'
@@ -5463,7 +5522,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -5500,7 +5561,9 @@ void main() {
     final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -5929,7 +5992,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     // Tap to trigger the text field.
@@ -5946,7 +6011,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     // Long press to trigger the text field.
@@ -5970,7 +6037,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
@@ -5996,7 +6065,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     final Offset textEndPos = textOffsetToPosition(tester, 11); // Position at the end of text.
@@ -6020,7 +6091,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     // Long press to trigger the text field.
@@ -6043,7 +6116,9 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
     );
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
@@ -6084,7 +6159,9 @@ void main() {
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(onTap: () => tapCount++))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(onTap: () => tapCount++)),
+      ),
     );
 
     expect(tapCount, 0);
@@ -6123,7 +6200,9 @@ void main() {
 
     // Enabling the text field, now it should accept taps.
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(onTap: () => tapCount++))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(onTap: () => tapCount++)),
+      ),
     );
 
     await tester.tap(find.byType(CupertinoTextField));
@@ -6146,7 +6225,9 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(focusNode: focusNode))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(focusNode: focusNode)),
+      ),
     );
 
     expect(focusNode.hasFocus, false); // initial status
@@ -6158,7 +6239,9 @@ void main() {
 
     // Disable the text field, now it should not accept requestFocus.
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(enabled: false, focusNode: focusNode))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(enabled: false, focusNode: focusNode)),
+      ),
     );
 
     // Should not accept requestFocus.
@@ -6406,15 +6489,19 @@ void main() {
         ),
       );
 
-      final RenderEditable renderEditable =
-          tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+      final RenderEditable renderEditable = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
 
       await tester.tapAt(textOffsetToPosition(tester, 5));
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       await tester.pumpAndSettle();
 
-      final List<Widget> transitions =
-          find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<Widget> transitions = find
+          .byType(FadeTransition)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .toList();
       expect(transitions.length, 2);
       final FadeTransition left = transitions[0] as FadeTransition;
       final FadeTransition right = transitions[1] as FadeTransition;
@@ -7011,10 +7098,9 @@ void main() {
                     Container(height: 100, color: CupertinoColors.black),
                     Expanded(
                       child: Navigator(
-                        onGenerateRoute:
-                            (_) => CupertinoPageRoute<void>(
-                              builder: (_) => CupertinoTextField(controller: controller),
-                            ),
+                        onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                          builder: (_) => CupertinoTextField(controller: controller),
+                        ),
                       ),
                     ),
                   ],
@@ -7043,7 +7129,9 @@ void main() {
         final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
-          CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+          CupertinoApp(
+            home: Center(child: CupertinoTextField(controller: controller)),
+          ),
         );
 
         // Initially, the menu is not shown and there is no selection.
@@ -7938,7 +8026,9 @@ void main() {
   testWidgets('textSelectionControls is passed to EditableText', (WidgetTester tester) async {
     final MockTextSelectionControls selectionControl = MockTextSelectionControls();
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextField(selectionControls: selectionControl))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(selectionControls: selectionControl)),
+      ),
     );
 
     final EditableText widget = tester.widget(find.byType(EditableText));
@@ -8174,15 +8264,11 @@ void main() {
       const CupertinoApp(home: Center(child: CupertinoTextField(decoration: null, enabled: false))),
     );
 
-    final Color disabledColor =
-        tester
-            .widget<ColoredBox>(
-              find.descendant(
-                of: find.byType(CupertinoTextField),
-                matching: find.byType(ColoredBox),
-              ),
-            )
-            .color;
+    final Color disabledColor = tester
+        .widget<ColoredBox>(
+          find.descendant(of: find.byType(CupertinoTextField), matching: find.byType(ColoredBox)),
+        )
+        .color;
     expect(disabledColor, isSameColorAs(const Color(0xFFFAFAFA)));
   });
 
@@ -8200,14 +8286,18 @@ void main() {
 
   testWidgets('textDirection is passed to EditableText', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoTextField(textDirection: TextDirection.ltr))),
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(textDirection: TextDirection.ltr)),
+      ),
     );
 
     final EditableText ltrWidget = tester.widget(find.byType(EditableText));
     expect(ltrWidget.textDirection, TextDirection.ltr);
 
     await tester.pumpWidget(
-      const CupertinoApp(home: Center(child: CupertinoTextField(textDirection: TextDirection.rtl))),
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(textDirection: TextDirection.rtl)),
+      ),
     );
 
     final EditableText rtlWidget = tester.widget(find.byType(EditableText));
@@ -8262,7 +8352,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 13));
@@ -8307,7 +8399,9 @@ void main() {
       );
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 13));
@@ -8355,7 +8449,9 @@ void main() {
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(child: CupertinoTextField(controller: controller, focusNode: focusNode)),
+        home: Center(
+          child: CupertinoTextField(controller: controller, focusNode: focusNode),
+        ),
       ),
     );
 
@@ -8406,7 +8502,9 @@ void main() {
       addTearDown(controller.dispose);
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 8));
@@ -8515,7 +8613,9 @@ void main() {
           defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.fuchsia;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       await tester.tapAt(textOffsetToPosition(tester, 8));
@@ -8624,7 +8724,9 @@ void main() {
       addTearDown(controller.dispose);
       final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Make a selection from right to left.
@@ -8734,7 +8836,9 @@ void main() {
           defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.fuchsia;
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Make a selection from right to left.
@@ -8841,7 +8945,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -8915,7 +9021,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -8976,7 +9084,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       // Initially, the menu is not shown and there is no selection.
@@ -9402,12 +9512,12 @@ void main() {
           CupertinoApp(
             home: CupertinoPageScaffold(
               child: Builder(
-                builder:
-                    (BuildContext context) => CupertinoTextField(
-                      dragStartBehavior: DragStartBehavior.down,
-                      controller: controller,
-                      magnifierConfiguration: TextMagnifierConfiguration(
-                        magnifierBuilder: (
+                builder: (BuildContext context) => CupertinoTextField(
+                  dragStartBehavior: DragStartBehavior.down,
+                  controller: controller,
+                  magnifierConfiguration: TextMagnifierConfiguration(
+                    magnifierBuilder:
+                        (
                           _,
                           MagnifierController controller,
                           ValueNotifier<MagnifierInfo> localMagnifierInfo,
@@ -9415,8 +9525,8 @@ void main() {
                           magnifierInfo = localMagnifierInfo;
                           return fakeMagnifier;
                         },
-                      ),
-                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -9477,14 +9587,15 @@ void main() {
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
-                  magnifierBuilder: (
-                    _,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                  ) {
-                    magnifierInfo = localMagnifierInfo;
-                    return fakeMagnifier;
-                  },
+                  magnifierBuilder:
+                      (
+                        _,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                      ) {
+                        magnifierInfo = localMagnifierInfo;
+                        return fakeMagnifier;
+                      },
                 ),
               ),
             ),
@@ -9585,14 +9696,15 @@ void main() {
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
-                  magnifierBuilder: (
-                    _,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                  ) {
-                    magnifierInfo = localMagnifierInfo;
-                    return fakeMagnifier;
-                  },
+                  magnifierBuilder:
+                      (
+                        _,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                      ) {
+                        magnifierInfo = localMagnifierInfo;
+                        return fakeMagnifier;
+                      },
                 ),
               ),
             ),
@@ -9651,14 +9763,15 @@ void main() {
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
-                  magnifierBuilder: (
-                    _,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                  ) {
-                    magnifierInfo = localMagnifierInfo;
-                    return fakeMagnifier;
-                  },
+                  magnifierBuilder:
+                      (
+                        _,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                      ) {
+                        magnifierInfo = localMagnifierInfo;
+                        return fakeMagnifier;
+                      },
                 ),
               ),
             ),
@@ -9718,18 +9831,19 @@ void main() {
                 dragStartBehavior: DragStartBehavior.down,
                 controller: controller,
                 magnifierConfiguration: TextMagnifierConfiguration(
-                  magnifierBuilder: (
-                    BuildContext context,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                  ) {
-                    magnifierController = controller;
-                    return TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
-                      context,
-                      controller,
-                      localMagnifierInfo,
-                    );
-                  },
+                  magnifierBuilder:
+                      (
+                        BuildContext context,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                      ) {
+                        magnifierController = controller;
+                        return TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
+                          context,
+                          controller,
+                          localMagnifierInfo,
+                        );
+                      },
                 ),
               ),
             ),
@@ -9818,14 +9932,15 @@ void main() {
               child: CupertinoTextField(
                 dragStartBehavior: DragStartBehavior.down,
                 magnifierConfiguration: TextMagnifierConfiguration(
-                  magnifierBuilder: (
-                    BuildContext context,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo> localMagnifierInfo,
-                  ) {
-                    magnifierInfo = localMagnifierInfo;
-                    return fakeMagnifier;
-                  },
+                  magnifierBuilder:
+                      (
+                        BuildContext context,
+                        MagnifierController controller,
+                        ValueNotifier<MagnifierInfo> localMagnifierInfo,
+                      ) {
+                        magnifierInfo = localMagnifierInfo;
+                        return fakeMagnifier;
+                      },
                 ),
               ),
             ),
@@ -10187,7 +10302,9 @@ void main() {
       final TextEditingController controller = TextEditingController(text: 'blah1 blah2');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        CupertinoApp(home: Center(child: CupertinoTextField(controller: controller))),
+        CupertinoApp(
+          home: Center(child: CupertinoTextField(controller: controller)),
+        ),
       );
 
       expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);

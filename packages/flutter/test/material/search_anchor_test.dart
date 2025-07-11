@@ -55,7 +55,10 @@ void main() {
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Material(child: SearchBar(hintText: 'hint text'))),
+      MaterialApp(
+        theme: theme,
+        home: const Material(child: SearchBar(hintText: 'hint text')),
+      ),
     );
 
     final Finder searchBarMaterial = find.descendant(
@@ -72,7 +75,11 @@ void main() {
     final TextEditingController controller = TextEditingController(text: defaultText);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(controller: controller)),
+      ),
+    );
 
     expect(controller.value.text, defaultText);
     expect(find.text(defaultText), findsOneWidget);
@@ -88,7 +95,11 @@ void main() {
     final FocusNode node = FocusNode();
     addTearDown(node.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node)),
+      ),
+    );
 
     expect(node.hasFocus, false);
 
@@ -105,7 +116,11 @@ void main() {
     final FocusNode node1 = FocusNode();
     addTearDown(node1.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node1))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node1)),
+      ),
+    );
 
     expect(node1.hasFocus, isFalse);
 
@@ -120,7 +135,11 @@ void main() {
     final FocusNode node2 = FocusNode();
     addTearDown(node2.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node2))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node2)),
+      ),
+    );
 
     expect(node1.hasFocus, isFalse);
     expect(node2.hasFocus, isFalse);
@@ -212,7 +231,9 @@ void main() {
   testWidgets('SearchBar respects hintText property', (WidgetTester tester) async {
     const String hintText = 'hint text';
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: SearchBar(hintText: hintText))),
+      const MaterialApp(
+        home: Material(child: SearchBar(hintText: hintText)),
+      ),
     );
 
     expect(find.text(hintText), findsOneWidget);
@@ -224,7 +245,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SearchBar(leading: IconButton(icon: const Icon(Icons.search), onPressed: () {})),
+          child: SearchBar(
+            leading: IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          ),
         ),
       ),
     );
@@ -328,7 +351,11 @@ void main() {
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: Material(child: SearchBar(constraints: constraints)))),
+      const MaterialApp(
+        home: Center(
+          child: Material(child: SearchBar(constraints: constraints)),
+        ),
+      ),
     );
 
     final Rect barRect = tester.getRect(find.byType(SearchBar));
@@ -752,7 +779,9 @@ void main() {
   testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchBar(TextCapitalization textCapitalization) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(textCapitalization: textCapitalization))),
+        home: Center(
+          child: Material(child: SearchBar(textCapitalization: textCapitalization)),
+        ),
       );
     }
 
@@ -1327,9 +1356,8 @@ void main() {
     await tester.pumpWidget(Container());
     await tester.pumpWidget(
       buildAnchor(
-        viewBuilder:
-            (Iterable<Widget> suggestions) =>
-                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+        viewBuilder: (Iterable<Widget> suggestions) =>
+            GridView.count(crossAxisCount: 5, children: suggestions.toList()),
       ),
     );
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
@@ -1361,9 +1389,8 @@ void main() {
     await tester.pumpWidget(Container());
     await tester.pumpWidget(
       buildAnchor(
-        viewBuilder:
-            (Iterable<Widget> suggestions) =>
-                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+        viewBuilder: (Iterable<Widget> suggestions) =>
+            GridView.count(crossAxisCount: 5, children: suggestions.toList()),
       ),
     );
     await tester.tap(find.byIcon(Icons.search));
@@ -1781,8 +1808,9 @@ void main() {
     // Divider should not be shown if there are no suggestions
     expect(findDivider, findsNothing);
 
-    final Finder findMaterial =
-        find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
+    final Finder findMaterial = find
+        .descendant(of: findViewContent(), matching: find.byType(Material))
+        .first;
     final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
     expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
 
@@ -1890,8 +1918,9 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    final Finder findSearchBar =
-        find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Finder findSearchBar = find
+        .descendant(of: findViewContent(), matching: find.byType(SearchBar))
+        .first;
     final Padding padding = tester.widget<Padding>(
       find.descendant(of: findSearchBar, matching: find.byType(Padding)).first,
     );
@@ -2533,7 +2562,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
+          return Scaffold(
+            body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child),
+          );
         },
         home: Material(
           child: SearchAnchor(
@@ -2575,7 +2606,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
+          return Scaffold(
+            body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child),
+          );
         },
         home: Material(
           child: Align(
@@ -2822,7 +2855,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: const Center(child: Material(child: SearchBar(hintText: 'hint text'))),
+          home: const Center(
+            child: Material(child: SearchBar(hintText: 'hint text')),
+          ),
         ),
       );
 
@@ -2870,13 +2905,12 @@ void main() {
       checkDecorationInSearchBar(tester);
 
       // Check search bar defaults in search view route.
-      final Finder searchBarMaterial =
-          find
-              .descendant(
-                of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
-                matching: find.byType(Material),
-              )
-              .first;
+      final Finder searchBarMaterial = find
+          .descendant(
+            of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
+            matching: find.byType(Material),
+          )
+          .first;
 
       final Material material = tester.widget<Material>(searchBarMaterial);
       expect(material.color, Colors.transparent);
@@ -2957,7 +2991,9 @@ void main() {
                   child: SearchAnchor.bar(
                     suggestionsBuilder: (BuildContext context, SearchController controller) {
                       return <Widget>[
-                        Card(child: ListTile(onTap: () {}, title: const Text('Item 1'))),
+                        Card(
+                          child: ListTile(onTap: () {}, title: const Text('Item 1')),
+                        ),
                       ];
                     },
                   ),
@@ -2999,7 +3035,9 @@ void main() {
   testWidgets('SearchBar respects keyboardType property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputType keyboardType) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(keyboardType: keyboardType))),
+        home: Center(
+          child: Material(child: SearchBar(keyboardType: keyboardType)),
+        ),
       );
     }
 
@@ -3091,7 +3129,9 @@ void main() {
   testWidgets('SearchBar respects textInputAction property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputAction textInputAction) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(textInputAction: textInputAction))),
+        home: Center(
+          child: Material(child: SearchBar(textInputAction: textInputAction)),
+        ),
       );
     }
 
@@ -3187,7 +3227,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: SearchBar(controller: controller, enabled: false)),
+        ),
       ),
     );
 
@@ -3232,7 +3274,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: SearchBar(controller: controller, enabled: false)),
+        ),
       ),
     );
 
@@ -3250,7 +3294,11 @@ void main() {
   testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: SearchBar()))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: SearchBar())),
+      ),
+    );
 
     expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
@@ -3258,7 +3306,9 @@ void main() {
 
   testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SearchBar(enabled: false)))),
+      const MaterialApp(
+        home: Material(child: Center(child: SearchBar(enabled: false))),
+      ),
     );
 
     final Finder searchBarFinder = find.byType(SearchBar);
@@ -3494,10 +3544,9 @@ void main() {
                       suggestionsLoadingCount++;
                       return SingleChildScrollView(
                         child: Column(
-                          children:
-                              result.map((String text) {
-                                return ListTile(title: Text(text));
-                              }).toList(),
+                          children: result.map((String text) {
+                            return ListTile(title: Text(text));
+                          }).toList(),
                         ),
                       );
                     },
@@ -3615,7 +3664,9 @@ void main() {
   ) async {
     const EdgeInsets scrollPadding = EdgeInsets.zero;
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: SearchBar(scrollPadding: scrollPadding))),
+      const MaterialApp(
+        home: Material(child: SearchBar(scrollPadding: scrollPadding)),
+      ),
     );
 
     expect(find.byType(EditableText), findsOneWidget);
@@ -3721,7 +3772,9 @@ void main() {
           wrapWithView: false,
           View(
             view: tester.view,
-            child: MaterialApp(home: Material(child: TextField(controller: controller))),
+            child: MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
           ),
         );
 
@@ -3874,7 +3927,10 @@ void main() {
     key.currentState!.pop();
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(navigatorKey: key, home: const Material(child: Text('disposed'))),
+      MaterialApp(
+        navigatorKey: key,
+        home: const Material(child: Text('disposed')),
+      ),
     );
     await tester.pump();
     expect(tester.takeException(), isNull);

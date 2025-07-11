@@ -217,10 +217,9 @@ class TextFormField extends FormField<String> {
 
            final String? errorText = field.errorText;
            if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
+             effectiveDecoration = errorBuilder != null
+                 ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                 : effectiveDecoration.copyWith(errorText: errorText);
            }
 
            void onChangedHandler(String value) {
@@ -366,10 +365,9 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

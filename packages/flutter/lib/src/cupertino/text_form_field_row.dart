@@ -316,10 +316,9 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

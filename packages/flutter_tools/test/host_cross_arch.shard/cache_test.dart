@@ -13,7 +13,7 @@ import '../src/common.dart';
 Future<void> main() async {
   test('verify the dart binary arch matches the host arch', () async {
     final HostPlatform dartArch = _identifyMacBinaryArch(_dartBinary.path);
-    final OperatingSystemUtils os = OperatingSystemUtils(
+    final os = OperatingSystemUtils(
       processManager: processManager,
       fileSystem: fileSystem,
       platform: platform,
@@ -27,7 +27,7 @@ Future<void> main() async {
 HostPlatform _identifyMacBinaryArch(String path) {
   // Expect STDOUT like:
   //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
-  final RegExp pattern = RegExp(r'Mach-O 64-bit executable (\w+)');
+  final pattern = RegExp(r'Mach-O 64-bit executable (\w+)');
   final ProcessResult result = processManager.runSync(<String>['file', _dartBinary.path]);
   expect(
     result,
@@ -49,11 +49,10 @@ HostPlatform _identifyMacBinaryArch(String path) {
 
 final String _flutterRootPath = getFlutterRoot();
 final Directory _flutterRoot = fileSystem.directory(_flutterRootPath);
-final File _dartBinary =
-    _flutterRoot
-        .childDirectory('bin')
-        .childDirectory('cache')
-        .childDirectory('dart-sdk')
-        .childDirectory('bin')
-        .childFile('dart')
-        .absolute;
+final File _dartBinary = _flutterRoot
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childDirectory('dart-sdk')
+    .childDirectory('bin')
+    .childFile('dart')
+    .absolute;
