@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_features.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
@@ -11,52 +14,55 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
-/// The rest of the tools code should use this class instead of looking up
-/// features directly. To facilitate rolls to google3 and other clients, all
-/// flags should be provided with a default implementation here. Clients that
-/// use this class should extend instead of implement, so that new flags are
-/// picked up automatically.
+/// This class is extended in google3. Whenever a new flag is added,
+/// google3 must also be updated using a g3fix.
+///
+/// See also:
+///
+/// * [FlutterFeatureFlags], Flutter's implementation of this class.
+/// * https://github.com/flutter/flutter/blob/main/docs/contributing/Feature-flags.md,
+///   docs on feature flags and how to add or use them.
 abstract class FeatureFlags {
   /// const constructor so that subclasses can be const.
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => false;
+  bool get isLinuxEnabled;
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => false;
+  bool get isMacOSEnabled;
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => false;
+  bool get isWebEnabled;
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => false;
+  bool get isWindowsEnabled;
 
   /// Whether android is enabled.
-  bool get isAndroidEnabled => true;
+  bool get isAndroidEnabled;
 
   /// Whether iOS is enabled.
-  bool get isIOSEnabled => true;
+  bool get isIOSEnabled;
 
   /// Whether fuchsia is enabled.
-  bool get isFuchsiaEnabled => true;
+  bool get isFuchsiaEnabled;
 
   /// Whether custom devices are enabled.
-  bool get areCustomDevicesEnabled => false;
+  bool get areCustomDevicesEnabled;
 
   /// Whether animations are used in the command line interface.
-  bool get isCliAnimationEnabled => true;
+  bool get isCliAnimationEnabled;
 
   /// Whether native assets compilation and bundling is enabled.
-  bool get isNativeAssetsEnabled => true;
+  bool get isNativeAssetsEnabled;
 
   /// Whether Swift Package Manager dependency management is enabled.
-  bool get isSwiftPackageManagerEnabled => false;
+  bool get isSwiftPackageManagerEnabled;
 
   /// Whether to stop writing the `{FLUTTER_ROOT}/version` file.
   ///
   /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
-  bool get isOmitLegacyVersionFileEnabled => false;
+  bool get isOmitLegacyVersionFileEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
