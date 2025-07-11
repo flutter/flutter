@@ -18,10 +18,13 @@ import 'actions.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
+import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_details.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
@@ -445,6 +448,7 @@ class ScrollAction extends ContextAction<ScrollIntent> {
   @override
   void invoke(ScrollIntent intent, [BuildContext? context]) {
     assert(context != null, 'Cannot scroll without a context.');
+
     ScrollableState? state = Scrollable.maybeOf(context!);
     if (state == null) {
       final ScrollController primaryScrollController = PrimaryScrollController.of(context);
@@ -480,22 +484,44 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         return;
       }
     }
+
+    final ScrollPosition position = state.position;
     assert(
-      state.position.hasPixels,
+      position.hasPixels,
       'Scrollable must be laid out before it can be scrolled via a ScrollAction',
     );
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (state.resolvedPhysics != null &&
-        !state.resolvedPhysics!.shouldAcceptUserOffset(state.position)) {
+    final ScrollPhysics? physics = state.resolvedPhysics;
+    if (physics != null && !physics.shouldAcceptUserOffset(position)) {
       return;
     }
+
     final double increment = getDirectionalIncrement(state, intent);
     if (increment == 0.0) {
       return;
     }
-    state.position.moveTo(
-      state.position.pixels + increment,
+
+    final ScrollDetails details = KeyboardScrollDetails(metrics: position, delta: increment);
+    final bool didRetarget = position.retargetActivity(details);
+    if (didRetarget) {
+      return;
+    }
+
+    if (position is ScrollActivityDelegate) {
+      final ScrollActivity? newActivity = physics?.createScrollActivity(
+        position as ScrollActivityDelegate,
+        details,
+        position.context.vsync,
+      );
+      if (newActivity != null) {
+        position.beginActivity(newActivity);
+        return;
+      }
+    }
+
+    position.moveTo(
+      position.pixels + increment,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
