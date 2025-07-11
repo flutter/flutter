@@ -18,10 +18,10 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
+import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
 
-const int kAndroidSdkMinVersion = 29;
-final Version kAndroidJavaMinVersion = Version(1, 8, 0);
+final Version kAndroidJavaMinVersion = Version(11, 0, 0);
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
@@ -226,12 +226,12 @@ class AndroidValidator extends DoctorValidator {
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
     if (androidSdkLatestVersion != null) {
-      if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion ||
+      if (androidSdkLatestVersion.sdkLevel < gradle_utils.minSdkVersionInt ||
           androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(
           ValidationMessage.error(
             _userMessages.androidSdkBuildToolsOutdated(
-              kAndroidSdkMinVersion,
+              gradle_utils.minSdkVersionInt,
               kAndroidSdkBuildToolsMinVersion.toString(),
               _platform,
             ),

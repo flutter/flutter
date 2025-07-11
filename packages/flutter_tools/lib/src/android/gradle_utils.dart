@@ -53,6 +53,7 @@ const String templateKotlinGradlePluginVersion = '2.1.0';
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '36';
 const String minSdkVersion = '24';
+final int minSdkVersionInt = int.parse(minSdkVersion);
 const String targetSdkVersion = '36';
 const String ndkVersion = '27.0.12077973';
 
