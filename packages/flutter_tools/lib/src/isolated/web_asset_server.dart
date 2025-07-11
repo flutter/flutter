@@ -76,6 +76,7 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
+    required this.isWasm,
   }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -270,6 +271,7 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      isWasm: isWasm,
     );
     final int selectedPort = server.selectedPort;
     String url = '$hostname:$selectedPort';
@@ -594,16 +596,26 @@ class WebAssetServer implements AssetReader {
 
   final FileSystem fileSystem;
 
+  final bool isWasm;
+
   String get _buildConfigString {
+    final List<Map<String, Object>> builds = <Map<String, Object>>[
+      if (isWasm)
+        <String, Object>{
+          'compileTarget': 'dart2wasm',
+          'renderer': 'skwasm',
+          'mainWasmPath': 'main.dart.wasm',
+          'jsSupportRuntimePath': 'main.dart.mjs',
+        },
+      <String, Object>{
+        'compileTarget': isWasm ? 'dart2js' : 'dartdevc',
+        'renderer': isWasm ? 'canvaskit' : webRenderer.name,
+        'mainJsPath': 'main.dart.js',
+      },
+    ];
     final Map<String, Object> buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
-      'builds': <Object>[
-        <String, Object>{
-          'compileTarget': 'dartdevc',
-          'renderer': webRenderer.name,
-          'mainJsPath': 'main.dart.js',
-        },
-      ],
+      'builds': builds,
       if (useLocalCanvasKit) 'useLocalCanvasKit': true,
     };
     return '''

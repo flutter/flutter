@@ -379,7 +379,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            compilerConfigs: _compilerConfigs,
           );
         }
         final WebDevFS webDevFS = device!.devFS! as WebDevFS;
@@ -428,18 +428,25 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
-  WebCompilerConfig get _compilerConfig {
+  List<WebCompilerConfig> get _compilerConfigs {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      final List<WebCompilerConfig> configs = <WebCompilerConfig>[
+        WasmCompilerConfig(
+          optimizationLevel: 0,
+          stripWasm: false,
+        ),
+        JsCompilerConfig(
+          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+        ),
+      ];
+      return configs;
     }
-    return JsCompilerConfig.run(
-      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-      renderer: debuggingOptions.webRenderer,
-    );
+    return <WebCompilerConfig>[
+      JsCompilerConfig.run(
+        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+        renderer: debuggingOptions.webRenderer,
+      ),
+    ];
   }
 
   @override
@@ -517,7 +524,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          compilerConfigs: _compilerConfigs,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');

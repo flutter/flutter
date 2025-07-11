@@ -1518,4 +1518,58 @@ name: foo
       expect(canvasKitOutputAfter.readAsStringSync(), 'bar');
     }),
   );
+
+  test(
+    'WebTemplatedFiles generates correct build config for WASM with JavaScript fallback',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').createSync();
+
+      final List<WebCompilerConfig> configs = <WebCompilerConfig>[
+        const WasmCompilerConfig(),
+        const JsCompilerConfig(),
+      ];
+
+      final List<Dart2WebTarget> targets = <Dart2WebTarget>[
+        Dart2WasmTarget(configs[0] as WasmCompilerConfig, const NoOpAnalytics()),
+        Dart2JSTarget(configs[1] as JsCompilerConfig),
+      ];
+
+      final WebTemplatedFiles target = WebTemplatedFiles(
+        targets.map((Dart2WebTarget target) => target.buildConfig).toList(),
+      );
+
+      await target.build(environment);
+
+      final File flutterBootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js');
+      expect(flutterBootstrapJs.existsSync(), true);
+
+      final String content = flutterBootstrapJs.readAsStringSync();
+
+      expect(content, contains('_flutter.buildConfig ='));
+      expect(content, contains('"compileTarget":"dart2wasm"'));
+      expect(content, contains('"compileTarget":"dart2js"'));
+      expect(content, contains('"renderer":"skwasm"'));
+      expect(content, contains('"renderer":"canvaskit"'));
+      expect(content, contains('"mainWasmPath":"main.dart.wasm"'));
+      expect(content, contains('"jsSupportRuntimePath":"main.dart.mjs"'));
+      expect(content, contains('"mainJsPath":"main.dart.js"'));
+
+      final RegExp configRegex = RegExp(r'_flutter\.buildConfig = ({.*?});', dotAll: true);
+      final Match? match = configRegex.firstMatch(content);
+      expect(match, isNotNull);
+
+      final String buildConfig = match!.group(1)!;
+
+      expect(buildConfig, contains('"builds":['));
+
+      final int wasmCount = '"compileTarget":"dart2wasm"'.allMatches(buildConfig).length;
+      final int jsCount = '"compileTarget":"dart2js"'.allMatches(buildConfig).length;
+      expect(wasmCount, 1);
+      expect(jsCount, 1);
+
+      final int wasmIndex = buildConfig.indexOf('"compileTarget":"dart2wasm"');
+      final int jsIndex = buildConfig.indexOf('"compileTarget":"dart2js"');
+      expect(wasmIndex, lessThan(jsIndex));
+    }),
+  );
 }
