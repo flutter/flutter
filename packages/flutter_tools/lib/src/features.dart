@@ -99,54 +99,54 @@ abstract class FeatureFlags {
 Iterable<Feature> get allConfigurableFeatures => featureFlags.allConfigurableFeatures;
 
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature.fullyEnabled(
+const flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
+const flutterMacOSDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
+const flutterLinuxDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
+const flutterWindowsDesktopFeature = Feature.fullyEnabled(
   name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
 );
 
 /// The [Feature] for Android devices.
-const Feature flutterAndroidFeature = Feature.fullyEnabled(
+const flutterAndroidFeature = Feature.fullyEnabled(
   name: 'Flutter for Android',
   configSetting: 'enable-android',
 );
 
 /// The [Feature] for iOS devices.
-const Feature flutterIOSFeature = Feature.fullyEnabled(
+const flutterIOSFeature = Feature.fullyEnabled(
   name: 'Flutter for iOS',
   configSetting: 'enable-ios',
 );
 
 /// The [Feature] for Fuchsia support.
-const Feature flutterFuchsiaFeature = Feature(
+const flutterFuchsiaFeature = Feature(
   name: 'Flutter for Fuchsia',
   configSetting: 'enable-fuchsia',
   environmentOverride: 'FLUTTER_FUCHSIA',
   master: FeatureChannelSetting(available: true),
 );
 
-const Feature flutterCustomDevicesFeature = Feature(
+const flutterCustomDevicesFeature = Feature(
   name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
@@ -158,13 +158,13 @@ const Feature flutterCustomDevicesFeature = Feature(
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
-const Feature cliAnimation = Feature.fullyEnabled(
+const cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
   configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.
-const Feature nativeAssets = Feature(
+const nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
@@ -173,7 +173,7 @@ const Feature nativeAssets = Feature(
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
-const Feature swiftPackageManager = Feature(
+const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
@@ -185,7 +185,7 @@ const Feature swiftPackageManager = Feature(
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
 ///
 /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
-const Feature omitLegacyVersionFile = Feature(
+const omitLegacyVersionFile = Feature(
   name: 'stops writing the legacy version file',
   configSetting: 'omit-legacy-version-file',
   extraHelpText:
@@ -263,8 +263,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name.');
-    final List<String> channels = <String>[
+    final buffer = StringBuffer('Enable or disable $name.');
+    final channels = <String>[
       if (master.available) 'master',
       if (beta.available) 'beta',
       if (stable.available) 'stable',
