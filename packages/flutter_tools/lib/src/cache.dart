@@ -78,28 +78,16 @@ class DevelopmentArtifact {
   static const web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
-  static const macOS = DevelopmentArtifact._(
-    'macos',
-    feature: flutterMacOSDesktopFeature,
-  );
+  static const macOS = DevelopmentArtifact._('macos', feature: flutterMacOSDesktopFeature);
 
   /// Artifacts required for desktop Windows.
-  static const windows = DevelopmentArtifact._(
-    'windows',
-    feature: flutterWindowsDesktopFeature,
-  );
+  static const windows = DevelopmentArtifact._('windows', feature: flutterWindowsDesktopFeature);
 
   /// Artifacts required for desktop Linux.
-  static const linux = DevelopmentArtifact._(
-    'linux',
-    feature: flutterLinuxDesktopFeature,
-  );
+  static const linux = DevelopmentArtifact._('linux', feature: flutterLinuxDesktopFeature);
 
   /// Artifacts required for Fuchsia.
-  static const fuchsia = DevelopmentArtifact._(
-    'fuchsia',
-    feature: flutterFuchsiaFeature,
-  );
+  static const fuchsia = DevelopmentArtifact._('fuchsia', feature: flutterFuchsiaFeature);
 
   /// Artifacts required for the Flutter Runner.
   static const flutterRunner = DevelopmentArtifact._(

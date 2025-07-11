@@ -313,8 +313,7 @@ void main() {
   });
 
   runInTestbed('parses base path from index.html', () async {
-    const htmlContent =
-        '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -357,8 +356,7 @@ void main() {
   });
 
   runInTestbed('throws if base path is relative', () async {
-    const htmlContent =
-        '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="foo/bar/"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -380,8 +378,7 @@ void main() {
   });
 
   runInTestbed('throws if base path does not end with slash', () async {
-    const htmlContent =
-        '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/bar"></head><body id="test"></body></html>';
     final Directory webDir = globals.fs.currentDirectory.childDirectory('web')..createSync();
     webDir.childFile('index.html').writeAsStringSync(htmlContent);
 
@@ -1214,8 +1211,7 @@ void main() {
   });
 
   runInTestbed('WebAssetServer strips leading base href off of asset requests', () async {
-    const htmlContent =
-        '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+    const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
     globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
       ..createSync(recursive: true)
       ..writeAsStringSync(htmlContent);
@@ -1245,8 +1241,7 @@ void main() {
     () async {
       final String path = globals.fs.path.join('lib', 'main.dart');
       final File outputFile = globals.fs.file(path)..createSync(recursive: true);
-      const htmlContent =
-          '<html><head><base href="/foo/"></head><body id="test"></body></html>';
+      const htmlContent = '<html><head><base href="/foo/"></head><body id="test"></body></html>';
       globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
         ..createSync(recursive: true)
         ..writeAsStringSync(htmlContent);

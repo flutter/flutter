@@ -48,10 +48,7 @@ void main() {
 
   group('DaemonConnection receiving end', () {
     testWithoutContext('redirects input to incoming commands', () async {
-      final commandToSend = <String, dynamic>{
-        'id': 0,
-        'method': 'some_method',
-      };
+      final commandToSend = <String, dynamic>{'id': 0, 'method': 'some_method'};
       daemonStreams.inputs.add(DaemonMessage(commandToSend));
 
       final DaemonMessage commandReceived = await daemonConnection.incomingCommands.first;
@@ -206,9 +203,7 @@ void main() {
         utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
 
     testWithoutContext('can parse a single message', () async {
-      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
-        testCommandBinary(10),
-      ]);
+      final inputStream = Stream<List<int>>.fromIterable(<List<int>>[testCommandBinary(10)]);
       final converter = DaemonInputStreamConverter(inputStream);
       final Stream<DaemonMessage> outputStream = converter.convertedStream;
       final List<DaemonMessage> outputs = await outputStream.toList();
@@ -278,9 +273,7 @@ void main() {
       () async {
         final List<int> binary1 = testCommandBinary(10);
         final List<int> binary2 = testCommandBinary(20);
-        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[
-          binary1 + binary2,
-        ]);
+        final inputStream = Stream<List<int>>.fromIterable(<List<int>>[binary1 + binary2]);
         final converter = DaemonInputStreamConverter(inputStream);
         final Stream<DaemonMessage> outputStream = converter.convertedStream;
         final List<DaemonMessage> outputs = await outputStream.toList();

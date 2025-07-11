@@ -857,9 +857,7 @@ void main() {
       commands.add(cmd);
     }
 
-    final chromeConnection = FakeChromeConnectionWithTab(
-      onSendCommand: onSendCommand,
-    );
+    final chromeConnection = FakeChromeConnectionWithTab(onSendCommand: onSendCommand);
     final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -912,9 +910,7 @@ void main() {
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
       final logger = BufferLogger.test();
-      final chromeConnection = FakeChromeConnectionWithTab(
-        throwWebSocketException: true,
-      );
+      final chromeConnection = FakeChromeConnectionWithTab(throwWebSocketException: true);
       final chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
         platform: platform,

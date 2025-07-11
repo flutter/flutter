@@ -323,8 +323,7 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns parsed uri',
       () async {
-        final command = DummyFlutterCommand()
-          ..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>[
           'dummy',
           '--${FlutterCommand.kDevToolsServerAddress}',
@@ -341,8 +340,7 @@ void main() {
     testUsingContext(
       'devToolsServerAddress returns null for bad input',
       () async {
-        final command = DummyFlutterCommand()
-          ..addDevToolsOptions(verboseHelp: false);
+        final command = DummyFlutterCommand()..addDevToolsOptions(verboseHelp: false);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
           'dummy',
@@ -526,9 +524,7 @@ void main() {
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
-      final flutterCommand = DummyFlutterCommand(
-        commandFunction: () async => commandResult,
-      );
+      final flutterCommand = DummyFlutterCommand(commandFunction: () async => commandResult);
       await flutterCommand.run();
 
       expect(
@@ -601,9 +597,7 @@ void main() {
     testUsingContext(
       'use fileSystemRoots to generate BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand(
-          fileSystemRoots: <String>['foo', 'bar'],
-        );
+        final flutterCommand = DummyFlutterCommand(fileSystemRoots: <String>['foo', 'bar']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
@@ -618,8 +612,7 @@ void main() {
     testUsingContext(
       'includes initializeFromDill in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()
-          ..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--initialize-from-dill=/foo/bar.dill']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -636,8 +629,7 @@ void main() {
     testUsingContext(
       'includes assumeInitializeFromDillUpToDate in BuildInfo',
       () async {
-        final flutterCommand = DummyFlutterCommand()
-          ..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
@@ -654,8 +646,7 @@ void main() {
     testUsingContext(
       'unsets assumeInitializeFromDillUpToDate in BuildInfo when disabled',
       () async {
-        final flutterCommand = DummyFlutterCommand()
-          ..usesInitializeFromDillOption(hide: false);
+        final flutterCommand = DummyFlutterCommand()..usesInitializeFromDillOption(hide: false);
         final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
         await runner.run(<String>['dummy', '--no-assume-initialize-from-dill-up-to-date']);
         final BuildInfo buildInfo = await flutterCommand.getBuildInfo(

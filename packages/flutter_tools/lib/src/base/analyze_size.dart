@@ -310,8 +310,7 @@ class SizeAnalyzer {
     var currentLevel = apkAnalysisJson;
     currentLevel['precompiler-trace'] = precompilerTrace;
     while (path.isNotEmpty) {
-      final children =
-          currentLevel['children'] as List<Map<String, Object?>>?;
+      final children = currentLevel['children'] as List<Map<String, Object?>>?;
       final Map<String, Object?> childWithPathAsName =
           children?.firstWhere(
             (Map<String, Object?> child) => (child['n'] as String?) == path.first,

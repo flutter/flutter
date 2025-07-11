@@ -606,9 +606,7 @@ void main() {
     });
 
     testWithoutContext('throws when the service is disposed', () async {
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[],
-      );
+      final fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
 
       await fakeVmServiceHost.vmService.dispose();
 
@@ -653,10 +651,8 @@ void main() {
 
 class FakeVMService extends Fake implements vm_service.VmService {
   final services = <String, String>{};
-  final serviceCallBacks =
-      <String, vm_service.ServiceCallback>{};
-  final calledMethods =
-      <String, List<({Map<String, Object?>? args, String? isolateId})>>{};
+  final serviceCallBacks = <String, vm_service.ServiceCallback>{};
+  final calledMethods = <String, List<({Map<String, Object?>? args, String? isolateId})>>{};
   final listenedStreams = <String>{};
   var errorOnRegisterService = false;
 

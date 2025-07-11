@@ -33,8 +33,7 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
   final alreadyTakenNames = <String>{};
-  final result =
-      <KernelAssetPath, List<FlutterCodeAsset>>{};
+  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
   final idToPath = <String, KernelAssetPath>{};
   for (final asset in nativeAssets) {
     // Use same target path for all assets with the same id.

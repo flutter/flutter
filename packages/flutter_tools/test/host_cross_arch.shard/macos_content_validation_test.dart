@@ -17,11 +17,7 @@ void main() {
     processManager.runSync(<String>[flutterBin, 'config', '--enable-macos-desktop']);
   });
 
-  for (final buildMode in <BuildMode>[
-    BuildMode.debug,
-    BuildMode.profile,
-    BuildMode.release,
-  ]) {
+  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
     test('verify ${buildMode.cliName} FlutterMacOS.xcframework artifact', () {
       final String flutterRoot = getFlutterRoot();
 

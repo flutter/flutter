@@ -1505,10 +1505,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     testWithoutContext(
       'copySync can directly copy bytes if both files can be opened but copySync fails',
       () {
-        final expectedBytes = List<int>.generate(
-          64 * 1024 + 3,
-          (int i) => i.isEven ? 0 : 1,
-        );
+        final expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
         fileSystem.file('source').writeAsBytesSync(expectedBytes);
         final File dest = fileSystem.file('dest');
 

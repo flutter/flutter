@@ -144,8 +144,7 @@ void main() {
       });
 
       testWithoutContext('diagnostic message', () async {
-        final deviceManager = FakeDeviceManager()
-          ..diagnostics = <String>['Device locked'];
+        final deviceManager = FakeDeviceManager()..diagnostics = <String>['Device locked'];
 
         final deviceValidator = DeviceValidator(
           deviceManager: deviceManager,
@@ -830,11 +829,7 @@ void main() {
     testUsingContext(
       'contains installed',
       () async {
-        final doctor = Doctor(
-          logger: logger,
-          clock: fakeSystemClock,
-          analytics: fakeAnalytics,
-        );
+        final doctor = Doctor(logger: logger, clock: fakeSystemClock, analytics: fakeAnalytics);
         await doctor.diagnose(verbose: false);
 
         expect(fakeAnalytics.sentEvents.length, 3);
@@ -990,10 +985,7 @@ void main() {
     testUsingContext(
       'grouped validator subresult and subvalidators different lengths',
       () async {
-        final fakeDoctor = FakeGroupedDoctorWithCrash(
-          logger,
-          clock: fakeSystemClock,
-        );
+        final fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
         await fakeDoctor.diagnose(verbose: false);
 
         expect(fakeDoctor.validators, hasLength(1));
@@ -1144,10 +1136,7 @@ class AsyncCrashingValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() {
     const delay = Duration(seconds: 1);
-    final result = Future<ValidationResult>.delayed(
-      delay,
-      () => throw StateError('fatal error'),
-    );
+    final result = Future<ValidationResult>.delayed(delay, () => throw StateError('fatal error'));
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
     return result;
@@ -1276,9 +1265,7 @@ class PassingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const messages = <ValidationMessage>[
-      ValidationMessage('A helpful message'),
-    ];
+    const messages = <ValidationMessage>[ValidationMessage('A helpful message')];
     return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
   }
 }
@@ -1288,9 +1275,7 @@ class MissingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const messages = <ValidationMessage>[
-      ValidationMessage.error('A useful error message'),
-    ];
+    const messages = <ValidationMessage>[ValidationMessage.error('A useful error message')];
     return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
   }
 }
@@ -1312,9 +1297,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    const messages = <ValidationMessage>[
-      ValidationMessage('A different message'),
-    ];
+    const messages = <ValidationMessage>[ValidationMessage('A different message')];
     return ZeroExecutionTimeValidationResult(
       ValidationType.success,
       messages,

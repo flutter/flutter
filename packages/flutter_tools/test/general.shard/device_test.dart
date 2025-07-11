@@ -279,16 +279,8 @@ void main() {
   group('Filter devices', () {
     final ephemeralOne = FakeDevice('ephemeralOne', 'ephemeralOne');
     final ephemeralTwo = FakeDevice('ephemeralTwo', 'ephemeralTwo');
-    final nonEphemeralOne = FakeDevice(
-      'nonEphemeralOne',
-      'nonEphemeralOne',
-      ephemeral: false,
-    );
-    final nonEphemeralTwo = FakeDevice(
-      'nonEphemeralTwo',
-      'nonEphemeralTwo',
-      ephemeral: false,
-    );
+    final nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', ephemeral: false);
+    final nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', ephemeral: false);
     final unsupported = FakeDevice('unsupported', 'unsupported', isSupported: false);
     final unsupportedForProject = FakeDevice(
       'unsupportedForProject',
@@ -299,11 +291,7 @@ void main() {
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     final fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
-    final unconnectedDevice = FakeDevice(
-      'ephemeralTwo',
-      'ephemeralTwo',
-      isConnected: false,
-    );
+    final unconnectedDevice = FakeDevice('ephemeralTwo', 'ephemeralTwo', isConnected: false);
     final wirelessDevice = FakeDevice(
       'ephemeralTwo',
       'ephemeralTwo',
@@ -323,12 +311,7 @@ void main() {
     testUsingContext(
       'returns null when multiple non ephemeral devices are found',
       () async {
-        final devices = <Device>[
-          ephemeralOne,
-          ephemeralTwo,
-          nonEphemeralOne,
-          nonEphemeralTwo,
-        ];
+        final devices = <Device>[ephemeralOne, ephemeralTwo, nonEphemeralOne, nonEphemeralTwo];
 
         final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
 
@@ -477,10 +460,7 @@ void main() {
       'uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject',
       () async {
         final devices = <Device>[unsupported, unsupportedForProject];
-        final deviceManager = TestDeviceManager(
-          devices,
-          logger: BufferLogger.test(),
-        );
+        final deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
         final supportFilter =
             TestDeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
               flutterProject: FakeFlutterProject(),
@@ -981,10 +961,7 @@ void main() {
     );
 
     testWithoutContext('No --enable-dart-profiling flag when option is false', () {
-      final original = DebuggingOptions.enabled(
-        BuildInfo.debug,
-        enableDartProfiling: false,
-      );
+      final original = DebuggingOptions.enabled(BuildInfo.debug, enableDartProfiling: false);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
         EnvironmentType.physical,

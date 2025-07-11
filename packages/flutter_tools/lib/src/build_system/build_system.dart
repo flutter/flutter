@@ -1111,8 +1111,7 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final invalidatedReasons =
-      <InvalidatedReasonKind, InvalidatedReason>{};
+  final invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;

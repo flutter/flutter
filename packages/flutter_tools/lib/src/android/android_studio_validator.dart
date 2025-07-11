@@ -62,10 +62,7 @@ class AndroidStudioValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidStudioLocation(_studio.directory)));
 
     if (_studio.pluginsPath != null) {
-      final plugins = IntelliJPlugins(
-        _studio.pluginsPath!,
-        fileSystem: _fileSystem,
-      );
+      final plugins = IntelliJPlugins(_studio.pluginsPath!, fileSystem: _fileSystem);
       plugins.validatePackage(
         messages,
         <String>['flutter-intellij', 'flutter-intellij.jar'],

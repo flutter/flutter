@@ -243,12 +243,8 @@ Future<vm_service.VmService> setUpVmService({
       final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
       final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
       final definitions = List<String>.from(params['definitions']! as List<Object?>);
-      final definitionTypes = List<String>.from(
-        params['definitionTypes']! as List<Object?>,
-      );
-      final typeDefinitions = List<String>.from(
-        params['typeDefinitions']! as List<Object?>,
-      );
+      final definitionTypes = List<String>.from(params['definitionTypes']! as List<Object?>);
+      final typeDefinitions = List<String>.from(params['typeDefinitions']! as List<Object?>);
       final typeBounds = List<String>.from(params['typeBounds']! as List<Object?>);
       final typeDefaults = List<String>.from(params['typeDefaults']! as List<Object?>);
       final libraryUri = params['libraryUri']! as String;

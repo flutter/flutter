@@ -270,8 +270,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return _buildSettingsByBuildContext[buildContext];
   }
 
-  final _buildSettingsByBuildContext =
-      <XcodeProjectBuildContext, Map<String, String>>{};
+  final _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<Map<String, String>?> _xcodeProjectBuildSettings(
     XcodeProjectBuildContext buildContext,
@@ -494,10 +493,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     required String configuration,
     required String target,
   }) async {
-    final context = XcodeProjectBuildContext(
-      configuration: configuration,
-      target: target,
-    );
+    final context = XcodeProjectBuildContext(configuration: configuration, target: target);
     final File file = await parent.buildDirectory
         .childDirectory('deeplink_data')
         .childFile('universal-link-settings-$configuration-$target.json')
@@ -547,8 +543,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     );
   }
 
-  final _productBundleIdentifiers =
-      <XcodeProjectBuildContext?, String?>{};
+  final _productBundleIdentifiers = <XcodeProjectBuildContext?, String?>{};
 
   Future<String?> _parseProductBundleIdentifier(XcodeProjectBuildContext? buildContext) async {
     String? fromPlist;

@@ -49,12 +49,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage XCLocalSwiftPackageReference.
-  static const _localFlutterPluginsSwiftPackageReferenceIdentifier =
-      '781AD8BC2B33823900A9FFBB';
+  static const _localFlutterPluginsSwiftPackageReferenceIdentifier = '781AD8BC2B33823900A9FFBB';
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
-  static const _flutterPluginsSwiftPackageProductDependencyIdentifier =
-      '78A3181F2AECB46A00862997';
+  static const _flutterPluginsSwiftPackageProductDependencyIdentifier = '78A3181F2AECB46A00862997';
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXFileReference.
   static const _flutterPluginsSwiftPackageFileIdentifer = '78E0A7A72DC9AD7400C4905E';
@@ -1049,8 +1047,7 @@ class ParsedProjectInfo {
     final buildFiles = <String>[];
     final references = <String>[];
     final groups = <ParsedProjectGroup>[];
-    final buildPhases =
-        <ParsedProjectFrameworksBuildPhase>[];
+    final buildPhases = <ParsedProjectFrameworksBuildPhase>[];
     final native = <ParsedNativeTarget>[];
     final project = <ParsedProject>[];
     final parsedSwiftPackageProductDependencies = <String>[];

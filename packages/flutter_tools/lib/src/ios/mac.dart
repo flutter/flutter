@@ -525,9 +525,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         );
       } else {
         // Discard unwanted errors. See: https://github.com/flutter/flutter/issues/95354
-        final warningDiscarder = XCResultIssueDiscarder(
-          typeMatcher: XCResultIssueType.warning,
-        );
+        final warningDiscarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
         final dartBuildErrorDiscarder = XCResultIssueDiscarder(
           messageMatcher: RegExp(r'Command PhaseScriptExecution failed with a nonzero exit code'),
         );
@@ -791,8 +789,7 @@ class XcodeBuildExecution {
   final Map<String, String> buildSettings;
 }
 
-final _xcodeRequirement =
-    'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
+final _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {

@@ -239,9 +239,7 @@ interface class FlutterTestRunner {
     );
 
     final mergedPackages = <Package>[...projectPackageConfig.packages];
-    final projectPackageNames = Set<String>.from(
-      mergedPackages.map((Package p) => p.name),
-    );
+    final projectPackageNames = Set<String>.from(mergedPackages.map((Package p) => p.name));
     for (final Package p in flutterToolsPackageConfig.packages) {
       if (!projectPackageNames.contains(p.name)) {
         mergedPackages.add(p);

@@ -406,8 +406,7 @@ void main() {
   testWithoutContext(
     'Converts a VM Service URI with a query parameter to a pretty display string',
     () {
-      const value =
-          'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
+      const value = 'http://127.0.0.1:9100?uri=http%3A%2F%2F127.0.0.1%3A57922%2F_MXpzytpH20%3D%2F';
       final Uri uri = Uri.parse(value);
 
       expect(

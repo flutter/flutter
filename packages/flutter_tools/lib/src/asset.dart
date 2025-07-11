@@ -176,8 +176,7 @@ class ManifestAssetBundle implements AssetBundle {
   final entries = <String, AssetBundleEntry>{};
 
   @override
-  final deferredComponentsEntries =
-      <String, Map<String, AssetBundleEntry>>{};
+  final deferredComponentsEntries = <String, Map<String, AssetBundleEntry>>{};
 
   @override
   final inputFiles = <File>[];
@@ -740,8 +739,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? flavor,
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
-    final deferredComponentsAssetVariants =
-        <String, Map<_Asset, List<_Asset>>>{};
+    final deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
     if (components == null) {
       return deferredComponentsAssetVariants;
     }

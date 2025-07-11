@@ -152,12 +152,7 @@ class AndroidEmulator extends Emulator {
     if (emulatorPath == null) {
       throw Exception('Emulator is missing from the Android SDK');
     }
-    final command = <String>[
-      emulatorPath,
-      '-avd',
-      id,
-      if (coldBoot) '-no-snapshot-load',
-    ];
+    final command = <String>[emulatorPath, '-avd', id, if (coldBoot) '-no-snapshot-load'];
     final Process process = await _processUtils.start(command);
 
     // Record output from the emulator process.

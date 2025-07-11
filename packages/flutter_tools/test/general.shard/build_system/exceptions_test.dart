@@ -24,14 +24,8 @@ void main() {
       globals.fs.file('foo'),
       globals.fs.file('bar'),
     ], 'example');
-    final misplacedOutputException = MisplacedOutputException(
-      'foo',
-      'example',
-    );
-    final missingDefineException = MissingDefineException(
-      'foobar',
-      'example',
-    );
+    final misplacedOutputException = MisplacedOutputException('foo', 'example');
+    final missingDefineException = MissingDefineException('foobar', 'example');
 
     expect(
       missingInputException.toString(),

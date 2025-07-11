@@ -20,25 +20,11 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
-const _kAvailablePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-];
+const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
 /// A list of all possible create platforms, even those that may not be enabled
 /// with the current config.
-const kAllCreatePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-];
+const kAllCreatePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
 const _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
@@ -160,10 +146,7 @@ mixin CreateBase on FlutterCommand {
     final File metadataFile = globals.fs.file(
       globals.fs.path.join(projectDir.absolute.path, '.metadata'),
     );
-    final projectMetadata = FlutterProjectMetadata(
-      metadataFile,
-      globals.logger,
-    );
+    final projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
     final FlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
@@ -233,8 +216,7 @@ mixin CreateBase on FlutterCommand {
     // If the destination directory is actually a file, then we refuse to
     // overwrite, on the theory that the user probably didn't expect it to exist.
     if (globals.fs.isFileSync(projectDirPath)) {
-      final message =
-          "Invalid project name: '$projectDirPath' - refers to an existing file.";
+      final message = "Invalid project name: '$projectDirPath' - refers to an existing file.";
       throwToolExit(
         overwrite ? '$message Refusing to overwrite a file with a directory.' : message,
         exitCode: 2,
@@ -492,9 +474,7 @@ mixin CreateBase on FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    final platformsForMigrateConfig = <SupportedPlatform>[
-      SupportedPlatform.root,
-    ];
+    final platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
     if (androidPlatform) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
       platformsForMigrateConfig.add(SupportedPlatform.android);

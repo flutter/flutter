@@ -461,8 +461,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        final specifiedDeviceId =
-            topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
+        final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
           globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }

@@ -346,14 +346,7 @@ class VisualStudio {
           ]
         : <String>[];
     try {
-      final defaultArguments = <String>[
-        '-format',
-        'json',
-        '-products',
-        '*',
-        '-utf8',
-        '-latest',
-      ];
+      final defaultArguments = <String>['-format', 'json', '-products', '*', '-utf8', '-latest'];
       // Ignore replacement characters as vswhere.exe is known to output them.
       // See: https://github.com/flutter/flutter/issues/102451
       const Encoding encoding = Utf8Codec(reportErrors: false);

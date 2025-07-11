@@ -428,19 +428,15 @@ class FlutterPlatform extends PlatformPlugin {
     final localController = StreamController<dynamic>();
     final remoteController = StreamController<dynamic>();
     final testCompleteCompleter = Completer<_AsyncError?>();
-    final remoteSink =
-        _FlutterPlatformStreamSinkWrapper<dynamic>(
-          remoteController.sink,
-          testCompleteCompleter.future,
-        );
+    final remoteSink = _FlutterPlatformStreamSinkWrapper<dynamic>(
+      remoteController.sink,
+      testCompleteCompleter.future,
+    );
     final localChannel = StreamChannel<dynamic>.withGuarantees(
       remoteController.stream,
       localController.sink,
     );
-    final remoteChannel = StreamChannel<dynamic>.withGuarantees(
-      localController.stream,
-      remoteSink,
-    );
+    final remoteChannel = StreamChannel<dynamic>.withGuarantees(localController.stream, remoteSink);
     testCompleteCompleter.complete(_startTest(path, localChannel, ourTestCount));
     return remoteChannel;
   }
@@ -677,8 +673,7 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final remoteChannelCompleter =
-          Completer<StreamChannel<String>>();
+      final remoteChannelCompleter = Completer<StreamChannel<String>>();
       unawaited(
         asyncGuard(
           () async {

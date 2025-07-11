@@ -234,8 +234,7 @@ class MDnsVmServiceDiscovery {
     // socket exceptions are routed to the current zone. Create an error zone to
     // catch the socket exception.
     // See: https://github.com/flutter/flutter/issues/150131
-    final completer =
-        Completer<List<MDnsVmServiceDiscoveryResult>>();
+    final completer = Completer<List<MDnsVmServiceDiscoveryResult>>();
     unawaited(
       runZonedGuarded(
         () async {

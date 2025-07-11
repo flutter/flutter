@@ -372,9 +372,7 @@ void main() {
           applicationPlistFolder,
           'Info.plist',
         );
-        const jetbrainsInfoPlist = <String, Object>{
-          'JetBrainsToolboxApp': 'ignored',
-        };
+        const jetbrainsInfoPlist = <String, Object>{'JetBrainsToolboxApp': 'ignored'};
         plistUtils.fileContents[applicationsPlistFilePath] = jetbrainsInfoPlist;
 
         final String homeDirectoryPlistFolder = fileSystem.path.join(
@@ -703,9 +701,7 @@ void main() {
           studioInApplicationPlistFolder,
           'Info.plist',
         );
-        final plistWithoutVersion = Map<String, Object>.from(
-          macStudioInfoPlist2022_1,
-        );
+        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
         plistWithoutVersion['CFBundleShortVersionString'] = '';
         plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
@@ -753,9 +749,7 @@ void main() {
           studioInApplicationPlistFolder,
           'Info.plist',
         );
-        final plistWithoutVersion = Map<String, Object>.from(
-          macStudioInfoPlist2022_1,
-        );
+        final plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
         plistWithoutVersion['CFBundleShortVersionString'] = '99999.99.99';
         plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 

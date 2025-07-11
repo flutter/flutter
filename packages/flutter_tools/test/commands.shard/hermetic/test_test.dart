@@ -776,10 +776,7 @@ const List<String> packageTestArgs = <String>[
   testUsingContext(
     'Verbose prints phase timings',
     () async {
-      final testRunner = FakeFlutterTestRunner(
-        0,
-        const Duration(milliseconds: 1),
-      );
+      final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
       final testCommand = TestCommand(testRunner: testRunner, verbose: true);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
@@ -810,10 +807,7 @@ const List<String> packageTestArgs = <String>[
   testUsingContext(
     'Non-verbose does not prints phase timings',
     () async {
-      final testRunner = FakeFlutterTestRunner(
-        0,
-        const Duration(milliseconds: 1),
-      );
+      final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
       final testCommand = TestCommand(testRunner: testRunner);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
@@ -1608,10 +1602,7 @@ resolution: workspace
 
       final testRunner = FakeFlutterTestRunner(0);
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(
-        testWrapper: fakePackageTest,
-        testRunner: testRunner,
-      );
+      final testCommand = TestCommand(testWrapper: fakePackageTest, testRunner: testRunner);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub']);

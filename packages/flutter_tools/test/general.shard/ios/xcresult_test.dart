@@ -134,9 +134,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard all warnings', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
-      typeMatcher: XCResultIssueType.warning,
-    );
+    final discarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
     final XCResult result = await generator.generate(
       issueDiscarders: <XCResultIssueDiscarder>[discarder],
     );
@@ -154,9 +152,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json and discard base on subType', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discarder = XCResultIssueDiscarder(
-      subTypeMatcher: RegExp(r'^Warning$'),
-    );
+    final discarder = XCResultIssueDiscarder(subTypeMatcher: RegExp(r'^Warning$'));
     final XCResult result = await generator.generate(
       issueDiscarders: <XCResultIssueDiscarder>[discarder],
     );
@@ -215,9 +211,7 @@ void main() {
 
   testWithoutContext('correctly parse sample result json with multiple discarders.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
-    final discardWarnings = XCResultIssueDiscarder(
-      typeMatcher: XCResultIssueType.warning,
-    );
+    final discardWarnings = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
     final discardSemanticIssues = XCResultIssueDiscarder(
       subTypeMatcher: RegExp(r'^Semantic Issue$'),
     );
@@ -241,9 +235,7 @@ void main() {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonWithActionIssues,
     );
-    final discarder = XCResultIssueDiscarder(
-      typeMatcher: XCResultIssueType.warning,
-    );
+    final discarder = XCResultIssueDiscarder(typeMatcher: XCResultIssueType.warning);
     final XCResult result = await generator.generate(
       issueDiscarders: <XCResultIssueDiscarder>[discarder],
     );

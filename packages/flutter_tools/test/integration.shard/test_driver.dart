@@ -478,10 +478,7 @@ abstract final class FlutterTestDriver {
   }) {
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
-      final longWarning = Timer(
-        timeout,
-        () => _debugPrint('$task is taking longer than usual...'),
-      );
+      final longWarning = Timer(timeout, () => _debugPrint('$task is taking longer than usual...'));
       return callback().whenComplete(longWarning.cancel);
     }
 
@@ -657,8 +654,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
             event: 'app.debugPort',
             timeout: appStartTimeout,
           );
-          final wsUriString =
-              (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
+          final wsUriString = (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);
           if (!startPaused) {
@@ -676,8 +672,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         // Now await the start/started events; if it had already happened the future will
         // have already completed.
         final startParams = (await start)['params'] as Map<String, Object?>?;
-        final startedParams =
-            (await started)['params'] as Map<String, Object?>?;
+        final startedParams = (await started)['params'] as Map<String, Object?>?;
         _currentRunningAppId = startedParams?['appId'] as String?;
         _currentRunningDeviceId = startParams?['deviceId'] as String?;
         _currentRunningMode = startParams?['mode'] as String?;
@@ -791,11 +786,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
   var id = 1;
   Future<Object?> _sendRequest(String method, Object? params) async {
     final int requestId = id++;
-    final request = <String, Object?>{
-      'id': requestId,
-      'method': method,
-      'params': params,
-    };
+    final request = <String, Object?>{'id': requestId, 'method': method, 'params': params};
     final String jsonEncoded = json.encode(<Map<String, Object?>>[request]);
     _debugPrint(jsonEncoded, topic: '=stdin=>');
 

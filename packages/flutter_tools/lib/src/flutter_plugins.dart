@@ -329,8 +329,7 @@ bool _writeFlutterPluginsList(
 bool flutterPluginsListHasDevDependencies(File pluginsFile) {
   final String pluginsString = pluginsFile.readAsStringSync();
   final pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
-  final plugins =
-      pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
+  final plugins = pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
 
   for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
     final platformPlugins = pluginEntries.value as List<dynamic>;
@@ -1052,8 +1051,7 @@ void createPluginSymlinks(
   Map<String, Object?>? platformPlugins;
   final String? pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
   if (pluginFileContent != null) {
-    final pluginInfo =
-        json.decode(pluginFileContent) as Map<String, Object?>?;
+    final pluginInfo = json.decode(pluginFileContent) as Map<String, Object?>?;
     platformPlugins = pluginInfo?[_kFlutterPluginsPluginListKey] as Map<String, Object?>?;
   }
   platformPlugins ??= <String, Object?>{};

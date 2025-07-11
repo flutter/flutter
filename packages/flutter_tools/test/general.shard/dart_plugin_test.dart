@@ -99,10 +99,7 @@ void main() {
       testWithoutContext(
         'selects uncontested implementation from direct dependency with additional native implementation',
         () async {
-          final directDependencies = <String>{
-            'url_launcher_linux',
-            'url_launcher_macos',
-          };
+          final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
           final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
             <Plugin>[
               // Following plugin is native only and is not resolved as a dart plugin:
@@ -906,10 +903,7 @@ void main() {
       );
 
       testUsingContext('provides error when user selected multiple implementations', () async {
-        final directDependencies = <String>{
-          'url_launcher_linux_1',
-          'url_launcher_linux_2',
-        };
+        final directDependencies = <String>{'url_launcher_linux_1', 'url_launcher_linux_2'};
         expect(() {
           resolvePlatformImplementation(<Plugin>[
             Plugin.fromYaml(

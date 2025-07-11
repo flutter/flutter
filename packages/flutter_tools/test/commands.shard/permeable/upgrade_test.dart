@@ -58,9 +58,7 @@ void main() {
       () async {
         final flutterVersion = FakeFlutterVersion(branch: 'beta');
         const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: upstreamRevision,
-        );
+        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
         fakeCommandRunner.remoteVersion = latestVersion;
 
         final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
@@ -82,9 +80,7 @@ void main() {
       () async {
         final flutterVersion = FakeFlutterVersion(branch: 'beta');
         const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(
-          frameworkRevision: upstreamRevision,
-        );
+        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
         fakeCommandRunner.remoteVersion = latestVersion;
         fakeCommandRunner.willHaveUncommittedChanges = true;
 
@@ -107,10 +103,7 @@ void main() {
       () async {
         const revision = 'abc123';
         final latestVersion = FakeFlutterVersion(frameworkRevision: revision);
-        final flutterVersion = FakeFlutterVersion(
-          branch: 'beta',
-          frameworkRevision: revision,
-        );
+        final flutterVersion = FakeFlutterVersion(branch: 'beta', frameworkRevision: revision);
         fakeCommandRunner.alreadyUpToDate = true;
         fakeCommandRunner.remoteVersion = latestVersion;
 

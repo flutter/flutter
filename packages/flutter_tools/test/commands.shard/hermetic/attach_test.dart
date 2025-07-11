@@ -140,8 +140,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -221,8 +220,7 @@ void main() {
               };
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -377,8 +375,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -459,8 +456,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -546,8 +542,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -646,8 +641,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -841,8 +835,7 @@ void main() {
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
 
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           final command = AttachCommand(
             hotRunnerFactory: hotRunnerFactory,
@@ -949,8 +942,7 @@ void main() {
               ) async => 0;
           hotRunner.exited = false;
           hotRunner.isWaitingForVmService = false;
-          final hotRunnerFactory = FakeHotRunnerFactory()
-            ..hotRunner = hotRunner;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
           await createTestCommandRunner(
             AttachCommand(
@@ -1994,15 +1986,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
 
     if (compatibleWithProtocolDiscovery) {
       return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -2065,15 +2056,14 @@ class FakeIOSSimulator extends Fake implements IOSSimulator {
     required bool ipv6,
     required Logger logger,
   }) {
-    final mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
     return mdnsVMServiceDiscoveryForAttach;
   }
 }

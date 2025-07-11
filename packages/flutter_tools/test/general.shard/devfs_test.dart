@@ -102,9 +102,7 @@ void main() {
   });
 
   testWithoutContext('DevFSStringCompressingBytesContent', () {
-    final content = DevFSStringCompressingBytesContent(
-      'uncompressed string',
-    );
+    final content = DevFSStringCompressingBytesContent('uncompressed string');
 
     expect(content.equals('uncompressed string'), isTrue);
     expect(content.bytes, isNotNull);
@@ -582,10 +580,7 @@ void main() {
       frontendServerStdErr(),
       frontendServerStdIn,
     );
-    final generatorStdoutHandler = StdoutHandler(
-      logger: testLogger,
-      fileSystem: fileSystem,
-    );
+    final generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: fileSystem);
 
     final residentCompiler = DefaultResidentCompiler(
       'sdkroot',

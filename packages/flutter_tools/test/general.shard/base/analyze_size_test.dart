@@ -94,8 +94,7 @@ void main() {
     expect(androidManifestMap['value'], 6);
 
     final metaInfMap = resultChildren[1] as Map<String, Object?>;
-    final metaInfMapChildren =
-        metaInfMap['children']! as List<Map<String, Object?>>;
+    final metaInfMapChildren = metaInfMap['children']! as List<Map<String, Object?>>;
     expect(metaInfMap['n'], 'META-INF');
     expect(metaInfMap['value'], 10);
     final Map<String, dynamic> certRsaMap = metaInfMapChildren[0];
@@ -106,13 +105,11 @@ void main() {
     expect(certSfMap['value'], 5);
 
     final libMap = resultChildren[2] as Map<String, Object?>;
-    final libMapChildren =
-        libMap['children']! as List<Map<String, Object?>>;
+    final libMapChildren = libMap['children']! as List<Map<String, Object?>>;
     expect(libMap['n'], 'lib');
     expect(libMap['value'], 12);
     final Map<String, Object?> arm64Map = libMapChildren[0];
-    final arn64MapChildren =
-        arm64Map['children']! as List<Map<String, Object?>>;
+    final arn64MapChildren = arm64Map['children']! as List<Map<String, Object?>>;
     expect(arm64Map['n'], 'arm64-v8a');
     expect(arm64Map['value'], 12);
     final Map<String, Object?> libAppMap = arn64MapChildren[0];

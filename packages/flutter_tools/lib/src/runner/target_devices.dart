@@ -17,8 +17,7 @@ const _chooseOneMessage = 'Please choose one (or "q" to quit)';
 const _connectedDevicesMessage = 'Connected devices:';
 const _foundButUnsupportedDevicesMessage =
     'The following devices were found, but are not supported by this project:';
-const _noAttachedCheckForWirelessMessage =
-    'No devices found yet. Checking for wireless devices...';
+const _noAttachedCheckForWirelessMessage = 'No devices found yet. Checking for wireless devices...';
 const _noDevicesFoundMessage = 'No devices found.';
 const _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 const _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';

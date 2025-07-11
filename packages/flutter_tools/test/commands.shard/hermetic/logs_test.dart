@@ -33,10 +33,7 @@ void main() {
     });
 
     testUsingContext('fail with a bad device id', () async {
-      final command = LogsCommand(
-        sigterm: FakeProcessSignal(),
-        sigint: FakeProcessSignal(),
-      );
+      final command = LogsCommand(sigterm: FakeProcessSignal(), sigint: FakeProcessSignal());
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
         throwsA(

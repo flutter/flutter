@@ -30,10 +30,7 @@ void main() {
   testWithoutContext(
     'Windows workflow configuration when feature is disabled on Windows host machine',
     () {
-      final windowsWorkflow = WindowsWorkflow(
-        platform: windows,
-        featureFlags: TestFeatureFlags(),
-      );
+      final windowsWorkflow = WindowsWorkflow(platform: windows, featureFlags: TestFeatureFlags());
 
       expect(windowsWorkflow.appliesToHostPlatform, false);
       expect(windowsWorkflow.canListDevices, false);

@@ -14,12 +14,11 @@ void main() {
   group('LogScanningVMServiceDiscoveryForAttach', () {
     testWithoutContext('can discover the port', () async {
       final logReader = FakeDeviceLogReader();
-      final discovery =
-          LogScanningVMServiceDiscoveryForAttach(
-            Future<FakeDeviceLogReader>.value(logReader),
-            ipv6: false,
-            logger: BufferLogger.test(),
-          );
+      final discovery = LogScanningVMServiceDiscoveryForAttach(
+        Future<FakeDeviceLogReader>.value(logReader),
+        ipv6: false,
+        logger: BufferLogger.test(),
+      );
 
       logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
 
@@ -28,13 +27,12 @@ void main() {
 
     testWithoutContext('ignores the port that does not match devicePort', () async {
       final logReader = FakeDeviceLogReader();
-      final discovery =
-          LogScanningVMServiceDiscoveryForAttach(
-            Future<FakeDeviceLogReader>.value(logReader),
-            devicePort: 9998,
-            ipv6: false,
-            logger: BufferLogger.test(),
-          );
+      final discovery = LogScanningVMServiceDiscoveryForAttach(
+        Future<FakeDeviceLogReader>.value(logReader),
+        devicePort: 9998,
+        ipv6: false,
+        logger: BufferLogger.test(),
+      );
 
       logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
       logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9998');
@@ -45,13 +43,12 @@ void main() {
     testWithoutContext('forwards the port if given a port forwarder', () async {
       final logReader = FakeDeviceLogReader();
       final portForwarder = FakePortForwarder(9900);
-      final discovery =
-          LogScanningVMServiceDiscoveryForAttach(
-            Future<FakeDeviceLogReader>.value(logReader),
-            portForwarder: portForwarder,
-            ipv6: false,
-            logger: BufferLogger.test(),
-          );
+      final discovery = LogScanningVMServiceDiscoveryForAttach(
+        Future<FakeDeviceLogReader>.value(logReader),
+        portForwarder: portForwarder,
+        ipv6: false,
+        logger: BufferLogger.test(),
+      );
 
       logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
 
@@ -63,14 +60,13 @@ void main() {
     testWithoutContext('uses the host port if given', () async {
       final logReader = FakeDeviceLogReader();
       final portForwarder = FakePortForwarder(9900);
-      final discovery =
-          LogScanningVMServiceDiscoveryForAttach(
-            Future<FakeDeviceLogReader>.value(logReader),
-            portForwarder: portForwarder,
-            hostPort: 9901,
-            ipv6: false,
-            logger: BufferLogger.test(),
-          );
+      final discovery = LogScanningVMServiceDiscoveryForAttach(
+        Future<FakeDeviceLogReader>.value(logReader),
+        portForwarder: portForwarder,
+        hostPort: 9901,
+        ipv6: false,
+        logger: BufferLogger.test(),
+      );
 
       logReader.addLine('The Dart VM service is listening on http://127.0.0.1:9999');
 

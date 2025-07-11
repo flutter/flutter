@@ -41,9 +41,7 @@ void main() {
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
-    final fakeFlutterVersion = FakeFlutterVersion(
-      branch: 'WestSideStory',
-    ); // an unknown branch
+    final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');

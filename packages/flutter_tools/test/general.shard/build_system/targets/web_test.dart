@@ -1129,10 +1129,7 @@ name: foo
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
-  for (final renderer in <WebRendererMode>[
-    WebRendererMode.canvaskit,
-    WebRendererMode.skwasm,
-  ]) {
+  for (final renderer in <WebRendererMode>[WebRendererMode.canvaskit, WebRendererMode.skwasm]) {
     for (final level in <int?>[null, 0, 1, 2, 3, 4]) {
       for (final strip in <bool>[true, false]) {
         for (final defines in const <List<String>>[

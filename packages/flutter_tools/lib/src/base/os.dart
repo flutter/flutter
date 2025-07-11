@@ -127,11 +127,7 @@ abstract class OperatingSystemUtils {
   ///
   /// If available, the detailed version of the OS is included.
   String get name {
-    const osNames = <String, String>{
-      'macos': 'Mac OS',
-      'linux': 'Linux',
-      'windows': 'Windows',
-    };
+    const osNames = <String, String>{'macos': 'Mac OS', 'linux': 'Linux', 'windows': 'Windows'};
     final String osName = _platform.operatingSystem;
     return osNames[osName] ?? osName;
   }

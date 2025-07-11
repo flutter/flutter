@@ -87,21 +87,13 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   final FeatureFlags featureFlags;
   final Logger _logger;
 
-  late final linuxWorkflow = LinuxWorkflow(
-    platform: platform,
-    featureFlags: featureFlags,
-  );
+  late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
 
   late final webWorkflow = WebWorkflow(platform: platform, featureFlags: featureFlags);
 
-  late final macOSWorkflow = MacOSWorkflow(
-    platform: platform,
-    featureFlags: featureFlags,
-  );
+  late final macOSWorkflow = MacOSWorkflow(platform: platform, featureFlags: featureFlags);
 
-  late final customDeviceWorkflow = CustomDeviceWorkflow(
-    featureFlags: featureFlags,
-  );
+  late final customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags);
 
   @override
   List<DoctorValidator> get validators {

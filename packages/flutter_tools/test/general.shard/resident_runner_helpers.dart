@@ -25,15 +25,9 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
 
-final fakeUnpausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kResume,
-  timestamp: 0,
-);
+final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
-final fakePausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kPauseException,
-  timestamp: 0,
-);
+final fakePausedEvent = vm_service.Event(kind: vm_service.EventKind.kPauseException, timestamp: 0);
 
 final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -141,8 +135,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 
   @override
   final String message;
-  static const defaultMessage =
-      'A DDS instance is already connected at http://localhost:8181';
+  static const defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
 
   @override
   Map<String, Object?> toJson() {

@@ -47,8 +47,7 @@ class AnalysisServer {
 
   Process? _process;
   final _analyzingController = StreamController<bool>.broadcast();
-  final _errorsController =
-      StreamController<FileAnalysisErrors>.broadcast();
+  final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
 
   var _id = 0;
@@ -178,8 +177,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final isAnalyzing =
-          (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
+      final isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }

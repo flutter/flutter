@@ -65,9 +65,7 @@ void main() {
         'version unknown',
         () async {
           const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(
-            frameworkVersion: frameworkVersion,
-          );
+          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
           final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
@@ -373,9 +371,7 @@ void main() {
         'version unknown',
         () async {
           const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(
-            frameworkVersion: frameworkVersion,
-          );
+          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
           final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),

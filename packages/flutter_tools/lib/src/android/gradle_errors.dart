@@ -352,9 +352,7 @@ final lockFileDepMissingHandler = GradleHandledError(
   },
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradleFile = project.android.hostAppGradleFile;
-    final generatedGradleCommand = globals.platform.isWindows
-        ? r'.\gradlew.bat'
-        : './gradlew';
+    final generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final String textInBold = globals.logger.terminal.bolden(
       'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
       'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}',
@@ -423,9 +421,7 @@ final outdatedGradleHandler = GradleHandledError(
   eventLabel: 'outdated-gradle-version',
 );
 
-final _minCompileSdkVersionPattern = RegExp(
-  r'The minCompileSdk \(([0-9]+)\) specified in a',
-);
+final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) specified in a');
 
 @visibleForTesting
 final minCompileSdkVersionHandler = GradleHandledError(

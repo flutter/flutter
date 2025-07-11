@@ -205,8 +205,7 @@ void main() {
         'package_graph.json',
       );
 
-      final packageGraph =
-          jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
+      final packageGraph = jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
 
       final packages = packageGraph['packages']! as List<Object?>;
 
@@ -630,10 +629,8 @@ dependencies:
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final String pluginsString = flutterProject.flutterPluginsDependenciesFile
               .readAsStringSync();
-          final jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
-          final actualPlugins =
-              jsonContent['plugins'] as Map<String, dynamic>?;
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+          final actualPlugins = jsonContent['plugins'] as Map<String, dynamic>?;
 
           final expectedPlugins = <String, Object>{
             'ios': <Map<String, Object>>[
@@ -719,13 +716,9 @@ dependencies:
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final String pluginsString = flutterProject.flutterPluginsDependenciesFile
               .readAsStringSync();
-          final jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-          final expectedSwiftPackageManagerEnabled = <String, dynamic>{
-            'ios': true,
-            'macos': true,
-          };
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
           expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
         },
         overrides: <Type, Generator>{
@@ -770,8 +763,7 @@ dependencies:
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final String pluginsString = flutterProject.flutterPluginsDependenciesFile
               .readAsStringSync();
-          final jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
           final expectedSwiftPackageManagerEnabled = <String, dynamic>{
             'ios': false,
@@ -821,13 +813,9 @@ dependencies:
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final String pluginsString = flutterProject.flutterPluginsDependenciesFile
               .readAsStringSync();
-          final jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-          final expectedSwiftPackageManagerEnabled = <String, dynamic>{
-            'ios': true,
-            'macos': false,
-          };
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': false};
           expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
         },
         overrides: <Type, Generator>{
@@ -1279,8 +1267,7 @@ flutter:
       ios:
         dartPluginClass: SomePlugin
     ''');
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1337,8 +1324,7 @@ flutter:
       macos:
         dartPluginClass: SomePlugin
     ''');
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1374,8 +1360,7 @@ flutter:
         pluginClass: none
         dartPluginClass: SomePlugin
     ''');
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1407,8 +1392,7 @@ flutter:
           pluginDirectory.childFile('pubspec.yaml').writeAsStringSync(r'''
 "aws ... \"Branch\": $BITBUCKET_BRANCH, \"Date\": $(date +"%m-%d-%y"), \"Time\": $(date +"%T")}\"
     ''');
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1841,10 +1825,7 @@ flutter:
             windowsPlatform: true,
           );
 
-          for (final project in <CmakeBasedProject?>[
-            linuxProject,
-            windowsProject,
-          ]) {
+          for (final project in <CmakeBasedProject?>[linuxProject, windowsProject]) {
             final File pluginCmakefile = project!.generatedPluginCmakeFile;
 
             expect(pluginCmakefile, exists);
@@ -1862,8 +1843,7 @@ flutter:
       testUsingContext(
         'iOS and macOS project setup up Darwin Dependency Management',
         () async {
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1886,8 +1866,7 @@ flutter:
       testUsingContext(
         'non-iOS or macOS project does not setup up Darwin Dependency Management',
         () async {
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -2242,9 +2221,7 @@ flutter:
       'Symlink failures give developer mode instructions on recent versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14972.1]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
         const e = FileSystemException('', '', OSError('', 1314));
 
@@ -2340,9 +2317,7 @@ flutter:
       'Symlink failures instruct developers to run as administrator on older versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14393]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
         const e = FileSystemException('', '', OSError('', 1314));
 
@@ -2363,9 +2338,7 @@ flutter:
       'Symlink failures instruct developers to have their project on the same drive as their SDK',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14972]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
 
         const e = FileSystemException('', '', OSError('', 1));
 
@@ -2386,9 +2359,7 @@ flutter:
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final os = FakeOperatingSystemUtils(
-        'Microsoft Windows [Version 10.0.14393]',
-      );
+      final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
       const e = FileSystemException('', '', OSError('', 999));
 
@@ -2463,8 +2434,7 @@ flutter:
             isDevDependency: true,
           );
 
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           const devDepImport = '#import <$testPluginName/Foo.h>';
 
           // Test non-release mode.
@@ -2542,8 +2512,7 @@ flutter:
             },
             isDevDependency: true,
           );
-          final dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           const expectedDevDepRegistration = 'Foo.register';
 
           // Test non-release mode.

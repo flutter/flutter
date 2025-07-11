@@ -96,8 +96,7 @@ void main() {
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
 
-      final decoded =
-          jsonDecode(result.stdout as String) as Map<String, dynamic>;
+      final decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
 
       expect(decoded.containsKey('FlutterProject.android.exists'), true);
       expect(decoded.containsKey('FlutterProject.ios.exists'), true);

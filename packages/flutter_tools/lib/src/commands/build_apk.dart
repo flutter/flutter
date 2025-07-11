@@ -69,16 +69,8 @@ class BuildApkCommand extends BuildSubCommand {
     return BuildMode.release;
   }
 
-  static const _kDefaultJitArchs = <String>[
-    'android-arm',
-    'android-arm64',
-    'android-x64',
-  ];
-  static const _kDefaultAotArchs = <String>[
-    'android-arm',
-    'android-arm64',
-    'android-x64',
-  ];
+  static const _kDefaultJitArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
+  static const _kDefaultAotArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
   List<String> get _targetArchs => stringsArg('target-platform').isEmpty
       ? switch (_buildMode) {
           BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
@@ -147,9 +139,7 @@ class BuildApkCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final buildLabel = impellerEnabled
-        ? 'manifest-impeller-enabled'
-        : 'manifest-impeller-disabled';
+    final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();

@@ -56,11 +56,7 @@ void writeBytesFile(String path, List<int> content) {
 }
 
 Future<void> getPackages(String folder) async {
-  final command = <String>[
-    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
-    'pub',
-    'get',
-  ];
+  final command = <String>[fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'), 'pub', 'get'];
   final ProcessResult result = await processManager.run(command, workingDirectory: folder);
   if (result.exitCode != 0) {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');

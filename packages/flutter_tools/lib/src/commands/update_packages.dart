@@ -498,9 +498,7 @@ class ResolvedDependencies {
     ResolvedDependencies newDeps,
     List<CherryPick> cherryPicks,
   ) {
-    final mergedDeps = ResolvedDependencies(<String, Map<String, String>>{
-      ...newDeps.data,
-    });
+    final mergedDeps = ResolvedDependencies(<String, Map<String, String>>{...newDeps.data});
     for (final MapEntry<String, Map<String, String>> entry in mergedDeps.data.entries) {
       final String dependencyType = entry.key;
       final Map<String, String>? oldData = oldDeps.data[dependencyType];

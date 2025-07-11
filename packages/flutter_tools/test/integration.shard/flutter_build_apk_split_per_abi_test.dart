@@ -52,8 +52,7 @@ Future<void> _assertSplitPerAbiVersionCodes(int? buildNumber) async {
       .childFile('output-metadata.json');
   expect(metadataFile, exists, reason: 'Expected output-metadata.json at ${metadataFile.path}');
 
-  final decodedJson =
-      jsonDecode(await metadataFile.readAsString()) as Map<String, dynamic>;
+  final decodedJson = jsonDecode(await metadataFile.readAsString()) as Map<String, dynamic>;
   final elements = decodedJson['elements'] as List<dynamic>;
 
   final actualVersionCodes = <String, int>{};

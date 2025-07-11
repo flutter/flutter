@@ -25,8 +25,7 @@ const _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
 const _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
 const _provisioningProfileBuildSettingName = 'PROVISIONING_PROFILE';
 
-const _codeSignSelectionCanceled =
-    'Code-signing setup canceled. Your changes have not been saved.';
+const _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes have not been saved.';
 
 /// User message when no development certificates are found in the keychain.
 ///

@@ -243,10 +243,7 @@ $fontsSection
     testUsingContext(
       'App uses package font with font file from another package',
       () async {
-        final deps = <String, String>{
-          'test_package': 'p/p/',
-          'test_package2': 'p2/p/',
-        };
+        final deps = <String, String>{'test_package': 'p/p/', 'test_package2': 'p2/p/'};
         writePubspecFile('pubspec.yaml', 'test');
         writePackageConfigFiles(
           directory: globals.fs.currentDirectory,

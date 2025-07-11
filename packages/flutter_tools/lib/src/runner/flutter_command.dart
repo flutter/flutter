@@ -139,8 +139,7 @@ abstract final class FlutterOptions {
   static const kDeferredComponents = 'deferred-components';
   static const kAndroidProjectArgs = 'android-project-arg';
   static const kAndroidGradleProjectCacheDir = 'android-project-cache-dir';
-  static const kAndroidSkipBuildDependencyValidation =
-      'android-skip-build-dependency-validation';
+  static const kAndroidSkipBuildDependencyValidation = 'android-skip-build-dependency-validation';
   static const kInitializeFromDill = 'initialize-from-dill';
   static const kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const kNativeAssetsYamlFile = 'native-assets-yaml-file';
@@ -1165,12 +1164,7 @@ abstract class FlutterCommand extends Command<void> {
     final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
     final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
     final bool profileResult = argIfDefined('profile', false);
-    final modeFlags = <bool>[
-      debugResult,
-      profileResult,
-      jitReleaseResult,
-      releaseResult,
-    ];
+    final modeFlags = <bool>[debugResult, profileResult, jitReleaseResult, releaseResult];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException(
         'Only one of "--debug", "--profile", "--jit-release", '

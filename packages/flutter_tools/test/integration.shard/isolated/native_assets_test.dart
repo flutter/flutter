@@ -522,8 +522,7 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
 
     final File inputFile = subDir.childFile('input.json');
     expect(inputFile, exists);
-    final inputContents =
-        json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
+    final inputContents = json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
     final input = BuildInput(inputContents);
     final BuildConfig config = input.config;
     if (!config.buildCodeAssets) {

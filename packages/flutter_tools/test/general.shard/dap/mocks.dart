@@ -23,11 +23,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
-      stdinController.stream,
-      stdoutController.sink,
-      null,
-    );
+    final channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
     final clientChannel = ByteStreamServerChannel(
       stdoutController.stream,
       stdinController.sink,
@@ -77,19 +73,14 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   @override
   bool get sendLogsToClient => false;
 
-  final _dapToClientMessagesController =
-      StreamController<Map<String, Object?>>.broadcast();
+  final _dapToClientMessagesController = StreamController<Map<String, Object?>>.broadcast();
 
   /// A stream of all messages sent from the adapter back to the client.
   Stream<Map<String, Object?>> get dapToClientMessages => _dapToClientMessagesController.stream;
 
   /// A stream of all progress events sent from the adapter back to the client.
   Stream<Map<String, Object?>> get dapToClientProgressEvents {
-    const progressEventTypes = <String>[
-      'progressStart',
-      'progressUpdate',
-      'progressEnd',
-    ];
+    const progressEventTypes = <String>['progressStart', 'progressUpdate', 'progressEnd'];
 
     return dapToClientMessages.where(
       (Map<String, Object?> message) => progressEventTypes.contains(message['event'] as String?),
@@ -230,11 +221,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
-    final channel = ByteStreamServerChannel(
-      stdinController.stream,
-      stdoutController.sink,
-      null,
-    );
+    final channel = ByteStreamServerChannel(stdinController.stream, stdoutController.sink, null);
 
     return FakeFlutterTestDebugAdapter._(
       stdinController.sink,

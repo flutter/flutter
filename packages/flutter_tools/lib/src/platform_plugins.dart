@@ -457,9 +457,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
       // If no variant list is provided assume Win32 for backward compatibility.
       variants.add(PluginPlatformVariant.win32);
     } else {
-      const variantByName = <String, PluginPlatformVariant>{
-        'win32': PluginPlatformVariant.win32,
-      };
+      const variantByName = <String, PluginPlatformVariant>{'win32': PluginPlatformVariant.win32};
       for (final String variantName in variantList.cast<String>()) {
         final PluginPlatformVariant? variant = variantByName[variantName];
         if (variant != null) {

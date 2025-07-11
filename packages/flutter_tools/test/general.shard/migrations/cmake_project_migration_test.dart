@@ -34,10 +34,7 @@ void main() {
       });
 
       testWithoutContext('skipped if files are missing', () async {
-        final cmakeProjectMigration = CmakeCustomCommandMigration(
-          mockCmakeProject,
-          testLogger,
-        );
+        final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
         expect(managedCmakeFile.existsSync(), isFalse);
 
@@ -53,10 +50,7 @@ void main() {
         managedCmakeFile.writeAsStringSync(contents);
         final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
 
-        final cmakeProjectMigration = CmakeCustomCommandMigration(
-          mockCmakeProject,
-          testLogger,
-        );
+        final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.lastModifiedSync(), projectLastModified);
@@ -80,10 +74,7 @@ add_custom_command(
         managedCmakeFile.writeAsStringSync(contents);
         final DateTime projectLastModified = managedCmakeFile.lastModifiedSync();
 
-        final cmakeProjectMigration = CmakeCustomCommandMigration(
-          mockCmakeProject,
-          testLogger,
-        );
+        final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.lastModifiedSync(), projectLastModified);
@@ -104,10 +95,7 @@ add_custom_command(
 )
 ''');
 
-        final cmakeProjectMigration = CmakeCustomCommandMigration(
-          mockCmakeProject,
-          testLogger,
-        );
+        final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.readAsStringSync(), r'''
@@ -141,10 +129,7 @@ add_custom_command(
 )
 ''');
 
-        final cmakeProjectMigration = CmakeCustomCommandMigration(
-          mockCmakeProject,
-          testLogger,
-        );
+        final cmakeProjectMigration = CmakeCustomCommandMigration(mockCmakeProject, testLogger);
         await cmakeProjectMigration.migrate();
 
         expect(managedCmakeFile.readAsStringSync(), r'''

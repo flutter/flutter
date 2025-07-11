@@ -376,9 +376,7 @@ void main() {
           stdin: IOSink(stdin.sink),
         ),
       ]);
-      final iosDeployDebugger = IOSDeployDebugger.test(
-        processManager: processManager,
-      );
+      final iosDeployDebugger = IOSDeployDebugger.test(processManager: processManager);
       expect(_decodeLines(stdin.stream), emits('process detach'));
       await iosDeployDebugger.launchAndAttach();
       await iosDeployDebugger.detach();
@@ -414,9 +412,7 @@ void main() {
           stdin: IOSink(stdin),
         ),
       ]);
-      final iosDeployDebugger = IOSDeployDebugger.test(
-        processManager: processManager,
-      );
+      final iosDeployDebugger = IOSDeployDebugger.test(processManager: processManager);
       await iosDeployDebugger.launchAndAttach();
       List<String>? stdinLines;
 

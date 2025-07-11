@@ -318,9 +318,7 @@ void _fixBrokenCmakeGeneration(Directory buildDirectory) {
       r'<Command Condition=.*\(Configuration\)\|\$\(Platform\).==.(Debug|Profile|Release)\|',
     );
     // E.g.: [...]/flutter_tools/bin/tool_backend.bat windows-x64 Debug
-    final assembleCallRegex = RegExp(
-      r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)',
-    );
+    final assembleCallRegex = RegExp(r'^.*/tool_backend\.bat windows[^ ]* (Debug|Profile|Release)');
     String? lastCommandConditionConfig;
     final newProjectContents = StringBuffer();
     // vcxproj files contain a BOM, which readAsLinesSync drops; re-add it.

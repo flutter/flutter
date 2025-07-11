@@ -219,24 +219,21 @@ const kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
 
 /// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsMapArtifactMap =
-    <WebRendererMode, HostArtifact>{
-      WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
-    };
+const kAmdDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+};
 
 /// The correct precompiled artifact to use for each build and render mode for
 /// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsArtifactMap =
-    <WebRendererMode, HostArtifact>{
-      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
-    };
+const kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+};
 
 /// The correct source map artifact to use for each build and render mode for
 /// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsMapArtifactMap =
-    <WebRendererMode, HostArtifact>{
-      WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
-    };
+const kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+};
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
   final values = <String, Object>{};

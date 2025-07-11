@@ -289,8 +289,7 @@ abstract class Domain {
   final Daemon daemon;
   final String name;
   final _handlers = <String, CommandHandler>{};
-  final _handlersWithBinary =
-      <String, CommandHandlerWithBinary>{};
+  final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
   void registerHandler(String name, CommandHandler handler) {
     assert(!_handlers.containsKey(name));
@@ -657,8 +656,7 @@ class AppDomain extends Domain {
 
   final _apps = <AppInstance>[];
 
-  final operationQueue =
-      DebounceOperationQueue<OperationResult, OperationType>();
+  final operationQueue = DebounceOperationQueue<OperationResult, OperationType>();
 
   Future<AppInstance> startApp(
     Device device,
@@ -1332,8 +1330,7 @@ class DeviceDomain extends Domain {
     return <String>[for (final List<String> diagnostics in diagnosticsLists) ...diagnostics];
   }
 
-  final _vmServiceDiscoverySubscriptions =
-      <String, StreamSubscription<Uri>>{};
+  final _vmServiceDiscoverySubscriptions = <String, StreamSubscription<Uri>>{};
 
   Future<String> startVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
     final String? deviceId = _getStringArg(args, 'deviceId', required: true);

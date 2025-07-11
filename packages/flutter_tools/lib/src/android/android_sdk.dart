@@ -227,9 +227,7 @@ class AndroidSdk {
     }
 
     if (sdkVersions.isEmpty || latestVersion == null) {
-      final msg = StringBuffer(
-        'No valid Android SDK platforms found in ${_platformsDir.path}.',
-      );
+      final msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
       if (_platforms.isEmpty) {
         msg.write(' Directory was empty.');
       } else {

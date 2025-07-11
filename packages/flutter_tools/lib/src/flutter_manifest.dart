@@ -17,14 +17,7 @@ import 'base/utils.dart';
 import 'globals.dart' as globals;
 import 'plugins.dart';
 
-const _kValidPluginPlatforms = <String>{
-  'android',
-  'ios',
-  'web',
-  'windows',
-  'linux',
-  'macos',
-};
+const _kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -63,8 +56,7 @@ class FlutterManifest {
       pubspec._descriptor = yamlMap.cast<String, Object?>();
     }
 
-    final flutterMap =
-        pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
+    final flutterMap = pubspec._descriptor['flutter'] as Map<Object?, Object?>?;
     if (flutterMap != null) {
       pubspec._flutterDescriptor = flutterMap.cast<String, Object?>();
     }

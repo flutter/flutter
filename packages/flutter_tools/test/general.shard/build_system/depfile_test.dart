@@ -53,10 +53,7 @@ a.txt c.txt d.txt: b.txt
 
   testWithoutContext('Can parse depfile with windows file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    final depfileService = DepfileService(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-    );
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync(r'''
 C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
@@ -77,10 +74,7 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     'Can escape depfile with windows file paths and spaces in directory names',
     () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final depfileService = DepfileService(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-      );
+      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
       final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
         ..createSync(recursive: true);
       final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
@@ -110,29 +104,25 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
   });
 
   testWithoutContext('Can produce normalized paths', () {
-    final pairs =
-        <(FileSystemStyle style, String input, String output, List<String> expects)>[
-          (
-            FileSystemStyle.posix,
-            r'Hello Flutter\a.txt',
-            r'Hello Flutter\b.txt',
-            <String>[r'/Hello\ Flutter/a.txt', r'/Hello\ Flutter/b.txt'],
-          ),
-          (
-            FileSystemStyle.windows,
-            r'Hello Flutter/a.txt',
-            r'Hello Flutter/b.txt',
-            <String>[r'\\Hello\ Flutter\\a.txt', r'\\Hello\ Flutter\\b.txt'],
-          ),
-        ];
+    final pairs = <(FileSystemStyle style, String input, String output, List<String> expects)>[
+      (
+        FileSystemStyle.posix,
+        r'Hello Flutter\a.txt',
+        r'Hello Flutter\b.txt',
+        <String>[r'/Hello\ Flutter/a.txt', r'/Hello\ Flutter/b.txt'],
+      ),
+      (
+        FileSystemStyle.windows,
+        r'Hello Flutter/a.txt',
+        r'Hello Flutter/b.txt',
+        <String>[r'\\Hello\ Flutter\\a.txt', r'\\Hello\ Flutter\\b.txt'],
+      ),
+    ];
 
     for (final (FileSystemStyle style, String input, String output, List<String> expects)
         in pairs) {
       final FileSystem fileSystem = MemoryFileSystem.test(style: style);
-      final depfileService = DepfileService(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-      );
+      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
       final File inputFile = fileSystem.file(input).absolute..createSync(recursive: true);
       final File outputFile = fileSystem.file(output).absolute..createSync();
       final depfile = Depfile(<File>[inputFile], <File>[outputFile]);

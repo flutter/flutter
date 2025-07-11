@@ -51,8 +51,7 @@ const _kNoPlatformsMessage =
     "You've created a plugin project that doesn't yet support any platforms.\n";
 const frameworkRevision = '12345678';
 const frameworkChannel = 'omega';
-const _kDisabledPlatformRequestedMessage =
-    'currently not supported on your local environment.';
+const _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 const _kIncompatibleJavaVersionMessage =
     'The configured version of Java detected may conflict with the';
 final String _kIncompatibleAgpVersionForModule =
@@ -68,9 +67,7 @@ FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const
   ..stdoutSupportsAnsi = false
   ..operatingSystem = 'macos';
 
-final noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorTerminalPlatform,
-};
+final noColorTerminalOverride = <Type, Generator>{Platform: _kNoColorTerminalPlatform};
 
 const samplesIndexJson = '''
 [
@@ -2369,13 +2366,7 @@ void main() {
     final String outputDir = globals.fs.path.join(tempDir.path, 'test_project');
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final args = <String>[
-      'create',
-      '--no-pub',
-      '--empty',
-      '--template=plugin',
-      outputDir,
-    ];
+    final args = <String>['create', '--no-pub', '--empty', '--template=plugin', outputDir];
 
     await expectLater(
       runner.run(args),
@@ -4960,12 +4951,7 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
 
   await _getPackages(workingDir);
 
-  final args = <String>[
-    flutterToolsSnapshotPath,
-    'test',
-    '--no-color',
-    if (target != null) target,
-  ];
+  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', if (target != null) target];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),

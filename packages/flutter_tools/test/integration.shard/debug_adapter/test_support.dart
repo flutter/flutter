@@ -81,8 +81,7 @@ class SimpleFlutterRunner {
         final Object? message = json.single;
         // Parse the add.debugPort event which contains our VM Service URI.
         if (message is Map<String, Object?> && message['event'] == 'app.debugPort') {
-          final vmServiceUri =
-              (message['params']! as Map<String, Object?>)['wsUri']! as String;
+          final vmServiceUri = (message['params']! as Map<String, Object?>)['wsUri']! as String;
           if (!_vmServiceUriCompleter.isCompleted) {
             _vmServiceUriCompleter.complete(Uri.parse(vmServiceUri));
           }

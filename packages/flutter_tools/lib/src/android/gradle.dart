@@ -529,8 +529,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     options.add('-Ptarget=$target');
     // If using v1 embedding, we want to use FlutterApplication as the base app.
-    final baseApplicationName =
-        project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2
+    final baseApplicationName = project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2
         ? 'android.app.Application'
         : 'io.flutter.app.FlutterApplication';
     options.add('-Pbase-application-name=$baseApplicationName');

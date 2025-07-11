@@ -457,8 +457,7 @@ void main() {
       fs.path.join(defaultL10nPath, 'gen_l10n_inputs_and_outputs.json'),
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
-    final jsonResult =
-        json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('outputs'), isTrue);
     final outputList = jsonResult['outputs'] as List<dynamic>;
     expect(outputList, contains(contains('unimplemented_message_translations.json')));
@@ -597,8 +596,7 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final jsonResult =
-        json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     expect(jsonResult.containsKey('inputs'), isTrue);
     final inputList = jsonResult['inputs'] as List<dynamic>;
     expect(inputList, contains(fs.path.absolute('lib', 'l10n', 'app_en.arb')));
@@ -634,8 +632,7 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final jsonResult =
-        json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
+    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
     final oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
     final inputList = jsonResult['inputs'] as List<dynamic>;
     expect(inputList, everyElement(isNot(contains(oppositeSeparator))));

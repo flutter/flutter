@@ -28,10 +28,7 @@ void main() {
   });
 
   testWithoutContext('Does not apply to non-Linux platform', () {
-    final linuxWorkflow = LinuxWorkflow(
-      platform: notLinux,
-      featureFlags: enabledFlags,
-    );
+    final linuxWorkflow = LinuxWorkflow(platform: notLinux, featureFlags: enabledFlags);
 
     expect(linuxWorkflow.appliesToHostPlatform, false);
     expect(linuxWorkflow.canLaunchDevices, false);

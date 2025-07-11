@@ -316,18 +316,12 @@ let package = Package(
 
   group('Format SwiftPackageProduct', () {
     testWithoutContext('without targets and libraryType', () {
-      final product = SwiftPackageProduct(
-        name: 'ProductName',
-        targets: <String>[],
-      );
+      final product = SwiftPackageProduct(name: 'ProductName', targets: <String>[]);
       expect(product.format(), '.library(name: "ProductName")');
     });
 
     testWithoutContext('with targets', () {
-      final singleProduct = SwiftPackageProduct(
-        name: 'ProductName',
-        targets: <String>['Target1'],
-      );
+      final singleProduct = SwiftPackageProduct(name: 'ProductName', targets: <String>['Target1']);
       expect(singleProduct.format(), '.library(name: "ProductName", targets: ["Target1"])');
 
       final multipleProducts = SwiftPackageProduct(
@@ -418,9 +412,7 @@ let package = Package(
 
   group('Format SwiftPackageTargetDependency', () {
     testWithoutContext('with only name', () {
-      final targetDependency = SwiftPackageTargetDependency.target(
-        name: 'DependencyName',
-      );
+      final targetDependency = SwiftPackageTargetDependency.target(name: 'DependencyName');
       expect(targetDependency.format(), '                .target(name: "DependencyName")');
     });
 

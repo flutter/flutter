@@ -402,12 +402,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       stdoutString = stdoutBuffer.toString();
       stderrString = stderrBuffer.toString();
 
-      final result = ProcessResult(
-        process.pid,
-        exitCode ?? -1,
-        stdoutString,
-        stderrString,
-      );
+      final result = ProcessResult(process.pid, exitCode ?? -1, stdoutString, stderrString);
       final runResult = RunResult(result, cmd);
 
       // If the process did not timeout. We are done.

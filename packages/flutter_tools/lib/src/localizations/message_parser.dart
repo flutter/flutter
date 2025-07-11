@@ -406,11 +406,7 @@ class Parser {
 
       // When we run out of tokens, just use -1 to represent the last index.
       final int positionInMessage = tokens.isNotEmpty ? tokens.first.positionInMessage : -1;
-      final node = Node(
-        nonterminal,
-        positionInMessage,
-        expectedSymbolCount: grammarRule.length,
-      );
+      final node = Node(nonterminal, positionInMessage, expectedSymbolCount: grammarRule.length);
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all

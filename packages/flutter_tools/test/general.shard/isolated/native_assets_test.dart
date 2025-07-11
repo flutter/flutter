@@ -60,9 +60,7 @@ void main() {
       CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) =>
           CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
-      final environmentDefines = <String, String>{
-        kBuildMode: BuildMode.release.cliName,
-      };
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.release.cliName};
       final codeAssets = <CodeAsset>[
         makeCodeAsset('malloc', LookupInProcess()),
         makeCodeAsset('free', LookupInExecutable()),
@@ -132,9 +130,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
 
-      final environmentDefines = <String, String>{
-        kBuildMode: BuildMode.debug.cliName,
-      };
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.debug.cliName};
       final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,

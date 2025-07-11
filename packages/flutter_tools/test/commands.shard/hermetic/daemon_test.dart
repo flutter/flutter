@@ -594,8 +594,7 @@ void main() {
           expect(applicationPackageIdResponse.data['id'], 0);
           expect(applicationPackageFactory.applicationBinaryRequested!.basename, 'test_file');
           expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
-          final applicationPackageId =
-              applicationPackageIdResponse.data['result'] as String?;
+          final applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
           // Try starting the app.
           final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
@@ -614,8 +613,7 @@ void main() {
           final DaemonMessage startAppResponse = await broadcastOutput.firstWhere(_notEvent);
           expect(startAppResponse.data['id'], 1);
           expect(device.startAppPackage, applicationPackage);
-          final startAppResult =
-              startAppResponse.data['result']! as Map<String, Object?>;
+          final startAppResult = startAppResponse.data['result']! as Map<String, Object?>;
           expect(startAppResult['started'], true);
           expect(startAppResult['vmServiceUri'], vmServiceUri.toString());
 
@@ -993,11 +991,7 @@ void main() {
     });
 
     testUsingContext('sends trace messages in notify verbose mode', () async {
-      final logger = NotifyingLogger(
-        verbose: false,
-        parent: bufferLogger,
-        notifyVerbose: true,
-      );
+      final logger = NotifyingLogger(verbose: false, parent: bufferLogger, notifyVerbose: true);
 
       final Future<LogMessage> messageResult = logger.onMessage.first;
       logger.printTrace('hello');

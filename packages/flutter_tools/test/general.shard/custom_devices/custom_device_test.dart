@@ -570,14 +570,8 @@ void main() {
         '--engineRevision=$expectedEngineRevision',
       ];
 
-      final expectedRunDebugCommand = <String>[
-        'testrundebug',
-        ...expectedCommandArguments,
-      ];
-      final expectedPostBuildCommand = <String>[
-        'testpostbuild',
-        ...expectedCommandArguments,
-      ];
+      final expectedRunDebugCommand = <String>['testrundebug', ...expectedCommandArguments];
+      final expectedPostBuildCommand = <String>['testpostbuild', ...expectedCommandArguments];
 
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -694,10 +688,7 @@ void main() {
     () async {
       final logReader = CustomDeviceLogReader('testname');
 
-      final lines = Iterable<List<int>>.generate(
-        5,
-        (int _) => utf8.encode('test'),
-      );
+      final lines = Iterable<List<int>>.generate(5, (int _) => utf8.encode('test'));
 
       logReader.listenToProcessOutput(
         FakeProcess(
@@ -707,8 +698,7 @@ void main() {
         ),
       );
 
-      final subscriptions =
-          <MyFakeStreamSubscription<String>>[];
+      final subscriptions = <MyFakeStreamSubscription<String>>[];
       var logLinesStreamDone = false;
       logReader.logLines.listen(
         (_) {},

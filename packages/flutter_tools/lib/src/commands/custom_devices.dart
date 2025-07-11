@@ -373,11 +373,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(final CustomDeviceConfig config) async {
-    final device = CustomDevice(
-      config: config,
-      logger: logger,
-      processManager: _processManager,
-    );
+    final device = CustomDevice(config: config, logger: logger, processManager: _processManager);
 
     var result = true;
 

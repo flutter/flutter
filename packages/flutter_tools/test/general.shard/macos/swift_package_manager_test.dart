@@ -29,10 +29,7 @@ void main() {
         group('generatePluginsSwiftPackage', () {
           testWithoutContext('skip if no dependencies and not already migrated', () async {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
@@ -45,10 +42,7 @@ void main() {
 
           testWithoutContext('generate if no dependencies and already migrated', () async {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('''
 '		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
@@ -95,10 +89,7 @@ $_doubleIndent
 
           testWithoutContext('generate with single dependency', () async {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final Directory validPlugin1Directory = fs.directory(
               '/local/path/to/plugins/valid_plugin_1',
@@ -159,10 +150,7 @@ let package = Package(
 
           testWithoutContext('generate with multiple dependencies', () async {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final nonPlatformCompatiblePlugin = FakePlugin(
               name: 'invalid_plugin_due_to_incompatible_platform',
               platforms: <String, PluginPlatform>{},
@@ -268,10 +256,7 @@ let package = Package(
         group('updateMinimumDeployment', () {
           testWithoutContext('return if invalid deploymentTarget', () {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
@@ -290,10 +275,7 @@ let package = Package(
 
           testWithoutContext('return if deploymentTarget is lower than default', () {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
@@ -312,10 +294,7 @@ let package = Package(
 
           testWithoutContext('return if deploymentTarget is same than default', () {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';
@@ -334,10 +313,7 @@ let package = Package(
 
           testWithoutContext('update if deploymentTarget is higher than default', () {
             final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: fs,
-            );
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final supportedPlatform = platform == FlutterDarwinPlatform.ios
                 ? '.iOS("13.0")'
                 : '.macOS("10.15")';

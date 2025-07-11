@@ -607,9 +607,7 @@ Future<void> _testFile(
   }
 }
 
-final _fontServerProtocolPattern = RegExp(
-  r'flutter_tester.*Font server protocol version mismatch',
-);
+final _fontServerProtocolPattern = RegExp(r'flutter_tester.*Font server protocol version mismatch');
 final _unableToConnectToFontDaemonPattern = RegExp(
   r'flutter_tester.*XType: unable to make a connection to the font daemon!',
 );

@@ -202,8 +202,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: missing main entry',
     () async {
-      final validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -328,8 +331,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: libraries is list',
     () async {
-      final validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -359,8 +365,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: libraries is list of strings',
     () async {
-      final validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );
@@ -392,8 +401,11 @@ loading-units:
   testWithoutContext(
     'loadingUnitCache validator detects malformed file: empty libraries allowed',
     () async {
-      final validator =
-          DeferredComponentsGenSnapshotValidator(env, exitOnFail: false, title: 'test check');
+      final validator = DeferredComponentsGenSnapshotValidator(
+        env,
+        exitOnFail: false,
+        title: 'test check',
+      );
       final File cacheFile = env.projectDir.childFile(
         DeferredComponentsValidator.kLoadingUnitsCacheFileName,
       );

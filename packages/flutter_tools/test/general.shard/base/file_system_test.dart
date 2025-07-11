@@ -325,10 +325,7 @@ void main() {
 
     testWithoutContext('on Linux', () {
       final fileSystem = MemoryFileSystem.test();
-      final fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: FakePlatform(),
-      );
+      final fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: FakePlatform());
       expect(fsUtils.escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
       expect(fsUtils.escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
       expect(fsUtils.escapePath(r'foo\cool.dart'), r'foo\cool.dart');

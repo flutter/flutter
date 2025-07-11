@@ -179,10 +179,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      final extensionData = <String, String>{
-        'test': 'data',
-        'renderedErrorText': 'error text',
-      };
+      final extensionData = <String, String>{'test': 'data', 'renderedErrorText': 'error text'};
       final fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           const FakeVmServiceRequest(

@@ -117,12 +117,7 @@ final class AssetTransformer {
       ...transformer.args,
     ];
 
-    final command = <String>[
-      _dartBinaryPath,
-      'run',
-      transformer.package,
-      ...transformerArguments,
-    ];
+    final command = <String>[_dartBinaryPath, 'run', transformer.package, ...transformerArguments];
 
     // Delete the output file if it already exists for whatever reason.
     // With this, we can check for the existence of the file after transformation
