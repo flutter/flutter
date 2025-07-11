@@ -87,9 +87,14 @@ const char* kUnknownLicense = R"lic(Unknown License
 v2.0
 )lic";
 
-absl::StatusOr<Data> MakeTestData() {
+absl::StatusOr<Data> MakeTestData(
+    std::optional<std::string_view> include_filter_text = std::nullopt) {
   std::stringstream include;
-  include << ".*\\.cc" << std::endl;
+  if (include_filter_text.has_value()) {
+    include << include_filter_text.value() << std::endl;
+  } else {
+    include << ".*\\.cc" << std::endl;
+  }
   absl::StatusOr<Filter> include_filter = Filter::Open(include);
   if (!include_filter.ok()) {
     return include_filter.status();
@@ -607,4 +612,36 @@ TEST_F(LicenseCheckerTest, UnmatchedCommentsAsErrors) {
       FindError(errors, absl::StatusCode::kNotFound,
                 "(?s).*foo.cc.*Selector didn't match.*Unknown Copyright"))
       << (errors.size() > 0 ? absl::StrCat(errors[0]) : "");
+}
+
+TEST_F(LicenseCheckerTest, NoticesFile) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/"NOTICES");
+  ASSERT_TRUE(data.ok());
+
+  std::string notices = R"notices(engine
+foobar
+
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
+Test License
+v2.0
+)notices";
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(notices, "NOTICES").ok());
+  Repo repo;
+  repo.Add("NOTICES");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), notices);
 }

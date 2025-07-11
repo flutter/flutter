@@ -237,6 +237,109 @@ struct ProcessState {
   absl::flat_hash_set<fs::path> seen_license_files;
 };
 
+namespace {
+bool ProcessSourceCode(const fs::path& relative_path,
+                       const MMapFile& file,
+                       const Data& data,
+                       const Package& package,
+                       const LicenseChecker::Flags& flags,
+                       ProcessState* state) {
+  bool did_find_copyright = false;
+  std::vector<absl::Status>* errors = &state->errors;
+  LicenseMap* license_map = &state->license_map;
+  IterateComments(
+      file.GetData(), file.GetSize(), [&](std::string_view comment) {
+        VLOG(4) << comment;
+        re2::StringPiece match;
+        if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
+          if (!VLOG_IS_ON(4)) {
+            VLOG(3) << comment;
+          }
+          absl::StatusOr<std::vector<Catalog::Match>> matches =
+              data.catalog.FindMatch(comment);
+          if (matches.ok()) {
+            did_find_copyright = true;
+            for (const Catalog::Match& match : matches.value()) {
+              license_map->Add(package.name, match.matched_text);
+              VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                      << match.matcher;
+            }
+          } else {
+            if (flags.treat_unmatched_comments_as_errors) {
+              errors->push_back(absl::NotFoundError(
+                  absl::StrCat(relative_path.lexically_normal().string(), " : ",
+                               matches.status().message(), "\n", comment)));
+            }
+            VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
+                    << " : " << matches.status().message() << "\n"
+                    << comment;
+          }
+        }
+      });
+  return did_find_copyright;
+}
+
+std::vector<std::string_view> SplitLines(std::string_view input) {
+  std::vector<std::string_view> result;
+
+  size_t pos = 0;
+  while (true) {
+    while (pos < input.size() && input[pos] == '\n') {
+      pos++;
+    }
+    const ::std::string::size_type newline = input.find('\n', pos);
+    if (newline == ::std::string::npos) {
+      result.push_back(input.substr(pos));
+      break;
+    } else {
+      result.push_back(input.substr(pos, newline - pos));
+      pos = newline + 1;
+    }
+  }
+
+  return result;
+}
+
+bool ProcessNotices(const fs::path& relative_path,
+                    const MMapFile& file,
+                    const Data& data,
+                    const Package& package,
+                    const LicenseChecker::Flags& flags,
+                    ProcessState* state) {
+  // std::vector<absl::Status>* errors = &state->errors;
+  // LicenseMap* license_map = &state->license_map;
+  static const std::string kDelimitor =
+      "------------------------------------------------------------------------"
+      "--------";
+  static const std::string pattern_str =
+      "(?s)(.+?)\n\n(.+?)(?:\n?" + kDelimitor + "|$)";
+  static const RE2 regex(pattern_str);
+
+  LicenseMap* license_map = &state->license_map;
+  re2::StringPiece input(file.GetData(), file.GetSize());
+  std::string_view projects_text;
+  std::string_view license;
+  while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
+    std::vector<std::string_view> projects = SplitLines(projects_text);
+
+    absl::StatusOr<std::vector<Catalog::Match>> matches =
+        data.catalog.FindMatch(license);
+    if (matches.ok()) {
+      for (const Catalog::Match& match : matches.value()) {
+        for (std::string_view project : projects) {
+          license_map->Add(project, match.matched_text);
+        }
+        VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
+                << match.matcher;
+      }
+    }
+  }
+  // Not having a license in a NOTICES file isn't technically a problem.
+  return true;
+}
+
+}  // namespace
+
 absl::Status ProcessFile(const fs::path& working_dir_path,
                          std::ostream& licenses,
                          const Data& data,
@@ -281,35 +384,14 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
       return file.status();
     }
   }
-  IterateComments(
-      file->GetData(), file->GetSize(), [&](std::string_view comment) {
-        VLOG(4) << comment;
-        re2::StringPiece match;
-        if (RE2::PartialMatch(comment, kHeaderLicense, &match)) {
-          if (!VLOG_IS_ON(4)) {
-            VLOG(3) << comment;
-          }
-          absl::StatusOr<std::vector<Catalog::Match>> matches =
-              data.catalog.FindMatch(comment);
-          if (matches.ok()) {
-            did_find_copyright = true;
-            for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.matched_text);
-              VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.matcher;
-            }
-          } else {
-            if (flags.treat_unmatched_comments_as_errors) {
-              errors->push_back(absl::NotFoundError(
-                  absl::StrCat(relative_path.lexically_normal().string(), " : ",
-                               matches.status().message(), "\n", comment)));
-            }
-            VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal()
-                    << " : " << matches.status().message() << "\n"
-                    << comment;
-          }
-        }
-      });
+
+  if (full_path.filename().string() == "NOTICES") {
+    did_find_copyright =
+        ProcessNotices(relative_path, *file, data, package, flags, state);
+  } else {
+    did_find_copyright =
+        ProcessSourceCode(relative_path, *file, data, package, flags, state);
+  }
   if (!did_find_copyright) {
     if (package.license_file.has_value()) {
       if (package.is_root_package) {
