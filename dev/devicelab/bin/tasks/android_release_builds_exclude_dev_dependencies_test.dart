@@ -60,7 +60,7 @@ Future<void> main() async {
             'app:dependencies',
             '--configuration',
             '${buildMode}RuntimeClasspath',
-          ], workingDirectory: flutterProject.androidPath);
+          ], workingDirectory: flutterProject.rootPath);
 
           if (isTestingReleaseMode) {
             utils.section(
