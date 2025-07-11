@@ -142,7 +142,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -158,7 +158,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
@@ -177,7 +177,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-14
+      os: Mac-14|Mac-15
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -194,7 +194,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -212,7 +212,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -227,7 +227,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: x86
       device_type: "msm8952"
   mac_arm64_android:
@@ -237,7 +237,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: arm64
       device_type: "msm8952"
 
@@ -249,7 +249,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: x86
       device_type: "mokey"
   mac_arm64_mokey:
@@ -259,7 +259,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: arm64
       device_type: "mokey"
 
@@ -270,7 +270,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: x86
       device_type: "Pixel 7 Pro"
   mac_ios:
@@ -284,7 +284,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: x86
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -302,7 +302,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: x86
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -320,7 +320,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-14
+      os: Mac-14|Mac-15
       cpu: arm64
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -5451,7 +5451,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-17|iOS-18","os=Mac-14", "cpu=x86"]
+        ["device_os=iOS-17|iOS-18","os=Mac-14|Mac-15", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
