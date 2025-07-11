@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
@@ -273,10 +274,12 @@ class Dart2JSTarget extends Dart2WebTarget {
 
 /// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
-  Dart2WasmTarget(this.compilerConfig);
+  Dart2WasmTarget(this.compilerConfig, this._analytics);
 
   @override
   final WasmCompilerConfig compilerConfig;
+
+  final Analytics _analytics;
 
   /// List the preconfigured build options for a given build mode.
   List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) => switch (mode) {
@@ -403,22 +406,28 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
+    final String result;
+    String? findingsSummary;
+
     if (exitCode != 0 && exitCode != 254) {
       environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
       if (stderr.isNotEmpty) {
         environment.logger.printWarning(stdout);
         environment.logger.printWarning(stderr);
       }
+      result = 'crash';
     } else if (exitCode == 0) {
       environment.logger.printWarning(
         'Wasm dry run succeeded. Consider building and testing your application with the '
         '`--wasm` flag. See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm',
       );
+      result = 'success';
     } else if (stderr.isNotEmpty) {
       environment.logger.printWarning('Wasm dry run failed:');
       environment.logger.printWarning(stdout);
       environment.logger.printWarning(stderr);
+      result = 'failure';
     } else if (stdout.isNotEmpty) {
       environment.logger.printWarning('Wasm dry run findings:');
       environment.logger.printWarning(stdout);
@@ -426,20 +435,30 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'Consider addressing these issues to enable wasm builds. See docs for more info: '
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
+      result = 'findings';
+      findingsSummary = RegExp(
+        r'\(([0-9]+)\)',
+      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
+    } else {
+      result = 'unknown';
     }
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
+
+    _analytics.send(
+      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+    );
   }
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
-  WebReleaseBundle(List<WebCompilerConfig> configs)
+  WebReleaseBundle(List<WebCompilerConfig> configs, Analytics analytics)
     : this._(
         compileTargets: configs
             .map(
               (WebCompilerConfig config) => switch (config) {
-                WasmCompilerConfig() => Dart2WasmTarget(config),
+                WasmCompilerConfig() => Dart2WasmTarget(config, analytics),
                 JsCompilerConfig() => Dart2JSTarget(config),
               },
             )
@@ -743,17 +762,18 @@ class WebBuiltInAssets extends Target {
 
 /// Generate a service worker for a web target.
 class WebServiceWorker extends Target {
-  const WebServiceWorker(this.fileSystem, this.compileConfigs);
+  const WebServiceWorker(this.fileSystem, this.compileConfigs, this.analytics);
 
   final FileSystem fileSystem;
   final List<WebCompilerConfig> compileConfigs;
+  final Analytics analytics;
 
   @override
   String get name => 'web_service_worker';
 
   @override
   List<Target> get dependencies => <Target>[
-    WebReleaseBundle(compileConfigs),
+    WebReleaseBundle(compileConfigs, analytics),
     WebBuiltInAssets(fileSystem),
   ];
 

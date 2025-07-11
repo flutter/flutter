@@ -14,6 +14,7 @@ import 'base/time.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 
 /// The default version when a version could not be determined.
@@ -689,6 +690,10 @@ void _ensureLegacyVersionFile({
   required String flutterRoot,
   required String frameworkVersion,
 }) {
+  // TODO(matanlurey): https://github.com/flutter/flutter/issues/171900.
+  if (featureFlags.isOmitLegacyVersionFileEnabled) {
+    return;
+  }
   final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
   if (!legacyVersionFile.existsSync()) {
     legacyVersionFile.writeAsStringSync(frameworkVersion);
