@@ -10,7 +10,8 @@
 TEST(FlFramebufferTest, HasDepthStencil) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 
-  g_autoptr(FlFramebuffer) framebuffer = fl_framebuffer_new(GL_RGB, 100, 100);
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
   GLint depth_type = GL_NONE;
   glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
@@ -31,7 +32,7 @@ TEST(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
   EXPECT_CALL(epoxy, glGenRenderbuffers);
-  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100);
+  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
