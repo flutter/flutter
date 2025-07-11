@@ -367,9 +367,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
       );
     }
 
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    final String? pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?;
-
+    final String? pluginClass = yaml[kPluginClass] as String?;
     return MacOSPlugin(
       name: name,
       pluginClass: pluginClass,
@@ -446,11 +444,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String?;
-    if (pluginClass == 'none') {
-      pluginClass = null;
-    }
+    final String? pluginClass = yaml[kPluginClass] as String?;
     final Set<PluginPlatformVariant> variants = <PluginPlatformVariant>{};
     final YamlList? variantList = yaml[kSupportedVariants] as YamlList?;
     if (variantList == null) {
@@ -568,8 +562,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
     return LinuxPlugin(
       name: name,
-      // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-      pluginClass: yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
+      pluginClass: yaml[kPluginClass] as String?,
       dartPluginClass: dartPluginClass,
       dartFileName: dartFileName,
       ffiPlugin: yaml[kFfiPlugin] as bool? ?? false,

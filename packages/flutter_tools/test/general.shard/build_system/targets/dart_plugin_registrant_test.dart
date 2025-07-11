@@ -54,6 +54,25 @@ environment:
   flutter: ">=1.20.0"
 ''';
 
+const String _kSamplePluginPubspecWithDartPluginClassNone = '''
+name: path_provider_linux
+description: linux implementation of the path_provider plugin
+// version: 2.0.1
+// homepage: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_linux
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      linux:
+        dartPluginClass: none
+        pluginClass: none
+
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''';
+
 void main() {
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
@@ -151,6 +170,57 @@ name: path_provider_example
             .childDirectory('flutter_build')
             .childFile('dart_plugin_registrant.dart');
         expect(generatedMain.existsSync(), isFalse);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        Pub: ThrowingPub.new,
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/57497.
+    testUsingContext(
+      'treats dartPluginClass: "none" literally',
+      () async {
+        final Directory projectDir = fileSystem.directory('project')..createSync();
+        final Environment environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          artifacts: Artifacts.test(),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{
+            kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+          },
+          generateDartPluginRegistry: true,
+        );
+
+        writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'path_provider_example',
+          packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
+          languageVersions: <String, String>{'path_provider_example': '2.12'},
+        );
+
+        projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
+
+        projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+
+        environment.fileSystem.currentDirectory
+            .childDirectory('path_provider_linux')
+            .childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_kSamplePluginPubspecWithDartPluginClassNone);
+
+        final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+        await DartPluginRegistrantTarget.test(testProject).build(environment);
+
+        final File generatedMain = projectDir
+            .childDirectory('.dart_tool')
+            .childDirectory('flutter_build')
+            .childFile('dart_plugin_registrant.dart');
+        final String mainContent = generatedMain.readAsStringSync();
+        expect(mainContent, contains('none.registerWith()'));
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
