@@ -1091,7 +1091,7 @@ class InputConfiguration {
 
   final TextCapitalizationConfig textCapitalization;
 
-  /// Whether the user can change the text seelction.
+  /// Whether the user can change the text selection.
   ///
   /// When this is false, the text selection cannot be adjusted by
   /// the user, text cannot be copied, and the user cannot paste into
