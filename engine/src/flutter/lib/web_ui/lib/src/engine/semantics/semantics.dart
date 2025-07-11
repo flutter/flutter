@@ -244,6 +244,8 @@ class SemanticsNodeUpdate {
     required this.platformViewId,
     required this.scrollChildren,
     required this.scrollIndex,
+    required this.overlayPortalChild,
+    required this.overlayPortalParent,
     required this.scrollPosition,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
@@ -304,6 +306,12 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int scrollIndex;
+
+  /// See [ui.SemanticsUpdateBuilder.overlayPortalChild].
+  final int? overlayPortalChild;
+
+  /// See [ui.SemanticsUpdateBUilder.overlayPortalParent].
+  final int? overlayPortalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -630,11 +638,14 @@ abstract class SemanticRole {
       // rasterization needs to be done.
       element.style.color = 'rgba(0,0,0,0)';
     }
-    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    // print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+
+    print(
+      'semanticsObject id: ${semanticsObject.id} overlayPortalChild id: ${semanticsObject.overlayPortalChild}',
+    );
+    print(
+      'semanticsObject id: ${semanticsObject.id} overlayPortalParent id: ${semanticsObject.overlayPortalParent}',
+    );
+
     // print(
     //   'semanticsObject id: ${semanticsObject.id} isOverlayPortal: ${semanticsObject.isOverlayPortal}',
     // );
@@ -1541,6 +1552,32 @@ class SemanticsObject {
     _dirtyFields |= _localeIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  int? get overlayPortalChild => _overlayPortalChild;
+  int? _overlayPortalChild;
+
+  static const int _overlayPortalChildIndex = 1 << 29;
+
+  /// Whether the [overlayPortalChild] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isOverlayPortalChildDirty => _isDirty(_overlayPortalChildIndex);
+  void _markOverlayPortalChildDirty() {
+    _dirtyFields |= _overlayPortalChildIndex;
+  }
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  int? get overlayPortalParent => _overlayPortalParent;
+  int? _overlayPortalParent;
+
+  static const int _overlayPortalParentIndex = 1 << 30;
+
+  /// Whether the [overlayPortalParent] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isOverlayPortalParentDirty => _isDirty(_overlayPortalParentIndex);
+  void _markOverlayPortalParentDirty() {
+    _dirtyFields |= _overlayPortalParentIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1729,6 +1766,16 @@ class SemanticsObject {
       _markScrollIndexDirty();
     }
 
+    if (_overlayPortalChild != update.overlayPortalChild) {
+      _overlayPortalChild = update.overlayPortalChild;
+      _markOverlayPortalChildDirty();
+    }
+
+    if (_overlayPortalParent != update.overlayPortalParent) {
+      _overlayPortalParent = update.overlayPortalParent;
+      _markOverlayPortalParentDirty();
+    }
+
     if (_scrollExtentMax != update.scrollExtentMax) {
       _scrollExtentMax = update.scrollExtentMax;
       _markScrollExtentMaxDirty();
@@ -1830,6 +1877,14 @@ class SemanticsObject {
 
     // Apply updates to the DOM.
     _updateRole();
+
+    // Set up aria-owns relationship for overlay portal children
+    if (overlayPortalParent != null) {
+      SemanticsObject? parent = owner._semanticsTree[overlayPortalParent!];
+      if (parent != null && parent.semanticRole != null) {
+        parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix${id}');
+      }
+    }
 
     if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
