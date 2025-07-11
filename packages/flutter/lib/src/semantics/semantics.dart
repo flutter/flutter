@@ -816,20 +816,18 @@ typedef _LabelPart = (String text, TextDirection? textDirection);
 ///
 /// Example usage:
 /// ```dart
-/// final builder = SemanticsLabelBuilder()
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder()
 ///   ..addPart('Hello')
 ///   ..addPart('world');
-/// final label = builder.build();
-/// print(label); // "Hello world"
+/// String label = builder.build(); // "Hello world"
 /// ```
 ///
 /// For multilingual text with proper RTL support:
 /// ```dart
-/// final builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
 ///   ..addPart('Welcome', textDirection: TextDirection.ltr)
 ///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
-/// final label = builder.build();
-/// print(label); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
+/// String label = builder.build(); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
 /// ```
 final class SemanticsLabelBuilder {
   /// Creates a new [SemanticsLabelBuilder].
