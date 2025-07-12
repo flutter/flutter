@@ -42,7 +42,7 @@ import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.internal.extensions.core.extra
+import org.gradle.kotlin.dsl.extra
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
