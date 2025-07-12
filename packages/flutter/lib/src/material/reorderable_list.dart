@@ -194,16 +194,14 @@ class ReorderableListView extends StatefulWidget {
   /// item and separator children because the builders are called only for
   /// the children that are actually visible.
   ///
-  /// When using this constructor, the list alternates between items and separators:
-  /// - Items are at even indices (0, 2, 4, ...)
-  /// - Separators are at odd indices (1, 3, 5, ...)
-  ///
   /// The `itemBuilder` callback will be called with indices greater than
-  /// or equal to zero and less than `itemCount` (the number of actual items).
+  /// or equal to zero and less than `itemCount`.
+  ///
+  /// Separators only appear between list items: separator 0 appears after item
+  /// 0 and the last separator appears before the last item.
   ///
   /// The `separatorBuilder` callback will be called with indices greater than
-  /// or equal to zero and less than `itemCount - 1`. It builds the separator
-  /// widgets which appear between the items.
+  /// or equal to zero and less than `itemCount - 1`.
   ///
   /// All other parameters function similarly to [ReorderableListView.builder].
   ///
