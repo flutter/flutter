@@ -757,14 +757,12 @@ void main() {
                       buildContext = context;
                       return TextField(
                         controller: controller,
-                        contextMenuBuilder: (
-                          BuildContext context,
-                          EditableTextState editableTextState,
-                        ) {
-                          return SystemContextMenu.editableText(
-                            editableTextState: editableTextState,
-                          );
-                        },
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
                       );
                     },
                   ),
@@ -800,14 +798,12 @@ void main() {
                       buildContext = context;
                       return TextField(
                         controller: controller,
-                        contextMenuBuilder: (
-                          BuildContext context,
-                          EditableTextState editableTextState,
-                        ) {
-                          return SystemContextMenu.editableText(
-                            editableTextState: editableTextState,
-                          );
-                        },
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
                       );
                     },
                   ),
@@ -837,7 +833,9 @@ void main() {
               final MediaQueryData mediaQueryData = MediaQuery.of(context);
               return MediaQuery(
                 data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-                child: MaterialApp(home: Scaffold(body: TextField(readOnly: readOnly))),
+                child: MaterialApp(
+                  home: Scaffold(body: TextField(readOnly: readOnly)),
+                ),
               );
             },
           ),
@@ -871,12 +869,12 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(editableTextState: editableTextState);
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
                     ),
                   ),
                 ),

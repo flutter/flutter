@@ -602,10 +602,9 @@ void main() {
         ),
       );
 
-      final Duration waitDuration =
-          SelectionOverlay.fadeDuration > kDoubleTapTimeout
-              ? SelectionOverlay.fadeDuration
-              : kDoubleTapTimeout;
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
 
       // Double tap to select the text.
       await tester.tapAt(textOffsetToPosition(tester, 5));
