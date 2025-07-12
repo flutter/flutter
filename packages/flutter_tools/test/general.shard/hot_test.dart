@@ -141,16 +141,14 @@ void main() {
     });
 
     testWithoutContext('ReasonForCancelling toString has a hint for specific errors', () {
-      final ReasonForCancelling reasonForCancelling = ReasonForCancelling(
-        message: 'Const class cannot remove fields',
-      );
+      final reasonForCancelling = ReasonForCancelling(message: 'Const class cannot remove fields');
 
       expect(reasonForCancelling.toString(), contains('Try performing a hot restart instead.'));
     });
   });
 
   group('hotRestart', () {
-    final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
+    final residentCompiler = FakeResidentCompiler();
     late MemoryFileSystem fileSystem;
     late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
@@ -180,8 +178,8 @@ void main() {
 name: my_app
 ''');
           writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-          final FakeDevice device = FakeDevice();
-          final List<FlutterDevice> devices = <FlutterDevice>[FakeFlutterDevice(device)];
+          final device = FakeDevice();
+          final devices = <FlutterDevice>[FakeFlutterDevice(device)];
           final OperationResult result = await HotRunner(
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -210,28 +208,24 @@ name: my_app
 name: my_app
 ''');
           writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-          final FakeDevice device = FakeDevice();
-          final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
-          final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          final OperationResult result =
-              await HotRunner(
-                devices,
-                debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-                target: 'main.dart',
-                devtoolsHandler: createNoOpHandler,
-                reassembleHelper:
-                    (
-                      List<FlutterDevice?> flutterDevices,
-                      Map<FlutterDevice?, List<FlutterView>> viewCache,
-                      void Function(String message)? onSlow,
-                      String reloadMessage,
-                    ) async => ReassembleResult(
-                      <FlutterView?, FlutterVmService?>{null: null},
-                      false,
-                      true,
-                    ),
-                analytics: fakeAnalytics,
-              ).restart();
+          final device = FakeDevice();
+          final fakeFlutterDevice = FakeFlutterDevice(device);
+          final devices = <FlutterDevice>[fakeFlutterDevice];
+          final OperationResult result = await HotRunner(
+            devices,
+            debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+            target: 'main.dart',
+            devtoolsHandler: createNoOpHandler,
+            reassembleHelper:
+                (
+                  List<FlutterDevice?> flutterDevices,
+                  Map<FlutterDevice?, List<FlutterView>> viewCache,
+                  void Function(String message)? onSlow,
+                  String reloadMessage,
+                ) async =>
+                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+            analytics: fakeAnalytics,
+          ).restart();
           expect(result.isOk, false);
           expect(result.message, 'setupHotReload failed');
           expect(failingTestingConfig.updateDevFSCompleteCalled, false);
@@ -258,8 +252,8 @@ name: my_app
         'shutdown hook called after signal',
         () async {
           writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-          final FakeDevice device = FakeDevice();
-          final List<FlutterDevice> devices = <FlutterDevice>[
+          final device = FakeDevice();
+          final devices = <FlutterDevice>[
             FlutterDevice(
               device,
               generator: residentCompiler,
@@ -288,8 +282,8 @@ name: my_app
         'shutdown hook called after app stop',
         () async {
           writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-          final FakeDevice device = FakeDevice();
-          final List<FlutterDevice> devices = <FlutterDevice>[
+          final device = FakeDevice();
+          final devices = <FlutterDevice>[
             FlutterDevice(
               device,
               generator: residentCompiler,
@@ -323,21 +317,20 @@ name: my_app
       testUsingContext(
         'correctly tracks time spent for analytics for hot restart',
         () async {
-          final FakeDevice device = FakeDevice();
-          final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
-          final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
+          final device = FakeDevice();
+          final fakeFlutterDevice = FakeFlutterDevice(device);
+          final devices = <FlutterDevice>[fakeFlutterDevice];
 
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => UpdateFSReport(
-                success: true,
-                invalidatedSourcesCount: 2,
-                syncedBytes: 4,
-                scannedSourcesCount: 8,
-                compileDuration: const Duration(seconds: 16),
-                transferDuration: const Duration(seconds: 32),
-              );
+          fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 2,
+            syncedBytes: 4,
+            scannedSourcesCount: 8,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
-          final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
+          final fakeStopwatchFactory = FakeStopwatchFactory(
             stopwatches: <String, Stopwatch>{
               'fullRestartHelper': FakeStopwatch()..elapsed = const Duration(seconds: 64),
               'updateDevFS': FakeStopwatch()..elapsed = const Duration(seconds: 128),
@@ -416,21 +409,20 @@ name: my_app
       testUsingContext(
         'correctly tracks time spent for analytics for hot reload',
         () async {
-          final FakeDevice device = FakeDevice();
-          final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
-          final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
+          final device = FakeDevice();
+          final fakeFlutterDevice = FakeFlutterDevice(device);
+          final devices = <FlutterDevice>[fakeFlutterDevice];
 
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => UpdateFSReport(
-                success: true,
-                invalidatedSourcesCount: 6,
-                syncedBytes: 8,
-                scannedSourcesCount: 16,
-                compileDuration: const Duration(seconds: 16),
-                transferDuration: const Duration(seconds: 32),
-              );
+          fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
 
-          final FakeStopwatchFactory fakeStopwatchFactory = FakeStopwatchFactory(
+          final fakeStopwatchFactory = FakeStopwatchFactory(
             stopwatches: <String, Stopwatch>{
               'updateDevFS': FakeStopwatch()..elapsed = const Duration(seconds: 64),
               'reloadSources:reload': FakeStopwatch()..elapsed = const Duration(seconds: 128),
@@ -441,15 +433,15 @@ name: my_app
 
           (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-          final OperationResult result =
-              await HotRunner(
-                devices,
-                debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-                target: 'main.dart',
-                devtoolsHandler: createNoOpHandler,
-                stopwatchFactory: fakeStopwatchFactory,
-                analytics: fakeAnalytics,
-                reloadSourcesHelper: (
+          final OperationResult result = await HotRunner(
+            devices,
+            debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+            target: 'main.dart',
+            devtoolsHandler: createNoOpHandler,
+            stopwatchFactory: fakeStopwatchFactory,
+            analytics: fakeAnalytics,
+            reloadSourcesHelper:
+                (
                   HotRunner hotRunner,
                   List<FlutterDevice?> flutterDevices,
                   bool? pause,
@@ -466,18 +458,15 @@ name: my_app
                   firstReloadDetails['receivedProceduresCount'] = 5;
                   return OperationResult.ok;
                 },
-                reassembleHelper:
-                    (
-                      List<FlutterDevice?> flutterDevices,
-                      Map<FlutterDevice?, List<FlutterView>> viewCache,
-                      void Function(String message)? onSlow,
-                      String reloadMessage,
-                    ) async => ReassembleResult(
-                      <FlutterView?, FlutterVmService?>{null: null},
-                      false,
-                      true,
-                    ),
-              ).restart();
+            reassembleHelper:
+                (
+                  List<FlutterDevice?> flutterDevices,
+                  Map<FlutterDevice?, List<FlutterView>> viewCache,
+                  void Function(String message)? onSlow,
+                  String reloadMessage,
+                ) async =>
+                    ReassembleResult(<FlutterView?, FlutterVmService?>{null: null}, false, true),
+          ).restart();
 
           expect(result.isOk, true);
           expect(testUsage.events, <TestUsageEvent>[
@@ -551,13 +540,13 @@ name: my_app
       testUsingContext(
         'still calls the devfs complete callback',
         () async {
-          final FakeDevice device = FakeDevice();
-          final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
-          final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => throw Exception('updateDevFS failed');
+          final device = FakeDevice();
+          final fakeFlutterDevice = FakeFlutterDevice(device);
+          final devices = <FlutterDevice>[fakeFlutterDevice];
+          fakeFlutterDevice.updateDevFSReportCallback = () async =>
+              throw Exception('updateDevFS failed');
 
-          final HotRunner runner = HotRunner(
+          final runner = HotRunner(
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
@@ -596,13 +585,13 @@ name: my_app
       testUsingContext(
         'still calls the devfs complete callback',
         () async {
-          final FakeDevice device = FakeDevice();
-          final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
-          final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
-          fakeFlutterDevice.updateDevFSReportCallback =
-              () async => throw Exception('updateDevFS failed');
+          final device = FakeDevice();
+          final fakeFlutterDevice = FakeFlutterDevice(device);
+          final devices = <FlutterDevice>[fakeFlutterDevice];
+          fakeFlutterDevice.updateDevFSReportCallback = () async =>
+              throw Exception('updateDevFS failed');
 
-          final HotRunner runner = HotRunner(
+          final runner = HotRunner(
             devices,
             debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
             target: 'main.dart',
@@ -652,9 +641,9 @@ name: my_app
       () async {
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
-        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-        final FakeDevice device = FakeDevice();
-        final List<FlutterDevice> devices = <FlutterDevice>[
+        final residentCompiler = FakeResidentCompiler();
+        final device = FakeDevice();
+        final devices = <FlutterDevice>[
           TestFlutterDevice(
             device: device,
             generator: residentCompiler,
@@ -696,12 +685,12 @@ name: my_app
     });
 
     testUsingContext('disposes each device', () async {
-      final FakeDevice device1 = FakeDevice();
-      final FakeDevice device2 = FakeDevice();
-      final FakeFlutterDevice flutterDevice1 = FakeFlutterDevice(device1);
-      final FakeFlutterDevice flutterDevice2 = FakeFlutterDevice(device2);
+      final device1 = FakeDevice();
+      final device2 = FakeDevice();
+      final flutterDevice1 = FakeFlutterDevice(device1);
+      final flutterDevice2 = FakeFlutterDevice(device2);
 
-      final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
+      final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
       await HotRunner(
         devices,

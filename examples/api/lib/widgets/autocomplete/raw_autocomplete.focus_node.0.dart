@@ -56,16 +56,16 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
               return option.contains(textEditingValue.text.toLowerCase());
             }).toList();
           },
-          optionsViewBuilder: (
-            BuildContext context,
-            AutocompleteOnSelected<String> onSelected,
-            Iterable<String> options,
-          ) {
-            return Material(
-              elevation: 4.0,
-              child: ListView(
-                children:
-                    options
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                return Material(
+                  elevation: 4.0,
+                  child: ListView(
+                    children: options
                         .map(
                           (String option) => GestureDetector(
                             onTap: () {
@@ -75,9 +75,9 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
                           ),
                         )
                         .toList(),
-              ),
-            );
-          },
+                  ),
+                );
+              },
         ),
       ),
     );

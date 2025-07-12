@@ -48,10 +48,9 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
           dropdownValue = value!;
         });
       },
-      items:
-          list.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
-          }).toList(),
+      items: list.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(value: value, child: Text(value));
+      }).toList(),
     );
   }
 }
