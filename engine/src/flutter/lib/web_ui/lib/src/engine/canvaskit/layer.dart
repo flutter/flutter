@@ -112,7 +112,7 @@ class ClipRRectEngineLayer extends ContainerLayer implements ui.ClipRRectEngineL
   }
 }
 
-/// A layer that clips its child layers by a given [RRect].
+/// A layer that clips its child layers by a given [RSuperellipse].
 class ClipRSuperellipseEngineLayer extends ContainerLayer
     implements ui.ClipRSuperellipseEngineLayer {
   ClipRSuperellipseEngineLayer(this.clipRSuperellipse, this.clipBehavior)

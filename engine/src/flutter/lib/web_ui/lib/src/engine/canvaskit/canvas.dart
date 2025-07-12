@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart' show LazyPath;
 import 'package:ui/ui.dart' as ui;
 
 import '../color_filter.dart';
@@ -53,13 +54,14 @@ class CkCanvas {
   }
 
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, bool doAntiAlias) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    skCanvas.clipRRect(
-      toSkRRect(rsuperellipse.toApproximateRRect()),
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    translate(offset.dx, offset.dy);
+    skCanvas.clipPath(
+      ((path as LazyPath).builtPath as CkPath).skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
+    translate(-offset.dx, -offset.dy);
   }
 
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
@@ -225,6 +227,15 @@ class CkCanvas {
   void drawRRect(ui.RRect rrect, CkPaint paint) {
     final skPaint = paint.toSkPaint();
     skCanvas.drawRRect(toSkRRect(rrect), skPaint);
+    skPaint.delete();
+  }
+
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, CkPaint paint) {
+    final skPaint = paint.toSkPaint();
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    translate(offset.dx, offset.dy);
+    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }
 

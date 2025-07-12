@@ -17,6 +17,7 @@ import 'src/web/bench_child_layers.dart';
 import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_default_target_platform.dart';
 import 'src/web/bench_draw_rect.dart';
+import 'src/web/bench_draw_rrect_rsuperellipse.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_harness.dart';
 import 'src/web/bench_image_decoding.dart';
@@ -56,6 +57,9 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchClippedOutPictures.benchmarkName: () => BenchClippedOutPictures(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect.staticPaint(),
   BenchDrawRect.variablePaintBenchmarkName: () => BenchDrawRect.variablePaint(),
+  BenchDrawRRectRSuperellipse.drawRRectName: () => BenchDrawRRectRSuperellipse.drawRRect(),
+  BenchDrawRRectRSuperellipse.drawRSuperellipseName: () =>
+      BenchDrawRRectRSuperellipse.drawRSuperellipse(),
   BenchPathRecording.benchmarkName: () => BenchPathRecording(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
