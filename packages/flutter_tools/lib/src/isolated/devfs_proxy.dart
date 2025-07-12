@@ -4,6 +4,13 @@ import 'package:yaml/yaml.dart';
 import '/src/base/logger.dart';
 import '../globals.dart' as globals;
 
+String _normalizePath(String path) {
+  if (!path.startsWith('/')) {
+    path = '/$path';
+  }
+  return path;
+}
+
 abstract class ProxyRule {
   ProxyRule({required this.target});
 
@@ -117,7 +124,7 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
 shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
   return (shelf.Handler innerHandler) {
     return (shelf.Request request) async {
-      final String requestPath = '/${request.url.path}';
+      final String requestPath = _normalizePath(request.url.path);
       for (final ProxyRule rule in effectiveProxy) {
         if (rule.matches(requestPath)) {
           final Uri targetBaseUri = Uri.parse(rule.target);
