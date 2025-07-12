@@ -1889,6 +1889,90 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+
+    testWidgets('CarouselView shows the correct item after animateToItem', (
+      WidgetTester tester,
+    ) async {
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 5, 2],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(6, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controller.animateToItem(
+        4,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(4));
+      expect(find.text('Item 4'), findsOneWidget);
+    });
+
+    testWidgets('CarouselView shows the correct item after dragging', (WidgetTester tester) async {
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 5, 2],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(5, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Drag to the left to show the next item.
+      await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(2));
+      expect(find.text('Item ${controller.currentIndex}'), findsOneWidget);
+    });
+
+    testWidgets('CarouselView starts with the correct initial item', (WidgetTester tester) async {
+      final CarouselController controller = CarouselController(initialItem: 2);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 5, 2],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(5, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.currentIndex, equals(2));
+      expect(find.text('Item 2'), findsOneWidget);
+
+      // Verify that the initial item is centered.
+      final Rect itemRect = tester.getRect(find.text('Item 2'));
+      final double centerX = tester.getCenter(find.byType(CarouselView)).dx;
+      expect(itemRect.center.dx, closeTo(centerX, 1.0)); // Allow a small margin of error.
+    });
   });
 }
 
