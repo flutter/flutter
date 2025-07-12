@@ -1601,6 +1601,24 @@ void main() {
       );
     });
 
+    testWidgets('ReorderableListView.separated asserts on negative childCount', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => ReorderableListView.separated(
+          itemBuilder: (BuildContext context, int index) {
+            return const SizedBox();
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider();
+          },
+          itemCount: -1,
+          onReorder: (int from, int to) {},
+        ),
+        throwsAssertionError,
+      );
+    });
+
     testWidgets('ReorderableListView.builder only creates the children it needs', (
       WidgetTester tester,
     ) async {
@@ -1620,6 +1638,209 @@ void main() {
 
       // Should have only created the first 18 items.
       expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
+    });
+
+    testWidgets(
+      'ReorderableListView.separated with null separatorBuilder creates expected number of items',
+      (WidgetTester tester) async {
+        final Set<int> itemsCreated = <int>{};
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ReorderableListView.separated(
+              itemBuilder: (BuildContext context, int index) {
+                itemsCreated.add(index);
+                return Text(index.toString(), key: ValueKey<int>(index));
+              },
+              separatorBuilder: null,
+              itemCount: 1000,
+              onReorder: (int from, int to) {},
+            ),
+          ),
+        );
+
+        // Should have only created the first 18 items.
+        expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
+      },
+    );
+
+    testWidgets('ReorderableListView.separated only creates the children and separators it needs', (
+      WidgetTester tester,
+    ) async {
+      final Set<int> itemsCreated = <int>{};
+      final Set<int> separatorsCreated = <int>{};
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              itemsCreated.add(index);
+              return Text(index.toString(), key: ValueKey<int>(index));
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              separatorsCreated.add(index);
+              return Divider(key: ValueKey<String>('divider_$index'));
+            },
+            itemCount: 1000,
+            onReorder: (int from, int to) {},
+          ),
+        ),
+      );
+
+      // Should have only created the first 14 items and 13 separators.
+      expect(itemsCreated.length, 14);
+      expect(separatorsCreated.length, 13);
+      // Verify the indices are contiguous and start from 0
+      for (int i = 0; i < itemsCreated.length; i++) {
+        expect(itemsCreated.contains(i), isTrue);
+      }
+      for (int i = 0; i < separatorsCreated.length; i++) {
+        expect(separatorsCreated.contains(i), isTrue);
+      }
+    });
+
+    testWidgets('ReorderableListView.separated throws error for items without keys', (
+      WidgetTester tester,
+    ) async {
+      // Items without keys should still throw an error in separated view
+      final Widget reorderableListViewWithoutItemKeys = ReorderableListView.separated(
+        itemBuilder: (BuildContext context, int index) {
+          // Items without keys - should cause an error
+          return SizedBox(child: Text('Item $index'));
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return const Divider();
+        },
+        itemCount: 2,
+        onReorder: (int oldIndex, int newIndex) {},
+      );
+      await tester.pumpWidget(MaterialApp(home: reorderableListViewWithoutItemKeys));
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      expect(exception.toString(), contains('Every item of ReorderableListView must have a key.'));
+    });
+
+    testWidgets('ReorderableListView.separated works with keyed items and keyless separators', (
+      WidgetTester tester,
+    ) async {
+      // Items with keys and separators without keys should work (separators auto-keyed)
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableListView.separated(
+            itemBuilder: (BuildContext context, int index) {
+              // Items with keys - should work
+              return SizedBox(
+                key: ValueKey<int>(index),
+                height: 50.0, // Give explicit height to ensure visibility
+                child: Text('Item $index'),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              // Separators without keys - should be automatically wrapped in KeyedSubtree
+              return const Divider(height: 1.0);
+            },
+            itemCount: 3,
+            onReorder: (int oldIndex, int newIndex) {},
+          ),
+        ),
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isNull); // Should not throw an error
+
+      // Verify the widget tree contains at least some expected items and separators
+      // The key point is that no exception was thrown, proving separators are auto-keyed
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.byType(Divider), findsAtLeastNWidgets(1)); // Should have separators
+
+      // Verify that a ReorderableListView was actually created
+      expect(find.byType(ReorderableListView), findsOneWidget);
+    });
+
+    testWidgets('ReorderableListView.separated reorder behavior', (WidgetTester tester) async {
+      Future<void> longPressDrag(Offset start, Offset end) async {
+        final TestGesture drag = await tester.startGesture(start);
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        await drag.moveTo(end);
+        await tester.pump(kPressTimeout);
+        await drag.up();
+      }
+
+      final List<int> items = List<int>.generate(5, (int index) => index);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Test App')),
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ReorderableListView.separated(
+                  itemCount: items.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      key: Key('item_${items[index]}'),
+                      title: Text('Item ${items[index]}'),
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                  onReorder: (int oldIndex, int newIndex) {
+                    setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final int item = items.removeAt(oldIndex);
+                      items.insert(newIndex, item);
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      const double appBarHeight = kToolbarHeight; // Default 56.0
+      const double itemHeight = 56.0; // ListTile height
+      const double separatorHeight = 16.0; // Divider height
+
+      // Initial position of 'Item 2'
+      const double initialItem2CenterY =
+          appBarHeight +
+          itemHeight +
+          separatorHeight +
+          itemHeight +
+          separatorHeight +
+          (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 2')).dy, initialItem2CenterY);
+
+      // Original position of 'Item 1'
+      const double originalItem1CenterY =
+          appBarHeight + itemHeight + separatorHeight + (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 1')).dy, originalItem1CenterY);
+
+      // Drag 'Item 2' to where 'Item 1' was.
+      await longPressDrag(
+        tester.getCenter(find.text('Item 2')), // Start drag on Item 2
+        tester.getCenter(find.text('Item 1')), // Move to original Item 1 position
+      );
+      await tester.pumpAndSettle();
+
+      // After reorder, 'Item 2' should now be at the original position of 'Item 1'.
+      const double newItem2CenterY = appBarHeight + itemHeight + separatorHeight + (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 2')).dy, newItem2CenterY);
+
+      // Verify 'Item 1' has moved down.
+      const double newItem1CenterY =
+          appBarHeight +
+          itemHeight +
+          separatorHeight +
+          itemHeight +
+          separatorHeight +
+          (itemHeight / 2);
+      expect(tester.getCenter(find.text('Item 1')).dy, newItem1CenterY);
+
+      // Verify the items list order has changed
+      expect(items, <int>[0, 2, 1, 3, 4]);
     });
 
     group('Padding', () {
