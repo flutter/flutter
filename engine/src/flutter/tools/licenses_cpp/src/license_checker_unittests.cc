@@ -645,3 +645,35 @@ v2.0
 
   EXPECT_EQ(ss.str(), notices);
 }
+
+TEST_F(LicenseCheckerTest, NoticesFileUnknownLicense) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData(/*include_filter_text=*/"NOTICES");
+  ASSERT_TRUE(data.ok());
+
+  std::string notices = R"notices(engine
+foobar
+
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
+Unknown license
+)notices";
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(notices, "NOTICES").ok());
+  Repo repo;
+  repo.Add("NOTICES");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(temp_path->string(), ss, *data);
+  EXPECT_EQ(errors.size(), 1u);
+  ASSERT_TRUE(!errors.empty());
+  EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound, "NOTICES"))
+      << errors[0];
+}

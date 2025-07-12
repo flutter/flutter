@@ -315,6 +315,7 @@ bool ProcessNotices(const fs::path& relative_path,
       "(?s)(.+?)\n\n(.+?)(?:\n?" + kDelimitor + "|$)";
   static const RE2 regex(pattern_str);
 
+  std::vector<absl::Status>* errors = &state->errors;
   LicenseMap* license_map = &state->license_map;
   re2::StringPiece input(file.GetData(), file.GetSize());
   std::string_view projects_text;
@@ -332,6 +333,10 @@ bool ProcessNotices(const fs::path& relative_path,
         VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
                 << match.matcher;
       }
+    } else {
+      errors->push_back(absl::NotFoundError(
+          absl::StrCat(relative_path.lexically_normal().string(), " : ",
+                       matches.status().message(), "\n", license)));
     }
   }
   // Not having a license in a NOTICES file isn't technically a problem.
