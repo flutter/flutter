@@ -1428,9 +1428,11 @@ abstract class ResidentRunner extends ResidentHandlers {
             logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
           }
         }
-          // Trailing slashes might confuse clients.
+        // Trailing slashes might confuse clients.
         final Uri? uri = devToolsServerAddress!.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${_trimTrailingSlashes(device.vmService!.httpAddress)}'},
+          queryParameters: <String, dynamic>{
+            'uri': '${_trimTrailingSlashes(device.vmService!.httpAddress)}',
+          },
         );
         if (uri != null) {
           logger.printStatus(
