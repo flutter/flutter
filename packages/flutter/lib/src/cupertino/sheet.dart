@@ -215,6 +215,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     required this.secondaryRouteAnimation,
     required this.child,
     required this.linearTransition,
+    required this.topGap,
   });
 
   /// `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0 when
@@ -233,6 +234,10 @@ class CupertinoSheetTransition extends StatefulWidget {
   /// Used to respond to a drag gesture.
   final bool linearTransition;
 
+  /// The gap between the top of the screen and the top of the sheet as a ratio
+  /// of the screen height (0.0 to 1.0).
+  final double topGap;
+
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
   ///
   /// Provided to the previous route to coordinate transitions between routes.
@@ -247,8 +252,15 @@ class CupertinoSheetTransition extends StatefulWidget {
     Widget? child, {
     double? topGap,
   }) {
-    if (CupertinoSheetRoute.hasParentSheet(context)) {
-      return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
+    final double effectiveTopGap = topGap ?? _kTopGapRatio;
+    if (CupertinoSheetRoute.hasParentSheet(context) &&
+        !CupertinoSheetRoute.hasParentSheetWithDifferentTopGap(context, effectiveTopGap)) {
+      final _CupertinoSheetScope? parentScope = _CupertinoSheetScope.maybeOf(context);
+      return _delegatedCoverSheetSecondaryTransition(
+        secondaryAnimation,
+        child,
+        parentTopGap: parentScope?.topGap,
+      );
     }
     final bool linear = Navigator.of(context).userGestureInProgress;
 
@@ -329,8 +341,9 @@ class CupertinoSheetTransition extends StatefulWidget {
 
   static Widget _delegatedCoverSheetSecondaryTransition(
     Animation<double> secondaryAnimation,
-    Widget? child,
-  ) {
+    Widget? child, {
+    double? parentTopGap,
+  }) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final CurvedAnimation curvedAnimation = CurvedAnimation(
@@ -339,7 +352,19 @@ class CupertinoSheetTransition extends StatefulWidget {
       parent: secondaryAnimation,
     );
 
-    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kMidUpTween);
+    // Create a dynamic tween based on the parent sheet's topGap
+    // If parentTopGap is different from default, adjust the slide offset accordingly
+    final double effectiveParentTopGap = parentTopGap ?? _kTopGapRatio;
+    final double topGapDifference = effectiveParentTopGap - _kTopGapRatio;
+
+    // Adjust the slide offset to account for different topGap positioning
+    // The offset needs to be modified so sheets with different topGaps align properly
+    final Animatable<Offset> dynamicMidUpTween = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0.0, -0.005 + (topGapDifference * 0.1)),
+    );
+
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(dynamicMidUpTween);
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
@@ -425,7 +450,11 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
     bool linearTransition,
     Widget? child,
   ) {
-    final Animatable<Offset> offsetTween = CupertinoSheetRoute.hasParentSheet(context)
+    // Check if there's a parent sheet and if topGap values are similar
+    final bool hasCompatibleParentSheet = CupertinoSheetRoute.hasParentSheet(context) &&
+        !CupertinoSheetRoute.hasParentSheetWithDifferentTopGap(context, widget.topGap);
+
+    final Animatable<Offset> offsetTween = hasCompatibleParentSheet
         ? _kBottomUpTweenWhenCoveringOtherSheet
         : _kBottomUpTween;
 
@@ -542,7 +571,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
-            child: _CupertinoSheetScope(child: builder(context)),
+            child: _CupertinoSheetScope(topGap: topGap, child: builder(context)),
           ),
         ),
       ),
@@ -553,6 +582,18 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   /// context.
   static bool hasParentSheet(BuildContext context) {
     return _CupertinoSheetScope.maybeOf(context) != null;
+  }
+
+  /// Checks if a parent sheet exists and has a significantly different topGap.
+  ///
+  /// Returns true if there's a parent sheet with a topGap difference greater than 0.01
+  /// (1% of screen height), which would require different transition handling.
+  static bool hasParentSheetWithDifferentTopGap(BuildContext context, double newTopGap) {
+    final _CupertinoSheetScope? parentScope = _CupertinoSheetScope.maybeOf(context);
+    if (parentScope == null) {
+      return false;
+    }
+    return (parentScope.topGap - newTopGap).abs() > 0.01;
   }
 
   /// Pops the entire [CupertinoSheetRoute], if a sheet route exists in the stack.
@@ -583,14 +624,16 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
 // Internally used to see if another sheet is in the tree already.
 class _CupertinoSheetScope extends InheritedWidget {
-  const _CupertinoSheetScope({required super.child});
+  const _CupertinoSheetScope({required super.child, required this.topGap});
+
+  final double topGap;
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
   }
 
   @override
-  bool updateShouldNotify(_CupertinoSheetScope oldWidget) => false;
+  bool updateShouldNotify(_CupertinoSheetScope oldWidget) => topGap != oldWidget.topGap;
 }
 
 /// A mixin that replaces the entire screen with an iOS sheet transition for a
@@ -666,6 +709,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
+      topGap: topGap,
       child: _CupertinoDownGestureDetector<T>(
         enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route),
