@@ -160,11 +160,21 @@ class AOTSnapshotter {
       }
     }
 
-    final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
+    final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
     if (targetingApplePlatform) {
-      genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-assembly', '--assembly=$assembly']);
+      // When the minimum version is updated, remember to update
+      // template MinimumOSVersion.
+      // https://github.com/flutter/flutter/pull/62902
+      final String minOSVersion =
+          platform == TargetPlatform.ios
+              ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
+              : FlutterDarwinPlatform.macos.deploymentTarget().toString();
+      genSnapshotArgs.addAll(<String>[
+        '--snapshot_kind=app-aot-macho-dylib',
+        '--macho=$aotSharedLibrary',
+        '--macho-min-os-version=$minOSVersion',
+      ]);
     } else {
-      final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
     }
 
@@ -233,7 +243,7 @@ class AOTSnapshotter {
         appleArch: darwinArch!,
         isIOS: platform == TargetPlatform.ios,
         sdkRoot: sdkRoot,
-        assemblyPath: assembly,
+        snapshotPath: aotSharedLibrary,
         outputPath: outputDir.path,
         quiet: quiet,
         stripAfterBuild: stripAfterBuild,
@@ -244,13 +254,13 @@ class AOTSnapshotter {
     }
   }
 
-  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
-  /// source at [assemblyPath].
+  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the Mach-O
+  /// dynamic library at [snapshotPath].
   Future<int> _buildFramework({
     required DarwinArch appleArch,
     required bool isIOS,
     String? sdkRoot,
-    required String assemblyPath,
+    required String snapshotPath,
     required String outputPath,
     required bool quiet,
     required bool stripAfterBuild,
@@ -264,29 +274,8 @@ class AOTSnapshotter {
     final commonBuildOptions = <String>[
       '-arch',
       targetArch,
-      if (isIOS)
-        // When the minimum version is updated, remember to update
-        // template MinimumOSVersion.
-        // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
     ];
-
-    final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
-
-    final RunResult compileResult = await _xcode.cc(<String>[
-      ...commonBuildOptions,
-      '-c',
-      assemblyPath,
-      '-o',
-      assemblyO,
-    ]);
-    if (compileResult.exitCode != 0) {
-      _logger.printError(
-        'Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}',
-      );
-      return compileResult.exitCode;
-    }
 
     final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
     _fileSystem.directory(frameworkDir).createSync(recursive: true);
@@ -307,7 +296,7 @@ class AOTSnapshotter {
       '@rpath/App.framework/App',
       '-o',
       appLib,
-      assemblyO,
+      snapshotPath,
     ];
 
     final RunResult linkResult = await _xcode.clang(linkArgs);
