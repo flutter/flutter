@@ -1179,7 +1179,8 @@ class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
         switch (isLTR) {
           true => secondaryOffset.dx > thumbCenter.dx + trackGap,
           false => secondaryOffset.dx < thumbCenter.dx - trackGap,
-        };
+        } &&
+        thumbCenter.dx < (secondaryOffset.dx - (sliderTheme.trackHeight! / 2));
 
     if (showSecondaryTrack) {
       final ColorTween secondaryTrackColorTween = ColorTween(
