@@ -2888,7 +2888,7 @@ sealed class IOSSystemContextMenuItemData {
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in copy button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in copy button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2906,7 +2906,7 @@ final class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemDat
   String get _jsonType => 'copy';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in cut button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in cut button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2924,7 +2924,7 @@ final class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData
   String get _jsonType => 'cut';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in paste button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in paste button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2942,7 +2942,7 @@ final class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemDa
   String get _jsonType => 'paste';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in select all
+/// An [IOSSystemContextMenuItemData] for the system's built-in select all
 /// button.
 ///
 /// The title and action are both handled by the platform.
@@ -2961,7 +2961,7 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
   String get _jsonType => 'selectAll';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in look up
+/// An [IOSSystemContextMenuItemData] for the system's built-in look up
 /// button.
 ///
 /// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
@@ -2993,7 +2993,7 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in search web
+/// An [IOSSystemContextMenuItemData] for the system's built-in search web
 /// button.
 ///
 /// Must specify a [title], typically
@@ -3026,7 +3026,7 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in share button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in share button.
 ///
 /// Must specify a [title], typically
 /// [WidgetsLocalizations.shareButtonLabel].
@@ -3058,7 +3058,7 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in Live Text
+/// An [IOSSystemContextMenuItemData] for the system's built-in Live Text
 /// (OCR) button.
 ///
 /// This button is only available on iOS 15.0+ devices with camera support.
