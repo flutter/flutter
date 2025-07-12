@@ -755,10 +755,6 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     dependsOn(compileTask)
                     with(compileTask.assets)
-                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
-                    //   minimum supported Gradle version is 8.3.
-                    // @Suppress("DEPRECATION")
-                    // fileMode = 420 // corresponds to unix 0644 in base 8
                     filePermissions {
                         user {
                             read = true
