@@ -1394,7 +1394,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (uri == null) {
       return null;
     }
-    final String s = uri.toString();
+    final s = uri.toString();
     int i = s.length;
     while (i > 0 && s[i - 1] == '/') {
       i--;
@@ -1428,11 +1428,11 @@ abstract class ResidentRunner extends ResidentHandlers {
             logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
           }
         }
+          // Trailing slashes might confuse clients.
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${_trimTrailingSlashes(device.vmService!.httpAddress)}'},
         );
         if (uri != null) {
-          // Trailing slashes might confuse clients.
           logger.printStatus(
             'The Flutter DevTools debugger and profiler '
             'on ${device.device!.displayName} '
