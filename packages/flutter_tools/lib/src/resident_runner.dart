@@ -1390,6 +1390,18 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   var _reportedDebuggers = false;
 
+  String? _trimTrailingSlashes(Uri? uri) {
+    if (uri == null) {
+      return null;
+    }
+    final String s = uri.toString();
+    int i = s.length;
+    while (i > 0 && s[i - 1] == '/') {
+      i--;
+    }
+    return s.substring(0, i);
+  }
+
   void printDebuggerList({bool includeVmService = true, bool includeDevtools = true}) {
     // TODO(bkonyi): update this logic when ready to serve DevTools from DDS.
     final DevToolsServerAddress? devToolsServerAddress =
@@ -1417,19 +1429,14 @@ abstract class ResidentRunner extends ResidentHandlers {
           }
         }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
-          queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
+          queryParameters: <String, dynamic>{'uri': '${_trimTrailingSlashes(device.vmService!.httpAddress)}'},
         );
         if (uri != null) {
-          final s = urlToDisplayString(uri);
           // Trailing slashes might confuse clients.
-          int i = s.length;
-          while (i > 0 && s[i - 1] == '/') {
-            i--;
-          }
           logger.printStatus(
             'The Flutter DevTools debugger and profiler '
             'on ${device.device!.displayName} '
-            'is available at: ${s.substring(0, i)}',
+            'is available at: ${urlToDisplayString(uri)}',
           );
         }
       }
