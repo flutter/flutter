@@ -804,8 +804,7 @@ class IconButton extends StatelessWidget {
       onTap: onPressed,
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
-      mouseCursor:
-          mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
+      mouseCursor: mouseCursor ?? SystemMouseCursors.basic,
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -1123,12 +1122,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1271,12 +1265,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1419,12 +1408,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1562,12 +1546,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

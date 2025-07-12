@@ -422,26 +422,26 @@ class ElevatedButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
         ? _ElevatedButtonDefaultsM3(context)
         : styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
-            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-            shadowColor: theme.shadowColor,
-            elevation: 2,
-            textStyle: theme.textTheme.labelLarge,
-            padding: _scaledPadding(context),
-            minimumSize: const Size(64, 36),
-            maximumSize: Size.infinite,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
-            disabledMouseCursor: SystemMouseCursors.basic,
-            visualDensity: theme.visualDensity,
-            tapTargetSize: theme.materialTapTargetSize,
-            animationDuration: kThemeChangeDuration,
-            enableFeedback: true,
-            alignment: Alignment.center,
-            splashFactory: InkRipple.splashFactory,
-          );
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+          shadowColor: theme.shadowColor,
+          elevation: 2,
+          textStyle: theme.textTheme.labelLarge,
+          padding: _scaledPadding(context),
+          minimumSize: const Size(64, 36),
+          maximumSize: Size.infinite,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+          enabledMouseCursor: SystemMouseCursors.basic,
+          disabledMouseCursor: SystemMouseCursors.basic,
+          visualDensity: theme.visualDensity,
+          tapTargetSize: theme.materialTapTargetSize,
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: true,
+          alignment: Alignment.center,
+          splashFactory: InkRipple.splashFactory,
+        );
   }
 
   /// Returns the [ElevatedButtonThemeData.style] of the closest
@@ -500,19 +500,20 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
-    final EdgeInsetsGeometry scaledPadding = useMaterial3
-        ? ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-            const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-            effectiveTextScale,
-          )
-        : ButtonStyleButton.scaledPadding(
-            const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-            const EdgeInsets.symmetric(horizontal: 8),
-            const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-            effectiveTextScale,
-          );
+    final EdgeInsetsGeometry scaledPadding =
+        useMaterial3
+            ? ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+              effectiveTextScale,
+            )
+            : ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+              const EdgeInsets.symmetric(horizontal: 8),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+              effectiveTextScale,
+            );
     return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
@@ -547,9 +548,10 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
-      children: effectiveIconAlignment == IconAlignment.start
-          ? <Widget>[icon, Flexible(child: label)]
-          : <Widget>[Flexible(child: label), icon],
+      children:
+          effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
     );
   }
 }
@@ -681,12 +683,7 @@ class _ElevatedButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

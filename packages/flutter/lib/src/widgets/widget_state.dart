@@ -426,11 +426,10 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     _clickable,
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+
+  // TODO(camsim99): not sure that I can modify this directly since this is referenced by cupertino. maybe the material level above?
   static MouseCursor _clickable(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.basic;
-    }
-    return SystemMouseCursors.click;
+    return SystemMouseCursors.basic;
   }
 
   /// A mouse cursor for widgets related to text, which resolves differently
