@@ -365,17 +365,13 @@ Future<void> testMain() async {
       final ui.PlatformMessageCallback? savedCallback = dispatcher.onPlatformMessage;
 
       bool markTextEventHandled = false;
-      dispatcher.onPlatformMessage = (
-        String channel,
-        ByteData? data,
-        ui.PlatformMessageResponseCallback? callback,
-      ) {
-        final ByteData response =
-            const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      dispatcher.onPlatformMessage =
+          (String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
+            final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{
               'handled': markTextEventHandled,
             })!;
-        callback!(response);
-      };
+            callback!(response);
+          };
       RawKeyboard.initialize();
 
       final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
@@ -682,10 +678,9 @@ Future<void> testMain() async {
 
         expect(domDocument.activeElement, textEditing.strategy.domElement);
 
-        final flutterView =
-            EnginePlatformDispatcher.instance.viewManager.findViewForElement(
-              textEditing.strategy.domElement,
-            )!;
+        final flutterView = EnginePlatformDispatcher.instance.viewManager.findViewForElement(
+          textEditing.strategy.domElement,
+        )!;
 
         flutterView.dom.rootElement.focusWithoutScroll();
         expect(spy.messages, isEmpty);
@@ -731,6 +726,7 @@ Future<void> testMain() async {
       bool decimal = false,
       bool isMultiline = false,
       bool autofillEnabled = true,
+      bool enableInteractiveSelection = true,
     }) {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         ++clientId,
@@ -741,6 +737,7 @@ Future<void> testMain() async {
           decimal: decimal,
           isMultiline: isMultiline,
           autofillEnabled: autofillEnabled,
+          enableInteractiveSelection: enableInteractiveSelection,
         ),
       ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -2952,6 +2949,77 @@ Future<void> testMain() async {
       //                https://github.com/flutter/flutter/issues/145101
     }, skip: true);
 
+    test('Collapses selections if interactive selection disabled', () {
+      final int clientId = showKeyboard(inputType: 'text', enableInteractiveSelection: false);
+
+      // The Safari strategy doesn't insert the input element into the DOM until
+      // it has received the geometry information.
+      final List<double> transform = Matrix4.identity().storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        10,
+        10,
+        transform,
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DomHTMLInputElement input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+
+      input.value = 'something';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      spy.messages.clear();
+
+      // Forward selection collapses at the end.
+      input.setSelectionRange(2, 5, 'forward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 5,
+          'selectionExtent': 5,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      // Backward selection collapses at the start.
+      input.setSelectionRange(2, 5, 'backward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 2,
+          'selectionExtent': 2,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      hideKeyboard();
+    });
+
     tearDown(() {
       clearForms();
     });
@@ -2963,12 +3031,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // Number of elements if number of fields sent to the constructor minus
       // one (for the focused text element).
@@ -3021,12 +3088,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['zzyyxx', 'aabbcc', 'jjkkll'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.formIdentifier, 'aabbcc*jjkkll*zzyyxx');
     });
@@ -3038,12 +3104,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       autofillForm.placeForm(testInputElement);
@@ -3065,12 +3130,11 @@ Future<void> testMain() async {
 
     test('Validate single element form', () {
       final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // The focused element is the only field. Form should be empty after
       // the initialization (focus element is appended later).
@@ -3105,12 +3169,11 @@ Future<void> testMain() async {
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('email', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.elements, hasLength(2));
 
@@ -3145,12 +3208,11 @@ Future<void> testMain() async {
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
-        final EngineAutofillForm autofillForm =
-            EngineAutofillForm.fromFrameworkMessage(
-              kImplicitViewId,
-              createAutofillInfo('email', 'field1'),
-              fields,
-            )!;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          createAutofillInfo('email', 'field1'),
+          fields,
+        )!;
         final List<DomHTMLInputElement> formChildNodes =
             autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement username = formChildNodes[0];
@@ -3174,12 +3236,11 @@ Future<void> testMain() async {
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('email', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
       final List<DomHTMLInputElement> formChildNodes =
           autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
       final DomHTMLInputElement username = formChildNodes[0];
@@ -3202,12 +3263,11 @@ Future<void> testMain() async {
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
-        final EngineAutofillForm autofillForm =
-            EngineAutofillForm.fromFrameworkMessage(
-              kImplicitViewId,
-              createAutofillInfo('email', 'field1'),
-              fields,
-            )!;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          createAutofillInfo('email', 'field1'),
+          fields,
+        )!;
 
         final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
         testInputElement.name = 'email';
@@ -3994,6 +4054,7 @@ Map<String, dynamic> createFlutterConfig(
   bool decimal = false,
   bool enableDeltaModel = false,
   bool isMultiline = false,
+  bool enableInteractiveSelection = true,
 }) {
   return <String, dynamic>{
     'inputType': <String, dynamic>{
@@ -4016,6 +4077,7 @@ Map<String, dynamic> createFlutterConfig(
     if (autofillEnabled && autofillHintsForFields != null)
       'fields': createFieldValues(autofillHintsForFields, autofillHintsForFields),
     'enableDeltaModel': enableDeltaModel,
+    'enableInteractiveSelection': enableInteractiveSelection,
   };
 }
 

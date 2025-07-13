@@ -16,7 +16,7 @@
 library;
 
 import 'dart:io';
-import 'dart:ui' show Image, Picture, Size;
+import 'dart:ui' show Image, Picture, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
 
@@ -232,3 +232,40 @@ bool _defaultPictureCapture(Picture picture) => true;
 /// Tests may use this to capture the picture and run assertions on it.
 ShaderWarmUpImageCallback debugCaptureShaderWarmUpImage = _defaultImageCapture;
 bool _defaultImageCapture(Image image) => true;
+
+/// Asserts that a given [TextDirection] is not null.
+///
+/// Used by painting library classes that require a [TextDirection] to resolve
+/// their properties, such as [BorderRadiusDirectional].
+///
+/// Does nothing if asserts are disabled. Always returns true.
+///
+/// See also:
+///
+///  * [debugCheckHasDirectionality], which is a similar widgets-library level function.
+bool debugCheckCanResolveTextDirection(TextDirection? direction, String target) {
+  assert(() {
+    if (direction == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No TextDirection found.'),
+        ErrorDescription(
+          'To resolve $target properties, it must be provided with a TextDirection.',
+        ),
+        ErrorHint(
+          'This error usually occurs when $target is used in a widget without '
+          'a Directionality ancestor.',
+        ),
+        ErrorHint(
+          'Typically, the Directionality widget is introduced by the MaterialApp '
+          'or WidgetsApp widget at the top of your application widget tree. It '
+          'determines the ambient reading direction and is used, for example, to '
+          'determine how to lay out text, how to interpret "start" and "end" '
+          'values, and to resolve EdgeInsetsDirectional, '
+          'AlignmentDirectional, and other *Directional objects.',
+        ),
+      ]);
+    }
+    return true;
+  }());
+  return true;
+}

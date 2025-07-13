@@ -514,11 +514,10 @@ abstract final class MatrixUtils {
     //  [0.0, 1.0, 0.0, 0.0],
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
-    Matrix4 result =
-        Matrix4.identity()
-          ..setEntry(3, 2, -perspective)
-          ..setEntry(2, 3, -radius)
-          ..setEntry(3, 3, perspective * radius + 1.0);
+    Matrix4 result = Matrix4.identity()
+      ..setEntry(3, 2, -perspective)
+      ..setEntry(2, 3, -radius)
+      ..setEntry(3, 3, perspective * radius + 1.0);
 
     // Model matrix by first translating the object from the origin of the world
     // by radius in the z axis and then rotating against the world.

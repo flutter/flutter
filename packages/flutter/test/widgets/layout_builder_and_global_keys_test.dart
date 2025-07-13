@@ -41,7 +41,9 @@ void main() {
     await tester.pumpWidget(
       LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0)));
+          return Wrapper(
+            child: StatefulWrapper(key: key, child: Container(height: 100.0)),
+          );
         },
       ),
     );
@@ -109,7 +111,9 @@ void main() {
             SliverLayoutBuilder(
               builder: (BuildContext context, SliverConstraints constraint) {
                 return SliverToBoxAdapter(
-                  child: Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0))),
+                  child: Wrapper(
+                    child: StatefulWrapper(key: key, child: Container(height: 100.0)),
+                  ),
                 );
               },
             ),

@@ -53,10 +53,9 @@ _ColorsAndStops _interpolateColorsAndStops(
   assert(bColors.length >= 2);
   assert(aStops.length == aColors.length);
   assert(bStops.length == bColors.length);
-  final SplayTreeSet<double> stops =
-      SplayTreeSet<double>()
-        ..addAll(aStops)
-        ..addAll(bStops);
+  final SplayTreeSet<double> stops = SplayTreeSet<double>()
+    ..addAll(aStops)
+    ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops
       .map<Color>(

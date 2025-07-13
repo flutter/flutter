@@ -11,7 +11,7 @@ import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 
-const String _sampleCmakeListsTxtUnmigrated = r'''
+const _sampleCmakeListsTxtUnmigrated = r'''
 # The Flutter tooling requires that developers have CMake 3.10 or later
 # installed. You should not increase this version, as doing so will cause
 # the plugin to fail to compile for some customers of the plugin.
@@ -31,7 +31,7 @@ set_target_properties(my_plugin PROPERTIES
 target_compile_definitions(my_plugin PUBLIC DART_SHARED_LIB)
 ''';
 
-const String _sampleCmakeListsTxtMigrated = r'''
+const _sampleCmakeListsTxtMigrated = r'''
 # The Flutter tooling requires that developers have CMake 3.10 or later
 # installed. You should not increase this version, as doing so will cause
 # the plugin to fail to compile for some customers of the plugin.
