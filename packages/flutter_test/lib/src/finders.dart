@@ -1417,7 +1417,7 @@ class _HitTestableWidgetFinder extends ChainedFinder {
 
   @override
   String describeMatch(Plurality plurality) {
-    return '${parent.describeMatch(plurality)} (considering only hit-testable ones)';
+    return '${parent.describeMatch(plurality)} (considering only hit-testable widgets with a RenderBox)';
   }
 
   @override
@@ -1427,8 +1427,11 @@ class _HitTestableWidgetFinder extends ChainedFinder {
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
       final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
-      final RenderBox box = candidate.renderObject! as RenderBox;
-      final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
+      final RenderObject? object = candidate.renderObject;
+      if (object is! RenderBox) {
+        continue;
+      }
+      final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
       final HitTestResult hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {

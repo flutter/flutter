@@ -726,6 +726,7 @@ Future<void> testMain() async {
       bool decimal = false,
       bool isMultiline = false,
       bool autofillEnabled = true,
+      bool enableInteractiveSelection = true,
     }) {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         ++clientId,
@@ -736,6 +737,7 @@ Future<void> testMain() async {
           decimal: decimal,
           isMultiline: isMultiline,
           autofillEnabled: autofillEnabled,
+          enableInteractiveSelection: enableInteractiveSelection,
         ),
       ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -2947,6 +2949,77 @@ Future<void> testMain() async {
       //                https://github.com/flutter/flutter/issues/145101
     }, skip: true);
 
+    test('Collapses selections if interactive selection disabled', () {
+      final int clientId = showKeyboard(inputType: 'text', enableInteractiveSelection: false);
+
+      // The Safari strategy doesn't insert the input element into the DOM until
+      // it has received the geometry information.
+      final List<double> transform = Matrix4.identity().storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        10,
+        10,
+        transform,
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DomHTMLInputElement input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+
+      input.value = 'something';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      spy.messages.clear();
+
+      // Forward selection collapses at the end.
+      input.setSelectionRange(2, 5, 'forward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 5,
+          'selectionExtent': 5,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      // Backward selection collapses at the start.
+      input.setSelectionRange(2, 5, 'backward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 2,
+          'selectionExtent': 2,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      hideKeyboard();
+    });
+
     tearDown(() {
       clearForms();
     });
@@ -3981,6 +4054,7 @@ Map<String, dynamic> createFlutterConfig(
   bool decimal = false,
   bool enableDeltaModel = false,
   bool isMultiline = false,
+  bool enableInteractiveSelection = true,
 }) {
   return <String, dynamic>{
     'inputType': <String, dynamic>{
@@ -4003,6 +4077,7 @@ Map<String, dynamic> createFlutterConfig(
     if (autofillEnabled && autofillHintsForFields != null)
       'fields': createFieldValues(autofillHintsForFields, autofillHintsForFields),
     'enableDeltaModel': enableDeltaModel,
+    'enableInteractiveSelection': enableInteractiveSelection,
   };
 }
 
