@@ -653,6 +653,7 @@ class IconButton extends StatelessWidget {
     Size? fixedSize,
     Size? maximumSize,
     double? iconSize,
+    double? splashRadius,
     BorderSide? side,
     OutlinedBorder? shape,
     EdgeInsetsGeometry? padding,
@@ -704,6 +705,7 @@ class IconButton extends StatelessWidget {
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
       alignment: alignment,
+      splashRadius: splashRadius,
       splashFactory: splashFactory,
     );
   }
@@ -733,6 +735,7 @@ class IconButton extends StatelessWidget {
         enabledMouseCursor: mouseCursor,
         disabledMouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
+        splashRadius: splashRadius,
       );
       if (style != null) {
         adjustedStyle = style!.merge(adjustedStyle);
@@ -777,8 +780,6 @@ class IconButton extends StatelessWidget {
     final EdgeInsetsGeometry effectivePadding = padding ?? const EdgeInsets.all(8.0);
     final AlignmentGeometry effectiveAlignment = alignment ?? Alignment.center;
     final bool effectiveEnableFeedback = enableFeedback ?? true;
-    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
-    final bool useMaterial3 = Theme.of(context).useMaterial3;
 
     Widget result = ConstrainedBox(
       constraints: adjustedConstraints,
@@ -813,8 +814,7 @@ class IconButton extends StatelessWidget {
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
       radius:
-          splashRadius ?? (!useMaterial3 ? iconButtonTheme.splashRadius : null) ??
-          math.max(
+          splashRadius ?? math.max(
             Material.defaultSplashRadius,
             (effectiveIconSize + math.min(effectivePadding.horizontal, effectivePadding.vertical)) *
                 0.7,

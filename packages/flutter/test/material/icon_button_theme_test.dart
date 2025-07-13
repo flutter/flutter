@@ -331,28 +331,4 @@ void main() {
     await tester.pumpAndSettle();
     expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
   });
-
-  testWidgets('IconButtonTheme IconButton.styleFrom splashRadius overrides default splash radius', (
-      WidgetTester tester,
-      ) async {
-    const double splashRadius = 42.0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: IconButtonTheme(
-              data: IconButtonThemeData(
-                style: IconButton.styleFrom(),
-                splashRadius: splashRadius
-              ),
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-              ),
-            ),
-          ),
-        ),
-      )
-    );
-  });
 }
