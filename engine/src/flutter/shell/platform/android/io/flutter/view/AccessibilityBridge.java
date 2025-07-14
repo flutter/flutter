@@ -1548,9 +1548,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           semanticsNodeUnderCursor.id, event);
     }
 
-    Log.e("flutter", "event.getX(): " + event.getX());
-    Log.e("flutter", "event.getY(): " + event.getY());
-
     if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER
         || event.getAction() == MotionEvent.ACTION_HOVER_MOVE) {
       handleTouchExploration(event.getX(), event.getY(), ignorePlatformViews);
@@ -1590,8 +1587,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (flutterSemanticsTree.isEmpty()) {
       return;
     }
-    // print x y
-    Log.e("flutter", "handleTouchExploration x: " + x + " y: " + y);
+
     SemanticsNode semanticsNodeUnderCursor =
         getRootSemanticsNode().hitTest(new float[] {x, y, 0, 1}, ignorePlatformViews);
     if (semanticsNodeUnderCursor != hoveredObject) {
