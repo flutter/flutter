@@ -1722,8 +1722,8 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corner of
-  /// this render object) in which to apply the matrix.
+  /// The origin of the coordinate system in which to apply the matrix,
+  /// described relative to the point given by [alignment].
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
