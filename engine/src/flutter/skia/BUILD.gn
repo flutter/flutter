@@ -17,6 +17,12 @@ if (is_fuchsia) {
   skia_use_icu = false
   skia_use_freetype = true
   skia_use_vulkan = true
+
+  # unit tests make use of loading FreeType files directly
+  skia_enable_fontmgr_custom_empty = true
+  skia_enable_fontmgr_custom_directory = false
+  skia_enable_fontmgr_custom_embedded = false
+  skia_use_dng_sdk = false
 }
 
 # Skia public API, generally provided by :skia.
