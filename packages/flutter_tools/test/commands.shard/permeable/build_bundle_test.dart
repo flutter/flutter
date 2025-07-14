@@ -308,7 +308,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -349,7 +348,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -390,7 +388,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -432,7 +429,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -474,7 +470,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -516,7 +511,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -565,7 +559,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
@@ -614,7 +607,6 @@ void main() {
           kIconTreeShakerFlag: 'false',
           kDeferredComponents: 'false',
           kDartObfuscation: 'false',
-          kNativeAssets: 'false',
         });
       }),
       FileSystem: fsFactory,
