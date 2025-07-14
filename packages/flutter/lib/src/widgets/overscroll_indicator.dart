@@ -824,6 +824,12 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               overscroll = -overscroll;
             }
 
+            // Adjust overscroll for reverse scroll directions.
+            if (widget.axisDirection == AxisDirection.up ||
+                widget.axisDirection == AxisDirection.left) {
+              overscroll = -overscroll;
+            }
+
             transform = StretchOverscrollEffect(
               stretchStrength: overscroll,
               axis: widget.axis,
