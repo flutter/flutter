@@ -915,7 +915,7 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$runtimeType'));
     switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
