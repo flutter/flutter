@@ -14,6 +14,11 @@ import 'package:web_engine_tester/golden_tester.dart';
 import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 
+EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView!;
+
+DomElement get platformViewsHost => implicitView.dom.platformViewsHost;
+DomElement get sceneHost => implicitView.dom.sceneHost;
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -30,6 +35,7 @@ Future<void> testMain() async {
       element.style.backgroundColor = 'blue';
       element.style.width = '100%';
       element.style.height = '100%';
+      element.id = 'view-$viewId';
       return element;
     });
   });
@@ -309,6 +315,36 @@ Future<void> testMain() async {
     await renderScene(sb.build());
 
     await matchGoldenFile('platformview_clippath.png', region: region);
+  });
+
+  test('embeds interactive platform views', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(0, 0);
+    sb.addPlatformView(1, width: 10, height: 10);
+    await renderScene(sb.build());
+
+    // The platform view is now split in two parts. The contents live
+    // as a child of the glassPane, and the slot lives in the glassPane
+    // shadow root. The slot is the one that has pointer events auto.
+    print(platformViewsHost.outerHTML);
+    final DomElement contents = platformViewsHost.querySelector('#view-1')!;
+    final DomElement slot = sceneHost.querySelector('slot')!;
+    final DomElement contentsHost = contents.parent!;
+    final DomElement slotHost = slot.parent!;
+
+    expect(contents, isNotNull, reason: 'The view from the factory is injected in the DOM.');
+
+    expect(contentsHost.tagName, equalsIgnoringCase('flt-platform-view'));
+    expect(slotHost.tagName, equalsIgnoringCase('flt-platform-view-slot'));
+
+    expect(slotHost.style.pointerEvents, 'auto', reason: 'The slot reenables pointer events.');
+    expect(
+      contentsHost.getAttribute('slot'),
+      slot.getAttribute('name'),
+      reason: 'The contents and slot are correctly related.',
+    );
   });
 }
 
