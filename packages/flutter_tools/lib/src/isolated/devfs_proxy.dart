@@ -8,13 +8,6 @@ import 'package:yaml/yaml.dart';
 import '/src/base/logger.dart';
 import '../globals.dart' as globals;
 
-String _normalizePath(String path) {
-  if (!path.startsWith('/')) {
-    path = '/$path';
-  }
-  return path;
-}
-
 abstract class ProxyRule {
   ProxyRule({required this.target});
 
@@ -23,26 +16,21 @@ abstract class ProxyRule {
   bool matches(String path);
 
   static ProxyRule? fromYaml(YamlMap yaml, {Logger? logger}) {
-    final target = yaml['target'] as String?;
-    final source = yaml['source'] as String?;
-    final regex = yaml['regex'] as String?;
-    final replace = yaml['replace'] as String?;
+    final String? target = yaml['target'] as String?;
+    final String? source = yaml['source'] as String?;
+    final String? regex = yaml['regex'] as String?;
+    final String? replace = yaml['replace'] as String?;
     final Logger effectiveLogger = logger ?? globals.logger;
 
     RegExp? proxyPattern;
+    if (target == null) {
+      final String? path = source ?? regex;
+      effectiveLogger.printError("Invalid 'target' for path: $path. 'target' cannot be null");
+      return null;
+    }
     if (source != null && source.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError(
-          "Invalid 'target' for 'source': $source. 'target' cannot be null",
-        );
-        return null;
-      }
       return SourceProxyRule(source: source, target: target, replacement: replace?.trim());
     } else if (regex != null && regex.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError("Invalid 'target' for 'regex': $regex. 'target' cannot be null");
-        return null;
-      }
       try {
         proxyPattern = RegExp(regex.trim());
       } on FormatException catch (e) {
@@ -77,8 +65,7 @@ class RegexProxyRule extends ProxyRule {
     }
     return path.replaceAllMapped(pattern, (Match match) {
       String result = replacement!;
-
-      for (var i = 0; i <= match.groupCount; i++) {
+      for (int i = 0; i <= match.groupCount; i++) {
         result = result.replaceAll('\$$i', match.group(i) ?? '');
       }
       return result;
@@ -125,11 +112,18 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
   );
 }
 
+String _normalizePath(String path) {
+  if (!path.startsWith('/')) {
+    path = '/$path';
+  }
+  return path;
+}
+
 shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
   return (shelf.Handler innerHandler) {
     return (shelf.Request request) async {
       final String requestPath = _normalizePath(request.url.path);
-      for (final rule in effectiveProxy) {
+      for (final ProxyRule rule in effectiveProxy) {
         if (rule.matches(requestPath)) {
           final Uri targetBaseUri = Uri.parse(rule.target);
           final String rewrittenRequest = rule.replace(requestPath);
@@ -139,7 +133,7 @@ shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
             final shelf.Response proxyResponse = await proxyHandler(targetBaseUri)(
               proxyBackendRequest,
             );
-            final internalRequest = proxyResponse.headers['sec-fetch-mode'] == 'no-cors';
+            final bool internalRequest = proxyResponse.headers['sec-fetch-mode'] == 'no-cors';
             if (!internalRequest) {
               globals.logger.printStatus(
                 '[PROXY] Matched "$requestPath". Requesting "$finalTargetUrl"',

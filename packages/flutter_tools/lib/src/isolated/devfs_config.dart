@@ -13,7 +13,7 @@ import '../base/common.dart';
 import '../globals.dart' as globals;
 import 'devfs_proxy.dart';
 
-const devConfigFilePath = 'web_dev_config.yaml';
+const String devConfigFilePath = 'web_dev_config.yaml';
 
 @immutable
 class DevConfig {
@@ -26,12 +26,12 @@ class DevConfig {
   });
 
   factory DevConfig.fromYaml(YamlMap yaml) {
-    final headers = <String, String>{};
+    final Map<String, String> headers = <String, String>{};
     if (yaml['headers'] != null) {
       if (yaml['headers'] is! YamlList) {
         throwToolExit('Headers must be a List of maps. Found ${yaml['headers'].runtimeType}');
       }
-      final headersList = yaml['headers'] as YamlList;
+      final YamlList headersList = yaml['headers'] as YamlList;
       for (final dynamic item in headersList) {
         if (item is! YamlMap) {
           throwToolExit(
@@ -63,7 +63,7 @@ class DevConfig {
       throwToolExit('Https must be a Map. Found ${yaml['https'].runtimeType}');
     }
 
-    final proxyRules = <ProxyRule>[];
+    final List<ProxyRule> proxyRules = <ProxyRule>[];
     if (yaml['proxy'] != null) {
       if (yaml['proxy'] is! YamlList) {
         throwToolExit('Proxy must be a list. Found ${yaml['proxy'].runtimeType}');
@@ -159,7 +159,7 @@ Future<DevConfig> loadDevConfig({
   List<String>? browserFlags,
 }) async {
   final io.File devConfigFile = globals.fs.file(devConfigFilePath);
-  var fileConfig = const DevConfig();
+  DevConfig fileConfig = const DevConfig();
 
   if (!devConfigFile.existsSync()) {
     globals.printStatus('No $devConfigFilePath found');
@@ -185,7 +185,7 @@ Future<DevConfig> loadDevConfig({
         );
       }
 
-      final serverYaml = contents['server'] as YamlMap;
+      final YamlMap serverYaml = contents['server'] as YamlMap;
       fileConfig = DevConfig.fromYaml(serverYaml);
       globals.printStatus('\nLoaded configuration from $devConfigFilePath');
       globals.printTrace(fileConfig.toString());
@@ -223,7 +223,7 @@ Future<DevConfig> loadDevConfig({
   } else {
     finalHttpsConfig = null;
   }
-  final finalHeaders = <String, String>{};
+  final Map<String, String> finalHeaders = <String, String>{};
   finalHeaders.addAll(fileConfig.headers);
   if (headers != null && headers.isNotEmpty) {
     for (final MapEntry<String, String> entry in headers.entries) {

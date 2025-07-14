@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:unified_analytics/unified_analytics.dart';
-
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
@@ -29,9 +27,6 @@ class BuildTargetsImpl extends BuildTargets {
   Target get dartPluginRegistrantTarget => const DartPluginRegistrantTarget();
 
   @override
-  Target webServiceWorker(
-    FileSystem fileSystem,
-    List<WebCompilerConfig> compileConfigs,
-    Analytics analytics,
-  ) => WebServiceWorker(fileSystem, compileConfigs, analytics);
+  Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs) =>
+      WebServiceWorker(fileSystem, compileConfigs);
 }

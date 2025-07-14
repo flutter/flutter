@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "flutter_tools",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "widget_preview_scaffold",
+            "cwd": "test/widget_preview_scaffold.shard/widget_preview_scaffold",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "widget_preview_scaffold (profile mode)",
+            "cwd": "test/widget_preview_scaffold.shard/widget_preview_scaffold",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "widget_preview_scaffold (release mode)",
+            "cwd": "test/widget_preview_scaffold.shard/widget_preview_scaffold",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "debug_run_chrome",
+            "type": "dart",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/flutter_tools.dart",
+            "args": [
+                "devices"
+            ]
+        }
+    ]
+}
