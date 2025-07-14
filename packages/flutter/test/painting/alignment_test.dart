@@ -366,6 +366,22 @@ void main() {
       ),
     );
   });
+
+  test('AlignmentDirectional.resolve with null TextDirection asserts', () {
+    const Alignment a = Alignment(5.0, 6.0);
+    const AlignmentDirectional b = AlignmentDirectional(15.0, 16.0);
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
 }
 
 double nonconst(double value) => value;
