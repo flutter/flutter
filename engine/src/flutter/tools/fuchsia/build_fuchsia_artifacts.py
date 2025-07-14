@@ -241,7 +241,7 @@ def RunCIPDCommandWithRetries(command):
         raise
 
 
-def ProcessCIPDPackage(upload, engine_version):
+def ProcessCIPDPackage(upload, engine_version, content_hash):
   if not upload or not IsLinux():
     RunCIPDCommandWithRetries([
         'cipd', 'pkg-build', '-pkg-def', 'fuchsia.cipd.yaml', '-out',
@@ -261,16 +261,19 @@ def ProcessCIPDPackage(upload, engine_version):
     print('CIPD package flutter/fuchsia tag %s already exists!' % tag)
     return
 
-  RunCIPDCommandWithRetries([
-      'cipd',
-      'create',
-      '-pkg-def',
-      'fuchsia.cipd.yaml',
-      '-ref',
-      'latest',
-      '-tag',
-      tag,
-  ])
+  print('codefu: tag:%s' % tag)
+
+  if false:
+    RunCIPDCommandWithRetries([
+        'cipd',
+        'create',
+        '-pkg-def',
+        'fuchsia.cipd.yaml',
+        '-ref',
+        'latest',
+        '-tag',
+        tag,
+    ])
 
 
 def main():
@@ -428,7 +431,7 @@ def main():
 
   # Create and optionally upload CIPD package
   if args.cipd_dry_run or args.upload:
-    ProcessCIPDPackage(should_upload, engine_version)
+    ProcessCIPDPackage(should_upload, engine_version, content_hash)
 
   return 0
 
