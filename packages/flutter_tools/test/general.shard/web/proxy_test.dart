@@ -444,31 +444,5 @@ void main() {
       expect(response.statusCode, 200);
       expect(await response.readAsString(), 'Inner Handler Response');
     });
-
-    test('should call inner handler if proxying throws an exception', () async {
-      final rules = <ProxyRule>[
-        RegexProxyRule(pattern: RegExp(r'^/api/error'), target: 'http://invalid-url.com'),
-      ];
-
-      final Middleware middleware = proxyMiddleware(rules);
-
-      var innerHandlerCalled = false;
-      FutureOr<Response> innerHandler(Request request) {
-        innerHandlerCalled = true;
-        return Response.ok('Inner Handler Response on Error');
-      }
-
-      final request = Request('GET', Uri.parse('http://localhost:8080/api/error/test'));
-      final Response response = await middleware(innerHandler)(request);
-
-      expect(innerHandlerCalled, isTrue);
-      expect(response.statusCode, 200);
-      expect(await response.readAsString(), 'Inner Handler Response on Error');
-      expect(
-        globals.logger.toString(),
-        contains('Proxy error for http://invalid-url.com/api/error/test: '),
-      );
-      expect(globals.logger.toString(), contains('Allowing fall-through.'));
-    }, skip: true);
   });
 }

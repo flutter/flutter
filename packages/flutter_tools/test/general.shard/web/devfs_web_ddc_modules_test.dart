@@ -968,7 +968,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    const DevConfig devConfig = DevConfig(host: 'any');
+    const devConfig = DevConfig();
     final webDevFS = WebDevFS(
       packagesFilePath: '.dart_tool/package_config.json',
       urlTunneller: null,
@@ -1010,7 +1010,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    const DevConfig devConfig = DevConfig();
+    const devConfig = DevConfig();
     final webDevFS = WebDevFS(
       packagesFilePath: '.dart_tool/package_config.json',
       urlTunneller: null,
@@ -1105,7 +1105,7 @@ void main() {
   test(
     'allows frame embedding',
     () => testbed.run(() async {
-      const DevConfig devConfig = DevConfig();
+      const devConfig = DevConfig();
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
         null,
