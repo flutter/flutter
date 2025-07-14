@@ -576,12 +576,13 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/170521.
       tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
       addTearDown(() {
         tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
         tester.view.reset();
+        controller.dispose();
       });
 
-      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
       bool readOnly = true;
       late StateSetter setState;
 
