@@ -258,12 +258,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -282,12 +288,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
@@ -409,12 +421,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -441,12 +459,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
@@ -513,9 +537,8 @@ void main() {
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 300)),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) =>
-                      SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
+              builder: (BuildContext context, SliverConstraints constraint) =>
+                  SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
             ),
             SliverToBoxAdapter(child: SizedBox(key: childKey2, height: 100)),
           ],
@@ -566,13 +589,9 @@ void main() {
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[0]++)),
               ),
               SliverLayoutBuilder(
-                builder:
-                    (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: GestureDetector(onTap: () => hitCounts[1]++),
-                      ),
-                    ),
+                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                  child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[1]++)),
+                ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -647,13 +666,9 @@ void main() {
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[0]++)),
             ),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 100,
-                      child: GestureDetector(onTap: () => hitCounts[1]++),
-                    ),
-                  ),
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[1]++)),
+              ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -840,10 +855,9 @@ void main() {
     (WidgetTester tester) async {
       final OverlayEntry overlayEntry1 = OverlayEntry(
         maintainState: true,
-        builder:
-            (BuildContext context) => LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
-            ),
+        builder: (BuildContext context) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+        ),
       );
       // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
       final OverlayEntry overlayEntry2 = OverlayEntry(
@@ -852,16 +866,61 @@ void main() {
         builder: (BuildContext context) => Container(),
       );
       addTearDown(
-        () =>
-            overlayEntry1
-              ..remove()
-              ..dispose(),
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
       );
       addTearDown(
-        () =>
-            overlayEntry2
-              ..remove()
-              ..dispose(),
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
+      );
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+          child: UnconstrainedBox(
+            child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1, overlayEntry2]),
+          ),
+        ),
+      );
+      WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+      await tester.pump();
+      WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'LayoutBuilder in a subtree that skips layout does not rebuild during the initial treewalk',
+    (WidgetTester tester) async {
+      bool rebuilt = false;
+      final LayoutBuilder layoutBuilder = LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          rebuilt = true;
+          return const Placeholder();
+        },
+      );
+      final OverlayEntry overlayEntry1 = OverlayEntry(
+        maintainState: true,
+        builder: (BuildContext context) => layoutBuilder,
+      );
+      // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+      final OverlayEntry overlayEntry2 = OverlayEntry(
+        opaque: true,
+        canSizeOverlay: true,
+        builder: (BuildContext context) => Container(),
+      );
+      addTearDown(
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
+      );
+      addTearDown(
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         Directionality(
@@ -873,13 +932,120 @@ void main() {
         ),
       );
 
-      WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+      final Element layoutBuilderElement = tester.element(
+        find.byWidget(layoutBuilder, skipOffstage: false),
+      );
+      layoutBuilderElement.markNeedsBuild();
       await tester.pump();
-      WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
-      await tester.pump();
+      expect(rebuilt, isFalse);
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (
+    WidgetTester tester,
+  ) async {
+    bool rebuilt = false;
+    final LayoutBuilder layoutBuilder = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        rebuilt = true;
+        return const Placeholder();
+      },
+    );
+    final OverlayEntry overlayEntry1 = OverlayEntry(
+      maintainState: true,
+      canSizeOverlay: true,
+      builder: (BuildContext context) => layoutBuilder,
+    );
+    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+    final OverlayEntry overlayEntry2 = OverlayEntry(
+      opaque: true,
+      canSizeOverlay: true,
+      builder: (BuildContext context) => const Placeholder(),
+    );
+    addTearDown(
+      () => overlayEntry1
+        ..remove()
+        ..dispose(),
+    );
+    addTearDown(
+      () => overlayEntry2
+        ..remove()
+        ..dispose(),
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1])),
+      ),
+    );
+    tester.state<OverlayState>(find.byType(Overlay)).insert(overlayEntry2);
+    await tester.pump();
+
+    rebuilt = false;
+    final Element layoutBuilderElement = tester.element(
+      find.byWidget(layoutBuilder, skipOffstage: false),
+    );
+    layoutBuilderElement.markNeedsBuild();
+    expect(rebuilt, isFalse);
+    await tester.pump();
+    expect(rebuilt, isTrue);
+  });
+
+  testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(focusNode.dispose);
+    addTearDown(controller.dispose);
+    final Widget layoutBuilderWithParent = SizedBox(
+      key: GlobalKey(),
+      child: LayoutBuilder(
+        builder: (BuildContext _, BoxConstraints _) {
+          // The text field keeps the widget alive in the SliverList.
+          return EditableText(
+            focusNode: focusNode,
+            backgroundCursorColor: const Color(0xFFFFFFFF),
+            cursorColor: const Color(0xFFFFFFFF),
+            style: const TextStyle(),
+            controller: controller,
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 60), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 6000), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+  });
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
@@ -921,7 +1087,9 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
 typedef _OnChildWasPaintedCallback = void Function(Offset extraOffset);
 
 class _RenderSmartLayoutBuilder extends RenderProxyBox
-    with RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
+    with
+        RenderObjectWithLayoutCallbackMixin,
+        RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
   _RenderSmartLayoutBuilder({required double offsetPercentage, required this.onChildWasPainted})
     : _offsetPercentage = offsetPercentage;
 
@@ -946,7 +1114,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
 
   @override
   void performLayout() {
-    rebuildIfNecessary();
+    runLayoutCallback();
     child?.layout(constraints);
   }
 
@@ -961,10 +1129,6 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
       onChildWasPainted(extraOffset);
     }
   }
-
-  @protected
-  @override
-  BoxConstraints get layoutInfo => constraints;
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {

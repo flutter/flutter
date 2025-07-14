@@ -16,6 +16,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
 
 namespace impeller {
 
@@ -227,6 +228,10 @@ TextureGLES::~TextureGLES() {
   if (!cached_fbo_.IsDead()) {
     reactor_->CollectHandle(cached_fbo_);
   }
+}
+
+void TextureGLES::Leak() {
+  handle_ = HandleGLES::DeadHandle();
 }
 
 // |Texture|

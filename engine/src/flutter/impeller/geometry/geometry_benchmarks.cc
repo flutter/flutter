@@ -4,9 +4,9 @@
 
 #include "flutter/benchmarking/benchmarking.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/tessellator/tessellator_libtess.h"
 
 namespace impeller {
@@ -14,80 +14,49 @@ namespace impeller {
 class ImpellerBenchmarkAccessor {
  public:
   static std::vector<Point> GenerateSolidStrokeVertices(
-      const Path::Polyline& polyline,
-      Scalar stroke_width,
-      Scalar miter_limit,
-      Join stroke_join,
-      Cap stroke_cap,
+      Tessellator& tessellator,
+      const PathSource& path,
+      const StrokeParameters& stroke,
       Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVertices(
-        polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+    return StrokePathGeometry::GenerateSolidStrokeVertices(  //
+        tessellator, path, stroke, scale);
   }
 };
 
 namespace {
 /// A path with many connected cubic components, including
 /// overlaps/self-intersections/multi-contour.
-Path CreateCubic(bool closed);
+flutter::DlPath CreateCubic(bool closed);
 /// Similar to the path above, but with all cubics replaced by quadratics.
-Path CreateQuadratic(bool closed);
+flutter::DlPath CreateQuadratic(bool closed);
 /// Create a rounded rect.
-Path CreateRRect();
+flutter::DlPath CreateRRect();
 /// Create a rounded superellipse.
-Path CreateRSuperellipse();
+flutter::DlPath CreateRSuperellipse();
 }  // namespace
 
 static TessellatorLibtess tess;
 
 template <class... Args>
-static void BM_Polyline(benchmark::State& state, Args&&... args) {
+static void BM_StrokePath(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple);
+  auto path = std::get<flutter::DlPath>(args_tuple);
 
-  size_t point_count = 0u;
-  size_t single_point_count = 0u;
-  auto points = std::make_unique<std::vector<Point>>();
-  points->reserve(2048);
-  while (state.KeepRunning()) {
-    auto polyline = path.CreatePolyline(
-        // Clang-tidy doesn't know that the points get moved back before
-        // getting moved again in this loop.
-        // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
-        1.0f, std::move(points),
-        [&points](Path::Polyline::PointBufferPtr reclaimed) {
-          points = std::move(reclaimed);
-        });
-    single_point_count = polyline.points->size();
-    point_count += single_point_count;
-  }
-  state.counters["SinglePointCount"] = single_point_count;
-  state.counters["TotalPointCount"] = point_count;
-}
+  Tessellator tessellator;
+  StrokeParameters stroke{
+      .width = 5.0f,
+      .cap = std::get<Cap>(args_tuple),
+      .join = std::get<Join>(args_tuple),
+      .miter_limit = 10.0f,
+  };
 
-template <class... Args>
-static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
-  auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple);
-  auto cap = std::get<Cap>(args_tuple);
-  auto join = std::get<Join>(args_tuple);
-
-  const Scalar stroke_width = 5.0f;
-  const Scalar miter_limit = 10.0f;
   const Scalar scale = 1.0f;
-
-  auto points = std::make_unique<std::vector<Point>>();
-  points->reserve(2048);
-  auto polyline =
-      path.CreatePolyline(1.0f, std::move(points),
-                          [&points](Path::Polyline::PointBufferPtr reclaimed) {
-                            points = std::move(reclaimed);
-                          });
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
     auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-        polyline, stroke_width, miter_limit, join, cap, scale);
+        tessellator, path, stroke, scale);
     single_point_count = vertices.size();
     point_count += single_point_count;
   }
@@ -98,7 +67,7 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
 template <class... Args>
 static void BM_Convex(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple);
+  auto path = flutter::DlPath(std::get<flutter::DlPath>(args_tuple));
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
@@ -116,57 +85,53 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed)         \
-  BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join, \
+#define MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, cap, join, closed) \
+  BENCHMARK_CAPTURE(BM_StrokePath, stroke_##path##_##cap##_##join,  \
                     Create##path(closed), Cap::k##cap, Join::k##join)
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(path, closed) \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, closed);      \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, closed)
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);   \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Miter, closed);   \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Round, closed);   \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Square, Bevel, closed); \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Round, Bevel, closed)
 
-BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true));
-BENCHMARK_CAPTURE(BM_Polyline, unclosed_cubic_polyline, CreateCubic(false));
 MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(Cubic, false);
 
-BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true));
-BENCHMARK_CAPTURE(BM_Polyline, unclosed_quad_polyline, CreateQuadratic(false));
 MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(Quadratic, false);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
 // A round rect has no ends so we don't need to try it with all cap values
 // but it does have joins and even though they should all be almost
 // colinear, we run the benchmark against all 3 join values.
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, );
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Miter, );
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Round, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RRect, Butt, Bevel, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RRect, Butt, Miter, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RRect, Butt, Round, );
 
 // Same as RRect
 BENCHMARK_CAPTURE(BM_Convex, rse_convex, CreateRSuperellipse(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RSuperellipse, Butt, Bevel, );
-MAKE_STROKE_BENCHMARK_CAPTURE(RSuperellipse, Butt, Miter, );
-MAKE_STROKE_BENCHMARK_CAPTURE(RSuperellipse, Butt, Round, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RSuperellipse, Butt, Bevel, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RSuperellipse, Butt, Miter, );
+MAKE_STROKE_PATH_BENCHMARK_CAPTURE(RSuperellipse, Butt, Round, );
 
 namespace {
 
-Path CreateRRect() {
-  return PathBuilder{}
+flutter::DlPath CreateRRect() {
+  return flutter::DlPathBuilder{}
       .AddRoundRect(
           RoundRect::MakeRectXY(Rect::MakeLTRB(0, 0, 400, 400), 16, 16))
       .TakePath();
 }
 
-Path CreateRSuperellipse() {
-  return PathBuilder{}
+flutter::DlPath CreateRSuperellipse() {
+  return flutter::DlPathBuilder{}
       .AddRoundSuperellipse(
           RoundSuperellipse::MakeRectXY(Rect::MakeLTRB(0, 0, 400, 400), 16, 16))
       .TakePath();
 }
 
-Path CreateCubic(bool closed) {
-  auto builder = PathBuilder{};
+flutter::DlPath CreateCubic(bool closed) {
+  auto builder = flutter::DlPathBuilder{};
   builder  //
       .MoveTo({359.934, 96.6335})
       .CubicCurveTo({358.189, 96.7055}, {356.436, 96.7908}, {354.673, 96.8895})
@@ -315,8 +280,8 @@ Path CreateCubic(bool closed) {
   return builder.TakePath();
 }
 
-Path CreateQuadratic(bool closed) {
-  auto builder = PathBuilder{};
+flutter::DlPath CreateQuadratic(bool closed) {
+  auto builder = flutter::DlPathBuilder{};
   builder  //
       .MoveTo({359.934, 96.6335})
       .QuadraticCurveTo({358.189, 96.7055}, {354.673, 96.8895})

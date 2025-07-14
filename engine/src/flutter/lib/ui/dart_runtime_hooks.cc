@@ -83,7 +83,9 @@ static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {
   PropagateIfError(result);
 }
 
-static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
+static void InitDartAsync(Dart_Handle builtin_library,
+                          bool is_ui_isolate,
+                          bool enable_microtask_profiling) {
   Dart_Handle schedule_microtask;
   if (is_ui_isolate) {
     schedule_microtask =
@@ -99,6 +101,29 @@ static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
   Dart_Handle result = Dart_Invoke(async_library, set_schedule_microtask, 1,
                                    &schedule_microtask);
   PropagateIfError(result);
+
+#if !FLUTTER_RELEASE
+  if (enable_microtask_profiling) {
+    Dart_Handle microtask_mirror_queue_type_name =
+        Dart_NewStringFromCString("_MicrotaskMirrorQueue");
+    PropagateIfError(microtask_mirror_queue_type_name);
+
+    Dart_Handle microtask_mirror_queue_type =
+        Dart_GetNonNullableType(async_library, microtask_mirror_queue_type_name,
+                                /*number_of_type_arguments=*/0,
+                                /*type_arguments=*/nullptr);
+    PropagateIfError(microtask_mirror_queue_type);
+
+    Dart_Handle should_profile_microtasks_field_name =
+        Dart_NewStringFromCString("_shouldProfileMicrotasks");
+    PropagateIfError(should_profile_microtasks_field_name);
+
+    Dart_Handle set_field_result =
+        Dart_SetField(microtask_mirror_queue_type,
+                      should_profile_microtasks_field_name, Dart_True());
+    PropagateIfError(set_field_result);
+  }
+#endif  // !FLUTTER_RELEASE
 }
 
 static void InitDartIO(Dart_Handle builtin_library,
@@ -132,11 +157,12 @@ static void InitDartIO(Dart_Handle builtin_library,
 }
 
 void DartRuntimeHooks::Install(bool is_ui_isolate,
+                               bool enable_microtask_profiling,
                                const std::string& script_uri) {
   Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   InitDartInternal(builtin, is_ui_isolate);
   InitDartCore(builtin, script_uri);
-  InitDartAsync(builtin, is_ui_isolate);
+  InitDartAsync(builtin, is_ui_isolate, enable_microtask_profiling);
   InitDartIO(builtin, script_uri);
 }
 

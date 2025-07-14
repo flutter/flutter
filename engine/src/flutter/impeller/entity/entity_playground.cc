@@ -53,11 +53,6 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     return false;
   }
   SinglePassCallback pass_callback = [&](RenderPass& pass) -> bool {
-    static bool wireframe = false;
-    if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
-      wireframe = !wireframe;
-      content_context.SetWireframe(wireframe);
-    }
     content_context.GetRenderTargetCache()->Start();
     bool result = callback(content_context, pass);
     content_context.GetRenderTargetCache()->End();

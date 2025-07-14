@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.embedding.engine.systemchannels;
 
 import static io.flutter.Build.API_LEVELS;
@@ -19,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
@@ -478,6 +483,16 @@ public class TextInputChannel {
         }
       }
 
+      // Build an array of hint locales from the data in the JSON list.
+      Locale[] hintLocales = null;
+      if (!json.isNull("hintLocales")) {
+        JSONArray hintLocalesJson = json.getJSONArray("hintLocales");
+        hintLocales = new Locale[hintLocalesJson.length()];
+        for (int i = 0; i < hintLocalesJson.length(); i++) {
+          hintLocales[i] = Locale.forLanguageTag(hintLocalesJson.optString(i));
+        }
+      }
+
       return new Configuration(
           json.optBoolean("obscureText"),
           json.optBoolean("autocorrect", true),
@@ -490,7 +505,8 @@ public class TextInputChannel {
           json.isNull("actionLabel") ? null : json.getString("actionLabel"),
           json.isNull("autofill") ? null : Autofill.fromJson(json.getJSONObject("autofill")),
           contentList.toArray(new String[contentList.size()]),
-          fields);
+          fields,
+          hintLocales);
     }
 
     @NonNull
@@ -649,6 +665,7 @@ public class TextInputChannel {
     @Nullable public final Autofill autofill;
     @Nullable public final String[] contentCommitMimeTypes;
     @Nullable public final Configuration[] fields;
+    @Nullable public final Locale[] hintLocales;
 
     public Configuration(
         boolean obscureText,
@@ -662,7 +679,8 @@ public class TextInputChannel {
         @Nullable String actionLabel,
         @Nullable Autofill autofill,
         @Nullable String[] contentCommitMimeTypes,
-        @Nullable Configuration[] fields) {
+        @Nullable Configuration[] fields,
+        @Nullable Locale[] hintLocales) {
       this.obscureText = obscureText;
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;
@@ -675,6 +693,7 @@ public class TextInputChannel {
       this.autofill = autofill;
       this.contentCommitMimeTypes = contentCommitMimeTypes;
       this.fields = fields;
+      this.hintLocales = hintLocales;
     }
   }
 

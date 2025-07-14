@@ -78,7 +78,7 @@ String indexHtmlFlutterJsLoad = _generateFlutterJsIndexHtml('''
 ''');
 
 /// index_without_flutterjs.html
-String indexHtmlNoFlutterJs = '''
+var indexHtmlNoFlutterJs = '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -86,7 +86,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
@@ -168,7 +167,8 @@ found in the LICENSE file. -->
 ''';
 
 // Generates the scaffolding of an index.html file, with a configurable `initScript`.
-String _generateFlutterJsIndexHtml(String initScript) => '''
+String _generateFlutterJsIndexHtml(String initScript) =>
+    '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -176,7 +176,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Integration test. App load with flutter.js and onEntrypointLoaded API</title>
   <!-- iOS meta tags & icons -->
@@ -200,7 +199,7 @@ $initScript
 ''';
 
 /// index.html using flutter bootstrap script
-const String indexHtmlWithFlutterBootstrapScriptTag = '''
+const indexHtmlWithFlutterBootstrapScriptTag = '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -208,7 +207,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
@@ -224,7 +222,7 @@ found in the LICENSE file. -->
 ''';
 
 /// index.html using flutter bootstrap script
-const String indexHtmlWithInlinedFlutterBootstrapScript = '''
+const indexHtmlWithInlinedFlutterBootstrapScript = '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -232,7 +230,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->

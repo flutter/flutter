@@ -411,6 +411,10 @@ class DartIsolate : public UIDartState {
   static Dart_Handle LoadLibraryFromKernel(
       const std::shared_ptr<const fml::Mapping>& mapping);
 
+  // Calls a Dart API that sets the isolate's owner thread to the current
+  // thread.
+  void SetOwnerToCurrentThread();
+
  private:
   friend class IsolateConfiguration;
   class AutoFireClosure {

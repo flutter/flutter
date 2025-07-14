@@ -8,6 +8,8 @@
 /// @docImport 'list_tile.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -260,13 +262,13 @@ abstract class SearchDelegate<T> {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
-      appBarTheme: AppBarTheme(
-        systemOverlayStyle:
-            colorScheme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-        backgroundColor:
-            colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+      appBarTheme: AppBarThemeData(
+        systemOverlayStyle: colorScheme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        backgroundColor: colorScheme.brightness == Brightness.dark
+            ? Colors.grey[900]
+            : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         titleTextStyle: theme.textTheme.titleLarge,
         toolbarTextStyle: theme.textTheme.bodyMedium,
@@ -344,6 +346,15 @@ abstract class SearchDelegate<T> {
       ..pop(result);
   }
 
+  /// Closes the search page and returns to the underlying route whitout result.
+  void _pop(BuildContext context) {
+    _currentBody = null;
+    _focusNode?.unfocus();
+    Navigator.of(context)
+      ..popUntil((Route<dynamic> route) => route == _route)
+      ..pop();
+  }
+
   /// The hint text that is shown in the search field when it is empty.
   ///
   /// If this value is set to null, the value of
@@ -370,7 +381,9 @@ abstract class SearchDelegate<T> {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
-  /// {@macro flutter.widgets.editableText.autocorrect}
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
   final bool autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
@@ -504,7 +517,16 @@ class _SearchPage<T> extends StatefulWidget {
 class _SearchPageState<T> extends State<_SearchPage<T>> {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
-  FocusNode focusNode = FocusNode();
+  late final FocusNode focusNode = FocusNode(
+    onKeyEvent: (FocusNode node, KeyEvent event) {
+      // When the user presses the escape key, close the search page.
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+        widget.delegate._pop(context);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    },
+  );
 
   @override
   void initState() {
@@ -613,16 +635,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             leadingWidth: widget.delegate.leadingWidth,
             automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
-            title: TextField(
-              controller: widget.delegate._queryTextController,
-              focusNode: focusNode,
-              style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
-              textInputAction: widget.delegate.textInputAction,
-              autocorrect: widget.delegate.autocorrect,
-              enableSuggestions: widget.delegate.enableSuggestions,
-              keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) => widget.delegate.showResults(context),
-              decoration: InputDecoration(hintText: searchFieldLabel),
+            title: Semantics(
+              inputType: SemanticsInputType.search,
+              child: TextField(
+                controller: widget.delegate._queryTextController,
+                focusNode: focusNode,
+                style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
+                textInputAction: widget.delegate.textInputAction,
+                autocorrect: widget.delegate.autocorrect,
+                enableSuggestions: widget.delegate.enableSuggestions,
+                keyboardType: widget.delegate.keyboardType,
+                onSubmitted: (String _) => widget.delegate.showResults(context),
+                decoration: InputDecoration(hintText: searchFieldLabel),
+              ),
             ),
             flexibleSpace: widget.delegate.buildFlexibleSpace(context),
             actions: widget.delegate.buildActions(context),

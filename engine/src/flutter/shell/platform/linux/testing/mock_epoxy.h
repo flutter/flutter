@@ -34,6 +34,16 @@ class MockEpoxy {
                GLint dstY1,
                GLbitfield mask,
                GLenum filter));
+  MOCK_METHOD(void,
+              glDeleteFramebuffers,
+              (GLsizei n, const GLuint* framebuffers));
+  MOCK_METHOD(void,
+              glDeleteRenderbuffers,
+              (GLsizei n, const GLuint* renderbuffers));
+  MOCK_METHOD(void, glDeleteTextures, (GLsizei n, const GLuint* textures));
+  MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
+  MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
+  MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
 };
 

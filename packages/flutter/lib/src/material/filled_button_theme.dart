@@ -97,7 +97,7 @@ class FilledButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final FilledButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [FilledButtonThemeData] from the closest ancestor [FilledButtonTheme].
   ///
   /// If there is no enclosing [FilledButtonTheme] widget, then
   /// [ThemeData.filledButtonTheme] is used.
@@ -108,8 +108,8 @@ class FilledButtonTheme extends InheritedTheme {
   /// FilledButtonThemeData theme = FilledButtonTheme.of(context);
   /// ```
   static FilledButtonThemeData of(BuildContext context) {
-    final FilledButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
+    final FilledButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
   }
 

@@ -66,7 +66,7 @@ void MockRasterCache::AddMockPicture(int width, int height) {
       .gr_context         = preroll_context_.gr_context,
       .dst_color_space    = preroll_context_.dst_color_space,
       .matrix             = ctm,
-      .logical_rect       = display_list->bounds(),
+      .logical_rect       = ToSkRect(display_list->GetBounds()),
       // clang-format on
   };
   UpdateCacheEntry(RasterCacheKeyID(display_list->unique_id(),

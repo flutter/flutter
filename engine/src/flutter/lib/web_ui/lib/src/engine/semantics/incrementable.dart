@@ -36,12 +36,12 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      createDomEventListener((_) {
+      createDomEventListener((DomEvent _) {
         if (_element.disabled!) {
           return;
         }
         _pendingResync = true;
-        final int newInputValue = int.parse(_element.value!);
+        final int newInputValue = int.parse(_element.value);
         if (newInputValue > _currentSurrogateValue) {
           _currentSurrogateValue += 1;
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -104,6 +104,11 @@ class SemanticIncrementable extends SemanticRole {
   bool _pendingResync = false;
 
   @override
+  void updateValidationResult() {
+    SemanticRole.updateAriaInvalid(_element, semanticsObject.validationResult);
+  }
+
+  @override
   void update() {
     super.update();
 
@@ -146,14 +151,16 @@ class SemanticIncrementable extends SemanticRole {
     _element.setAttribute('aria-valuetext', semanticsObject.value!);
 
     final bool canIncrease = semanticsObject.increasedValue!.isNotEmpty;
-    final String surrogateMaxTextValue =
-        canIncrease ? '${_currentSurrogateValue + 1}' : surrogateTextValue;
+    final String surrogateMaxTextValue = canIncrease
+        ? '${_currentSurrogateValue + 1}'
+        : surrogateTextValue;
     _element.max = surrogateMaxTextValue;
     _element.setAttribute('aria-valuemax', surrogateMaxTextValue);
 
     final bool canDecrease = semanticsObject.decreasedValue!.isNotEmpty;
-    final String surrogateMinTextValue =
-        canDecrease ? '${_currentSurrogateValue - 1}' : surrogateTextValue;
+    final String surrogateMinTextValue = canDecrease
+        ? '${_currentSurrogateValue - 1}'
+        : surrogateTextValue;
     _element.min = surrogateMinTextValue;
     _element.setAttribute('aria-valuemin', surrogateMinTextValue);
   }

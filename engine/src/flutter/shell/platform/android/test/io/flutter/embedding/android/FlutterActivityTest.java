@@ -38,6 +38,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -60,7 +61,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -602,7 +602,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_28)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_28)
   public void fullyDrawn_beforeAndroidQ() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =

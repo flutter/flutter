@@ -9,7 +9,8 @@
     ],
     "luci_flags": {
       "delay_collect_builds": true,
-      "parallel_download_builds": true
+      "parallel_download_builds": true,
+      "upload_content_hash": true
     },
     "builds": [
         {
@@ -155,7 +156,11 @@
                     "parameters": [
                         "../../src/out/ci/android_release_arm64/libflutter.so",
                         "${FLUTTER_LOGS_DIR}"
-                    ]
+                    ],
+                    "upload_logs": {
+                        "name": "android-arm64-release",
+                        "uuid": "sizes"
+                    }
                 }
             ]
         },

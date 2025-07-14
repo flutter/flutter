@@ -304,6 +304,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
   ///
+  /// Use [buildToggleableWithChild] if one would like to provide a [Widget]
+  /// instead of [CustomPainter].
+  ///
   /// If drawing a radial ink reaction is desired (in Material Design for
   /// example), consider providing a subclass of [ToggleablePainter] as a
   /// `painter`, which implements logic to draw a radial ink reaction for this
@@ -331,6 +334,47 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     required Size size,
     required CustomPainter painter,
   }) {
+    return buildToggleableWithChild(
+      focusNode: focusNode,
+      onFocusChange: onFocusChange,
+      autofocus: autofocus,
+      mouseCursor: mouseCursor,
+      child: CustomPaint(size: size, painter: painter),
+    );
+  }
+
+  /// Typically wraps a child that draws the actual visuals of the
+  /// Toggleable with logic to toggle it.
+  ///
+  /// {@template flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
+  /// If drawing a radial ink reaction is desired (in Material Design for
+  /// example), consider providing [CustomPaint] with a subclass of
+  /// [ToggleablePainter] as a [CustomPaint.painter], which implements logic
+  /// to draw a radial ink reaction for this control. The painter is usually
+  /// configured with the [ToggleableStateMixin.reaction],
+  /// [ToggleableStateMixin.position], [ToggleableStateMixin.reactionHoverFade],
+  /// and [ToggleableStateMixin.reactionFocusFade] animation provided by this
+  /// mixin. It is expected to draw the visuals of the Toggleable based on the
+  /// current value of these animations. The animations are triggered by this
+  /// mixin to transition the Toggleable from one state to another.
+  /// {@endtemplate}
+  ///
+  /// Material Toggleables must provide a [mouseCursor] which resolves to a
+  /// [MouseCursor] based on the current [WidgetState] of the Toggleable.
+  /// Cupertino Toggleables may not provide a [mouseCursor]. If no [mouseCursor]
+  /// is provided, [SystemMouseCursors.basic] will be used as the [mouseCursor]
+  /// across all [WidgetState]s.
+  ///
+  /// This method must be called from the [build] method of the [State] class
+  /// that uses this mixin. The returned [Widget] must be returned from the
+  /// build method - potentially after wrapping it in other widgets.
+  Widget buildToggleableWithChild({
+    FocusNode? focusNode,
+    ValueChanged<bool>? onFocusChange,
+    bool autofocus = false,
+    WidgetStateProperty<MouseCursor>? mouseCursor,
+    required Widget child,
+  }) {
     return FocusableActionDetector(
       actions: _actionMap,
       focusNode: focusNode,
@@ -346,7 +390,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
         onTap: isInteractive ? _handleTap : null,
         onTapUp: isInteractive ? _handleTapEnd : null,
         onTapCancel: isInteractive ? _handleTapEnd : null,
-        child: Semantics(enabled: isInteractive, child: CustomPaint(size: size, painter: painter)),
+        child: Semantics(enabled: isInteractive, child: child),
       ),
     );
   }
@@ -579,24 +623,23 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     required Offset origin,
   }) {
     if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
-      final Paint reactionPaint =
-          Paint()
-            ..color =
-                Color.lerp(
-                  Color.lerp(
-                    Color.lerp(inactiveReactionColor, reactionColor, position.value),
-                    hoverColor,
-                    reactionHoverFade.value,
-                  ),
-                  focusColor,
-                  reactionFocusFade.value,
-                )!;
+      final Paint reactionPaint = Paint()
+        ..color = Color.lerp(
+          Color.lerp(
+            Color.lerp(inactiveReactionColor, reactionColor, position.value),
+            hoverColor,
+            reactionHoverFade.value,
+          ),
+          focusColor,
+          reactionFocusFade.value,
+        )!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
       );
-      final double reactionRadius =
-          isFocused || isHovered ? splashRadius : radialReactionRadiusTween.evaluate(reaction);
+      final double reactionRadius = isFocused || isHovered
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(origin + offset, reactionRadius, reactionPaint);
       }

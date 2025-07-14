@@ -75,6 +75,9 @@ import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
+import 'package:yaml_edit/yaml_edit.dart' show YamlEditor;
+
+const String _pubspecName = 'pubspec.yaml';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _packageFlutter = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
@@ -175,7 +178,7 @@ Future<void> main(List<String> arguments) async {
       if (entity is! Directory) {
         continue;
       }
-      final File pubspec = File(path.join(entity.path, 'pubspec.yaml'));
+      final File pubspec = File(path.join(entity.path, _pubspecName));
       if (!pubspec.existsSync()) {
         throw StateError("Unexpected package '${entity.path}' found in packages directory");
       }
@@ -472,6 +475,14 @@ class _SnippetChecker {
   /// automatically if there are no errors unless _keepTmp is true.
   final Directory _tempDirectory;
 
+  Directory get _contentDirectory {
+    final Directory directory = Directory(path.join(_tempDirectory.path, 'packages'));
+    if (!directory.existsSync()) {
+      directory.createSync();
+    }
+    return directory;
+  }
+
   /// The package directories within the flutter root dir that will be checked.
   final List<Directory> _flutterPackages;
 
@@ -504,28 +515,28 @@ class _SnippetChecker {
 
   /// Computes the headers needed for each snippet file.
   List<_Line> get headersWithoutImports {
-    return _headersWithoutImports ??=
-        ignoresDirectives.map<_Line>((String code) => _Line.generated(code: code)).toList();
+    return _headersWithoutImports ??= ignoresDirectives
+        .map<_Line>((String code) => _Line.generated(code: code))
+        .toList();
   }
 
   List<_Line>? _headersWithoutImports;
 
   /// Computes the headers needed for each snippet file.
   List<_Line> get headersWithImports {
-    return _headersWithImports ??=
-        <String>[
-          ...ignoresDirectives,
-          '// ignore_for_file: unused_import',
-          "import 'dart:async';",
-          "import 'dart:convert';",
-          "import 'dart:io';",
-          "import 'dart:math' as math;",
-          "import 'dart:typed_data';",
-          "import 'dart:ui' as ui;",
-          "import 'package:flutter_test/flutter_test.dart';",
-          for (final File file in _listDartFiles(Directory(_packageFlutter)))
-            "import 'package:flutter/${path.basename(file.path)}';",
-        ].map<_Line>((String code) => _Line.generated(code: code)).toList();
+    return _headersWithImports ??= <String>[
+      ...ignoresDirectives,
+      '// ignore_for_file: unused_import',
+      "import 'dart:async';",
+      "import 'dart:convert';",
+      "import 'dart:io';",
+      "import 'dart:math' as math;",
+      "import 'dart:typed_data';",
+      "import 'dart:ui' as ui;",
+      "import 'package:flutter_test/flutter_test.dart';",
+      for (final File file in _listDartFiles(Directory(_packageFlutter)))
+        "import 'package:flutter/${path.basename(file.path)}';",
+    ].map<_Line>((String code) => _Line.generated(code: code)).toList();
   }
 
   List<_Line>? _headersWithImports;
@@ -840,10 +851,12 @@ class _SnippetChecker {
         ...assumptions,
       ];
     }
-    final String firstCodeLine =
-        block.firstWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
-    final String lastCodeLine =
-        block.lastWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
+    final String firstCodeLine = block
+        .firstWhere((String line) => !line.startsWith(_nonCodeRegExp))
+        .trim();
+    final String lastCodeLine = block
+        .lastWhere((String line) => !line.startsWith(_nonCodeRegExp))
+        .trim();
     if (firstCodeLine.startsWith('import ')) {
       // probably an entire program
       if (importPreviousExample) {
@@ -982,17 +995,21 @@ class _SnippetChecker {
   /// Creates the configuration files necessary for the analyzer to consider
   /// the temporary directory a package, and sets which lint rules to enforce.
   void _createConfigurationFiles() {
-    final File targetPubSpec = File(path.join(_tempDirectory.path, 'pubspec.yaml'));
-    if (!targetPubSpec.existsSync()) {
-      // Copying pubspec.yaml from examples/api into temp directory.
-      final File sourcePubSpec = File(path.join(_flutterRoot, 'examples', 'api', 'pubspec.yaml'));
-      if (!sourcePubSpec.existsSync()) {
-        throw 'Cannot find pubspec.yaml at ${sourcePubSpec.path}, which is also used to analyze code snippets.';
-      }
-      sourcePubSpec.copySync(targetPubSpec.path);
-    }
+    final String targetWorkspacePubspecPath = path.join(_tempDirectory.path, _pubspecName);
+    _copyPubspec(targetWorkspacePubspecPath, path.join(_flutterRoot, _pubspecName));
+    final File targetWorkspacePubspec = File(targetWorkspacePubspecPath);
+    final String pubspec = targetWorkspacePubspec.readAsStringSync();
+
+    final YamlEditor yamlEditor = YamlEditor(pubspec);
+    yamlEditor.update(<String>['workspace'], <String>['packages']);
+    targetWorkspacePubspec.writeAsStringSync(yamlEditor.toString());
+
+    _copyPubspec(
+      path.join(_contentDirectory.path, _pubspecName),
+      path.join(_flutterRoot, 'examples', 'api', _pubspecName),
+    );
     final File targetAnalysisOptions = File(
-      path.join(_tempDirectory.path, 'analysis_options.yaml'),
+      path.join(_contentDirectory.path, 'analysis_options.yaml'),
     );
     if (!targetAnalysisOptions.existsSync()) {
       // Use the same analysis_options.yaml configuration that's used for examples/api.
@@ -1008,6 +1025,20 @@ class _SnippetChecker {
     }
   }
 
+  void _copyPubspec(String targetPath, String sourcePath) {
+    final File targetPubSpec = File(targetPath);
+    if (!targetPubSpec.existsSync()) {
+      // Copying pubspec.yaml from examples/api into temp directory.
+      final File sourcePubSpec = File(sourcePath);
+      if (!sourcePubSpec.existsSync()) {
+        throw 'Cannot find pubspec.yaml at ${sourcePubSpec.path}, which is also used to analyze code snippets.';
+      }
+      targetPubSpec
+        ..createSync(recursive: true)
+        ..writeAsStringSync(sourcePubSpec.readAsStringSync());
+    }
+  }
+
   /// Writes out a snippet section to the disk and returns the file.
   File _writeSnippetFile(_SnippetFile snippetFile) {
     final String snippetFileId = _createNameFromSource(
@@ -1015,10 +1046,12 @@ class _SnippetChecker {
       snippetFile.filename,
       snippetFile.indexLine,
     );
-    final File outputFile = File(path.join(_tempDirectory.path, '$snippetFileId.dart'))
+    final File outputFile = File(path.join(_contentDirectory.path, '$snippetFileId.dart'))
       ..createSync(recursive: true);
-    final String contents =
-        snippetFile.code.map<String>((_Line line) => line.code).join('\n').trimRight();
+    final String contents = snippetFile.code
+        .map<String>((_Line line) => line.code)
+        .join('\n')
+        .trimRight();
     outputFile.writeAsStringSync('$contents\n');
     return outputFile;
   }
@@ -1045,7 +1078,7 @@ class _SnippetChecker {
         continue;
       }
       final String message = match.namedGroup('description')!;
-      final File file = File(path.join(_tempDirectory.path, match.namedGroup('file')));
+      final File file = File(path.join(_contentDirectory.path, match.namedGroup('file')));
       final List<String> fileContents = file.readAsLinesSync();
       final String lineString = match.namedGroup('line')!;
       final String columnString = match.namedGroup('column')!;
@@ -1146,14 +1179,13 @@ class _SnippetChecker {
     Process.runSync(_flutter, <String>[
       'pub',
       'get',
-    ], workingDirectory: _tempDirectory.absolute.path);
+    ], workingDirectory: _contentDirectory.absolute.path);
     final ProcessResult result = Process.runSync(_flutter, <String>[
       '--no-wrap',
       'analyze',
-      '--no-preamble',
       '--no-congratulate',
       '.',
-    ], workingDirectory: _tempDirectory.absolute.path);
+    ], workingDirectory: _contentDirectory.absolute.path);
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
     // Remove output from building the flutter tool.
@@ -1172,13 +1204,12 @@ class _SnippetChecker {
     if (stderr.isNotEmpty && stderr.any((String line) => line.isNotEmpty)) {
       throw _SnippetCheckerException('Cannot analyze dartdocs; unexpected error output:\n$stderr');
     }
-    if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
-      stdout.removeAt(0);
-    }
-    if (stdout.isNotEmpty && stdout.first.isEmpty) {
-      stdout.removeAt(0);
-    }
-    return stdout;
+    // Skip the boring part of the analysis, the preface - we only want the errors.
+    return stdout
+        .skipWhile((String line) => !line.startsWith('Analyzing packages...'))
+        .skip(1)
+        .skipWhile((String line) => line.isEmpty)
+        .toList();
   }
 }
 

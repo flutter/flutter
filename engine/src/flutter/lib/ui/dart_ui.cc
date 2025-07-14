@@ -31,6 +31,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/vertices.h"
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/semantics/semantics_update_builder.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
@@ -78,11 +79,13 @@ typedef CanvasPath Path;
   V(PathMeasure::Create)                                           \
   V(Path::Create)                                                  \
   V(PictureRecorder::Create)                                       \
+  V(RSuperellipse::Create)                                         \
   V(SceneBuilder::Create)                                          \
   V(SemanticsUpdateBuilder::Create)                                \
   /* Other */                                                      \
   V(FontCollection::LoadFontFromList)                              \
   V(ImageDescriptor::initEncoded)                                  \
+  V(ImageFilter::equals)                                           \
   V(ImmutableBuffer::init)                                         \
   V(ImmutableBuffer::initFromAsset)                                \
   V(ImmutableBuffer::initFromFile)                                 \
@@ -92,6 +95,7 @@ typedef CanvasPath Path;
   V(IsolateNameServerNatives::RemovePortNameMapping)               \
   V(NativeStringAttribute::initLocaleStringAttribute)              \
   V(NativeStringAttribute::initSpellOutStringAttribute)            \
+  V(NativeSemanticsFlags::initSemanticsFlags)                      \
   V(PlatformConfigurationNativeApi::DefaultRouteName)              \
   V(PlatformConfigurationNativeApi::ScheduleFrame)                 \
   V(PlatformConfigurationNativeApi::EndWarmUpFrame)                \
@@ -208,7 +212,6 @@ typedef CanvasPath Path;
   V(ImageFilter, initComposeFilter)              \
   V(ImageFilter, initShader)                     \
   V(ImageFilter, initMatrix)                     \
-  V(ImageFilter, equals)                         \
   V(ImageShader, dispose)                        \
   V(ImageShader, initWithImage)                  \
   V(ImmutableBuffer, dispose)                    \
@@ -252,6 +255,7 @@ typedef CanvasPath Path;
   V(Path, addPathWithMatrix)                     \
   V(Path, addPolygon)                            \
   V(Path, addRRect)                              \
+  V(Path, addRSuperellipse)                      \
   V(Path, addRect)                               \
   V(Path, arcTo)                                 \
   V(Path, arcToPoint)                            \
@@ -283,6 +287,7 @@ typedef CanvasPath Path;
   V(Picture, dispose)                            \
   V(Picture, toImage)                            \
   V(Picture, toImageSync)                        \
+  V(RSuperellipse, contains)                     \
   V(SceneBuilder, addPerformanceOverlay)         \
   V(SceneBuilder, addPicture)                    \
   V(SceneBuilder, addPlatformView)               \

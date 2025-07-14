@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -101,18 +102,18 @@ void main() {
             width: 300.0,
             child: ListView(
               controller: controller,
-              children:
-                  children = List<Widget>.generate(20, (int i) {
-                    return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
-                  }),
+              children: children = List<Widget>.generate(20, (int i) {
+                return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
+              }),
             ),
           ),
         ),
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -157,18 +158,18 @@ void main() {
             child: ListView(
               scrollDirection: Axis.horizontal,
               controller: controller,
-              children:
-                  children = List<Widget>.generate(20, (int i) {
-                    return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
-                  }),
+              children: children = List<Widget>.generate(20, (int i) {
+                return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
+              }),
             ),
           ),
         ),
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -213,18 +214,18 @@ void main() {
             child: ListView(
               controller: controller,
               reverse: true,
-              children:
-                  children = List<Widget>.generate(20, (int i) {
-                    return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
-                  }),
+              children: children = List<Widget>.generate(20, (int i) {
+                return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
+              }),
             ),
           ),
         ),
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -270,18 +271,18 @@ void main() {
               scrollDirection: Axis.horizontal,
               reverse: true,
               controller: controller,
-              children:
-                  children = List<Widget>.generate(20, (int i) {
-                    return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
-                  }),
+              children: children = List<Widget>.generate(20, (int i) {
+                return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
+              }),
             ),
           ),
         ),
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -340,8 +341,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -389,8 +391,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -438,8 +441,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -491,8 +495,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -542,8 +547,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -590,8 +596,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(
       find.byWidget(children[5], skipOffstage: false),
@@ -981,8 +988,10 @@ void main() {
                       physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
                       scrollDirection: Axis.horizontal,
                       controller: controllerX,
-                      children:
-                          slivers = <Widget>[Container(width: 150.0), Container(width: 150.0)],
+                      children: slivers = <Widget>[
+                        Container(width: 150.0),
+                        Container(width: 150.0),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 150.0),
@@ -1068,10 +1077,9 @@ void main() {
             height: 200.0,
             child: ListView(
               controller: controller,
-              children:
-                  children = List<Widget>.generate(20, (int i) {
-                    return SizedBox(height: 300.0, child: Text('Tile $i'));
-                  }),
+              children: children = List<Widget>.generate(20, (int i) {
+                return SizedBox(height: 300.0, child: Text('Tile $i'));
+              }),
             ),
           ),
         ),
@@ -1130,21 +1138,18 @@ void main() {
               height: 600.0,
               child: CustomScrollView(
                 controller: controller,
-                slivers:
-                    children = List<Widget>.generate(20, (int i) {
-                      return i == 10
-                          ? SliverPersistentHeader(
-                            pinned: true,
-                            delegate: _TestSliverPersistentHeaderDelegate(
-                              minExtent: 100,
-                              maxExtent: 300,
-                              key: headerKey,
-                            ),
-                          )
-                          : SliverToBoxAdapter(
-                            child: SizedBox(height: 300.0, child: Text('Tile $i')),
-                          );
-                    }),
+                slivers: children = List<Widget>.generate(20, (int i) {
+                  return i == 10
+                      ? SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _TestSliverPersistentHeaderDelegate(
+                            minExtent: 100,
+                            maxExtent: 300,
+                            key: headerKey,
+                          ),
+                        )
+                      : SliverToBoxAdapter(child: SizedBox(height: 300.0, child: Text('Tile $i')));
+                }),
               ),
             ),
           ),
@@ -1200,15 +1205,14 @@ void main() {
               scrollDirection: axis,
               center: reversed ? const Key('19') : null,
               controller: controller,
-              slivers:
-                  children = List<Widget>.generate(20, (int i) {
-                    return i == 10
-                        ? floatingHeader
-                        : SliverToBoxAdapter(
-                          key: (i == 19) ? const Key('19') : null,
-                          child: SizedBox(height: 300.0, width: 300, child: Text('Tile $i')),
-                        );
-                  }),
+              slivers: children = List<Widget>.generate(20, (int i) {
+                return i == 10
+                    ? floatingHeader
+                    : SliverToBoxAdapter(
+                        key: (i == 19) ? const Key('19') : null,
+                        child: SizedBox(height: 300.0, width: 300, child: Text('Tile $i')),
+                      );
+              }),
             ),
           ),
         ),
@@ -1605,8 +1609,9 @@ void main() {
 
     testWidgets('up, forward growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1615,8 +1620,9 @@ void main() {
 
     testWidgets('up, reverse growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1625,8 +1631,9 @@ void main() {
 
     testWidgets('right, forward growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.horizontal));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1635,8 +1642,9 @@ void main() {
 
     testWidgets('right, reverse growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.horizontal, reverseGrowth: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1645,8 +1653,9 @@ void main() {
 
     testWidgets('down, forward growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1655,8 +1664,9 @@ void main() {
 
     testWidgets('down, reverse growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverseGrowth: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1665,8 +1675,9 @@ void main() {
 
     testWidgets('left, forward growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 5', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1675,8 +1686,9 @@ void main() {
 
     testWidgets('left, reverse growth', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.horizontal, reverse: true, reverseGrowth: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
@@ -1685,8 +1697,9 @@ void main() {
 
     testWidgets('will not assert on mismatched axis', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
-      final RenderAbstractViewport viewport =
-          tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
 
       final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
       viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
@@ -1893,48 +1906,102 @@ void main() {
     );
   });
 
-  group('Viewport childrenInPaintOrder control test', () {
-    test('RenderViewport', () async {
-      final List<RenderSliver> children = <RenderSliver>[
-        RenderSliverToBoxAdapter(),
-        RenderSliverToBoxAdapter(),
-        RenderSliverToBoxAdapter(),
-      ];
+  group('Viewport paint order', () {
+    final List<int> paintLog = <int>[];
 
-      final RenderViewport renderViewport = RenderViewport(
-        crossAxisDirection: AxisDirection.right,
-        offset: ViewportOffset.zero(),
-        children: children,
+    Widget makeSliver(int i) {
+      return SliverToBoxAdapter(
+        key: ValueKey<int>(i),
+        child: CustomPaint(
+          painter: TestCustomPainter()..onPaint = (_, _) => paintLog.add(i),
+          child: Text('Item $i'),
+        ),
+      );
+    }
+
+    testWidgets('default (firstIsTop)', (WidgetTester tester) async {
+      addTearDown(paintLog.clear);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            center: const ValueKey<int>(2),
+            anchor: 0.5,
+            slivers: List<Widget>.generate(5, makeSliver),
+          ),
+        ),
       );
 
-      // Children should be painted in reverse order to the list given
-      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
-      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      // First sliver paints last, over other slivers; last sliver paints first.
+      expect(paintLog, equals(<int>[4, 3, 2, 1, 0]));
+    });
+
+    testWidgets('lastIsTop', (WidgetTester tester) async {
+      addTearDown(paintLog.clear);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            paintOrder: SliverPaintOrder.lastIsTop,
+            center: const ValueKey<int>(2),
+            anchor: 0.5,
+            slivers: List<Widget>.generate(5, makeSliver),
+          ),
+        ),
+      );
+
+      // Last sliver paints last, over other slivers; first sliver paints first.
+      expect(paintLog, equals(<int>[0, 1, 2, 3, 4]));
+    });
+  });
+
+  group('Viewport hit-test order', () {
+    Widget makeSliver(int i) {
+      return _AllOverlapSliver(key: ValueKey<int>(i), id: i);
+    }
+
+    testWidgets('default (firstIsTop)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            center: const ValueKey<int>(2),
+            anchor: 0.5,
+            slivers: List<Widget>.generate(5, makeSliver),
+          ),
+        ),
+      );
+
+      final HitTestResult result = tester.hitTestOnBinding(const Offset(400, 300));
       expect(
-        renderViewport.childrenInPaintOrder,
-        equals(renderViewport.childrenInHitTestOrder.toList().reversed),
+        result.path
+            .map((HitTestEntry<HitTestTarget> e) => e.target)
+            .map((HitTestTarget t) => t is _RenderAllOverlapSliver ? t.id : null)
+            .nonNulls,
+        equals(<int>[0, 1, 2, 3, 4]),
       );
     });
 
-    test('RenderShrinkWrappingViewport', () async {
-      final List<RenderSliver> children = <RenderSliver>[
-        RenderSliverToBoxAdapter(),
-        RenderSliverToBoxAdapter(),
-        RenderSliverToBoxAdapter(),
-      ];
-
-      final RenderShrinkWrappingViewport renderViewport = RenderShrinkWrappingViewport(
-        crossAxisDirection: AxisDirection.right,
-        offset: ViewportOffset.zero(),
-        children: children,
+    testWidgets('lastIsTop', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            paintOrder: SliverPaintOrder.lastIsTop,
+            center: const ValueKey<int>(2),
+            anchor: 0.5,
+            slivers: List<Widget>.generate(5, makeSliver),
+          ),
+        ),
       );
 
-      // Children should be painted in reverse order to the list given
-      expect(renderViewport.childrenInPaintOrder, equals(children.reversed));
-      // childrenInPaintOrder should be reverse of childrenInHitTestOrder
+      final HitTestResult result = tester.hitTestOnBinding(const Offset(400, 300));
       expect(
-        renderViewport.childrenInPaintOrder,
-        equals(renderViewport.childrenInHitTestOrder.toList().reversed),
+        result.path
+            .map((HitTestEntry<HitTestTarget> e) => e.target)
+            .map((HitTestTarget t) => t is _RenderAllOverlapSliver ? t.id : null)
+            .nonNulls,
+        equals(<int>[4, 3, 2, 1, 0]),
       );
     });
   });
@@ -1954,9 +2021,8 @@ void main() {
             physics: physics,
             scrollDirection: scrollDirection,
             shrinkWrap: true,
-            itemBuilder:
-                (BuildContext context, int index) =>
-                    SizedBox(height: 50, width: 50, child: Text('Item $index')),
+            itemBuilder: (BuildContext context, int index) =>
+                SizedBox(height: 50, width: 50, child: Text('Item $index')),
             itemCount: 20,
             itemExtent: 50,
           ),
@@ -2438,6 +2504,69 @@ void main() {
       tester: tester,
     );
   });
+}
+
+class TestCustomPainter extends CustomPainter {
+  void Function(Canvas canvas, Size size)? onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (onPaint != null) {
+      onPaint!(canvas, size);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+/// A sliver that overlaps with other slivers as far as possible,
+/// and does nothing else.
+class _AllOverlapSliver extends LeafRenderObjectWidget {
+  const _AllOverlapSliver({super.key, required this.id});
+
+  final int id;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderAllOverlapSliver(id);
+}
+
+class _RenderAllOverlapSliver extends RenderSliver {
+  _RenderAllOverlapSliver(this.id);
+
+  final int id;
+
+  @override
+  void performLayout() {
+    geometry = SliverGeometry(
+      paintExtent: constraints.remainingPaintExtent,
+      maxPaintExtent: constraints.remainingPaintExtent,
+      layoutExtent: 0.0,
+    );
+  }
+
+  @override
+  bool hitTest(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    if (mainAxisPosition >= 0.0 &&
+        mainAxisPosition < geometry!.hitTestExtent &&
+        crossAxisPosition >= 0.0 &&
+        crossAxisPosition < constraints.crossAxisExtent) {
+      result.add(
+        SliverHitTestEntry(
+          this,
+          mainAxisPosition: mainAxisPosition,
+          crossAxisPosition: crossAxisPosition,
+        ),
+      );
+    }
+    return false;
+  }
 }
 
 // Simple sliver that applies N scroll offset corrections.

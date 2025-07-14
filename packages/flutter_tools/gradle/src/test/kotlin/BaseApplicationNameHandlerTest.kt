@@ -1,4 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
+
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
 import com.flutter.gradle.BaseApplicationNameHandler.GRADLE_BASE_APPLICATION_NAME_PROPERTY

@@ -492,6 +492,34 @@ mixin WidgetsBinding
       _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
+  /// The notifier for whether or not taps on the device are treated as widget
+  /// selections when the widget inspector is enabled.
+  ///
+  /// - If true, taps in the app are intercepted by the widget inspector.
+  /// - If false, taps in the app are not intercepted by the widget inspector.
+  ValueNotifier<bool> get debugWidgetInspectorSelectionOnTapEnabled =>
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??= ValueNotifier<bool>(true);
+  ValueNotifier<bool>? _debugWidgetInspectorSelectionOnTapEnabledNotifierObject;
+
+  /// If true, [WidgetInspector] will not be automatically injected into the
+  /// widget tree.
+  ///
+  /// This overrides the behavior where [WidgetInspector] is added to the
+  /// widget tree created by [WidgetsApp] when the `debugShowWidgetInspector`
+  /// value is set in [WidgetsApp] or [debugShowWidgetInspectorOverride] is set
+  /// to true.
+  ///
+  /// Used by tools that want more control over which widgets can be selected
+  /// and highlighted by the widget inspector by manually injecting instances of
+  /// [WidgetInspector].
+  bool get debugExcludeRootWidgetInspector => _debugExcludeRootWidgetInspector;
+
+  set debugExcludeRootWidgetInspector(bool value) {
+    _debugExcludeRootWidgetInspector = value;
+  }
+
+  bool _debugExcludeRootWidgetInspector = false;
+
   @visibleForTesting
   @override
   void resetInternalState() {
@@ -499,6 +527,8 @@ mixin WidgetsBinding
     super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject?.dispose();
+    _debugWidgetInspectorSelectionOnTapEnabledNotifierObject = null;
   }
 
   void _debugAddStackFilters() {
@@ -779,9 +809,8 @@ mixin WidgetsBinding
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) {
-    if (observer == _backGestureObserver) {
-      _backGestureObserver = null;
-    }
+    _backGestureObservers.remove(observer);
+
     return _observers.remove(observer);
   }
 
@@ -918,32 +947,33 @@ mixin WidgetsBinding
     return false;
   }
 
-  // The observer that is currently handling an active predictive back gesture.
-  WidgetsBindingObserver? _backGestureObserver;
+  // The observers that are currently handling an active predictive back gesture.
+  final List<WidgetsBindingObserver> _backGestureObservers = <WidgetsBindingObserver>[];
 
-  Future<bool> _handleStartBackGesture(Map<String?, Object?> arguments) {
-    _backGestureObserver = null;
+  bool _handleStartBackGesture(Map<String?, Object?> arguments) {
+    _backGestureObservers.clear();
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
-        _backGestureObserver = observer;
-        return Future<bool>.value(true);
+        _backGestureObservers.add(observer);
       }
     }
-    return Future<bool>.value(false);
+    return _backGestureObservers.isNotEmpty;
   }
 
-  Future<void> _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) async {
-    if (_backGestureObserver == null) {
+  void _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) {
+    if (_backGestureObservers.isEmpty) {
       return;
     }
 
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
-    _backGestureObserver!.handleUpdateBackGestureProgress(backEvent);
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleUpdateBackGestureProgress(backEvent);
+    }
   }
 
   Future<void> _handleCommitBackGesture() async {
-    if (_backGestureObserver == null) {
+    if (_backGestureObservers.isEmpty) {
       // If the predictive back was not handled, then the route should be popped
       // like a normal, non-predictive back. For example, this will happen if a
       // back gesture occurs but no predictive back route transition exists to
@@ -952,15 +982,15 @@ mixin WidgetsBinding
       await handlePopRoute();
       return;
     }
-    _backGestureObserver?.handleCommitBackGesture();
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleCommitBackGesture();
+    }
   }
 
-  Future<void> _handleCancelBackGesture() async {
-    if (_backGestureObserver == null) {
-      return;
+  void _handleCancelBackGesture() {
+    for (final WidgetsBindingObserver observer in _backGestureObservers) {
+      observer.handleCancelBackGesture();
     }
-
-    _backGestureObserver!.handleCancelBackGesture();
   }
 
   /// Called when the host tells the app to push a new route onto the
@@ -1011,9 +1041,9 @@ mixin WidgetsBinding
     };
   }
 
-  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
-    final Map<String?, Object?>? arguments =
-        (methodCall.arguments as Map<Object?, Object?>?)?.cast<String?, Object?>();
+  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) async {
+    final Map<String?, Object?>? arguments = (methodCall.arguments as Map<Object?, Object?>?)
+        ?.cast<String?, Object?>();
     return switch (methodCall.method) {
       'startBackGesture' => _handleStartBackGesture(arguments!),
       'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
@@ -1548,12 +1578,11 @@ void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
 }
 
 String _debugDumpAppString() {
-  const String mode =
-      kDebugMode
-          ? 'DEBUG MODE'
-          : kReleaseMode
-          ? 'RELEASE MODE'
-          : 'PROFILE MODE';
+  const String mode = kDebugMode
+      ? 'DEBUG MODE'
+      : kReleaseMode
+      ? 'RELEASE MODE'
+      : 'PROFILE MODE';
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.rootElement != null) {

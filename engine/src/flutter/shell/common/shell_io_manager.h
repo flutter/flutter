@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/lib/ui/io_manager.h"
+#include "impeller/renderer/context.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/GrTypes.h"
 
@@ -31,7 +32,8 @@ class ShellIOManager final : public IOManager {
       sk_sp<GrDirectContext> resource_context,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
       fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
-      std::shared_ptr<impeller::Context> impeller_context,
+      std::shared_ptr<impeller::ImpellerContextFuture> impeller_context,
+      bool impeller_enabled,
       fml::TimeDelta unref_queue_drain_delay =
           fml::TimeDelta::FromMilliseconds(8));
 
@@ -73,7 +75,7 @@ class ShellIOManager final : public IOManager {
   // Unref queue management.
   fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
-  std::shared_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_;
   fml::WeakPtrFactory<ShellIOManager> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellIOManager);

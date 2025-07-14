@@ -10,6 +10,8 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -28,13 +30,13 @@ import 'test_utils.dart';
 //   Messages regarding what the test is doing.
 // If this is false, then only critical errors and logs when things appear to be
 // taking a long time are printed to the console.
-const bool _printDebugOutputToStdOut = false;
+const _printDebugOutputToStdOut = false;
 
-final DateTime startTime = DateTime.now();
+final startTime = DateTime.now();
 
-const Duration defaultTimeout = Duration(seconds: 5);
-const Duration appStartTimeout = Duration(seconds: 120);
-const Duration quitTimeout = Duration(seconds: 10);
+const defaultTimeout = Duration(seconds: 5);
+const appStartTimeout = Duration(seconds: 120);
+const quitTimeout = Duration(seconds: 10);
 
 abstract final class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder, {String? logPrefix})
@@ -44,14 +46,14 @@ abstract final class FlutterTestDriver {
   final String _logPrefix;
   Process? _process;
   int? _processPid;
-  final StreamController<String> _stdout = StreamController<String>.broadcast();
-  final StreamController<String> _stderr = StreamController<String>.broadcast();
-  final StreamController<String> _allMessages = StreamController<String>.broadcast();
-  final StringBuffer _errorBuffer = StringBuffer();
+  final _stdout = StreamController<String>.broadcast();
+  final _stderr = StreamController<String>.broadcast();
+  final _allMessages = StreamController<String>.broadcast();
+  final _errorBuffer = StringBuffer();
   String? _lastResponse;
   Uri? _vmServiceWsUri;
   int? _attachPort;
-  bool _hasExited = false;
+  var _hasExited = false;
 
   VmService? _vmService;
   String get lastErrorInfo => _errorBuffer.toString();
@@ -61,15 +63,16 @@ abstract final class FlutterTestDriver {
   bool get hasExited => _hasExited;
   Uri? get vmServiceWsUri => _vmServiceWsUri;
 
-  String lastTime = '';
+  var lastTime = '';
   void _debugPrint(String message, {String topic = ''}) {
-    const int maxLength = 2500;
-    final String truncatedMessage =
-        message.length > maxLength ? '${message.substring(0, maxLength)}...' : message;
-    final String line = '${topic.padRight(10)} $truncatedMessage';
+    const maxLength = 2500;
+    final truncatedMessage = message.length > maxLength
+        ? '${message.substring(0, maxLength)}...'
+        : message;
+    final line = '${topic.padRight(10)} $truncatedMessage';
     _allMessages.add(line);
     final int timeInSeconds = DateTime.now().difference(startTime).inSeconds;
-    String time = '${timeInSeconds.toString().padLeft(5)}s ';
+    var time = '${timeInSeconds.toString().padLeft(5)}s ';
     if (time == lastTime) {
       time = ' ' * time.length;
     } else {
@@ -138,17 +141,22 @@ abstract final class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
-  Future<void> get done async => _process?.exitCode;
+  /// Completes when process exits with the given exit code.
+  ///
+  /// If the process has never been started, complets with `null`.
+  Future<int?> get done async => _process?.exitCode;
 
   Future<void> connectToVmService({bool pauseOnExceptions = false}) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService!.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
     _vmService!.onReceive.listen((String s) => _debugPrint(s, topic: '<=vm='));
 
-    final Completer<void> isolateStarted = Completer<void>();
+    final isolateStarted = Completer<void>();
     _vmService!.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateStart) {
-        isolateStarted.complete();
+        if (!isolateStarted.isCompleted) {
+          isolateStarted.complete();
+        }
       } else if (event.kind == EventKind.kIsolateExit && event.isolate?.id == _flutterIsolateId) {
         // Hot restarts cause all the isolates to exit, so we need to refresh
         // our idea of what the Flutter isolate ID is.
@@ -398,15 +406,15 @@ abstract final class FlutterTestDriver {
   Future<SourcePosition?> getSourceLocation() async {
     final String flutterIsolateId = await _getFlutterIsolateId();
     final Frame frame = await getTopStackFrame();
-    final Script script =
+    final script =
         await _vmService!.getObject(flutterIsolateId, frame.location!.script!.id!) as Script;
     return _lookupTokenPos(script.tokenPosTable!, frame.location!.tokenPos!);
   }
 
   SourcePosition? _lookupTokenPos(List<List<int>> table, int tokenPos) {
-    for (final List<int> row in table) {
+    for (final row in table) {
       final int lineNumber = row[0];
-      int index = 1;
+      var index = 1;
 
       for (index = 1; index < row.length - 1; index += 2) {
         if (row[index] == tokenPos) {
@@ -426,8 +434,8 @@ abstract final class FlutterTestDriver {
   }) async {
     assert(event != null || id != null);
     assert(event == null || id == null);
-    final String interestingOccurrence = event != null ? '$event event' : 'response to request $id';
-    final Completer<Map<String, Object?>> response = Completer<Map<String, Object?>>();
+    final interestingOccurrence = event != null ? '$event event' : 'response to request $id';
+    final response = Completer<Map<String, Object?>>();
     StreamSubscription<String>? subscription;
     subscription = _stdout.stream.listen((String line) async {
       final Map<String, Object?>? json = parseFlutterResponse(line);
@@ -441,7 +449,7 @@ abstract final class FlutterTestDriver {
         response.complete(json);
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription?.cancel();
-        final StringBuffer error = StringBuffer();
+        final error = StringBuffer();
         error.write(
           'Received app.stop event while waiting for $interestingOccurrence\n\n$_errorBuffer',
         );
@@ -470,28 +478,25 @@ abstract final class FlutterTestDriver {
   }) {
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
-      final Timer longWarning = Timer(
-        timeout,
-        () => _debugPrint('$task is taking longer than usual...'),
-      );
+      final longWarning = Timer(timeout, () => _debugPrint('$task is taking longer than usual...'));
       return callback().whenComplete(longWarning.cancel);
     }
 
     // We're not showing all output to the screen, so let's capture the output
     // that we would have printed if we were, and output it if we take longer
     // than the timeout or if we get an error.
-    final StringBuffer messages = StringBuffer('$task\n');
-    final DateTime start = DateTime.now();
-    bool timeoutExpired = false;
+    final messages = StringBuffer('$task\n');
+    final start = DateTime.now();
+    var timeoutExpired = false;
     void logMessage(String logLine) {
       final int ms = DateTime.now().difference(start).inMilliseconds;
-      final String formattedLine = '[+ ${ms.toString().padLeft(5)}] $logLine';
+      final formattedLine = '[+ ${ms.toString().padLeft(5)}] $logLine';
       messages.writeln(formattedLine);
     }
 
     final StreamSubscription<String> subscription = _allMessages.stream.listen(logMessage);
 
-    final Timer longWarning = Timer(timeout, () {
+    final longWarning = Timer(timeout, () {
       _debugPrint(messages.toString());
       timeoutExpired = true;
       _debugPrint('$task is taking longer than usual...');
@@ -527,31 +532,37 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool chrome = false,
+    String device = FlutterTesterDevices.kTesterDeviceId,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
-    bool serveObservatory = false,
     bool noDevtools = false,
     bool verbose = false,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
+    List<String> deviceArgs;
+    switch (device) {
+      case GoogleChromeDevice.kChromeDeviceId:
+        deviceArgs = <String>[
+          GoogleChromeDevice.kChromeDeviceId,
+          '--web-run-headless',
+          '--no-web-resources-cdn',
+          if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
+        ];
+      default:
+        deviceArgs = <String>[device];
+    }
+
     await _setupProcess(
       <String>[
         'run',
-        if (!chrome) '--disable-service-auth-codes',
+        if (device != GoogleChromeDevice.kChromeDeviceId) '--disable-service-auth-codes',
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
         if (noDevtools) '--no-devtools',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         ...getLocalEngineArguments(),
         '-d',
-        if (chrome) ...<String>[
-          'chrome',
-          '--web-run-headless',
-          if (!expressionEvaluation) '--no-web-enable-expression-evaluation',
-        ] else
-          'flutter-tester',
+        ...deviceArgs,
         if (structuredErrors) '--dart-define=flutter.inspector.structuredErrors=true',
         ...?additionalCommandArgs,
       ],
@@ -568,7 +579,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -578,7 +588,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance) '--no-dds',
-        '--${serveObservatory ? '' : 'no-'}serve-observatory',
         '-d',
         'flutter-tester',
         '--debug-port',
@@ -605,7 +614,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     assert(!startPaused || withDebugger);
     await super._setupProcess(args, script: script, withDebugger: withDebugger, verbose: verbose);
 
-    final Completer<void> prematureExitGuard = Completer<void>();
+    final prematureExitGuard = Completer<void>();
 
     // If the process exits before all of the `await`s below are done, then it
     // exited prematurely. This causes the currently suspended `await` to
@@ -645,8 +654,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
             event: 'app.debugPort',
             timeout: appStartTimeout,
           );
-          final String wsUriString =
-              (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
+          final wsUriString = (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);
           if (!startPaused) {
@@ -663,9 +671,8 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
 
         // Now await the start/started events; if it had already happened the future will
         // have already completed.
-        final Map<String, Object?>? startParams = (await start)['params'] as Map<String, Object?>?;
-        final Map<String, Object?>? startedParams =
-            (await started)['params'] as Map<String, Object?>?;
+        final startParams = (await start)['params'] as Map<String, Object?>?;
+        final startedParams = (await started)['params'] as Map<String, Object?>?;
         _currentRunningAppId = startedParams?['appId'] as String?;
         _currentRunningDeviceId = startParams?['deviceId'] as String?;
         _currentRunningMode = startParams?['mode'] as String?;
@@ -706,7 +713,7 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     _debugPrint(
       'Performing ${pause ? "paused " : ""}${fullRestart ? "hot restart" : "hot reload"}...',
     );
-    final Map<String, Object?>? hotReloadResponse =
+    final hotReloadResponse =
         await _sendRequest('app.restart', <String, Object?>{
               'appId': _currentRunningAppId,
               'fullRestart': fullRestart,
@@ -776,14 +783,10 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     return 0;
   }
 
-  int id = 1;
+  var id = 1;
   Future<Object?> _sendRequest(String method, Object? params) async {
     final int requestId = id++;
-    final Map<String, Object?> request = <String, Object?>{
-      'id': requestId,
-      'method': method,
-      'params': params,
-    };
+    final request = <String, Object?>{'id': requestId, 'method': method, 'params': params};
     final String jsonEncoded = json.encode(<Map<String, Object?>>[request]);
     _debugPrint(jsonEncoded, topic: '=stdin=>');
 
@@ -856,10 +859,10 @@ final class FlutterTestTestDriver extends FlutterTestDriver {
     _processPid = version?['pid'] as int?;
 
     if (withDebugger) {
-      final Map<String, Object?> startedProcessParams =
+      final startedProcessParams =
           (await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout))['params']!
               as Map<String, Object?>;
-      final String vmServiceHttpString = startedProcessParams['vmServiceUri']! as String;
+      final vmServiceHttpString = startedProcessParams['vmServiceUri']! as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.
@@ -890,7 +893,7 @@ final class FlutterTestTestDriver extends FlutterTestDriver {
   }
 
   Future<void> waitForCompletion() async {
-    final Completer<bool> done = Completer<bool>();
+    final done = Completer<bool>();
     // Waiting for `{"success":true,"type":"done",...}` line indicating
     // end of test run.
     final StreamSubscription<String> subscription = _stdout.stream.listen((String line) async {
@@ -902,7 +905,7 @@ final class FlutterTestTestDriver extends FlutterTestDriver {
 
     await resume();
 
-    final Future<void> timeoutFuture = Future<void>.delayed(defaultTimeout);
+    final timeoutFuture = Future<void>.delayed(defaultTimeout);
     await Future.any<void>(<Future<void>>[done.future, timeoutFuture]);
     await subscription.cancel();
     if (!done.isCompleted) {
@@ -938,7 +941,7 @@ class SourcePosition {
 }
 
 Future<Isolate> waitForExtension(VmService vmService, String extension) async {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   try {
     await vmService.streamListen(EventStreams.kExtension);
   } on RPCError {

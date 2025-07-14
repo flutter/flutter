@@ -37,7 +37,7 @@ For example, if we inject at (-500, -500) `touch-input-view` will see a touch ev
 
 ## Running the Test
 
-Reference the Flutter integration test [documentation](https://github.com/flutter/engine/blob/main/shell/platform/fuchsia/flutter/tests/integration/README.md) at //flutter/shell/platform/fuchsia/flutter/tests/integration/README.md
+Reference the Flutter integration test [documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/fuchsia/flutter/tests/integration/README.md) at //flutter/shell/platform/fuchsia/flutter/tests/integration/README.md
 
 ## Playing around with `touch-input-view`
 

@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 const String kCanvasContainerTag = 'flt-canvas-container';
 
-typedef RenderResult =
-    ({List<DomImageBitmap> imageBitmaps, int rasterStartMicros, int rasterEndMicros});
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
 
 // This is an interface that renders a `ScenePicture` as a `DomImageBitmap`.
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
@@ -206,28 +208,11 @@ class EngineSceneView {
     }
   }
 
-  String _generateDebugFilename() {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return 'flutter-scene-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void dumpDebugInfo() {
+  Map<String, dynamic>? dumpDebugInfo() {
     if (kDebugMode && _previousRender != null) {
-      final Map<String, Object?> debugJson = _previousRender!.scene.debugJsonDescription;
-      final String jsonString = jsonEncode(debugJson);
-      final blob = createDomBlob([jsonString], {'type': 'application/json'});
-      final url = domWindow.URL.createObjectURL(blob);
-      final element = domDocument.createElement('a');
-      element.setAttribute('href', url);
-      element.setAttribute('download', _generateDebugFilename());
-      element.click();
+      return _previousRender!.scene.debugJsonDescription;
     }
+    return null;
   }
 }
 
@@ -240,7 +225,7 @@ sealed class SliceContainer {
 final class PictureSliceContainer extends SliceContainer {
   factory PictureSliceContainer(ui.Rect bounds) {
     final DomElement container = domDocument.createElement(kCanvasContainerTag);
-    final DomCanvasElement canvas = createDomCanvasElement(
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
       width: bounds.width.toInt(),
       height: bounds.height.toInt(),
     );
@@ -289,13 +274,13 @@ final class PictureSliceContainer extends SliceContainer {
   }
 
   void renderBitmap(DomImageBitmap bitmap) {
-    final DomCanvasRenderingContextBitmapRenderer ctx = canvas.contextBitmapRenderer;
+    final DomImageBitmapRenderingContext ctx = canvas.contextBitmapRenderer;
     ctx.transferFromImageBitmap(bitmap);
   }
 
   @override
   final DomElement container;
-  final DomCanvasElement canvas;
+  final DomHTMLCanvasElement canvas;
 }
 
 final class PlatformViewContainer extends SliceContainer {

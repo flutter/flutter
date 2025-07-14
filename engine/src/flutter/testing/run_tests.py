@@ -131,7 +131,8 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   for forbidden_string in forbidden_output:
     if forbidden_string in output:
-      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_string}.*$', output)]
+      forbidden_escaped = re.escape(forbidden_string)
+      matches = [x.group(0) for x in re.findall(f'^.*{forbidden_escaped}.*$', output)]
       raise RuntimeError(
           f'command "{command_string}" contained forbidden string "{forbidden_string}": {matches}'
       )
@@ -462,6 +463,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('availability_version_check_unittests'),
+        make_test('framework_common_swift_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
         make_test('gpu_surface_metal_unittests'),
@@ -505,6 +507,15 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():
+    # macOS Desktop unit tests written in Swift.
+    run_engine_executable(
+        build_dir,
+        'flutter_desktop_darwin_swift_unittests',
+        executable_filter,
+        shuffle_flags,
+        coverage=coverage
+    )
+
     # flutter_desktop_darwin_unittests uses global state that isn't handled
     # correctly by gtest-parallel.
     # https://github.com/flutter/flutter/issues/104789
@@ -598,29 +609,34 @@ def run_engine_benchmarks(build_dir, executable_filter):
 
 class FlutterTesterOptions():
 
-  def __init__(
+  def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded=False,
       enable_impeller=False,
-      enable_observatory=False,
+      enable_vm_service=False,
+      enable_microtask_profiling=False,
       expect_failure=False
   ):
     self.multithreaded = multithreaded
     self.enable_impeller = enable_impeller
-    self.enable_observatory = enable_observatory
+    self.enable_vm_service = enable_vm_service
+    self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
 
   def apply_args(self, command_args):
-    if not self.enable_observatory:
-      command_args.append('--disable-observatory')
+    if not self.enable_vm_service:
+      command_args.append('--disable-vm-service')
 
     if self.enable_impeller:
-      command_args += ['--enable-impeller']
+      command_args += ['--enable-impeller', '--enable-flutter-gpu']
     else:
       command_args += ['--no-enable-impeller']
 
     if self.multithreaded:
       command_args.insert(0, '--force-multithreading')
+
+    if self.enable_microtask_profiling:
+      command_args.append('--profile-microtasks')
 
   def threading_description(self):
     if self.multithreaded:
@@ -857,15 +873,16 @@ def gather_dart_tests(build_dir, test_filter):
       cwd=dart_tests_dir,
   )
 
-  dart_observatory_tests = glob.glob('%s/observatory/*_test.dart' % dart_tests_dir)
+  dart_vm_service_tests = glob.glob('%s/vm_service/*_test.dart' % dart_tests_dir)
   dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
 
   if 'release' not in build_dir:
-    for dart_test_file in dart_observatory_tests:
-      if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
+    for dart_test_file in dart_vm_service_tests:
+      dart_test_basename = os.path.basename(dart_test_file)
+      if test_filter is not None and dart_test_basename not in test_filter:
         logger.info("Skipping '%s' due to filter.", dart_test_file)
       else:
-        logger.info("Gathering dart test '%s' with observatory enabled", dart_test_file)
+        logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
           for enable_impeller in [False, True]:
             yield gather_dart_test(
@@ -873,7 +890,9 @@ def gather_dart_tests(build_dir, test_filter):
                 FlutterTesterOptions(
                     multithreaded=multithreaded,
                     enable_impeller=enable_impeller,
-                    enable_observatory=True
+                    enable_vm_service=True,
+                    enable_microtask_profiling=dart_test_basename ==
+                    'microtask_profiling_test.dart',
                 )
             )
 
@@ -968,7 +987,6 @@ def build_dart_host_test_list():
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
       os.path.join('flutter', 'tools', 'const_finder'),
-      os.path.join('flutter', 'tools', 'dir_contents_diff'),
       os.path.join('flutter', 'tools', 'engine_tool'),
       os.path.join('flutter', 'tools', 'githooks'),
       os.path.join('flutter', 'tools', 'header_guard_check'),
@@ -1061,6 +1079,23 @@ class DirectoryChange():
     os.chdir(self.old_cwd)
 
 
+def contains_png_recursive(directory):
+  """
+  Recursively checks if a directory contains at least one .png file.
+
+  Args:
+    directory: The path to the directory to check.
+
+  Returns:
+    True if a .png file is found, False otherwise.
+  """
+  for _, _, files in os.walk(directory):
+    for filename in files:
+      if filename.lower().endswith('.png'):
+        return True
+  return False
+
+
 def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
   """
   Executes the impeller golden image tests from in the `variant` build.
@@ -1079,19 +1114,9 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     extra_env.update(vulkan_validation_env(build_dir))
     run_cmd([tests_path, f'--working_dir={temp_dir}'], cwd=build_dir, env=extra_env)
     dart_bin = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
-    golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
-    script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
-    diff_result = subprocess.run(
-        f'{dart_bin} {script_path} {golden_path} {temp_dir}',
-        check=False,
-        shell=True,
-        stdout=subprocess.PIPE,
-        cwd=os.path.join(BUILDROOT_DIR, 'flutter')
-    )
-    if diff_result.returncode != 0:
-      print_divider('<')
-      print(diff_result.stdout.decode())
-      raise RuntimeError('impeller_golden_tests diff failure')
+
+    if not contains_png_recursive(temp_dir):
+      raise RuntimeError('impeller_golden_tests diff failure - no PNGs found!')
 
     if not require_skia_gold:
       print_divider('<')
@@ -1109,7 +1134,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
         raise RuntimeError(
             """
 The GOLDCTL environment variable is not set. This is required for Skia Gold tests.
-See https://github.com/flutter/engine/tree/main/testing/skia_gold_client#configuring-ci
+See flutter/tree/main/engine/src/flutter/testing/skia_gold_client#configuring-ci
 for more information.
 """
         )

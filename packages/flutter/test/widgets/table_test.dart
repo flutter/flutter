@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsRole;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,11 +113,17 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: table)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: table),
+      ),
     );
     // Move table to a different location to simulate detaching and re-attaching effect.
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: Center(child: table))),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Center(child: table)),
+      ),
     );
 
     expect(tester.takeException(), isNull);
@@ -851,7 +856,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Table(
           children: <TableRow>[
-            TableRow(children: <Widget>[KeyedSubtree(key: key, child: const Text('Hello'))]),
+            TableRow(
+              children: <Widget>[KeyedSubtree(key: key, child: const Text('Hello'))],
+            ),
           ],
         ),
       );

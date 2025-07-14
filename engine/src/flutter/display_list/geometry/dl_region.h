@@ -54,9 +54,6 @@ class DlRegion {
 
   /// Returns whether this region intersects with a rectangle.
   bool intersects(const DlIRect& rect) const;
-  bool intersects(const SkIRect& rect) const {
-    return intersects(ToDlIRect(rect));
-  }
 
   /// Returns whether this region intersects with another region.
   bool intersects(const DlRegion& region) const;

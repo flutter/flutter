@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -13,10 +13,10 @@ import '../../../globals.dart' as globals;
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
 Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const String kClangPlusPlusBinary = 'clang++';
-  const String kClangBinary = 'clang';
-  const String kArBinary = 'llvm-ar';
-  const String kLdBinary = 'ld.lld';
+  const kClangPlusPlusBinary = 'clang++';
+  const kClangBinary = 'clang';
+  const kArBinary = 'llvm-ar';
+  const kLdBinary = 'ld.lld';
 
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
@@ -29,8 +29,8 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
 
   final Directory clangDir = clangPpFile.parent;
-  final Map<String, Uri> binaryPaths = <String, Uri>{};
-  for (final String binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
+  final binaryPaths = <String, Uri>{};
+  for (final binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
     final File binaryFile = clangDir.childFile(binary);
     if (!await binaryFile.exists()) {
       throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");

@@ -27,15 +27,13 @@ Future<void> main() async {
           ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/arm64-v8a/libflutter.so',
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
+          // Debug mode intentionally includes `x86_64`.
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
         checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -152,12 +150,27 @@ Future<void> main() async {
             throw TaskResult.failure("Shared library doesn't exist");
           }
         }
+
+        section('AGP cxx build artifacts');
+
+        final String defaultPath = path.join(project.rootPath, 'android', 'app', '.cxx');
+
+        final String modifiedPath = path.join(project.rootPath, 'build', '.cxx');
+        if (Directory(defaultPath).existsSync()) {
+          throw TaskResult.failure('Producing unexpected build artifacts in $defaultPath');
+        }
+        if (!Directory(modifiedPath).existsSync()) {
+          throw TaskResult.failure(
+            'Not producing external native build output directory in $modifiedPath',
+          );
+        }
       });
 
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

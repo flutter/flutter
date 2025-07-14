@@ -33,6 +33,6 @@
   "searchWebButtonLabel": "Pretraži web",
   "shareButtonLabel": "Dijeli...",
   "clearButtonLabel": "Izbriši",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Odustani",
+  "backButtonLabel": "Natrag"
 }

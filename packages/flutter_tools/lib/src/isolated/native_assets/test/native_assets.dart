@@ -4,7 +4,7 @@
 
 // Logic for native assets shared between all host OSes.
 
-import 'package:native_assets_cli/code_assets.dart' show OS;
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../base/platform.dart';
@@ -30,14 +30,20 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     return null;
   }
   final Uri projectUri = FlutterProject.current().directory.uri;
-  final String runPackageName =
-      buildInfo.packageConfig.packages.firstWhere((Package p) => p.root == projectUri).name;
+  final String runPackageName = buildInfo.packageConfig.packages
+      .firstWhere((Package p) => p.root == projectUri)
+      .name;
+  final String pubspecPath = Uri.file(
+    buildInfo.packageConfigPath,
+  ).resolve('../pubspec.yaml').toFilePath();
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
     runPackageName,
+    includeDevDependencies: true,
+    pubspecPath,
   );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
@@ -57,9 +63,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
-  final Map<String, String> environmentDefines = <String, String>{
-    kBuildMode: buildInfo.mode.cliName,
-  };
+  final environmentDefines = <String, String>{kBuildMode: buildInfo.mode.cliName};
 
   // First perform the dart build.
   final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(

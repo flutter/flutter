@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -83,7 +84,7 @@ class SystemContextMenu extends StatefulWidget {
         ),
       ),
       items: items ?? getDefaultItems(editableTextState),
-      onSystemHide: editableTextState.hideToolbar,
+      onSystemHide: () => editableTextState.hideToolbar(false),
     );
   }
 
@@ -134,6 +135,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
+      if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -162,8 +164,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
     if (widget.items.isNotEmpty) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final List<IOSSystemContextMenuItemData> itemDatas =
-          widget.items.map((IOSSystemContextMenuItem item) => item.getData(localizations)).toList();
+      final List<IOSSystemContextMenuItemData> itemDatas = widget.items
+          .map((IOSSystemContextMenuItem item) => item.getData(localizations))
+          .toList();
       _systemContextMenuController.showWithItems(widget.anchor, itemDatas);
     }
 
@@ -320,7 +323,7 @@ final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataLookUp], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemLookUp].
   const IOSSystemContextMenuItemLookUp({this.title});
 
@@ -333,8 +336,9 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemLookUp(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -355,7 +359,7 @@ final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataSearchWeb], which specifies the data to be
 ///    sent to the platform for this same button.
-final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
   const IOSSystemContextMenuItemSearchWeb({this.title});
 
@@ -370,8 +374,9 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemSearchWeb(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('title', title));
   }
 }
 
@@ -392,7 +397,7 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
 ///    context menu.
 ///  * [IOSSystemContextMenuItemDataShare], which specifies the data to be sent
 ///    to the platform for this same button.
-final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
+final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemShare].
   const IOSSystemContextMenuItemShare({this.title});
 
@@ -405,8 +410,30 @@ final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   }
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemShare(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+  }
+}
+
+/// Creates an instance of [IOSSystemContextMenuItem] for the
+/// system's built-in Live Text button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataLiveText], which specifies the data to be sent
+///    to the platform for this same button.
+final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
+  /// Creates an instance of [IOSSystemContextMenuItemLiveText].
+  const IOSSystemContextMenuItemLiveText();
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    return const IOSSystemContextMenuItemDataLiveText();
   }
 }
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -12,15 +13,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -53,10 +51,7 @@ void main() {
 
   testUsingContext(
     'does not throw if clang not present but no native assets present',
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
@@ -81,16 +76,14 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['which', 'clang++'],
-              stdout: '''
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['which', 'clang++'],
+          stdout: '''
 /some/path/to/clang++
 ''', // Newline at the end of the string.
-            ),
-          ]),
+        ),
+      ]),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -104,7 +97,7 @@ void main() {
       await fileSystem.file('/some/path/to/llvm-ar').create();
       await fileSystem.file('/some/path/to/ld.lld').create();
 
-      final File packageConfigFile = writePackageConfigFile(
+      final File packageConfigFile = writePackageConfigFiles(
         directory: fileSystem.directory(projectUri),
         mainLibName: 'my_app',
       );
@@ -112,12 +105,18 @@ void main() {
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        includeDevDependencies: false,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));

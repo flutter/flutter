@@ -15,28 +15,16 @@ void main() {
     final RichText richText = tester.widget(find.byType(RichText).first);
     expect(richText.text.toPlainText(), 'First tappable label text');
 
-    // First Radio is initially unchecked.
-    Radio<bool> radio = tester.widget(find.byType(Radio<bool>).first);
-    expect(radio.value, true);
-    expect(radio.groupValue, false);
-
-    // Last Radio is initially checked.
-    radio = tester.widget(find.byType(Radio<bool>).last);
-    expect(radio.value, false);
-    expect(radio.groupValue, false);
+    RadioGroup<bool> group = tester.widget<RadioGroup<bool>>(find.byType(RadioGroup<bool>));
+    // Second radio is checked.
+    expect(group.groupValue, isFalse);
 
     // Tap the first radio.
     await tester.tap(find.byType(Radio<bool>).first);
     await tester.pump();
 
     // First Radio is now checked.
-    radio = tester.widget(find.byType(Radio<bool>).first);
-    expect(radio.value, true);
-    expect(radio.groupValue, true);
-
-    // Last Radio is now unchecked.
-    radio = tester.widget(find.byType(Radio<bool>).last);
-    expect(radio.value, false);
-    expect(radio.groupValue, true);
+    group = tester.widget<RadioGroup<bool>>(find.byType(RadioGroup<bool>));
+    expect(group.groupValue, true);
   });
 }

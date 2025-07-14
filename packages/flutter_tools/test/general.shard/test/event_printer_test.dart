@@ -20,7 +20,7 @@ void main() {
     });
 
     testWithoutContext('handles a null parent', () {
-      final FakeDevice device = FakeDevice();
+      final device = FakeDevice();
 
       expect(() => eventPrinter.handleFinishedTest(device), returnsNormally);
       expect(() => eventPrinter.handleStartedDevice(vmServiceUri), returnsNormally);
@@ -35,8 +35,7 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234",'
-          '"observatoryUri":"http://localhost:1234"}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":"http://localhost:1234"}}]'
           '\n',
         );
       });
@@ -47,8 +46,7 @@ void main() {
         expect(
           output.toString(),
           '\n'
-          '[{"event":"test.startedProcess","params":{"vmServiceUri":null,'
-          '"observatoryUri":null}}]'
+          '[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]'
           '\n',
         );
       });

@@ -47,6 +47,11 @@ mixin CompositionAwareMixin {
   /// so it is safe to reference it to get the current composingText.
   String? composingText;
 
+  /// The base offset of the composing text in the `InputElement` or `TextAreaElement`.
+  ///
+  /// Will be null if composing just started, ended, or no composing is being done.
+  int? composingBase;
+
   void addCompositionEventHandlers(DomHTMLElement domElement) {
     domElement.addEventListener(_kCompositionStart, _compositionStartListener);
     domElement.addEventListener(_kCompositionUpdate, _compositionUpdateListener);
@@ -59,34 +64,35 @@ mixin CompositionAwareMixin {
     domElement.removeEventListener(_kCompositionEnd, _compositionEndListener);
   }
 
-  JSVoid _handleCompositionStart(DomEvent event) {
+  void _handleCompositionStart(DomEvent event) {
     composingText = null;
+    composingBase = null;
   }
 
-  JSVoid _handleCompositionUpdate(DomEvent event) {
-    if (domInstanceOfString(event, 'CompositionEvent')) {
+  void _handleCompositionUpdate(DomEvent event) {
+    if (event.isA<DomCompositionEvent>()) {
       composingText = (event as DomCompositionEvent).data;
     }
   }
 
-  JSVoid _handleCompositionEnd(DomEvent event) {
+  void _handleCompositionEnd(DomEvent event) {
     composingText = null;
+    composingBase = null;
   }
 
   EditingState determineCompositionState(EditingState editingState) {
-    if (editingState.extentOffset == null || composingText == null || editingState.text == null) {
+    if (composingText == null) {
       return editingState;
     }
 
-    final int composingBase = editingState.extentOffset! - composingText!.length;
-
-    if (composingBase < 0) {
+    composingBase ??= editingState.extentOffset - composingText!.length;
+    if (composingBase! < 0) {
       return editingState;
     }
 
     return editingState.copyWith(
       composingBaseOffset: composingBase,
-      composingExtentOffset: composingBase + composingText!.length,
+      composingExtentOffset: composingBase! + composingText!.length,
     );
   }
 }

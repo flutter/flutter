@@ -7,14 +7,13 @@ publish_to: none
 
 # Required for workspace support.
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 # This package is managed as part of the engine workspace.
 resolution: workspace
 
 dependencies:
   args: any
-  dir_contents_diff: any
   engine_repo_tools: any
   meta: any
   path: any

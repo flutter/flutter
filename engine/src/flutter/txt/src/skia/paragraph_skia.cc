@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "display_list/dl_paint.h"
+#include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "include/core/SkMatrix.h"
@@ -76,7 +77,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     if (impeller_enabled_) {
       SkTextBlobRunIterator run(blob.get());
       if (ShouldRenderAsPath(dl_paints_[paint_id])) {
-        auto path = skia::textlayout::Paragraph::GetPath(blob.get());
+        SkPath path = skia::textlayout::Paragraph::GetPath(blob.get());
         // If there is no path, this is an emoji and should be drawn as is,
         // ignoring the color source.
         if (path.isEmpty()) {

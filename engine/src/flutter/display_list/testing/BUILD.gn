@@ -10,6 +10,7 @@ source_set("display_list_testing") {
 
   sources = [
     "dl_test_equality.h",
+    "dl_test_mock_path_receiver.h",
     "dl_test_snippets.cc",
     "dl_test_snippets.h",
   ]

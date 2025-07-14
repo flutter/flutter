@@ -79,6 +79,10 @@ GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {
 
 void gdk_window_set_cursor(GdkWindow* window, GdkCursor* cursor) {}
 
+void gdk_gl_context_make_current(GdkGLContext* context) {}
+
+void gdk_gl_context_clear_current() {}
+
 GtkWidget* gtk_window_new(GtkWindowType type) {
   GtkWindow* window = GTK_WINDOW(g_object_new(gtk_window_get_type(), nullptr));
   mock->gtk_window_new(window, type);
@@ -123,6 +127,8 @@ void gtk_window_iconify(GtkWindow* window) {
 void gtk_window_deiconify(GtkWindow* window) {
   mock->gtk_window_deiconify(window);
 }
+
+void gtk_widget_realize(GtkWidget* widget) {}
 
 void gtk_widget_show(GtkWidget* widget) {}
 

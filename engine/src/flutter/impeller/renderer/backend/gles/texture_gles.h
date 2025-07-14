@@ -102,6 +102,10 @@ class TextureGLES final : public Texture,
 
   bool IsWrapped() const;
 
+  /// @brief Reset the internal texture state so that the reactor will not free
+  ///        the associated handle.
+  void Leak();
+
   std::optional<GLuint> GetFBO() const;
 
   //----------------------------------------------------------------------------

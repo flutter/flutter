@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
@@ -59,6 +60,7 @@ using DlImageSampling = flutter::DlImageSampling;
 using SaveLayerOptions = flutter::SaveLayerOptions;
 using DisplayListOpType = flutter::DisplayListOpType;
 using DisplayListOpCategory = flutter::DisplayListOpCategory;
+using DlPathFillType = flutter::DlPathFillType;
 using DlPath = flutter::DlPath;
 
 using DisplayListStreamDispatcher = flutter::testing::DisplayListStreamDispatcher;
@@ -137,6 +139,14 @@ extern std::ostream& operator<<(
   return os << "DisplayListOpCategory::???";
 }
 
+extern std::ostream& operator<<(
+    std::ostream& os, const flutter::DlPathFillType& type) {
+  switch (type) {
+    DLT_OSTREAM_CASE(DlPathFillType, Odd);
+    DLT_OSTREAM_CASE(DlPathFillType, NonZero);
+  }
+}
+
 #undef DLT_OSTREAM_CASE
 
 std::ostream& operator<<(std::ostream& os, const SaveLayerOptions& options) {
@@ -162,9 +172,15 @@ static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
 
 extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
   return os << "DlPath("
-            << "bounds: " << path.GetSkBounds()
+            << "bounds: " << path.GetBounds()
             // should iterate over verbs and coordinates...
             << ")";
+}
+
+extern std::ostream& operator<<(std::ostream& os, const flutter::testing::DlVerbosePath& path) {
+  DisplayListStreamDispatcher dispatcher(os, 0);
+  dispatcher.out(path);
+  return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op) {
@@ -625,6 +641,64 @@ void DisplayListStreamDispatcher::out(const DlImageFilter* filter) {
     outdent(1);
   }
 }
+DisplayListStreamDispatcher::DlPathStreamer::~DlPathStreamer() {
+  if (done_with_info_) {
+    dispatcher_.outdent(2);
+    dispatcher_.startl() << "}" << std::endl;
+  }
+}
+void DisplayListStreamDispatcher::DlPathStreamer::MoveTo(const DlPoint& p2,
+                                                         bool will_be_closed) {
+  if (!done_with_info_) {
+    done_with_info_ = true;
+    dispatcher_.startl() << "{" << std::endl;
+    dispatcher_.indent(2);
+  }
+  dispatcher_.startl() << "MoveTo(" << p2 << ", " << will_be_closed << "),"
+                       << std::endl;
+}
+void DisplayListStreamDispatcher::DlPathStreamer::LineTo(const DlPoint& p2) {
+  FML_DCHECK(done_with_info_);
+  dispatcher_.startl() << "LineTo(" << p2 << ")," << std::endl;
+}
+void DisplayListStreamDispatcher::DlPathStreamer::QuadTo(const DlPoint& cp,
+                                                         const DlPoint& p2) {
+  FML_DCHECK(done_with_info_);
+  dispatcher_.startl() << "QuadTo(" << cp << ", " << p2 << ")," << std::endl;
+}
+bool DisplayListStreamDispatcher::DlPathStreamer::ConicTo(const DlPoint& cp,
+                                                          const DlPoint& p2,
+                                                          DlScalar weight) {
+  FML_DCHECK(done_with_info_);
+  dispatcher_.startl() << "ConicTo(" << cp << ", " << p2 << ", " << weight
+                       << ")," << std::endl;
+  return true;
+}
+void DisplayListStreamDispatcher::DlPathStreamer::CubicTo(const DlPoint& cp1,
+                                                          const DlPoint& cp2,
+                                                          const DlPoint& p2) {
+  FML_DCHECK(done_with_info_);
+  dispatcher_.startl() << "CubicTo(" << cp1 << ", " << cp2 << ", " << p2 << ", "
+                                     << p2 << ")," << std::endl;
+}
+void DisplayListStreamDispatcher::DlPathStreamer::Close() {
+  FML_DCHECK(done_with_info_);
+  dispatcher_.startl() << "Close()," << std::endl;
+}
+void DisplayListStreamDispatcher::out(const DlVerbosePath& path) {
+  os_ << "DlPath(" << path.path.GetFillType() << ", ";
+  if (path.path.IsConvex()) {
+    os_ << "(convex), ";
+  }
+  os_ << path.path.GetBounds() << "," << std::endl;
+  indent(2);
+  {
+    DlPathStreamer streamer(*this);
+    path.path.Dispatch(streamer);
+  }
+  outdent(2);
+  os_ << ")";
+}
 void DisplayListStreamDispatcher::setImageFilter(const DlImageFilter* filter) {
   startl() << "setImageFilter(";
   indent(15);
@@ -898,7 +972,7 @@ void DisplayListStreamDispatcher::drawDisplayList(
     const sk_sp<DisplayList> display_list, DlScalar opacity) {
   startl() << "drawDisplayList("
            << "ID: " << display_list->unique_id() << ", "
-           << "bounds: " << display_list->bounds() << ", "
+           << "bounds: " << display_list->GetBounds() << ", "
            << "opacity: " << opacity
            << ");" << std::endl;
 }

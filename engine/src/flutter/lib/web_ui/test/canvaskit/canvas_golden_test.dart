@@ -398,10 +398,9 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.restore();
 
   canvas.translate(60, 0);
-  final CkPaint thickStroke =
-      CkPaint()
-        ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = 20;
+  final CkPaint thickStroke = CkPaint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 20;
   final CkPaint semitransparent = CkPaint()..color = const ui.Color(0x66000000);
 
   canvas.saveLayer(kDefaultRegion, semitransparent);
@@ -477,7 +476,7 @@ void drawTestPicture(CkCanvas canvas) {
 }
 
 CkImage generateTestImage() {
-  final DomCanvasElement canvas = createDomCanvasElement(width: 20, height: 20);
+  final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 20, height: 20);
   final DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#FF0000';
   ctx.fillRect(0, 0, 10, 10);
@@ -488,17 +487,16 @@ CkImage generateTestImage() {
   ctx.fillStyle = '#FF00FF';
   ctx.fillRect(10, 10, 10, 10);
   final Uint8List imageData = ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
-  final SkImage skImage =
-      canvasKit.MakeImage(
-        SkImageInfo(
-          width: 20,
-          height: 20,
-          alphaType: canvasKit.AlphaType.Premul,
-          colorType: canvasKit.ColorType.RGBA_8888,
-          colorSpace: SkColorSpaceSRGB,
-        ),
-        imageData,
-        4 * 20,
-      )!;
+  final SkImage skImage = canvasKit.MakeImage(
+    SkImageInfo(
+      width: 20,
+      height: 20,
+      alphaType: canvasKit.AlphaType.Premul,
+      colorType: canvasKit.ColorType.RGBA_8888,
+      colorSpace: SkColorSpaceSRGB,
+    ),
+    imageData,
+    4 * 20,
+  )!;
   return CkImage(skImage);
 }

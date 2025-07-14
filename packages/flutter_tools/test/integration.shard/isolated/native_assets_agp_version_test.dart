@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Skip('flutter/flutter/issues/170382')
+library;
+
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -12,27 +15,23 @@ import '../test_utils.dart' show flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
-const String packageName = 'package_with_native_assets';
+const packageName = 'package_with_native_assets';
 
 /// The AGP versions to run these tests against.
-final List<String> agpVersions = <String>['8.4.0'];
+final agpVersions = <String>['8.4.0'];
 
 /// The build modes to target for each flutter command that supports passing
 /// a build mode.
 ///
 /// The flow of compiling kernel as well as bundling dylibs can differ based on
 /// build mode, so we should cover this.
-const List<String> buildModes = <String>['debug', 'profile', 'release'];
+const buildModes = <String>['debug', 'profile', 'release'];
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
-
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
 
   for (final String agpVersion in agpVersions) {
     for (final String buildMode in buildModes) {
@@ -64,7 +63,7 @@ void main() {
             // Use expected AGP version.
             final String settingsGradle = settingsGradleFile.readAsStringSync();
 
-            final RegExp androidPluginRegExp = RegExp(
+            final androidPluginRegExp = RegExp(
               r'id\("com\.android\.application"\)\s+version\s+"([^"]+)"\s+apply\s+false',
             );
             expect(androidPluginRegExp.firstMatch(settingsGradle), isNotNull);
@@ -80,11 +79,12 @@ void main() {
               '\r\n',
               '\n',
             );
-            final RegExp buildTypesBlockRegExp = RegExp(
+            final buildTypesBlockRegExp = RegExp(
               r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}',
             );
             final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)![0]!;
-            final String appBuildGradleSegmentDefiningFlavors = '''
+            final appBuildGradleSegmentDefiningFlavors =
+                '''
     $buildTypesBlock
 
     flavorDimensions += "mode"
@@ -131,9 +131,8 @@ void main() {
             expect(nativeAssetsDir, exists);
 
             // We expect one subdirectory for each Android architecture.
-            expect(nativeAssetsDir.listSync().length, 4);
+            expect(nativeAssetsDir.listSync().length, 3);
             expect(nativeAssetsDir..childDirectory('armeabi-v7a'), exists);
-            expect(nativeAssetsDir..childDirectory('x86'), exists);
             expect(nativeAssetsDir..childDirectory('arm64-v8a'), exists);
             expect(nativeAssetsDir..childDirectory('x86_64'), exists);
           });

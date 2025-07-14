@@ -26,7 +26,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(delegate);
 }
 
-#if not APPLICATION_EXTENSION_API_ONLY
 - (void)testDidEnterBackground {
   XCTNSNotificationExpectation* expectation = [[XCTNSNotificationExpectation alloc]
       initWithName:UIApplicationDidEnterBackgroundNotification];
@@ -109,7 +108,5 @@ FLUTTER_ASSERT_ARC
   XCTAssertNil(weakPlugin);
   XCTAssertNil(weakDelegate);
 }
-
-#endif
 
 @end

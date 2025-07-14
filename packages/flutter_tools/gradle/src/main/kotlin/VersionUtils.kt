@@ -26,7 +26,7 @@ object VersionUtils {
         val v2Parts = version2.split(".", "-")
         val maxSize = max(v1Parts.size, v2Parts.size)
 
-        for (i in 0..maxSize - 1) {
+        for (i in 0 until maxSize) {
             val v1Part: String = v1Parts.getOrNull(i) ?: "0"
             val v2Part: String = v2Parts.getOrNull(i) ?: "0"
 
@@ -42,7 +42,7 @@ object VersionUtils {
                     return version1 // v1 is a number, v2 is not, so v1 is newer.
                 v1Num == null && v2Num != null ->
                     return version2 // v1 is not a number, v2 is, so v2 is newer.
-                v1Num == null && v2Num == null -> { // Both are not numbers (pre-release identifiers)
+                else -> { // Both are not numbers (pre-release identifiers)
                     if (v1Part != v2Part) {
                         return if (comparePreReleaseIdentifiers(v1Part, v2Part)) version1 else version2
                     }

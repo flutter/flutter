@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
 class TestDeferredComponentManager implements DeferredComponentManager {
   DeferredComponentChannel channel;
@@ -53,7 +52,6 @@ class TestDeferredComponentManager implements DeferredComponentManager {
   public void destroy() {}
 }
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class DeferredComponentChannelTest {
   @Test

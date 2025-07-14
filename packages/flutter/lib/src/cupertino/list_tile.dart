@@ -283,13 +283,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => false,
     };
     final Widget title = DefaultTextStyle(
-      style:
-          baseType || widget.subtitle == null
-              ? textStyle
-              : textStyle.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-              ),
+      style: baseType || widget.subtitle == null
+          ? textStyle
+          : textStyle.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
+            ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       child: widget.title,
@@ -308,7 +307,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     // null and it will resolve to the correct color provided by context. But if
     // the tile was tapped, it is set to what user provided or if null to the
     // default color that matched the iOS-style.
-    Color? backgroundColor = widget.backgroundColor;
+    Color backgroundColor = widget.backgroundColor ?? CupertinoColors.transparent;
     if (_tapped) {
       backgroundColor =
           widget.backgroundColorActivated ?? CupertinoColors.systemGrey4.resolveFrom(context);
@@ -321,44 +320,49 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
     };
 
-    final Widget child = Container(
+    final Widget child = ConstrainedBox(
       constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
-      color: backgroundColor,
-      child: Padding(
-        padding: padding,
-        child: Row(
-          children: <Widget>[
-            if (widget.leading case final Widget leading) ...<Widget>[
-              SizedBox.square(dimension: widget.leadingSize, child: Center(child: leading)),
-              SizedBox(width: widget.leadingToTitle),
-            ] else
-              SizedBox(height: widget.leadingSize),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  title,
-                  if (widget.subtitle case final Widget subtitle) ...<Widget>[
-                    const SizedBox(height: _kNotchedTitleToSubtitle),
-                    DefaultTextStyle(
-                      style: coloredStyle.copyWith(
-                        fontSize: baseType ? _kSubtitleFontSize : _kNotchedSubtitleFontSize,
+      child: ColoredBox(
+        color: backgroundColor,
+        child: Padding(
+          padding: padding,
+          child: Row(
+            children: <Widget>[
+              if (widget.leading case final Widget leading) ...<Widget>[
+                SizedBox.square(
+                  dimension: widget.leadingSize,
+                  child: Center(child: leading),
+                ),
+                SizedBox(width: widget.leadingToTitle),
+              ] else
+                SizedBox(height: widget.leadingSize),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    title,
+                    if (widget.subtitle case final Widget subtitle) ...<Widget>[
+                      const SizedBox(height: _kNotchedTitleToSubtitle),
+                      DefaultTextStyle(
+                        style: coloredStyle.copyWith(
+                          fontSize: baseType ? _kSubtitleFontSize : _kNotchedSubtitleFontSize,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: subtitle,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      child: subtitle,
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (widget.additionalInfo case final Widget additionalInfo) ...<Widget>[
-              DefaultTextStyle(style: coloredStyle, maxLines: 1, child: additionalInfo),
-              if (widget.trailing != null) const SizedBox(width: _kAdditionalInfoToTrailing),
+              if (widget.additionalInfo case final Widget additionalInfo) ...<Widget>[
+                DefaultTextStyle(style: coloredStyle, maxLines: 1, child: additionalInfo),
+                if (widget.trailing != null) const SizedBox(width: _kAdditionalInfoToTrailing),
+              ],
+              if (widget.trailing != null) widget.trailing!,
             ],
-            if (widget.trailing != null) widget.trailing!,
-          ],
+          ),
         ),
       ),
     );
@@ -368,14 +372,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     return GestureDetector(
-      onTapDown:
-          (_) => setState(() {
-            _tapped = true;
-          }),
-      onTapCancel:
-          () => setState(() {
-            _tapped = false;
-          }),
+      onTapDown: (_) => setState(() {
+        _tapped = true;
+      }),
+      onTapCancel: () => setState(() {
+        _tapped = false;
+      }),
       onTap: () async {
         await widget.onTap!();
         if (mounted) {

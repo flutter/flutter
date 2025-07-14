@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Web'de Ara",
   "shareButtonLabel": "Paylaş...",
   "clearButtonLabel": "Temizle",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "İptal",
+  "backButtonLabel": "Geri"
 }

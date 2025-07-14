@@ -564,6 +564,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       if (!_visible) {
         return;
       }
+
       _controller.forward();
       _timer?.cancel();
       _timer = showDuration == null ? null : Timer(showDuration, _controller.reverse);
@@ -606,6 +607,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
+    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+      return;
+    }
     // PointerDeviceKinds that don't support hovering.
     const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
       PointerDeviceKind.invertedStylus,
@@ -617,22 +621,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
-        final LongPressGestureRecognizer recognizer =
-            _longPressRecognizer ??= LongPressGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final LongPressGestureRecognizer recognizer = _longPressRecognizer ??=
+            LongPressGestureRecognizer(debugOwner: this, supportedDevices: triggerModeDeviceKinds);
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
           ..onLongPress = _handleLongPress
           ..onLongPressUp = _handlePressUp
           ..addPointer(event);
       case TooltipTriggerMode.tap:
-        final TapGestureRecognizer recognizer =
-            _tapRecognizer ??= TapGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
+          debugOwner: this,
+          supportedDevices: triggerModeDeviceKinds,
+        );
         recognizer
           ..onTapCancel = _handleTapToDismiss
           ..onTap = _handleTap
@@ -722,6 +722,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
+    assert(mounted);
+    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+      return;
+    }
     // _handleMouseEnter is only called when the mouse starts to hover over this
     // tooltip (including the actual tooltip it shows on the overlay), and this
     // tooltip is the first to be hit in the widget tree's hit testing order.
@@ -732,10 +736,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // before dispatching any `onEnter` events, so `event.device` must have
     // already been removed from _activeHoveringPointerDevices of the tooltips
     // that are no longer being hovered over.
-    final List<TooltipState> tooltipsToDismiss =
-        Tooltip._openedTooltips
-            .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
-            .toList();
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+        .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
+        .toList();
     for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
@@ -744,6 +747,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
+    assert(mounted);
+    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+      return;
+    }
     if (_activeHoveringPointerDevices.isEmpty) {
       return;
     }

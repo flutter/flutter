@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 
 import 'package:meta/meta.dart';
@@ -83,7 +84,7 @@ void testMain() {
 
   test('_PointerEventContext generates expected events', () {
     DomPointerEvent expectCorrectType(DomEvent e) {
-      expect(domInstanceOfString(e, 'PointerEvent'), isTrue);
+      expect(e.isA<DomPointerEvent>(), isTrue);
       return e as DomPointerEvent;
     }
 
@@ -2526,7 +2527,7 @@ void testMain() {
       Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler: (event) {
+        handler: (DomEvent event) {
           expect(event, expected);
           handled = true;
         },
@@ -2541,7 +2542,7 @@ void testMain() {
       final Listener listener = Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler: (event) {
+        handler: (DomEvent event) {
           handled = true;
         },
       );
@@ -3252,19 +3253,18 @@ class _PointerEventContext extends _BasicEventContext
     if (coalescedEvents != null) {
       // There's no JS API for setting coalesced events, so we need to
       // monkey-patch the `getCoalescedEvents` method to return what we want.
-      final coalescedEventJs =
-          coalescedEvents
-              .map(
-                (_CoalescedTouchDetails details) => _moveWithFullDetails(
-                  pointer: details.pointer,
-                  button: button,
-                  buttons: buttons,
-                  clientX: details.clientX,
-                  clientY: details.clientY,
-                  pointerType: 'touch',
-                ),
-              )
-              .toJSAnyDeep;
+      final coalescedEventJs = coalescedEvents
+          .map(
+            (_CoalescedTouchDetails details) => _moveWithFullDetails(
+              pointer: details.pointer,
+              button: button,
+              buttons: buttons,
+              clientX: details.clientX,
+              clientY: details.clientY,
+              pointerType: 'touch',
+            ),
+          )
+          .toJSAnyDeep;
 
       js_util.setProperty(
         event,

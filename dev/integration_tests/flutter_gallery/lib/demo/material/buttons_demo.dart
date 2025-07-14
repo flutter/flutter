@@ -287,12 +287,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown1Value = newValue;
                 });
               },
-              items:
-                  <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-                    String value,
-                  ) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
+                String value,
+              ) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
             ),
           ),
           const SizedBox(height: 24.0),
@@ -306,12 +305,11 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown2Value = newValue;
                 });
               },
-              items:
-                  <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-                    String value,
-                  ) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
+                String value,
+              ) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
             ),
           ),
           const SizedBox(height: 24.0),

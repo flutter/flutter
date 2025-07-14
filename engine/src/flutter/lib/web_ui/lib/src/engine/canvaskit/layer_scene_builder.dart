@@ -4,13 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../vector_math.dart';
-import 'layer.dart';
-import 'layer_tree.dart';
-import 'path.dart';
-import 'picture.dart';
 
 class LayerScene implements ui.Scene {
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
@@ -114,7 +109,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as CkPath, clipBehavior));
+    return pushLayer<ClipPathEngineLayer>(ClipPathEngineLayer(path as LazyPath, clipBehavior));
   }
 
   @override
@@ -128,11 +123,13 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   ClipRSuperellipseEngineLayer pushClipRSuperellipse(
-    ui.RSuperellipse rse, {
+    ui.RSuperellipse rsuperellipse, {
     ui.Clip? clipBehavior,
     ui.EngineLayer? oldLayer,
   }) {
-    return pushLayer<ClipRSuperellipseEngineLayer>(ClipRSuperellipseEngineLayer(rse, clipBehavior));
+    return pushLayer<ClipRSuperellipseEngineLayer>(
+      ClipRSuperellipseEngineLayer(rsuperellipse, clipBehavior),
+    );
   }
 
   @override

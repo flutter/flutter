@@ -399,10 +399,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
           }
           // It is observed on the simulator that the minimal height varies
           // depending on whether the device is in accessibility mode.
-          final double actionsMinHeight =
-              _isInAccessibilityMode(context)
-                  ? constraints.maxHeight / 2 + _kDividerThickness
-                  : _kDialogActionsSectionMinHeight + _kDividerThickness;
+          final double actionsMinHeight = _isInAccessibilityMode(context)
+              ? constraints.maxHeight / 2 + _kDividerThickness
+              : _kDialogActionsSectionMinHeight + _kDividerThickness;
           return _PriorityColumn(
             top: contentSection,
             bottom: Column(
@@ -455,10 +454,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
                       child: SizedBox(
-                        width:
-                            isInAccessibilityMode
-                                ? _kAccessibilityCupertinoDialogWidth
-                                : _kCupertinoDialogWidth,
+                        width: isInAccessibilityMode
+                            ? _kAccessibilityCupertinoDialogWidth
+                            : _kCupertinoDialogWidth,
                         child: _ActionSheetGestureDetector(
                           child: CupertinoPopupSurface(
                             isSurfacePainted: false,
@@ -1172,10 +1170,12 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           bottom: _kActionSheetContentVerticalPadding,
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
-        titleTextStyle:
-            widget.message == null ? textStyle : textStyle.copyWith(fontWeight: FontWeight.w600),
-        messageTextStyle:
-            widget.title == null ? textStyle.copyWith(fontWeight: FontWeight.w600) : textStyle,
+        titleTextStyle: widget.message == null
+            ? textStyle
+            : textStyle.copyWith(fontWeight: FontWeight.w600),
+        messageTextStyle: widget.title == null
+            ? textStyle.copyWith(fontWeight: FontWeight.w600)
+            : textStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       ),
     );
@@ -1199,8 +1199,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     assert(widget.cancelButton != null);
     final double cancelPadding =
         (widget.actions != null || widget.message != null || widget.title != null)
-            ? _kActionSheetCancelButtonPadding
-            : 0.0;
+        ? _kActionSheetCancelButtonPadding
+        : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
       child: _ActionSheetButtonBackground(
@@ -1299,7 +1299,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final List<Widget> children = <Widget>[
       Flexible(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -1320,8 +1320,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       if (widget.cancelButton != null) _buildCancelButton(),
     ];
     final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
-      Orientation.portrait => MediaQuery.sizeOf(context).width,
-      Orientation.landscape => MediaQuery.sizeOf(context).height,
+      Orientation.portrait => MediaQuery.widthOf(context),
+      Orientation.landscape => MediaQuery.heightOf(context),
     };
 
     return SafeArea(
@@ -1474,10 +1474,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
       // `Text` will scale the provided font size inside, so its parameter is
       // unscaled first.
       fontSize: fontSize / contextScaleFactor,
-      color:
-          widget.isDestructiveAction
-              ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
-              : CupertinoTheme.of(context).primaryColor,
+      color: widget.isDestructiveAction
+          ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
+          : CupertinoTheme.of(context).primaryColor,
     );
 
     if (widget.isDefaultAction) {
@@ -1593,24 +1592,30 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    late final Color backgroundColor;
-    BorderRadius? borderRadius;
+    late final Widget child;
     if (!widget.isCancel) {
-      backgroundColor = widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor;
-    } else {
-      backgroundColor = widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    }
-    return MetaData(
-      metaData: this,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: borderRadius,
+      child = ColoredBox(
+        color: CupertinoDynamicColor.resolve(
+          widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor,
+          context,
         ),
         child: widget.child,
-      ),
-    );
+      );
+    } else {
+      child = DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          ),
+          color: CupertinoDynamicColor.resolve(
+            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+            context,
+          ),
+        ),
+        child: widget.child,
+      );
+    }
+    return MetaData(metaData: this, child: child);
   }
 }
 
@@ -2109,6 +2114,7 @@ class CupertinoDialogAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.textStyle,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -2142,6 +2148,12 @@ class CupertinoDialogAction extends StatefulWidget {
   /// must be used if a text size is desired other than that specified in
   /// [_kCupertinoDialogActionStyle].
   final TextStyle? textStyle;
+
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
   ///
@@ -2183,8 +2195,9 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
     required double padding,
   }) {
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
-    final double dialogWidth =
-        isInAccessibilityMode ? _kAccessibilityCupertinoDialogWidth : _kCupertinoDialogWidth;
+    final double dialogWidth = isInAccessibilityMode
+        ? _kAccessibilityCupertinoDialogWidth
+        : _kCupertinoDialogWidth;
     // The fontSizeRatio is the ratio of the current text size (including any
     // iOS scale factor) vs the minimum text size that we allow in action
     // buttons. This ratio information is used to automatically scale down action
@@ -2252,24 +2265,27 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
     // the case that if content text does not contain a space, it should also
     // wrap instead of ellipsizing. We are consciously not implementing that
     // now due to complexity.
-    final Widget sizedContent =
-        _isInAccessibilityMode(context)
-            ? _buildContentWithAccessibilitySizingPolicy(textStyle: style, content: widget.child)
-            : _buildContentWithRegularSizingPolicy(
-              context: context,
-              textStyle: style,
-              content: widget.child,
-              padding: padding,
-            );
+    final Widget sizedContent = _isInAccessibilityMode(context)
+        ? _buildContentWithAccessibilitySizingPolicy(textStyle: style, content: widget.child)
+        : _buildContentWithRegularSizingPolicy(
+            context: context,
+            textStyle: style,
+            content: widget.child,
+            padding: padding,
+          );
 
     return MouseRegion(
-      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor:
+          widget.mouseCursor ?? (enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _kDialogMinButtonHeight),
-          child: Padding(padding: EdgeInsets.all(padding), child: Center(child: sizedContent)),
+          child: Padding(
+            padding: EdgeInsets.all(padding),
+            child: Center(child: sizedContent),
+          ),
         ),
       ),
     );
@@ -2301,23 +2317,31 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderAlertDialogActionsLayout(dividerThickness: _dividerThickness);
+    return _RenderAlertDialogActionsLayout(
+      dividerThickness: _dividerThickness,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderAlertDialogActionsLayout renderObject) {
-    renderObject.dividerThickness = _dividerThickness;
+    renderObject
+      ..dividerThickness = _dividerThickness
+      ..textDirection = Directionality.of(context);
   }
 }
 
 class _RenderAlertDialogActionsLayout extends RenderFlex {
-  _RenderAlertDialogActionsLayout({List<RenderBox>? children, required double dividerThickness})
-    : _dividerThickness = dividerThickness,
-      super(
-        direction: Axis.vertical,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-      ) {
+  _RenderAlertDialogActionsLayout({
+    List<RenderBox>? children,
+    required double dividerThickness,
+    super.textDirection,
+  }) : _dividerThickness = dividerThickness,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
     addAll(children);
   }
 
@@ -2399,12 +2423,17 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
+    final bool ltr = textDirection == TextDirection.ltr;
     RenderBox slot = firstChild!;
-    double x = 0;
+    double x = ltr ? 0 : (overallWidth - slotWidth);
     while (true) {
       slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
       (slot.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += slot.size.width;
+      if (ltr) {
+        x += slot.size.width;
+      } else {
+        x -= slot.size.width;
+      }
 
       final RenderBox? divider = childAfter(slot);
       if (divider == null) {
@@ -2412,8 +2441,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       }
       divider.layout(BoxConstraints.tight(Size(dividerThickness, height)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += dividerThickness;
-
+      if (ltr) {
+        x += dividerThickness;
+      } else {
+        x -= dividerThickness;
+      }
       slot = childAfter(divider)!;
     }
   }

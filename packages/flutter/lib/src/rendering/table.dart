@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
@@ -557,8 +556,9 @@ class RenderTable extends RenderBox {
         painter?.dispose();
       }
     }
-    _rowDecorationPainters =
-        _rowDecorations != null ? List<BoxPainter?>.filled(_rowDecorations!.length, null) : null;
+    _rowDecorationPainters = _rowDecorations != null
+        ? List<BoxPainter?>.filled(_rowDecorations!.length, null)
+        : null;
   }
 
   /// The settings to pass to the [rowDecorations] when painting, so that they
@@ -618,7 +618,7 @@ class RenderTable extends RenderBox {
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
-  /// And if a cell has mutiple semantics node or has a different semantic role, we create
+  /// And if a cell has multiple semantics node or has a different semantic role, we create
   /// a new semantics node to wrap it.
   @override
   void assembleSemanticsNode(
@@ -722,20 +722,18 @@ class RenderTable extends RenderBox {
             (rawChildrens.single.role != SemanticsRole.cell &&
                 rawChildrens.single.role != SemanticsRole.columnHeader);
 
-        final SemanticsNode cell =
-            addCellWrapper
-                ? (_cachedCells[_Index(y, x)] ??
-                    (_cachedCells[_Index(y, x)] =
-                        SemanticsNode()..updateWith(
-                          config: SemanticsConfiguration()..role = SemanticsRole.cell,
-                          childrenInInversePaintOrder: rawChildrens,
-                        )))
-                : rawChildrens.single;
+        final SemanticsNode cell = addCellWrapper
+            ? (_cachedCells[_Index(y, x)] ??
+                  (_cachedCells[_Index(y, x)] = SemanticsNode()
+                    ..updateWith(
+                      config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                      childrenInInversePaintOrder: rawChildrens,
+                    )))
+            : rawChildrens.single;
 
-        final double cellWidth =
-            x == _columns - 1
-                ? rowBox.width - _columnLefts!.elementAt(x)
-                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+        final double cellWidth = x == _columns - 1
+            ? rowBox.width - _columnLefts!.elementAt(x)
+            : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
 
         // Skip cell if it's invisible
         if (cellWidth <= 0.0) {
@@ -759,12 +757,9 @@ class RenderTable extends RenderBox {
           // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
           // if addCellWrapper is false, the rect is relative to the raw
           // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
-          final double dx =
-              addCellWrapper
-                  ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
-                  : (localRect.right <= _columnLefts!.elementAt(x)
-                      ? _columnLefts!.elementAt(x)
-                      : 0.0);
+          final double dx = addCellWrapper
+              ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
+              : (localRect.right <= _columnLefts!.elementAt(x) ? _columnLefts!.elementAt(x) : 0.0);
 
           if (dx != 0 || dy != 0) {
             shiftTransform(child, dx, dy);
@@ -777,10 +772,9 @@ class RenderTable extends RenderBox {
 
       newRow
         ..updateWith(
-          config:
-              SemanticsConfiguration()
-                ..indexInParent = y
-                ..role = SemanticsRole.row,
+          config: SemanticsConfiguration()
+            ..indexInParent = y
+            ..role = SemanticsRole.row,
           childrenInInversePaintOrder: cells,
         )
         ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)

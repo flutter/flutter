@@ -130,7 +130,7 @@ void main() {
     testWithoutContext(
       'injects the wrapper and the Gradle version is derived from the AGP version',
       () {
-        const Map<String, String> testCases = <String, String>{
+        const testCases = <String, String>{
           // AGP version : Gradle version
           '1.0.0': '2.3',
           '3.3.1': '4.10.2',
@@ -218,21 +218,24 @@ void main() {
 
     testWithoutContext('returns the gradle properties file', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory(gradleDirectoryName)
-        .childDirectory(gradleWrapperDirectoryName)..createSync(recursive: true);
-      final File expectedFile =
-          await wrapperDirectory.childFile(gradleWrapperPropertiesFilename).create();
+      final Directory wrapperDirectory =
+          androidDirectory
+              .childDirectory(gradleDirectoryName)
+              .childDirectory(gradleWrapperDirectoryName)
+            ..createSync(recursive: true);
+      final File expectedFile = await wrapperDirectory
+          .childFile(gradleWrapperPropertiesFilename)
+          .create();
       final File gradleWrapperFile = getGradleWrapperFile(androidDirectory);
       expect(gradleWrapperFile.path, expectedFile.path);
     });
 
     testWithoutContext('returns the gradle wrapper version', () async {
-      const String expectedVersion = '7.4.2';
+      const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -248,11 +251,11 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
     });
 
     testWithoutContext('ignores gradle comments', () async {
-      const String expectedVersion = '7.4.2';
+      const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -270,11 +273,11 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVers
     });
 
     testWithoutContext('returns gradlew version, whitespace, location', () async {
-      const String expectedVersion = '7.4.2';
+      const expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
       wrapperDirectory.childFile('gradle-wrapper.properties').writeAsStringSync('''
@@ -293,9 +296,9 @@ zipStorePath=wrapper/dists
 
     testWithoutContext('does not crash on hypothetical new format', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final Directory wrapperDirectory = androidDirectory
-        .childDirectory('gradle')
-        .childDirectory('wrapper')..createSync(recursive: true);
+      final Directory wrapperDirectory =
+          androidDirectory.childDirectory('gradle').childDirectory('wrapper')
+            ..createSync(recursive: true);
       // Distribution url is not the last line.
       // Whitespace around distribution url.
       wrapperDirectory
@@ -313,8 +316,9 @@ zipStorePath=wrapper/dists
     });
 
     testWithoutContext('returns the installed gradle version', () async {
-      const String expectedVersion = '7.4.2';
-      const String gradleOutput = '''
+      const expectedVersion = '7.4.2';
+      const gradleOutput =
+          '''
 
 ------------------------------------------------------------
 Gradle $expectedVersion
@@ -330,10 +334,10 @@ JVM:          11.0.18 (Azul Systems, Inc. 11.0.18+10-LTS)
 OS:           Mac OS X 13.2.1 aarch64
 ''';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final ProcessManager processManager =
-          FakeProcessManager.empty()..addCommand(
-            const FakeCommand(command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput),
-          );
+      final ProcessManager processManager = FakeProcessManager.empty()
+        ..addCommand(
+          const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
+        );
 
       expect(
         await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -342,13 +346,13 @@ OS:           Mac OS X 13.2.1 aarch64
     });
 
     testWithoutContext('returns the installed gradle with whitespace formatting', () async {
-      const String expectedVersion = '7.4.2';
-      const String gradleOutput = 'Gradle   $expectedVersion';
+      const expectedVersion = '7.4.2';
+      const gradleOutput = 'Gradle   $expectedVersion';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      final ProcessManager processManager =
-          FakeProcessManager.empty()..addCommand(
-            const FakeCommand(command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput),
-          );
+      final ProcessManager processManager = FakeProcessManager.empty()
+        ..addCommand(
+          const FakeCommand(command: <String>['gradle', gradleVersionsFlag], stdout: gradleOutput),
+        );
 
       expect(
         await getGradleVersion(androidDirectory, BufferLogger.test(), processManager),
@@ -359,7 +363,7 @@ OS:           Mac OS X 13.2.1 aarch64
     testWithoutContext(
       'returns the AGP version when set in Groovy build file as classpath with single quotes and commented line',
       () async {
-        const String expectedVersion = '7.3.0';
+        const expectedVersion = '7.3.0';
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle').writeAsStringSync('''
 buildscript {
@@ -390,7 +394,7 @@ allprojects {
     testWithoutContext(
       'returns the AGP version when set in Kotlin build file as classpath',
       () async {
-        const String expectedVersion = '7.3.0';
+        const expectedVersion = '7.3.0';
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 buildscript {
@@ -419,7 +423,7 @@ allprojects {
     testWithoutContext(
       'returns the AGP version when set in Groovy build file as compileOnly with double quotes',
       () async {
-        const String expectedVersion = '7.1.0';
+        const expectedVersion = '7.1.0';
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 dependencies {
@@ -433,7 +437,7 @@ dependencies {
     testWithoutContext(
       'returns the AGP version when set in Kotlin build file as compileOnly',
       () async {
-        const String expectedVersion = '7.1.0';
+        const expectedVersion = '7.1.0';
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 dependencies {
@@ -445,7 +449,7 @@ dependencies {
       },
     );
     testWithoutContext('returns the AGP version when set in Groovy build file as plugin', () async {
-      const String expectedVersion = '6.8';
+      const expectedVersion = '6.8';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
 plugins {
@@ -456,7 +460,7 @@ plugins {
     });
 
     testWithoutContext('returns the AGP version when set in Kotlin build file as plugin', () async {
-      const String expectedVersion = '7.2.0';
+      const expectedVersion = '7.2.0';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 plugins {
@@ -467,8 +471,8 @@ plugins {
     });
 
     testWithoutContext('prefers the AGP version when set in Groovy, ignores Kotlin', () async {
-      const String versionInGroovy = '7.3.0';
-      const String versionInKotlin = '7.4.2';
+      const versionInGroovy = '7.3.0';
+      const versionInKotlin = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
 
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
@@ -615,7 +619,7 @@ dependencies {
     });
 
     group('validates gradle/agp versions', () {
-      final List<GradleAgpTestData> testData = <GradleAgpTestData>[
+      final testData = <GradleAgpTestData>[
         // Values too new *these need to be updated* when
         // max known gradle and max known agp versions are updated:
         // Newer tools version supports max gradle version.
@@ -693,7 +697,7 @@ dependencies {
         GradleAgpTestData(true, agpVersion: '3.4.0', gradleVersion: '5.4.1'),
         GradleAgpTestData(true, agpVersion: '3.3.0', gradleVersion: '5.1.1'),
       ];
-      for (final GradleAgpTestData data in testData) {
+      for (final data in testData) {
         test('(gradle, agp): (${data.gradleVersion}, ${data.agpVersion})', () {
           expect(
             validateGradleAndAgp(
@@ -708,37 +712,279 @@ dependencies {
       }
     });
 
+    FakeCommand createKgpVersionCommand(String kgpV) {
+      return FakeCommand(
+        command: const <String>['./gradlew', 'kgpVersion', '-q'],
+        stdout:
+            '''
+    KGP Version: $kgpV
+    ''',
+      );
+    }
+
+    testWithoutContext('returns the KGP fetched from kgpVersion gradle task', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // Three numbered versions.
+      const kgpV2 = '1.8.22';
+      final processManager2 = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpV2),
+      ]);
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager2), kgpV2);
+      // 2 numbered versions
+      const kgpV3 = '1.9';
+      final processManager3 = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpV3),
+      ]);
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager3), kgpV3);
+      final processManagerNoGradle = FakeProcessManager.empty();
+      processManagerNoGradle.excludedExecutables = <String>{'./gradlew'};
+      expect(
+        await getKgpVersion(androidDirectory, BufferLogger.test(), processManagerNoGradle),
+        null,
+      );
+    });
+
+    testWithoutContext('returns the KGP version when in Kotlin settings as plugin', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+pluginManagement {
+  plugins {
+      id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+      // Decoy value to ensure we ignore commented out lines.
+      // id("org.jetbrains.kotlin.android") version "6.1.0" apply false
+      id("org.jetbrains.kotlin.android") version "1.8.22" apply false
+  }
+}
+''');
+      final processManager = FakeProcessManager.empty();
+      processManager.excludedExecutables = <String>{'./gradlew'};
+
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager), '1.8.22');
+    });
+
+    group('validates kgp/gradle versions', () {
+      final testData = <GradleKgpTestData>[
+        // Values too new.
+        GradleKgpTestData(true, kgpVersion: '3.0', gradleVersion: '99.99'),
+
+        // Template versions of Gradle/AGP.
+        GradleKgpTestData(
+          true,
+          kgpVersion: templateKotlinGradlePluginVersion,
+          // TODO(reidbaker): replace with templateDefaultGradleVersion.
+          gradleVersion: '8.10',
+        ),
+
+        // Kotlin version at the edge of support window.
+        GradleKgpTestData(true, kgpVersion: '2.1.20', gradleVersion: '8.1'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0.21', gradleVersion: '7.6.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0.20', gradleVersion: '7.6.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0', gradleVersion: '8.5'),
+        GradleKgpTestData(true, kgpVersion: '1.9.25', gradleVersion: '8.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.9.20', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.9.10', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.9.0', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.8.22', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.8.20', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.11', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.0', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.7.22', gradleVersion: '7.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.7.20', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.7.10', gradleVersion: '7.0.2'),
+        GradleKgpTestData(true, kgpVersion: '1.7.0', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.20', gradleVersion: '7.0.2'),
+        // Gradle versions inspired by
+        // https://developer.android.com/build/releases/gradle-plugin#expandable-1
+        GradleKgpTestData(true, kgpVersion: '2.1.20', gradleVersion: '8.11.1'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.10.2'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.9'),
+        GradleKgpTestData(true, kgpVersion: '2.1.5', gradleVersion: '8.7'),
+        GradleKgpTestData(true, kgpVersion: '2.1.0', gradleVersion: '8.7'),
+        GradleKgpTestData(true, kgpVersion: '2.0.20', gradleVersion: '8.6'),
+        GradleKgpTestData(true, kgpVersion: '2.0.1', gradleVersion: '8.4'),
+        GradleKgpTestData(true, kgpVersion: '2.0.0', gradleVersion: '8.2'),
+        GradleKgpTestData(true, kgpVersion: '1.9.25', gradleVersion: '8.0'),
+        GradleKgpTestData(true, kgpVersion: '1.9.10', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.9.7', gradleVersion: '7.5'),
+        GradleKgpTestData(true, kgpVersion: '1.8.21', gradleVersion: '7.4'),
+        GradleKgpTestData(true, kgpVersion: '1.9.0', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.0', gradleVersion: '7.2'),
+        GradleKgpTestData(true, kgpVersion: '1.7.0', gradleVersion: '7.0'),
+        GradleKgpTestData(true, kgpVersion: '2.0.21', gradleVersion: '7.0'),
+        GradleKgpTestData(true, kgpVersion: '1.7.22', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.5'),
+        // Kotlin newer than max known.
+        GradleKgpTestData(true, kgpVersion: '2.1.21', gradleVersion: '8.12.1'),
+        // Kotlin too new for gradle version.
+        GradleKgpTestData(false, kgpVersion: '2.1.20', gradleVersion: '7.6.2'),
+        GradleKgpTestData(false, kgpVersion: '2.1.0', gradleVersion: '7.6.2'),
+        GradleKgpTestData(false, kgpVersion: '2.0.20', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.9.0', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.8.0', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.7.22', gradleVersion: '6.7.0'),
+        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '6.1.1'),
+        // Kotlin too old for gradle version.
+        GradleKgpTestData(false, kgpVersion: '2.1.10', gradleVersion: '8.11.1'),
+        GradleKgpTestData(false, kgpVersion: '2.1.0', gradleVersion: '8.11'),
+        GradleKgpTestData(false, kgpVersion: '2.0.0', gradleVersion: '8.6'),
+        GradleKgpTestData(false, kgpVersion: '1.9.20', gradleVersion: '8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.9.0', gradleVersion: '7.7'),
+        GradleKgpTestData(false, kgpVersion: '1.8.20', gradleVersion: '7.7'),
+        GradleKgpTestData(false, kgpVersion: '1.8.0', gradleVersion: '7.4'),
+        GradleKgpTestData(false, kgpVersion: '1.7.20', gradleVersion: '7.2'),
+        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '7.0.3'),
+        GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '7.0.3'),
+        // Kotlin older than oldest supported.
+        GradleKgpTestData(false, kgpVersion: '1.6.19', gradleVersion: '7.0.3'),
+        // Gradle older than oldest supported.
+        GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '4.10'),
+        // Null values:
+        // ignore: avoid_redundant_argument_values
+        GradleKgpTestData(false, kgpVersion: null, gradleVersion: '7.2'),
+        // ignore: avoid_redundant_argument_values
+        GradleKgpTestData(false, kgpVersion: '2.1', gradleVersion: null),
+        // ignore: avoid_redundant_argument_values
+        GradleKgpTestData(false, kgpVersion: '', gradleVersion: ''),
+        // ignore: avoid_redundant_argument_values
+        GradleKgpTestData(false, kgpVersion: null, gradleVersion: null),
+      ];
+      for (final data in testData) {
+        test('(KGP, Gradle): (${data.kgpVersion}, ${data.gradleVersion})', () {
+          expect(
+            validateGradleAndKGP(
+              BufferLogger.test(),
+              gradleV: data.gradleVersion,
+              kgpV: data.kgpVersion,
+            ),
+            data.validPair ? isTrue : isFalse,
+            reason: 'KGP: ${data.kgpVersion}, G: ${data.gradleVersion}',
+          );
+        });
+      }
+    });
+
+    group('validates KGP/AGP versions', () {
+      final testData = <KgpAgpTestData>[
+        // Values too new.
+        KgpAgpTestData(true, kgpVersion: '3.0', agpVersion: '99.99'),
+
+        // Template versions of Gradle/AGP.
+        KgpAgpTestData(
+          true,
+          kgpVersion: templateKotlinGradlePluginVersion,
+          // TODO(reidbaker): Replace with templateAndroidGradlePluginVersion
+          agpVersion: '8.7.2',
+        ),
+
+        // Kotlin version at the edge of support window.
+        KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '8.7.2'),
+        KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '7.3.1'),
+        // AGP Versions not "fully supported" by kotlin
+        KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '8.9'),
+        KgpAgpTestData(true, kgpVersion: '2.1.20', agpVersion: '8.8'),
+        // Gradle versions inspired by
+        // https://developer.android.com/build/releases/gradle-plugin#expandable-1
+        KgpAgpTestData(true, kgpVersion: '2.1.5', agpVersion: '8.7'),
+        KgpAgpTestData(true, kgpVersion: '2.1.10', agpVersion: '8.6'),
+        KgpAgpTestData(true, kgpVersion: '2.0.21', agpVersion: '8.5'),
+        KgpAgpTestData(true, kgpVersion: '2.0.20', agpVersion: '8.4'),
+        KgpAgpTestData(true, kgpVersion: '2.0', agpVersion: '8.3.1'),
+        KgpAgpTestData(true, kgpVersion: '2.1.5', agpVersion: '8.2'),
+        KgpAgpTestData(true, kgpVersion: '1.9.25', agpVersion: '8.1'),
+        KgpAgpTestData(true, kgpVersion: '1.9.20', agpVersion: '8.0'),
+        KgpAgpTestData(true, kgpVersion: '1.9.10', agpVersion: '7.4'),
+        KgpAgpTestData(true, kgpVersion: '1.8.20', agpVersion: '7.4'),
+        KgpAgpTestData(true, kgpVersion: '1.8.21', agpVersion: '7.3'),
+        KgpAgpTestData(true, kgpVersion: '1.8.11', agpVersion: '7.2.1'),
+        KgpAgpTestData(true, kgpVersion: '1.8.0', agpVersion: '7.2.1'),
+        KgpAgpTestData(true, kgpVersion: '1.8.0', agpVersion: '7.1'),
+        KgpAgpTestData(true, kgpVersion: '1.7.20', agpVersion: '7.0.4'),
+        KgpAgpTestData(true, kgpVersion: '1.7.22', agpVersion: '7.0'),
+        KgpAgpTestData(true, kgpVersion: '1.8.22', agpVersion: '4.2.0'),
+        KgpAgpTestData(true, kgpVersion: '1.6.20', agpVersion: '4.1.0'),
+        // Kotlin newer than max known.
+        KgpAgpTestData(true, kgpVersion: '2.1.21', agpVersion: '8.7.2'),
+        // Kotlin too new for AGP version.
+        KgpAgpTestData(false, kgpVersion: '2.1.20', agpVersion: '7.3.0'),
+        KgpAgpTestData(false, kgpVersion: '2.1.10', agpVersion: '7.3.0'),
+        KgpAgpTestData(false, kgpVersion: '2.0.21', agpVersion: '7.1.2'),
+        KgpAgpTestData(false, kgpVersion: '2.0.0', agpVersion: '7.1.2'),
+        KgpAgpTestData(false, kgpVersion: '1.9.25', agpVersion: '4.2.1'),
+        KgpAgpTestData(false, kgpVersion: '1.8.20', agpVersion: '4.1.2'),
+        // Kotlin too old for gradle version.
+        KgpAgpTestData(false, kgpVersion: '2.0.20', agpVersion: '8.7.2'),
+        KgpAgpTestData(false, kgpVersion: '2.0.20', agpVersion: '8.6'),
+        KgpAgpTestData(false, kgpVersion: '2.0.0', agpVersion: '8.4'),
+        KgpAgpTestData(false, kgpVersion: '1.9.20', agpVersion: '8.2'),
+        KgpAgpTestData(false, kgpVersion: '1.9.0', agpVersion: '7.5'),
+        KgpAgpTestData(false, kgpVersion: '1.8.20', agpVersion: '7.5'),
+        KgpAgpTestData(false, kgpVersion: '1.8.1', agpVersion: '7.3'),
+        KgpAgpTestData(false, kgpVersion: '1.7.20', agpVersion: '7.1'),
+        KgpAgpTestData(false, kgpVersion: '1.7.0', agpVersion: '7.0.3'),
+        KgpAgpTestData(false, kgpVersion: '1.6.19', agpVersion: '7.0.3'),
+        // Unknown values.
+        KgpAgpTestData(
+          false,
+          kgpVersion: oldestDocumentedKgpCompatabilityVersion,
+          agpVersion: oldestConsideredAgpVersion,
+        ),
+        // Null values:
+        // ignore: avoid_redundant_argument_values
+        KgpAgpTestData(false, kgpVersion: null, agpVersion: '7.2'),
+        // ignore: avoid_redundant_argument_values
+        KgpAgpTestData(false, kgpVersion: '2.1', agpVersion: null),
+        // ignore: avoid_redundant_argument_values
+        KgpAgpTestData(false, kgpVersion: '', agpVersion: ''),
+        // ignore: avoid_redundant_argument_values
+        KgpAgpTestData(false, kgpVersion: null, agpVersion: null),
+      ];
+      for (final data in testData) {
+        test('(KGP, AGP): (${data.kgpVersion}, ${data.agpVersion})', () {
+          expect(
+            validateAgpAndKgp(BufferLogger.test(), agpV: data.agpVersion, kgpV: data.kgpVersion),
+            data.validPair ? isTrue : isFalse,
+            reason: 'KGP: ${data.kgpVersion}, AGP: ${data.agpVersion}',
+          );
+        });
+      }
+    });
+
     group('Parse gradle version from distribution url', () {
       testWithoutContext('null distribution url returns null version', () {
         expect(parseGradleVersionFromDistributionUrl(null), null);
       });
 
       testWithoutContext('unparseable format returns null', () {
-        const String distributionUrl = 'aString';
+        const distributionUrl = 'aString';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
       });
 
       testWithoutContext("recognizable 'all' format returns correct version", () {
-        const String distributionUrl =
+        const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
       testWithoutContext("recognizable 'bin' format returns correct version", () {
-        const String distributionUrl =
+        const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
       });
 
       testWithoutContext("recognizable 'rc' format returns correct version", () {
-        const String distributionUrl =
+        const distributionUrl =
             r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '8.1');
       });
     });
 
     group('validates java/gradle versions', () {
-      final List<JavaGradleTestData> testData = <JavaGradleTestData>[
+      final testData = <JavaGradleTestData>[
         // Values too new *these need to be updated* when
         // max supported java and max known gradle versions are updated:
         // Newer tools version does not even meet current gradle version requirements.
@@ -803,13 +1049,13 @@ dependencies {
         JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '4.3'),
       ];
 
-      for (final JavaGradleTestData data in testData) {
+      for (final data in testData) {
         testWithoutContext('(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
           expect(
             validateJavaAndGradle(
               BufferLogger.test(),
-              javaV: data.javaVersion,
-              gradleV: data.gradleVersion,
+              javaVersion: data.javaVersion,
+              gradleVersion: data.gradleVersion,
             ),
             data.validPair ? isTrue : isFalse,
             reason: 'J: ${data.javaVersion}, G: ${data.gradleVersion}',
@@ -829,8 +1075,8 @@ dependencies {
     });
 
     testWithoutContext('prefers build.gradle over build.gradle.kts', () async {
-      const String versionInGroovy = '4.0.0';
-      const String versionInKotlin = '7.4.2';
+      const versionInGroovy = '4.0.0';
+      const versionInKotlin = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
 
       androidDirectory.childFile('build.gradle').writeAsStringSync('''
@@ -881,7 +1127,7 @@ allprojects {
   });
 
   group('validates java/AGP versions', () {
-    final List<JavaAgpTestData> testData = <JavaAgpTestData>[
+    final testData = <JavaAgpTestData>[
       // Strictly too old Java versions for known AGP versions.
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
@@ -896,14 +1142,15 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
       // Strictly too new AGP versions.
       // *The tests that follow need to be updated* when max supported AGP versions are updated:
-      JavaAgpTestData(false, javaVersion: '24', agpVersion: '8.8'),
-      JavaAgpTestData(false, javaVersion: '20', agpVersion: '8.8'),
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '24', agpVersion: '9.0'),
+      JavaAgpTestData(false, javaVersion: '20', agpVersion: '9.0'),
+      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
       // Java 17 & patch versions compatibility cases
       // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '17', agpVersion: '9.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.6'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.5'),
@@ -912,8 +1159,9 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
-      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '8.8'),
+      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '9.0'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
+      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.8'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.7'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.6'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.5'),
@@ -951,7 +1199,7 @@ allprojects {
       JavaAgpTestData(false, javaVersion: null, agpVersion: null),
     ];
 
-    for (final JavaAgpTestData data in testData) {
+    for (final data in testData) {
       testWithoutContext('(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
         expect(
           validateJavaAndAgp(BufferLogger.test(), javaV: data.javaVersion, agpV: data.agpVersion),
@@ -1314,7 +1562,7 @@ allprojects {
       );
       // Strictly too new Gradle and AGP versions.
       expect(
-        getJavaVersionFor(gradleV: '8.13', agpV: '8.9'),
+        getJavaVersionFor(gradleV: '8.13', agpV: '9.0'),
         equals(const VersionRange(null, null)),
       );
       // Strictly too new Gradle version and maximum version of AGP.
@@ -1326,7 +1574,7 @@ allprojects {
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
       expect(
-        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.8'),
+        getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '9.0'),
         equals(const VersionRange(null, '24')),
       );
       // Tests with a known compatible Gradle/AGP version pair.
@@ -1370,6 +1618,20 @@ class GradleAgpTestData {
   GradleAgpTestData(this.validPair, {this.gradleVersion, this.agpVersion});
   final String? gradleVersion;
   final String? agpVersion;
+  final bool validPair;
+}
+
+class GradleKgpTestData {
+  GradleKgpTestData(this.validPair, {this.gradleVersion, this.kgpVersion});
+  final String? gradleVersion;
+  final String? kgpVersion;
+  final bool validPair;
+}
+
+class KgpAgpTestData {
+  KgpAgpTestData(this.validPair, {this.agpVersion, this.kgpVersion});
+  final String? agpVersion;
+  final String? kgpVersion;
   final bool validPair;
 }
 

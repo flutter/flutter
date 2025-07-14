@@ -13,7 +13,7 @@ final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU()
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 String? _computeEffectiveFontFamily(String? fontFamily) {
-  return ui_web.debugEmulateFlutterTesterEnvironment && !_testFonts.contains(fontFamily)
+  return ui_web.TestEnvironment.instance.forceTestFonts && !_testFonts.contains(fontFamily)
       ? _testFonts.first
       : fontFamily;
 }
@@ -348,8 +348,9 @@ class CkTextStyle implements ui.TextStyle {
       originalFontFamily: fontFamily,
       effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       originalFontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback:
-          ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
+          ? null
+          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -707,8 +708,9 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) : _fontFamily = _computeEffectiveFontFamily(fontFamily),
-       _fontFamilyFallback =
-           ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
+       _fontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
+           ? null
+           : fontFamilyFallback,
        _fontSize = fontSize,
        _height = height == ui.kTextHeightNone ? null : height,
        _leadingDistribution = leadingDistribution,
@@ -1081,7 +1083,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
     _placeholderCount++;
     _placeholderScales.add(scale);
-    final _CkParagraphPlaceholder placeholderStyle = toSkPlaceholderStyle(
+    final _CkParagraphPlaceholder placeholderStyle = _toSkPlaceholderStyle(
       width * scale,
       height * scale,
       alignment,
@@ -1101,7 +1103,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     );
   }
 
-  static _CkParagraphPlaceholder toSkPlaceholderStyle(
+  static _CkParagraphPlaceholder _toSkPlaceholderStyle(
     double width,
     double height,
     ui.PlaceholderAlignment alignment,

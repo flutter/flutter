@@ -4,12 +4,11 @@
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/render_pass.h"
-#include "vulkan/vulkan_enums.hpp"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 namespace testing {
@@ -76,8 +75,10 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
 
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
-    EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
-    EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
+    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
+              nullptr);
+    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
+              nullptr);
 
     auto command_buffer = context->CreateCommandBuffer();
     auto render_pass = command_buffer->CreateRenderPass(render_target);
@@ -106,10 +107,14 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
 
-    EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
-    EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
-    framebuffers.push_back(texture_vk.GetCachedFramebuffer());
-    render_passes.push_back(texture_vk.GetCachedRenderPass());
+    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
+              nullptr);
+    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
+              nullptr);
+    framebuffers.push_back(
+        texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer);
+    render_passes.push_back(
+        texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass);
   }
 
   // Iterate through once more to verify render passes and framebuffers are
@@ -121,8 +126,14 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
 
-    EXPECT_EQ(texture_vk.GetCachedFramebuffer(), framebuffers[i]);
-    EXPECT_EQ(texture_vk.GetCachedRenderPass(), render_passes[i]);
+    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
+              framebuffers[i]);
+    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
+              render_passes[i]);
+    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).framebuffer,
+              framebuffers[i]);
+    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).render_pass,
+              render_passes[i]);
   }
 }
 

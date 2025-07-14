@@ -914,10 +914,10 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
 
-  // Chop off the last samples if the radius >= 3 where they account for < 1.56%
-  // of the result.
+  // Chop off the last samples if the radius >= 16 where they can account for
+  // < 1.56% of the result.
   int x_offset = 0;
-  if (parameters.blur_radius >= 3) {
+  if (parameters.blur_radius >= 16) {
     result.sample_count -= 2;
     x_offset = 1;
   }
