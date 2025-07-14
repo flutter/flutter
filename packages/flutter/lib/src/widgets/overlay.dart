@@ -2650,15 +2650,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
   Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
 
   @override
-  _RenderTheater get theater {
-    return _findDeferredLayoutBoxParent().theater;
-  }
-
-  // @override
-  // _RenderTheater get theater => switch (parent) {
-  //   final _RenderDeferredLayoutBox parent => parent.theater,
-  //   _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
-  // };
+  _RenderTheater get theater => _findDeferredLayoutBoxParent().theater;
 
   @override
   bool get sizedByParent => true;
