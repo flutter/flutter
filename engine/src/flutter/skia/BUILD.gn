@@ -12,6 +12,11 @@ import("flutter_defines.gni")
 
 if (is_fuchsia) {
   import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
+
+  skia_use_gl = false
+  skia_use_icu = false
+  skia_use_freetype = true
+  skia_use_vulkan = true
 }
 
 # Skia public API, generally provided by :skia.
@@ -296,15 +301,15 @@ optional("fontmgr_fontconfig") {
 }
 
 optional("fontmgr_fuchsia") {
-  enabled = skia_enable_fontmgr_fuchsia
+  enabled = is_fuchsia
   public_defines = [ "SK_FONTMGR_FUCHSIA_AVAILABLE" ]
 
-  deps = []
+  deps = [ ":typeface_freetype" ]
 
   if (is_fuchsia) {
     deps += [ "${fuchsia_sdk}/fidl/fuchsia.fonts" ]
   } else {
-    deps = [ "//sdk/fidl/fuchsia.fonts" ]
+    deps += [ "//sdk/fidl/fuchsia.fonts" ]
   }
   public = skia_ports_fontmgr_fuchsia_public
   sources = skia_ports_fontmgr_fuchsia_sources

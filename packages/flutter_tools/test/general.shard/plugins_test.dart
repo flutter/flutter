@@ -66,7 +66,7 @@ class _PluginPlatformInfo {
   /// Returns the body of a platform section for a plugin's pubspec, properly
   /// indented.
   String get indentedPubspecSection {
-    const String indentation = '        ';
+    const indentation = '        ';
     return <String>[
       if (pluginClass != null) '${indentation}pluginClass: $pluginClass',
       if (dartPluginClass != null) '${indentation}dartPluginClass: $dartPluginClass',
@@ -96,8 +96,8 @@ void main() {
     // using it instead of fs must re-run any necessary setup (e.g.,
     // setUpProject).
     late FileSystem fsWindows;
-    const String pubCachePath = '/path/to/.pub-cache/hosted/pub.dartlang.org/foo-1.2.3';
-    const String ephemeralPackagePath = '/path/to/app/linux/flutter/ephemeral/foo-1.2.3';
+    const pubCachePath = '/path/to/.pub-cache/hosted/pub.dartlang.org/foo-1.2.3';
+    const ephemeralPackagePath = '/path/to/app/linux/flutter/ephemeral/foo-1.2.3';
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(FileSystem fileSystem) {
@@ -190,7 +190,7 @@ void main() {
     void addToPackageConfig(String name, Directory packageDir, {bool isDevDependency = false}) {
       final File packageConfigFile = flutterProject.packageConfig;
 
-      final Map<String, Object?> packageConfig =
+      final packageConfig =
           jsonDecode(packageConfigFile.readAsStringSync()) as Map<String, Object?>;
 
       (packageConfig['packages']! as List<Object?>).add(<String, Object?>{
@@ -205,20 +205,19 @@ void main() {
         'package_graph.json',
       );
 
-      final Map<String, Object?> packageGraph =
-          jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
+      final packageGraph = jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
 
-      final List<Object?> packages = packageGraph['packages']! as List<Object?>;
+      final packages = packageGraph['packages']! as List<Object?>;
 
       packages.add(<String, Object?>{'name': name, 'dependencies': <Object?>[]});
 
-      final Map<String, Object?> mainPackage =
+      final mainPackage =
           packages.firstWhere(
                 (Object? p) =>
                     (p! as Map<String, Object?>)['name'] == flutterProject.manifest.appName,
               )!
               as Map<String, Object?>;
-      final List<Object?> dependencyList =
+      final dependencyList =
           (mainPackage[isDevDependency ? 'devDependencies' : 'dependencies'] ??= <Object?>[])
               as List<Object?>;
 
@@ -235,7 +234,7 @@ void main() {
     // Otherwise it will be treated as a name, and put in a default location
     // (a fake pub cache).
     List<Directory> createFakePlugins(FileSystem fileSystem, List<String> pluginNamesOrPaths) {
-      const String pluginYamlTemplate = '''
+      const pluginYamlTemplate = '''
   flutter:
     plugin:
       platforms:
@@ -255,15 +254,14 @@ void main() {
           package: AndroidPackage
   ''';
 
-      final List<Directory> directories = <Directory>[];
+      final directories = <Directory>[];
       final Directory fakePubCache = fileSystem.systemTempDirectory.childDirectory('cache');
       writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
-      for (final String nameOrPath in pluginNamesOrPaths) {
+      for (final nameOrPath in pluginNamesOrPaths) {
         final String name = fileSystem.path.basename(nameOrPath);
-        final Directory pluginDirectory =
-            (nameOrPath == name)
-                ? fakePubCache.childDirectory(name)
-                : fileSystem.directory(nameOrPath);
+        final Directory pluginDirectory = (nameOrPath == name)
+            ? fakePubCache.childDirectory(name)
+            : fileSystem.directory(nameOrPath);
         addToPackageConfig(name, pluginDirectory);
         pluginDirectory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
@@ -367,7 +365,7 @@ flutter:
     pluginClass: UseNewEmbedding
 dependencies:
 ''');
-      for (final String dependency in dependencies) {
+      for (final dependency in dependencies) {
         pluginDirectory
             .childFile('pubspec.yaml')
             .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
@@ -383,7 +381,8 @@ dependencies:
       bool isDevDependency = false,
     }) {
       final Iterable<String> platformSections = platforms.entries.map(
-        (MapEntry<String, _PluginPlatformInfo> entry) => '''
+        (MapEntry<String, _PluginPlatformInfo> entry) =>
+            '''
       ${entry.key}:
 ${entry.value.indentedPubspecSection}
 ''',
@@ -398,7 +397,7 @@ ${platformSections.join('\n')}
 
 dependencies:
 ''');
-      for (final String dependency in dependencies) {
+      for (final dependency in dependencies) {
         pluginDirectory
             .childFile('pubspec.yaml')
             .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
@@ -460,8 +459,8 @@ dependencies:
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
 
-          final String pluginsFileContents =
-              flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
+          final String pluginsFileContents = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
           expect(
             pluginsFileContents.indexOf('plugin_a'),
             lessThan(pluginsFileContents.indexOf('plugin_b')),
@@ -622,20 +621,18 @@ dependencies:
           );
           iosProject.testExists = true;
 
-          final DateTime dateCreated = DateTime(1970);
+          final dateCreated = DateTime(1970);
           systemClock.currentTime = dateCreated;
 
           await refreshPluginsList(flutterProject);
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final String pluginsString =
-              flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-          final Map<String, dynamic> jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
-          final Map<String, dynamic>? actualPlugins =
-              jsonContent['plugins'] as Map<String, dynamic>?;
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+          final actualPlugins = jsonContent['plugins'] as Map<String, dynamic>?;
 
-          final Map<String, Object> expectedPlugins = <String, Object>{
+          final expectedPlugins = <String, Object>{
             'ios': <Map<String, Object>>[
               <String, Object>{
                 'name': 'plugin-a',
@@ -708,7 +705,7 @@ dependencies:
           );
           iosProject.testExists = true;
 
-          final DateTime dateCreated = DateTime(1970);
+          final dateCreated = DateTime(1970);
           systemClock.currentTime = dateCreated;
 
           iosProject.usesSwiftPackageManager = true;
@@ -717,15 +714,11 @@ dependencies:
           await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final String pluginsString =
-              flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-          final Map<String, dynamic> jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-          final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
-            'ios': true,
-            'macos': true,
-          };
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
           expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
         },
         overrides: <Type, Generator>{
@@ -759,7 +752,7 @@ dependencies:
           );
           iosProject.testExists = true;
 
-          final DateTime dateCreated = DateTime(1970);
+          final dateCreated = DateTime(1970);
           systemClock.currentTime = dateCreated;
 
           iosProject.usesSwiftPackageManager = true;
@@ -768,12 +761,11 @@ dependencies:
           await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final String pluginsString =
-              flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-          final Map<String, dynamic> jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-          final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{
             'ios': false,
             'macos': false,
           };
@@ -810,7 +802,7 @@ dependencies:
           );
           iosProject.testExists = true;
 
-          final DateTime dateCreated = DateTime(1970);
+          final dateCreated = DateTime(1970);
           systemClock.currentTime = dateCreated;
 
           iosProject.usesSwiftPackageManager = true;
@@ -819,15 +811,11 @@ dependencies:
           await refreshPluginsList(flutterProject, iosPlatform: true, macOSPlatform: true);
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
-          final String pluginsString =
-              flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-          final Map<String, dynamic> jsonContent =
-              json.decode(pluginsString) as Map<String, dynamic>;
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
 
-          final Map<String, dynamic> expectedSwiftPackageManagerEnabled = <String, dynamic>{
-            'ios': true,
-            'macos': false,
-          };
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': false};
           expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
         },
         overrides: <Type, Generator>{
@@ -1196,8 +1184,7 @@ flutter:
         fileName: src/web_plugin.dart
     ''');
 
-            final FlutterManifest manifest =
-                FlutterManifest.createFromString('''
+            final FlutterManifest manifest = FlutterManifest.createFromString('''
 name: my_app
 version: 1.0.0
 
@@ -1280,8 +1267,7 @@ flutter:
       ios:
         dartPluginClass: SomePlugin
     ''');
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1338,8 +1324,7 @@ flutter:
       macos:
         dartPluginClass: SomePlugin
     ''');
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1375,8 +1360,7 @@ flutter:
         pluginClass: none
         dartPluginClass: SomePlugin
     ''');
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1408,8 +1392,7 @@ flutter:
           pluginDirectory.childFile('pubspec.yaml').writeAsStringSync(r'''
 "aws ... \"Branch\": $BITBUCKET_BRANCH, \"Date\": $(date +"%m-%d-%y"), \"Time\": $(date +"%T")}\"
     ''');
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1485,8 +1468,7 @@ flutter:
         pluginClass: InlineUrlLauncherLinux
     ''');
 
-          final FlutterManifest manifest =
-              FlutterManifest.createFromString('''
+          final FlutterManifest manifest = FlutterManifest.createFromString('''
 name: my_app
 version: 1.0.0
 
@@ -1557,8 +1539,7 @@ flutter:
         pluginClass: InlineUrlLauncherLinux
     ''');
 
-          final FlutterManifest manifest =
-              FlutterManifest.createFromString('''
+          final FlutterManifest manifest = FlutterManifest.createFromString('''
 name: my_app
 version: 1.0.0
 
@@ -1701,7 +1682,7 @@ flutter:
           final File pluginRegistrant = linuxProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
           );
-          for (final File file in <File>[pluginCmakeFile, pluginRegistrant]) {
+          for (final file in <File>[pluginCmakeFile, pluginRegistrant]) {
             final String contents = file.readAsStringSync();
             expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
             expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
@@ -1816,7 +1797,7 @@ flutter:
           final File pluginRegistrant = windowsProject.managedDirectory.childFile(
             'generated_plugin_registrant.cc',
           );
-          for (final File file in <File>[pluginCmakeFile, pluginRegistrant]) {
+          for (final file in <File>[pluginCmakeFile, pluginRegistrant]) {
             final String contents = file.readAsStringSync();
             expect(contents.indexOf('plugin_a'), lessThan(contents.indexOf('plugin_b')));
             expect(contents.indexOf('plugin_b'), lessThan(contents.indexOf('plugin_c')));
@@ -1844,10 +1825,7 @@ flutter:
             windowsPlatform: true,
           );
 
-          for (final CmakeBasedProject? project in <CmakeBasedProject?>[
-            linuxProject,
-            windowsProject,
-          ]) {
+          for (final project in <CmakeBasedProject?>[linuxProject, windowsProject]) {
             final File pluginCmakefile = project!.generatedPluginCmakeFile;
 
             expect(pluginCmakefile, exists);
@@ -1865,8 +1843,7 @@ flutter:
       testUsingContext(
         'iOS and macOS project setup up Darwin Dependency Management',
         () async {
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1889,8 +1866,7 @@ flutter:
       testUsingContext(
         'non-iOS or macOS project does not setup up Darwin Dependency Management',
         () async {
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
+          final dependencyManagement = FakeDarwinDependencyManagement();
           await injectPlugins(
             flutterProject,
             releaseMode: false,
@@ -1953,17 +1929,17 @@ flutter:
           linuxProject.exists = true;
           windowsProject.exists = true;
 
-          final List<File> dummyFiles = <File>[
+          final dummyFiles = <File>[
             flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
             flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
           ];
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             file.createSync(recursive: true);
           }
 
           createPluginSymlinks(flutterProject, force: true);
 
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             expect(file, isNot(exists));
           }
         },
@@ -1980,11 +1956,11 @@ flutter:
           linuxProject.exists = true;
           windowsProject.exists = true;
 
-          final List<File> dummyFiles = <File>[
+          final dummyFiles = <File>[
             flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
             flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
           ];
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             file.createSync(recursive: true);
           }
 
@@ -1992,7 +1968,7 @@ flutter:
           createFakePlugin(fs);
           await refreshPluginsList(flutterProject);
 
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             expect(file, isNot(exists));
           }
         },
@@ -2009,18 +1985,18 @@ flutter:
           linuxProject.exists = true;
           windowsProject.exists = true;
 
-          final List<File> dummyFiles = <File>[
+          final dummyFiles = <File>[
             flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
             flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
           ];
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             file.createSync(recursive: true);
           }
 
           // Without force, this should do nothing to existing files.
           createPluginSymlinks(flutterProject);
 
-          for (final File file in dummyFiles) {
+          for (final file in dummyFiles) {
             expect(file, exists);
           }
         },
@@ -2039,16 +2015,16 @@ flutter:
           createFakePlugin(fs);
           await refreshPluginsList(flutterProject);
 
-          final List<Link> links = <Link>[
+          final links = <Link>[
             linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
             windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
           ];
-          for (final Link link in links) {
+          for (final link in links) {
             link.deleteSync();
           }
           createPluginSymlinks(flutterProject);
 
-          for (final Link link in links) {
+          for (final link in links) {
             expect(link, exists);
           }
         },
@@ -2080,7 +2056,7 @@ flutter:
       }
 
       testUsingContext('validatePubspecForPlugin works', () async {
-        const String pluginYaml = '''
+        const pluginYaml = '''
   flutter:
     plugin:
       platforms:
@@ -2131,8 +2107,8 @@ flutter:
 
     group('Plugin files', () {
       testWithoutContext('for SwiftPM and podspec paths for iOS and macOS plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
+        final fs = MemoryFileSystem.test();
+        final plugin = Plugin(
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
@@ -2169,8 +2145,8 @@ flutter:
       });
 
       testWithoutContext('for SwiftPM and podspec paths for darwin plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
+        final fs = MemoryFileSystem.test();
+        final plugin = Plugin(
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
@@ -2215,8 +2191,8 @@ flutter:
       });
 
       testWithoutContext('for SwiftPM and podspec paths for non darwin plugins', () async {
-        final MemoryFileSystem fs = MemoryFileSystem.test();
-        final Plugin plugin = Plugin(
+        final fs = MemoryFileSystem.test();
+        final plugin = Plugin(
           name: 'test',
           path: '/path/to/test/',
           defaultPackagePlatforms: const <String, String>{},
@@ -2245,11 +2221,9 @@ flutter:
       'Symlink failures give developer mode instructions on recent versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14972.1]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972.1]');
 
-        const FileSystemException e = FileSystemException('', '', OSError('', 1314));
+        const e = FileSystemException('', '', OSError('', 1314));
 
         expect(
           () => handleSymlinkException(
@@ -2267,18 +2241,17 @@ flutter:
     testUsingContext(
       'Symlink ERROR_ACCESS_DENIED failures show developers paths that were used',
       () async {
-        final FakeFlutterProject flutterProject =
-            FakeFlutterProject()..directory = globals.fs.currentDirectory.childDirectory('app');
+        final flutterProject = FakeFlutterProject()
+          ..directory = globals.fs.currentDirectory.childDirectory('app');
         final Directory windowsManagedDirectory = flutterProject.directory
             .childDirectory('windows')
             .childDirectory('flutter');
-        final FakeWindowsProject windowsProject =
-            FakeWindowsProject()
-              ..managedDirectory = windowsManagedDirectory
-              ..pluginSymlinkDirectory = windowsManagedDirectory
-                  .childDirectory('ephemeral')
-                  .childDirectory('.plugin_symlinks')
-              ..exists = true;
+        final windowsProject = FakeWindowsProject()
+          ..managedDirectory = windowsManagedDirectory
+          ..pluginSymlinkDirectory = windowsManagedDirectory
+              .childDirectory('ephemeral')
+              .childDirectory('.plugin_symlinks')
+          ..exists = true;
 
         final File dependenciesFile = flutterProject.directory.childFile(
           '.flutter-plugins-dependencies',
@@ -2289,7 +2262,7 @@ flutter:
 
         writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
 
-        const String dependenciesFileContents = r'''
+        const dependenciesFileContents = r'''
 {
   "plugins": {
     "windows": [
@@ -2303,7 +2276,7 @@ flutter:
 ''';
         dependenciesFile.writeAsStringSync(dependenciesFileContents);
 
-        const String expectedMessage =
+        const expectedMessage =
             'ERROR_ACCESS_DENIED file system exception thrown while trying to '
             r'create a symlink from C:\some_plugin to '
             r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
@@ -2318,15 +2291,15 @@ flutter:
       },
       overrides: <Type, Generator>{
         FileSystem: () {
-          final FileExceptionHandler handle = FileExceptionHandler();
-          final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+          final handle = FileExceptionHandler();
+          final fileSystem = ErrorHandlingFileSystem(
             platform: FakePlatform(),
             delegate: MemoryFileSystem.test(
               style: FileSystemStyle.windows,
               opHandle: handle.opHandle,
             ),
           );
-          const String pluginSymlinkPath =
+          const pluginSymlinkPath =
               r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
           handle.addError(
             fileSystem.link(pluginSymlinkPath),
@@ -2344,11 +2317,9 @@ flutter:
       'Symlink failures instruct developers to run as administrator on older versions of Windows',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14393]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
-        const FileSystemException e = FileSystemException('', '', OSError('', 1314));
+        const e = FileSystemException('', '', OSError('', 1314));
 
         expect(
           () => handleSymlinkException(
@@ -2367,11 +2338,9 @@ flutter:
       'Symlink failures instruct developers to have their project on the same drive as their SDK',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
-        final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
-          'Microsoft Windows [Version 10.0.14972]',
-        );
+        final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
 
-        const FileSystemException e = FileSystemException('', '', OSError('', 1));
+        const e = FileSystemException('', '', OSError('', 1));
 
         expect(
           () => handleSymlinkException(
@@ -2390,11 +2359,9 @@ flutter:
 
     testWithoutContext('Symlink failures only give instructions for specific errors', () async {
       final Platform platform = FakePlatform(operatingSystem: 'windows');
-      final FakeOperatingSystemUtils os = FakeOperatingSystemUtils(
-        'Microsoft Windows [Version 10.0.14393]',
-      );
+      final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14393]');
 
-      const FileSystemException e = FileSystemException('', '', OSError('', 999));
+      const e = FileSystemException('', '', OSError('', 999));
 
       expect(
         () => handleSymlinkException(
@@ -2409,7 +2376,7 @@ flutter:
     });
 
     group('injectPlugins in release mode', () {
-      const String testPluginName = 'test_plugin';
+      const testPluginName = 'test_plugin';
 
       // Fake pub to override dev dependencies of flutterProject.
 
@@ -2457,7 +2424,7 @@ flutter:
       );
 
       testUsingContext(
-        'excludes dev dependencies from iOS plugin registrant',
+        'includes dev dependencies from iOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2467,9 +2434,8 @@ flutter:
             isDevDependency: true,
           );
 
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
-          const String devDepImport = '#import <$testPluginName/Foo.h>';
+          final dependencyManagement = FakeDarwinDependencyManagement();
+          const devDepImport = '#import <$testPluginName/Foo.h>';
 
           // Test non-release mode.
           await injectPlugins(
@@ -2491,7 +2457,7 @@ flutter:
             releaseMode: true,
           );
           expect(generatedPluginRegistrantImpl, exists);
-          expect(generatedPluginRegistrantImpl.readAsStringSync(), isNot(contains(devDepImport)));
+          expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2511,7 +2477,7 @@ flutter:
             isDevDependency: true,
           );
 
-          const String expectedDevDepImport = '#include <$testPluginName/foo.h>';
+          const expectedDevDepImport = '#include <$testPluginName/foo.h>';
 
           // Test non-release mode.
           await injectPlugins(flutterProject, linuxPlatform: true, releaseMode: false);
@@ -2537,7 +2503,7 @@ flutter:
       );
 
       testUsingContext(
-        'excludes dev dependencies from MacOS plugin registrant',
+        'includes dev dependencies from MacOS plugin registrant',
         () async {
           createPlugin(
             name: testPluginName,
@@ -2546,9 +2512,8 @@ flutter:
             },
             isDevDependency: true,
           );
-          final FakeDarwinDependencyManagement dependencyManagement =
-              FakeDarwinDependencyManagement();
-          const String expectedDevDepRegistration = 'Foo.register';
+          final dependencyManagement = FakeDarwinDependencyManagement();
+          const expectedDevDepRegistration = 'Foo.register';
 
           // Test non-release mode.
           await injectPlugins(
@@ -2576,7 +2541,7 @@ flutter:
           expect(generatedPluginRegistrant, exists);
           expect(
             generatedPluginRegistrant.readAsStringSync(),
-            isNot(contains(expectedDevDepRegistration)),
+            contains(expectedDevDepRegistration),
           );
         },
         overrides: <Type, Generator>{
@@ -2597,7 +2562,7 @@ flutter:
             isDevDependency: true,
           );
 
-          const String expectedDevDepRegistration = '#include <$testPluginName/foo.h>';
+          const expectedDevDepRegistration = '#include <$testPluginName/foo.h>';
           writePackageConfigFiles(
             directory: flutterProject.directory,
             mainLibName: 'my_app',
@@ -2633,7 +2598,7 @@ flutter:
 
     group('flutterPluginsListHasDevDependencies', () {
       testWithoutContext('throws if file does not exist', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
 
         expect(
@@ -2643,7 +2608,7 @@ flutter:
       });
 
       testWithoutContext('throws if file is malformed', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
 
         pluginsFile.writeAsStringSync('This is not JSON');
@@ -2655,7 +2620,7 @@ flutter:
       });
 
       testWithoutContext('Returns false if has no dependencies', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
 
         pluginsFile.writeAsStringSync('''
@@ -2667,7 +2632,7 @@ flutter:
       });
 
       testWithoutContext('Returns false if has no dev dependencies', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
 
         pluginsFile.writeAsStringSync('''
@@ -2687,7 +2652,7 @@ flutter:
       });
 
       testWithoutContext('Returns true if has dev dependencies', () {
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final fileSystem = MemoryFileSystem.test();
         final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
 
         pluginsFile.writeAsStringSync('''
@@ -2711,21 +2676,20 @@ flutter:
   testUsingContext(
     'exits tool when deleting .plugin_symlinks fails',
     () async {
-      final FakeFlutterProject flutterProject =
-          FakeFlutterProject()..directory = globals.fs.currentDirectory.childDirectory('app');
-      final FakeFlutterManifest flutterManifest = FakeFlutterManifest();
+      final flutterProject = FakeFlutterProject()
+        ..directory = globals.fs.currentDirectory.childDirectory('app');
+      final flutterManifest = FakeFlutterManifest();
       final Directory windowsManagedDirectory = flutterProject.directory
           .childDirectory('windows')
           .childDirectory('flutter');
-      final FakeWindowsProject windowsProject =
-          FakeWindowsProject()
-            ..managedDirectory = windowsManagedDirectory
-            ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
-            ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
-            ..pluginSymlinkDirectory = windowsManagedDirectory
-                .childDirectory('ephemeral')
-                .childDirectory('.plugin_symlinks')
-            ..exists = true;
+      final windowsProject = FakeWindowsProject()
+        ..managedDirectory = windowsManagedDirectory
+        ..cmakeFile = windowsManagedDirectory.parent.childFile('CMakeLists.txt')
+        ..generatedPluginCmakeFile = windowsManagedDirectory.childFile('generated_plugins.mk')
+        ..pluginSymlinkDirectory = windowsManagedDirectory
+            .childDirectory('ephemeral')
+            .childDirectory('.plugin_symlinks')
+        ..exists = true;
 
       flutterProject
         ..manifest = flutterManifest
@@ -2758,15 +2722,15 @@ flutter:
     },
     overrides: <Type, Generator>{
       FileSystem: () {
-        final FileExceptionHandler handle = FileExceptionHandler();
-        final ErrorHandlingFileSystem fileSystem = ErrorHandlingFileSystem(
+        final handle = FileExceptionHandler();
+        final fileSystem = ErrorHandlingFileSystem(
           platform: FakePlatform(),
           delegate: MemoryFileSystem.test(
             style: FileSystemStyle.windows,
             opHandle: handle.opHandle,
           ),
         );
-        const String symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
+        const symlinkDirectoryPath = r'C:\app\windows\flutter\ephemeral\.plugin_symlinks';
         handle.addError(
           fileSystem.directory(symlinkDirectoryPath),
           FileSystemOp.delete,
@@ -2784,7 +2748,7 @@ flutter:
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  late Set<String> dependencies = <String>{};
+  late var dependencies = <String>{};
   @override
   late String appName;
   @override
@@ -2798,7 +2762,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  bool isModule = false;
+  var isModule = false;
 
   @override
   late FlutterManifest manifest;
@@ -2833,9 +2797,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
 class FakeMacOSProject extends Fake implements MacOSProject {
   @override
-  String pluginConfigKey = 'macos';
+  var pluginConfigKey = 'macos';
 
-  bool exists = false;
+  var exists = false;
 
   @override
   late File podfile;
@@ -2844,7 +2808,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late File podManifestLock;
 
   @override
-  bool usesSwiftPackageManager = false;
+  var usesSwiftPackageManager = false;
 
   @override
   late Directory managedDirectory;
@@ -2855,9 +2819,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  String pluginConfigKey = 'ios';
+  var pluginConfigKey = 'ios';
 
-  bool testExists = false;
+  var testExists = false;
 
   @override
   bool existsSync() => testExists;
@@ -2882,14 +2846,14 @@ class FakeIosProject extends Fake implements IosProject {
   late File podManifestLock;
 
   @override
-  bool usesSwiftPackageManager = false;
+  var usesSwiftPackageManager = false;
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
   @override
-  String pluginConfigKey = 'android';
+  var pluginConfigKey = 'android';
 
-  bool exists = false;
+  var exists = false;
 
   @override
   late Directory pluginRegistrantHost;
@@ -2929,12 +2893,12 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
 class FakeWebProject extends Fake implements WebProject {
   @override
-  String pluginConfigKey = 'web';
+  var pluginConfigKey = 'web';
 
   @override
   late Directory libDirectory;
 
-  bool exists = false;
+  var exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2942,7 +2906,7 @@ class FakeWebProject extends Fake implements WebProject {
 
 class FakeWindowsProject extends Fake implements WindowsProject {
   @override
-  String pluginConfigKey = 'windows';
+  var pluginConfigKey = 'windows';
 
   @override
   late Directory managedDirectory;
@@ -2958,7 +2922,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
   @override
   late File generatedPluginCmakeFile;
-  bool exists = false;
+  var exists = false;
 
   @override
   bool existsSync() => exists;
@@ -2966,7 +2930,7 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
 class FakeLinuxProject extends Fake implements LinuxProject {
   @override
-  String pluginConfigKey = 'linux';
+  var pluginConfigKey = 'linux';
 
   @override
   late Directory managedDirectory;
@@ -2982,7 +2946,7 @@ class FakeLinuxProject extends Fake implements LinuxProject {
 
   @override
   late File generatedPluginCmakeFile;
-  bool exists = false;
+  var exists = false;
 
   @override
   bool existsSync() => exists;
@@ -3005,7 +2969,7 @@ class FakeSystemClock extends Fake implements SystemClock {
 }
 
 class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyManagement {
-  List<FlutterDarwinPlatform> setupPlatforms = <FlutterDarwinPlatform>[];
+  var setupPlatforms = <FlutterDarwinPlatform>[];
 
   @override
   Future<void> setUp({required FlutterDarwinPlatform platform}) async {
@@ -3015,7 +2979,7 @@ class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyMan
 
 /// A fake of [CocoaPods] that writes calls to [invalidatePodInstallOutput] to [capturedInvocations].
 final class FakeCocoaPodsCapturesInvalidate extends Fake implements CocoaPods {
-  final List<XcodeBasedProject> capturedInvocations = <XcodeBasedProject>[];
+  final capturedInvocations = <XcodeBasedProject>[];
 
   @override
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {

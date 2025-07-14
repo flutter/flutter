@@ -36,7 +36,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: OutlinedButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -59,9 +61,9 @@ void main() {
       material3
           ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
           : RoundedRectangleBorder(
-            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
+              side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+            ),
     );
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -106,9 +108,9 @@ void main() {
       material3
           ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
           : RoundedRectangleBorder(
-            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
+              side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+            ),
     );
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -152,9 +154,9 @@ void main() {
       material3
           ? StadiumBorder(side: BorderSide(color: colorScheme.outline))
           : RoundedRectangleBorder(
-            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
+              side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+            ),
     );
 
     expect(material.textStyle!.color, colorScheme.primary);
@@ -185,9 +187,9 @@ void main() {
       material3
           ? StadiumBorder(side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)))
           : RoundedRectangleBorder(
-            side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
+              side: BorderSide(color: colorScheme.onSurface.withOpacity(0.12)),
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+            ),
     );
 
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
@@ -1097,7 +1099,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(),
-          child: Center(child: OutlinedButton(onPressed: onPressed, child: const Text('button'))),
+          child: Center(
+            child: OutlinedButton(onPressed: onPressed, child: const Text('button')),
+          ),
         ),
       );
     }
@@ -1126,22 +1130,25 @@ void main() {
           child: Container(
             alignment: Alignment.topLeft,
             child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: const RoundedRectangleBorder(),
-                // default border radius is 0
-                backgroundColor: fillColor,
-                minimumSize: const Size(64, 36),
-              ).copyWith(
-                side: MaterialStateProperty.resolveWith<BorderSide>((Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return disabledBorderSide;
-                  }
-                  if (states.contains(MaterialState.pressed)) {
-                    return pressedBorderSide;
-                  }
-                  return enabledBorderSide;
-                }),
-              ),
+              style:
+                  OutlinedButton.styleFrom(
+                    shape: const RoundedRectangleBorder(),
+                    // default border radius is 0
+                    backgroundColor: fillColor,
+                    minimumSize: const Size(64, 36),
+                  ).copyWith(
+                    side: MaterialStateProperty.resolveWith<BorderSide>((
+                      Set<MaterialState> states,
+                    ) {
+                      if (states.contains(MaterialState.disabled)) {
+                        return disabledBorderSide;
+                      }
+                      if (states.contains(MaterialState.pressed)) {
+                        return pressedBorderSide;
+                      }
+                      return enabledBorderSide;
+                    }),
+                  ),
               clipBehavior: Clip.antiAlias,
               onPressed: onPressed,
               child: const Text('button'),
@@ -1322,7 +1329,9 @@ void main() {
           child: MediaQuery.withClampedTextScaling(
             minScaleFactor: 3.0,
             maxScaleFactor: 3.0,
-            child: Center(child: OutlinedButton(onPressed: () {}, child: const Text('ABC'))),
+            child: Center(
+              child: OutlinedButton(onPressed: () {}, child: const Text('ABC')),
+            ),
           ),
         ),
       ),
@@ -1383,15 +1392,14 @@ void main() {
                 ),
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),
@@ -1523,19 +1531,18 @@ void main() {
                         textDirection: textDirection,
                         child: Scaffold(
                           body: Center(
-                            child:
-                                icon == null
-                                    ? OutlinedButton(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      child: const Text('button', key: labelKey),
-                                    )
-                                    : OutlinedButton.icon(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      icon: icon,
-                                      label: const Text('button', key: labelKey),
-                                    ),
+                            child: icon == null
+                                ? OutlinedButton(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    child: const Text('button', key: labelKey),
+                                  )
+                                : OutlinedButton.icon(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    icon: icon,
+                                    label: const Text('button', key: labelKey),
+                                  ),
                           ),
                         ),
                       ),
@@ -1572,11 +1579,13 @@ void main() {
 
             final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
             final Rect labelBounds = globalBounds(labelRenderBox);
-            final RenderBox? iconRenderBox =
-                icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final RenderBox? iconRenderBox = icon == null
+                ? null
+                : tester.renderObject<RenderBox>(find.byKey(iconKey));
             final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
-            final Rect childBounds =
-                icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
+            final Rect childBounds = icon == null
+                ? labelBounds
+                : labelBounds.expandToInclude(iconBounds!);
 
             // We measure the `InkResponse` descendant of the button
             // element, because the button has a larger `RenderBox`
@@ -1610,10 +1619,9 @@ void main() {
 
             // Check the gap between the icon and the label
             if (icon != null) {
-              final double gapWidth =
-                  textDirection == TextDirection.ltr
-                      ? labelBounds.left - iconBounds!.right
-                      : iconBounds!.left - labelBounds.right;
+              final double gapWidth = textDirection == TextDirection.ltr
+                  ? labelBounds.left - iconBounds!.right
+                  : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1673,7 +1681,9 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
-              body: Center(child: OutlinedButton(onPressed: () {}, child: const Text('text'))),
+              body: Center(
+                child: OutlinedButton(onPressed: () {}, child: const Text('text')),
+              ),
             );
           },
         ),
@@ -1810,7 +1820,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
+          home: Center(
+            child: OutlinedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       );
 
@@ -1835,7 +1847,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: OutlinedButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: OutlinedButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -2136,19 +2150,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? OutlinedButton(
-                    statesController: controller,
-                    onPressed: () {},
-                    child: const Text('button'),
-                  )
-                  : OutlinedButton.icon(
-                    statesController: controller,
-                    onPressed: () {},
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? OutlinedButton(
+                  statesController: controller,
+                  onPressed: () {},
+                  child: const Text('button'),
+                )
+              : OutlinedButton.icon(
+                  statesController: controller,
+                  onPressed: () {},
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2205,19 +2218,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? OutlinedButton(
-                    statesController: controller,
-                    onPressed: null,
-                    child: const Text('button'),
-                  )
-                  : OutlinedButton.icon(
-                    statesController: controller,
-                    onPressed: null,
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? OutlinedButton(
+                  statesController: controller,
+                  onPressed: null,
+                  child: const Text('button'),
+                )
+              : OutlinedButton.icon(
+                  statesController: controller,
+                  onPressed: null,
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2406,22 +2418,16 @@ void main() {
             body: Center(
               child: OutlinedButton(
                 style: ButtonStyle(
-                  backgroundBuilder: (
-                    BuildContext context,
-                    Set<MaterialState> states,
-                    Widget? child,
-                  ) {
-                    backgroundStates = states;
-                    return child!;
-                  },
-                  foregroundBuilder: (
-                    BuildContext context,
-                    Set<MaterialState> states,
-                    Widget? child,
-                  ) {
-                    foregroundStates = states;
-                    return child!;
-                  },
+                  backgroundBuilder:
+                      (BuildContext context, Set<MaterialState> states, Widget? child) {
+                        backgroundStates = states;
+                        return child!;
+                      },
+                  foregroundBuilder:
+                      (BuildContext context, Set<MaterialState> states, Widget? child) {
+                        foregroundStates = states;
+                        return child!;
+                      },
                 ),
                 onPressed: () {},
                 focusNode: focusNode,

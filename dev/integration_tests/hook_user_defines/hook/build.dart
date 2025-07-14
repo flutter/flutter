@@ -22,10 +22,9 @@ void main(List<String> args) async {
     await cbuilder.run(
       input: input,
       output: output,
-      logger:
-          Logger('')
-            ..level = Level.ALL
-            ..onRecord.listen((LogRecord record) => print(record.message)),
+      logger: Logger('')
+        ..level = Level.ALL
+        ..onRecord.listen((LogRecord record) => print(record.message)),
     );
   });
 }

@@ -63,15 +63,14 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children:
-                        List<Widget>.generate(schemeVariants.length, (int index) {
-                          return ColorSchemeVariantColumn(
-                            selectedColor: selectedColor,
-                            brightness: selectedBrightness,
-                            schemeVariant: schemeVariants[index],
-                            contrastLevel: selectedContrast,
-                          );
-                        }).toList(),
+                    children: List<Widget>.generate(schemeVariants.length, (int index) {
+                      return ColorSchemeVariantColumn(
+                        selectedColor: selectedColor,
+                        brightness: selectedBrightness,
+                        schemeVariant: schemeVariants[index],
+                        contrastLevel: selectedContrast,
+                      );
+                    }).toList(),
                   ),
                 ),
               ],
@@ -145,10 +144,9 @@ class _SettingsState extends State<Settings> {
                   ...List<Widget>.generate(ColorSeed.values.length, (int index) {
                     final Color itemColor = ColorSeed.values[index].color;
                     return IconButton(
-                      icon:
-                          selectedColor == ColorSeed.values[index].color
-                              ? Icon(Icons.circle, color: itemColor)
-                              : Icon(Icons.circle_outlined, color: itemColor),
+                      icon: selectedColor == ColorSeed.values[index].color
+                          ? Icon(Icons.circle, color: itemColor)
+                          : Icon(Icons.circle_outlined, color: itemColor),
                       onPressed: () {
                         setState(() {
                           selectedColor = itemColor;
@@ -409,7 +407,10 @@ class ColorGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: children),
+      ),
     );
   }
 }
@@ -434,7 +435,11 @@ class ColorChip extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
-          children: <Expanded>[Expanded(child: Text(label, style: TextStyle(color: labelColor)))],
+          children: <Expanded>[
+            Expanded(
+              child: Text(label, style: TextStyle(color: labelColor)),
+            ),
+          ],
         ),
       ),
     );

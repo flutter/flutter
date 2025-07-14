@@ -33,7 +33,6 @@ import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -99,17 +98,6 @@ Future<void> main(List<String> args) async {
     userMessages: UserMessages(),
   );
 
-  // Silently add --start-paused if running with -d web-server and --web-experimental-hot-reload,
-  // and --start-paused is not already present. This is to support hot reload in web-server environment.
-  // TODO(yjessy): Remove this workaround once https://github.com/dart-lang/sdk/issues/60688 is resolved.
-
-  if (args.contains('-d') &&
-      args.contains('web-server') &&
-      args.contains('--web-experimental-hot-reload') &&
-      !args.contains('--start-paused')) {
-    args = List<String>.from(args)..add('--start-paused');
-  }
-
   await runner.run(
     args,
     () => generateCommands(verboseHelp: verboseHelp, verbose: verbose),
@@ -124,16 +112,15 @@ Future<void> main(List<String> args) async {
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
-      DevtoolsLauncher:
-          () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
-        final LoggerFactory loggerFactory = LoggerFactory(
+        final loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,
@@ -243,7 +230,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       InstallCommand(verboseHelp: verboseHelp),
       LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      MakeHostAppEditableCommand(),
       PackagesCommand(),
       PrecacheCommand(
         verboseHelp: verboseHelp,

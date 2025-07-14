@@ -161,17 +161,17 @@ If you need to pin a particular version, edit the table at the top of the `updat
 
 ## Using a locally-built engine with the `flutter` tool
 
-To allow the tool to be used with a locally-built engine, the `flutter` tool accepts two
-global parameters: `local-engine-src-path`, which specifies the path to your engine repository,
-and `local-engine`, which specifies which build of the engine to use.
+To allow the tool to be used with a locally-built engine, the `flutter` tool accepts three
+global parameters:
 
-**Important:** before building your local engine, you should ensure that your engine feature branch is based on the
-same upstream version of the engine that the Flutter SDK/flutter tool has pinned. You can find the engine version
-that the Flutter SDK has pinned at `bin/cache/engine.stamp`.
+* `local-engine`, which specifies which build of the engine to run
+* `local-engine-host`, which specifies which build of the engine to use for host artifacts like the dart compiler
+* `local-engine-src-path` (optional), which specifies the path to your engine sources
 
-A typical invocation would be: `--local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
+A typical invocation would be: `--local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
 
-If your engine is in a directory called `engine` that is a peer to the framework repository's `flutter` directory, then you can omit `--local-engine-src-path` and only specify `--local-engine`.
+If your engine is in a directory other than the `engine` directory that is a peer to the
+framework repository's `flutter` directory, then you must specify `--local-engine-src-path` as well.
 
 You can also set the environment variable `$FLUTTER_ENGINE` instead of specifying `--local-engine-src-path`.
 

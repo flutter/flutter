@@ -360,7 +360,9 @@ void main() {
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
 
@@ -394,7 +396,10 @@ void main() {
   testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(navigatorKey: navigator, home: const Material(child: Center(child: Text('Go')))),
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Material(child: Center(child: Text('Go'))),
+      ),
     );
 
     final Future<int?> result = showDialog<int>(
@@ -451,7 +456,9 @@ void main() {
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
 
@@ -776,8 +783,9 @@ void main() {
     final GlobalKey contentKey = GlobalKey();
     final GlobalKey childrenKey = GlobalKey();
 
-    final Finder dialogFinder =
-        find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first;
+    final Finder dialogFinder = find
+        .descendant(of: find.byType(Dialog), matching: find.byType(Material))
+        .first;
     final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
@@ -1479,14 +1487,15 @@ void main() {
           child: Navigator(
             onGenerateRoute: (_) {
               return PageRouteBuilder<void>(
-                pageBuilder: (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) {
-                  outerContext = context;
-                  return Container();
-                },
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) {
+                      outerContext = context;
+                      return Container();
+                    },
               );
             },
           ),
@@ -1532,7 +1541,10 @@ void main() {
       const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pumpWidget(
-      const MediaQuery(data: MediaQueryData(), child: Dialog(child: Placeholder())),
+      const MediaQuery(
+        data: MediaQueryData(),
+        child: Dialog(child: Placeholder()),
+      ),
     );
     expect(
       // no change because this is an animation
@@ -1781,7 +1793,10 @@ void main() {
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const SimpleDialog(
           title: Text('title'),
-          children: <Widget>[Text('content'), TextButton(onPressed: null, child: Text('action'))],
+          children: <Widget>[
+            Text('content'),
+            TextButton(onPressed: null, child: Text('action')),
+          ],
         ),
       ),
     );
@@ -1901,11 +1916,10 @@ void main() {
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(
                   itemExtent: 100.0,
-                  children:
-                      <int>[0, 1, 2, 3, 4]
-                          .where((int i) => !dismissedItems.contains(i))
-                          .map<Widget>((int item) => buildDismissibleItem(item, setState))
-                          .toList(),
+                  children: <int>[0, 1, 2, 3, 4]
+                      .where((int i) => !dismissedItems.contains(i))
+                      .map<Widget>((int item) => buildDismissibleItem(item, setState))
+                      .toList(),
                 ),
               ),
             );
@@ -2690,7 +2704,9 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+        home: Material(
+          child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+        ),
       ),
     );
     final BuildContext context = tester.element(find.text('Go'));
@@ -2907,6 +2923,64 @@ void main() {
     expect(tester.getSize(find.byType(SizedBox)).width, 560);
   });
 
+  testWidgets('AlertDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(const AlertDialog(content: SizedBox(), contentPadding: EdgeInsets.zero)),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('AlertDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const AlertDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          content: SizedBox(width: 1000, height: 100),
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
+  testWidgets('SimpleDialog respects the default constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(contentPadding: EdgeInsets.zero, children: <Widget>[SizedBox()]),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 280);
+  });
+
+  testWidgets('SimpleDialog respects the given constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildAppWithDialog(
+        const SimpleDialog(
+          constraints: BoxConstraints(maxWidth: 560),
+          contentPadding: EdgeInsets.zero,
+          children: <Widget>[SizedBox(width: 1000, height: 100)],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(SizedBox)).width, 560);
+  });
+
   testWidgets('test no back gesture on fullscreen dialogs', (WidgetTester tester) async {
     // no back button in app bar for RawDialogRoute with full screen dialog set to true
     await tester.pumpWidget(
@@ -2919,16 +2993,17 @@ void main() {
                 onPressed: () {
                   Navigator.of(context).push(
                     RawDialogRoute<void>(
-                      pageBuilder: (
-                        BuildContext context,
-                        Animation<double> animation,
-                        Animation<double> secondaryAnimation,
-                      ) {
-                        return Scaffold(
-                          appBar: AppBar(title: const Text('title')),
-                          body: const Text('body'),
-                        );
-                      },
+                      pageBuilder:
+                          (
+                            BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return Scaffold(
+                              appBar: AppBar(title: const Text('title')),
+                              body: const Text('body'),
+                            );
+                          },
                       fullscreenDialog: true,
                     ),
                   );

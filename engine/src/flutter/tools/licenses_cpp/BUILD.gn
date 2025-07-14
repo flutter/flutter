@@ -16,6 +16,7 @@ source_set("licenses") {
     "src/mmap_file.h",
   ]
   public_deps = [
+    "//flutter/third_party/abseil-cpp/absl/log:initialize",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
     "//flutter/third_party/re2",
   ]
@@ -28,6 +29,21 @@ executable("licenses_cpp") {
     "//flutter/third_party/abseil-cpp/absl/flags:flag",
     "//flutter/third_party/abseil-cpp/absl/flags:parse",
     "//flutter/third_party/abseil-cpp/absl/status:statusor",
+  ]
+}
+
+executable("license_file_compare") {
+  sources = [
+    "src/license_file_compare.cc",
+    "src/mmap_file.cc",
+    "src/mmap_file.h",
+  ]
+  deps = [
+    "//flutter/third_party/abseil-cpp/absl/flags:flag",
+    "//flutter/third_party/abseil-cpp/absl/flags:parse",
+    "//flutter/third_party/abseil-cpp/absl/log:initialize",
+    "//flutter/third_party/abseil-cpp/absl/status:statusor",
+    "//flutter/third_party/re2",
   ]
 }
 

@@ -30,14 +30,12 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
                 child: Stack(
                   children: <Widget>[
                     GestureDetector(
-                      onPanUpdate:
-                          (DragUpdateDetails details) => setState(() {
-                            dragGesturePosition = details.localPosition;
-                          }),
-                      onPanDown:
-                          (DragDownDetails details) => setState(() {
-                            dragGesturePosition = details.localPosition;
-                          }),
+                      onPanUpdate: (DragUpdateDetails details) => setState(() {
+                        dragGesturePosition = details.localPosition;
+                      }),
+                      onPanDown: (DragDownDetails details) => setState(() {
+                        dragGesturePosition = details.localPosition;
+                      }),
                       child: const FlutterLogo(size: 200),
                     ),
                     Positioned(

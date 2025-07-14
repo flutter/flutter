@@ -61,7 +61,7 @@ class SemanticMenu extends SemanticRole {
       }
     }
 
-    final String attributeValue = ids.map((id) => 'flt-semantic-node-$id').join(' ');
+    final String attributeValue = ids.map((id) => '$kFlutterSemanticNodePrefix$id').join(' ');
     setAttribute('aria-owns', attributeValue);
   }
 
@@ -122,7 +122,7 @@ class SemanticMenuBar extends SemanticRole {
       }
     }
 
-    final String attributeValue = ids.map((id) => 'flt-semantic-node-$id').join(' ');
+    final String attributeValue = ids.map((id) => '$kFlutterSemanticNodePrefix$id').join(' ');
     setAttribute('aria-owns', attributeValue);
   }
 
