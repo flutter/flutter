@@ -133,8 +133,9 @@ abstract class BrowserImageDecoder implements ui.Codec {
       );
     }
 
-    final DecodeResult result =
-        await webDecoder.decode(DecodeOptions(frameIndex: _nextFrameIndex)).toDart;
+    final DecodeResult result = await webDecoder
+        .decode(DecodeOptions(frameIndex: _nextFrameIndex))
+        .toDart;
     final VideoFrame frame = result.image;
     _nextFrameIndex = (_nextFrameIndex + 1) % frameCount;
 

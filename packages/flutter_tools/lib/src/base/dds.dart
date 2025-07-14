@@ -46,7 +46,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   Uri? _existingDdsUri;
 
   Future<void> get done => _completer.future;
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 
   final Logger _logger;
 
@@ -62,11 +62,10 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     Uri? devToolsServerAddress,
   }) async {
     assert(_ddsInstance == null);
-    final Uri ddsUri = Uri(
+    final ddsUri = Uri(
       scheme: 'http',
-      host:
-          ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
-              .host,
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
+          .host,
       port: ddsPort ?? 0,
     );
     _logger.printTrace(

@@ -16,14 +16,14 @@ import '../src/fakes.dart';
 void main() {
   group('Features', () {
     testWithoutContext('setting has safe defaults', () {
-      const FeatureChannelSetting featureSetting = FeatureChannelSetting();
+      const featureSetting = FeatureChannelSetting();
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
     });
 
     testWithoutContext('has safe defaults', () {
-      const Feature feature = Feature(name: 'example');
+      const feature = Feature(name: 'example');
 
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
@@ -31,10 +31,10 @@ void main() {
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
-      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: true);
-      const Feature feature = Feature(
+      const masterSetting = FeatureChannelSetting(available: true);
+      const betaSetting = FeatureChannelSetting(available: true);
+      const stableSetting = FeatureChannelSetting(available: true);
+      const feature = Feature(
         name: 'example',
         master: masterSetting,
         beta: betaSetting,
@@ -48,12 +48,12 @@ void main() {
     });
 
     testWithoutContext('reads from configuration if available', () {
-      const Feature exampleFeature = Feature(
+      const exampleFeature = Feature(
         name: 'example',
         master: FeatureChannelSetting(available: true),
       );
 
-      final FlutterFeatureFlags flags = FlutterFeatureFlags(
+      final flags = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
         platform: FakePlatform(),
@@ -62,9 +62,9 @@ void main() {
     });
 
     testWithoutContext('returns false if not available', () {
-      const Feature exampleFeature = Feature(name: 'example');
+      const exampleFeature = Feature(name: 'example');
 
-      final FlutterFeatureFlags flags = FlutterFeatureFlags(
+      final flags = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
         platform: FakePlatform(),
@@ -130,10 +130,12 @@ void main() {
 
       expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
 
-      final List<String> featureNames =
-          featureFlags.allFeatures.map((Feature feature) => feature.name).toList();
-      final List<String> testFeatureNames =
-          testFeatureFlags.allFeatures.map((Feature feature) => feature.name).toList();
+      final List<String> featureNames = featureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+      final List<String> testFeatureNames = testFeatureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
 
       expect(featureNames, unorderedEquals(testFeatureNames));
     });
@@ -151,9 +153,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterLinuxDesktopFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterLinuxDesktopFeature);
       expect(checkFlags.isLinuxEnabled, isTrue);
     });
   });
@@ -170,9 +170,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterMacOSDesktopFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterMacOSDesktopFeature);
       expect(checkFlags.isMacOSEnabled, isTrue);
     });
   });
@@ -189,9 +187,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterWindowsDesktopFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWindowsDesktopFeature);
       expect(checkFlags.isWindowsEnabled, isTrue);
     });
   });
@@ -208,9 +204,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterWebFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWebFeature);
       expect(checkFlags.isWebEnabled, isTrue);
     });
   });
@@ -227,9 +221,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterAndroidFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterAndroidFeature);
       expect(checkFlags.isAndroidEnabled, isTrue);
     });
   });
@@ -246,9 +238,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterIOSFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterIOSFeature);
       expect(checkFlags.isIOSEnabled, isTrue);
     });
   });
@@ -271,9 +261,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterFuchsiaFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterFuchsiaFeature);
       expect(checkFlags.isFuchsiaEnabled, isTrue);
     });
   });
@@ -296,9 +284,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: flutterCustomDevicesFeature,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterCustomDevicesFeature);
       expect(checkFlags.areCustomDevicesEnabled, isTrue);
     });
   });
@@ -310,7 +296,7 @@ void main() {
     });
 
     test('can be disabled by TERM=dumb', () {
-      final FlutterFeatureFlags features = FlutterFeatureFlags(
+      final features = FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(),
         featuresConfig: _FakeFeaturesConfig(),
         platform: FakePlatform(environment: <String, String>{'TERM': 'dumb'}),
@@ -320,9 +306,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: cliAnimation,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: cliAnimation);
       expect(checkFlags.isCliAnimationEnabled, isTrue);
     });
   });
@@ -345,9 +329,7 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: nativeAssets,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: nativeAssets);
       expect(checkFlags.isNativeAssetsEnabled, isTrue);
     });
   });
@@ -370,16 +352,14 @@ void main() {
     });
 
     test('forwards to isEnabled', () {
-      final _TestIsGetterForwarding checkFlags = _TestIsGetterForwarding(
-        shouldInvoke: swiftPackageManager,
-      );
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: swiftPackageManager);
       expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
     });
   });
 }
 
 final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
-  final Map<Feature, bool?> cannedResponse = <Feature, bool?>{};
+  final cannedResponse = <Feature, bool?>{};
 
   @override
   bool? isEnabled(Feature feature) => cannedResponse[feature];

@@ -348,8 +348,9 @@ class CkTextStyle implements ui.TextStyle {
       originalFontFamily: fontFamily,
       effectiveFontFamily: _computeEffectiveFontFamily(fontFamily),
       originalFontFamilyFallback: fontFamilyFallback,
-      effectiveFontFamilyFallback:
-          ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
+      effectiveFontFamilyFallback: ui_web.TestEnvironment.instance.forceTestFonts
+          ? null
+          : fontFamilyFallback,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
@@ -707,8 +708,9 @@ class CkStrutStyle implements ui.StrutStyle {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) : _fontFamily = _computeEffectiveFontFamily(fontFamily),
-       _fontFamilyFallback =
-           ui_web.TestEnvironment.instance.forceTestFonts ? null : fontFamilyFallback,
+       _fontFamilyFallback = ui_web.TestEnvironment.instance.forceTestFonts
+           ? null
+           : fontFamilyFallback,
        _fontSize = fontSize,
        _height = height == ui.kTextHeightNone ? null : height,
        _leadingDistribution = leadingDistribution,

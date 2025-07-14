@@ -1081,8 +1081,8 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength =
           originalIndex <= replacementRange.start && originalIndex < replacementRange.end
-              ? 0
-              : replacementString.length;
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
       final int removedLength =
           originalIndex.clamp(replacementRange.start, replacementRange.end) -
@@ -1708,10 +1708,9 @@ TextInputAction _toTextInputAction(String action) {
     'TextInputAction.emergencyCall' => TextInputAction.emergencyCall,
     'TextInputAction.done' => TextInputAction.done,
     'TextInputAction.newline' => TextInputAction.newline,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text input action: $action'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text input action: $action'),
+    ]),
   };
 }
 
@@ -1720,10 +1719,9 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     'FloatingCursorDragState.start' => FloatingCursorDragState.Start,
     'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
     'FloatingCursorDragState.end' => FloatingCursorDragState.End,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text cursor action: $state'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text cursor action: $state'),
+    ]),
   };
 }
 
@@ -1736,10 +1734,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
     encoded['Y'] != null,
     'You must provide a value for the vertical location of the floating cursor.',
   );
-  final Offset offset =
-      state == FloatingCursorDragState.Update
-          ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
-          : Offset.zero;
+  final Offset offset = state == FloatingCursorDragState.Update
+      ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
+      : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1811,8 +1808,8 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel =
-          newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
+      _instance._channel = newChannel
+        ..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1981,14 +1978,13 @@ class TextInput {
           stack: stack,
           library: 'services library',
           context: ErrorDescription('during method call ${call.method}'),
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<MethodCall>(
-                  'call',
-                  call,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<MethodCall>(
+              'call',
+              call,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ),
       );
       rethrow;
@@ -2005,11 +2001,10 @@ class TextInput {
         );
         return;
       case 'TextInputClient.requestElementsInRect':
-        final List<double> args =
-            (methodCall.arguments as List<dynamic>)
-                .cast<num>()
-                .map<double>((num value) => value.toDouble())
-                .toList();
+        final List<double> args = (methodCall.arguments as List<dynamic>)
+            .cast<num>()
+            .map<double>((num value) => value.toDouble())
+            .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
               final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
@@ -2775,8 +2770,9 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
     ServicesBinding.systemContextMenuClient = this;
 
-    final List<Map<String, dynamic>> itemsJson =
-        items.map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json).toList();
+    final List<Map<String, dynamic>> itemsJson = items
+        .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
+        .toList();
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -2892,7 +2888,7 @@ sealed class IOSSystemContextMenuItemData {
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in copy button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in copy button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2910,7 +2906,7 @@ final class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemDat
   String get _jsonType => 'copy';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in cut button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in cut button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2928,7 +2924,7 @@ final class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData
   String get _jsonType => 'cut';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in paste button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in paste button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2946,7 +2942,7 @@ final class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemDa
   String get _jsonType => 'paste';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in select all
+/// An [IOSSystemContextMenuItemData] for the system's built-in select all
 /// button.
 ///
 /// The title and action are both handled by the platform.
@@ -2965,7 +2961,7 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
   String get _jsonType => 'selectAll';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in look up
+/// An [IOSSystemContextMenuItemData] for the system's built-in look up
 /// button.
 ///
 /// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
@@ -2997,7 +2993,7 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in search web
+/// An [IOSSystemContextMenuItemData] for the system's built-in search web
 /// button.
 ///
 /// Must specify a [title], typically
@@ -3030,7 +3026,7 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in share button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in share button.
 ///
 /// Must specify a [title], typically
 /// [WidgetsLocalizations.shareButtonLabel].
@@ -3060,6 +3056,29 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
   }
+}
+
+/// An [IOSSystemContextMenuItemData] for the system's built-in Live Text
+/// (OCR) button.
+///
+/// This button is only available on iOS 15.0+ devices with camera support.
+/// It allows the user to scan text from the camera and insert it at the
+/// current cursor position.
+///
+/// The title and action are both handled by the platform, and the platform
+/// will use its default localized title.
+///
+/// See also:
+///
+///  * [IOSSystemContextMenuItemLiveText], which performs a similar role but at the
+///    widget level.
+///  * https://github.com/flutter/flutter/issues/169781
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData {
+  /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
+  const IOSSystemContextMenuItemDataLiveText();
+
+  @override
+  String get _jsonType => 'captureTextFromCamera';
 }
 
 // TODO(justinmc): Support the "custom" type.
