@@ -72,11 +72,10 @@ class CustomNetworkImage extends ImageProvider<Uri> {
       chunkEvents: chunkEvents.stream,
       scale: 1.0,
       debugLabel: '"key"',
-      informationCollector:
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<Uri>('URL', key),
-          ],
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<Uri>('URL', key),
+      ],
     );
   }
 

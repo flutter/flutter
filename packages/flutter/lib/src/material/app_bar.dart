@@ -885,8 +885,9 @@ class _AppBarState extends State<AppBar> {
     Brightness brightness, [
     Color? backgroundColor,
   ]) {
-    final SystemUiOverlayStyle style =
-        brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
+    final SystemUiOverlayStyle style = brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
     // For backward compatibility, create an overlay style without system navigation bar settings.
     return SystemUiOverlayStyle(
       statusBarColor: backgroundColor,
@@ -903,13 +904,14 @@ class _AppBarState extends State<AppBar> {
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final AppBarThemeData appBarTheme = AppBarTheme.of(context);
-    final AppBarThemeData defaults =
-        theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
+    final AppBarThemeData defaults = theme.useMaterial3
+        ? _AppBarDefaultsM3(context)
+        : _AppBarDefaultsM2(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
 
-    final FlexibleSpaceBarSettings? settings =
-        context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+    final FlexibleSpaceBarSettings? settings = context
+        .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
     final Set<MaterialState> states = <MaterialState>{
       if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
     };
@@ -935,21 +937,21 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor =
-        states.contains(MaterialState.scrolledUnder) ? scrolledUnderBackground : backgroundColor;
+    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+        ? scrolledUnderBackground
+        : backgroundColor;
 
     final Color foregroundColor =
         widget.foregroundColor ?? appBarTheme.foregroundColor ?? defaults.foregroundColor!;
 
     final double elevation = widget.elevation ?? appBarTheme.elevation ?? defaults.elevation!;
 
-    final double effectiveElevation =
-        states.contains(MaterialState.scrolledUnder)
-            ? widget.scrolledUnderElevation ??
-                appBarTheme.scrolledUnderElevation ??
-                defaults.scrolledUnderElevation ??
-                elevation
-            : elevation;
+    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
+        ? widget.scrolledUnderElevation ??
+              appBarTheme.scrolledUnderElevation ??
+              defaults.scrolledUnderElevation ??
+              elevation
+        : elevation;
 
     IconThemeData overallIconTheme =
         widget.iconTheme ??
@@ -1100,8 +1102,9 @@ class _AppBarState extends State<AppBar> {
         padding: actionsPadding,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment:
-              theme.useMaterial3 ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
+          crossAxisAlignment: theme.useMaterial3
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.stretch,
           children: widget.actions!,
         ),
       );
@@ -1364,10 +1367,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade =
         pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity =
-        !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
-            ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
-            : 1.0;
+    final double toolbarOpacity = !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
+        ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
+        : 1.0;
     final Widget? effectiveTitle = switch (variant) {
       _SliverAppVariant.small => title,
       _SliverAppVariant.medium || _SliverAppVariant.large => AnimatedOpacity(
@@ -1392,10 +1394,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         title: effectiveTitle,
         actions: actions,
         automaticallyImplyActions: automaticallyImplyActions,
-        flexibleSpace:
-            (title == null && flexibleSpace != null && !excludeHeaderSemantics)
-                ? Semantics(header: true, child: flexibleSpace)
-                : flexibleSpace,
+        flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
+            ? Semantics(header: true, child: flexibleSpace)
+            : flexibleSpace,
         bottom: bottom,
         elevation: isScrolledUnder ? elevation : 0.0,
         scrolledUnderElevation: scrolledUnderElevation,
@@ -2047,12 +2048,9 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       _snapConfiguration = null;
     }
 
-    _showOnScreenConfiguration =
-        widget.floating & widget.snap
-            ? const PersistentHeaderShowOnScreenConfiguration(
-              minShowOnScreenExtent: double.infinity,
-            )
-            : null;
+    _showOnScreenConfiguration = widget.floating & widget.snap
+        ? const PersistentHeaderShowOnScreenConfiguration(minShowOnScreenExtent: double.infinity)
+        : null;
   }
 
   void _updateStretchConfiguration() {
@@ -2089,10 +2087,9 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
-    final double collapsedHeight =
-        (widget.pinned && widget.floating && widget.bottom != null)
-            ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
-            : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
+    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
+        ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
+        : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
     final double? effectiveExpandedHeight;
     final double effectiveCollapsedHeight;
     final Widget? effectiveFlexibleSpace;
@@ -2257,10 +2254,11 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     late final AppBarThemeData appBarTheme = AppBarTheme.of(context);
-    late final AppBarThemeData defaults =
-        Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
-    final FlexibleSpaceBarSettings settings =
-        context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
+    late final AppBarThemeData defaults = Theme.of(context).useMaterial3
+        ? _AppBarDefaultsM3(context)
+        : _AppBarDefaultsM2(context);
+    final FlexibleSpaceBarSettings settings = context
+        .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final _ScrollUnderFlexibleConfig config = configBuilder(context);
     assert(
       config.expandedTitlePadding.isNonNegative,
@@ -2287,8 +2285,9 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     final EdgeInsets resolvedTitlePadding = config.expandedTitlePadding.resolve(
       Directionality.of(context),
     );
-    final EdgeInsetsGeometry expandedTitlePadding =
-        bottomHeight > 0 ? resolvedTitlePadding.copyWith(bottom: 0) : resolvedTitlePadding;
+    final EdgeInsetsGeometry expandedTitlePadding = bottomHeight > 0
+        ? resolvedTitlePadding.copyWith(bottom: 0)
+        : resolvedTitlePadding;
 
     // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
     // title to keep the visual hierarchy the same even with larger font

@@ -93,8 +93,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathArcToRotated(
       handle,
       radius.x,
@@ -116,8 +117,9 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
     bool clockwise = true,
   }) {
     final PathArcSize arcSize = largeArc ? PathArcSize.large : PathArcSize.small;
-    final PathDirection pathDirection =
-        clockwise ? PathDirection.clockwise : PathDirection.counterClockwise;
+    final PathDirection pathDirection = clockwise
+        ? PathDirection.clockwise
+        : PathDirection.counterClockwise;
     pathRelativeArcToRotated(
       handle,
       radius.x,
@@ -172,9 +174,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath, Disp
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    addRRect(rsuperellipse.toApproximateRRect());
+    final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
+    addPath((path as LazyPath).builtPath, offset);
   }
 
   @override
