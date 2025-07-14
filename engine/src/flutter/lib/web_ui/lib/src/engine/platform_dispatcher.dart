@@ -549,10 +549,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final String? text = arguments['text'] as String?;
+            ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            ClipboardMessageHandler().getDataMethodCall(callback);
+            final String? format = decoded.arguments as String?;
+            ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
             ClipboardMessageHandler().hasStringsMethodCall(callback);
