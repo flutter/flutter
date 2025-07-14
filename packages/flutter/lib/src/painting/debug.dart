@@ -18,6 +18,7 @@ library;
 import 'dart:io';
 import 'dart:ui' show Image, Picture, Size, TextDirection;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 /// Whether to replace all shadows with solid color blocks.
@@ -236,7 +237,7 @@ bool _defaultImageCapture(Image image) => true;
 /// Asserts that a given [TextDirection] is not null.
 ///
 /// Used by painting library classes that require a [TextDirection] to resolve
-/// their properties, such as [BorderRadiusDirectional].
+/// their properties, such as [BorderRadiusDirectional], [EdgeInsetsDirectional].
 ///
 /// Does nothing if asserts are disabled. Always returns true.
 ///

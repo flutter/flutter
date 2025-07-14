@@ -779,6 +779,32 @@ void main() {
       matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
     );
   });
+
+  testWidgets(
+    'Container with EdgeInsetsDirectional and no Directionality throws a detailed error',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Padding(
+          padding: EdgeInsetsDirectional.only(start: 16.0),
+          child: Placeholder(),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+              (FlutterError e) => e.message,
+          'message',
+          allOf(
+            contains('No TextDirection found.'),
+            contains('EdgeInsetsDirectional.resolve'),
+            contains('without a Directionality ancestor'),
+          ),
+        ),
+      );
+    },
+  );
+
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {
