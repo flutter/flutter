@@ -345,6 +345,12 @@ class Mapping {
         size_(size),
         release_callback_(std::move(release_callback)) {}
 
+  ~Mapping() {
+    if (release_callback_) {
+      release_callback_();
+    }
+  }
+
   const uint8_t* GetMapping() const { return mapping_; }
 
   size_t GetSize() const { return size_; }
