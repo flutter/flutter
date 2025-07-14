@@ -165,7 +165,7 @@ SKWASM_EXPORT void path_addPath(SkPath* path,
                                 const SkPath* other,
                                 const SkScalar* matrix33,
                                 SkPath::AddPathMode extendPath) {
-  path->addPath(*other, createMatrix(matrix33), extendPath);
+  path->addPath(*other, createSkMatrix(matrix33), extendPath);
 }
 
 SKWASM_EXPORT void path_close(SkPath* path) {
@@ -181,7 +181,7 @@ SKWASM_EXPORT bool path_contains(SkPath* path, SkScalar x, SkScalar y) {
 }
 
 SKWASM_EXPORT void path_transform(SkPath* path, const SkScalar* matrix33) {
-  path->transform(createMatrix(matrix33));
+  path->transform(createSkMatrix(matrix33));
 }
 
 SKWASM_EXPORT void path_getBounds(SkPath* path, SkRect* rect) {

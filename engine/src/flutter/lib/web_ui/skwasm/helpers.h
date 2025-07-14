@@ -14,7 +14,31 @@
 
 namespace Skwasm {
 
-inline SkMatrix createMatrix(const SkScalar* f) {
+template <typename T>
+class sp_wrapper {
+ public:
+  sp_wrapper(std::shared_ptr<T> ptr) : _ptr(std::move(ptr)) {}
+
+  const std::shared_ptr<T>& shared() { return _ptr; }
+
+  T* raw() { return _ptr.get(); }
+
+ private:
+  std::shared_ptr<T> _ptr;
+};
+
+inline flutter::DlMatrix createDlMatrixFrom3x3(const flutter::DlScalar* f) {
+  // clang-format off
+  return flutter::DlMatrix(
+    f[0], f[1], 0, f[2],
+    f[3], f[4], 0, f[5],
+    0, 0, 1, 0,
+    f[6], f[7], 0, f[8]
+  );
+  // clang-format on
+}
+
+inline SkMatrix createSkMatrix(const SkScalar* f) {
   return SkMatrix::MakeAll(f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7],
                            f[8]);
 }
@@ -36,7 +60,8 @@ inline flutter::DlRoundingRadii createDlRadii(const float* f) {
 }
 
 inline flutter::DlRoundRect createDlRRect(const float* f) {
-  return flutter::DlRoundRect::MakeRectRadii(createDlRect(f), createDlRadii(f + 4));
+  return flutter::DlRoundRect::MakeRectRadii(createDlRect(f),
+                                             createDlRadii(f + 4));
 }
 
 inline SkRRect createSkRRect(const SkScalar* f) {
