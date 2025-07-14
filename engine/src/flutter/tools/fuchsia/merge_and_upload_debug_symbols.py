@@ -79,13 +79,21 @@ def CheckCIPDPackageExists(package_name, tag):
     return True
 
 
-def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
+def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir, target_arch):
   _packaging_dir = GetPackagingDir(out_dir)
-  tag = 'git_revision:%s' % engine_version
   package_name = 'flutter/fuchsia-debug-symbols-%s' % target_arch
-  already_exists = CheckCIPDPackageExists(package_name, tag)
+
+  gitTag = 'git_revision:%s' % engine_version
+  already_exists = CheckCIPDPackageExists(package_name, gitTag)
   if already_exists:
-    print('CIPD package %s tag %s already exists!' % (package_name, tag))
+    print('CIPD package %s tag %s already exists!' % (package_name, gitTag))
+
+  contentTag = ''
+  if content_hash:
+    contentTag = 'cah_revision:%s' % content_hash
+    already_exists = CheckCIPDPackageExists(package_name, contentTag) or already_exists
+    if already_exists:
+      print('CIPD package %s tag %s already exists!' % (package_name, contentTag))
 
   if upload and IsLinux() and not already_exists:
     command = [
@@ -96,10 +104,12 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
         '-ref',
         'latest',
         '-tag',
-        tag,
+        gitTag,
         '-verification-timeout',
         '10m0s',
     ]
+    if contentTag:
+      command.extend(['-tag', contentTag])
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
@@ -239,7 +249,7 @@ def main():
       else:
         print('Could not find content_aware_hash.sh at %s' % script_path)
 
-  ProcessCIPDPackage(should_upload, cipd_def, engine_version, out_dir, arch)
+  ProcessCIPDPackage(should_upload, cipd_def, engine_version, content_hash, out_dir, arch)
   return 0
 
 

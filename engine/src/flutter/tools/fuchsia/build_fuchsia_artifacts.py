@@ -257,23 +257,30 @@ def ProcessCIPDPackage(upload, engine_version, content_hash):
     print('--upload requires --engine-version to be specified.')
     return
 
+  gitTag = 'git_revision:%s' % engine_version
+  already_exists = CheckCIPDPackageExists('flutter/fuchsia', gitTag)
   if already_exists:
-    print('CIPD package flutter/fuchsia tag %s already exists!' % tag)
+    print('CIPD package flutter/fuchsia tag %s already exists!' % gitTag)
     return
 
-  print('codefu: tag:%s' % tag)
+  contentTag = 'cah_revision:%s' % content_hash
+  already_exists = CheckCIPDPackageExists('flutter/fuchsia', contentTag)
+  if already_exists:
+    print('CIPD package flutter/fuchsia tag %s already exists!' % contentTag)
+    return
 
-  if false:
-    RunCIPDCommandWithRetries([
-        'cipd',
-        'create',
-        '-pkg-def',
-        'fuchsia.cipd.yaml',
-        '-ref',
-        'latest',
-        '-tag',
-        tag,
-    ])
+  RunCIPDCommandWithRetries([
+      'cipd',
+      'create',
+      '-pkg-def',
+      'fuchsia.cipd.yaml',
+      '-ref',
+      'latest',
+      '-tag',
+      gitTag,
+      '-tag',
+      contentTag,
+  ])
 
 
 def main():
