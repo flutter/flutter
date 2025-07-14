@@ -6,7 +6,8 @@
 library;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+import 'widget_tester.dart';
 
 // Examples can assume:
 // final TransitionDurationObserver transitionDurationObserver = TransitionDurationObserver();
