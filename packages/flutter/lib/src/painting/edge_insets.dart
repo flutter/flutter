@@ -10,6 +10,7 @@ library;
 import 'dart:ui' as ui show ViewPadding, lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/painting/debug.dart';
 
 import 'basic_types.dart';
 
@@ -893,7 +894,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$runtimeType'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(end, top, start, bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(start, top, end, bottom),
