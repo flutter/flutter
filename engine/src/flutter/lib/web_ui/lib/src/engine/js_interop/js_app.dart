@@ -59,12 +59,10 @@ extension type FlutterApp._primary(JSObject _) implements JSObject {
   external factory FlutterApp._({required JSFunction addView, required JSFunction removeView});
 
   @JS('addView')
-  external JSNumber _addView(JsFlutterViewOptions options);
-  int addView(JsFlutterViewOptions options) => _addView(options).toDartInt;
+  external int addView(JsFlutterViewOptions options);
 
   @JS('removeView')
-  external JsFlutterViewOptions? _removeView(JSNumber id);
-  JsFlutterViewOptions? removeView(int id) => _removeView(id.toJS);
+  external JsFlutterViewOptions? removeView(int id);
 }
 
 /// Typedef for the function that adds a new view to the app.

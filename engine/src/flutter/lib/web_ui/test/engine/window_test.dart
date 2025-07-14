@@ -437,23 +437,20 @@ Future<void> testMain() async {
     bool simulateError = false;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    domWindow.setProperty(
-      'screen'.toJS,
-      <String, Object?>{
-        'orientation': <String, Object?>{
-          'lock': (String lockType) {
-            lockCalls.add(lockType);
-            if (simulateError) {
-              throw Error();
-            }
-            return Future<JSNumber>.value(0.toJS).toJS;
-          }.toJS,
-          'unlock': () {
-            unlockCount += 1;
-          }.toJS,
-        },
-      }.jsify(),
-    );
+    domWindow['screen'] = <String, Object?>{
+      'orientation': <String, Object?>{
+        'lock': (String lockType) {
+          lockCalls.add(lockType);
+          if (simulateError) {
+            throw Error();
+          }
+          return Future<JSNumber>.value(0.toJS).toJS;
+        }.toJS,
+        'unlock': () {
+          unlockCount += 1;
+        }.toJS,
+      },
+    }.jsify();
 
     // Sanity-check the test setup.
     expect(lockCalls, <String>[]);
@@ -509,7 +506,7 @@ Future<void> testMain() async {
     expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
 
-    domWindow.setProperty('screen'.toJS, original);
+    domWindow['screen'] = original;
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/66128.
@@ -517,10 +514,10 @@ Future<void> testMain() async {
     final DomScreen? original = domWindow.screen;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    domWindow.setProperty('screen'.toJS, <Object?, Object?>{'orientation': null}.jsify());
+    domWindow['screen'] = <Object?, Object?>{'orientation': null}.jsify();
     expect(domWindow.screen!.orientation, isNull);
     expect(await sendSetPreferredOrientations(<dynamic>[]), isFalse);
-    domWindow.setProperty('screen'.toJS, original);
+    domWindow['screen'] = original;
   });
 
   test(

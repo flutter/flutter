@@ -3267,7 +3267,7 @@ class _PointerEventContext extends _BasicEventContext
           )
           .toJSAnyDeep;
 
-      event.setProperty('getCoalescedEvents'.toJS, (() => coalescedEventJs).toJS);
+      event['getCoalescedEvents'] = (() => coalescedEventJs).toJS;
     }
 
     return event;

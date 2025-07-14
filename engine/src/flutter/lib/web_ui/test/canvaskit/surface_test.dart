@@ -292,18 +292,12 @@ void testMain() {
       final JSObject originalTransferToImageBitmap = offscreenCanvas.getProperty<JSObject>(
         'transferToImageBitmap'.toJS,
       );
-      offscreenCanvas.setProperty(
-        'originalTransferToImageBitmap'.toJS,
-        originalTransferToImageBitmap,
-      );
+      offscreenCanvas['originalTransferToImageBitmap'] = originalTransferToImageBitmap;
       int transferToImageBitmapCalls = 0;
-      offscreenCanvas.setProperty(
-        'transferToImageBitmap'.toJS,
-        () {
-          transferToImageBitmapCalls++;
-          return offscreenCanvas.callMethod<JSObject>('originalTransferToImageBitmap'.toJS);
-        }.toJS,
-      );
+      offscreenCanvas['transferToImageBitmap'] = () {
+        transferToImageBitmapCalls++;
+        return offscreenCanvas.callMethod<JSObject>('originalTransferToImageBitmap'.toJS);
+      }.toJS;
       final RenderCanvas renderCanvas = RenderCanvas();
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 10, 10));
@@ -320,11 +314,11 @@ void testMain() {
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
       final JSObject originalMakeGrContext = canvasKit.getProperty('MakeGrContext'.toJS);
       canvasKit
-        ..setProperty('originalMakeGrContext'.toJS, originalMakeGrContext)
-        ..setProperty('MakeGrContext'.toJS, ((int glContext) => null).toJS);
+        ..['originalMakeGrContext'] = originalMakeGrContext
+        ..['MakeGrContext'] = ((int glContext) => null).toJS;
       final Surface surface = Surface();
       expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
-      canvasKit.setProperty('MakeGrContext'.toJS, originalMakeGrContext);
+      canvasKit['MakeGrContext'] = originalMakeGrContext;
       // Skipping on Firefox for now since Firefox headless doesn't support WebGL
     }, skip: isFirefox);
 
