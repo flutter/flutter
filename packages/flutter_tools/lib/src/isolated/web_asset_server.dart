@@ -177,7 +177,7 @@ class WebAssetServer implements AssetReader {
   Uri? get baseUri => _baseUri;
   Uri? _baseUri;
 
-  /// Start the web asset server on a [hostname] and [port].
+  /// Start the web asset server on a hostname and port.
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
