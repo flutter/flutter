@@ -263,7 +263,7 @@ def ProcessCIPDPackage(upload, engine_version, content_hash):
     print('CIPD package flutter/fuchsia tag %s already exists!' % gitTag)
     return
 
-  contentTag = 'cah_revision:%s' % content_hash
+  contentTag = 'content_aware_hash:%s' % content_hash
   already_exists = CheckCIPDPackageExists('flutter/fuchsia', contentTag)
   if already_exists:
     print('CIPD package flutter/fuchsia tag %s already exists!' % contentTag)
