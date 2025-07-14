@@ -289,8 +289,8 @@ class ResidentWebRunner extends ResidentRunner {
         );
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
-                ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
-                : null;
+            ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
+            : null;
 
         // Retrieve connected web devices, excluding the web server device.
         final List<Device>? devices = await globals.deviceManager?.getAllDevices();
@@ -372,8 +372,9 @@ class ResidentWebRunner extends ResidentRunner {
             device!.device is WebServerDevice && debuggingOptions.startPaused;
         // Listen for connected apps early and then await this `Future` later
         // when we attach.
-        final Future<ConnectionResult?>? connectDebug =
-            supportsServiceProtocol ? webDevFS.connect(useDebugExtension) : null;
+        final Future<ConnectionResult?>? connectDebug = supportsServiceProtocol
+            ? webDevFS.connect(useDebugExtension)
+            : null;
         await device!.device!.startApp(
           package,
           mainPath: target,

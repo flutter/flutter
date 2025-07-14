@@ -22,7 +22,7 @@ void main() {
     test(
       'should create SourceProxyRule with source and no replacement',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml('''
           target: http://localhost:8080
           source: /api
@@ -39,7 +39,7 @@ void main() {
     test(
       'should create SourceProxyRule with source and replacement',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml('''
           target: http://localhost:8080
           source: /api
@@ -60,7 +60,7 @@ void main() {
     test(
       'should create RegexProxyRule with regex and no replacement',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml(r'''
           target: http://localhost:8081
           regex: ^/users/(\d+)
@@ -77,7 +77,7 @@ void main() {
     test(
       'should create RegexProxyRule with regex and replacement using capturing groups',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml(r'''
           target: http://localhost:8081/user-service
           regex: ^/users/(\d+)/profile(.*)
@@ -95,7 +95,7 @@ void main() {
     test(
       'should create RegexProxyRule with regex and empty replacement',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml(r'''
           target: http://localhost:8081/user-service
           regex: ^/users/\d+/profile
@@ -112,7 +112,7 @@ void main() {
     test(
       'should handle invalid regex key gracefully and fall back to RegexProxyRule using escaped string',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml('''
           target: http://localhost:8082
           regex: ^/invalid(
@@ -129,7 +129,7 @@ void main() {
     test(
       'should return null if target is missing',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml('''
           source: /api
         ''')
@@ -143,7 +143,7 @@ void main() {
     test(
       'should return null if neither source nor regex is provided',
       () => testbed.run(() {
-        final YamlMap yaml =
+        final yaml =
             loadYaml('''
           target: http://localhost:8080
         ''')
@@ -156,32 +156,34 @@ void main() {
   });
 
   group('RegexProxyRule', () {
-    final RegexProxyRule ruleNoReplacement = RegexProxyRule(
+    final ruleNoReplacement = RegexProxyRule(
       pattern: RegExp(r'^/users/(\d+)'),
       target: 'http://example.com',
     );
-    final RegexProxyRule ruleWithCapturingGroupReplacement = RegexProxyRule(
+
+    final ruleWithCapturingGroupReplacement = RegexProxyRule(
       pattern: RegExp(r'^/api/v1/users/(\d+)(.*)'),
       target: 'http://backend.com',
       replacement: r'/$1/profile$2',
     );
 
-    final RegexProxyRule rulePrefixRemovalReplacement = RegexProxyRule(
+    final rulePrefixRemovalReplacement = RegexProxyRule(
       pattern: RegExp(r'^/old_path'),
       target: 'http://legacy.com',
       replacement: '/new_path',
     );
-    final RegexProxyRule ruleMiddlePattern = RegexProxyRule(
+    final ruleMiddlePattern = RegexProxyRule(
       pattern: RegExp(r'/test_static'),
       target: 'http://static.com',
       replacement: '/assets',
     );
-    final RegexProxyRule ruleExactMatch = RegexProxyRule(
+
+    final ruleExactMatch = RegexProxyRule(
       pattern: RegExp(r'^/exact_match_only$'),
       target: 'http://exact.com',
       replacement: '/found',
     );
-    final RegexProxyRule ruleZeroGroup = RegexProxyRule(
+    final ruleZeroGroup = RegexProxyRule(
       pattern: RegExp(r'^/prefix/(.*)'),
       target: 'http://test.com',
       replacement: r'/all$0',
@@ -226,7 +228,7 @@ void main() {
     });
 
     test('replace should match exactly', () {
-      final RegexProxyRule rule = RegexProxyRule(
+      final rule = RegexProxyRule(
         pattern: RegExp(r'/temp1'),
         target: 'http://legacy.com',
         replacement: '/temp2/',
@@ -270,23 +272,20 @@ void main() {
   });
 
   group('SourceProxyRule', () {
-    final SourceProxyRule ruleNoReplacement = SourceProxyRule(
-      source: '/assets/',
-      target: 'http://cdn.example.com',
-    );
+    final ruleNoReplacement = SourceProxyRule(source: '/assets/', target: 'http://cdn.example.com');
 
-    final SourceProxyRule ruleWithReplacement = SourceProxyRule(
+    final ruleWithReplacement = SourceProxyRule(
       source: '/old-assets/',
       target: 'http://cdn.example.com',
       replacement: '/new-assets/',
     );
 
-    final SourceProxyRule ruleEmptyReplacement = SourceProxyRule(
+    final ruleEmptyReplacement = SourceProxyRule(
       source: '/remove-me/',
       target: 'http://cdn.example.com',
       replacement: '',
     );
-    final SourceProxyRule ruleSlashReplacement = SourceProxyRule(
+    final ruleSlashReplacement = SourceProxyRule(
       source: '/remove-me-too',
       target: 'http://cdn.example.com',
       replacement: '/',
@@ -352,18 +351,15 @@ void main() {
     test('should correctly proxy all request elements', () async {
       final Uri originalUrl = Uri.parse('http://original.example.com/path');
       final Uri finalTargetUrl = Uri.parse('http://target.example.com/newpath');
-      const String originalBody = 'Hello, Shelf Proxy!';
-      final Map<String, String> originalHeaders = <String, String>{
+      const originalBody = 'Hello, Shelf Proxy!';
+      final originalHeaders = <String, String>{
         'Content-Type': 'text/plain',
         'X-Custom-Header': 'value',
         'content-length': 'ignored',
       };
-      final Map<String, Object> originalContext = <String, Object>{
-        'user': 'testuser',
-        'auth': true,
-      };
+      final originalContext = <String, Object>{'user': 'testuser', 'auth': true};
 
-      final Request originalRequest = Request(
+      final originalRequest = Request(
         'POST',
         originalUrl,
         headers: originalHeaders,
@@ -372,7 +368,7 @@ void main() {
       );
       final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl);
 
-      final Map<String, String> expectedHeadersFiltered = Map<String, String>.fromEntries(
+      final expectedHeadersFiltered = Map<String, String>.fromEntries(
         originalHeaders.entries.where(
           (MapEntry<String, String> entry) => entry.key.toLowerCase() != 'content-length',
         ),
@@ -393,7 +389,8 @@ void main() {
     test('should handle an empty request body', () async {
       final Uri originalUrl = Uri.parse('http://original.example.com/empty');
       final Uri finalTargetUrl = Uri.parse('http://target.example.com/empty-new');
-      final Request originalRequest = Request('GET', originalUrl);
+
+      final originalRequest = Request('GET', originalUrl);
 
       final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl);
 
@@ -405,10 +402,10 @@ void main() {
     test('should handle different HTTP methods', () async {
       final Uri originalUrl = Uri.parse('http://original.example.com/data');
       final Uri finalTargetUrl = Uri.parse('http://target.example.com/api/data');
-      final List<String> methods = <String>['PUT', 'DELETE', 'PATCH', 'GET'];
+      final methods = <String>['PUT', 'DELETE', 'PATCH', 'GET'];
 
-      for (final String method in methods) {
-        final Request originalRequest = Request(
+      for (final method in methods) {
+        final originalRequest = Request(
           method,
           originalUrl,
           body: method == 'PUT' || method == 'PATCH' ? '{"key": "value"}' : null,
@@ -428,19 +425,19 @@ void main() {
 
   group('proxyMiddleware', () {
     test('should call inner handler if no rule matches', () async {
-      final List<ProxyRule> rules = <ProxyRule>[
+      final rules = <ProxyRule>[
         RegexProxyRule(pattern: RegExp(r'^/other_api'), target: 'http://mock-backend.com'),
       ];
 
       final Middleware middleware = proxyMiddleware(rules);
 
-      bool innerHandlerCalled = false;
+      var innerHandlerCalled = false;
       FutureOr<Response> innerHandler(Request request) {
         innerHandlerCalled = true;
         return Response.ok('Inner Handler Response');
       }
 
-      final Request request = Request('GET', Uri.parse('http://localhost:8080/non_matching_path'));
+      final request = Request('GET', Uri.parse('http://localhost:8080/non_matching_path'));
       final Response response = await middleware(innerHandler)(request);
 
       expect(innerHandlerCalled, isTrue);
