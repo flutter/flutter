@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -328,6 +329,20 @@ void main() {
     expect(BorderRadiusDirectional.circular(15.0) ~/ 10.0, BorderRadiusDirectional.circular(1.0));
 
     expect(BorderRadiusDirectional.circular(15.0) % 10.0, BorderRadiusDirectional.circular(5.0));
+  });
+
+  test('BorderRadiusDirectional.resolve with null throws detailed error', () {
+    const BorderRadiusDirectional borderRadius = BorderRadiusDirectional.all(Radius.circular(1.0));
+    expect(
+      () => borderRadius.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
   });
 
   test('BorderRadiusDirectional.lerp() invariants', () {

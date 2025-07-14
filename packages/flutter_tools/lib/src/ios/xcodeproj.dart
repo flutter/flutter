@@ -20,8 +20,8 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../reporting/reporting.dart';
 
-final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
+final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
+final _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -97,7 +97,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Analytics _analytics;
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
+  static final _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -164,7 +164,7 @@ class XcodeProjectInterpreter {
   /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
-    final List<String> xcrunCommand = <String>[];
+    final xcrunCommand = <String>[];
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>['/usr/bin/arch', '-arm64e']);
@@ -193,7 +193,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
-    final List<String> showBuildSettingsCommand = <String>[
+    final showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-project',
@@ -259,7 +259,7 @@ class XcodeProjectInterpreter {
     }
     final Status status = _logger.startSpinner();
     final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
-    final List<String> showBuildSettingsCommand = <String>[
+    final showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-alltargets',
@@ -321,9 +321,9 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
-    const int missingProjectExitCode = 66;
+    const missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
-    const int corruptedProjectExitCode = 74;
+    const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
@@ -349,7 +349,7 @@ class XcodeProjectInterpreter {
 /// for or be aware of each one. This could be used to set code signing build settings in a CI
 /// environment without requiring settings changes in the Xcode project.
 List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
-  const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
+  const xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
   return platform.environment.entries
       .where((MapEntry<String, String> mapEntry) {
         return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
@@ -365,7 +365,7 @@ List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
-  final Map<String, String> settings = <String, String>{};
+  final settings = <String, String>{};
   for (final Match? match
       in showBuildSettingsOutput.split('\n').map<Match?>(_settingExpr.firstMatch)) {
     if (match != null) {
@@ -458,9 +458,9 @@ class XcodeProjectInfo {
     : _logger = logger;
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
-    final List<String> targets = <String>[];
-    final List<String> buildConfigurations = <String>[];
-    final List<String> schemes = <String>[];
+    final targets = <String>[];
+    final buildConfigurations = <String>[];
+    final schemes = <String>[];
     List<String>? collector;
     for (final String line in output.split('\n')) {
       if (line.isEmpty) {

@@ -396,6 +396,23 @@ Future<void> testMain() async {
     expect(responded, isTrue);
   });
 
+  test('onFrameDataChanged preserves the zone', () {
+    final Zone innerZone = Zone.current.fork();
+
+    innerZone.runGuarded(() {
+      void callback() {
+        expect(Zone.current, innerZone);
+      }
+
+      myWindow.onFrameDataChanged = callback;
+
+      // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
+      expect(myWindow.onFrameDataChanged, same(callback));
+    });
+
+    EnginePlatformDispatcher.instance.invokeOnFrameDataChanged();
+  });
+
   // Emulates the framework sending a request for screen orientation lock.
   Future<bool> sendSetPreferredOrientations(List<dynamic> orientations) {
     final Completer<bool> completer = Completer<bool>();

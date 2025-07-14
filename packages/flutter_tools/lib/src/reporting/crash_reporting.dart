@@ -18,26 +18,26 @@ import '../project.dart';
 import 'github_template.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
-const String _kProductId = 'Flutter_Tools';
+const _kProductId = 'Flutter_Tools';
 
 /// Tells crash backend that this is a Dart error as opposed to, say, Java.
-const String _kDartTypeId = 'DartError';
+const _kDartTypeId = 'DartError';
 
 /// Crash backend host.
-const String _kCrashServerHost = 'clients2.google.com';
+const _kCrashServerHost = 'clients2.google.com';
 
 /// Path to the crash servlet.
-const String _kCrashEndpointPath = '/cr/report';
+const _kCrashEndpointPath = '/cr/report';
 
 /// The field corresponding to the multipart/form-data file attachment where
 /// crash backend expects to find the Dart stack trace.
-const String _kStackTraceFileField = 'DartError';
+const _kStackTraceFileField = 'DartError';
 
 /// The name of the file attached as [_kStackTraceFileField].
 ///
 /// The precise value is not important. It is ignored by the crash back end, but
 /// it must be supplied in the request.
-const String _kStackTraceFilename = 'stacktrace_file';
+const _kStackTraceFilename = 'stacktrace_file';
 
 class CrashDetails {
   CrashDetails({
@@ -90,7 +90,7 @@ class CrashReporter {
       emphasis: true,
     );
 
-    final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
+    final gitHubTemplateCreator = GitHubTemplateCreator(
       fileSystem: _fileSystem,
       logger: _logger,
       flutterProjectFactory: _flutterProjectFactory,
@@ -132,7 +132,7 @@ class CrashReportSender {
   final OperatingSystemUtils _operatingSystemUtils;
   final Analytics _analytics;
 
-  bool _crashReportSent = false;
+  var _crashReportSent = false;
 
   Uri get _baseUrl {
     final String? overrideUrl = _platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
@@ -170,7 +170,7 @@ class CrashReportSender {
         queryParameters: <String, String>{'product': _kProductId, 'version': flutterVersion},
       );
 
-      final http.MultipartRequest req = http.MultipartRequest('POST', uri);
+      final req = http.MultipartRequest('POST', uri);
       req.fields['uuid'] = _analytics.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
