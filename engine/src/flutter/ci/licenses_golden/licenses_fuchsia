@@ -1,4 +1,4 @@
-Signature: 8f0961fbb7d44525fec9ab09f7b079a2
+Signature: e0b50897abbfce9e7c0f8a95cfc227aa
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14587,6 +14587,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl + ../..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/stall-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/rules.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.observability/constants.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/secure_mem.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14703,6 +14704,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/msi-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/stall-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/capabilities.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/rules.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power.observability/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem2/secure_mem.fidl
@@ -14813,6 +14815,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/log_freeze.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_flush.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/interconnect.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14844,6 +14847,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runtime/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.system/log_freeze.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/log_flush.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.haptics/haptics.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.interconnect/interconnect.fidl
