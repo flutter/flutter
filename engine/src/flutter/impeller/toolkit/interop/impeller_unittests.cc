@@ -100,31 +100,32 @@ TEST_P(InteropPlaygroundTest, CanDrawImage) {
   auto compressed = LoadFixtureImageCompressed(
       flutter::testing::OpenFixtureAsMapping("boston.jpg"));
   ASSERT_NE(compressed, nullptr);
-  auto decompressed = compressed->Decode().ConvertToRGBA();
-  ASSERT_TRUE(decompressed.IsValid());
-  ImpellerMapping mapping = {};
-  mapping.data = decompressed.GetAllocation()->GetMapping();
-  mapping.length = decompressed.GetAllocation()->GetSize();
+  auto decompressed = std::make_shared<impeller::DecompressedImage>(
+      compressed->Decode().ConvertToRGBA());
+  ASSERT_TRUE(decompressed->IsValid());
+  auto mapping = std::make_unique<hpp::Mapping>(
+      decompressed->GetAllocation()->GetMapping(),
+      decompressed->GetAllocation()->GetSize(), [decompressed]() {
+        // Mapping will be dropped on the floor.
+      });
 
-  auto context = GetInteropContext();
+  auto context = GetHPPContext();
   ImpellerTextureDescriptor desc = {};
   desc.pixel_format = ImpellerPixelFormat::kImpellerPixelFormatRGBA8888;
-  desc.size = {decompressed.GetSize().width, decompressed.GetSize().height};
+  desc.size = {decompressed->GetSize().width, decompressed->GetSize().height};
   desc.mip_count = 1u;
-  auto texture = Adopt<Texture>(ImpellerTextureCreateWithContentsNew(
-      context.GetC(), &desc, &mapping, nullptr));
+  auto texture = hpp::Texture::WithContents(context, desc, std::move(mapping));
   ASSERT_TRUE(texture);
-  auto builder =
-      Adopt<DisplayListBuilder>(ImpellerDisplayListBuilderNew(nullptr));
-  ImpellerPoint point = {100, 100};
-  ImpellerDisplayListBuilderDrawTexture(builder.GetC(), texture.GetC(), &point,
-                                        kImpellerTextureSamplingLinear,
-                                        nullptr);
-  auto dl = Adopt<DisplayList>(
-      ImpellerDisplayListBuilderCreateDisplayListNew(builder.GetC()));
+
+  auto dl = hpp::DisplayListBuilder{}
+                .DrawTexture(texture, {100, 100},
+                             kImpellerTextureSamplingLinear, hpp::Paint{})
+                .Build();
+
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
-        ImpellerSurfaceDrawDisplayList(surface.GetC(), dl.GetC());
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
         return true;
       }));
 }
@@ -689,6 +690,14 @@ TEST_P(InteropPlaygroundTest, CanCreateFragmentProgramColorFilters) {
         window.Draw(dl);
         return true;
       }));
+}
+
+TEST_P(InteropPlaygroundTest, MappingsReleaseTheirDataOnDestruction) {
+  bool deleted = false;
+  {
+    hpp::Mapping mapping(nullptr, 0, [&deleted]() { deleted = true; });
+  }
+  ASSERT_TRUE(deleted);
 }
 
 }  // namespace impeller::interop::testing
