@@ -489,4 +489,31 @@ void main() {
       ),
     );
   });
+
+  test('resolve method throws detailed error when TextDirection is null', () {
+    const EdgeInsets a = EdgeInsets.only(top: 5.0, left: 5.0);
+    const EdgeInsetsDirectional b = EdgeInsetsDirectional.only(top: 15.0, start: 15.0);
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+
+    expect(
+      () => b.subtract(a).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
 }
