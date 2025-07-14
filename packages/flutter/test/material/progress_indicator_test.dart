@@ -569,6 +569,7 @@ void main() {
       vsync: tester,
       duration: const Duration(seconds: 2),
     );
+    addTearDown(controller.dispose);
 
     Widget buildWidget(AnimationController? controller) {
       return MaterialApp(
@@ -603,6 +604,7 @@ void main() {
       vsync: tester,
       duration: const Duration(seconds: 2),
     );
+    addTearDown(controller.dispose);
 
     Widget buildWidget(AnimationController? controller) {
       return MaterialApp(
