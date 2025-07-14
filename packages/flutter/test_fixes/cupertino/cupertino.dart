@@ -290,6 +290,12 @@ void main() {
   // https://github.com/flutter/flutter/pull/161295
   CupertinoButton(minSize: 60.0);
 
+  // https://github.com/flutter/flutter/pull/170625
+  showCupertinoSheet(
+    context: context,
+    pageBuilder: (BuildContext context) => Container(),
+  );
+
   // https://github.com/flutter/flutter/pull/171160
   CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFF000000),

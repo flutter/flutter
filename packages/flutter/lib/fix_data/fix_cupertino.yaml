@@ -429,6 +429,29 @@ transforms:
         kind: fragment
         value: 'arguments[minSize]'
 
+  # Changes made in https://github.com/flutter/flutter/pull/170625
+  - title: "Migrate to 'builder'"
+    date: 2025-06-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "pageBuilder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'builder'
+            style: optional_named
+            argumentValue:
+              expression: '{% pageBuilder %}'
+              requiredIf: "pageBuilder != ''"
+          - kind: 'removeParameter'
+            name: 'pageBuilder'
+    variables:
+      pageBuilder:
+        kind: fragment
+        value: 'arguments[pageBuilder]'
+
   # Changes made in https://github.com/flutter/flutter/pull/171160
   - title: "Rename from 'opacity' to 'a'"
     date: 2025-06-24

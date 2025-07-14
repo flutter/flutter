@@ -20,7 +20,7 @@ class DapTestClient {
     // emitted by the debug adapter so tests have easy access to it.
     vmServiceUri = event('dart.debuggerUris')
         .then<Uri?>((Event event) {
-          final Map<String, Object?> body = event.body! as Map<String, Object?>;
+          final body = event.body! as Map<String, Object?>;
           return Uri.parse(body['vmServiceUri']! as String);
         })
         .then((Uri? uri) => uri, onError: (Object? e) => null);
@@ -47,9 +47,9 @@ class DapTestClient {
   late final StreamSubscription<String> _subscription;
   final Logger? _logger;
   final bool captureVmServiceTraffic;
-  final Map<int, _OutgoingRequest> _pendingRequests = <int, _OutgoingRequest>{};
-  final StreamController<Event> _eventController = StreamController<Event>.broadcast();
-  int _seq = 1;
+  final _pendingRequests = <int, _OutgoingRequest>{};
+  final _eventController = StreamController<Event>.broadcast();
+  var _seq = 1;
   late final Future<Uri?> vmServiceUri;
 
   /// Returns a stream of [OutputEventBody] events.
@@ -87,7 +87,7 @@ class DapTestClient {
 
   /// Returns a stream of progress events.
   Stream<Event> progressEvents() {
-    const Set<String> progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
+    const progressEvents = <String>{'progressStart', 'progressUpdate', 'progressEnd'};
     return _eventController.stream.where((Event e) => progressEvents.contains(e.event));
   }
 
@@ -225,8 +225,8 @@ class DapTestClient {
     String? overrideCommand,
   }) {
     final String command = overrideCommand ?? commandTypes[arguments.runtimeType]!;
-    final Request request = Request(seq: _seq++, command: command, arguments: arguments);
-    final Completer<Response> completer = Completer<Response>();
+    final request = Request(seq: _seq++, command: command, arguments: arguments);
+    final completer = Completer<Response>();
     _pendingRequests[request.seq] = _OutgoingRequest(completer, command, allowFailure);
     _channel.sendRequest(request);
     return completer.future;
@@ -306,11 +306,7 @@ class DapTestClient {
     bool captureVmServiceTraffic = false,
     Logger? logger,
   }) async {
-    final ByteStreamServerChannel channel = ByteStreamServerChannel(
-      server.stream,
-      server.sink,
-      logger,
-    );
+    final channel = ByteStreamServerChannel(server.stream, server.sink, logger);
     return DapTestClient._(channel, logger, captureVmServiceTraffic: captureVmServiceTraffic);
   }
 }

@@ -17,141 +17,260 @@ void main() {
 
 Future<void> testMain() async {
   setUpImplicitView();
-  group('message handler', () {
+
+  group('$ClipboardMessageHandler', () {
     const String testText = 'test text';
+    const JSONMethodCodec codec = JSONMethodCodec();
 
     late ClipboardMessageHandler clipboardMessageHandler;
-    MockClipboardAPICopyStrategy clipboardAPICopyStrategy = MockClipboardAPICopyStrategy();
-    MockClipboardAPIPasteStrategy clipboardAPIPasteStrategy = MockClipboardAPIPasteStrategy();
+    _MockClipboardStrategy mockClipboardStrategy = _MockClipboardStrategy();
 
     setUp(() {
       clipboardMessageHandler = ClipboardMessageHandler();
-      clipboardAPICopyStrategy = MockClipboardAPICopyStrategy();
-      clipboardAPIPasteStrategy = MockClipboardAPIPasteStrategy();
-      clipboardMessageHandler.copyToClipboardStrategy = clipboardAPICopyStrategy;
-      clipboardMessageHandler.pasteFromClipboardStrategy = clipboardAPIPasteStrategy;
+      mockClipboardStrategy = _MockClipboardStrategy();
+      clipboardMessageHandler.clipboardStrategy = mockClipboardStrategy;
     });
 
-    test('set data successful', () async {
-      clipboardAPICopyStrategy.testResult = true;
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<bool> completer = Completer<bool>();
-      void callback(ByteData? data) {
-        completer.complete(codec.decodeEnvelope(data!) as bool);
-      }
-
-      clipboardMessageHandler.setDataMethodCall(
-        const MethodCall('Clipboard.setData', <String, dynamic>{'text': testText}),
-        callback,
-      );
-
-      expect(await completer.future, isTrue);
+    test('kTextPlainFormat is correct', () {
+      expect(ClipboardMessageHandler.kTextPlainFormat, 'text/plain');
     });
 
-    test('set data error', () async {
-      clipboardAPICopyStrategy.testResult = false;
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<ByteData> completer = Completer<ByteData>();
-      void callback(ByteData? data) {
-        completer.complete(data!);
-      }
+    group('setDataMethodCall', () {
+      test('completes successfully when no exception arises', () async {
+        final Completer<ByteData> completer = Completer<ByteData>();
 
-      clipboardMessageHandler.setDataMethodCall(
-        const MethodCall('Clipboard.setData', <String, dynamic>{'text': testText}),
-        callback,
-      );
+        clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
 
-      final ByteData result = await completer.future;
-      expect(
-        () => codec.decodeEnvelope(result),
-        throwsA(
-          const TypeMatcher<PlatformException>().having(
-            (PlatformException e) => e.code,
-            'code',
-            equals('copy_fail'),
+        final ByteData result = await completer.future;
+        expect(codec.decodeEnvelope(result), isNull);
+      });
+
+      test('completes with error when clipboard is not available', () async {
+        mockClipboardStrategy.onSetData = (String? text) async {
+          throw StateError('Clipboard is not available in the context.');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
+
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('copy_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard is not available in the context.'),
+                ),
           ),
-        ),
-      );
+        );
+      });
+
+      test('completes with error when exception arises', () async {
+        mockClipboardStrategy.onSetData = (String? text) async {
+          throw Exception('');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
+
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('copy_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard.setData failed.'),
+                ),
+          ),
+        );
+      });
     });
 
-    test('get data successful', () async {
-      clipboardAPIPasteStrategy.testResult = testText;
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-      void callback(ByteData? data) {
-        completer.complete(codec.decodeEnvelope(data!) as Map<String, dynamic>);
-      }
+    group('getDataMethodCall', () {
+      test('completes with null value when filter is not supported', () async {
+        final Completer<ByteData> completer = Completer<ByteData>();
 
-      clipboardMessageHandler.getDataMethodCall(callback);
+        clipboardMessageHandler.getDataMethodCall(completer.complete, 'unknown/unknown');
 
-      final Map<String, dynamic> result = await completer.future;
-      expect(result['text'], testText);
+        final ByteData result = await completer.future;
+        expect(codec.decodeEnvelope(result), isNull);
+      });
+
+      test('completes without text when clipboard is empty', () async {
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.getDataMethodCall(
+          completer.complete,
+          ClipboardMessageHandler.kTextPlainFormat,
+        );
+
+        final ByteData result = await completer.future;
+        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        expect(data['text'], isEmpty);
+      });
+
+      test('completes with text when clipboard is not empty', () async {
+        mockClipboardStrategy.onGetData = () async => testText;
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.getDataMethodCall(
+          completer.complete,
+          ClipboardMessageHandler.kTextPlainFormat,
+        );
+
+        final ByteData result = await completer.future;
+        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        expect(data['text'], testText);
+      });
+
+      test('completes with error when clipboard is not available', () async {
+        mockClipboardStrategy.onGetData = () async {
+          throw StateError('Clipboard is not available in the context.');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.getDataMethodCall(
+          completer.complete,
+          ClipboardMessageHandler.kTextPlainFormat,
+        );
+
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('paste_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard is not available in the context.'),
+                ),
+          ),
+        );
+      });
+
+      test('completes with error when exception arises', () async {
+        mockClipboardStrategy.onGetData = () async {
+          throw Exception('');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.getDataMethodCall(
+          completer.complete,
+          ClipboardMessageHandler.kTextPlainFormat,
+        );
+
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('paste_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard.getData failed.'),
+                ),
+          ),
+        );
+      });
     });
 
-    test('has strings true', () async {
-      clipboardAPIPasteStrategy.testResult = testText;
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-      void callback(ByteData? data) {
-        completer.complete(codec.decodeEnvelope(data!) as Map<String, dynamic>);
-      }
+    group('hasStringsMethodCall', () {
+      test('completes with false value when clipboard is empty', () async {
+        final Completer<ByteData> completer = Completer<ByteData>();
 
-      clipboardMessageHandler.hasStringsMethodCall(callback);
+        clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
-      final Map<String, dynamic> result = await completer.future;
-      expect(result['value'], isTrue);
-    });
+        final ByteData result = await completer.future;
+        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        expect(data['value'], isFalse);
+      });
 
-    test('has strings false', () async {
-      clipboardAPIPasteStrategy.testResult = '';
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-      void callback(ByteData? data) {
-        completer.complete(codec.decodeEnvelope(data!) as Map<String, dynamic>);
-      }
+      test('completes with true value when clipboard is not empty', () async {
+        mockClipboardStrategy.onGetData = () async => testText;
+        final Completer<ByteData> completer = Completer<ByteData>();
 
-      clipboardMessageHandler.hasStringsMethodCall(callback);
+        clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
-      final Map<String, dynamic> result = await completer.future;
-      expect(result['value'], isFalse);
-    });
+        final ByteData result = await completer.future;
+        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        expect(data['value'], isTrue);
+      });
 
-    test('has strings error', () async {
-      clipboardAPIPasteStrategy.errors = true;
-      const MethodCodec codec = JSONMethodCodec();
-      final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-      void callback(ByteData? data) {
-        completer.complete(codec.decodeEnvelope(data!) as Map<String, dynamic>);
-      }
+      test('completes with error when clipboard is not available', () async {
+        mockClipboardStrategy.onGetData = () async {
+          throw StateError('Clipboard is not available in the context.');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
 
-      clipboardMessageHandler.hasStringsMethodCall(callback);
+        clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
-      final Map<String, dynamic> result = await completer.future;
-      expect(result['value'], isFalse);
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('has_strings_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard is not available in the context.'),
+                ),
+          ),
+        );
+      });
+
+      test('completes with error when exception arises', () async {
+        mockClipboardStrategy.onGetData = () async {
+          throw Exception('');
+        };
+        final Completer<ByteData> completer = Completer<ByteData>();
+
+        clipboardMessageHandler.hasStringsMethodCall(completer.complete);
+
+        final ByteData result = await completer.future;
+        expect(
+          () => codec.decodeEnvelope(result),
+          throwsA(
+            isA<PlatformException>()
+                .having((PlatformException e) => e.code, 'code', equals('has_strings_fail'))
+                .having(
+                  (PlatformException e) => e.message,
+                  'message',
+                  equals('Clipboard.hasStrings failed.'),
+                ),
+          ),
+        );
+      });
     });
   });
 }
 
-class MockClipboardAPICopyStrategy implements ClipboardAPICopyStrategy {
-  bool testResult = true;
+class _MockClipboardStrategy implements ClipboardStrategy {
+  Future<void> Function(String?)? onSetData;
+
+  Future<String> Function()? onGetData;
 
   @override
-  Future<bool> setData(String? text) {
-    return Future<bool>.value(testResult);
-  }
-}
-
-class MockClipboardAPIPasteStrategy implements ClipboardAPIPasteStrategy {
-  String testResult = '';
-
-  // Whether getData's Future will resolve with an error.
-  bool errors = false;
-
-  @override
-  Future<String> getData() {
-    if (errors) {
-      return Future<String>.error(Error());
+  Future<void> setData(String? text) async {
+    if (onSetData == null) {
+      return;
     }
-    return Future<String>.value(testResult);
+    await onSetData!.call(text);
+  }
+
+  @override
+  Future<String> getData() async {
+    if (onGetData == null) {
+      return '';
+    }
+    return onGetData!.call();
   }
 }
