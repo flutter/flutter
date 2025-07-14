@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -472,5 +473,20 @@ void main() {
       const EdgeInsetsDirectional.fromSTEB(10, 20, 20, 40),
     );
     expect(EdgeInsetsGeometry.zero, EdgeInsets.zero);
+  });
+
+  test('EdgeInsetsDirectional.resolve with null TextDirection asserts', () {
+    const EdgeInsetsDirectional edgeInsets = EdgeInsetsDirectional.all(10);
+
+    expect(
+      () => edgeInsets.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
   });
 }
