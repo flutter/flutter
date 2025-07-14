@@ -1578,12 +1578,12 @@ Use the "flutter config" command to enable feature flags.''',
           );
         },
         overrides: <Type, Generator>{
-          DeviceManager:
-              () => FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
           Platform: () => FakePlatform(),
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           FileSystem: () {
-            final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+            final fileSystem = MemoryFileSystem.test();
             fileSystem
               ..file('lib/main.dart').createSync(recursive: true)
               ..file('pubspec.yaml').createSync()
@@ -1601,7 +1601,7 @@ Use the "flutter config" command to enable feature flags.''',
       testUsingContext(
         'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
         () async {
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -1609,14 +1609,13 @@ Use the "flutter config" command to enable feature flags.''',
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags:
-              () => const FakeFeatureFlags(
-                allFeatures: <FakeFeature>[
-                  FakeFeature(name: 'Foo', enabled: true),
-                  FakeFeature(name: 'Bar', runtimeId: 'bar_feature', enabled: false),
-                  FakeFeature(name: 'Buzz', runtimeId: 'buzz_feature', enabled: true),
-                ],
-              ),
+          FeatureFlags: () => const FakeFeatureFlags(
+            allFeatures: <FakeFeature>[
+              FakeFeature(name: 'Foo', enabled: true),
+              FakeFeature(name: 'Bar', runtimeId: 'bar_feature', enabled: false),
+              FakeFeature(name: 'Buzz', runtimeId: 'buzz_feature', enabled: true),
+            ],
+          ),
         },
       );
     });

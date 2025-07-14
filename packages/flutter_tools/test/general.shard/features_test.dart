@@ -142,12 +142,13 @@ void main() {
 
     testUsingContext('Feature runtime IDs are valid', () {
       // Verify features' runtime IDs can be encoded into a Dart define.
-      final RegExp runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
+      final runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
       assert(runtimeIdPattern.hasMatch('multi_window'));
       assert(!runtimeIdPattern.hasMatch('multi-window'));
 
-      final Iterable<String> runtimeIds =
-          featureFlags.allFeatures.map((Feature feature) => feature.runtimeId).nonNulls;
+      final Iterable<String> runtimeIds = featureFlags.allFeatures
+          .map((Feature feature) => feature.runtimeId)
+          .nonNulls;
 
       expect(
         runtimeIds,
