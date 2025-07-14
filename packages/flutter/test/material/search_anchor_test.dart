@@ -4166,9 +4166,9 @@ void main() {
       tester.platformDispatcher.supportsShowingSystemContextMenu = true;
       final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
       addTearDown(() {
-        controller.dispose();
         tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
         tester.view.reset();
+        controller.dispose();
       });
 
       bool readOnly = true;
