@@ -13,7 +13,7 @@ library;
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show FlutterView, FontWeight, Offset, Rect, Size, TextAlign, TextDirection;
+import 'dart:ui' show FlutterView, FontWeight, Locale, Offset, Rect, Size, TextAlign, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -530,6 +530,7 @@ class TextInputConfiguration {
     this.enableIMEPersonalizedLearning = true,
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
+    this.hintLocales = const <Locale>[],
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -683,6 +684,24 @@ class TextInputConfiguration {
   /// {@macro flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
   final List<String> allowedMimeTypes;
 
+  /// {@template flutter.services.TextInputConfiguration.hintLocales}
+  /// List of the languages that the user is expected to use.
+  ///
+  /// This special "hint" can be used mainly for, but not limited to,
+  /// multilingual users who want IMEs to switch language based on editor's context.
+  ///
+  /// Pass an empty list to express the intention that a specific hint should not be set.
+  ///
+  /// Defaults to null, which indicates no preference in keyboard language.
+  ///
+  /// This setting is only honored on Android devices running API 24 and above.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#hintLocales>
+  /// {@endtemplate}
+  final List<Locale>? hintLocales;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -703,6 +722,7 @@ class TextInputConfiguration {
     List<String>? allowedMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
+    List<Locale>? hintLocales,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -723,6 +743,7 @@ class TextInputConfiguration {
       allowedMimeTypes: allowedMimeTypes ?? this.allowedMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
+      hintLocales: hintLocales ?? this.hintLocales,
     );
   }
 
@@ -772,6 +793,7 @@ class TextInputConfiguration {
       'contentCommitMimeTypes': allowedMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel': enableDeltaModel,
+      'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
     };
   }
 
@@ -800,7 +822,8 @@ class TextInputConfiguration {
         other.autofillConfiguration == autofillConfiguration &&
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
-        other.enableDeltaModel == enableDeltaModel;
+        other.enableDeltaModel == enableDeltaModel &&
+        other.hintLocales == hintLocales;
   }
 
   @override
@@ -823,6 +846,7 @@ class TextInputConfiguration {
       enableIMEPersonalizedLearning,
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
+      hintLocales,
     );
   }
 
@@ -846,6 +870,7 @@ class TextInputConfiguration {
       'enableIMEPersonalizedLearning: $enableIMEPersonalizedLearning',
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
+      if (hintLocales != null) 'hintLocales: $hintLocales',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
@@ -1056,8 +1081,8 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength =
           originalIndex <= replacementRange.start && originalIndex < replacementRange.end
-              ? 0
-              : replacementString.length;
+          ? 0
+          : replacementString.length;
       // The length removed by removing the replacementRange.
       final int removedLength =
           originalIndex.clamp(replacementRange.start, replacementRange.end) -
@@ -1683,10 +1708,9 @@ TextInputAction _toTextInputAction(String action) {
     'TextInputAction.emergencyCall' => TextInputAction.emergencyCall,
     'TextInputAction.done' => TextInputAction.done,
     'TextInputAction.newline' => TextInputAction.newline,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text input action: $action'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text input action: $action'),
+    ]),
   };
 }
 
@@ -1695,10 +1719,9 @@ FloatingCursorDragState _toTextCursorAction(String state) {
     'FloatingCursorDragState.start' => FloatingCursorDragState.Start,
     'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
     'FloatingCursorDragState.end' => FloatingCursorDragState.End,
-    _ =>
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unknown text cursor action: $state'),
-      ]),
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Unknown text cursor action: $state'),
+    ]),
   };
 }
 
@@ -1711,10 +1734,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
     encoded['Y'] != null,
     'You must provide a value for the vertical location of the floating cursor.',
   );
-  final Offset offset =
-      state == FloatingCursorDragState.Update
-          ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
-          : Offset.zero;
+  final Offset offset = state == FloatingCursorDragState.Update
+      ? Offset((encoded['X'] as num).toDouble(), (encoded['Y'] as num).toDouble())
+      : Offset.zero;
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1786,8 +1808,8 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
-      _instance._channel =
-          newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
+      _instance._channel = newChannel
+        ..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
   }
@@ -1956,14 +1978,13 @@ class TextInput {
           stack: stack,
           library: 'services library',
           context: ErrorDescription('during method call ${call.method}'),
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<MethodCall>(
-                  'call',
-                  call,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsProperty<MethodCall>(
+              'call',
+              call,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ],
         ),
       );
       rethrow;
@@ -1980,11 +2001,10 @@ class TextInput {
         );
         return;
       case 'TextInputClient.requestElementsInRect':
-        final List<double> args =
-            (methodCall.arguments as List<dynamic>)
-                .cast<num>()
-                .map<double>((num value) => value.toDouble())
-                .toList();
+        final List<double> args = (methodCall.arguments as List<dynamic>)
+            .cast<num>()
+            .map<double>((num value) => value.toDouble())
+            .toList();
         return _scribbleClients.keys
             .where((String elementIdentifier) {
               final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
@@ -2582,7 +2602,7 @@ class _PlatformTextInputControl with TextInputControl {
 ///  * [SystemContextMenu], which wraps this functionality in a widget.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
-class SystemContextMenuController with SystemContextMenuClient {
+class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Creates an instance of [SystemContextMenuController].
   ///
   /// Not shown until [show] is called.
@@ -2711,7 +2731,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// `items` specifies the buttons that appear in the menu. The buttons that
   /// appear in the menu will be exactly as given and will not automatically
-  /// udpate based on the state of the input field. See
+  /// update based on the state of the input field. See
   /// [SystemContextMenu.getDefaultItems] for the default items for a given
   /// [EditableTextState].
   ///
@@ -2750,8 +2770,9 @@ class SystemContextMenuController with SystemContextMenuClient {
 
     ServicesBinding.systemContextMenuClient = this;
 
-    final List<Map<String, dynamic>> itemsJson =
-        items.map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json).toList();
+    final List<Map<String, dynamic>> itemsJson = items
+        .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
+        .toList();
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -2794,8 +2815,20 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 
   @override
-  String toString() {
-    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$isVisible, _isDisposed=$_isDisposed)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('isVisible', isVisible));
+    properties.add(
+      FlagProperty(
+        'onSystemHide',
+        value: onSystemHide != null,
+        ifTrue: 'callback set',
+        ifFalse: 'callback null',
+        showName: true,
+      ),
+    );
+    properties.add(DiagnosticsProperty<bool>('_hiddenBySystem', _hiddenBySystem));
+    properties.add(DiagnosticsProperty<bool>('_isDisposed', _isDisposed));
   }
 
   /// Used to release resources when this instance will never be used again.
@@ -2855,7 +2888,7 @@ sealed class IOSSystemContextMenuItemData {
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in copy button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in copy button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2873,7 +2906,7 @@ final class IOSSystemContextMenuItemDataCopy extends IOSSystemContextMenuItemDat
   String get _jsonType => 'copy';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in cut button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in cut button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2891,7 +2924,7 @@ final class IOSSystemContextMenuItemDataCut extends IOSSystemContextMenuItemData
   String get _jsonType => 'cut';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in paste button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in paste button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2909,7 +2942,7 @@ final class IOSSystemContextMenuItemDataPaste extends IOSSystemContextMenuItemDa
   String get _jsonType => 'paste';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in select all
+/// An [IOSSystemContextMenuItemData] for the system's built-in select all
 /// button.
 ///
 /// The title and action are both handled by the platform.
@@ -2928,7 +2961,7 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
   String get _jsonType => 'selectAll';
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in look up
+/// An [IOSSystemContextMenuItemData] for the system's built-in look up
 /// button.
 ///
 /// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
@@ -2942,7 +2975,8 @@ final class IOSSystemContextMenuItemDataSelectAll extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemLookUp], which performs a similar role but at the
 ///    widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataLookUp].
   const IOSSystemContextMenuItemDataLookUp({required this.title});
 
@@ -2953,12 +2987,13 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
   String get _jsonType => 'lookUp';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataLookUp(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in search web
+/// An [IOSSystemContextMenuItemData] for the system's built-in search web
 /// button.
 ///
 /// Must specify a [title], typically
@@ -2973,7 +3008,8 @@ final class IOSSystemContextMenuItemDataLookUp extends IOSSystemContextMenuItemD
 ///  * [IOSSystemContextMenuItemSearchWeb], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataSearchWeb].
   const IOSSystemContextMenuItemDataSearchWeb({required this.title});
 
@@ -2984,12 +3020,13 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
   String get _jsonType => 'searchWeb';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataSearchWeb(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in share button.
+/// An [IOSSystemContextMenuItemData] for the system's built-in share button.
 ///
 /// Must specify a [title], typically
 /// [WidgetsLocalizations.shareButtonLabel].
@@ -3003,7 +3040,8 @@ final class IOSSystemContextMenuItemDataSearchWeb extends IOSSystemContextMenuIt
 ///  * [IOSSystemContextMenuItemShare], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default
 ///    localized value.
-final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData {
+final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataShare].
   const IOSSystemContextMenuItemDataShare({required this.title});
 
@@ -3014,9 +3052,33 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
   String get _jsonType => 'share';
 
   @override
-  String toString() {
-    return 'IOSSystemContextMenuItemDataShare(title: $title)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
   }
+}
+
+/// An [IOSSystemContextMenuItemData] for the system's built-in Live Text
+/// (OCR) button.
+///
+/// This button is only available on iOS 15.0+ devices with camera support.
+/// It allows the user to scan text from the camera and insert it at the
+/// current cursor position.
+///
+/// The title and action are both handled by the platform, and the platform
+/// will use its default localized title.
+///
+/// See also:
+///
+///  * [IOSSystemContextMenuItemLiveText], which performs a similar role but at the
+///    widget level.
+///  * https://github.com/flutter/flutter/issues/169781
+final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuItemData {
+  /// Creates an instance of [IOSSystemContextMenuItemDataLiveText].
+  const IOSSystemContextMenuItemDataLiveText();
+
+  @override
+  String get _jsonType => 'captureTextFromCamera';
 }
 
 // TODO(justinmc): Support the "custom" type.

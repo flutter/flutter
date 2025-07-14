@@ -16,9 +16,7 @@ import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PathUtilsTest {
 
@@ -67,9 +65,7 @@ public class PathUtilsTest {
   public void canGetCacheDir() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(new File(APP_DATA_PATH + "/cache"));
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
-      when(context.getCodeCacheDir()).thenReturn(new File(APP_DATA_PATH + "/code_cache"));
-    }
+    when(context.getCodeCacheDir()).thenReturn(new File(APP_DATA_PATH + "/code_cache"));
     assertTrue(PathUtils.getCacheDirectory(context).startsWith(APP_DATA_PATH));
   }
 
@@ -77,14 +73,10 @@ public class PathUtilsTest {
   public void canOnlyGetCachePathWhenDiskFullAndCacheDirNotCreated() {
     Context context = mock(Context.class);
     when(context.getCacheDir()).thenReturn(null);
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_21) {
-      when(context.getCodeCacheDir()).thenReturn(null);
-    }
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
-    } else {
-      when(context.getApplicationInfo().dataDir).thenReturn(APP_DATA_PATH);
-    }
+    // Requires at least api 21.
+    when(context.getCodeCacheDir()).thenReturn(null);
+    // Requires at least api 24.
+    when(context.getDataDir()).thenReturn(new File(APP_DATA_PATH));
     assertEquals(PathUtils.getCacheDirectory(context), APP_DATA_PATH + "/cache");
   }
 }

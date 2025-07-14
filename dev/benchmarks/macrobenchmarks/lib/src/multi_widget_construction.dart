@@ -79,19 +79,19 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                   // for benchmark purposes.
                   return counter.isEven
                       ? Container(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(Colors.white, baseColor, label / totalLength),
-                        constraints: BoxConstraints.expand(height: height),
-                        child: Text('${widgetCounter + label}'),
-                      )
+                          // This key forces rebuilding the element
+                          key: ValueKey<int>(widgetCounter + label),
+                          color: Color.lerp(Colors.white, baseColor, label / totalLength),
+                          constraints: BoxConstraints.expand(height: height),
+                          child: Text('${widgetCounter + label}'),
+                        )
                       : MyContainer(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
-                        constraints: BoxConstraints.expand(height: height),
-                        child: Text('${widgetCounter + label}'),
-                      );
+                          // This key forces rebuilding the element
+                          key: ValueKey<int>(widgetCounter + label),
+                          color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
+                          constraints: BoxConstraints.expand(height: height),
+                          child: Text('${widgetCounter + label}'),
+                        );
                 }),
               ),
             ),

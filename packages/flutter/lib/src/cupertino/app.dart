@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'icons.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
@@ -534,46 +535,44 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticsLabel,
     required GlobalKey key,
   }) {
-    return CupertinoButton(
-      key: key,
-      color: _widgetSelectionButtonsBackgroundColor(context),
-      padding: EdgeInsets.zero,
+    return _CupertinoInspectorButton.filled(
       onPressed: onPressed,
-      child: Icon(
-        CupertinoIcons.xmark,
-        size: 28.0,
-        color: _widgetSelectionButtonsForegroundColor(context),
-        semanticLabel: 'Exit Select Widget mode.',
-      ),
+      semanticsLabel: semanticsLabel,
+      icon: CupertinoIcons.xmark,
+      buttonKey: key,
     );
   }
 
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    bool isLeftAligned = true,
+    required String semanticsLabel,
+    bool usesDefaultAlignment = true,
   }) {
-    return CupertinoButton(
+    return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      child: Icon(
-        isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
-        size: 32.0,
-        color: _widgetSelectionButtonsBackgroundColor(context),
-        semanticLabel:
-            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
-      ),
+      semanticsLabel: semanticsLabel,
+      icon: usesDefaultAlignment ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
     );
   }
 
-  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryContrastingColor;
-  }
-
-  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryColor;
+  Widget _tapBehaviorButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticsLabel,
+    required bool selectionOnTapEnabled,
+  }) {
+    return _CupertinoInspectorButton.toggle(
+      onPressed: onPressed,
+      semanticsLabel: semanticsLabel,
+      // This unicode icon is also used for the Material-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
+      toggledOn: selectionOnTapEnabled,
+    );
   }
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
@@ -607,6 +606,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
         moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -642,6 +642,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
       moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -678,5 +679,84 @@ class _CupertinoAppState extends State<CupertinoApp> {
         ),
       ),
     );
+  }
+}
+
+class _CupertinoInspectorButton extends InspectorButton {
+  const _CupertinoInspectorButton.filled({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    super.buttonKey,
+  }) : super.filled();
+
+  const _CupertinoInspectorButton.toggle({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+    super.toggledOn,
+  }) : super.toggle();
+
+  const _CupertinoInspectorButton.iconOnly({
+    required super.onPressed,
+    required super.semanticsLabel,
+    required super.icon,
+  }) : super.iconOnly();
+
+  @override
+  Widget build(BuildContext context) {
+    final Icon buttonIcon = Icon(
+      icon,
+      semanticLabel: semanticsLabel,
+      size: iconSizeForVariant,
+      color: foregroundColor(context),
+    );
+
+    return Padding(
+      key: buttonKey,
+      padding: const EdgeInsets.all(
+        (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
+      ),
+      child: variant == InspectorButtonVariant.toggle && !toggledOn!
+          ? CupertinoButton.tinted(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              child: buttonIcon,
+            )
+          : CupertinoButton(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              color: backgroundColor(context),
+              child: buttonIcon,
+            ),
+    );
+  }
+
+  @override
+  Color foregroundColor(BuildContext context) {
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+        return secondaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return primaryColor;
+      case InspectorButtonVariant.toggle:
+        return !toggledOn! ? primaryColor : secondaryColor;
+    }
+  }
+
+  @override
+  Color backgroundColor(BuildContext context) {
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+    switch (variant) {
+      case InspectorButtonVariant.filled:
+      case InspectorButtonVariant.toggle:
+        return primaryColor;
+      case InspectorButtonVariant.iconOnly:
+        return const Color(0x00000000);
+    }
   }
 }

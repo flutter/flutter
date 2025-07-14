@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:file/memory.dart';
+library;
+
 import 'dart:io' as io show Directory, File, IOOverrides, Link;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 
-/// An [IOOverrides] that can delegate to [FileSystem] implementation if provided.
+/// An [io.IOOverrides] that can delegate to [FileSystem] implementation if provided.
 ///
 /// Does not override any of the socket facilities.
 ///

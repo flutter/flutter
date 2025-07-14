@@ -186,7 +186,7 @@ generated_file("dart_sdk_entitlement_config") {
   outputs = [ "$target_gen_dir/dart_sdk_entitlements.txt" ]
 
   # Dart SDK is a prebuilt archive. The rule for building
-  # Dart SDK is https://github.com/flutter/engine/blob/main/BUILD.gn#L61
+  # Dart SDK is https://github.com/flutter/flutter/blob/main/engine/src/flutter/BUILD.gn#L61
   contents = [
     "dart-sdk/bin/dart",
     "dart-sdk/bin/dartaotruntime",

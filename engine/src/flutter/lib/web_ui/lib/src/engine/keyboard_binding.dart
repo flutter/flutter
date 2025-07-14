@@ -142,7 +142,7 @@ class KeyboardBinding {
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
   void _addEventListener(String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
@@ -151,16 +151,16 @@ class KeyboardBinding {
       }
     }
 
-    final DomEventListener wrappedHandler = createDomEventListener(loggedHandler);
+    final DomEventListener wrappedHandler = loggedHandler.toJS;
     assert(!_listeners.containsKey(eventName));
     _listeners[eventName] = wrappedHandler;
-    domWindow.addEventListener(eventName, wrappedHandler, true);
+    domWindow.addEventListener(eventName, wrappedHandler, true.toJS);
   }
 
   /// Remove all active event listeners.
   void _clearListeners() {
     _listeners.forEach((String eventName, DomEventListener listener) {
-      domWindow.removeEventListener(eventName, listener, true);
+      domWindow.removeEventListener(eventName, listener, true.toJS);
     });
     _listeners.clear();
   }
@@ -234,17 +234,14 @@ class KeyboardConverter {
   final locale_keymap.LocaleKeymap _mapping;
 
   static locale_keymap.LocaleKeymap _mappingFromPlatform(ui_web.OperatingSystem platform) {
-    switch (platform) {
-      case ui_web.OperatingSystem.iOs:
-      case ui_web.OperatingSystem.macOs:
-        return locale_keymap.LocaleKeymap.darwin();
-      case ui_web.OperatingSystem.windows:
-        return locale_keymap.LocaleKeymap.win();
-      case ui_web.OperatingSystem.android:
-      case ui_web.OperatingSystem.linux:
-      case ui_web.OperatingSystem.unknown:
-        return locale_keymap.LocaleKeymap.linux();
-    }
+    return switch (platform) {
+      ui_web.OperatingSystem.iOs ||
+      ui_web.OperatingSystem.macOs => locale_keymap.LocaleKeymap.darwin(),
+      ui_web.OperatingSystem.windows => locale_keymap.LocaleKeymap.win(),
+      ui_web.OperatingSystem.android ||
+      ui_web.OperatingSystem.linux ||
+      ui_web.OperatingSystem.unknown => locale_keymap.LocaleKeymap.linux(),
+    };
   }
 
   // The `performDispatchKeyData` wrapped with tracking logic.

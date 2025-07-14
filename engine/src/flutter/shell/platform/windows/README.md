@@ -13,7 +13,7 @@ For more information on embedders, see the
 > [!CAUTION]
 > This is a best effort attempt to document the Windows embedder. It is not
 > guaranteed to be up to date or complete. If you find a discrepancy, please
-> [send a pull request](https://github.com/flutter/engine/compare)!
+> [send a pull request](https://github.com/flutter/flutter/compare)!
 
 See also:
 
@@ -36,7 +36,7 @@ See:
 
 Some notable files include:
 
-1. [`flutter_windows_engine.h`](https://github.com/flutter/engine/blob/main/shell/platform/windows/flutter_windows_engine.h) - Connects the Windows embedder to the Flutter engine.
-1. [`flutter_windows_view.h`](https://github.com/flutter/engine/blob/main/shell/platform/windows/flutter_windows_view.h) - The logic for a Flutter view.
-1. [`flutter_window.h`](https://github.com/flutter/engine/blob/main/shell/platform/windows/flutter_window.h) - Integrates a Flutter view with Windows (using a win32 child window).
-1. [`//shell/platform/embedder/embedder.h`](https://github.com/flutter/engine/blob/main/shell/platform/embedder/embedder.h) - The API boundary between the Windows embedder and the Flutter engine.
+1. [`flutter_windows_engine.h`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/windows/flutter_windows_engine.h) - Connects the Windows embedder to the Flutter engine.
+1. [`flutter_windows_view.h`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/windows/flutter_windows_view.h) - The logic for a Flutter view.
+1. [`flutter_window.h`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/windows/flutter_window.h) - Integrates a Flutter view with Windows (using a win32 child window).
+1. [`//shell/platform/embedder/embedder.h`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/embedder/embedder.h) - The API boundary between the Windows embedder and the Flutter engine.

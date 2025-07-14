@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'color_scheme.dart';
 import 'date.dart';
 import 'date_picker_theme.dart';
 import 'debug.dart';
@@ -24,16 +23,25 @@ import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
-import 'text_theme.dart';
 import 'theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
-const double _dayPickerRowHeight = 42.0;
+// Current M2 implementation is not compliant with the M2 specification.
+// Instead of a 42 pixels row height it should be 40 with a 2 pixels inner padding.
+// See: https://m2.material.io/components/date-pickers#specs.
+const double _dayPickerRowHeightM2 = 42.0;
+// For M3, row height is 48 pxiels with 4 pixels inner padding.
+// See: https://m3.material.io/components/date-pickers/specs#2d53890e-a08f-4c63-a0d9-abd9e95b4245.
+const double _dayPickerRowHeightM3 = 48.0;
+
 const int _maxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // One extra row for the day-of-week header.
-const double _maxDayPickerHeight = _dayPickerRowHeight * (_maxDayPickerRowCount + 1);
-const double _monthPickerHorizontalPadding = 8.0;
+const double _maxDayPickerHeightM2 = _dayPickerRowHeightM2 * (_maxDayPickerRowCount + 1);
+const double _maxDayPickerHeightM3 = _dayPickerRowHeightM3 * (_maxDayPickerRowCount + 1);
+
+const double _monthPickerHorizontalPaddingPortraitM3 = 12.0;
+const double _monthPickerHorizontalPaddingOther = 8.0;
 
 const int _yearPickerColumnCount = 3;
 const double _yearPickerPadding = 16.0;
@@ -363,14 +371,21 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           context,
         ).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) /
         _fontSizeToScale;
+
+    // Conform to M3 spec in portrait mode (landscape mode is not specified).
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double maxDayPickerHeight =
+        Theme.of(context).useMaterial3 && orientation == Orientation.portrait
+        ? _maxDayPickerHeightM3
+        : _maxDayPickerHeightM2;
+
     // Scale the height of the picker area up with larger text. The size of the
-    // picker has room for larger text, up until a scale facotr of 1.3. After
+    // picker has room for larger text, up until a scale factor of 1.3. After
     // after which, we increase the height to add room for content to continue
     // to scale the text size.
-    final double scaledMaxDayPickerHeight =
-        textScaleFactor > 1.3
-            ? _maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8))
-            : _maxDayPickerHeight;
+    final double scaledMaxDayPickerHeight = textScaleFactor > 1.3
+        ? maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8))
+        : maxDayPickerHeight;
     return Stack(
       children: <Widget>[
         SizedBox(height: _subHeaderHeight + scaledMaxDayPickerHeight, child: _buildPicker()),
@@ -383,11 +398,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
               _currentDisplayedMonthDate,
               _localizations,
             ),
-            onTitlePressed:
-                () => _handleModeChanged(switch (_mode) {
-                  DatePickerMode.day => DatePickerMode.year,
-                  DatePickerMode.year => DatePickerMode.day,
-                }),
+            onTitlePressed: () => _handleModeChanged(switch (_mode) {
+              DatePickerMode.day => DatePickerMode.year,
+              DatePickerMode.year => DatePickerMode.day,
+            }),
           ),
         ),
       ],
@@ -450,9 +464,16 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final Color controlColor = colorScheme.onSurface.withOpacity(0.60);
+    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
+    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final TextStyle? buttonTextStyle =
+        datePickerTheme.toggleButtonTextStyle ?? defaults.toggleButtonTextStyle;
+    final Color? subHeaderForegroundColor =
+        datePickerTheme.subHeaderForegroundColor ?? defaults.subHeaderForegroundColor;
+    final Color? buttonTextColor =
+        datePickerTheme.toggleButtonTextStyle?.color ??
+        datePickerTheme.subHeaderForegroundColor ??
+        defaults.toggleButtonTextStyle?.color;
 
     return SizedBox(
       height: _subHeaderHeight,
@@ -477,12 +498,12 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
                             child: Text(
                               widget.title,
                               overflow: TextOverflow.ellipsis,
-                              style: textTheme.titleSmall?.copyWith(color: controlColor),
+                              style: buttonTextStyle?.apply(color: buttonTextColor),
                             ),
                           ),
                           RotationTransition(
                             turns: _controller,
-                            child: Icon(Icons.arrow_drop_down, color: controlColor),
+                            child: Icon(Icons.arrow_drop_down, color: subHeaderForegroundColor),
                           ),
                         ],
                       ),
@@ -826,7 +847,9 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Color controlColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.60);
+    final Color? subHeaderForegroundColor =
+        DatePickerTheme.of(context).subHeaderForegroundColor ??
+        DatePickerTheme.defaults(context).subHeaderForegroundColor;
 
     return Semantics(
       container: true,
@@ -842,13 +865,13 @@ class _MonthPickerState extends State<_MonthPicker> {
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    color: controlColor,
+                    color: subHeaderForegroundColor,
                     tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
                     onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    color: controlColor,
+                    color: subHeaderForegroundColor,
                     tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
                     onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                   ),
@@ -1018,7 +1041,11 @@ class _DayPickerState extends State<_DayPicker> {
       i = (i + 1) % DateTime.daysPerWeek
     ) {
       final String weekday = localizations.narrowWeekdays[i];
-      result.add(ExcludeSemantics(child: Center(child: Text(weekday, style: headerStyle))));
+      result.add(
+        ExcludeSemantics(
+          child: Center(child: Text(weekday, style: headerStyle)),
+        ),
+      );
     }
     return result;
   }
@@ -1074,13 +1101,16 @@ class _DayPickerState extends State<_DayPicker> {
       }
     }
 
+    final double monthPickerHorizontalPadding =
+        Theme.of(context).useMaterial3 && !isLandscapeOrientation
+        ? _monthPickerHorizontalPaddingPortraitM3
+        : _monthPickerHorizontalPaddingOther;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: _monthPickerHorizontalPadding),
+      padding: EdgeInsets.symmetric(horizontal: monthPickerHorizontalPadding),
       child: MediaQuery.withClampedTextScaling(
-        maxScaleFactor:
-            isLandscapeOrientation
-                ? _kDayPickerGridLandscapeMaxScaleFactor
-                : _kDayPickerGridPortraitMaxScaleFactor,
+        maxScaleFactor: isLandscapeOrientation
+            ? _kDayPickerGridLandscapeMaxScaleFactor
+            : _kDayPickerGridPortraitMaxScaleFactor,
         child: GridView.custom(
           physics: const ClampingScrollPhysics(),
           gridDelegate: _DayPickerGridDelegate(context),
@@ -1160,19 +1190,20 @@ class _DayState extends State<_Day> {
       (Set<MaterialState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
-    final OutlinedBorder dayShape =
-        resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states)!;
-    final ShapeDecoration decoration =
-        widget.isToday
-            ? ShapeDecoration(
-              color: dayBackgroundColor,
-              shape: dayShape.copyWith(
-                side: (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
-                  color: dayForegroundColor,
-                ),
+    final OutlinedBorder dayShape = resolve<OutlinedBorder?>(
+      (DatePickerThemeData? theme) => theme?.dayShape,
+      states,
+    )!;
+    final ShapeDecoration decoration = widget.isToday
+        ? ShapeDecoration(
+            color: dayBackgroundColor,
+            shape: dayShape.copyWith(
+              side: (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
+                color: dayForegroundColor,
               ),
-            )
-            : ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
+            ),
+          )
+        : ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
     Widget dayWidget = Ink(
       decoration: decoration,
@@ -1183,6 +1214,13 @@ class _DayState extends State<_Day> {
         ),
       ),
     );
+
+    // Adds padding as per M3 guidelines for portrait mode. Not applied in landscape
+    // mode currently due to unclear specifications.
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    if (Theme.of(context).useMaterial3 && orientation == Orientation.portrait) {
+      dayWidget = Padding(padding: const EdgeInsets.all(4.0), child: dayWidget);
+    }
 
     if (widget.isDisabled) {
       dayWidget = ExcludeSemantics(child: dayWidget);
@@ -1232,10 +1270,15 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
     final double textScaleFactor =
         MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) /
         _fontSizeToScale;
-    final double scaledRowHeight =
-        textScaleFactor > 1.3
-            ? ((textScaleFactor - 1) * 30) + _dayPickerRowHeight
-            : _dayPickerRowHeight;
+    // Conform to M3 spec in portrait mode (landscape mode is not specified).
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    final double dayPickerRowHeight =
+        Theme.of(context).useMaterial3 && orientation == Orientation.portrait
+        ? _dayPickerRowHeightM3
+        : _dayPickerRowHeightM2;
+    final double scaledRowHeight = textScaleFactor > 1.3
+        ? ((textScaleFactor - 1) * 30) + dayPickerRowHeight
+        : dayPickerRowHeight;
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(
@@ -1409,17 +1452,21 @@ class _YearPickerState extends State<YearPicker> {
           effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
     );
 
-    BoxBorder? border;
+    final OutlinedBorder yearShape = resolve<OutlinedBorder?>(
+      (DatePickerThemeData? theme) => theme?.yearShape,
+      states,
+    )!;
+
+    BorderSide? borderSide;
     if (isCurrentYear) {
-      final BorderSide? todayBorder = datePickerTheme.todayBorder ?? defaults.todayBorder;
-      if (todayBorder != null) {
-        border = Border.fromBorderSide(todayBorder.copyWith(color: textColor));
+      borderSide = datePickerTheme.todayBorder ?? defaults.todayBorder;
+      if (borderSide != null) {
+        borderSide = borderSide.copyWith(color: textColor);
       }
     }
-    final BoxDecoration decoration = BoxDecoration(
-      border: border,
+    final ShapeDecoration decoration = ShapeDecoration(
       color: background,
-      borderRadius: BorderRadius.circular(decorationHeight / 2),
+      shape: yearShape.copyWith(side: borderSide),
     );
 
     final TextStyle? itemStyle = (datePickerTheme.yearStyle ?? defaults.yearStyle)?.apply(
@@ -1507,15 +1554,15 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
     final double textScaleFactor =
         MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 3.0).scale(_fontSizeToScale) /
         _fontSizeToScale;
-    final int scaledYearPickerColumnCount =
-        textScaleFactor > 1.65 ? _yearPickerColumnCount - 1 : _yearPickerColumnCount;
+    final int scaledYearPickerColumnCount = textScaleFactor > 1.65
+        ? _yearPickerColumnCount - 1
+        : _yearPickerColumnCount;
     final double tileWidth =
         (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) /
         scaledYearPickerColumnCount;
-    final double scaledYearPickerRowHeight =
-        textScaleFactor > 1
-            ? _yearPickerRowHeight + ((textScaleFactor - 1) * 9)
-            : _yearPickerRowHeight;
+    final double scaledYearPickerRowHeight = textScaleFactor > 1
+        ? _yearPickerRowHeight + ((textScaleFactor - 1) * 9)
+        : _yearPickerRowHeight;
     return SliverGridRegularTileLayout(
       childCrossAxisExtent: tileWidth,
       childMainAxisExtent: scaledYearPickerRowHeight,

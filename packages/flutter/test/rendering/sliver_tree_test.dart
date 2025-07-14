@@ -139,11 +139,11 @@ void main() {
     expect(find.text('Third'), findsOneWidget);
     expect(tester.getRect(find.text('Third')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
     expect(find.text('gamma'), findsOneWidget);
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 128.0, 296.0, 152.0));
     expect(find.text('delta'), findsOneWidget);
-    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(46.0, 168.0, 286.0, 192.0));
+    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(56.0, 168.0, 296.0, 192.0));
     expect(find.text('epsilon'), findsOneWidget);
-    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(46.0, 208.0, 382.0, 232.0));
+    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(56.0, 208.0, 392.0, 232.0));
     expect(find.text('Fourth'), findsOneWidget);
     expect(tester.getRect(find.text('Fourth')), const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0));
 
@@ -204,11 +204,11 @@ void main() {
     expect(find.text('Third'), findsOneWidget);
     expect(tester.getRect(find.text('Third')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
     expect(find.text('gamma'), findsOneWidget);
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(96.0, 128.0, 336.0, 152.0));
     expect(find.text('delta'), findsOneWidget);
-    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(46.0, 168.0, 286.0, 192.0));
+    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(96.0, 168.0, 336.0, 192.0));
     expect(find.text('epsilon'), findsOneWidget);
-    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(46.0, 208.0, 382.0, 232.0));
+    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(96.0, 208.0, 432.0, 232.0));
     expect(find.text('Fourth'), findsOneWidget);
     expect(tester.getRect(find.text('Fourth')), const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0));
 
@@ -234,11 +234,11 @@ void main() {
     expect(find.text('Third'), findsOneWidget);
     expect(tester.getRect(find.text('Third')), const Rect.fromLTRB(46.0, 226.0, 286.0, 274.0));
     expect(find.text('gamma'), findsOneWidget);
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 326.0, 286.0, 374.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 326.0, 296.0, 374.0));
     expect(find.text('delta'), findsOneWidget);
-    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(46.0, 426.0, 286.0, 474.0));
+    expect(tester.getRect(find.text('delta')), const Rect.fromLTRB(56.0, 426.0, 296.0, 474.0));
     expect(find.text('epsilon'), findsOneWidget);
-    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(46.0, 526.0, 382.0, 574.0));
+    expect(tester.getRect(find.text('epsilon')), const Rect.fromLTRB(56.0, 526.0, 392.0, 574.0));
     expect(find.text('Fourth'), findsNothing);
   });
 
@@ -282,9 +282,9 @@ void main() {
     // is not visible yet.
     expect(find.text('alpha'), findsNothing);
     expect(find.text('beta'), findsOneWidget);
-    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(46.0, 8.0, 238.0, 32.0));
+    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(56.0, 8.0, 248.0, 32.0));
     expect(find.text('kappa'), findsOneWidget);
-    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(46.0, 48.0, 286.0, 72.0));
+    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(56.0, 48.0, 296.0, 72.0));
     // Progress the animation.
     await tester.pump(const Duration(milliseconds: 50));
     expect(
@@ -329,11 +329,11 @@ void main() {
         ..paragraph(offset: const Offset(46.0, 368.0)), // Fourth
     );
     expect(find.text('alpha'), findsOneWidget);
-    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
+    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(56.0, 88.0, 296.0, 112.0));
     expect(find.text('beta'), findsOneWidget);
-    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(46.0, 128.0, 238.0, 152.0));
+    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(56.0, 128.0, 248.0, 152.0));
     expect(find.text('kappa'), findsOneWidget);
-    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(46.0, 168.0, 286.0, 192.0));
+    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(56.0, 168.0, 296.0, 192.0));
 
     // Customize the animation
     treeSliver = TreeSliver<String>(
@@ -364,7 +364,7 @@ void main() {
     );
     // Still visible from earlier.
     expect(find.text('alpha'), findsOneWidget);
-    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
+    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(56.0, 88.0, 296.0, 112.0));
     // Collapse the node now
     await tester.tap(find.byType(Icon).first);
     await tester.pump();
@@ -444,11 +444,11 @@ void main() {
         ..paragraph(offset: const Offset(46.0, 368.0)), // Fourth
     );
     expect(find.text('alpha'), findsOneWidget);
-    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
+    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(56.0, 88.0, 296.0, 112.0));
     expect(find.text('beta'), findsOneWidget);
-    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(46.0, 128.0, 238.0, 152.0));
+    expect(tester.getRect(find.text('beta')), const Rect.fromLTRB(56.0, 128.0, 248.0, 152.0));
     expect(find.text('kappa'), findsOneWidget);
-    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(46.0, 168.0, 286.0, 192.0));
+    expect(tester.getRect(find.text('kappa')), const Rect.fromLTRB(56.0, 168.0, 296.0, 192.0));
   });
 
   testWidgets('Multiple animating node segments', (WidgetTester tester) async {
@@ -476,7 +476,7 @@ void main() {
 
     expect(tester.getRect(find.text('Second')), const Rect.fromLTRB(46.0, 48.0, 334.0, 72.0));
     expect(tester.getRect(find.text('Third')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 128.0, 296.0, 152.0));
 
     // Trigger two animations to run together.
     // Collapse Third
@@ -501,7 +501,7 @@ void main() {
     );
     // Third is collapsing
     expect(tester.getRect(find.text('Third')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 128.0, 296.0, 152.0));
     // Second is expanding
     expect(tester.getRect(find.text('Second')), const Rect.fromLTRB(46.0, 48.0, 334.0, 72.0));
     // beta has been added and is animating into view.
@@ -532,7 +532,7 @@ void main() {
     // gamma appears to not have moved, this is because it is
     // intersecting both animations, the positive offset of
     // Second animation == the negative offset of Third
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 128.0, 296.0, 152.0));
     // Second is still expanding
     expect(tester.getRect(find.text('Second')), const Rect.fromLTRB(46.0, 48.0, 334.0, 72.0));
     // alpha is still animating into view.
@@ -564,7 +564,7 @@ void main() {
     // gamma appears to not have moved, this is because it is
     // intersecting both animations, the positive offset of
     // Second animation == the negative offset of Third
-    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(46.0, 128.0, 286.0, 152.0));
+    expect(tester.getRect(find.text('gamma')), const Rect.fromLTRB(56.0, 128.0, 296.0, 152.0));
     // Second is still expanding
     expect(tester.getRect(find.text('Second')), const Rect.fromLTRB(46.0, 48.0, 334.0, 72.0));
     // alpha is still animating into view.
@@ -590,7 +590,7 @@ void main() {
     expect(find.text('gamma'), findsNothing);
     expect(tester.getRect(find.text('Second')), const Rect.fromLTRB(46.0, 48.0, 334.0, 72.0));
     // alpha is in place.
-    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(46.0, 88.0, 286.0, 112.0));
+    expect(tester.getRect(find.text('alpha')), const Rect.fromLTRB(56.0, 88.0, 296.0, 112.0));
   });
 
   testWidgets('only paints visible rows', (WidgetTester tester) async {

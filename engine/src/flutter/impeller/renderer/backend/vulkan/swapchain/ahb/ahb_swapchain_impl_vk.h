@@ -73,8 +73,7 @@ class AHBSwapchainImplVK final
       std::weak_ptr<android::SurfaceControl> surface_control,
       const CreateTransactionCB& cb,
       const ISize& size,
-      bool enable_msaa,
-      size_t swapchain_image_count);
+      bool enable_msaa);
 
   ~AHBSwapchainImplVK();
 
@@ -137,8 +136,7 @@ class AHBSwapchainImplVK final
       std::weak_ptr<android::SurfaceControl> surface_control,
       const CreateTransactionCB& cb,
       const ISize& size,
-      bool enable_msaa,
-      size_t swapchain_image_count);
+      bool enable_msaa);
 
   bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture);
 

@@ -8,11 +8,12 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
 #include "flutter/fml/time/time_point.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 
 namespace flutter {
@@ -60,6 +61,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 - (FlutterRestorationPlugin*)restorationPlugin;
+- (FlutterTextInputPlugin*)textInputPlugin;
 
 // Accepts keypress events, and then calls |nextAction| if the event was not
 // handled.
@@ -71,6 +73,8 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 - (int32_t)accessibilityFlags;
 
 - (BOOL)supportsShowingSystemContextMenu;
+- (BOOL)stateIsActive;
+- (BOOL)stateIsBackground;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_

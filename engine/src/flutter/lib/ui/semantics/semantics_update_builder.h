@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      Dart_Handle flags,
       int actions,
       int maxValueLength,
       int currentValueLength,
@@ -47,8 +47,6 @@ class SemanticsUpdateBuilder
       double top,
       double right,
       double bottom,
-      double elevation,
-      double thickness,
       std::string identifier,
       std::string label,
       const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -69,7 +67,8 @@ class SemanticsUpdateBuilder
       int headingLevel,
       std::string linkUrl,
       int role,
-      const std::vector<std::string>& controlsNodes);
+      const std::vector<std::string>& controlsNodes,
+      int validationResult);
 
   void updateCustomAction(int id,
                           std::string label,

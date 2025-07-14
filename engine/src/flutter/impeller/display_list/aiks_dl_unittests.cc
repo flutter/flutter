@@ -10,7 +10,7 @@
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
-#include "display_list/geometry/dl_path.h"
+#include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -78,6 +78,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
 
 TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
 
   const float matrix[20] = {
       -1.0, 0,    0,    1.0, 0,  //
@@ -541,7 +542,7 @@ TEST_P(AiksTest, StrokedPathWithMoveToThenCloseDrawnCorrectly) {
       // add another nearly-empty contour.
       .MoveTo(DlPoint(0, 400))
       .Close();
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   DisplayListBuilder builder;
   builder.Translate(50, 50);
@@ -1121,10 +1122,7 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
   EXPECT_EQ(texture, nullptr);
 }
 
-TEST_P(AiksTest, DisplayListToTextureWithMipGenerationOnGLES) {
-  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Only relevant for GLES";
-  }
+TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
   DisplayListBuilder builder;
 
   std::shared_ptr<DlImageFilter> filter =

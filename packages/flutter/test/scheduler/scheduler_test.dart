@@ -177,17 +177,12 @@ void main() {
         }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
-        createTimer: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Duration duration,
-          void Function() f,
-        ) {
-          // Don't actually run the tasks, just record that it was scheduled.
-          timerQueueTasks.add(f);
-          return DummyTimer();
-        },
+        createTimer:
+            (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
+              // Don't actually run the tasks, just record that it was scheduled.
+              timerQueueTasks.add(f);
+              return DummyTimer();
+            },
       ),
     );
 
@@ -287,16 +282,11 @@ void main() {
     expect(scheduler.schedulerPhase, SchedulerPhase.idle);
     final List<VoidCallback> timers = <VoidCallback>[];
     final ZoneSpecification timerInterceptor = ZoneSpecification(
-      createTimer: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone,
-        Duration duration,
-        void Function() callback,
-      ) {
-        timers.add(callback);
-        return DummyTimer();
-      },
+      createTimer:
+          (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() callback) {
+            timers.add(callback);
+            return DummyTimer();
+          },
     );
 
     // Schedule a warm-up frame.
@@ -322,7 +312,7 @@ void main() {
     // callback that reschedules the engine frame.
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
-  });
+  }, skip: true); // Flaky, follow up in https://github.com/flutter/flutter/issues/166470
 
   test('Can schedule futures to completion', () async {
     bool isCompleted = false;

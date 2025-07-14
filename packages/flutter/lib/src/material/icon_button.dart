@@ -692,10 +692,12 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
-        WidgetState.disabled: disabledMouseCursor,
-        WidgetState.any: enabledMouseCursor,
-      }),
+      mouseCursor: disabledMouseCursor == null && enabledMouseCursor == null
+          ? null
+          : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+              WidgetState.disabled: disabledMouseCursor,
+              WidgetState.any: enabledMouseCursor,
+            }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -710,10 +712,12 @@ class IconButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     if (theme.useMaterial3) {
-      final Size? minSize =
-          constraints == null ? null : Size(constraints!.minWidth, constraints!.minHeight);
-      final Size? maxSize =
-          constraints == null ? null : Size(constraints!.maxWidth, constraints!.maxHeight);
+      final Size? minSize = constraints == null
+          ? null
+          : Size(constraints!.minWidth, constraints!.minHeight);
+      final Size? maxSize = constraints == null
+          ? null
+          : Size(constraints!.maxWidth, constraints!.maxHeight);
 
       ButtonStyle adjustedStyle = styleFrom(
         visualDensity: visualDensity,
@@ -1002,7 +1006,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   ButtonStyle? themeStyleOf(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
-    final bool isDefaultColor = identical(iconTheme.color, switch (Theme.of(context).brightness) {
+    final bool isDefaultColor = identical(iconTheme.color, switch (Theme.brightnessOf(context)) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
     });

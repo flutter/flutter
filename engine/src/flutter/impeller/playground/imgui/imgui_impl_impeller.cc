@@ -12,7 +12,6 @@
 #include "fml/mapping.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/platform.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/imgui/imgui_raster.frag.h"

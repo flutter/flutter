@@ -25,10 +25,9 @@ import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
 // Run with Robolectric so that Log calls don't crash.
-@Config(manifest = Config.NONE)
+
 @RunWith(AndroidJUnit4.class)
 public class FlutterEngineConnectionRegistryTest {
   @Test

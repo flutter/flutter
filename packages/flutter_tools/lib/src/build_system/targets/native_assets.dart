@@ -14,7 +14,6 @@ import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
-import 'common.dart';
 
 /// Runs the dart build of the app.
 abstract class DartBuild extends Target {
@@ -34,13 +33,32 @@ abstract class DartBuild extends Target {
     } else {
       final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
+      final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(environment.packageConfigPath),
+        packageConfigFile,
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String? runPackageName = packageConfig.packages
+          .where((Package p) => p.root == projectUri)
+          .firstOrNull
+          ?.name;
+      if (runPackageName == null) {
+        throw StateError(
+          'Could not determine run package name. '
+          'Project path "${projectUri.toFilePath()}" did not occur as package '
+          'root in package config "${environment.packageConfigPath}". '
+          'Please report a reproduction on '
+          'https://github.com/flutter/flutter/issues/169475.',
+        );
+      }
+      final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+      final String? buildModeEnvironment = environment.defines[kBuildMode];
+      if (buildModeEnvironment == null) {
+        throw MissingDefineException(kBuildMode, name);
+      }
+      final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+      final bool includeDevDependencies = !buildMode.isRelease;
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -48,7 +66,9 @@ abstract class DartBuild extends Target {
             packageConfig,
             fileSystem,
             environment.logger,
-            runPackageName!,
+            runPackageName,
+            includeDevDependencies: includeDevDependencies,
+            pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
         environmentDefines: environment.defines,
@@ -65,7 +85,7 @@ abstract class DartBuild extends Target {
     }
     dartBuildResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
       <File>[fileSystem.file(dartBuildResultJsonFile)],
     );
@@ -75,7 +95,7 @@ abstract class DartBuild extends Target {
     }
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!await outputDepfile.exists()) {
-      throwToolExit("${outputDepfile.path} doesn't exist.");
+      throw StateError("${outputDepfile.path} doesn't exist.");
     }
   }
 
@@ -88,7 +108,7 @@ abstract class DartBuild extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
@@ -111,15 +131,16 @@ abstract class DartBuild extends Target {
     );
   }
 
-  static const String dartBuildResultFilename = 'dart_build_result.json';
-  static const String depFilename = 'dart_build.d';
+  static const dartBuildResultFilename = 'dart_build_result.json';
+  static const depFilename = 'dart_build.d';
 }
 
 class DartBuildForNative extends DartBuild {
   const DartBuildForNative({@visibleForTesting super.buildRunner});
 
+  // TODO(dcharkes): Add `KernelSnapshot()` for AOT builds only when adding tree-shaking information. https://github.com/dart-lang/native/issues/153
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
@@ -152,7 +173,7 @@ class InstallCodeAssets extends Target {
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri file in dartBuildResult.filesToBeBundled) fileSystem.file(file)],
       <File>[fileSystem.file(nativeAssetsFileUri)],
     );
@@ -175,7 +196,7 @@ class InstallCodeAssets extends Target {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
     // If different packages are resolved, different native assets might need to be built.
-    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 
   @override
@@ -184,8 +205,8 @@ class InstallCodeAssets extends Target {
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/$nativeAssetsFilename')];
 
-  static const String nativeAssetsFilename = 'native_assets.json';
-  static const String depFilename = 'install_code_assets.d';
+  static const nativeAssetsFilename = 'native_assets.json';
+  static const depFilename = 'install_code_assets.d';
 }
 
 TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {

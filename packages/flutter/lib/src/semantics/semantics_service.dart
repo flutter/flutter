@@ -33,6 +33,9 @@ abstract final class SemanticsService {
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
   ///
+  /// Not all platforms support announcements. Check to see if it is supported using
+  /// [MediaQuery.supportsAnnounceOf] before calling this method.
+  ///
   /// ### Android
   /// Android has [deprecated announcement events][1] due to its disruptive
   /// behavior with TalkBack forcing it to clear its speech queue and speak the

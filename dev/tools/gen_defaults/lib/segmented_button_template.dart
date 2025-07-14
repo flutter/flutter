@@ -38,7 +38,8 @@ class SegmentedButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   _${blockName}DefaultsM3(this.context);
   final BuildContext context;

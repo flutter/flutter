@@ -554,10 +554,10 @@ class _LineCaretMetrics {
     return offset == Offset.zero
         ? this
         : _LineCaretMetrics(
-          offset: offset + this.offset,
-          writingDirection: writingDirection,
-          height: height,
-        );
+            offset: offset + this.offset,
+            writingDirection: writingDirection,
+            height: height,
+          );
   }
 }
 
@@ -583,8 +583,9 @@ class _LineCaretMetrics {
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 ///
-/// The default text style is white. To change the color of the text,
-/// pass a [TextStyle] object to the [TextSpan] in `text`.
+/// The default text style color is white on non-web platforms and black on
+/// the web. If developing across both platforms, always set the text color
+/// explicitly.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
@@ -602,7 +603,7 @@ class TextPainter {
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -612,14 +613,15 @@ class TextPainter {
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
-         textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
+         textScaleFactor == 1.0 || identical(textScaler, const _UnspecifiedTextScaler()),
          'Use textScaler instead.',
        ),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
-       _textScaler =
-           textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+       _textScaler = textScaler == const _UnspecifiedTextScaler()
+           ? TextScaler.linear(textScaleFactor)
+           : textScaler,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
@@ -665,8 +667,9 @@ class TextPainter {
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
-      textScaler:
-          textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+      textScaler: textScaler == TextScaler.noScaling
+          ? TextScaler.linear(textScaleFactor)
+          : textScaler,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -718,8 +721,9 @@ class TextPainter {
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
-      textScaler:
-          textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+      textScaler: textScaler == TextScaler.noScaling
+          ? TextScaler.linear(textScaleFactor)
+          : textScaler,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -805,10 +809,9 @@ class TextPainter {
       _layoutTemplate = null;
     }
 
-    final RenderComparison comparison =
-        value == null
-            ? RenderComparison.layout
-            : _text?.compareTo(value) ?? RenderComparison.layout;
+    final RenderComparison comparison = value == null
+        ? RenderComparison.layout
+        : _text?.compareTo(value) ?? RenderComparison.layout;
 
     _text = value;
     _cachedPlainText = null;
@@ -1246,8 +1249,9 @@ class TextPainter {
     // when the text is not left-aligned, so we don't have to deal with an
     // infinite paint offset.
     final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
-    final double? adjustedMaxWidth =
-        !adjustMaxWidth ? maxWidth : cachedLayout?.layout.maxIntrinsicLineExtent;
+    final double? adjustedMaxWidth = !adjustMaxWidth
+        ? maxWidth
+        : cachedLayout?.layout.maxIntrinsicLineExtent;
     final double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
 
     // Only rebuild the paragraph when there're layout changes, even when
@@ -1257,9 +1261,8 @@ class TextPainter {
     //    the paragraph rebuilds is unnecessary)
     // 2. the user could be measuring the text layout so `paint` will never be
     //    called.
-    final ui.Paragraph paragraph =
-        (cachedLayout?.paragraph ?? _createParagraph(text))
-          ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
+    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
+      ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
     final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
@@ -1412,8 +1415,9 @@ class TextPainter {
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.
-      final double dx =
-          paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
+      final double dx = paintOffsetAlignment == 0
+          ? 0
+          : paintOffsetAlignment * layoutCache.contentWidth;
       return Offset(dx, 0.0);
     }
 
@@ -1453,10 +1457,9 @@ class TextPainter {
         return heightFromCaretMetrics;
       }
     }
-    final TextBox textBox =
-        _getOrCreateLayoutTemplate()
-            .getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut)
-            .single;
+    final TextBox textBox = _getOrCreateLayoutTemplate()
+        .getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut)
+        .single;
     return textBox.toRect().height;
   }
 
@@ -1749,8 +1752,8 @@ class TextPainter {
     return offset == Offset.zero
         ? rawMetrics
         : rawMetrics
-            .map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset))
-            .toList(growable: false);
+              .map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset))
+              .toList(growable: false);
   }
 
   bool _disposed = false;
@@ -1783,4 +1786,13 @@ class TextPainter {
     _layoutCache = null;
     _text = null;
   }
+}
+
+class _UnspecifiedTextScaler extends TextScaler {
+  const _UnspecifiedTextScaler();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
 }

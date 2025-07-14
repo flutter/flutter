@@ -4,7 +4,7 @@
 
 part of ui;
 
-// For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
+// For documentation see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/painting.dart
 
 abstract class Path {
   factory Path() => engine.renderer.createPath();
@@ -41,6 +41,7 @@ abstract class Path {
   void addArc(Rect oval, double startAngle, double sweepAngle);
   void addPolygon(List<Offset> points, bool close);
   void addRRect(RRect rrect);
+  void addRSuperellipse(RSuperellipse rsuperellipse);
   void addPath(Path path, Offset offset, {Float64List? matrix4});
   void extendWithPath(Path path, Offset offset, {Float64List? matrix4});
   void close();

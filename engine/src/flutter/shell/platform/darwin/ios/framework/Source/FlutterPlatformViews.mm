@@ -46,12 +46,7 @@ CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
 
 class CGPathReceiver final : public flutter::DlPathReceiver {
  public:
-  void SetPathInfo(flutter::DlPathFillType type, bool is_convex) override {
-    // CGPaths do not have an inherit fill type, we would need to remember
-    // the fill type and employ it when we use the path.
-    // see https://github.com/flutter/flutter/issues/164826
-  }
-  void MoveTo(const flutter::DlPoint& p2) override {  //
+  void MoveTo(const flutter::DlPoint& p2, bool will_be_closed) override {  //
     CGPathMoveToPoint(path_ref_, nil, p2.x, p2.y);
   }
   void LineTo(const flutter::DlPoint& p2) override {
@@ -69,7 +64,7 @@ class CGPathReceiver final : public flutter::DlPathReceiver {
   }
   void Close() override { CGPathCloseSubpath(path_ref_); }
 
-  CGMutablePathRef TakePath() { return path_ref_; }
+  CGMutablePathRef TakePath() const { return path_ref_; }
 
  private:
   CGMutablePathRef path_ref_ = CGPathCreateMutable();
@@ -249,6 +244,10 @@ static BOOL _preparedOnce = NO;
   CGRect rectSoFar_;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame {
+  return [self initWithFrame:frame screenScale:[UIScreen mainScreen].scale];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
@@ -416,6 +415,9 @@ static BOOL _preparedOnce = NO;
 
   CGPathReceiver receiver;
 
+  // TODO(flar): https://github.com/flutter/flutter/issues/164826
+  // CGPaths do not have an inherit fill type, we would need to remember
+  // the fill type and employ it when we use the path.
   dlPath.Dispatch(receiver);
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
@@ -463,11 +465,12 @@ static BOOL _preparedOnce = NO;
   return self;
 }
 
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return [[FlutterClippingMaskView alloc] initWithFrame:frame screenScale:screenScale];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame
+                                              screenScale:UIScreen.mainScreen.scale];
   }
   FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;

@@ -25,8 +25,10 @@ static void StartupAndShutdownShell(benchmark::State& state,
   {
     benchmarking::ScopedPauseTiming pause(state, !measure_startup);
     Settings settings = {};
-    settings.task_observer_add = [](intptr_t, const fml::closure&) {};
-    settings.task_observer_remove = [](intptr_t) {};
+    settings.task_observer_add = [](intptr_t, const fml::closure&) {
+      return fml::TaskQueueId::Invalid();
+    };
+    settings.task_observer_remove = [](fml::TaskQueueId, intptr_t) {};
 
     if (DartVM::IsRunningPrecompiledCode()) {
       aot_symbols = testing::LoadELFSymbolFromFixturesIfNeccessary(

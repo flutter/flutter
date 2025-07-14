@@ -1,0 +1,23 @@
+name: hook_user_defines
+description: 'Project for testing user-defines.'
+version: 0.0.1
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+hooks:
+  user_defines:
+    hook_user_defines: # package name
+      magic_value: 1000
+
+dependencies:
+  hooks: any
+  logging: any
+  native_toolchain_c: any
+
+dev_dependencies:
+  test: any
+
+# PUBSPEC CHECKSUM: meinbq

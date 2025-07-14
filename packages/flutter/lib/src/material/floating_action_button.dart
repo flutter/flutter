@@ -20,7 +20,6 @@ import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 import 'tooltip.dart';
 
 class _DefaultHeroTag {
@@ -115,8 +114,9 @@ class FloatingActionButton extends StatelessWidget {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
-       _floatingActionButtonType =
-           mini ? _FloatingActionButtonType.small : _FloatingActionButtonType.regular,
+       _floatingActionButtonType = mini
+           ? _FloatingActionButtonType.small
+           : _FloatingActionButtonType.regular,
        _extendedLabel = null,
        extendedIconLabelSpacing = null,
        extendedPadding = null,
@@ -489,10 +489,9 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
-    final FloatingActionButtonThemeData defaults =
-        theme.useMaterial3
-            ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
-            : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
+    final FloatingActionButtonThemeData defaults = theme.useMaterial3
+        ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
+        : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
 
     final Color foregroundColor =
         this.foregroundColor ??
@@ -528,15 +527,20 @@ class FloatingActionButton extends StatelessWidget {
     final bool enableFeedback =
         this.enableFeedback ?? floatingActionButtonTheme.enableFeedback ?? defaults.enableFeedback!;
     final double iconSize = floatingActionButtonTheme.iconSize ?? defaults.iconSize!;
-    final TextStyle extendedTextStyle = (this.extendedTextStyle ??
-            floatingActionButtonTheme.extendedTextStyle ??
-            defaults.extendedTextStyle!)
-        .copyWith(color: foregroundColor);
+    final TextStyle extendedTextStyle =
+        (this.extendedTextStyle ??
+                floatingActionButtonTheme.extendedTextStyle ??
+                defaults.extendedTextStyle!)
+            .copyWith(color: foregroundColor);
     final ShapeBorder shape = this.shape ?? floatingActionButtonTheme.shape ?? defaults.shape!;
 
     BoxConstraints sizeConstraints;
-    Widget? resolvedChild =
-        child != null ? IconTheme.merge(data: IconThemeData(size: iconSize), child: child!) : child;
+    Widget? resolvedChild = child != null
+        ? IconTheme.merge(
+            data: IconThemeData(size: iconSize),
+            child: child!,
+          )
+        : child;
     switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;

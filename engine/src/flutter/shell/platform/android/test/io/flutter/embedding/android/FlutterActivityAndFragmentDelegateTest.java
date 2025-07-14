@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,8 +30,10 @@ import android.view.View;
 import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.Host;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -67,7 +70,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -75,9 +77,6 @@ public class FlutterActivityAndFragmentDelegateTest {
   private FlutterActivityAndFragmentDelegate.Host mockHost;
   private FlutterActivityAndFragmentDelegate.Host mockHost2;
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Before
   public void setup() {
     FlutterInjector.reset();
@@ -88,7 +87,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Create a mocked Host, which is required by the delegate being tested.
     mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost.getContext()).thenReturn(ctx);
-    when(mockHost.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
     when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
     when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
@@ -106,7 +104,6 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     mockHost2 = mock(FlutterActivityAndFragmentDelegate.Host.class);
     when(mockHost2.getContext()).thenReturn(ctx);
-    when(mockHost2.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
     when(mockHost2.getLifecycle()).thenReturn(mock(Lifecycle.class));
     when(mockHost2.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
     when(mockHost2.getDartEntrypointFunctionName()).thenReturn("main");
@@ -128,79 +125,90 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // We're testing lifecycle behaviors, which require/expect that certain methods have already
-    // been executed by the time they run. Therefore, we run those expected methods first.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
+            // We're testing lifecycle behaviors, which require/expect that certain methods have
+            // already
+            // been executed by the time they run. Therefore, we run those expected methods first.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
 
-    // --- Execute the behavior under test ---
-    // By the time an Activity/Fragment is started, we don't expect any lifecycle messages
-    // to have been sent to Flutter.
-    delegate.onStart();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // --- Execute the behavior under test ---
+            // By the time an Activity/Fragment is started, we don't expect any lifecycle messages
+            // to have been sent to Flutter.
+            delegate.onStart();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When the Activity/Fragment is resumed, a resumed message should have been sent to Flutter.
-    delegate.onResume();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // When the Activity/Fragment is resumed, a resumed message should have been sent to
+            // Flutter.
+            delegate.onResume();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When the app loses focus because something else has it (e.g. notification
-    // windowshade or app switcher), it should go to inactive.
-    delegate.onWindowFocusChanged(false);
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // When the app loses focus because something else has it (e.g. notification
+            // windowshade or app switcher), it should go to inactive.
+            delegate.onWindowFocusChanged(false);
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When the app regains focus, it should go to resumed again.
-    delegate.onWindowFocusChanged(true);
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // When the app regains focus, it should go to resumed again.
+            delegate.onWindowFocusChanged(true);
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When the Activity/Fragment is paused, an inactive message should have been sent to Flutter.
-    delegate.onPause();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // When the Activity/Fragment is paused, an inactive message should have been sent to
+            // Flutter.
+            delegate.onPause();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When the Activity/Fragment is stopped, a paused message should have been sent to Flutter.
-    // Notice that Flutter uses the term "paused" in a different way, and at a different time
-    // than the Android OS.
-    delegate.onStop();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            // When the Activity/Fragment is stopped, a paused message should have been sent to
+            // Flutter.
+            // Notice that Flutter uses the term "paused" in a different way, and at a different
+            // time
+            // than the Android OS.
+            delegate.onStop();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
-    // When activity detaches, a detached message should have been sent to Flutter.
-    delegate.onDetach();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsDetached();
+            // When activity detaches, a detached message should have been sent to Flutter.
+            delegate.onDetach();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsDetached();
+          });
+    }
   }
 
   @Test
@@ -208,27 +216,34 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    when(mockHost.shouldDispatchAppLifecycleState()).thenReturn(false);
+            when(mockHost.shouldDispatchAppLifecycleState()).thenReturn(false);
 
-    // We're testing lifecycle behaviors, which require/expect that certain methods have already
-    // been executed by the time they run. Therefore, we run those expected methods first.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onWindowFocusChanged(false);
-    delegate.onWindowFocusChanged(true);
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDetach();
+            // We're testing lifecycle behaviors, which require/expect that certain methods have
+            // already
+            // been executed by the time they run. Therefore, we run those expected methods first.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onWindowFocusChanged(false);
+            delegate.onWindowFocusChanged(true);
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDetach();
 
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
+            verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
+          });
+    }
   }
 
   @Test
@@ -293,12 +308,19 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // The FlutterEngine existence is verified in onAttach()
-    delegate.onAttach(ctx);
-
-    // Expect IllegalStateException.
+            // --- Execute the behavior under test ---
+            // The FlutterEngine existence is verified in onAttach()
+            delegate.onAttach(ctx);
+          });
+    } catch (IllegalStateException e) {
+      // Expect IllegalStateException.
+      throw e;
+    }
   }
 
   // Bug: b/271100292
@@ -409,13 +431,19 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // The FlutterEngine is created in onAttach().
-    delegate.onAttach(ctx);
+            // --- Execute the behavior under test ---
+            // The FlutterEngine is created in onAttach().
+            delegate.onAttach(ctx);
 
-    // Verify that the host was asked to configure our FlutterEngine.
-    verify(mockHost, times(1)).configureFlutterEngine(mockFlutterEngine);
+            // Verify that the host was asked to configure our FlutterEngine.
+            verify(mockHost, times(1)).configureFlutterEngine(mockFlutterEngine);
+          });
+    }
   }
 
   @Test
@@ -432,36 +460,40 @@ public class FlutterActivityAndFragmentDelegateTest {
     verify(mockHost, times(1)).onFlutterSurfaceViewCreated(isNotNull());
   }
 
-  @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
   @Test
   public void itGivesHostAnOpportunityToConfigureFlutterTextureView() {
     // ---- Test setup ----
     Host customMockHost = mock(Host.class);
     when(customMockHost.getContext()).thenReturn(ctx);
-    when(customMockHost.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
-    when(customMockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
-    when(customMockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
-    when(customMockHost.getDartEntrypointFunctionName()).thenReturn("main");
-    when(customMockHost.getAppBundlePath()).thenReturn("/fake/path");
-    when(customMockHost.getInitialRoute()).thenReturn("/");
-    when(customMockHost.getRenderMode()).thenReturn(RenderMode.texture);
-    when(customMockHost.getTransparencyMode()).thenReturn(TransparencyMode.transparent);
-    when(customMockHost.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
-    when(customMockHost.shouldAttachEngineToActivity()).thenReturn(true);
-    when(customMockHost.shouldDestroyEngineWithHost()).thenReturn(true);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(customMockHost.getActivity()).thenReturn(activity);
+            when(customMockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
+            when(customMockHost.getFlutterShellArgs())
+                .thenReturn(new FlutterShellArgs(new String[] {}));
+            when(customMockHost.getDartEntrypointFunctionName()).thenReturn("main");
+            when(customMockHost.getAppBundlePath()).thenReturn("/fake/path");
+            when(customMockHost.getInitialRoute()).thenReturn("/");
+            when(customMockHost.getRenderMode()).thenReturn(RenderMode.texture);
+            when(customMockHost.getTransparencyMode()).thenReturn(TransparencyMode.transparent);
+            when(customMockHost.provideFlutterEngine(any(Context.class)))
+                .thenReturn(mockFlutterEngine);
+            when(customMockHost.shouldAttachEngineToActivity()).thenReturn(true);
+            when(customMockHost.shouldDestroyEngineWithHost()).thenReturn(true);
 
-    // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate =
-        new FlutterActivityAndFragmentDelegate(customMockHost);
+            // Create the real object that we're testing.
+            FlutterActivityAndFragmentDelegate delegate =
+                new FlutterActivityAndFragmentDelegate(customMockHost);
 
-    // --- Execute the behavior under test ---
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, false);
+            // --- Execute the behavior under test ---
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, false);
 
-    // Verify that the host was asked to configure a FlutterTextureView.
-    verify(customMockHost, times(1)).onFlutterTextureViewCreated(isNotNull());
+            // Verify that the host was asked to configure a FlutterTextureView.
+            verify(customMockHost, times(1)).onFlutterTextureViewCreated(isNotNull());
+          });
+    }
   }
 
   @Test
@@ -469,14 +501,20 @@ public class FlutterActivityAndFragmentDelegateTest {
     // ---- Test setup ----
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // The FlutterEngine is created in onAttach().
-    delegate.onAttach(ctx);
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // The FlutterEngine is created in onAttach().
+            delegate.onAttach(ctx);
+            delegate.onDetach();
 
-    // Verify that the host was asked to configure our FlutterEngine.
-    verify(mockHost, times(1)).cleanUpFlutterEngine(mockFlutterEngine);
+            // Verify that the host was asked to configure our FlutterEngine.
+            verify(mockHost, times(1)).cleanUpFlutterEngine(mockFlutterEngine);
+          });
+    }
   }
 
   @Test
@@ -610,20 +648,26 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // Flutter is attached to the surrounding Activity in onAttach.
-    delegate.onAttach(ctx);
+            // --- Execute the behavior under test ---
+            // Flutter is attached to the surrounding Activity in onAttach.
+            delegate.onAttach(ctx);
 
-    // Verify that the ActivityControlSurface was told to attach to an Activity.
-    verify(mockFlutterEngine.getActivityControlSurface(), times(1))
-        .attachToActivity(any(ExclusiveAppComponent.class), any(Lifecycle.class));
+            // Verify that the ActivityControlSurface was told to attach to an Activity.
+            verify(mockFlutterEngine.getActivityControlSurface(), times(1))
+                .attachToActivity(any(ExclusiveAppComponent.class), any(Lifecycle.class));
 
-    // Flutter is detached from the surrounding Activity in onDetach.
-    delegate.onDetach();
+            // Flutter is detached from the surrounding Activity in onDetach.
+            delegate.onDetach();
 
-    // Verify that the ActivityControlSurface was told to detach from the Activity.
-    verify(mockFlutterEngine.getActivityControlSurface(), times(1)).detachFromActivity();
+            // Verify that the ActivityControlSurface was told to detach from the Activity.
+            verify(mockFlutterEngine.getActivityControlSurface(), times(1)).detachFromActivity();
+          });
+    }
   }
 
   // "Attaching" to the surrounding Activity refers to Flutter being able to control
@@ -1057,7 +1101,94 @@ public class FlutterActivityAndFragmentDelegateTest {
   @SuppressWarnings("deprecation")
   // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
   // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
-  public void itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemory() {
+  @Config(minSdk = Build.API_LEVELS.API_26)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryAboveApi25() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Test assumes no frames have been displayed.
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    // Emulate the host and call the method that we expect to be forwarded.
+    // This is below the warning threshold, so a warning shoud not be sent.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    // If the first frame has not ben displayed, the warning should not be sent even if this is
+    // above the threshold.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    verify(mockHost, times(0)).onFlutterUiDisplayed();
+
+    delegate.onCreateView(null, null, null, 0, false);
+    final FlutterRenderer renderer = mockFlutterEngine.getRenderer();
+    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    // 1 times: once for engine attachment
+    verify(renderer, times(1)).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    // First frame is shown show nw the warning should be sent.
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+
+    verify(mockHost, times(1)).onFlutterUiDisplayed();
+
+    // As long as the memory is below the warning threshold, the warning should be not
+    // be sent.
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(0)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(0)).sendMemoryPressureWarning();
+
+    // These are above (or equal) the threadshold, so each should send a warning (order does not
+    // matter).
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_BACKGROUND);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_COMPLETE);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_MODERATE);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+    clearInvocations(mockFlutterEngine.getDartExecutor());
+    clearInvocations(mockFlutterEngine.getSystemChannel());
+    delegate.onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+    verify(mockFlutterEngine.getDartExecutor(), times(1)).notifyLowMemoryWarning();
+    verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+  }
+
+  @Test
+  @SuppressWarnings("deprecation")
+  // TRIM_MEMORY_COMPLETE, TRIM_MEMORY_MODERATE, TRIM_MEMORY_RUNNING_LOW,
+  // TRIM_MEMORY_RUNNING_MODERATE, TRIM_MEMORY_RUNNING_CRITICAL
+  @Config(minSdk = Build.API_LEVELS.FLUTTER_MIN, maxSdk = Build.API_LEVELS.API_25)
+  public void
+      itNotifiesDartExecutorAndSendsMessageOverSystemChannelWhenToldToTrimMemoryBelowApi26() {
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
@@ -1116,20 +1247,26 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // --- Verify that the cached engine was destroyed ---
-    verify(mockFlutterEngine, times(1)).destroy();
+            // --- Verify that the cached engine was destroyed ---
+            verify(mockFlutterEngine, times(1)).destroy();
+          });
+    }
   }
 
   @Test
@@ -1140,20 +1277,26 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // --- Verify that the cached engine was destroyed ---
-    verify(mockFlutterEngine, never()).destroy();
+            // --- Verify that the cached engine was destroyed ---
+            verify(mockFlutterEngine, never()).destroy();
+          });
+    }
   }
 
   @Test
@@ -1171,21 +1314,27 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // --- Verify that the cached engine was destroyed ---
-    verify(cachedEngine, times(1)).destroy();
-    assertNull(FlutterEngineCache.getInstance().get("my_flutter_engine"));
+            // --- Verify that the cached engine was destroyed ---
+            verify(cachedEngine, times(1)).destroy();
+            assertNull(FlutterEngineCache.getInstance().get("my_flutter_engine"));
+          });
+    }
   }
 
   @Test
@@ -1203,20 +1352,26 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // --- Verify that the cached engine was NOT destroyed ---
-    verify(cachedEngine, never()).destroy();
+            // --- Verify that the cached engine was NOT destroyed ---
+            verify(cachedEngine, never()).destroy();
+          });
+    }
   }
 
   @Test
@@ -1387,55 +1542,75 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the real objects that we're testing.
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
-    FlutterActivityAndFragmentDelegate delegate2 =
-        new FlutterActivityAndFragmentDelegate(mockHost2);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            when(mockHost.getActivity()).thenReturn(activity);
 
-    // This test is written to recreate the following scenario:
-    // 1. We have a FlutterFragment_A attached to a singleton cached engine.
-    // 2. An intent arrives that spawns FlutterFragment_B.
-    // 3. FlutterFragment_B starts and steals the engine from FlutterFragment_A while attaching.
-    //    Via a call to FlutterActivityAndFragmentDelegate.detachFromFlutterEngine().
-    // 4. FlutterFragment_A is forcibly detached from the engine.
-    // 5. FlutterFragment_B is attached to the engine.
-    // 6. FlutterFragment_A is detached from the engine.
-    // Note that the second detach for FlutterFragment_A is done unconditionally when the Fragment
-    // is being
-    // torn down.
+            FlutterActivityAndFragmentDelegate delegate2 =
+                new FlutterActivityAndFragmentDelegate(mockHost2);
+            try (ActivityScenario<Activity> scenario2 = ActivityScenario.launch(Activity.class)) {
+              scenario2.onActivity(
+                  activity2 -> {
+                    when(mockHost2.getActivity()).thenReturn(activity2);
 
-    // At this point the engine's life cycle channel receives a message (triggered by
-    // FlutterFragment_A's second detach)
-    // that indicates the app is detached. This breaks FlutterFragment_B.
+                    // This test is written to recreate the following scenario:
+                    // 1. We have a FlutterFragment_A attached to a singleton cached engine.
+                    // 2. An intent arrives that spawns FlutterFragment_B.
+                    // 3. FlutterFragment_B starts and steals the engine from FlutterFragment_A
+                    // while attaching.
+                    //    Via a call to
+                    // FlutterActivityAndFragmentDelegate.detachFromFlutterEngine().
+                    // 4. FlutterFragment_A is forcibly detached from the engine.
+                    // 5. FlutterFragment_B is attached to the engine.
+                    // 6. FlutterFragment_A is detached from the engine.
+                    // Note that the second detach for FlutterFragment_A is done unconditionally
+                    // when the Fragment
+                    // is being
+                    // torn down.
 
-    // Below is a sequence of calls that mimicks the calls that the above scenario would trigger
-    // without
-    // relying on an intent to trigger the behaviour.
+                    // At this point the engine's life cycle channel receives a message (triggered
+                    // by
+                    // FlutterFragment_A's second detach)
+                    // that indicates the app is detached. This breaks FlutterFragment_B.
 
-    // FlutterFragment_A is attached to the engine.
-    delegate.onAttach(ctx);
+                    // Below is a sequence of calls that mimicks the calls that the above scenario
+                    // would trigger
+                    // without
+                    // relying on an intent to trigger the behaviour.
 
-    // NOTE: The following two calls happen in a slightly different order in reality. That is, via,
-    // a call to host.detachFromFlutterEngine, delegate2.onAttach ends up invoking
-    // delegate.onDetach.
-    // To keep this regression test simple, we call them directly.
+                    // FlutterFragment_A is attached to the engine.
+                    delegate.onAttach(ctx);
 
-    // Detach FlutterFragment_A.
-    delegate.onDetach();
+                    // NOTE: The following two calls happen in a slightly different order in
+                    // reality. That is, via,
+                    // a call to host.detachFromFlutterEngine, delegate2.onAttach ends up invoking
+                    // delegate.onDetach.
+                    // To keep this regression test simple, we call them directly.
 
-    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+                    // Detach FlutterFragment_A.
+                    delegate.onDetach();
 
-    // Attaches to the engine FlutterFragment_B.
-    delegate2.onAttach(ctx);
-    delegate2.onResume();
+                    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
 
-    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+                    // Attaches to the engine FlutterFragment_B.
+                    delegate2.onAttach(ctx);
+                    delegate2.onResume();
 
-    // A second Detach of FlutterFragment_A happens when the Fragment is detached.
-    delegate.onDetach();
+                    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsResumed();
+                    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
 
-    // IMPORTANT: The bug we fixed would have resulted in the engine thinking the app
-    // is detached twice instead of once.
-    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+                    // A second Detach of FlutterFragment_A happens when the Fragment is detached.
+                    delegate.onDetach();
+
+                    // IMPORTANT: The bug we fixed would have resulted in the engine thinking the
+                    // app
+                    // is detached twice instead of once.
+                    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsDetached();
+                  });
+            }
+          });
+    }
   }
 
   /**

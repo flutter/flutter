@@ -271,7 +271,7 @@ void main() {
     testWithoutContext(
       'CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts',
       () {
-        final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+        final webArtifacts = CachedLocalWebSdkArtifacts(
           parent: artifacts,
           webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
           fileSystem: fileSystem,
@@ -552,26 +552,39 @@ void main() {
     );
 
     testWithoutContext('uses prebuilt dart sdk for web platform', () {
-      final String failureMessage =
+      final webArtifacts = CachedLocalWebSdkArtifacts(
+        parent: CachedArtifacts(
+          fileSystem: fileSystem,
+          cache: cache,
+          platform: platform,
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+        ),
+        webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+
+      final failureMessage =
           'Unable to find a prebuilt dart sdk at:'
           ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
 
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
           platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
-        () => artifacts.getArtifactPath(
+        () => webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
           platform: TargetPlatform.web_javascript,
         ),
@@ -587,7 +600,7 @@ void main() {
           .createSync(recursive: true);
 
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript,
         ),
@@ -602,21 +615,21 @@ void main() {
         ),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
           platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk'),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
           platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dart'),
       );
       expect(
-        artifacts.getArtifactPath(
+        webArtifacts.getArtifactPath(
           Artifact.engineDartAotRuntime,
           platform: TargetPlatform.web_javascript,
         ),
@@ -628,6 +641,37 @@ void main() {
           'bin',
           'dartaotruntime',
         ),
+      );
+    });
+
+    testWithoutContext('uses local dart sdk for web platform wrapping a local engine', () {
+      final failureMessage =
+          'Unable to find a built dart sdk at:'
+          ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
+          ' or a prebuilt dart sdk at:'
+          ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
+
+      expect(
+        () => artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        throwsToolExit(message: failureMessage),
+      );
+
+      fileSystem
+          .directory('out')
+          .childDirectory('host_debug_unopt')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          .createSync(recursive: true);
+
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.engineDartSdkPath,
+          platform: TargetPlatform.web_javascript,
+        ),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
     });
 

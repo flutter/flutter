@@ -12,13 +12,13 @@ import 'theme.dart';
 
 /// Defines a theme for [TabBar] widgets.
 ///
-/// Descendant widgets obtain the current [TabBarTheme] object using
-/// `TabBarTheme.of(context)`.
+/// Descendant widgets obtain the current [TabBarThemeData] object using
+/// [TabBarTheme.of].
 ///
 /// See also:
 ///
-///  * [TabBarThemeData], which describes the actual configuration of a switch
-///    theme.
+///  * [TabBarThemeData], which describes the actual configuration of a tab
+///    bar theme.
 @immutable
 class TabBarTheme extends InheritedTheme with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
@@ -266,7 +266,7 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     );
   }
 
-  /// Returns the closest [TabBarTheme] instance given the build context.
+  /// Returns the closest [TabBarThemeData] instance given the build context.
   static TabBarThemeData of(BuildContext context) {
     final TabBarTheme? tabBarTheme = context.dependOnInheritedWidgetOfExactType<TabBarTheme>();
     return tabBarTheme?.data ?? Theme.of(context).tabBarTheme;
@@ -319,8 +319,8 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
 /// Defines default property values for descendant [TabBar] widgets.
 ///
 /// Descendant widgets obtain the current [TabBarThemeData] object using
-/// `TabBarTheme.of(context).data`. Instances of [TabBarThemeData] can be
-/// customized with [TabBarThemeData.copyWith].
+/// [TabBarTheme.of]. Instances of [TabBarThemeData] can be customized
+/// with [TabBarThemeData.copyWith].
 ///
 /// Typically a [TabBarThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.tabBarTheme].

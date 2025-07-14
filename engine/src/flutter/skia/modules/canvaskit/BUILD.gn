@@ -47,6 +47,9 @@ canvaskit_wasm_lib("canvaskit") {
       "../../modules/skunicode:skunicode",
     ]
   }
+  if (skia_canvaskit_enable_bidi) {
+    deps += [ "../../modules/skunicode:skunicode" ]
+  }
 
   sources = [
     "$_skia_root/modules/canvaskit/WasmCommon.h",
@@ -56,6 +59,13 @@ canvaskit_wasm_lib("canvaskit") {
     sources += [
       "$_skia_root/modules/canvaskit/paragraph_bindings.cpp",
       "$_skia_root/modules/canvaskit/paragraph_bindings_gen.cpp",
+    ]
+  }
+
+  if (skia_canvaskit_enable_bidi) {
+    sources += [
+      "$_skia_root/modules/canvaskit/bidi_bindings.cpp",
+      "$_skia_root/modules/canvaskit/bidi_bindings_gen.cpp",
     ]
   }
 
@@ -121,10 +131,19 @@ canvaskit_wasm_lib("canvaskit") {
     rebase_path("$_skia_root/modules/canvaskit/interface.js"),
   ]
 
-  ldflags += [
-    "--pre-js",
-    rebase_path("$_skia_root/modules/canvaskit/paragraph.js"),
-  ]
+  if (skia_canvaskit_enable_paragraph) {
+    ldflags += [
+      "--pre-js",
+      rebase_path("$_skia_root/modules/canvaskit/paragraph.js"),
+    ]
+  }
+
+  if (skia_canvaskit_enable_bidi) {
+    ldflags += [
+      "--pre-js",
+      rebase_path("$_skia_root/modules/canvaskit/bidi.js"),
+    ]
+  }
 
   if (skia_canvaskit_enable_pathops) {
     ldflags += [
@@ -194,6 +213,9 @@ canvaskit_wasm_lib("canvaskit") {
   ]
   if (skia_canvaskit_enable_paragraph) {
     defines += [ "CK_INCLUDE_PARAGRAPH" ]
+  }
+  if (skia_canvaskit_enable_bidi) {
+    defines += [ "CK_ENABLE_BIDI" ]
   }
   if (skia_canvaskit_enable_skp_serialization) {
     defines += [ "CK_SERIALIZE_SKP" ]

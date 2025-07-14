@@ -15,6 +15,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -704,18 +705,17 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(
       valueListenable: _extent._currentSize,
-      builder:
-          (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-              final Widget sheet = FractionallySizedBox(
-                heightFactor: currentSize,
-                alignment: Alignment.bottomCenter,
-                child: child,
-              );
-              return widget.expand ? SizedBox.expand(child: sheet) : sheet;
-            },
-          ),
+      builder: (BuildContext context, double currentSize, Widget? child) => LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+          final Widget sheet = FractionallySizedBox(
+            heightFactor: currentSize,
+            alignment: Alignment.bottomCenter,
+            child: child,
+          );
+          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
+        },
+      ),
       child: widget.builder(context, _scrollController),
     );
   }
@@ -769,14 +769,13 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   String _snapSizeErrorMessage(int invalidIndex) {
-    final List<String> snapSizesWithIndicator =
-        widget.snapSizes!.asMap().keys.map((int index) {
-          final String snapSizeString = widget.snapSizes![index].toString();
-          if (index == invalidIndex) {
-            return '>>> $snapSizeString <<<';
-          }
-          return snapSizeString;
-        }).toList();
+    final List<String> snapSizesWithIndicator = widget.snapSizes!.asMap().keys.map((int index) {
+      final String snapSizeString = widget.snapSizes![index].toString();
+      if (index == invalidIndex) {
+        return '>>> $snapSizeString <<<';
+      }
+      return snapSizeString;
+    }).toList();
     return "Invalid snapSize '${widget.snapSizes![invalidIndex]}' at index $invalidIndex of:\n"
         '  $snapSizesWithIndicator';
   }
@@ -909,14 +908,18 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     }
   }
 
-  bool get _isAtSnapSize {
-    return extent.snapSizes.any((double snapSize) {
+  // Checks if the sheet's current size is close to a snap size, returning the
+  // snap size if so; returns null otherwise.
+  double? _getCurrentSnapSize() {
+    return extent.snapSizes.firstWhereOrNull((double snapSize) {
       return (extent.currentSize - snapSize).abs() <=
           extent.pixelsToSize(physics.toleranceFor(this).distance);
     });
   }
 
-  bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
+  bool _isAtSnapSize() => _getCurrentSnapSize() != null;
+
+  bool _shouldSnap() => extent.snap && extent.hasDragged && !_isAtSnapSize();
 
   @override
   void dispose() {
@@ -929,7 +932,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void goBallistic(double velocity) {
-    if ((velocity == 0.0 && !_shouldSnap) ||
+    if ((velocity == 0.0 && !_shouldSnap()) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
@@ -981,6 +984,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
+        // Update the extent value after the snap animation completes to
+        // avoid rounding errors that could prevent the sheet from closing when
+        // it reaches minSize.
+        final double? snapSize = _getCurrentSnapSize();
+        if (snapSize != null) {
+          extent.updateSize(snapSize, context.notificationContext!);
+        }
         super.goBallistic(0);
       }
     }
@@ -1035,8 +1045,8 @@ class DraggableScrollableActuator extends StatefulWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier? notifier =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final _InheritedResetNotifier? notifier = context
+        .dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     return notifier?._sendReset() ?? false;
   }
 
@@ -1098,8 +1108,8 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget? widget =
-        context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
+    final InheritedWidget? widget = context
+        .dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }

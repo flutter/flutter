@@ -701,10 +701,9 @@ class FlutterErrorDetails with Diagnosticable {
         // If not: Error is in user code (user violated assertion in framework).
         // If so:  Error is in Framework. We either need an assertion higher up
         //         in the stack, or we've violated our own assertions.
-        final List<StackFrame> stackFrames =
-            StackFrame.fromStackTrace(
-              FlutterError.demangleStackTrace(stack!),
-            ).skipWhile((StackFrame frame) => frame.packageScheme == 'dart').toList();
+        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(
+          FlutterError.demangleStackTrace(stack!),
+        ).skipWhile((StackFrame frame) => frame.packageScheme == 'dart').toList();
         final bool ourFault =
             stackFrames.length >= 2 &&
             stackFrames[0].package == 'flutter' &&
@@ -717,7 +716,7 @@ class FlutterErrorDetails with Diagnosticable {
               'provide substantially more information in this error message to help you determine '
               'and fix the underlying cause.\n'
               'In either case, please report this assertion by filing a bug on GitHub:\n'
-              '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           );
         }
@@ -863,7 +862,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ]),
     );
@@ -900,7 +899,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
             '\nThis error should still help you solve your problem, '
             'however please also report this malformed error in the '
             'framework by filing a bug on GitHub:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         );
         throw FlutterError.fromParts(message);

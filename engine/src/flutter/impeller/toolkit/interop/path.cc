@@ -14,4 +14,14 @@ const SkPath& Path::GetPath() const {
   return path_;
 }
 
+ImpellerRect Path::GetBounds() const {
+  const auto bounds = path_.getBounds();
+  return ImpellerRect{
+      .x = bounds.x(),
+      .y = bounds.y(),
+      .width = bounds.width(),
+      .height = bounds.height(),
+  };
+}
+
 }  // namespace impeller::interop

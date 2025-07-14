@@ -19,11 +19,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    withImplicitView: true,
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
   group('${ui.SceneBuilder}', () {
     const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
@@ -645,6 +641,18 @@ Future<void> testMain() async {
         region: const ui.Rect.fromLTWH(0, 0, 10 * 50, 10 * 50),
       );
     });
+
+    test('push pop balance enfocement is consistent', () async {
+      final sceneBuilder = ui.SceneBuilder();
+      // Normally pop() must follow a previously non-popped layer push. However,
+      // the Flutter engine chooses to be lenient and allows calling pop() with
+      // no layers.
+      sceneBuilder.pop();
+
+      // Just checking that a scene can be built without crashing after a stray
+      // pop() from above.
+      sceneBuilder.build();
+    });
   });
 }
 
@@ -670,8 +678,9 @@ ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, final double rectSize, 
     for (int i = 0; i < count; i++) {
       for (int j = 0; j < count; j++) {
         final bool rectOdd = (i + j) & 1 == 0;
-        final ui.Color fg =
-            (i < count / 2) ? ((j < count / 2) ? green : blue) : ((j < count / 2) ? yellow : red);
+        final ui.Color fg = (i < count / 2)
+            ? ((j < count / 2) ? green : blue)
+            : ((j < count / 2) ? yellow : red);
         canvas.drawRect(
           ui.Rect.fromLTWH(i * rectSize, j * rectSize, rectSize, rectSize),
           ui.Paint()..color = rectOdd ? fg : white,

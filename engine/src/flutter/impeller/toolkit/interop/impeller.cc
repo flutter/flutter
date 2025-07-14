@@ -4,6 +4,8 @@
 
 #include "impeller/toolkit/interop/impeller.h"
 
+#include <algorithm>
+#include <iterator>
 #include <sstream>
 
 #include "flutter/fml/mapping.h"
@@ -17,7 +19,10 @@
 #include "impeller/toolkit/interop/context.h"
 #include "impeller/toolkit/interop/dl_builder.h"
 #include "impeller/toolkit/interop/formats.h"
+#include "impeller/toolkit/interop/fragment_program.h"
+#include "impeller/toolkit/interop/glyph_info.h"
 #include "impeller/toolkit/interop/image_filter.h"
+#include "impeller/toolkit/interop/line_metrics.h"
 #include "impeller/toolkit/interop/mask_filter.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
@@ -58,7 +63,10 @@ DEFINE_PEER_GETTER(ColorSource, ImpellerColorSource);
 DEFINE_PEER_GETTER(Context, ImpellerContext);
 DEFINE_PEER_GETTER(DisplayList, ImpellerDisplayList);
 DEFINE_PEER_GETTER(DisplayListBuilder, ImpellerDisplayListBuilder);
+DEFINE_PEER_GETTER(FragmentProgram, ImpellerFragmentProgram);
+DEFINE_PEER_GETTER(GlyphInfo, ImpellerGlyphInfo);
 DEFINE_PEER_GETTER(ImageFilter, ImpellerImageFilter);
+DEFINE_PEER_GETTER(LineMetrics, ImpellerLineMetrics);
 DEFINE_PEER_GETTER(MaskFilter, ImpellerMaskFilter);
 DEFINE_PEER_GETTER(Paint, ImpellerPaint);
 DEFINE_PEER_GETTER(Paragraph, ImpellerParagraph);
@@ -318,6 +326,11 @@ void ImpellerPathRetain(ImpellerPath path) {
 IMPELLER_EXTERN_C
 void ImpellerPathRelease(ImpellerPath path) {
   ObjectBase::SafeRelease(path);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerPathGetBounds(ImpellerPath path, ImpellerRect* out_bounds) {
+  *out_bounds = GetPeer(path)->GetBounds();
 }
 
 IMPELLER_EXTERN_C
@@ -941,6 +954,52 @@ ImpellerColorSource ImpellerColorSourceCreateImageNew(
       .Leak();
 }
 
+struct SamplersAndUniforms {
+  std::vector<std::shared_ptr<flutter::DlColorSource>> samplers;
+  std::shared_ptr<std::vector<uint8_t>> uniforms;
+};
+
+static SamplersAndUniforms ReadSamplersAndUniforms(ImpellerTexture* samplers,
+                                                   size_t samplers_count,
+                                                   const uint8_t* data,
+                                                   size_t data_bytes_length) {
+  SamplersAndUniforms result;
+  result.uniforms = std::make_shared<std::vector<uint8_t>>();
+  if (data_bytes_length > 0) {
+    std::copy(data, data + data_bytes_length,
+              std::back_inserter(*result.uniforms));
+  }
+  if (samplers_count > 0) {
+    result.samplers.reserve(samplers_count);
+    for (size_t i = 0; i < samplers_count; i++) {
+      result.samplers.emplace_back(flutter::DlColorSource::MakeImage(
+          DlImageImpeller::Make(GetPeer(samplers[i])->GetTexture()),  //
+          flutter::DlTileMode::kClamp,                                //
+          flutter::DlTileMode::kClamp                                 //
+          ));
+    }
+  }
+  return result;
+}
+
+IMPELLER_EXTERN_C ImpellerColorSource
+ImpellerColorSourceCreateFragmentProgramNew(
+    ImpellerContext context,
+    ImpellerFragmentProgram fragment_program,
+    ImpellerTexture* samplers,
+    size_t samplers_count,
+    const uint8_t* data,
+    size_t data_bytes_length) {
+  auto bindings = ReadSamplersAndUniforms(samplers, samplers_count, data,
+                                          data_bytes_length);
+  return ColorSource::MakeFragmentProgram(*GetPeer(context),             //
+                                          *GetPeer(fragment_program),    //
+                                          std::move(bindings.samplers),  //
+                                          std::move(bindings.uniforms)   //
+                                          )
+      .Leak();
+}
+
 IMPELLER_EXTERN_C
 void ImpellerColorFilterRetain(ImpellerColorFilter color_filter) {
   ObjectBase::SafeRetain(color_filter);
@@ -1023,7 +1082,24 @@ ImpellerImageFilter ImpellerImageFilterCreateMatrixNew(
 }
 
 IMPELLER_EXTERN_C
-ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
+ImpellerImageFilter ImpellerImageFilterCreateFragmentProgramNew(
+    ImpellerContext context,
+    ImpellerFragmentProgram fragment_program,
+    ImpellerTexture* samplers,
+    size_t samplers_count,
+    const uint8_t* data,
+    size_t data_bytes_length) {
+  auto bindings = ReadSamplersAndUniforms(samplers, samplers_count, data,
+                                          data_bytes_length);
+  return ImageFilter::MakeFragmentProgram(*GetPeer(context),             //
+                                          *GetPeer(fragment_program),    //
+                                          std::move(bindings.samplers),  //
+                                          std::move(bindings.uniforms)   //
+                                          )
+      .Leak();
+}
+
+IMPELLER_EXTERN_C ImpellerImageFilter ImpellerImageFilterCreateComposeNew(
     ImpellerImageFilter outer,
     ImpellerImageFilter inner) {
   return ImageFilter::MakeCompose(*GetPeer(outer), *GetPeer(inner)).Leak();
@@ -1132,6 +1208,13 @@ void ImpellerParagraphStyleSetTextDirection(
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetTextDecoration(
+    ImpellerParagraphStyle paragraph_style,
+    const ImpellerTextDecoration* decoration) {
+  GetPeer(paragraph_style)->SetTextDecoration(*decoration);
+}
+
+IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetMaxLines(ImpellerParagraphStyle paragraph_style,
                                        uint32_t max_lines) {
   GetPeer(paragraph_style)->SetMaxLines(max_lines);
@@ -1141,6 +1224,12 @@ IMPELLER_EXTERN_C
 void ImpellerParagraphStyleSetLocale(ImpellerParagraphStyle paragraph_style,
                                      const char* locale) {
   GetPeer(paragraph_style)->SetLocale(ReadString(locale));
+}
+
+IMPELLER_EXTERN_C
+void ImpellerParagraphStyleSetEllipsis(ImpellerParagraphStyle paragraph_style,
+                                       const char* ellipsis) {
+  GetPeer(paragraph_style)->SetEllipsis(ReadString(ellipsis));
 }
 
 IMPELLER_EXTERN_C
@@ -1273,6 +1362,13 @@ uint32_t ImpellerParagraphGetLineCount(ImpellerParagraph paragraph) {
 }
 
 IMPELLER_EXTERN_C
+void ImpellerParagraphGetWordBoundary(ImpellerParagraph paragraph,
+                                      size_t code_unit_index,
+                                      ImpellerRange* out_range) {
+  *out_range = GetPeer(paragraph)->GetWordBoundary(code_unit_index);
+}
+
+IMPELLER_EXTERN_C
 ImpellerTypographyContext ImpellerTypographyContextNew() {
   auto context = Create<TypographyContext>();
   if (!context->IsValid()) {
@@ -1307,6 +1403,204 @@ bool ImpellerTypographyContextRegisterFont(ImpellerTypographyContext context,
   );
   return GetPeer(context)->RegisterFont(std::move(wrapped_contents),
                                         family_name_alias);
+}
+
+IMPELLER_EXTERN_C
+ImpellerLineMetrics ImpellerParagraphGetLineMetrics(
+    ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetLineMetrics().GetC();
+}
+
+IMPELLER_EXTERN_C
+ImpellerGlyphInfo ImpellerParagraphCreateGlyphInfoAtCodeUnitIndexNew(
+    ImpellerParagraph paragraph,
+    size_t code_unit_index) {
+  return GetPeer(paragraph)
+      ->GetGlyphInfoAtCodeUnitIndex(code_unit_index)
+      .Leak();
+}
+
+IMPELLER_EXTERN_C
+ImpellerGlyphInfo ImpellerParagraphCreateGlyphInfoAtParagraphCoordinatesNew(
+    ImpellerParagraph paragraph,
+    double x,
+    double y) {
+  return GetPeer(paragraph)
+      ->GetClosestGlyphInfoAtParagraphCoordinates(x, y)
+      .Leak();
+}
+
+//------------------------------------------------------------------------------
+// Line Metrics
+//------------------------------------------------------------------------------
+
+IMPELLER_EXTERN_C
+void ImpellerLineMetricsRetain(ImpellerLineMetrics line_metrics) {
+  ObjectBase::SafeRetain(line_metrics);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerLineMetricsRelease(ImpellerLineMetrics line_metrics) {
+  ObjectBase::SafeRelease(line_metrics);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetUnscaledAscent(ImpellerLineMetrics metrics,
+                                            size_t line) {
+  return GetPeer(metrics)->GetUnscaledAscent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetAscent(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetAscent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetDescent(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetDescent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetBaseline(ImpellerLineMetrics metrics,
+                                      size_t line) {
+  return GetPeer(metrics)->GetBaseline(line);
+}
+
+IMPELLER_EXTERN_C
+bool ImpellerLineMetricsIsHardbreak(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->IsHardbreak(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetWidth(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetWidth(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetHeight(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetHeight(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetLeft(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetLeft(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitStartIndex(ImpellerLineMetrics metrics,
+                                                size_t line) {
+  return GetPeer(metrics)->GetCodeUnitStartIndex(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndex(ImpellerLineMetrics metrics,
+                                              size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndex(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace(
+    ImpellerLineMetrics metrics,
+    size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndexExcludingWhitespace(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndexIncludingNewline(
+    ImpellerLineMetrics metrics,
+    size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndexIncludingNewline(line);
+}
+
+//------------------------------------------------------------------------------
+// Glyph Info
+//------------------------------------------------------------------------------
+
+IMPELLER_EXTERN_C
+void ImpellerGlyphInfoRetain(ImpellerGlyphInfo glyph_info) {
+  ObjectBase::SafeRetain(glyph_info);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerGlyphInfoRelease(ImpellerGlyphInfo glyph_info) {
+  ObjectBase::SafeRelease(glyph_info);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetGraphemeClusterCodeUnitRangeBegin();
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetGraphemeClusterCodeUnitRangeEnd();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerGlyphInfoGetGraphemeClusterBounds(ImpellerGlyphInfo glyph_info,
+                                               ImpellerRect* out_bounds) {
+  *out_bounds = GetPeer(glyph_info)->GetGraphemeClusterBounds();
+}
+
+IMPELLER_EXTERN_C
+bool ImpellerGlyphInfoIsEllipsis(ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->IsEllipsis();
+}
+
+IMPELLER_EXTERN_C
+ImpellerTextDirection ImpellerGlyphInfoGetTextDirection(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetTextDirection();
+}
+
+//------------------------------------------------------------------------------
+// Fragment Program
+//------------------------------------------------------------------------------
+
+static std::shared_ptr<fml::Mapping> MakeCopyableMapping(
+    const ImpellerMapping* data,
+    void* user_data) {
+  if (data == nullptr) {
+    return nullptr;
+  }
+
+  // If the user has supplied a release callback, defer deallocation to them.
+  if (auto callback = data->on_release) {
+    return std::make_shared<fml::NonOwnedMapping>(
+        data->data,    //
+        data->length,  //
+        [user_data, callback](const uint8_t* data, size_t size) {
+          callback(user_data);
+        });
+  }
+
+  return std::make_shared<fml::MallocMapping>(
+      fml::MallocMapping::Copy(data->data, data->length));
+}
+
+IMPELLER_EXTERN_C
+ImpellerFragmentProgram ImpellerFragmentProgramNew(
+    const ImpellerMapping* data,
+    void* data_release_user_data) {
+  auto data_mapping = MakeCopyableMapping(data, data_release_user_data);
+  auto program = Create<FragmentProgram>(std::move(data_mapping));
+  if (!program->IsValid()) {
+    VALIDATION_LOG << "Could not create valid fragment program.";
+    return nullptr;
+  }
+  return program.Leak();
+}
+
+IMPELLER_EXTERN_C
+void ImpellerFragmentProgramRetain(ImpellerFragmentProgram fragment_program) {
+  ObjectBase::SafeRetain(fragment_program);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerFragmentProgramRelease(ImpellerFragmentProgram fragment_program) {
+  ObjectBase::SafeRelease(fragment_program);
 }
 
 }  // namespace impeller::interop

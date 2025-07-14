@@ -920,12 +920,11 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     r'(' // 2
     r' *Licenses for support code\n'
     r' *-------------------------\n+)'
-    r'(.+?)\n+' // 3
-    r'(BoringSSL uses the Chromium test infrastructure to run a continuous build,\n' // 4
-    r'trybots etc\. The scripts which manage this, and the script for generating build\n'
-    r'metadata, are under the Chromium license\. Distributing code linked against\n'
-    r'BoringSSL does not trigger this license\.)\n+'
-    r'(.+?)\n+$', // 5
+    r'\n'
+    r'Parts of the TLS test suite are under the Go license. This code is not included\n'
+    r'in BoringSSL \(i.e. libcrypto and libssl\) when compiled, however, so\n'
+    r'distributing code linked against BoringSSL does not trigger this license:\n'
+    r'(.+?)\n+$', // 3
     dotAll: true,
   );
 
@@ -934,7 +933,7 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     if (match == null) {
       throw 'Failed to match BoringSSL license pattern.';
     }
-    assert(match.groupCount == 5);
+    assert(match.groupCount == 3);
     return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
   }
 }
@@ -1213,14 +1212,13 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
 
   /// Searches the current directory for licenses of the specified type.
   License? _localLicenseWithType(LicenseType type) {
-    final List<License> licenses =
-        _licenses.expand((_RepositoryLicenseFile license) {
-          final License? result = license.licenseOfType(type);
-          if (result != null) {
-            return <License>[result];
-          }
-          return const <License>[];
-        }).toList();
+    final List<License> licenses = _licenses.expand((_RepositoryLicenseFile license) {
+      final License? result = license.licenseOfType(type);
+      if (result != null) {
+        return <License>[result];
+      }
+      return const <License>[];
+    }).toList();
     if (licenses.length > 1) {
       print('unexpectedly found multiple matching licenses in $name of type $type');
       return null;
@@ -1521,16 +1519,15 @@ class _RepositoryInjaJsonFile extends _RepositorySourceFile {
         throw '${io.fullName} has changed contents.';
       }
       final String license = match.group(3)!;
-      _internalLicenses =
-          match.groups(const <int>[2, 6, 8]).map<License>((String? copyright) {
-            assert(copyright!.contains('Copyright'));
-            return License.fromCopyrightAndLicense(
-              copyright!,
-              license,
-              LicenseType.mit,
-              origin: io.fullName,
-            );
-          }).toList();
+      _internalLicenses = match.groups(const <int>[2, 6, 8]).map<License>((String? copyright) {
+        assert(copyright!.contains('Copyright'));
+        return License.fromCopyrightAndLicense(
+          copyright!,
+          license,
+          LicenseType.mit,
+          origin: io.fullName,
+        );
+      }).toList();
       assert(
         !match
             .groups(const <int>[1, 4, 5, 7, 9, 10, 11])
@@ -2140,8 +2137,9 @@ Future<void> _collectLicensesForComponent(
   }
   progress.label = 'Dumping results...';
   progress.flush();
-  final List<String> output =
-      licenses.map((GroupedLicense license) => license.toStringDebug()).toList();
+  final List<String> output = licenses
+      .map((GroupedLicense license) => license.toStringDebug())
+      .toList();
   for (int index = 0; index < output.length; index += 1) {
     // The strings we look for here are strings which we do not expect to see in
     // any of the licenses we use. They either represent examples of misparsing
@@ -2200,17 +2198,16 @@ Future<void> _collectLicensesForComponent(
 // MAIN
 
 Future<void> main(List<String> arguments) async {
-  final ArgParser parser =
-      ArgParser()
-        ..addOption('src', help: 'The root of the engine source.')
-        ..addOption(
-          'out',
-          help: 'The directory where output is written. (Ignored if used with --release.)',
-        )
-        ..addOption('golden', help: 'The directory containing golden results.')
-        ..addFlag('quiet', help: 'If set, the diagnostic output is much less verbose.')
-        ..addFlag('verbose', help: 'If set, print additional information to help with development.')
-        ..addFlag('release', help: 'Print output in the format used for product releases.');
+  final ArgParser parser = ArgParser()
+    ..addOption('src', help: 'The root of the engine source.')
+    ..addOption(
+      'out',
+      help: 'The directory where output is written. (Ignored if used with --release.)',
+    )
+    ..addOption('golden', help: 'The directory containing golden results.')
+    ..addFlag('quiet', help: 'If set, the diagnostic output is much less verbose.')
+    ..addFlag('verbose', help: 'If set, print additional information to help with development.')
+    ..addFlag('release', help: 'Print output in the format used for product releases.');
 
   final ArgResults argResults = parser.parse(arguments);
   final bool quiet = argResults['quiet'] as bool;
@@ -2325,12 +2322,10 @@ Future<void> main(List<String> arguments) async {
         system.exit(1);
       }
       // write to disk the list of files we did _not_ cover, so it's easier to catch in diffs
-      final String excluded = (_RepositoryDirectory._excluded
-              .map((fs.IoNode node) => node.fullName)
-              .toSet()
-              .toList()
-            ..sort())
-          .join('\n');
+      final String excluded =
+          (_RepositoryDirectory._excluded.map((fs.IoNode node) => node.fullName).toSet().toList()
+                ..sort())
+              .join('\n');
       system.File(
         path.join(argResults['out'] as String, 'excluded_files'),
       ).writeAsStringSync('$excluded\n');

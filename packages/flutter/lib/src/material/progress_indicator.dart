@@ -479,20 +479,19 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
         widget.minHeight ?? indicatorTheme.linearMinHeight ?? defaults.linearMinHeight!;
     final BorderRadiusGeometry? borderRadius =
         widget.borderRadius ?? indicatorTheme.borderRadius ?? defaults.borderRadius;
-    final Color? stopIndicatorColor =
-        !year2023
-            ? widget.stopIndicatorColor ??
-                indicatorTheme.stopIndicatorColor ??
-                defaults.stopIndicatorColor
-            : null;
-    final double? stopIndicatorRadius =
-        !year2023
-            ? widget.stopIndicatorRadius ??
-                indicatorTheme.stopIndicatorRadius ??
-                defaults.stopIndicatorRadius
-            : null;
-    final double? trackGap =
-        !year2023 ? widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap : null;
+    final Color? stopIndicatorColor = !year2023
+        ? widget.stopIndicatorColor ??
+              indicatorTheme.stopIndicatorColor ??
+              defaults.stopIndicatorColor
+        : null;
+    final double? stopIndicatorRadius = !year2023
+        ? widget.stopIndicatorRadius ??
+              indicatorTheme.stopIndicatorRadius ??
+              defaults.stopIndicatorRadius
+        : null;
+    final double? trackGap = !year2023
+        ? widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap
+        : null;
 
     Widget result = ConstrainedBox(
       constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
@@ -550,17 +549,15 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     this.strokeCap,
     this.trackGap,
     this.year2023 = true,
-  }) : arcStart =
-           value != null
-               ? _startAngle
-               : _startAngle +
-                   tailValue * 3 / 2 * math.pi +
-                   rotationValue * math.pi * 2.0 +
-                   offsetValue * 0.5 * math.pi,
-       arcSweep =
-           value != null
-               ? clampDouble(value, 0.0, 1.0) * _sweep
-               : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
+  }) : arcStart = value != null
+           ? _startAngle
+           : _startAngle +
+                 tailValue * 3 / 2 * math.pi +
+                 rotationValue * math.pi * 2.0 +
+                 offsetValue * 0.5 * math.pi,
+       arcSweep = value != null
+           ? clampDouble(value, 0.0, 1.0) * _sweep
+           : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? trackColor;
   final Color valueColor;
@@ -585,11 +582,10 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint =
-        Paint()
-          ..color = valueColor
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke;
+    final Paint paint = Paint()
+      ..color = valueColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
 
     // Use the negative operator as intended to keep the exposed constant value
     // as users are already familiar with.
@@ -599,12 +595,11 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     final bool hasGap = trackGap != null && trackGap! > 0;
 
     if (trackColor != null) {
-      final Paint backgroundPaint =
-          Paint()
-            ..color = trackColor!
-            ..strokeWidth = strokeWidth
-            ..strokeCap = strokeCap ?? StrokeCap.round
-            ..style = PaintingStyle.stroke;
+      final Paint backgroundPaint = Paint()
+        ..color = trackColor!
+        ..strokeWidth = strokeWidth
+        ..strokeCap = strokeCap ?? StrokeCap.round
+        ..style = PaintingStyle.stroke;
       // If hasGap is true, draw the background arc with a gap.
       if (hasGap && value != null && value! > _epsilon) {
         final double arcRadius = arcActualSize.shortestSide / 2;
@@ -744,7 +739,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.value,
     super.backgroundColor,
     super.valueColor,
-    this.strokeWidth = 4.0,
+    this.strokeWidth,
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
@@ -944,9 +939,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       true =>
         year2023
             ? _CircularProgressIndicatorDefaultsM3Year2023(
-              context,
-              indeterminate: widget.value == null,
-            )
+                context,
+                indeterminate: widget.value == null,
+              )
             : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget.value == null),
       false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: widget.value == null),
     };
@@ -959,8 +954,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     final StrokeCap? strokeCap = widget.strokeCap ?? indicatorTheme.strokeCap;
     final BoxConstraints constraints =
         widget.constraints ?? indicatorTheme.constraints ?? defaults.constraints!;
-    final double? trackGap =
-        year2023 ? null : widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap;
+    final double? trackGap = year2023
+        ? null
+        : widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap;
     final EdgeInsetsGeometry? effectivePadding =
         widget.padding ?? indicatorTheme.circularTrackPadding ?? defaults.circularTrackPadding;
 
@@ -1064,18 +1060,16 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
-    final Path path =
-        Path()
-          ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
-          ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
-          ..lineTo(arrowheadPointX, arrowheadPointY)
-          ..close();
+    final Path path = Path()
+      ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
+      ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
+      ..lineTo(arrowheadPointX, arrowheadPointY)
+      ..close();
 
-    final Paint paint =
-        Paint()
-          ..color = valueColor
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.fill;
+    final Paint paint = Paint()
+      ..color = valueColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
   }
 
@@ -1227,8 +1221,9 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     double rotationValue,
   ) {
     final double? value = widget.value;
-    final double arrowheadScale =
-        value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
+    final double arrowheadScale = value == null
+        ? 0.0
+        : const Interval(0.1, _strokeHeadInterval).transform(value);
     final double rotation;
 
     if (value == null && _lastValue == null) {

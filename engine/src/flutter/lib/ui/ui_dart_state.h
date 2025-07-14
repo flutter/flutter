@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_UI_DART_STATE_H_
 #define FLUTTER_LIB_UI_UI_DART_STATE_H_
 
+#include <future>
 #include <memory>
 #include <string>
 #include <utility>
@@ -19,6 +20,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/platform_message_handler.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -44,18 +46,21 @@ class UIDartState : public tonic::DartState {
   struct Context {
     explicit Context(const TaskRunners& task_runners);
 
-    Context(const TaskRunners& task_runners,
-            fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-            fml::WeakPtr<IOManager> io_manager,
-            fml::RefPtr<SkiaUnrefQueue> unref_queue,
-            fml::WeakPtr<ImageDecoder> image_decoder,
-            fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
-            std::string advisory_script_uri,
-            std::string advisory_script_entrypoint,
-            bool deterministic_rendering_enabled,
-            std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-            bool enable_impeller,
-            impeller::RuntimeStageBackend runtime_stage_backend);
+    Context(
+        const TaskRunners& task_runners,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::WeakPtr<IOManager> io_manager,
+        fml::RefPtr<SkiaUnrefQueue> unref_queue,
+        fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+        fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+            image_generator_registry,
+        std::string advisory_script_uri,
+        std::string advisory_script_entrypoint,
+        bool deterministic_rendering_enabled,
+        std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+        std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
+        bool enable_impeller,
+        bool enable_flutter_gpu);
 
     /// The task runners used by the shell hosting this runtime controller. This
     /// may be used by the isolate to scheduled asynchronous texture uploads or
@@ -75,12 +80,13 @@ class UIDartState : public tonic::DartState {
     fml::RefPtr<SkiaUnrefQueue> unref_queue;
 
     /// The image decoder.
-    fml::WeakPtr<ImageDecoder> image_decoder;
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder;
 
     /// Cascading registry of image generator builders. Given compressed image
     /// bytes as input, this is used to find and create image generators, which
     /// can then be used for image decoding.
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry;
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry;
 
     /// The advisory script URI (only used for debugging). This does not affect
     /// the code being run in the isolate in any way.
@@ -98,11 +104,14 @@ class UIDartState : public tonic::DartState {
     /// of shared worker threads.
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner;
 
+    /// The runtime stage backend for fragment shaders.
+    std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend;
+
     /// Whether Impeller is enabled or not.
     bool enable_impeller = false;
 
-    /// The expected backend for runtime stage shaders.
-    impeller::RuntimeStageBackend runtime_stage_backend;
+    /// Whether flutter_gpu is enabled or not.
+    bool enable_flutter_gpu = false;
   };
 
   Dart_Port main_port() const { return main_port_; }
@@ -140,9 +149,10 @@ class UIDartState : public tonic::DartState {
 
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
-  fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
+  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetImageDecoder() const;
 
-  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry() const;
+  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+  GetImageGeneratorRegistry() const;
 
   std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
 
@@ -170,7 +180,10 @@ class UIDartState : public tonic::DartState {
   /// Whether Impeller is enabled for this application.
   bool IsImpellerEnabled() const;
 
-  /// The expected type for runtime stage shaders.
+  /// Whether Flutter GPU is enabled for this application.
+  bool IsFlutterGPUEnabled() const;
+
+  /// The runtime stage to use for fragment shaders.
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;
 
   virtual Dart_Isolate CreatePlatformIsolate(Dart_Handle entry_point,
@@ -198,6 +211,7 @@ class UIDartState : public tonic::DartState {
 
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
+  std::optional<fml::TaskQueueId> callback_queue_id_;
   const std::string logger_prefix_;
   Dart_Port main_port_ = ILLEGAL_PORT;
   const bool is_root_isolate_;

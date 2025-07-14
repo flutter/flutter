@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jaga …",
   "clearButtonLabel": "Kustutamine",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Tühista",
+  "backButtonLabel": "Tagasi"
 }

@@ -4,7 +4,7 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -57,7 +57,7 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
   );
 }
 
-/// Combines dylibs from [sources] into a fat binary at [targetFullPath].
+/// Combines dylibs from [sources] into a fat binary in [target].
 ///
 /// The dylibs must have different architectures. E.g. a dylib targeting
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
@@ -126,8 +126,9 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   }
 
   return <String>{
-    for (final List<String> architectureSection
-        in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
+    for (final List<String> architectureSection in parseOtoolArchitectureSections(
+      installNameResult.stdout as String,
+    ).values)
       // For each architecture, a separate install name is reported, which are
       // not necessarily the same.
       architectureSection.single,
@@ -142,7 +143,7 @@ Future<void> codesignDylib(
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
   }
-  final List<String> codesignCommand = <String>[
+  final codesignCommand = <String>[
     'codesign',
     '--force',
     '--sign',
@@ -177,10 +178,9 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath =
-      LineSplitter.split(
-        xcrunResult.stdout as String,
-      ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
+  final String installPath = LineSplitter.split(
+    xcrunResult.stdout as String,
+  ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
   return CCompilerConfig(
     compiler: Uri.file('$installPath/clang'),
     archiver: Uri.file('$installPath/ar'),
@@ -222,8 +222,8 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   }
   fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
   if (alreadyTakenNames.contains(fileName)) {
-    final String prefixName = fileName;
-    for (int i = 1; i < 1000; i++) {
+    final prefixName = fileName;
+    for (var i = 1; i < 1000; i++) {
       fileName = '$prefixName$i';
       if (!alreadyTakenNames.contains(fileName)) {
         break;
@@ -252,15 +252,15 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   // /build/native_assets/ios/buz.framework/buz:
   // @rpath/libbuz.dylib
 
-  const Map<String, Architecture> outputArchitectures = <String, Architecture>{
+  const outputArchitectures = <String, Architecture>{
     'arm': Architecture.arm,
     'arm64': Architecture.arm64,
     'x86_64': Architecture.x64,
   };
-  final RegExp architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
+  final architectureHeaderPattern = RegExp(r'^[^(]+( \(architecture (.+)\))?:$');
   final Iterator<String> lines = output.trim().split('\n').iterator;
   Architecture? currentArchitecture;
-  final Map<Architecture?, List<String>> architectureSections = <Architecture?, List<String>>{};
+  final architectureSections = <Architecture?, List<String>>{};
 
   while (lines.moveNext()) {
     final String line = lines.current;

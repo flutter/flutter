@@ -660,7 +660,9 @@ void main() {
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: ExpansionTile(title: Text('Title')))),
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Title'))),
+      ),
     );
 
     final ListTile listTile = tester.widget(find.byType(ListTile));
@@ -755,6 +757,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocused: true,
         isFocusable: true,
@@ -771,6 +774,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocusable: true,
         label: 'Second Expansion Tile',

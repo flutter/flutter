@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -18,6 +19,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
+import 'darwin.dart';
 import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
@@ -31,7 +33,7 @@ import 'native_assets.dart';
 ///   * [DebugUnpackMacOS]
 ///   * [ProfileUnpackMacOS]
 ///   * [ReleaseUnpackMacOS]
-abstract class UnpackMacOS extends Target {
+abstract class UnpackMacOS extends UnpackDarwin {
   const UnpackMacOS();
 
   @override
@@ -54,46 +56,35 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
 
-    // Copy Flutter framework.
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final String basePath = environment.artifacts.getArtifactPath(
-      Artifact.flutterMacOSFramework,
-      mode: buildMode,
+    // Copy FlutterMacOS framework.
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    await copyFramework(
+      environment,
+      framework: Artifact.flutterMacOSFramework,
+      buildMode: buildMode,
     );
-    final ProcessResult result = environment.processManager.runSync(<String>[
-      'rsync',
-      '-av',
-      '--delete',
-      '--filter',
-      '- .DS_Store/',
-      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-      basePath,
-      environment.outputDir.path,
-    ]);
 
     _removeDenylistedFiles(environment.outputDir);
-    if (result.exitCode != 0) {
-      throw Exception(
-        'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
-      );
-    }
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('FlutterMacOS.framework')
+        .childDirectory(FlutterDarwinPlatform.macos.frameworkName)
         .childDirectory('Versions')
         .childDirectory('A')
-        .childFile('FlutterMacOS');
+        .childFile(FlutterDarwinPlatform.macos.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
 
-    await _thinFramework(environment, frameworkBinaryPath);
+    await thinFramework(
+      environment,
+      frameworkBinaryPath,
+      environment.defines[kDarwinArchs] ?? 'x86_64 arm64',
+    );
   }
 
   /// Files that should not be copied to build output directory if found during framework copy step.
-  static const List<String> _copyDenylist = <String>[
+  static const _copyDenylist = <String>[
     'entitlements.txt',
     'without_entitlements.txt',
     'unsigned_binaries.txt',
@@ -107,51 +98,6 @@ abstract class UnpackMacOS extends Target {
       if (_copyDenylist.contains(entity.basename)) {
         entity.deleteSync();
       }
-    }
-  }
-
-  Future<void> _thinFramework(Environment environment, String frameworkBinaryPath) async {
-    final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
-    final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = await environment.processManager.run(<String>[
-      'lipo',
-      '-info',
-      frameworkBinaryPath,
-    ]);
-    final String lipoInfo = infoResult.stdout as String;
-
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
-      'lipo',
-      frameworkBinaryPath,
-      '-verify_arch',
-      ...archList,
-    ]);
-
-    if (verifyResult.exitCode != 0) {
-      throw Exception(
-        'Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo',
-      );
-    }
-
-    // Skip thinning for non-fat executables.
-    if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
-      return;
-    }
-
-    // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
-      'lipo',
-      '-output',
-      frameworkBinaryPath,
-      for (final String arch in archList) ...<String>['-extract', arch],
-      ...<String>[frameworkBinaryPath],
-    ]);
-
-    if (extractResult.exitCode != 0) {
-      throw Exception(
-        'Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo',
-      );
     }
   }
 }
@@ -186,7 +132,7 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkDsym = environment.fileSystem.directory(
       environment.artifacts.getArtifactPath(
         Artifact.flutterMacOSFrameworkDsym,
@@ -269,7 +215,8 @@ class DebugMacOSFramework extends Target {
     );
 
     outputFile.createSync(recursive: true);
-    final File debugApp = environment.buildDir.childFile('debug_app.cc')..writeAsStringSync(r'''
+    final File debugApp = environment.buildDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode!.clang(<String>[
@@ -325,14 +272,14 @@ class CompileMacOSFramework extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
       kExtraGenSnapshotOptions,
@@ -345,7 +292,7 @@ class CompileMacOSFramework extends Target {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -353,8 +300,8 @@ class CompileMacOSFramework extends Target {
       processManager: environment.processManager,
     );
 
-    final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch darwinArch in darwinArchs) {
+    final pending = <Future<int>>[];
+    for (final darwinArch in darwinArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
@@ -452,11 +399,11 @@ abstract class MacOSBundleFlutterAssets extends Target {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment.outputDir.childDirectory('App.framework');
-    final Directory outputDirectory = frameworkRootDirectory
-      .childDirectory('Versions')
-      .childDirectory('A')..createSync(recursive: true);
+    final Directory outputDirectory =
+        frameworkRootDirectory.childDirectory('Versions').childDirectory('A')
+          ..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir
@@ -706,7 +653,7 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   Future<void> build(Environment environment) async {
-    bool buildSuccess = true;
+    var buildSuccess = true;
     try {
       await super.build(environment);
     } catch (_) {

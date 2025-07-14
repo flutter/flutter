@@ -49,9 +49,10 @@ class RadioThemeData with Diagnosticable {
     this.splashRadius,
     this.materialTapTargetSize,
     this.visualDensity,
+    this.backgroundColor,
   });
 
-  /// {@macro flutter.material.radio.mouseCursor}
+  /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor]. The
   /// default value is [WidgetStateMouseCursor.clickable].
@@ -86,6 +87,9 @@ class RadioThemeData with Diagnosticable {
   /// default value is the value of [ThemeData.visualDensity].
   final VisualDensity? visualDensity;
 
+  /// {@macro flutter.material.Radio.backgroundColor}
+  final WidgetStateProperty<Color?>? backgroundColor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
@@ -95,6 +99,7 @@ class RadioThemeData with Diagnosticable {
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
+    WidgetStateProperty<Color?>? backgroundColor,
   }) {
     return RadioThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -103,6 +108,7 @@ class RadioThemeData with Diagnosticable {
       splashRadius: splashRadius ?? this.splashRadius,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
     );
   }
 
@@ -125,6 +131,12 @@ class RadioThemeData with Diagnosticable {
       ),
       splashRadius: lerpDouble(a?.splashRadius, b?.splashRadius, t),
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
+      backgroundColor: WidgetStateProperty.lerp<Color?>(
+        a?.backgroundColor,
+        b?.backgroundColor,
+        t,
+        Color.lerp,
+      ),
     );
   }
 
@@ -136,6 +148,7 @@ class RadioThemeData with Diagnosticable {
     splashRadius,
     materialTapTargetSize,
     visualDensity,
+    backgroundColor,
   );
 
   @override
@@ -152,7 +165,8 @@ class RadioThemeData with Diagnosticable {
         other.overlayColor == overlayColor &&
         other.splashRadius == splashRadius &&
         other.materialTapTargetSize == materialTapTargetSize &&
-        other.visualDensity == visualDensity;
+        other.visualDensity == visualDensity &&
+        other.backgroundColor == backgroundColor;
   }
 
   @override
@@ -189,6 +203,13 @@ class RadioThemeData with Diagnosticable {
     );
     properties.add(
       DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
+        'backgroundColor',
+        backgroundColor,
+        defaultValue: null,
+      ),
     );
   }
 }

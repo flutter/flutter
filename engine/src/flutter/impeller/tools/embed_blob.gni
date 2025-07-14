@@ -30,6 +30,7 @@ template("embed_blob") {
     ]
     script = "//flutter/impeller/tools/xxd.py"
     deps = invoker.deps
+    mnemonic = "XXD"
   }
 
   embed_config = "embed_$target_name"

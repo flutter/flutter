@@ -50,7 +50,7 @@ Unmute the [tree-gardener channel] and [hackers-infra channel] on [Discord]. Con
 Escalate to the [test owner][TESTOWNERS]. File GitHub issues if none are already open.
 1. The title should include the name of the failing test.
 1. Assign the issue to the test owner with a `P1` priority.
-1. Add the `team` label.
+1. Add the [`c: contributor-productivity`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22c%3A%20contributor-productivity%22) label.
 1. Include links to the failing tests. Download any relevant logs and attach them to the issue, even if the link to the failing tests has the same information. This prevents the issues from becoming stale when logs are expunged.
 1. @ mention the test owner in the [tree-gardener channel] on [Discord] with a link to the GitHub issue. If they are unavailable, escalate to another team member. Continue escalating until someone acknowledges the issue is being investigated.
 
@@ -174,7 +174,7 @@ The bulk of communication happens on [Discord].
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
 [golden test build breakage]: /docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md#build-breakage
 [new issue]: https://github.com/flutter/flutter/issues/new/choose
-[new infra issue]: https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml
+[new infra issue]: https://github.com/flutter/flutter/issues/new?template=06_infrastructure.yml
 
 [Framework build dashboard]: https://flutter-dashboard.appspot.com/#/build
 [framework benchmarks]: https://flutter-flutter-perf.skia.org/e/

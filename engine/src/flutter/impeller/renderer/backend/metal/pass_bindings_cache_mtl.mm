@@ -149,4 +149,12 @@ void PassBindingsCacheMTL::SetScissor(const IRect& scissor) {
   scissor_ = scissor;
 }
 
+void PassBindingsCacheMTL::SetStencilRef(uint32_t stencil_ref) {
+  if (stencil_ref_.has_value() && stencil_ref_.value() == stencil_ref) {
+    return;
+  }
+  [encoder_ setStencilReferenceValue:stencil_ref];
+  stencil_ref_ = stencil_ref;
+}
+
 }  // namespace impeller

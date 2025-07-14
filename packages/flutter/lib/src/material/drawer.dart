@@ -262,8 +262,9 @@ class Drawer extends StatelessWidget {
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
-    final DrawerThemeData defaults =
-        useMaterial3 ? _DrawerDefaultsM3(context) : _DrawerDefaultsM2(context);
+    final DrawerThemeData defaults = useMaterial3
+        ? _DrawerDefaultsM3(context)
+        : _DrawerDefaultsM2(context);
     final ShapeBorder? effectiveShape =
         shape ??
         (isDrawerStart
@@ -283,10 +284,9 @@ class Drawer extends StatelessWidget {
           surfaceTintColor:
               surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior:
-              effectiveShape != null
-                  ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
-                  : Clip.none,
+          clipBehavior: effectiveShape != null
+              ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
+              : Clip.none,
           child: child,
         ),
       ),
@@ -339,6 +339,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
+    this.drawerBarrierDismissible = true,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -354,6 +355,13 @@ class DrawerController extends StatefulWidget {
 
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
+
+  /// Whether tapping the barrier behind the [Drawer] dismisses it.
+  ///
+  /// Defaults to true.
+  ///
+  /// If false, tapping the barrier will not dismiss the drawer.
+  final bool drawerBarrierDismissible;
 
   /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -725,7 +733,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   // On Android, the back button is used to dismiss a modal.
                   excluding: platformHasBackButton,
                   child: GestureDetector(
-                    onTap: close,
+                    onTap: widget.drawerBarrierDismissible ? close : null,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: drawerScrim,

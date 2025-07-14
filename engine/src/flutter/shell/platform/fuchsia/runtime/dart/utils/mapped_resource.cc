@@ -134,27 +134,47 @@ bool ElfSnapshot::Load(fdio_ns_t* namespc, const std::string& path) {
 }
 
 bool ElfSnapshot::Load(int dirfd, const std::string& path) {
-  const int fd = OpenFdExec(path, dirfd);
-  if (fd < 0) {
+  fml::UniqueFD fd(OpenFdExec(path, dirfd));
+  if (!fd.is_valid()) {
     FML_LOG(ERROR) << "Failed to open VMO for " << path << " from dir.";
     return false;
   }
   return Load(fd);
 }
 
-bool ElfSnapshot::Load(int fd) {
-  const char* error;
-  handle_ = Dart_LoadELF_Fd(fd, 0, &error, &vm_data_, &vm_instrs_,
-                            &isolate_data_, &isolate_instrs_);
+bool ElfSnapshot::Load(const fml::UniqueFD& fd) {
+  zx_handle_t vmo = ZX_HANDLE_INVALID;
+  zx_status_t status = fdio_get_vmo_exec(fd.get(), &vmo);
+  if (status != ZX_OK) {
+    FML_LOG(ERROR) << "Failed load ELF: " << zx_status_get_string(status);
+    return false;
+  }
+  handle_ = dlopen_vmo(vmo, RTLD_LAZY);
   if (handle_ == nullptr) {
+    const char* error = dlerror();
     FML_LOG(ERROR) << "Failed load ELF: " << error;
     return false;
   }
+
+  vm_data_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kVmSnapshotDataCSymbol));
+  vm_instrs_ = reinterpret_cast<const uint8_t*>(
+      dlsym(handle_, kVmSnapshotInstructionsCSymbol));
+  isolate_data_ = reinterpret_cast<const uint8_t*>(
+      dlsym(handle_, kIsolateSnapshotDataCSymbol));
+  isolate_instrs_ = reinterpret_cast<const uint8_t*>(
+      dlsym(handle_, kIsolateSnapshotInstructionsCSymbol));
+  if (vm_data_ == nullptr || vm_instrs_ == nullptr ||
+      isolate_data_ == nullptr || isolate_instrs_ == nullptr) {
+    FML_LOG(ERROR) << "Failed to load ELF symbols";
+    return false;
+  }
+
   return true;
 }
 
 ElfSnapshot::~ElfSnapshot() {
-  Dart_UnloadELF(handle_);
+  dlclose(handle_);
 }
 
 }  // namespace dart_utils

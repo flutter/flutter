@@ -39,7 +39,12 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
   await pinDependencies(packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
-  await addLinkHookDependency(packageName, packageDirectory);
+  await addTestProjectAsDependency(packageName, packageDirectory, 'link_hook');
+  await addLinkHookUse(packageName, packageDirectory);
+
+  await addTestProjectAsDependency(packageName, packageDirectory, 'hook_user_defines');
+  await addUserDefine(packageName, packageDirectory);
+
   await addDynamicallyLinkedNativeLibrary(packageName, packageDirectory);
 
   final ProcessResult result2 = await processManager.run(<String>[
@@ -52,12 +57,16 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   return packageDirectory;
 }
 
-Future<void> addLinkHookDependency(String packageName, Directory packageDirectory) async {
+Future<void> addTestProjectAsDependency(
+  String packageName,
+  Directory packageDirectory,
+  String testProject,
+) async {
   final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
   final Directory linkHookDirectory = flutterDirectory
       .childDirectory('dev')
       .childDirectory('integration_tests')
-      .childDirectory('link_hook');
+      .childDirectory(testProject);
   expect(linkHookDirectory, exists);
 
   final File linkHookPubspecFile = linkHookDirectory.childFile('pubspec.yaml');
@@ -66,19 +75,15 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
   final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(
     linkHookPubspecFile.readAsStringSync(),
   );
-  final Map<String, Object?> linkHooksDependencies =
-      linkHookPubspec['dependencies']! as Map<String, Object?>;
-  final Map<String, Object?> linkHooksDevDependencies =
-      linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
+  final linkHooksDependencies = linkHookPubspec['dependencies']! as Map<String, Object?>;
+  final linkHooksDevDependencies = linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
 
   final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(
     thisPubspecFile.readAsStringSync(),
   );
 
-  final Map<String, Object?> thisDependencies =
-      thisPubspec['dependencies']! as Map<String, Object?>;
-  final Map<String, Object?> thisDevDependencies =
-      thisPubspec['dev_dependencies']! as Map<String, Object?>;
+  final thisDependencies = thisPubspec['dependencies']! as Map<String, Object?>;
+  final thisDevDependencies = thisPubspec['dev_dependencies']! as Map<String, Object?>;
 
   // Flutter CI uses pinned dependencies for all packages (including
   // dev/integration_tests/link_hook) for deterministic testing on CI.
@@ -102,10 +107,12 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
   // `test_core` that is compatible (and `test_core` is pinned in `link_hook`)
   _updateDependencies(thisDependencies, linkHooksDevDependencies);
   _updateDependencies(thisDevDependencies, linkHooksDevDependencies);
-  thisDependencies['link_hook'] = <String, Object?>{'path': linkHookDirectory.path};
+  thisDependencies[testProject] = <String, Object?>{'path': linkHookDirectory.path};
 
   await thisPubspecFile.writeAsString(json.encode(thisPubspec));
+}
 
+Future<void> addLinkHookUse(String packageName, Directory packageDirectory) async {
   final File dartFile = packageDirectory.childDirectory('lib').childFile('$packageName.dart');
   final String dartFileOld = (await dartFile.readAsString()).replaceAll('\r\n', '\n');
   // Replace with something that results in the same resulting int, so that the
@@ -127,6 +134,27 @@ import '${packageName}_bindings_generated.dart' as bindings;
   );
   expect(dartFileNew2, isNot(dartFileNew));
   await dartFile.writeAsString(dartFileNew2);
+}
+
+/// Adds a user-define to the pubspec of the package and the example project.
+///
+/// The build hook will fail if the user-define is not set. So, we don't have to
+/// actually invoke the native code from the test project. If it succeeds to
+/// build, then the user-define is properly wired through.
+Future<void> addUserDefine(String packageName, Directory packageDirectory) async {
+  for (final pubspecFile in <File>[
+    packageDirectory.childFile('pubspec.yaml'),
+    packageDirectory.childDirectory('example').childFile('pubspec.yaml'),
+  ]) {
+    final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(pubspecFile.readAsStringSync());
+    thisPubspec['hooks'] = <String, Map<String, Map<String, int>>>{
+      'user_defines': <String, Map<String, int>>{
+        'hook_user_defines': <String, int>{'magic_value': 1000},
+      },
+    };
+
+    await pubspecFile.writeAsString(json.encode(thisPubspec));
+  }
 }
 
 Map<String, Object?> _pubspecAsMutableJson(String pubspecContent) {
@@ -179,17 +207,18 @@ FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
   await mainLibrarySourceFile.writeAsString(mainLibrarySource);
 
   // Update builder to build the native library and link it into the main library.
-  const String builderSource = r'''
+  const builderSource = r'''
 
 import 'package:logging/logging.dart';
-import 'package:native_assets_cli/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:code_assets/code_assets.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
     final packageName = input.packageName;
 
-    if (!input.config.buildAssetTypes.contains(CodeAsset.type)) {
+    if (!input.config.buildCodeAssets) {
       return;
     }
     final builders = [

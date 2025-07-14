@@ -56,13 +56,18 @@ class CupertinoThumbPainter {
   /// Consider using [radius] and [extension] when deciding how large a
   /// rectangle to use for the thumb.
   void paint(Canvas canvas, Rect rect) {
-    final RRect rrect = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0));
+    // Paint RRects instead of RSuperellipses here, because practically
+    // [CupertinoSlider] only draws circular thumbs.
+    final RRect thumbShape = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(rect.shortestSide / 2.0),
+    );
 
     for (final BoxShadow shadow in shadows) {
-      canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
+      canvas.drawRRect(thumbShape.shift(shadow.offset), shadow.toPaint());
     }
 
-    canvas.drawRRect(rrect.inflate(0.5), Paint()..color = _kThumbBorderColor);
-    canvas.drawRRect(rrect, Paint()..color = color);
+    canvas.drawRRect(thumbShape.inflate(0.5), Paint()..color = _kThumbBorderColor);
+    canvas.drawRRect(thumbShape, Paint()..color = color);
   }
 }

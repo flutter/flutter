@@ -42,8 +42,9 @@ void doTests() {
       expect(rootChildren[2], domManager.semanticsHost);
       expect(rootChildren[3].tagName, equalsIgnoringCase('style'));
 
-      final List<DomElement> shadowChildren =
-          domManager.renderingHost.childNodes.cast<DomElement>().toList();
+      final List<DomElement> shadowChildren = domManager.renderingHost.childNodes
+          .cast<DomElement>()
+          .toList();
       expect(shadowChildren.length, 2);
       expect(shadowChildren[0], domManager.sceneHost);
       expect(shadowChildren[1].tagName, equalsIgnoringCase('style'));
@@ -103,7 +104,7 @@ void doTests() {
     test('Initializes and attaches a shadow root', () {
       final DomManager domManager = DomManager(devicePixelRatio: 3.0);
 
-      expect(domInstanceOfString(domManager.renderingHost, 'ShadowRoot'), isTrue);
+      expect(domManager.renderingHost.isA<DomShadowRoot>(), isTrue);
       expect(domManager.renderingHost.host, domManager.platformViewsHost);
       expect(domManager.renderingHost, domManager.platformViewsHost.shadowRoot);
 

@@ -128,6 +128,38 @@ void fl_dart_project_set_dart_entrypoint_arguments(FlDartProject* project,
  */
 gchar** fl_dart_project_get_dart_entrypoint_arguments(FlDartProject* project);
 
+/**
+ * FlUIThreadPolicy:
+ * Configures the thread policy for running the UI isolate.
+ * @FL_UI_THREAD_POLICY_DEFAULT: Defaut value. Currently will run the UI isolate
+ * on separate thread, later will change to run on platform thread.
+ * @FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD: Run the UI isolate on the
+ * platform thread.
+ * @FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD: Run the UI isolate on a separate
+ * thread.
+ */
+typedef enum {
+  FL_UI_THREAD_POLICY_DEFAULT,
+  FL_UI_THREAD_POLICY_RUN_ON_PLATFORM_THREAD,
+  FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD,
+} FlUIThreadPolicy;
+
+/**
+ * fl_dart_project_set_ui_thread_policy:
+ * @project: an #FlDartProject.
+ * @policy: the thread policy to use for running the UI isolate.
+ */
+void fl_dart_project_set_ui_thread_policy(FlDartProject* project,
+                                          FlUIThreadPolicy policy);
+
+/**
+ * fl_dart_project_get_ui_thread_policy:
+ * @project: an #FlDartProject.
+ *
+ * Returns: the thread policy used for running the UI isolate.
+ */
+FlUIThreadPolicy fl_dart_project_get_ui_thread_policy(FlDartProject* project);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_DART_PROJECT_H_

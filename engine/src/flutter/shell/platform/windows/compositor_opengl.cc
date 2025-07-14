@@ -20,6 +20,20 @@ struct FramebufferBackingStore {
   uint32_t texture_id;
 };
 
+typedef const impeller::GLProc<decltype(glBlitFramebuffer)> BlitFramebufferProc;
+
+const BlitFramebufferProc& GetBlitFramebufferProc(
+    const impeller::ProcTableGLES& gl) {
+  if (gl.BlitFramebuffer.IsAvailable()) {
+    return gl.BlitFramebuffer;
+  } else if (gl.BlitFramebufferANGLE.IsAvailable()) {
+    return gl.BlitFramebufferANGLE;
+  }
+
+  // CompositorOpenGL::Initialize verifies that a blit procedure is available.
+  FML_UNREACHABLE();
+}
+
 }  // namespace
 
 CompositorOpenGL::CompositorOpenGL(FlutterWindowsEngine* engine,
@@ -160,16 +174,17 @@ bool CompositorOpenGL::Present(FlutterWindowsView* view,
   gl_->BindFramebuffer(GL_READ_FRAMEBUFFER, source_id);
   gl_->BindFramebuffer(GL_DRAW_FRAMEBUFFER, kWindowFrameBufferId);
 
-  gl_->BlitFramebuffer(0,                    // srcX0
-                       0,                    // srcY0
-                       width,                // srcX1
-                       height,               // srcY1
-                       0,                    // dstX0
-                       0,                    // dstY0
-                       width,                // dstX1
-                       height,               // dstY1
-                       GL_COLOR_BUFFER_BIT,  // mask
-                       GL_NEAREST            // filter
+  auto blitFramebuffer = GetBlitFramebufferProc(*gl_);
+  blitFramebuffer(0,                    // srcX0
+                  0,                    // srcY0
+                  width,                // srcX1
+                  height,               // srcY1
+                  0,                    // dstX0
+                  0,                    // dstY0
+                  width,                // dstX1
+                  height,               // dstY1
+                  GL_COLOR_BUFFER_BIT,  // mask
+                  GL_NEAREST            // filter
   );
 
   if (!surface->SwapBuffers()) {
@@ -204,6 +219,12 @@ bool CompositorOpenGL::Initialize() {
   } else {
     format_.sized_format = GL_RGBA8;
     format_.general_format = GL_RGBA;
+  }
+
+  if (!gl_->BlitFramebuffer.IsAvailable() &&
+      !gl_->BlitFramebufferANGLE.IsAvailable()) {
+    FML_LOG(ERROR) << "Unable to find OpenGL blit framebuffer procedure.";
+    return false;
   }
 
   is_initialized_ = true;

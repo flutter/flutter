@@ -11,6 +11,8 @@ source_set("external_view_embedder") {
     "external_view_embedder.h",
     "external_view_embedder_2.cc",
     "external_view_embedder_2.h",
+    "external_view_embedder_wrapper.cc",
+    "external_view_embedder_wrapper.h",
     "surface_pool.cc",
     "surface_pool.h",
   ]
@@ -21,6 +23,7 @@ source_set("external_view_embedder") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/fml",
+    "//flutter/impeller/renderer/backend/vulkan",
     "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/jni",
     "//flutter/shell/platform/android/surface",

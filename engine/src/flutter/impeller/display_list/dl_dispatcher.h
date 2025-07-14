@@ -412,7 +412,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
 /// submitted via Context::SubmitOnscreen.
 bool RenderToTarget(ContentContext& context, RenderTarget render_target,
                          const sk_sp<flutter::DisplayList>& display_list,
-                         SkIRect cull_rect,
+                         Rect cull_rect,
                          bool reset_host_buffer,
                          bool is_onscreen = true);
 

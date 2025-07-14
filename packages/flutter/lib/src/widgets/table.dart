@@ -7,7 +7,6 @@
 library;
 
 import 'dart:collection';
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -163,10 +162,9 @@ class Table extends RenderObjectWidget {
          }
          return true;
        }()),
-       _rowDecorations =
-           children.any((TableRow row) => row.decoration != null)
-               ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
-               : null {
+       _rowDecorations = children.any((TableRow row) => row.decoration != null)
+           ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
+           : null {
     assert(() {
       final List<Widget> flatChildren = children
           .expand<Widget>((TableRow row) => row.children)
@@ -346,8 +344,9 @@ class _TableElement extends RenderObjectElement {
         oldKeyedRows[row.key!] = row.children;
       }
     }
-    final Iterator<_TableElementRow> oldUnkeyedRows =
-        _children.where((_TableElementRow row) => row.key == null).iterator;
+    final Iterator<_TableElementRow> oldUnkeyedRows = _children
+        .where((_TableElementRow row) => row.key == null)
+        .iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
     for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {

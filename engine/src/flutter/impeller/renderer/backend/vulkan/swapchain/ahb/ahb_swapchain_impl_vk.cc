@@ -68,11 +68,9 @@ std::shared_ptr<AHBSwapchainImplVK> AHBSwapchainImplVK::Create(
     std::weak_ptr<android::SurfaceControl> surface_control,
     const CreateTransactionCB& cb,
     const ISize& size,
-    bool enable_msaa,
-    size_t swapchain_image_count) {
-  auto impl = std::shared_ptr<AHBSwapchainImplVK>(
-      new AHBSwapchainImplVK(context, std::move(surface_control), cb, size,
-                             enable_msaa, swapchain_image_count));
+    bool enable_msaa) {
+  auto impl = std::shared_ptr<AHBSwapchainImplVK>(new AHBSwapchainImplVK(
+      context, std::move(surface_control), cb, size, enable_msaa));
   return impl->IsValid() ? impl : nullptr;
 }
 
@@ -81,12 +79,10 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
     std::weak_ptr<android::SurfaceControl> surface_control,
     const CreateTransactionCB& cb,
     const ISize& size,
-    bool enable_msaa,
-    size_t swapchain_image_count)
+    bool enable_msaa)
     : surface_control_(std::move(surface_control)), cb_(cb) {
   desc_ = android::HardwareBufferDescriptor::MakeForSwapchainImage(size);
-  pool_ =
-      std::make_shared<AHBTexturePoolVK>(context, desc_, swapchain_image_count);
+  pool_ = std::make_shared<AHBTexturePoolVK>(context, desc_);
   if (!pool_->IsValid()) {
     return;
   }
@@ -203,7 +199,8 @@ bool AHBSwapchainImplVK::Present(
     return false;
   }
 
-  android::SurfaceTransaction transaction = cb_();
+  android::SurfaceTransaction transaction =
+      (cb_) ? cb_() : impeller::android::SurfaceTransaction();
   if (!transaction.SetContents(control.get(),               //
                                texture->GetBackingStore(),  //
                                present_ready->CreateFD()    //

@@ -32,8 +32,7 @@
  * before being used, and must be set up only once until detachFromEngine:.
  */
 - (void)setUpWithEngine:(nonnull FlutterEngine*)engine
-         viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-     threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer;
+         viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 /**
  * Reset the `engine` and `id` of this controller.
@@ -53,6 +52,14 @@
  * updated.
  */
 - (void)updateSemantics:(nonnull const FlutterSemanticsUpdate2*)update;
+
+/**
+ * Removes this controller from the engine. The controller is removed from the engine
+ * on dealloc, however in multi-window scenario the controller needs to be unregistered
+ * from the engine eagerly - because the FlutterView needs to be removed from the
+ * Flutter isolate before destroying the controller and window.
+ */
+- (void)dispose;
 
 @end
 

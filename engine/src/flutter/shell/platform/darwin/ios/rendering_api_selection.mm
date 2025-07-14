@@ -11,7 +11,7 @@
 #import <TargetConditionals.h>
 
 #include "flutter/fml/logging.h"
-
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 
@@ -35,8 +35,8 @@ IOSRenderingAPI GetRenderingAPIForProcess(bool force_software) {
   }
 #else
   if (force_software) {
-    FML_LOG(WARNING) << "The --enable-software-rendering is only supported on Simulator targets "
-                        "and will be ignored.";
+    [FlutterLogger logWarning:@"The --enable-software-rendering is only supported on simulator "
+                               "targets and will be ignored."];
   }
 #endif  // TARGET_OS_SIMULATOR
 

@@ -18,6 +18,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   late Environment environment;
@@ -172,10 +173,12 @@ void main() {
       final File entitlements = environment.outputDir.childFile('entitlements.txt');
       final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
       final File unsignedBinaries = environment.outputDir.childFile('unsigned_binaries.txt');
-      final File nestedEntitlements = environment.outputDir
-        .childDirectory('first_level')
-        .childDirectory('second_level')
-        .childFile('entitlements.txt')..createSync(recursive: true);
+      final File nestedEntitlements =
+          environment.outputDir
+              .childDirectory('first_level')
+              .childDirectory('second_level')
+              .childFile('entitlements.txt')
+            ..createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
@@ -258,7 +261,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:',
+              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
@@ -347,7 +350,7 @@ void main() {
     () async {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
-      final FakeCommand failedCopyFrameworkDsymCommand = FakeCommand(
+      final failedCopyFrameworkDsymCommand = FakeCommand(
         command: <String>[
           'rsync',
           '-av',
@@ -434,7 +437,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
@@ -495,7 +498,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
@@ -522,10 +525,7 @@ void main() {
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
       fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
       fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       await const DebugMacOSBundleFlutterAssets().build(environment);
       final Directory frameworkDirectory = environment.outputDir.childDirectory(
@@ -549,8 +549,8 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 

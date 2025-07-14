@@ -42,7 +42,7 @@ enum _SwitchListTileType { material, adaptive }
 /// into [value] must be properly managed. This is typically done by invoking
 /// [State.setState] in [onChanged] to toggle the state value.
 ///
-/// The [value], [onChanged], [activeColor], [activeThumbImage], and
+/// The [value], [onChanged], [activeThumbColor], [activeThumbImage], and
 /// [inactiveThumbImage] properties of this widget are identical to the
 /// similarly-named properties on the [Switch] widget.
 ///
@@ -50,8 +50,8 @@ enum _SwitchListTileType { material, adaptive }
 /// those of the same name on [ListTile].
 ///
 /// The [selected] property on this widget is similar to the [ListTile.selected]
-/// property. This tile's [activeColor] is used for the selected item's text color, or
-/// the theme's [SwitchThemeData.overlayColor] if [activeColor] is null.
+/// property. This tile's [activeThumbColor] is used for the selected item's text color, or
+/// the theme's [SwitchThemeData.overlayColor] if [activeThumbColor] is null.
 ///
 /// This widget does not coordinate the [selected] state and the
 /// [value]; to have the list tile appear selected when the
@@ -175,7 +175,12 @@ class SwitchListTile extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    @Deprecated(
+      'Use activeThumbColor instead. '
+      'This feature was deprecated after v3.31.0-2.0.pre.',
+    )
     this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -198,7 +203,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -214,7 +219,7 @@ class SwitchListTile extends StatelessWidget {
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -232,7 +237,12 @@ class SwitchListTile extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    @Deprecated(
+      'Use activeThumbColor or activeTrackColor instead. '
+      'This feature was deprecated after v3.31.0-2.0.pre.',
+    )
     this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -256,7 +266,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -269,7 +279,7 @@ class SwitchListTile extends StatelessWidget {
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(!isThreeLine || subtitle != null),
+       assert(isThreeLine != true || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
@@ -306,7 +316,16 @@ class SwitchListTile extends StatelessWidget {
   /// {@macro flutter.material.switch.activeColor}
   ///
   /// Defaults to [ColorScheme.secondary] of the current [Theme].
+  @Deprecated(
+    'Use activeThumbColor or activeTrackColor instead. '
+    'This feature was deprecated after v3.31.0-2.0.pre.',
+  )
   final Color? activeColor;
+
+  /// {@macro flutter.material.switch.activeThumbColor}
+  ///
+  /// Defaults to [ColorScheme.secondary] of the current [Theme].
+  final Color? activeThumbColor;
 
   /// {@macro flutter.material.switch.activeTrackColor}
   ///
@@ -350,7 +369,7 @@ class SwitchListTile extends StatelessWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then the value of [activeColor] is used in the selected state
+  /// If null, then the value of [activeThumbColor] is used in the selected state
   /// and [inactiveThumbColor] in the default state. If that is also null, then
   /// the value of [SwitchThemeData.thumbColor] is used. If that is also null,
   /// The default value is used.
@@ -419,7 +438,7 @@ class SwitchListTile extends StatelessWidget {
   ///  * [WidgetState.selected].
   ///  * [WidgetState.hovered].
   ///
-  /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
+  /// If null, then the value of [activeThumbColor] with alpha [kRadialReactionAlpha]
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
   /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
   /// also null, then the default value is used in the pressed and hovered state.
@@ -460,9 +479,10 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
-  final bool isThreeLine;
+  /// If null, the value from [ListTileThemeData.isThreeLine] is used.
+  /// If that is also null, the value from [ThemeData.listTileTheme] is used.
+  /// If still null, the default value is `false`.
+  final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
   ///
@@ -478,7 +498,7 @@ class SwitchListTile extends StatelessWidget {
   /// is used.
   final EdgeInsetsGeometry? contentPadding;
 
-  /// Whether to render icons and text in the [activeColor].
+  /// Whether to render icons and text in the [activeThumbColor].
   ///
   /// No effort is made to automatically coordinate the [selected] state and the
   /// [value] state. To have the list tile appear selected when the switch is
@@ -535,6 +555,7 @@ class SwitchListTile extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
+            activeThumbColor: activeThumbColor,
             activeThumbImage: activeThumbImage,
             inactiveThumbImage: inactiveThumbImage,
             materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
@@ -563,6 +584,7 @@ class SwitchListTile extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
+            activeThumbColor: activeThumbColor,
             activeThumbImage: activeThumbImage,
             inactiveThumbImage: inactiveThumbImage,
             materialTapTargetSize: materialTapTargetSize ?? MaterialTapTargetSize.shrinkWrap,
@@ -598,7 +620,10 @@ class SwitchListTile extends StatelessWidget {
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
     final Color effectiveActiveColor =
-        activeColor ?? switchTheme.thumbColor?.resolve(states) ?? theme.colorScheme.secondary;
+        activeThumbColor ??
+        activeColor ??
+        switchTheme.thumbColor?.resolve(states) ??
+        theme.colorScheme.secondary;
     return MergeSemantics(
       child: ListTile(
         selectedColor: effectiveActiveColor,
@@ -610,12 +635,11 @@ class SwitchListTile extends StatelessWidget {
         dense: dense,
         contentPadding: contentPadding,
         enabled: onChanged != null,
-        onTap:
-            onChanged != null
-                ? () {
-                  onChanged!(!value);
-                }
-                : null,
+        onTap: onChanged != null
+            ? () {
+                onChanged!(!value);
+              }
+            : null,
         selected: selected,
         selectedTileColor: selectedTileColor,
         autofocus: autofocus,

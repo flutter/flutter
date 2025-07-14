@@ -470,11 +470,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -482,10 +485,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -493,10 +499,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -507,10 +516,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -518,11 +530,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -530,12 +545,42 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
+      ),
+    );
+  });
+  testWidgets('Navigation bar disabled semantics', (WidgetTester tester) async {
+    Widget widget({int selectedIndex = 0}) {
+      return _buildWidget(
+        NavigationBar(
+          selectedIndex: selectedIndex,
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC', enabled: false),
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'Another'),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widget());
+
+    expect(
+      tester.getSemantics(find.text('AC')),
+      matchesSemantics(
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
+        textDirection: TextDirection.ltr,
+        isSelected: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isButton: true,
       ),
     );
   });
@@ -559,11 +604,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -571,10 +619,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -585,10 +636,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -596,9 +650,12 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         isSelected: true,
         isButton: true,
         hasTapAction: true,
@@ -918,10 +975,9 @@ void main() {
 
     await tester.pumpWidget(buildNavigationBar());
     await tester.pumpAndSettle();
-    final Finder transformFinder =
-        find
-            .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
-            .last;
+    final Finder transformFinder = find
+        .descendant(of: find.byType(NavigationIndicator), matching: find.byType(Transform))
+        .last;
     Matrix4 transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 0.0);
 
@@ -1076,9 +1132,9 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..rrect()
-            ..rrect()
-            ..circle(color: hoverColor))
+              ..rrect()
+              ..rrect()
+              ..circle(color: hoverColor))
           : (paints..circle(color: hoverColor)),
     );
 
@@ -1090,12 +1146,12 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle()
-            ..circle(color: pressedColor))
+              ..circle()
+              ..circle()
+              ..circle(color: pressedColor))
           : (paints
-            ..circle()
-            ..circle(color: pressedColor)),
+              ..circle()
+              ..circle(color: pressedColor)),
     );
 
     await gesture.up();
@@ -1110,11 +1166,11 @@ void main() {
       inkFeatures,
       kIsWeb
           ? (paints
-            ..circle()
-            ..circle(color: focusColor))
+              ..circle()
+              ..circle(color: focusColor))
           : (paints
-            ..circle()
-            ..circle(color: focusColor)),
+              ..circle()
+              ..circle(color: focusColor)),
     );
   });
 
@@ -1638,8 +1694,11 @@ void main() {
       ),
     );
 
-    final double safeAreaBottomPadding =
-        tester.widget<Padding>(find.byType(Padding).first).padding.resolve(textDirection).bottom;
+    final double safeAreaBottomPadding = tester
+        .widget<Padding>(find.byType(Padding).first)
+        .padding
+        .resolve(textDirection)
+        .bottom;
     expect(safeAreaBottomPadding, equals(0));
   });
 }
@@ -1659,8 +1718,8 @@ Material _getMaterial(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "export.h"
+#include "live_objects.h"
 #include "skwasm_support.h"
 #include "surface.h"
 #include "wrappers.h"
@@ -116,6 +117,7 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 SKWASM_EXPORT SkImage* image_createFromPicture(SkPicture* picture,
                                                int32_t width,
                                                int32_t height) {
+  liveImageCount++;
   return DeferredFromPicture(sk_ref_sp<SkPicture>(picture), {width, height},
                              nullptr, nullptr, BitDepth::kU8,
                              SkColorSpace::MakeSRGB())
@@ -127,6 +129,7 @@ SKWASM_EXPORT SkImage* image_createFromPixels(SkData* data,
                                               int height,
                                               PixelFormat pixelFormat,
                                               size_t rowByteCount) {
+  liveImageCount++;
   return SkImages::RasterFromData(
              SkImageInfo::Make(width, height,
                                colorTypeForPixelFormat(pixelFormat),
@@ -140,6 +143,7 @@ SKWASM_EXPORT SkImage* image_createFromTextureSource(SkwasmObject textureSource,
                                                      int width,
                                                      int height,
                                                      Skwasm::Surface* surface) {
+  liveImageCount++;
   return SkImages::DeferredFromTextureGenerator(
              std::unique_ptr<TextureSourceImageGenerator>(
                  new TextureSourceImageGenerator(
@@ -151,10 +155,12 @@ SKWASM_EXPORT SkImage* image_createFromTextureSource(SkwasmObject textureSource,
 }
 
 SKWASM_EXPORT void image_ref(SkImage* image) {
+  liveImageCount++;
   image->ref();
 }
 
 SKWASM_EXPORT void image_dispose(SkImage* image) {
+  liveImageCount--;
   image->unref();
 }
 

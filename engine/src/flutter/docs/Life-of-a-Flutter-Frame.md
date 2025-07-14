@@ -66,21 +66,21 @@ As a result, the first frame can be produced with a size of zero.
 
 TODO(cbracken): write this up using [this patch](https://github.com/flutter/engine/pull/38038) as a reminder.
 
-[animator]: https://github.com/flutter/engine/blob/main/shell/common/animator.h
+[animator]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/common/animator.h
 [drawFrame]: https://api.flutter.dev/flutter/rendering/RendererBinding/drawFrame.html
-[embedderAPI]: https://github.com/flutter/engine/blob/main/shell/platform/embedder/embedder.h
+[embedderAPI]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/embedder/embedder.h
 [engineArchThreading]: ../about/The-Engine-architecture.md#threading
 [flutterViewRender]: https://api.flutter.dev/flutter/dart-ui/FlutterView/render.html
 [handleBeginFrame]: https://api.flutter.dev/flutter/scheduler/SchedulerBinding/handleBeginFrame.html
-[layerTree]: https://github.com/flutter/engine/blob/main/flow/layers/layer_tree.h
+[layerTree]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/flow/layers/layer_tree.h
 [onBeginFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onBeginFrame.html
 [onDrawFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onDrawFrame.html
 [onMetricsChanged]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/onMetricsChanged.html
-[pipeline]: https://github.com/flutter/engine/blob/main/shell/common/pipeline.h
-[rasterizer]: https://github.com/flutter/engine/blob/main/shell/common/rasterizer.h
+[pipeline]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/common/pipeline.h
+[rasterizer]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/common/rasterizer.h
 [renderingPipelineTalk]: https://www.youtube.com/watch?v=UUfXWzp0-DU
 [scene]: https://api.flutter.dev/flutter/dart-ui/Scene-class.html
 [scheduleWarmUpFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/scheduleWarmUpFrame.html
-[surface]: https://github.com/flutter/engine/blob/main/flow/surface.h
+[surface]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/flow/surface.h
 [scheduleFrame]: https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/scheduleFrame.html
-[vsyncWaiter]: https://github.com/flutter/engine/blob/main/shell/common/vsync_waiter.h
+[vsyncWaiter]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/common/vsync_waiter.h

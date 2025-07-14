@@ -51,6 +51,9 @@ void main() {
   });
 
   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
+    // Set window orientation to portrait.
+    tester.view.physicalSize = const Size(2400.0, 3000.0);
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(const CupertinoApp(home: Placeholder()));
 
     tester
@@ -74,16 +77,16 @@ void main() {
     // position Text is initially invisible while the sliver is expanded).
     expect(find.widgetWithText(CupertinoSliverNavigationBar, 'An iPod'), findsNWidgets(2));
 
-    final List<Element> titles =
-        tester.elementList(find.text('An iPod')).toList()..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
-        });
+    final List<Element> titles = tester.elementList(find.text('An iPod')).toList()
+      ..sort((Element a, Element b) {
+        final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
+        final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
+        return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+      });
 
     final Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity =
-          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity = element
+          .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
       return renderOpacity.opacity.value;
     });
 
@@ -828,36 +831,35 @@ void main() {
   Future<void> testParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
     await tester.pumpWidget(
       CupertinoApp(
-        onGenerateRoute:
-            (RouteSettings settings) => CupertinoPageRoute<void>(
-              fullscreenDialog: fromFullscreenDialog,
-              settings: settings,
-              builder: (BuildContext context) {
-                return Column(
-                  children: <Widget>[
-                    const Placeholder(),
-                    CupertinoButton(
-                      child: const Text('Button'),
-                      onPressed: () {
-                        Navigator.push<void>(
-                          context,
-                          CupertinoPageRoute<void>(
-                            builder: (BuildContext context) {
-                              return CupertinoButton(
-                                child: const Text('Close'),
-                                onPressed: () {
-                                  Navigator.pop<void>(context);
-                                },
-                              );
+        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+          fullscreenDialog: fromFullscreenDialog,
+          settings: settings,
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                const Placeholder(),
+                CupertinoButton(
+                  child: const Text('Button'),
+                  onPressed: () {
+                    Navigator.push<void>(
+                      context,
+                      CupertinoPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return CupertinoButton(
+                            child: const Text('Close'),
+                            onPressed: () {
+                              Navigator.pop<void>(context);
                             },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
 
@@ -944,36 +946,35 @@ void main() {
     Future<void> testParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
       await tester.pumpWidget(
         CupertinoApp(
-          onGenerateRoute:
-              (RouteSettings settings) => CupertinoPageRoute<void>(
-                fullscreenDialog: fromFullscreenDialog,
-                settings: settings,
-                builder: (BuildContext context) {
-                  return Column(
-                    children: <Widget>[
-                      const Placeholder(),
-                      CupertinoButton(
-                        child: const Text('Button'),
-                        onPressed: () {
-                          Navigator.push<void>(
-                            context,
-                            CupertinoPageRoute<void>(
-                              builder: (BuildContext context) {
-                                return CupertinoButton(
-                                  child: const Text('Close'),
-                                  onPressed: () {
-                                    Navigator.pop<void>(context);
-                                  },
-                                );
+          onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+            fullscreenDialog: fromFullscreenDialog,
+            settings: settings,
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  const Placeholder(),
+                  CupertinoButton(
+                    child: const Text('Button'),
+                    onPressed: () {
+                      Navigator.push<void>(
+                        context,
+                        CupertinoPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return CupertinoButton(
+                              child: const Text('Close'),
+                              onPressed: () {
+                                Navigator.pop<void>(context);
                               },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       );
 
@@ -1122,36 +1123,35 @@ void main() {
   Future<void> testNoParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
     await tester.pumpWidget(
       CupertinoApp(
-        onGenerateRoute:
-            (RouteSettings settings) => CupertinoPageRoute<void>(
-              fullscreenDialog: fromFullscreenDialog,
-              builder: (BuildContext context) {
-                return Column(
-                  children: <Widget>[
-                    const Placeholder(),
-                    CupertinoButton(
-                      child: const Text('Button'),
-                      onPressed: () {
-                        Navigator.push<void>(
-                          context,
-                          CupertinoPageRoute<void>(
-                            fullscreenDialog: true,
-                            builder: (BuildContext context) {
-                              return CupertinoButton(
-                                child: const Text('Close'),
-                                onPressed: () {
-                                  Navigator.pop<void>(context);
-                                },
-                              );
+        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+          fullscreenDialog: fromFullscreenDialog,
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                const Placeholder(),
+                CupertinoButton(
+                  child: const Text('Button'),
+                  onPressed: () {
+                    Navigator.push<void>(
+                      context,
+                      CupertinoPageRoute<void>(
+                        fullscreenDialog: true,
+                        builder: (BuildContext context) {
+                          return CupertinoButton(
+                            child: const Text('Close'),
+                            onPressed: () {
+                              Navigator.pop<void>(context);
                             },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
 
@@ -2866,16 +2866,17 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
-                  child: Container(),
-                );
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return CupertinoPageScaffold(
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
+                      child: Container(),
+                    );
+                  },
             );
           }
           return CupertinoPageRoute<void>(
@@ -3119,7 +3120,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      CupertinoApp(navigatorKey: navigatorKey, home: CupertinoTextField(focusNode: focusNode)),
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: CupertinoTextField(focusNode: focusNode),
+      ),
     );
     focusNode.requestFocus();
     await tester.pump();
@@ -3153,7 +3157,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      CupertinoApp(navigatorKey: navigatorKey, home: CupertinoTextField(focusNode: focusNode)),
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: CupertinoTextField(focusNode: focusNode),
+      ),
     );
     focusNode.requestFocus();
     await tester.pump();
@@ -3314,16 +3321,15 @@ class _TestPageUpdateState extends State<_TestPageUpdate> {
     return MaterialApp(
       home: Navigator(
         key: navKey,
-        pages:
-            updatePages
-                ? <Page<dynamic>>[
-                  const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
-                  const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
-                ]
-                : <Page<dynamic>>[
-                  const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
-                  CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
-                ],
+        pages: updatePages
+            ? <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
+              ]
+            : <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
+              ],
         onPopPage: (_, _) {
           return false;
         },
@@ -3398,7 +3404,9 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
           counter += 1;
         });
       },
-      child: const Center(child: Text('Hold', style: TextStyle(color: Colors.blue))),
+      child: const Center(
+        child: Text('Hold', style: TextStyle(color: Colors.blue)),
+      ),
     );
   }
 
@@ -3406,16 +3414,14 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget build(BuildContext context) {
     return CupertinoApp(
       initialRoute: 'home',
-      onGenerateRoute:
-          (RouteSettings settings) => CupertinoPageRoute<void>(
-            settings: settings,
-            builder:
-                (BuildContext context) => switch (settings.name) {
-                  'home' => _buildHome(context),
-                  'sub' => _buildSub(context),
-                  _ => throw UnimplementedError(),
-                },
-          ),
+      onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        settings: settings,
+        builder: (BuildContext context) => switch (settings.name) {
+          'home' => _buildHome(context),
+          'sub' => _buildSub(context),
+          _ => throw UnimplementedError(),
+        },
+      ),
     );
   }
 }

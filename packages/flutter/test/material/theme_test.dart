@@ -47,6 +47,98 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  group('Theme.brightnessOf', () {
+    testWidgets('return correct brightness when just media query is given', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: SizedBox(),
+        ),
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.dark));
+    });
+
+    testWidgets('return correct brightness with overriding theme brightness over media query', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
+        ),
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.light));
+    });
+
+    testWidgets('returns Brightness.light when no theme or media query is present', (
+      WidgetTester tester,
+    ) async {
+      // Prevent the implicitly added View from adding a MediaQuery
+      await tester.pumpWidget(
+        RawView(view: FakeFlutterView(tester.view, viewId: 77), child: const SizedBox()),
+        wrapWithView: false,
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.light));
+    });
+  });
+
+  group('Theme.maybeBrightnessOf', () {
+    testWidgets('return correct brightness when just media query is given', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: SizedBox(),
+        ),
+      );
+
+      expect(
+        Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))),
+        equals(Brightness.dark),
+      );
+    });
+
+    testWidgets('return correct brightness with overriding theme brightness over media query', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Theme(
+            data: ThemeData(brightness: Brightness.light),
+            child: const SizedBox(),
+          ),
+        ),
+      );
+
+      expect(
+        Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))),
+        equals(Brightness.light),
+      );
+    });
+
+    testWidgets('returns null when no theme or media query is present', (
+      WidgetTester tester,
+    ) async {
+      // Prevent the implicitly added View from adding a MediaQuery
+      await tester.pumpWidget(
+        RawView(view: FakeFlutterView(tester.view, viewId: 77), child: const SizedBox()),
+        wrapWithView: false,
+      );
+
+      expect(Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))), isNull);
+    });
+  });
+
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
     final Key key = UniqueKey();
     const Color defaultSelectionColor = Color(0x11111111);
@@ -672,6 +764,30 @@ void main() {
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
     });
 
+    testWidgets('Cupertino widgets correctly get the right text theme in dark mode', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey textFieldKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(body: CupertinoTextField(key: textFieldKey)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Default CupertinoTextStyle color is a CupertinoDynamicColor.
+      final CupertinoThemeData cupertinoThemeData = CupertinoTheme.of(textFieldKey.currentContext!);
+      expect(cupertinoThemeData.textTheme.textStyle.color, isA<CupertinoDynamicColor>());
+      final CupertinoDynamicColor themeTextStyleColor =
+          cupertinoThemeData.textTheme.textStyle.color! as CupertinoDynamicColor;
+
+      // The value of the textfield's color should resolve to the theme's dark color.
+      expect(state.widget.style.color?.value, equals(themeTextStyleColor.darkColor.value));
+    });
+
     testWidgets('Material2 - Can override material theme', (WidgetTester tester) async {
       final CupertinoThemeData themeM2 = await testTheme(
         tester,
@@ -1241,4 +1357,12 @@ class _TextStyleProxy implements TextStyle {
   TextStyle merge(TextStyle? other) {
     throw UnimplementedError();
   }
+}
+
+class FakeFlutterView extends TestFlutterView {
+  FakeFlutterView(TestFlutterView view, {required this.viewId})
+    : super(view: view, display: view.display, platformDispatcher: view.platformDispatcher);
+
+  @override
+  final int viewId;
 }

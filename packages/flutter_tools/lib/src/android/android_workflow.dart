@@ -20,9 +20,9 @@ import '../features.dart';
 import 'android_sdk.dart';
 import 'java.dart';
 
-const int kAndroidSdkMinVersion = 29;
-final Version kAndroidJavaMinVersion = Version(1, 8, 0);
-final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
+const kAndroidSdkMinVersion = 29;
+final kAndroidJavaMinVersion = Version(1, 8, 0);
+final kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
@@ -30,9 +30,9 @@ AndroidLicenseValidator? get androidLicenseValidator => context.get<AndroidLicen
 
 enum LicensesAccepted { none, some, all, unknown }
 
-final RegExp licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
-final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
-final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
+final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
+final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -60,6 +60,45 @@ class AndroidWorkflow implements Workflow {
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
 }
 
+Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager processManager) async {
+  try {
+    if (!processManager.canRun(androidSdk.emulatorPath)) {
+      return null;
+    }
+
+    final ProcessResult result = await processManager.run(<Object>[
+      androidSdk.emulatorPath!,
+      '-version',
+    ]);
+
+    if (result.exitCode != 0) {
+      return null;
+    }
+
+    final String output = result.stdout.toString().trim();
+
+    final String versionLine = output
+        .split('\n')
+        .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
+
+    if (versionLine.isNotEmpty) {
+      final regex = RegExp(r'Android emulator version\s+(.*)');
+      final Match? match = regex.firstMatch(versionLine);
+      if (match != null && match.groupCount >= 1) {
+        return match.group(1)?.trim();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } on Exception catch (e, _) {
+    return null;
+  } on Error catch (_) {
+    return null;
+  }
+}
+
 /// A validator that checks if the Android SDK and Java SDK are available and
 /// installed correctly.
 ///
@@ -74,11 +113,13 @@ class AndroidValidator extends DoctorValidator {
     required Logger logger,
     required Platform platform,
     required UserMessages userMessages,
+    required ProcessManager processManager,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
+       _processManager = processManager,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -86,6 +127,7 @@ class AndroidValidator extends DoctorValidator {
   final Logger _logger;
   final Platform _platform;
   final UserMessages _userMessages;
+  final ProcessManager _processManager;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -135,7 +177,7 @@ class AndroidValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
       // No Android SDK found.
@@ -155,6 +197,11 @@ class AndroidValidator extends DoctorValidator {
     }
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(
+      ValidationMessage(
+        'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
+      ),
+    );
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
@@ -276,7 +323,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
     if (_androidSdk == null ||
@@ -366,18 +413,16 @@ class AndroidLicenseValidator extends DoctorValidator {
       await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
-      final Future<void> output =
-          process.stdout
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
-      final Future<void> errors =
-          process.stderr
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
+      final Future<void> output = process.stdout
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
+      final Future<void> errors = process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on IOException catch (e) {
@@ -422,7 +467,7 @@ class AndroidLicenseValidator extends DoctorValidator {
             ),
       );
 
-      final List<String> stderrLines = <String>[];
+      final stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {

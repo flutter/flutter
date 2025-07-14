@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_INITIAL_ROUTE;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -36,6 +35,7 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,9 +63,9 @@ import java.util.List;
  * <p>Any time that a "delegate" is created with the purpose of encapsulating the internal behaviors
  * of another object, that delegate is highly susceptible to degeneration. It is easy to tack new
  * responsibilities on to the delegate which would not otherwise be added to the original object. It
- * is also easy to begin hanging listeners and callbacks on a delegate object that likewise would
- * not be added to the original object. A delegate can quickly become a complex web of dependencies
- * and optional references that are very difficult to track.
+ * is also easy to begin hanging listeners and callbacks objectn a delegate object that likewise
+ * would not be added to the original object. A delegate can quickly become a complex web of
+ * dependencies and optional references that are very difficult to track.
  *
  * <p>Maintainers of this class should take care to only place code in this delegate that would
  * otherwise be placed in either {@link FlutterActivity} or {@link FlutterFragment}, and in exactly
@@ -90,6 +90,7 @@ import java.util.List;
   @Nullable private FlutterEngine flutterEngine;
   @VisibleForTesting @Nullable FlutterView flutterView;
   @Nullable private PlatformPlugin platformPlugin;
+  @Nullable private SensitiveContentPlugin sensitiveContentPlugin;
   @VisibleForTesting @Nullable OnPreDrawListener activePreDrawListener;
   private boolean isFlutterEngineFromHost;
   private boolean isFlutterUiDisplayed;
@@ -141,6 +142,7 @@ import java.util.List;
     this.flutterEngine = null;
     this.flutterView = null;
     this.platformPlugin = null;
+    this.sensitiveContentPlugin = null;
   }
 
   /**
@@ -209,13 +211,17 @@ import java.util.List;
       flutterEngine.getActivityControlSurface().attachToActivity(this, host.getLifecycle());
     }
 
-    // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin
-    // is bound to a specific Activity. Therefore, it needs to be created and configured
-    // every time this Fragment attaches to a new Activity.
+    // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin and
+    // SensitiveContentPlugin are bound to a specific Activity. Therefore, they need to be
+    // created and configured every time this delegate attaches the engine to a new Activity.
     // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
     //                    control of the entire window. This is unacceptable for non-fullscreen
     //                    use-cases.
-    platformPlugin = host.providePlatformPlugin(host.getActivity(), flutterEngine);
+    // TODO(camsim99): Consider creating an interface for embedding plugins that require an
+    // `Activity` reference. See https://github.com/flutter/flutter/issues/164945.
+    final Activity hostActivity = host.getActivity();
+    platformPlugin = host.providePlatformPlugin(hostActivity, flutterEngine);
+    sensitiveContentPlugin = host.provideSensitiveContentPlugin(hostActivity, flutterEngine);
 
     host.configureFlutterEngine(flutterEngine);
     isAttached = true;
@@ -363,6 +369,7 @@ import java.util.List;
    * </ol>
    */
   @NonNull
+  @RequiresApi(API_LEVELS.API_24)
   View onCreateView(
       LayoutInflater inflater,
       @Nullable ViewGroup container,
@@ -660,6 +667,7 @@ import java.util.List;
    *
    * <p>This method removes this delegate's {@link FlutterView}'s {@link FlutterUiDisplayListener}.
    */
+  @RequiresApi(API_LEVELS.API_24)
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
@@ -755,12 +763,15 @@ import java.util.List;
       }
     }
 
-    // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this
-    // Fragment,
-    // and this Fragment's Activity.
+    // Null out the platformPlugin and sensitiveContentPlugin to avoid a possible
+    // retain cycle between the plugins, this Fragment, and this Fragment's Activity.
     if (platformPlugin != null) {
       platformPlugin.destroy();
       platformPlugin = null;
+    }
+    if (sensitiveContentPlugin != null) {
+      sensitiveContentPlugin.destroy();
+      sensitiveContentPlugin = null;
     }
 
     if (host.shouldDispatchAppLifecycleState() && flutterEngine != null) {
@@ -811,7 +822,6 @@ import java.util.List;
    *
    * @param backEvent The BackEvent object containing information about the touch.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void startBackGesture(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -834,7 +844,6 @@ import java.util.List;
    *
    * @param backEvent An BackEvent object describing the progress event.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -859,7 +868,6 @@ import java.util.List;
    * navigation, including finalizing animations and updating the UI to reflect the navigation
    * outcome.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void commitBackGesture() {
     ensureAlive();
@@ -881,7 +889,6 @@ import java.util.List;
    * in response to the back gesture. This includes resetting UI elements to their state prior to
    * the gesture's start.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void cancelBackGesture() {
     ensureAlive();
@@ -1189,6 +1196,17 @@ import java.util.List;
      */
     @Nullable
     PlatformPlugin providePlatformPlugin(
+        @Nullable Activity activity, @NonNull FlutterEngine flutterEngine);
+
+    /**
+     * Hook for host to create/provide a {@link SensitiveContentPlugin} if the associated Flutter
+     * experience should set content sensitivity for the {@link FlutterView} that {@code activity}
+     * creates.
+     *
+     * <p>Expect a null {@code SensitiveContentPlugin} if {@code activity} is null.
+     */
+    @Nullable
+    SensitiveContentPlugin provideSensitiveContentPlugin(
         @Nullable Activity activity, @NonNull FlutterEngine flutterEngine);
 
     /**
