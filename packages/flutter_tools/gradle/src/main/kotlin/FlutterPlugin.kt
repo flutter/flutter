@@ -14,6 +14,7 @@ import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -22,7 +23,6 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -343,7 +343,7 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
-        } catch (e: TaskInstantiationException) {
+        } catch (e: InvalidUserDataException) {
             // ignored
         }
     }
