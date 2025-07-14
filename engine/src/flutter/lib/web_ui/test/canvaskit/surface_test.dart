@@ -289,9 +289,8 @@ void testMain() {
       final Surface surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final JSObject originalTransferToImageBitmap = offscreenCanvas.getProperty<JSObject>(
-        'transferToImageBitmap'.toJS,
-      );
+      final JSObject originalTransferToImageBitmap =
+          offscreenCanvas['transferToImageBitmap']! as JSObject;
       offscreenCanvas['originalTransferToImageBitmap'] = originalTransferToImageBitmap;
       int transferToImageBitmapCalls = 0;
       offscreenCanvas['transferToImageBitmap'] = () {
@@ -312,7 +311,7 @@ void testMain() {
     }, skip: !Surface.offscreenCanvasSupported);
 
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
-      final JSObject originalMakeGrContext = canvasKit.getProperty('MakeGrContext'.toJS);
+      final JSObject originalMakeGrContext = canvasKit['MakeGrContext']! as JSObject;
       canvasKit
         ..['originalMakeGrContext'] = originalMakeGrContext
         ..['MakeGrContext'] = ((int glContext) => null).toJS;

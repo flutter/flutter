@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:test/bootstrap/browser.dart';
@@ -21,7 +20,7 @@ void testMain() {
         nonce: 'some_nonce',
       );
 
-      assert(domWindow.getProperty('flutterConfiguration'.toJS) == null);
+      assert(domWindow['flutterConfiguration'] == null);
 
       await initializeEngineServices(jsConfiguration: config);
 
