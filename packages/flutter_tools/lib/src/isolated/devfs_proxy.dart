@@ -8,13 +8,6 @@ import 'package:yaml/yaml.dart';
 import '/src/base/logger.dart';
 import '../globals.dart' as globals;
 
-String _normalizePath(String path) {
-  if (!path.startsWith('/')) {
-    path = '/$path';
-  }
-  return path;
-}
-
 abstract class ProxyRule {
   ProxyRule({required this.target});
 
@@ -29,20 +22,15 @@ abstract class ProxyRule {
     final replace = yaml['replace'] as String?;
     final Logger effectiveLogger = logger ?? globals.logger;
 
+    if (target == null) {
+      final String? path = source ?? regex;
+      effectiveLogger.printError("Invalid 'target' for path: $path. 'target' cannot be null");
+      return null;
+    }
     RegExp? proxyPattern;
     if (source != null && source.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError(
-          "Invalid 'target' for 'source': $source. 'target' cannot be null",
-        );
-        return null;
-      }
       return SourceProxyRule(source: source, target: target, replacement: replace?.trim());
     } else if (regex != null && regex.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError("Invalid 'target' for 'regex': $regex. 'target' cannot be null");
-        return null;
-      }
       try {
         proxyPattern = RegExp(regex.trim());
       } on FormatException catch (e) {
@@ -123,6 +111,13 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
     body: originalRequest.read(),
     context: originalRequest.context,
   );
+}
+
+String _normalizePath(String path) {
+  if (!path.startsWith('/')) {
+    path = '/$path';
+  }
+  return path;
 }
 
 shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
