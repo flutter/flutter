@@ -1743,7 +1743,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// )
   /// ```
   ///
-  /// However, in this example the `origin` offset is applied after the
+  /// However, in this example the [origin] offset is applied after the
   /// `alignment`, so the child rotates about its bottom-right corner:
   ///
   /// ```dart
