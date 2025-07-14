@@ -2543,16 +2543,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  int? get overlayPortalChild => _overlayPortalChild;
-  int? _overlayPortalChild;
-  set overlayPortalChild(int? value) {
-    if (_overlayPortalChild == value) {
-      return;
-    }
-    _overlayPortalChild = value;
-    _markDirty();
-  }
-
   int? get overlayPortalParent => _overlayPortalParent;
   int? _overlayPortalParent;
   set overlayPortalParent(int? value) {
@@ -3422,26 +3412,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     );
   }
 
-  Matrix4 calculateGlobalTransform(SemanticsNode node) {
-    Matrix4 globalTransform = Matrix4.identity();
-    SemanticsNode? current = node;
-
-    // Walk up the semantics tree to accumulate transforms
-    while (current != null) {
-      if (current.transform != null) {
-        globalTransform = current.transform!.multiplied(globalTransform);
-      }
-      current = current.semanticsParent;
-    }
-
-    return globalTransform;
-  }
-
-  Rect getGlobalRect(SemanticsNode node) {
-    Matrix4 globalTransform = calculateGlobalTransform(node);
-    return MatrixUtils.transformRect(globalTransform, node.rect);
-  }
-
   /// Returns a summary of the semantics for this node.
   ///
   /// If this node has [mergeAllDescendantsIntoThisNode], then the returned data
@@ -3694,17 +3664,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
       parentSemanticsClipRect = geometry.semanticsClipRect;
     }
 
-    if (data.identifier.endsWith('parent')) {
-      overlayPortalChild = owner!._overlayPortalChildNodes[data.identifier.split(' ')[0]]?.id;
-      // print owner!._overlayPortalChildNodes
-    }
     if (data.identifier.endsWith('child')) {
       overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
-      // print owner!._overlayPortalChildNodes
     }
-    print('==========================================');
-    print('parent id: $id, overlayPortalChild: $overlayPortalChild');
-    print('child id: $id, overlayPortalPArent: $overlayPortalChild');
+
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
@@ -3736,7 +3699,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
       transform: kIsWeb
           ? data.transform?.storage ?? _kIdentityTransform
           : geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
-      overlayPortalChild: overlayPortalChild,
       overlayPortalParent: overlayPortalParent,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
@@ -3778,7 +3740,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
       }
     }
-    print('parent id: $id, updatedChildren: ${updatedChildren?.map((e) => e.id)}');
     return updatedChildren;
   }
 
@@ -4125,7 +4086,7 @@ final class _SemanticsGeometry {
     while (!identical(childSemanticsNode, parentSemanticsNode)) {
       final int fromDepth = childSemanticsNode.depth;
       final int toDepth = parentSemanticsNode.depth;
-      // print('============= fromDepth: $fromDepth, toDepth: $toDepth =============');
+
       if (fromDepth >= toDepth) {
         assert(
           childSemanticsNode.parent != null,
@@ -4213,13 +4174,6 @@ final class _SemanticsGeometry {
     // parent.describeSemanticsClip(child) ??
     // _intersectRects(parentSemanticsClipRect, additionalPaintClip);
     return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
-  }
-
-  static Rect? _intersectRects(Rect? a, Rect? b) {
-    if (b == null) {
-      return a;
-    }
-    return a?.intersect(b) ?? b;
   }
 
   /// From parent to child coordinate system.
