@@ -50,5 +50,6 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
 
+  @override
   late final DartToolingDaemon dtd;
 }
