@@ -28,7 +28,7 @@ skia_component("skparagraph") {
   check_includes = false
   public_configs = [ ":public_config" ]
   public = skparagraph_core_public
-  sources = skparagraph_core
+  sources = skparagraph_core_sources
 
   public_deps = [
     "../..:skia",
