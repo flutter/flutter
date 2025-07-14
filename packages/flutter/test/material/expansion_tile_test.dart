@@ -660,7 +660,9 @@ void main() {
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: ExpansionTile(title: Text('Title')))),
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Title'))),
+      ),
     );
 
     final ListTile listTile = tester.widget(find.byType(ListTile));

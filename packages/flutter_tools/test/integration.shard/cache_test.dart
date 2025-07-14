@@ -34,7 +34,7 @@ void main() {
     testWithoutContext('should log a message to stderr when lock is not acquired', () async {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
@@ -42,7 +42,7 @@ void main() {
       Process? process;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
-        final Cache cache = Cache.test(
+        final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
@@ -79,7 +79,7 @@ Future<void> main(List<String> args) async {
         ]);
         // Wait for the script to lock the test cache file before checking to
         // see that the cache is unable to.
-        bool locked = false;
+        var locked = false;
         while (!locked) {
           // Give the script a chance to try for the lock much more often.
           await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -119,19 +119,19 @@ Future<void> main(List<String> args) async {
     testWithoutContext('should log a warning message for unknown version ', () async {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
-        final Cache cache = Cache.test(
+        final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
         );
-        final FakeVersionlessArtifact artifact = FakeVersionlessArtifact(cache);
+        final artifact = FakeVersionlessArtifact(cache);
         cache.registerArtifact(artifact);
         await artifact.update(
           FakeArtifactUpdater(),
@@ -166,8 +166,12 @@ Future<void> main(List<String> args) async {
       '--version',
     ]);
     // Parse 'arch' out of a string like '... "os_arch"\n'.
-    final String dartTargetArch =
-        (dartResult.stdout as String).trim().split(' ').last.replaceAll('"', '').split('_')[1];
+    final String dartTargetArch = (dartResult.stdout as String)
+        .trim()
+        .split(' ')
+        .last
+        .replaceAll('"', '')
+        .split('_')[1];
     final ProcessResult unameResult = await const LocalProcessManager().run(<String>[
       'uname',
       '-m',
@@ -183,6 +187,7 @@ Future<void> main(List<String> args) async {
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipArchive;
   void Function(String, Uri, Directory)? onDownloadZipTarball;
+  void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
@@ -192,6 +197,11 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   @override
   Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
+  }
+
+  @override
+  Future<void> downloadFile(String message, Uri url, Directory location) async {
+    onDownloadFile?.call(message, url, location);
   }
 
   @override

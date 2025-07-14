@@ -273,7 +273,8 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
-    InputDecorationTheme? inputDecorationTheme,
+    // TODO(bleroux): Change the parameter type to InputDecorationThemeData.
+    Object? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
@@ -384,7 +385,17 @@ class ThemeData with Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     extensions ??= <ThemeExtension<dynamic>>[];
     adaptations ??= <Adaptation<Object>>[];
-    inputDecorationTheme ??= const InputDecorationTheme();
+    // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
+    if (inputDecorationTheme != null) {
+      if (inputDecorationTheme is InputDecorationTheme) {
+        inputDecorationTheme = inputDecorationTheme.data;
+      } else if (inputDecorationTheme is! InputDecorationThemeData) {
+        throw ArgumentError(
+          'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+        );
+      }
+    }
+    inputDecorationTheme ??= const InputDecorationThemeData();
     platform ??= defaultTargetPlatform;
     switch (platform) {
       case TargetPlatform.android:
@@ -402,12 +413,11 @@ class ThemeData with Diagnosticable {
     useMaterial3 ??= true;
     useSystemColors ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
-    splashFactory ??=
-        useMaterial3
-            ? useInkSparkle
-                ? InkSparkle.splashFactory
-                : InkRipple.splashFactory
-            : InkSplash.splashFactory;
+    splashFactory ??= useMaterial3
+        ? useInkSparkle
+              ? InkSparkle.splashFactory
+              : InkRipple.splashFactory
+        : InkSplash.splashFactory;
 
     // COLOR
     assert(
@@ -492,10 +502,9 @@ class ThemeData with Diagnosticable {
     splashColor ??= isDark ? const Color(0x40CCCCCC) : const Color(0x66C8C8C8);
 
     // TYPOGRAPHY & ICONOGRAPHY
-    typography ??=
-        useMaterial3
-            ? Typography.material2021(platform: platform, colorScheme: colorScheme)
-            : Typography.material2014(platform: platform);
+    typography ??= useMaterial3
+        ? Typography.material2021(platform: platform, colorScheme: colorScheme)
+        : Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     if (fontFamily != null) {
@@ -514,14 +523,12 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??=
-        isDark
-            ? IconThemeData(color: kDefaultIconLightColor)
-            : IconThemeData(color: kDefaultIconDarkColor);
-    primaryIconTheme ??=
-        primaryIsDark
-            ? const IconThemeData(color: Colors.white)
-            : const IconThemeData(color: Colors.black);
+    iconTheme ??= isDark
+        ? IconThemeData(color: kDefaultIconLightColor)
+        : IconThemeData(color: kDefaultIconDarkColor);
+    primaryIconTheme ??= primaryIsDark
+        ? const IconThemeData(color: Colors.white)
+        : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
     // TODO(huycozy): Clean this up once the type of `appBarTheme` is changed to `appBarThemeData`
@@ -591,7 +598,7 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       extensions: _themeExtensionIterableToMap(extensions),
-      inputDecorationTheme: inputDecorationTheme,
+      inputDecorationTheme: inputDecorationTheme as InputDecorationThemeData,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
       platform: platform,
@@ -995,7 +1002,7 @@ class ThemeData with Diagnosticable {
   /// and [TextFormField] are based on this theme.
   ///
   /// See [InputDecoration.applyDefaults].
-  final InputDecorationTheme inputDecorationTheme;
+  final InputDecorationThemeData inputDecorationTheme;
 
   /// Configures the hit test size of certain Material widgets.
   ///
@@ -1488,7 +1495,7 @@ class ThemeData with Diagnosticable {
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
-    InputDecorationTheme? inputDecorationTheme,
+    Object? inputDecorationTheme,
     MaterialTapTargetSize? materialTapTargetSize,
     PageTransitionsTheme? pageTransitionsTheme,
     TargetPlatform? platform,
@@ -1598,6 +1605,17 @@ class ThemeData with Diagnosticable {
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
+    // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
+    if (inputDecorationTheme != null) {
+      if (inputDecorationTheme is InputDecorationTheme) {
+        inputDecorationTheme = inputDecorationTheme.data;
+      } else if (inputDecorationTheme is! InputDecorationThemeData) {
+        throw ArgumentError(
+          'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+        );
+      }
+    }
+
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -1609,7 +1627,8 @@ class ThemeData with Diagnosticable {
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
-      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
+      inputDecorationTheme:
+          inputDecorationTheme as InputDecorationThemeData? ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       platform: platform ?? this.platform,
@@ -1815,8 +1834,9 @@ class ThemeData with Diagnosticable {
       return this;
     }
 
-    final SystemColorPalette systemColors =
-        brightness == Brightness.dark ? SystemColor.dark : SystemColor.light;
+    final SystemColorPalette systemColors = brightness == Brightness.dark
+        ? SystemColor.dark
+        : SystemColor.light;
 
     ThemeData theme = this;
 
@@ -1844,40 +1864,36 @@ class ThemeData with Diagnosticable {
           style: ElevatedButton.styleFrom(
             foregroundColor: systemColors.buttonText.value,
             backgroundColor: systemColors.buttonFace.value,
-            side:
-                systemColors.buttonBorder.value == null
-                    ? null
-                    : BorderSide(color: systemColors.buttonBorder.value!),
+            side: systemColors.buttonBorder.value == null
+                ? null
+                : BorderSide(color: systemColors.buttonBorder.value!),
           ),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             foregroundColor: systemColors.buttonText.value,
             backgroundColor: systemColors.buttonFace.value,
-            side:
-                systemColors.buttonBorder.value == null
-                    ? null
-                    : BorderSide(color: systemColors.buttonBorder.value!),
+            side: systemColors.buttonBorder.value == null
+                ? null
+                : BorderSide(color: systemColors.buttonBorder.value!),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: systemColors.buttonText.value,
             backgroundColor: systemColors.buttonFace.value,
-            side:
-                systemColors.buttonBorder.value == null
-                    ? null
-                    : BorderSide(color: systemColors.buttonBorder.value!),
+            side: systemColors.buttonBorder.value == null
+                ? null
+                : BorderSide(color: systemColors.buttonBorder.value!),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             foregroundColor: systemColors.buttonText.value,
             backgroundColor: systemColors.buttonFace.value,
-            side:
-                systemColors.buttonBorder.value == null
-                    ? null
-                    : BorderSide(color: systemColors.buttonBorder.value!),
+            side: systemColors.buttonBorder.value == null
+                ? null
+                : BorderSide(color: systemColors.buttonBorder.value!),
           ),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -1934,8 +1950,9 @@ class ThemeData with Diagnosticable {
 
       // GENERAL CONFIGURATION
       adaptationMap: t < 0.5 ? a.adaptationMap : b.adaptationMap,
-      applyElevationOverlayColor:
-          t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
+      applyElevationOverlayColor: t < 0.5
+          ? a.applyElevationOverlayColor
+          : b.applyElevationOverlayColor,
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       extensions: _lerpThemeExtensions(a, b, t),
       inputDecorationTheme: t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
@@ -1993,33 +2010,53 @@ class ThemeData with Diagnosticable {
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       drawerTheme: DrawerThemeData.lerp(a.drawerTheme, b.drawerTheme, t)!,
       dropdownMenuTheme: DropdownMenuThemeData.lerp(a.dropdownMenuTheme, b.dropdownMenuTheme, t),
-      elevatedButtonTheme:
-          ElevatedButtonThemeData.lerp(a.elevatedButtonTheme, b.elevatedButtonTheme, t)!,
-      expansionTileTheme:
-          ExpansionTileThemeData.lerp(a.expansionTileTheme, b.expansionTileTheme, t)!,
+      elevatedButtonTheme: ElevatedButtonThemeData.lerp(
+        a.elevatedButtonTheme,
+        b.elevatedButtonTheme,
+        t,
+      )!,
+      expansionTileTheme: ExpansionTileThemeData.lerp(
+        a.expansionTileTheme,
+        b.expansionTileTheme,
+        t,
+      )!,
       filledButtonTheme: FilledButtonThemeData.lerp(a.filledButtonTheme, b.filledButtonTheme, t)!,
-      floatingActionButtonTheme:
-          FloatingActionButtonThemeData.lerp(
-            a.floatingActionButtonTheme,
-            b.floatingActionButtonTheme,
-            t,
-          )!,
+      floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(
+        a.floatingActionButtonTheme,
+        b.floatingActionButtonTheme,
+        t,
+      )!,
       iconButtonTheme: IconButtonThemeData.lerp(a.iconButtonTheme, b.iconButtonTheme, t)!,
       listTileTheme: ListTileThemeData.lerp(a.listTileTheme, b.listTileTheme, t)!,
       menuBarTheme: MenuBarThemeData.lerp(a.menuBarTheme, b.menuBarTheme, t)!,
       menuButtonTheme: MenuButtonThemeData.lerp(a.menuButtonTheme, b.menuButtonTheme, t)!,
       menuTheme: MenuThemeData.lerp(a.menuTheme, b.menuTheme, t)!,
-      navigationBarTheme:
-          NavigationBarThemeData.lerp(a.navigationBarTheme, b.navigationBarTheme, t)!,
-      navigationDrawerTheme:
-          NavigationDrawerThemeData.lerp(a.navigationDrawerTheme, b.navigationDrawerTheme, t)!,
-      navigationRailTheme:
-          NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t)!,
-      outlinedButtonTheme:
-          OutlinedButtonThemeData.lerp(a.outlinedButtonTheme, b.outlinedButtonTheme, t)!,
+      navigationBarTheme: NavigationBarThemeData.lerp(
+        a.navigationBarTheme,
+        b.navigationBarTheme,
+        t,
+      )!,
+      navigationDrawerTheme: NavigationDrawerThemeData.lerp(
+        a.navigationDrawerTheme,
+        b.navigationDrawerTheme,
+        t,
+      )!,
+      navigationRailTheme: NavigationRailThemeData.lerp(
+        a.navigationRailTheme,
+        b.navigationRailTheme,
+        t,
+      )!,
+      outlinedButtonTheme: OutlinedButtonThemeData.lerp(
+        a.outlinedButtonTheme,
+        b.outlinedButtonTheme,
+        t,
+      )!,
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t)!,
-      progressIndicatorTheme:
-          ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
+      progressIndicatorTheme: ProgressIndicatorThemeData.lerp(
+        a.progressIndicatorTheme,
+        b.progressIndicatorTheme,
+        t,
+      )!,
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
       searchBarTheme: SearchBarThemeData.lerp(a.searchBarTheme, b.searchBarTheme, t)!,
       searchViewTheme: SearchViewThemeData.lerp(a.searchViewTheme, b.searchViewTheme, t)!,
@@ -2033,11 +2070,17 @@ class ThemeData with Diagnosticable {
       switchTheme: SwitchThemeData.lerp(a.switchTheme, b.switchTheme, t),
       tabBarTheme: TabBarThemeData.lerp(a.tabBarTheme, b.tabBarTheme, t),
       textButtonTheme: TextButtonThemeData.lerp(a.textButtonTheme, b.textButtonTheme, t)!,
-      textSelectionTheme:
-          TextSelectionThemeData.lerp(a.textSelectionTheme, b.textSelectionTheme, t)!,
+      textSelectionTheme: TextSelectionThemeData.lerp(
+        a.textSelectionTheme,
+        b.textSelectionTheme,
+        t,
+      )!,
       timePickerTheme: TimePickerThemeData.lerp(a.timePickerTheme, b.timePickerTheme, t),
-      toggleButtonsTheme:
-          ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
+      toggleButtonsTheme: ToggleButtonsThemeData.lerp(
+        a.toggleButtonsTheme,
+        b.toggleButtonsTheme,
+        t,
+      )!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
@@ -2289,7 +2332,7 @@ class ThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<InputDecorationTheme>(
+      DiagnosticsProperty<InputDecorationThemeData>(
         'inputDecorationTheme',
         inputDecorationTheme,
         level: DiagnosticLevel.debug,

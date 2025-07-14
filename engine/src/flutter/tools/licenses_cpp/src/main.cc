@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <filesystem>
 #include <fstream>
 
 #include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
@@ -12,10 +13,13 @@
 #include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
 
+namespace fs = std::filesystem;
+
 ABSL_FLAG(std::optional<std::string>,
           working_dir,
           std::nullopt,
           "[REQUIRED] The directory to scan.");
+ABSL_FLAG(std::optional<std::string>, input, std::nullopt, "The file to scan.");
 ABSL_FLAG(std::optional<std::string>,
           data_dir,
           std::nullopt,
@@ -29,12 +33,17 @@ ABSL_FLAG(std::optional<std::string>,
           std::nullopt,
           "Regex that overrides the include filter.");
 ABSL_FLAG(int, v, 0, "Set the verbosity of logs.");
+ABSL_FLAG(bool,
+          treat_unmatched_comments_as_errors,
+          false,
+          "Whether unmatched comments are considered errors.");
 
 namespace {
 int Run(std::string_view working_dir,
         std::ostream& licenses,
         std::string_view data_dir,
-        std::string_view include_filter) {
+        std::string_view include_filter,
+        const LicenseChecker::Flags& flags) {
   absl::StatusOr<Data> data = Data::Open(data_dir);
   if (!data.ok()) {
     std::cerr << "Can't load data at " << data_dir << ": " << data.status()
@@ -53,7 +62,7 @@ int Run(std::string_view working_dir,
   data->include_filter = std::move(filter.value());
 
   std::vector<absl::Status> errors =
-      LicenseChecker::Run(working_dir, licenses, data.value());
+      LicenseChecker::Run(working_dir, licenses, data.value(), flags);
   for (const absl::Status& status : errors) {
     std::cerr << status << "\n";
   }
@@ -73,6 +82,7 @@ int main(int argc, char** argv) {
   absl::SetStderrThreshold(absl::LogSeverity::kInfo);
 
   std::optional<std::string> working_dir = absl::GetFlag(FLAGS_working_dir);
+  std::optional<std::string> input = absl::GetFlag(FLAGS_input);
   std::optional<std::string> data_dir = absl::GetFlag(FLAGS_data_dir);
   std::optional<std::string> licenses_path = absl::GetFlag(FLAGS_licenses_path);
   std::optional<std::string> include_filter =
@@ -85,12 +95,25 @@ int main(int argc, char** argv) {
       std::cerr << "Unable to write to '" << licenses_path.value() << "'.";
       return 1;
     }
-    if (include_filter.has_value()) {
-      return Run(working_dir.value(), licenses, data_dir.value(),
-                 include_filter.value());
+    LicenseChecker::Flags flags;
+    flags.treat_unmatched_comments_as_errors =
+        absl::GetFlag(FLAGS_treat_unmatched_comments_as_errors);
+    if (input.has_value()) {
+      if (include_filter.has_value()) {
+        std::cerr << "`--input_filter` not supported with `--input`"
+                  << std::endl;
+      }
+      fs::path full_path = fs::canonical(input.value());
+      return LicenseChecker::FileRun(working_dir.value(), full_path.string(),
+                                     licenses, data_dir.value(), flags);
     } else {
-      return LicenseChecker::Run(working_dir.value(), licenses,
-                                 data_dir.value());
+      if (include_filter.has_value()) {
+        return Run(working_dir.value(), licenses, data_dir.value(),
+                   include_filter.value(), flags);
+      } else {
+        return LicenseChecker::Run(working_dir.value(), licenses,
+                                   data_dir.value(), flags);
+      }
     }
   }
 
