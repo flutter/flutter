@@ -69,15 +69,18 @@ class TransitionDurationObserver extends NavigatorObserver {
   ///
   /// {@tool snippet}
   /// ```dart
-  /// expect(find.text('Page 1'), findsOneWidget);
-  /// expect(find.text('Page 2'), findsNothing);
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   // ...Pump an app with two pages, then:
+  ///   expect(find.text('Page 1'), findsOneWidget);
+  ///   expect(find.text('Page 2'), findsNothing);
   ///
-  /// await tester.tap(find.text('Next'));
+  ///   await tester.tap(find.text('Next'));
   ///
-  /// await transitionDurationObserver.pumpPastTransition(tester);
+  ///   await transitionDurationObserver.pumpPastTransition(tester);
   ///
-  /// expect(find.text('Page 1'), findsNothing);
-  /// expect(find.text('Page 2'), findsOneWidget);
+  ///   expect(find.text('Page 1'), findsNothing);
+  ///   expect(find.text('Page 2'), findsOneWidget);
+  /// });
   /// ```
   /// {@end-tool}
   ///
