@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -350,4 +351,21 @@ void main() {
     expect(AlignmentGeometry.bottomCenter, Alignment.bottomCenter);
     expect(AlignmentGeometry.bottomRight, Alignment.bottomRight);
   });
+
+  test('AlignmentDirectional.resolve with null TextDirection asserts', () {
+    const AlignmentDirectional alignmentDirectional = AlignmentDirectional(1.0, 2.0);
+
+    expect(
+      () => alignmentDirectional.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
 }
+
+double nonconst(double value) => value;
