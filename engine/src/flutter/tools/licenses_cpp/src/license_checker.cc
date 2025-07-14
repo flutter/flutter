@@ -222,8 +222,9 @@ absl::Status MatchLicenseFile(const fs::path& path,
       }
     } else {
       return absl::NotFoundError(
-          absl::StrCat("Unknown license in ", package.license_file->string(),
-                       " : ", matches.status().message()));
+          absl::StrCat("Unknown license in ",
+                       package.license_file->lexically_normal().string(), " : ",
+                       matches.status().message()));
     }
   }
   return absl::OkStatus();
