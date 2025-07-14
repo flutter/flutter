@@ -5,7 +5,7 @@
 /// @docImport 'mock_canvas.dart';
 library;
 
-import 'dart:ui' show Image;
+import 'dart:ui' show Image, PointMode, Vertices;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -164,27 +164,13 @@ class TestRecordingCanvas implements Canvas {
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
     invocations.add(
       RecordedInvocation(
-        _MethodCall(#drawArc, <dynamic>[rect, startAngle, sweepAngle, useCenter, Paint.from(paint)]),
-        stack: StackTrace.current,
-      ),
-    );
-  }
-
-  @override
-  void drawImage(Image image, Offset offset, Paint paint) {
-    invocations.add(
-      RecordedInvocation(
-        _MethodCall(#drawImage, <dynamic>[image, offset, Paint.from(paint)]),
-        stack: StackTrace.current,
-      ),
-    );
-  }
-
-  @override
-  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
-    invocations.add(
-      RecordedInvocation(
-        _MethodCall(#drawImageRect, <dynamic>[image, src, dst, Paint.from(paint)]),
+        _MethodCall(#drawArc, <dynamic>[
+          rect,
+          startAngle,
+          sweepAngle,
+          useCenter,
+          Paint.from(paint),
+        ]),
         stack: StackTrace.current,
       ),
     );
@@ -215,6 +201,26 @@ class TestRecordingCanvas implements Canvas {
     invocations.add(
       RecordedInvocation(
         _MethodCall(#drawOval, <dynamic>[rect, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawImage(Image image, Offset offset, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawImage, <dynamic>[image, offset, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawImageRect, <dynamic>[image, src, dst, Paint.from(paint)]),
         stack: StackTrace.current,
       ),
     );
@@ -261,20 +267,52 @@ class TestRecordingCanvas implements Canvas {
   }
 
   @override
-  void drawAtlas(Image atlas, List<RSTransform> transforms, List<Rect> rects, List<Color>? colors, BlendMode? blendMode, Rect? cullRect, Paint paint) {
+  void drawAtlas(
+    Image atlas,
+    List<RSTransform> transforms,
+    List<Rect> rects,
+    List<Color>? colors,
+    BlendMode? blendMode,
+    Rect? cullRect,
+    Paint paint,
+  ) {
     invocations.add(
       RecordedInvocation(
-        _MethodCall(#drawAtlas, <dynamic>[atlas, transforms, rects, colors, blendMode, cullRect, Paint.from(paint)]),
+        _MethodCall(#drawAtlas, <dynamic>[
+          atlas,
+          transforms,
+          rects,
+          colors,
+          blendMode,
+          cullRect,
+          Paint.from(paint),
+        ]),
         stack: StackTrace.current,
       ),
     );
   }
 
   @override
-  void drawRawAtlas(Image atlas, Float32List rstTransforms, Float32List rects, Int32List? colors, BlendMode? blendMode, Rect? cullRect, Paint paint) {
+  void drawRawAtlas(
+    Image atlas,
+    Float32List rstTransforms,
+    Float32List rects,
+    Int32List? colors,
+    BlendMode? blendMode,
+    Rect? cullRect,
+    Paint paint,
+  ) {
     invocations.add(
       RecordedInvocation(
-        _MethodCall(#drawRawAtlas, <dynamic>[atlas, rstTransforms, rects, colors, blendMode, cullRect, Paint.from(paint)]),
+        _MethodCall(#drawRawAtlas, <dynamic>[
+          atlas,
+          rstTransforms,
+          rects,
+          colors,
+          blendMode,
+          cullRect,
+          Paint.from(paint),
+        ]),
         stack: StackTrace.current,
       ),
     );
