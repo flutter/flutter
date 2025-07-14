@@ -17,6 +17,7 @@
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/comments.h"
 #include "flutter/tools/licenses_cpp/src/data.h"
+#include "flutter/tools/licenses_cpp/src/deps_parser.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
 
@@ -437,6 +438,35 @@ std::vector<absl::Status> LicenseChecker::Run(
 
   size_t count = 0;
   ProcessState state;
+
+  // Not every dependency is a git repository, so it won't be considered with
+  // the crawl that happens below of git repositories. For those dependencies
+  // we just crawl the whole directory.
+  fs::path deps_path = working_dir_path / "DEPS";
+  if (fs::exists(deps_path)) {
+    absl::StatusOr<MMapFile> deps_file = MMapFile::Make(deps_path.string());
+    if (deps_file.ok()) {
+      DepsParser deps_parser;
+      std::vector<std::string> deps = deps_parser.Parse(
+          std::string_view(deps_file->GetData(), deps_file->GetSize()));
+      for (const std::string& dep : deps) {
+        fs::path dep_path = working_dir_path / dep;
+        if (fs::is_directory(dep_path)) {
+          for (const auto& entry : fs::recursive_directory_iterator(dep_path)) {
+            if (entry.is_regular_file()) {
+              absl::Status process_result =
+                  ProcessFile(working_dir_path, licenses, data, entry.path(),
+                              flags, &state);
+              if (!process_result.ok()) {
+                return state.errors;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   for (const fs::path& git_repo : git_repos) {
     if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
       PrintProgress(count++, git_repos.size());
