@@ -6,11 +6,14 @@ import 'dart:typed_data' show Float32List, Int32List;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart' hide createTestImage;
-
-import 'reference_image_test.dart' show createTestImage;
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  late final ui.Image image;
+  setUpAll(() async {
+    image = await createTestImage(width: 8, height: 8);
+  });
+
   testWidgets('paints.circle is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
     await tester.pumpWidget(
@@ -296,8 +299,6 @@ void main() {
 
   testWidgets('paints.image is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
-    final ui.Image image = await createTestImage(8, 8, const ui.Color(0xffff0000));
-
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -330,7 +331,6 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
-    final ui.Image image = await createTestImage(8, 8, const ui.Color(0xffff0000));
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
@@ -360,7 +360,6 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
-    final ui.Image image = await createTestImage(8, 8, const ui.Color(0xffff0000));
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
@@ -503,7 +502,6 @@ void main() {
 
   testWidgets('paints.drawAtlas is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
-    final ui.Image image = await createTestImage(8, 8, const ui.Color(0xffff0000));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -543,7 +541,6 @@ void main() {
 
   testWidgets('paints.drawRawAtlas is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
-    final ui.Image image = await createTestImage(8, 8, const ui.Color(0xffff0000));
 
     await tester.pumpWidget(
       MaterialApp(
