@@ -26,7 +26,7 @@ import '../src/context.dart';
 import '../src/package_config.dart';
 
 void main() {
-  const String shaderLibDir = '/./shader_lib';
+  const shaderLibDir = '/./shader_lib';
 
   group('AssetBundle.build (using context)', () {
     late FileSystem testFileSystem;
@@ -67,8 +67,8 @@ void main() {
           bundle.entries.keys,
           unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin']),
         );
-        const String expectedJsonAssetManifest = '{}';
-        const Map<Object, Object> expectedBinAssetManifest = <Object, Object>{};
+        const expectedJsonAssetManifest = '{}';
+        const expectedBinAssetManifest = <Object, Object>{};
         expect(
           utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
           expectedJsonAssetManifest,
@@ -104,14 +104,14 @@ flutter:
     - assets/bar/lizard.png
 ''');
 
-        final List<String> assets = <String>[
+        final assets = <String>[
           'assets/foo/dog.png',
           'assets/foo/sub/cat.png',
           'assets/bar/lizard.png',
           'assets/bar/sheep.png',
         ];
 
-        for (final String asset in assets) {
+        for (final asset in assets) {
           final File assetFile = globals.fs.file(globals.fs.path.joinAll(asset.split('/')));
           assetFile.createSync(recursive: true);
         }
@@ -498,9 +498,9 @@ flutter:
     testWithoutContext(
       'throws ToolExit when directory entry contains invalid characters (Windows only)',
       () async {
-        final MemoryFileSystem fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
-        final BufferLogger logger = BufferLogger.test();
-        final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
+        final fileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+        final logger = BufferLogger.test();
+        final platform = FakePlatform(operatingSystem: 'windows');
         final String flutterRoot = Cache.defaultFlutterRoot(
           platform: platform,
           fileSystem: fileSystem,
@@ -516,7 +516,7 @@ flutter:
   assets:
     - https://mywebsite.com/images/
 ''');
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
+        final bundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -554,8 +554,8 @@ flutter:
             }
           },
         );
-        final BufferLogger logger = BufferLogger.test();
-        final FakePlatform platform = FakePlatform(operatingSystem: 'windows');
+        final logger = BufferLogger.test();
+        final platform = FakePlatform(operatingSystem: 'windows');
         final String flutterRoot = Cache.defaultFlutterRoot(
           platform: platform,
           fileSystem: fileSystem,
@@ -570,7 +570,7 @@ flutter:
   assets:
     - http://website.com/hi.png
 ''');
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
+        final bundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -594,8 +594,8 @@ flutter:
 
         fileSystem.file('my-asset.txt').createSync();
 
-        final BufferLogger logger = BufferLogger.test();
-        final FakePlatform platform = FakePlatform();
+        final logger = BufferLogger.test();
+        final platform = FakePlatform();
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         fileSystem.file('pubspec.yaml')
           ..createSync()
@@ -607,7 +607,7 @@ flutter:
       transformers:
         - package: my-transformer-one
 ''');
-        final ManifestAssetBundle bundle = ManifestAssetBundle(
+        final bundle = ManifestAssetBundle(
           logger: logger,
           fileSystem: fileSystem,
           platform: platform,
@@ -732,7 +732,7 @@ flutter:
             'assets/bar/lizard.png',
           ]),
         );
-        final Map<Object?, Object?> manifestJson =
+        final manifestJson =
             json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()))
                 as Map<Object?, Object?>;
         expect(manifestJson, isNotEmpty);
@@ -745,7 +745,7 @@ flutter:
               as String,
         );
 
-        final Uint8List manifestBinBytes = Uint8List.fromList(
+        final manifestBinBytes = Uint8List.fromList(
           await bundle.entries['AssetManifest.bin']!.contentsAsBytes(),
         );
 
@@ -764,7 +764,7 @@ flutter:
   });
 
   testUsingContext('Failed directory delete shows message', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
 
     final Directory directory = fileSystem.directory('foo')..createSync();
