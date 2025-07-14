@@ -956,14 +956,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     final double fontSize = sliderTheme.valueIndicatorTextStyle?.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
-    final TextScaler textScaler =
-        theme.useMaterial3
-            // TODO(tahatesser): This is an eye-balled value.
-            // This needs to be updated when accessibility
-            // guidelines are available on the material specs page
-            // https://m3.material.io/components/sliders/accessibility.
-            ? MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3)
-            : MediaQuery.textScalerOf(context);
+    final TextScaler textScaler = theme.useMaterial3
+        // TODO(tahatesser): This is an eye-balled value.
+        // This needs to be updated when accessibility
+        // guidelines are available on the material specs page
+        // https://m3.material.io/components/sliders/accessibility.
+        ? MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3)
+        : MediaQuery.textScalerOf(context);
     final double effectiveTextScale = textScaler.scale(fontSizeToScale) / fontSizeToScale;
 
     Widget result = CompositedTransformTarget(
@@ -971,8 +970,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       child: _SliderRenderObjectWidget(
         key: _renderObjectKey,
         value: _convert(widget.value),
-        secondaryTrackValue:
-            (widget.secondaryTrackValue != null) ? _convert(widget.secondaryTrackValue!) : null,
+        secondaryTrackValue: (widget.secondaryTrackValue != null)
+            ? _convert(widget.secondaryTrackValue!)
+            : null,
         divisions: widget.divisions,
         label: widget.label,
         sliderTheme: sliderTheme,
@@ -1187,20 +1187,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _allowedInteraction = allowedInteraction {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
-    _drag =
-        HorizontalDragGestureRecognizer()
-          ..team = team
-          ..onStart = _handleDragStart
-          ..onUpdate = _handleDragUpdate
-          ..onEnd = _handleDragEnd
-          ..onCancel = _endInteraction
-          ..gestureSettings = gestureSettings;
-    _tap =
-        TapGestureRecognizer()
-          ..team = team
-          ..onTapDown = _handleTapDown
-          ..onTapUp = _handleTapUp
-          ..gestureSettings = gestureSettings;
+    _drag = HorizontalDragGestureRecognizer()
+      ..team = team
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _endInteraction
+      ..gestureSettings = gestureSettings;
+    _tap = TapGestureRecognizer()
+      ..team = team
+      ..onTapDown = _handleTapDown
+      ..onTapUp = _handleTapUp
+      ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -1280,8 +1278,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // and if we get re-targeted in the middle, it still takes that long to
       // get to the new location.
       final double distance = (_value - _state.positionController.value).abs();
-      _state.positionController.duration =
-          distance != 0.0 ? _positionAnimationDuration * (1.0 / distance) : Duration.zero;
+      _state.positionController.duration = distance != 0.0
+          ? _positionAnimationDuration * (1.0 / distance)
+          : Duration.zero;
       _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;
@@ -1745,10 +1744,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
     );
     final double padding = _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
-    final double thumbPosition =
-        isDiscrete
-            ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
-            : trackRect.left + visualPosition * trackRect.width;
+    final double thumbPosition = isDiscrete
+        ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
+        : trackRect.left + visualPosition * trackRect.width;
     // Apply padding to trackRect.left and trackRect.right if the track height is
     // greater than the thumb radius to ensure the thumb is drawn within the track.
     final Size thumbPreferredSize = _sliderTheme.thumbShape!.getPreferredSize(
@@ -1764,21 +1762,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
       overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
     }
-    final Offset? secondaryOffset =
-        (secondaryVisualPosition != null)
-            ? Offset(
-              trackRect.left + secondaryVisualPosition * trackRect.width,
-              trackRect.center.dy,
-            )
-            : null;
+    final Offset? secondaryOffset = (secondaryVisualPosition != null)
+        ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy)
+        : null;
 
     // If [Slider.year2023] is false, the thumb uses handle thumb shape and gapped track shape.
     // The handle width and track gap are adjusted when the thumb is pressed.
     double? thumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.width;
     final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.height;
     double? trackGap = _sliderTheme.trackGap;
-    final double? pressedThumbWidth =
-        _sliderTheme.thumbSize?.resolve(<MaterialState>{MaterialState.pressed})?.width;
+    final double? pressedThumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{
+      MaterialState.pressed,
+    })?.width;
     final double delta;
     if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {
       delta = thumbWidth - pressedThumbWidth;
@@ -1821,10 +1816,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (isDiscrete) {
-      final double tickMarkWidth =
-          _sliderTheme.tickMarkShape!
-              .getPreferredSize(isEnabled: isInteractive, sliderTheme: _sliderTheme)
-              .width;
+      final double tickMarkWidth = _sliderTheme.tickMarkShape!
+          .getPreferredSize(isEnabled: isInteractive, sliderTheme: _sliderTheme)
+          .width;
       final double discreteTrackPadding = trackRect.height;
       final double adjustedTrackWidth = trackRect.width - discreteTrackPadding;
       // If the tick marks would be too dense, don't bother painting them.
@@ -1858,14 +1852,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             _sliderTheme.valueIndicatorShape!.paint(
               context,
               offset + thumbCenter,
-              activationAnimation:
-                  shouldAlwaysShowValueIndicator
-                      ? const AlwaysStoppedAnimation<double>(1)
-                      : _valueIndicatorAnimation,
-              enableAnimation:
-                  shouldAlwaysShowValueIndicator
-                      ? const AlwaysStoppedAnimation<double>(1)
-                      : _enableAnimation,
+              activationAnimation: shouldAlwaysShowValueIndicator
+                  ? const AlwaysStoppedAnimation<double>(1)
+                  : _valueIndicatorAnimation,
+              enableAnimation: shouldAlwaysShowValueIndicator
+                  ? const AlwaysStoppedAnimation<double>(1)
+                  : _enableAnimation,
               isDiscrete: isDiscrete,
               labelPainter: _labelPainter,
               parentBox: this,
@@ -1888,12 +1880,11 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,
       parentBox: this,
-      sliderTheme:
-          thumbWidth != null && thumbHeight != null
-              ? _sliderTheme.copyWith(
-                thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
-              )
-              : _sliderTheme,
+      sliderTheme: thumbWidth != null && thumbHeight != null
+          ? _sliderTheme.copyWith(
+              thumbSize: MaterialStatePropertyAll<Size?>(Size(thumbWidth, thumbHeight)),
+            )
+          : _sliderTheme,
       textDirection: _textDirection,
       value: _value,
       textScaleFactor: textScaleFactor,

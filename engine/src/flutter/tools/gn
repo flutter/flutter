@@ -604,6 +604,8 @@ def to_gn_args(args):
     if sys.platform.startswith(('cygwin', 'win')):
       gn_args['dart_use_fallback_root_certificates'] = True
 
+  gn_args['dart_disable_secure_socket'] = args.no_dart_secure_socket
+
   if args.target_sysroot:
     gn_args['target_sysroot'] = args.target_sysroot
     gn_args['custom_sysroot'] = args.target_sysroot
@@ -861,28 +863,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_webgpu'] = False
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
-
-
-def run_impeller_cmake(args):
-  impeller_cmake_dir = os.path.join('flutter', 'third_party', 'impeller-cmake-example')
-  if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
-    print('The Impeller cmake example directory "{}" does not exist'.format(impeller_cmake_dir))
-    return 1
-  cmake_cmd = [
-      'python3',
-      os.path.join(SRC_ROOT, 'flutter', 'ci', 'impeller_cmake_build_test.py'),
-      '--path',
-      impeller_cmake_dir,
-      '--cmake',
-  ]
-  if args.xcode_symlinks:
-    cmake_cmd = cmake_cmd + ['--xcode-symlinks']
-  try:
-    cmake_call_result = subprocess.call(cmake_cmd, cwd=SRC_ROOT)
-  except subprocess.CalledProcessError as exc:
-    print('Failed to generate cmake files: ', exc.returncode, exc.output)
-    return 1
-  return cmake_call_result
 
 
 def parse_args(args):
@@ -1187,22 +1167,14 @@ def parse_args(args):
       '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
   )
 
-  # Impeller flags.
   parser.add_argument(
-      '--enable-impeller-3d',
+      '--no-dart-secure-socket',
       default=False,
       action='store_true',
-      help='Enables experimental 3d support.'
+      help='(dangerous) Disable secure socket support in Dart.',
   )
 
   parser.add_argument('--malioc-path', type=str, help='The path to the malioc tool.')
-
-  parser.add_argument(
-      '--impeller-cmake-example',
-      default=False,
-      action='store_true',
-      help='Do not run GN. Instead configure the Impeller cmake example build.',
-  )
 
   parser.add_argument(
       '--slimpeller',
@@ -1272,9 +1244,6 @@ def validate_args(args):
 def main(argv):
   args = parse_args(argv)
   validate_args(args)
-
-  if args.impeller_cmake_example:
-    return run_impeller_cmake(args)
 
   exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 

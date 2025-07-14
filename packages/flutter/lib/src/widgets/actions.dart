@@ -400,14 +400,13 @@ abstract class Action<T extends Intent> with Diagnosticable {
     for (final ActionListenerCallback listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector =
-            () => <DiagnosticsNode>[
-              DiagnosticsProperty<Action<T>>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<Action<T>>(
+            'The $runtimeType sending notification was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ];
         return true;
       }());
       try {
@@ -741,8 +740,8 @@ class Actions extends StatefulWidget {
     if (!context.mounted) {
       return false;
     }
-    InheritedElement? actionsElement =
-        context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
+    InheritedElement? actionsElement = context
+        .getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
       if (visitor(actionsElement)) {
         break;
@@ -1633,10 +1632,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
 
   Action<T>? getOverrideAction({bool declareDependency = false}) {
-    final Action<T>? override =
-        declareDependency
-            ? Actions.maybeFind(lookupContext)
-            : Actions._maybeFindWithoutDependingOn(lookupContext);
+    final Action<T>? override = declareDependency
+        ? Actions.maybeFind(lookupContext)
+        : Actions._maybeFindWithoutDependingOn(lookupContext);
     assert(!identical(override, this));
     return override;
   }
@@ -1666,10 +1664,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   @override
   Object? invoke(T intent, [BuildContext? context]) {
     final Action<T>? overrideAction = getOverrideAction();
-    final Object? returnValue =
-        overrideAction == null
-            ? invokeDefaultAction(intent, callingAction, context)
-            : _invokeOverride(overrideAction, intent, context);
+    final Object? returnValue = overrideAction == null
+        ? invokeDefaultAction(intent, callingAction, context)
+        : _invokeOverride(overrideAction, intent, context);
     return returnValue;
   }
 
@@ -1692,10 +1689,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   @override
   bool get isActionEnabled {
     final Action<T>? overrideAction = getOverrideAction(declareDependency: true);
-    final bool returnValue =
-        overrideAction != null
-            ? isOverrideActionEnabled(overrideAction)
-            : defaultAction.isActionEnabled;
+    final bool returnValue = overrideAction != null
+        ? isOverrideActionEnabled(overrideAction)
+        : defaultAction.isActionEnabled;
     return returnValue;
   }
 

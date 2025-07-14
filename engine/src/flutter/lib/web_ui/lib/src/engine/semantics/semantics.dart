@@ -25,6 +25,7 @@ import 'checkable.dart';
 import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
+import 'form.dart';
 import 'header.dart';
 import 'heading.dart';
 import 'image.dart';
@@ -44,6 +45,8 @@ import 'table.dart';
 import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
+
+const String kFlutterSemanticNodePrefix = 'flt-semantic-node-';
 
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
@@ -268,6 +271,7 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -380,6 +384,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.Locale? locale;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -522,6 +529,9 @@ enum EngineSemanticsRole {
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
+
+  /// An area that represents a form.
+  form,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -600,7 +610,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -780,6 +790,10 @@ abstract class SemanticRole {
     if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
     }
+
+    if (semanticsObject.isLocaleDirty) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
+    }
   }
 
   void _updateIdentifier() {
@@ -799,7 +813,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('flt-semantic-node-$semanticNodeId');
+          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -808,6 +822,16 @@ abstract class SemanticRole {
       });
     }
     removeAttribute('aria-controls');
+  }
+
+  void _updateLocale() {
+    final String locale = semanticsObject.locale?.toString() ?? '';
+    final isSameAsParent = semanticsObject.locale == semanticsObject.parent?.locale;
+    if (locale.isEmpty || isSameAsParent) {
+      removeAttribute('lang');
+      return;
+    }
+    setAttribute('lang', locale);
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1470,6 +1494,18 @@ class SemanticsObject {
     _dirtyFields |= _controlsNodesIndex;
   }
 
+  /// The language of this node.
+  ui.Locale? locale;
+
+  static const int _localeIndex = 1 << 28;
+
+  /// Whether the [locale] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isLocaleDirty => _isDirty(_localeIndex);
+  void _markLocaleDirty() {
+    _dirtyFields |= _localeIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1752,6 +1788,11 @@ class SemanticsObject {
       _markControlsNodesDirty();
     }
 
+    if (locale != update.locale) {
+      locale = update.locale;
+      _markLocaleDirty();
+    }
+
     // Apply updates to the DOM.
     _updateRole();
 
@@ -1988,12 +2029,13 @@ class SemanticsObject {
         return EngineSemanticsRole.navigation;
       case ui.SemanticsRole.region:
         return EngineSemanticsRole.region;
+      case ui.SemanticsRole.form:
+        return EngineSemanticsRole.form;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
       case ui.SemanticsRole.progressBar:
@@ -2069,6 +2111,7 @@ class SemanticsObject {
       EngineSemanticsRole.main => SemanticMain(this),
       EngineSemanticsRole.navigation => SemanticNavigation(this),
       EngineSemanticsRole.region => SemanticRegion(this),
+      EngineSemanticsRole.form => SemanticForm(this),
     };
   }
 
@@ -2390,8 +2433,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
