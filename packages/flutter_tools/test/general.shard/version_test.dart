@@ -1403,7 +1403,7 @@ void main() {
       workingDirectory: '.',
     );
     // reported version should increment the m
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre.12');
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre-12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {
