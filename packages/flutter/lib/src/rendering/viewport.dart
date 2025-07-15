@@ -947,7 +947,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         pivot = child;
       }
       if (parent is RenderSliver) {
-        leadingScrollOffset += parent.childScrollOffset(child)!;
+        leadingScrollOffset += parent.childScrollOffsetToReveal(child)!;
       } else {
         onlySlivers = false;
         leadingScrollOffset = 0.0;
