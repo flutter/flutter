@@ -118,6 +118,7 @@ v\d\.\d)lic"},
       .include_filter = std::move(*include_filter),
       .exclude_filter = std::move(*exclude_filter),
       .catalog = std::move(catalog.value()),
+      .secondary_dir = fs::path(),
   };
 }
 
@@ -670,8 +671,9 @@ Unknown license
   ASSERT_TRUE(repo.Commit().ok());
 
   std::stringstream ss;
+  LicenseChecker::Flags flags = {.treat_unmatched_comments_as_errors = true};
   std::vector<absl::Status> errors =
-      LicenseChecker::Run(temp_path->string(), ss, *data);
+      LicenseChecker::Run(temp_path->string(), ss, *data, flags);
   EXPECT_EQ(errors.size(), 1u);
   ASSERT_TRUE(!errors.empty());
   EXPECT_TRUE(FindError(errors, absl::StatusCode::kNotFound, "NOTICES"))
@@ -750,4 +752,42 @@ deps = {
 
 Copyright Test
 )output");
+}
+
+TEST_F(LicenseCheckerTest, Secondary) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  fs::create_directories("engine/third_party/foobar");
+  fs::create_directories("secondary/third_party/foobar");
+  ASSERT_TRUE(WriteFile(kHeader, "engine/third_party/foobar/foobar.cc").ok());
+  ASSERT_TRUE(
+      WriteFile(kLicense, "secondary/third_party/foobar/license.txt").ok());
+
+  data->secondary_dir = *temp_path / "secondary";
+
+  fs::current_path(*temp_path / "engine");
+  Repo repo;
+  repo.Add("third_party/foobar/foobar.cc");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run((*temp_path / "engine").string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << errors[0];
+
+  EXPECT_EQ(ss.str(), R"notices(foobar
+
+Copyright Test
+--------------------------------------------------------------------------------
+foobar
+
+Test License
+v2.0
+
+)notices");
 }

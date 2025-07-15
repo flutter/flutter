@@ -499,20 +499,46 @@ std::vector<absl::Status> LicenseChecker::Run(
       PrintProgress(count++, git_repos.size());
     }
 
-    absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
-    if (!git_files.ok()) {
+    absl::StatusOr<std::vector<std::string>> git_files =
+    GitLsFiles(git_repo); if (!git_files.ok()) {
       state.errors.push_back(git_files.status());
       return state.errors;
     }
     for (const std::string& git_file : git_files.value()) {
       fs::path full_path = git_repo / git_file;
       absl::Status process_result = ProcessFile(working_dir_path, licenses,
-                                                data, full_path, flags, &state);
+                                                data, full_path, flags,
+                                                &state);
       if (!process_result.ok()) {
         return state.errors;
       }
     }
   }
+
+  if (!data.secondary_dir.empty()) {
+    for (const auto& entry :
+         fs::recursive_directory_iterator(data.secondary_dir)) {
+      if (!fs::is_directory(entry)) {
+        fs::path relative_path = fs::relative(entry, data.secondary_dir);
+        if (!fs::exists(working_dir / relative_path.parent_path())) {
+          state.errors.push_back(absl::InvalidArgumentError(absl::StrCat(
+              "secondary license path mixmatch at ", relative_path.string())));
+        } else {
+          fs::path full_path = data.secondary_dir / entry;
+          Package package = GetPackage(data, working_dir_path, relative_path);
+          absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
+          if (file.ok()) {
+            state.license_map.Add(
+                package.name,
+                std::string_view(file->GetData(), file->GetSize()));
+          } else {
+            state.errors.push_back(file.status());
+          }
+        }
+      }
+    }
+  }
+
   state.license_map.Write(licenses);
   if (!VLOG_IS_ON(1) && IsStdoutTerminal()) {
     PrintProgress(count++, git_repos.size());
