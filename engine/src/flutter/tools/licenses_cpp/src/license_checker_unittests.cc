@@ -678,6 +678,43 @@ Unknown license
       << errors[0];
 }
 
+TEST_F(LicenseCheckerTest, CipdDependencyParentDir) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+
+  const char* deps_file = R"deps(
+deps = {
+  'child/third_party/foobar': {
+    'dep_type': 'cipd',
+    'packages': [{'package': 'flutter/testing/foobar', 'version': '1.0.0'}],
+  },
+}
+)deps";
+  ASSERT_TRUE(WriteFile(deps_file, "DEPS").ok());
+
+  fs::create_directories("child/third_party/foobar");
+  ASSERT_TRUE(WriteFile(kHeader, "child/third_party/foobar/foobar.cc").ok());
+
+  Repo repo;
+  repo.Add("DEPS");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run((*temp_path / "child").string(), ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << (errors.empty() ? "" : errors[0].message());
+
+  EXPECT_EQ(ss.str(), R"output(foobar
+
+Copyright Test
+)output");
+}
+
 TEST_F(LicenseCheckerTest, CipdDependency) {
   absl::StatusOr<fs::path> temp_path = MakeTempDir();
   ASSERT_TRUE(temp_path.ok());

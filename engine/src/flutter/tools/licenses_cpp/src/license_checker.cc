@@ -421,6 +421,22 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
 }
 }  // namespace
 
+namespace {
+// Searches parent directories for `file_name` starting from `starting_dir`.
+fs::path FindFileInParentDirectories(const fs::path& starting_dir,
+                                     const std::string_view file_name) {
+  fs::path current_dir = starting_dir;
+  while (!current_dir.empty() && current_dir != current_dir.root_path()) {
+    fs::path file_path = current_dir / file_name;
+    if (fs::exists(file_path)) {
+      return file_path;
+    }
+    current_dir = current_dir.parent_path();
+  }
+  return fs::path();
+}
+}  // namespace
+
 std::vector<absl::Status> LicenseChecker::Run(std::string_view working_dir,
                                               std::ostream& licenses,
                                               const Data& data) {
@@ -442,16 +458,22 @@ std::vector<absl::Status> LicenseChecker::Run(
   // Not every dependency is a git repository, so it won't be considered with
   // the crawl that happens below of git repositories. For those dependencies
   // we just crawl the whole directory.
-  fs::path deps_path = working_dir_path / "DEPS";
-  if (fs::exists(deps_path)) {
+  fs::path deps_path = FindFileInParentDirectories(working_dir_path, "DEPS");
+  if (!deps_path.empty()) {
     absl::StatusOr<MMapFile> deps_file = MMapFile::Make(deps_path.string());
     if (deps_file.ok()) {
       DepsParser deps_parser;
       std::vector<std::string> deps = deps_parser.Parse(
           std::string_view(deps_file->GetData(), deps_file->GetSize()));
       for (const std::string& dep : deps) {
-        fs::path dep_path = working_dir_path / dep;
+        fs::path dep_path = deps_path.parent_path() / dep;
         if (fs::is_directory(dep_path)) {
+          // We don't want to process deps that are outside the working
+          // directory.
+          if (dep_path.string().find(working_dir_path.string()) != 0) {
+            continue;
+          }
+
           for (const auto& entry : fs::recursive_directory_iterator(dep_path)) {
             if (entry.is_regular_file()) {
               absl::Status process_result =
