@@ -111,7 +111,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(appBar: AppBar(centerTitle: false, title: const Placeholder(key: Key('X')))),
+        home: Scaffold(
+          appBar: AppBar(centerTitle: false, title: const Placeholder(key: Key('X'))),
+        ),
       ),
     );
 
@@ -406,7 +408,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: SizedBox.shrink(child: Scaffold(appBar: AppBar(title: const Text('X')))),
+          child: SizedBox.shrink(
+            child: Scaffold(appBar: AppBar(title: const Text('X'))),
+          ),
         ),
       ),
     );
@@ -450,7 +454,10 @@ void main() {
   testWidgets('AppBar drawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), drawer: const Drawer()),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Howdy!')),
+          drawer: const Drawer(),
+        ),
       ),
     );
     final double iconSize = const IconThemeData.fallback().size!;
@@ -462,7 +469,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), drawer: const Drawer()),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Howdy!')),
+          drawer: const Drawer(),
+        ),
       ),
     );
 
@@ -489,7 +499,10 @@ void main() {
       MaterialApp(
         theme: themeData,
         home: Scaffold(
-          appBar: AppBar(title: const Text('Howdy!'), iconTheme: const IconThemeData(color: color)),
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
           drawer: const Drawer(),
         ),
       ),
@@ -501,7 +514,10 @@ void main() {
   testWidgets('AppBar endDrawer icon has default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), endDrawer: const Drawer()),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Howdy!')),
+          endDrawer: const Drawer(),
+        ),
       ),
     );
 
@@ -514,7 +530,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), endDrawer: const Drawer()),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Howdy!')),
+          endDrawer: const Drawer(),
+        ),
       ),
     );
 
@@ -541,7 +560,10 @@ void main() {
       MaterialApp(
         theme: themeData,
         home: Scaffold(
-          appBar: AppBar(title: const Text('Howdy!'), iconTheme: const IconThemeData(color: color)),
+          appBar: AppBar(
+            title: const Text('Howdy!'),
+            iconTheme: const IconThemeData(color: color),
+          ),
           endDrawer: const Drawer(),
         ),
       ),
@@ -575,7 +597,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
-        home: Scaffold(appBar: AppBar(leading: Container(), title: const Text('X'))),
+        home: Scaffold(
+          appBar: AppBar(leading: Container(), title: const Text('X')),
+        ),
       ),
     );
 
@@ -639,7 +663,9 @@ void main() {
   ) async {
     Widget buildAppBar([double? elevation]) {
       return MaterialApp(
-        home: Scaffold(appBar: AppBar(title: const Text('Title'), elevation: elevation)),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title'), elevation: elevation),
+        ),
       );
     }
 
@@ -710,8 +736,8 @@ void main() {
                 width: 800.0,
                 child: ListView.builder(
                   itemCount: 100,
-                  itemBuilder:
-                      (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+                  itemBuilder: (BuildContext context, int index) =>
+                      ListTile(title: Text('Item $index')),
                 ),
               );
             },
@@ -747,7 +773,10 @@ void main() {
         ],
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: MediaQuery(data: topPadding100, child: Scaffold(primary: false, appBar: AppBar())),
+          child: MediaQuery(
+            data: topPadding100,
+            child: Scaffold(primary: false, appBar: AppBar()),
+          ),
         ),
       ),
     );
@@ -860,7 +889,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
-            child: Scaffold(body: Column(children: <Widget>[AppBar(title: const Text('title'))])),
+            child: Scaffold(
+              body: Column(children: <Widget>[AppBar(title: const Text('title'))]),
+            ),
           ),
         ),
       ),
@@ -904,7 +935,11 @@ void main() {
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(appBar: AppBar())));
     expect(find.byIcon(Icons.menu), findsNothing);
-    await tester.pumpWidget(MaterialApp(home: Scaffold(drawer: const Drawer(), appBar: AppBar())));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(drawer: const Drawer(), appBar: AppBar()),
+      ),
+    );
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
@@ -1422,7 +1457,10 @@ void main() {
   ) async {
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
-      MaterialApp(theme: darkTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(appBar: AppBar(title: const Text('test'))),
+      ),
     );
 
     expect(darkTheme.colorScheme.brightness, Brightness.dark);
@@ -1441,7 +1479,10 @@ void main() {
   ) async {
     final ThemeData lightTheme = ThemeData();
     await tester.pumpWidget(
-      MaterialApp(theme: lightTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(appBar: AppBar(title: const Text('test'))),
+      ),
     );
 
     expect(lightTheme.colorScheme.brightness, Brightness.light);
@@ -1474,8 +1515,9 @@ void main() {
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
           appBarMaterial.color!,
         );
-        final Brightness onAppBarBrightness =
-            appBarBrightness == Brightness.light ? Brightness.dark : Brightness.light;
+        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light;
 
         expect(
           SystemChrome.latestStyle,
@@ -1496,8 +1538,9 @@ void main() {
         final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
           appBarMaterial.color!,
         );
-        final Brightness onAppBarBrightness =
-            appBarBrightness == Brightness.light ? Brightness.dark : Brightness.light;
+        final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+            ? Brightness.dark
+            : Brightness.light;
 
         expect(
           SystemChrome.latestStyle,
@@ -1736,7 +1779,9 @@ void main() {
 
   testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(appBar: AppBar(), endDrawer: const Drawer())),
+      MaterialApp(
+        home: Scaffold(appBar: AppBar(), endDrawer: const Drawer()),
+      ),
     );
 
     final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
@@ -1752,7 +1797,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(appBar: AppBar(title: const Text('Title')))),
+      MaterialApp(
+        home: Scaffold(appBar: AppBar(title: const Text('Title'))),
+      ),
     );
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
@@ -1773,7 +1820,10 @@ void main() {
             backgroundColor: backgroundColor,
             leading: Icon(Icons.add_circle, key: leadingIconKey),
             title: const Text('title'),
-            actions: <Widget>[Icon(Icons.ac_unit, key: actionIconKey), const Text('action')],
+            actions: <Widget>[
+              Icon(Icons.ac_unit, key: actionIconKey),
+              const Text('action'),
+            ],
           ),
         ),
       ),
@@ -1784,28 +1834,25 @@ void main() {
     );
     expect(appBarMaterial.color, backgroundColor);
 
-    final TextStyle titleTextStyle =
-        tester
-            .widget<DefaultTextStyle>(
-              find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
-            )
-            .style;
+    final TextStyle titleTextStyle = tester
+        .widget<DefaultTextStyle>(
+          find.ancestor(of: find.text('title'), matching: find.byType(DefaultTextStyle)).first,
+        )
+        .style;
     expect(titleTextStyle.color, foregroundColor);
 
-    final IconThemeData leadingIconTheme =
-        tester
-            .widget<IconTheme>(
-              find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
-            )
-            .data;
+    final IconThemeData leadingIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(leadingIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(leadingIconTheme.color, foregroundColor);
 
-    final IconThemeData actionIconTheme =
-        tester
-            .widget<IconTheme>(
-              find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
-            )
-            .data;
+    final IconThemeData actionIconTheme = tester
+        .widget<IconTheme>(
+          find.ancestor(of: find.byKey(actionIconKey), matching: find.byType(IconTheme)).first,
+        )
+        .data;
     expect(actionIconTheme.color, foregroundColor);
 
     // Test icon color
@@ -2256,8 +2303,9 @@ void main() {
               return states.contains(MaterialState.scrolledUnder) ? scrolledColor : defaultColor;
             }),
             title: const Text('AppBar'),
-            flexibleSpace:
-                includeFlexibleSpace ? const FlexibleSpaceBar(title: Text('FlexibleSpace')) : null,
+            flexibleSpace: includeFlexibleSpace
+                ? const FlexibleSpaceBar(title: Text('FlexibleSpace'))
+                : null,
             animateColor: animateColor,
           ),
           body: ListView(
@@ -2747,7 +2795,11 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(MaterialApp(home: Scaffold(key: key, appBar: AppBar())));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(key: key, appBar: AppBar()),
+      ),
+    );
     expect(find.byType(BackButton), findsNothing);
 
     // Push one entry that doesn't imply app bar dismissal.
@@ -3118,8 +3170,8 @@ void main() {
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder:
-                            (_) => Scaffold(appBar: AppBar(title: const Text('Second Screen'))),
+                        builder: (_) =>
+                            Scaffold(appBar: AppBar(title: const Text('Second Screen'))),
                       ),
                     );
                   },
@@ -3164,8 +3216,8 @@ void main() {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder:
-                              (_) => Scaffold(appBar: AppBar(title: const Text('Second Screen'))),
+                          builder: (_) =>
+                              Scaffold(appBar: AppBar(title: const Text('Second Screen'))),
                         ),
                       );
                     },
@@ -3227,7 +3279,10 @@ void main() {
     ) async {
       final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
       await tester.pumpWidget(
-        MaterialApp(theme: darkTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
+        MaterialApp(
+          theme: darkTheme,
+          home: Scaffold(appBar: AppBar(title: const Text('test'))),
+        ),
       );
 
       expect(darkTheme.colorScheme.brightness, Brightness.dark);
@@ -3248,7 +3303,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), drawer: const Drawer()),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Howdy!')),
+            drawer: const Drawer(),
+          ),
         ),
       );
 
@@ -3263,7 +3321,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(appBar: AppBar(title: const Text('Howdy!')), endDrawer: const Drawer()),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Howdy!')),
+            endDrawer: const Drawer(),
+          ),
         ),
       );
 
@@ -3295,7 +3356,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: Scaffold(appBar: AppBar(leading: Container(), title: const Text('X'))),
+          home: Scaffold(
+            appBar: AppBar(leading: Container(), title: const Text('X')),
+          ),
         ),
       );
 
@@ -3360,7 +3423,9 @@ void main() {
       Widget buildAppBar([double? elevation]) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
-          home: Scaffold(appBar: AppBar(title: const Text('Title'), elevation: elevation)),
+          home: Scaffold(
+            appBar: AppBar(title: const Text('Title'), elevation: elevation),
+          ),
         );
       }
 
@@ -3445,7 +3510,10 @@ void main() {
     ) async {
       final ThemeData lightTheme = ThemeData(primarySwatch: Colors.lightBlue, useMaterial3: false);
       await tester.pumpWidget(
-        MaterialApp(theme: lightTheme, home: Scaffold(appBar: AppBar(title: const Text('test')))),
+        MaterialApp(
+          theme: lightTheme,
+          home: Scaffold(appBar: AppBar(title: const Text('test'))),
+        ),
       );
 
       expect(lightTheme.colorScheme.brightness, Brightness.light);
@@ -3477,8 +3545,9 @@ void main() {
           final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
             appBarMaterial.color!,
           );
-          final Brightness onAppBarBrightness =
-              appBarBrightness == Brightness.light ? Brightness.dark : Brightness.light;
+          final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light;
 
           expect(
             SystemChrome.latestStyle,
@@ -3498,8 +3567,9 @@ void main() {
           final Brightness appBarBrightness = ThemeData.estimateBrightnessForColor(
             appBarMaterial.color!,
           );
-          final Brightness onAppBarBrightness =
-              appBarBrightness == Brightness.light ? Brightness.dark : Brightness.light;
+          final Brightness onAppBarBrightness = appBarBrightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light;
 
           expect(
             SystemChrome.latestStyle,

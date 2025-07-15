@@ -381,19 +381,17 @@ class PaintingContext extends ClipContext {
     }
     assert(() {
       if (debugRepaintRainbowEnabled) {
-        final Paint paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 6.0
-              ..color = debugCurrentRepaintColor.toColor();
+        final Paint paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6.0
+          ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(estimatedBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
-        final Paint paint =
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.0
-              ..color = const Color(0xFFFF9800);
+        final Paint paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFF9800);
         canvas.drawRect(estimatedBounds, paint);
       }
       return true;
@@ -777,10 +775,9 @@ class PaintingContext extends ClipContext {
     PaintingContextCallback painter, {
     TransformLayer? oldLayer,
   }) {
-    final Matrix4 effectiveTransform =
-        Matrix4.translationValues(offset.dx, offset.dy, 0.0)
-          ..multiply(transform)
-          ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
+    final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+      ..multiply(transform)
+      ..translateByDouble(-offset.dx, -offset.dy, 0, 1);
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;
@@ -2084,20 +2081,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         stack: stack,
         library: 'rendering library',
         context: ErrorDescription('during $method()'),
-        informationCollector:
-            () => <DiagnosticsNode>[
-              // debugCreator should always be null outside of debugMode, but we want
-              // the tree shaker to notice this.
-              if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
-              describeForError(
-                'The following RenderObject was being processed when the exception was fired',
-              ),
-              // TODO(jacobr): this error message has a code smell. Consider whether
-              // displaying the truncated children is really useful for command line
-              // users. Inspector users can see the full tree by clicking on the
-              // render object so this may not be that useful.
-              describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          // debugCreator should always be null outside of debugMode, but we want
+          // the tree shaker to notice this.
+          if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
+          describeForError(
+            'The following RenderObject was being processed when the exception was fired',
+          ),
+          // TODO(jacobr): this error message has a code smell. Consider whether
+          // displaying the truncated children is really useful for command line
+          // users. Inspector users can see the full tree by clicking on the
+          // render object so this may not be that useful.
+          describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren),
+        ],
       ),
     );
   }
@@ -2211,8 +2207,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
 
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
-      final String culpritMethodName =
-          debugActiveLayout.debugDoingThisLayout ? 'performLayout' : 'performResize';
+      final String culpritMethodName = debugActiveLayout.debugDoingThisLayout
+          ? 'performLayout'
+          : 'performResize';
       final String culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
       result = false;
 
@@ -2254,11 +2251,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         'A $runtimeType was mutated in $culpritFullMethodName.',
       );
       final bool isMutatedByAncestor = activeLayoutRoot == debugActiveLayout;
-      final String description =
-          isMutatedByAncestor
-              ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
-              : 'A RenderObject must not mutate another RenderObject from a different render subtree '
-                  'in its $culpritMethodName method.';
+      final String description = isMutatedByAncestor
+          ? 'A RenderObject must not mutate its descendants in its $culpritMethodName method.'
+          : 'A RenderObject must not mutate another RenderObject from a different render subtree '
+                'in its $culpritMethodName method.';
 
       throw FlutterError.fromParts(<DiagnosticsNode>[
         summary,
@@ -2681,8 +2677,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
             final Match? targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
             final String? problemFunction =
                 (targetFrameMatch != null && targetFrameMatch.groupCount > 0)
-                    ? targetFrameMatch.group(1)
-                    : stack[targetFrame].trim();
+                ? targetFrameMatch.group(1)
+                : stack[targetFrame].trim();
             return <DiagnosticsNode>[
               ErrorDescription(
                 "These invalid constraints were provided to $runtimeType's layout() "
@@ -4599,6 +4595,493 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   }
 }
 
+/// A mixin for [RenderObject]s that want to annotate the [SemanticsNode]
+/// for their subtree.
+mixin SemanticsAnnotationsMixin on RenderObject {
+  /// Initializes the semantics annotations for this mixin.
+  // Parameters added to this method should be marked as required to ensure
+  // callers of the method provide a value.
+  void initSemanticsAnnotations({
+    required SemanticsProperties properties,
+    required bool container,
+    required bool explicitChildNodes,
+    required bool excludeSemantics,
+    required bool blockUserActions,
+    required Locale? localeForSubtree,
+    required TextDirection? textDirection,
+  }) {
+    _properties = properties;
+    _container = container;
+    _explicitChildNodes = explicitChildNodes;
+    _excludeSemantics = excludeSemantics;
+    _blockUserActions = blockUserActions;
+    _localeForSubtree = localeForSubtree;
+    _textDirection = textDirection;
+    _updateAttributedFields(_properties);
+  }
+
+  /// All of the [SemanticsProperties] for this [SemanticsAnnotationsMixin].
+  SemanticsProperties get properties => _properties;
+  late SemanticsProperties _properties;
+  set properties(SemanticsProperties value) {
+    if (_properties == value) {
+      return;
+    }
+    _properties = value;
+    _updateAttributedFields(_properties);
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If 'container' is true, this [RenderObject] will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors.
+  ///
+  /// Whether descendants of this [RenderObject] can add their semantic information
+  /// to the [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
+  bool get container => _container;
+  late bool _container;
+  set container(bool value) {
+    if (container == value) {
+      return;
+    }
+    _container = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether descendants of this [RenderObject] are allowed to add semantic
+  /// information to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticsNode]s to the tree.
+  ///
+  /// This setting is often used in combination with
+  /// [SemanticsConfiguration.isSemanticBoundary] to create semantic boundaries
+  /// that are either writable or not for children.
+  bool get explicitChildNodes => _explicitChildNodes;
+  late bool _explicitChildNodes;
+  set explicitChildNodes(bool value) {
+    if (_explicitChildNodes == value) {
+      return;
+    }
+    _explicitChildNodes = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether descendants of this [RenderObject] should have their semantic
+  /// information ignored.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  bool get excludeSemantics => _excludeSemantics;
+  late bool _excludeSemantics;
+  set excludeSemantics(bool value) {
+    if (_excludeSemantics == value) {
+      return;
+    }
+    _excludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether to block user interactions for the semantics subtree.
+  ///
+  /// Setting this true prevents user from activating pointer related
+  /// [SemanticsAction]s, such as [SemanticsAction.tap] or
+  /// [SemanticsAction.longPress].
+  bool get blockUserActions => _blockUserActions;
+  late bool _blockUserActions;
+  set blockUserActions(bool value) {
+    if (_blockUserActions == value) {
+      return;
+    }
+    _blockUserActions = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// The [Locale] for the semantics subtree.
+  ///
+  /// Setting this to null will inherit locale from ancestor semantics node.
+  Locale? get localeForSubtree => _localeForSubtree;
+  Locale? _localeForSubtree;
+  set localeForSubtree(Locale? value) {
+    if (_localeForSubtree == value) {
+      return;
+    }
+    _localeForSubtree = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  void _updateAttributedFields(SemanticsProperties value) {
+    _attributedLabel = _effectiveAttributedLabel(value);
+    _attributedValue = _effectiveAttributedValue(value);
+    _attributedIncreasedValue = _effectiveAttributedIncreasedValue(value);
+    _attributedDecreasedValue = _effectiveAttributedDecreasedValue(value);
+    _attributedHint = _effectiveAttributedHint(value);
+  }
+
+  AttributedString? _effectiveAttributedLabel(SemanticsProperties value) {
+    return value.attributedLabel ?? (value.label == null ? null : AttributedString(value.label!));
+  }
+
+  AttributedString? _effectiveAttributedValue(SemanticsProperties value) {
+    return value.attributedValue ?? (value.value == null ? null : AttributedString(value.value!));
+  }
+
+  AttributedString? _effectiveAttributedIncreasedValue(SemanticsProperties value) {
+    return value.attributedIncreasedValue ??
+        (value.increasedValue == null ? null : AttributedString(value.increasedValue!));
+  }
+
+  AttributedString? _effectiveAttributedDecreasedValue(SemanticsProperties value) {
+    return properties.attributedDecreasedValue ??
+        (value.decreasedValue == null ? null : AttributedString(value.decreasedValue!));
+  }
+
+  AttributedString? _effectiveAttributedHint(SemanticsProperties value) {
+    return value.attributedHint ?? (value.hint == null ? null : AttributedString(value.hint!));
+  }
+
+  AttributedString? _attributedLabel;
+  AttributedString? _attributedValue;
+  AttributedString? _attributedIncreasedValue;
+  AttributedString? _attributedDecreasedValue;
+  AttributedString? _attributedHint;
+
+  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given
+  /// value.
+  ///
+  /// This must not be null if [SemanticsProperties.attributedLabel],
+  /// [SemanticsProperties.attributedHint],
+  /// [SemanticsProperties.attributedValue],
+  /// [SemanticsProperties.attributedIncreasedValue], or
+  /// [SemanticsProperties.attributedDecreasedValue] are not null.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (excludeSemantics) {
+      return;
+    }
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = container;
+    config.explicitChildNodes = explicitChildNodes;
+    config.isBlockingUserActions = blockUserActions;
+    config.localeForSubtree = localeForSubtree;
+    assert(
+      ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
+          !(_properties.scopesRoute ?? false),
+      'explicitChildNodes must be set to true if scopes route is true',
+    );
+    assert(
+      !((_properties.toggled ?? false) && (_properties.checked ?? false)),
+      'A semantics node cannot be toggled and checked at the same time',
+    );
+
+    if (_properties.enabled != null) {
+      config.isEnabled = _properties.enabled;
+    }
+    if (_properties.checked != null) {
+      config.isChecked = _properties.checked;
+    }
+    if (_properties.mixed != null) {
+      config.isCheckStateMixed = _properties.mixed;
+    }
+    if (_properties.toggled != null) {
+      config.isToggled = _properties.toggled;
+    }
+    if (_properties.selected != null) {
+      config.isSelected = _properties.selected!;
+    }
+    if (_properties.button != null) {
+      config.isButton = _properties.button!;
+    }
+    if (_properties.expanded != null) {
+      config.isExpanded = _properties.expanded;
+    }
+    if (_properties.link != null) {
+      config.isLink = _properties.link!;
+    }
+    if (_properties.linkUrl != null) {
+      config.linkUrl = _properties.linkUrl;
+    }
+    if (_properties.slider != null) {
+      config.isSlider = _properties.slider!;
+    }
+    if (_properties.keyboardKey != null) {
+      config.isKeyboardKey = _properties.keyboardKey!;
+    }
+    if (_properties.header != null) {
+      config.isHeader = _properties.header!;
+    }
+    if (_properties.headingLevel != null) {
+      config.headingLevel = _properties.headingLevel!;
+    }
+    if (_properties.textField != null) {
+      config.isTextField = _properties.textField!;
+    }
+    if (_properties.readOnly != null) {
+      config.isReadOnly = _properties.readOnly!;
+    }
+    if (_properties.focusable != null) {
+      config.isFocusable = _properties.focusable!;
+    }
+    if (_properties.focused != null) {
+      config.isFocused = _properties.focused!;
+    }
+    if (_properties.inMutuallyExclusiveGroup != null) {
+      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
+    }
+    if (_properties.obscured != null) {
+      config.isObscured = _properties.obscured!;
+    }
+    if (_properties.multiline != null) {
+      config.isMultiline = _properties.multiline!;
+    }
+    if (_properties.hidden != null) {
+      config.isHidden = _properties.hidden!;
+    }
+    if (_properties.image != null) {
+      config.isImage = _properties.image!;
+    }
+    if (_properties.isRequired != null) {
+      config.isRequired = _properties.isRequired;
+    }
+    if (_properties.identifier != null) {
+      config.identifier = _properties.identifier!;
+    }
+    if (_attributedLabel != null) {
+      config.attributedLabel = _attributedLabel!;
+    }
+    if (_attributedValue != null) {
+      config.attributedValue = _attributedValue!;
+    }
+    if (_attributedIncreasedValue != null) {
+      config.attributedIncreasedValue = _attributedIncreasedValue!;
+    }
+    if (_attributedDecreasedValue != null) {
+      config.attributedDecreasedValue = _attributedDecreasedValue!;
+    }
+    if (_attributedHint != null) {
+      config.attributedHint = _attributedHint!;
+    }
+    if (_properties.tooltip != null) {
+      config.tooltip = _properties.tooltip!;
+    }
+    if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty) {
+      config.hintOverrides = _properties.hintOverrides;
+    }
+    if (_properties.scopesRoute != null) {
+      config.scopesRoute = _properties.scopesRoute!;
+    }
+    if (_properties.namesRoute != null) {
+      config.namesRoute = _properties.namesRoute!;
+    }
+    if (_properties.liveRegion != null) {
+      config.liveRegion = _properties.liveRegion!;
+    }
+    if (_properties.maxValueLength != null) {
+      config.maxValueLength = _properties.maxValueLength;
+    }
+    if (_properties.currentValueLength != null) {
+      config.currentValueLength = _properties.currentValueLength;
+    }
+    if (textDirection != null) {
+      config.textDirection = textDirection;
+    }
+    if (_properties.sortKey != null) {
+      config.sortKey = _properties.sortKey;
+    }
+    if (_properties.tagForChildren != null) {
+      config.addTagForChildren(_properties.tagForChildren!);
+    }
+    if (properties.role != null) {
+      config.role = _properties.role!;
+    }
+    if (_properties.controlsNodes != null) {
+      config.controlsNodes = _properties.controlsNodes;
+    }
+    if (config.validationResult != _properties.validationResult) {
+      config.validationResult = _properties.validationResult;
+    }
+
+    if (_properties.inputType != null) {
+      config.inputType = _properties.inputType!;
+    }
+
+    // Registering _perform* as action handlers instead of the user provided
+    // ones to ensure that changing a user provided handler from a non-null to
+    // another non-null value doesn't require a semantics update.
+    if (_properties.onTap != null) {
+      config.onTap = _performTap;
+    }
+    if (_properties.onLongPress != null) {
+      config.onLongPress = _performLongPress;
+    }
+    if (_properties.onDismiss != null) {
+      config.onDismiss = _performDismiss;
+    }
+    if (_properties.onScrollLeft != null) {
+      config.onScrollLeft = _performScrollLeft;
+    }
+    if (_properties.onScrollRight != null) {
+      config.onScrollRight = _performScrollRight;
+    }
+    if (_properties.onScrollUp != null) {
+      config.onScrollUp = _performScrollUp;
+    }
+    if (_properties.onScrollDown != null) {
+      config.onScrollDown = _performScrollDown;
+    }
+    if (_properties.onIncrease != null) {
+      config.onIncrease = _performIncrease;
+    }
+    if (_properties.onDecrease != null) {
+      config.onDecrease = _performDecrease;
+    }
+    if (_properties.onCopy != null) {
+      config.onCopy = _performCopy;
+    }
+    if (_properties.onCut != null) {
+      config.onCut = _performCut;
+    }
+    if (_properties.onPaste != null) {
+      config.onPaste = _performPaste;
+    }
+    if (_properties.onMoveCursorForwardByCharacter != null) {
+      config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
+    }
+    if (_properties.onMoveCursorBackwardByCharacter != null) {
+      config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
+    }
+    if (_properties.onMoveCursorForwardByWord != null) {
+      config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
+    }
+    if (_properties.onMoveCursorBackwardByWord != null) {
+      config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
+    }
+    if (_properties.onSetSelection != null) {
+      config.onSetSelection = _performSetSelection;
+    }
+    if (_properties.onSetText != null) {
+      config.onSetText = _performSetText;
+    }
+    if (_properties.onDidGainAccessibilityFocus != null) {
+      config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
+    }
+    if (_properties.onDidLoseAccessibilityFocus != null) {
+      config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
+    }
+    if (_properties.onFocus != null) {
+      config.onFocus = _performFocus;
+    }
+    if (_properties.customSemanticsActions != null) {
+      config.customSemanticsActions = _properties.customSemanticsActions!;
+    }
+  }
+
+  void _performTap() {
+    _properties.onTap?.call();
+  }
+
+  void _performLongPress() {
+    _properties.onLongPress?.call();
+  }
+
+  void _performDismiss() {
+    _properties.onDismiss?.call();
+  }
+
+  void _performScrollLeft() {
+    _properties.onScrollLeft?.call();
+  }
+
+  void _performScrollRight() {
+    _properties.onScrollRight?.call();
+  }
+
+  void _performScrollUp() {
+    _properties.onScrollUp?.call();
+  }
+
+  void _performScrollDown() {
+    _properties.onScrollDown?.call();
+  }
+
+  void _performIncrease() {
+    _properties.onIncrease?.call();
+  }
+
+  void _performDecrease() {
+    _properties.onDecrease?.call();
+  }
+
+  void _performCopy() {
+    _properties.onCopy?.call();
+  }
+
+  void _performCut() {
+    _properties.onCut?.call();
+  }
+
+  void _performPaste() {
+    _properties.onPaste?.call();
+  }
+
+  void _performMoveCursorForwardByCharacter(bool extendSelection) {
+    _properties.onMoveCursorForwardByCharacter?.call(extendSelection);
+  }
+
+  void _performMoveCursorBackwardByCharacter(bool extendSelection) {
+    _properties.onMoveCursorBackwardByCharacter?.call(extendSelection);
+  }
+
+  void _performMoveCursorForwardByWord(bool extendSelection) {
+    _properties.onMoveCursorForwardByWord?.call(extendSelection);
+  }
+
+  void _performMoveCursorBackwardByWord(bool extendSelection) {
+    _properties.onMoveCursorBackwardByWord?.call(extendSelection);
+  }
+
+  void _performSetSelection(TextSelection selection) {
+    _properties.onSetSelection?.call(selection);
+  }
+
+  void _performSetText(String text) {
+    _properties.onSetText?.call(text);
+  }
+
+  void _performDidGainAccessibilityFocus() {
+    _properties.onDidGainAccessibilityFocus?.call();
+  }
+
+  void _performDidLoseAccessibilityFocus() {
+    _properties.onDidLoseAccessibilityFocus?.call();
+  }
+
+  void _performFocus() {
+    _properties.onFocus?.call();
+  }
+}
+
 /// Properties of _RenderObjectSemantics that are imposed from parent.
 @immutable
 final class _SemanticsParentData {
@@ -4607,6 +5090,7 @@ final class _SemanticsParentData {
     required this.blocksUserActions,
     required this.explicitChildNodes,
     required this.tagsForChildren,
+    required this.localeForChildren,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -4633,12 +5117,15 @@ final class _SemanticsParentData {
   /// [_RenderObjectSemantics.shouldFormSemanticsNode] is true.
   final Set<SemanticsTag>? tagsForChildren;
 
+  final Locale? localeForChildren;
+
   @override
   bool operator ==(Object other) {
     return other is _SemanticsParentData &&
         other.mergeIntoParent == mergeIntoParent &&
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
+        other.localeForChildren == localeForChildren &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -4648,6 +5135,7 @@ final class _SemanticsParentData {
       mergeIntoParent,
       blocksUserActions,
       explicitChildNodes,
+      localeForChildren,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -4783,8 +5271,10 @@ class _IncompleteSemanticsFragment extends _SemanticsFragment {
   }
 }
 
-typedef _MergeUpAndSiblingMergeGroups =
-    (List<_SemanticsFragment> mergeUp, List<List<_SemanticsFragment>> siblingMergeGroups);
+typedef _MergeUpAndSiblingMergeGroups = (
+  List<_SemanticsFragment> mergeUp,
+  List<List<_SemanticsFragment>> siblingMergeGroups,
+);
 
 /// A wrapper class for a [RenderObject] that provides semantics related
 /// properties and compilations.
@@ -5037,6 +5527,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
+    // localeForSubtree from the config overrides parentData's inherited locale.
+    final Locale? localeForChildren =
+        configProvider.effective.localeForSubtree ?? parentData?.localeForChildren;
+
     siblingMergeGroups.clear();
     mergeUp.clear();
     final _SemanticsParentData childParentData = _SemanticsParentData(
@@ -5044,6 +5538,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
+      localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
     );
@@ -5060,12 +5555,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
 
-      final Iterable<SemanticsConfiguration> mergeUpConfigs =
-          mergeUp
-              .map<SemanticsConfiguration?>(
-                (_SemanticsFragment fragment) => fragment.configToMergeUp,
-              )
-              .whereType<SemanticsConfiguration>();
+      final Iterable<SemanticsConfiguration> mergeUpConfigs = mergeUp
+          .map<SemanticsConfiguration?>((_SemanticsFragment fragment) => fragment.configToMergeUp)
+          .whereType<SemanticsConfiguration>();
       configProvider.absorbAll(mergeUpConfigs);
       // merge up fragments below this object will not be visible to parent
       // because they are either absorbed or will form a semantics node.
@@ -5093,6 +5585,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
         configProvider.updateConfig((SemanticsConfiguration config) {
           config.isBlockingUserActions = blocksUserAction;
+        });
+      }
+      if (localeForChildren != configProvider.effective.locale) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.locale = localeForChildren;
         });
       }
     }
@@ -5163,6 +5660,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         blocksUserActions: childParentData.blocksUserActions,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
+        localeForChildren: childParentData.localeForChildren,
       );
     } else {
       effectiveChildParentData = childParentData;
@@ -5289,15 +5787,15 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       );
       child._updateGeometry(newGeometry: childGeometry);
     }
-    for (final _RenderObjectSemantics explicitSiblingChild in siblingMergeGroups
-        .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
-        .whereType<_RenderObjectSemantics>()
-        .expand(
-          (_RenderObjectSemantics siblingChild) =>
-              siblingChild.shouldFormSemanticsNode
+    for (final _RenderObjectSemantics explicitSiblingChild
+        in siblingMergeGroups
+            .expand<_SemanticsFragment>((List<_SemanticsFragment> group) => group)
+            .whereType<_RenderObjectSemantics>()
+            .expand(
+              (_RenderObjectSemantics siblingChild) => siblingChild.shouldFormSemanticsNode
                   ? <_RenderObjectSemantics>[siblingChild]
                   : siblingChild._children,
-        )) {
+            )) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: parentGeometry.paintClipRect,
         parentSemanticsClipRect: parentGeometry.semanticsClipRect,
@@ -5489,14 +5987,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         _producedSiblingNodesAndOwners[node] = group;
         semanticsNodes.add(node);
 
-        final Set<SemanticsTag> tags =
-            group
-                .map<Set<SemanticsTag>?>(
-                  (_SemanticsFragment fragment) => fragment.owner.parentData!.tagsForChildren,
-                )
-                .whereType<Set<SemanticsTag>>()
-                .expand<SemanticsTag>((Set<SemanticsTag> tags) => tags)
-                .toSet();
+        final Set<SemanticsTag> tags = group
+            .map<Set<SemanticsTag>?>(
+              (_SemanticsFragment fragment) => fragment.owner.parentData!.tagsForChildren,
+            )
+            .whereType<Set<SemanticsTag>>()
+            .expand<SemanticsTag>((Set<SemanticsTag> tags) => tags)
+            .toSet();
         // This fragment is only allowed to add tags into the node instead of
         // cleaning it since some of the tags may be added by the parent fragment
         // who actually take these node as their siblings.
@@ -5981,11 +6478,10 @@ final class _SemanticsGeometry {
     _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
     parent.applyPaintTransform(child, _temporaryTransformHolder);
 
-    final Rect paintClipRect =
-        _transformRect(
-          _intersectRects(additionalPaintClip, parentPaintClipRect),
-          _temporaryTransformHolder,
-        )!;
+    final Rect paintClipRect = _transformRect(
+      _intersectRects(additionalPaintClip, parentPaintClipRect),
+      _temporaryTransformHolder,
+    )!;
     final Rect? semanticsClip =
         parent.describeSemanticsClip(child) ??
         _intersectRects(parentSemanticsClipRect, additionalPaintClip);
