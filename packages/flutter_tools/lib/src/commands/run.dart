@@ -402,6 +402,7 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -424,14 +425,6 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine friendly format.',
-      )
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
@@ -486,7 +479,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  final String name = 'run';
+  final name = 'run';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -494,13 +487,13 @@ class RunCommand extends RunCommandBase {
   DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
 
   @override
-  final String description = 'Run your Flutter app on an attached device.';
+  final description = 'Run your Flutter app on an attached device.';
 
   @override
   String get category => FlutterCommandCategory.project;
 
   List<Device>? devices;
-  bool webMode = false;
+  var webMode = false;
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -543,9 +536,9 @@ class RunCommand extends RunCommandBase {
   late final Future<AnalyticsUsageValuesRecord> _sharedAnalyticsUsageValues = (() async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
-    bool anyAndroidDevices = false;
-    bool anyIOSDevices = false;
-    bool anyWirelessIOSDevices = false;
+    var anyAndroidDevices = false;
+    var anyIOSDevices = false;
+    var anyWirelessIOSDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
@@ -585,7 +578,7 @@ class RunCommand extends RunCommandBase {
     }
 
     String? androidEmbeddingVersion;
-    final List<String> hostLanguage = <String>[];
+    final hostLanguage = <String>[];
     if (anyAndroidDevices) {
       final AndroidProject androidProject = FlutterProject.current().android;
       if (androidProject.existsSync()) {
@@ -760,7 +753,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       if (devices!.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }
@@ -822,7 +815,7 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[
+    final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
@@ -846,7 +839,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+    final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
     // This callback can't throw.

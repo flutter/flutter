@@ -34,7 +34,7 @@ void main() {
     testWithoutContext('should log a message to stderr when lock is not acquired', () async {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
@@ -42,7 +42,7 @@ void main() {
       Process? process;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
-        final Cache cache = Cache.test(
+        final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
@@ -79,7 +79,7 @@ Future<void> main(List<String> args) async {
         ]);
         // Wait for the script to lock the test cache file before checking to
         // see that the cache is unable to.
-        bool locked = false;
+        var locked = false;
         while (!locked) {
           // Give the script a chance to try for the lock much more often.
           await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -119,19 +119,19 @@ Future<void> main(List<String> args) async {
     testWithoutContext('should log a warning message for unknown version ', () async {
       final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
       logger.fatalWarnings = true;
       try {
         Cache.flutterRoot = tempDir.absolute.path;
-        final Cache cache = Cache.test(
+        final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
         );
-        final FakeVersionlessArtifact artifact = FakeVersionlessArtifact(cache);
+        final artifact = FakeVersionlessArtifact(cache);
         cache.registerArtifact(artifact);
         await artifact.update(
           FakeArtifactUpdater(),

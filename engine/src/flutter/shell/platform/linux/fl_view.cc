@@ -39,6 +39,9 @@ struct _FlView {
   // Engine this view is showing.
   FlEngine* engine;
 
+  // Combines layers into frame.
+  FlCompositor* compositor;
+
   // Signal subscription for engine restart signal.
   guint on_pre_engine_restart_cb_id;
 
@@ -199,7 +202,7 @@ static void handle_geometry_changed(FlView* self) {
   // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
   if (allocation.width > 1 && allocation.height > 1 &&
       gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_compositor_wait_for_frame(fl_engine_get_compositor(self->engine),
+    fl_compositor_wait_for_frame(self->compositor,
                                  allocation.width * scale_factor,
                                  allocation.height * scale_factor);
   }
@@ -245,9 +248,13 @@ static void on_pre_engine_restart_cb(FlView* self) {
   init_touch(self);
 }
 
-// Implements FlRenderable::redraw
-static void fl_view_redraw(FlRenderable* renderable) {
+// Implements FlRenderable::present_layers
+static void fl_view_present_layers(FlRenderable* renderable,
+                                   const FlutterLayer** layers,
+                                   size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
+
+  fl_compositor_present_layers(self->compositor, layers, layers_count);
 
   gtk_widget_queue_draw(self->render_area);
 
@@ -257,12 +264,6 @@ static void fl_view_redraw(FlRenderable* renderable) {
     // callback.
     g_idle_add(first_frame_idle_cb, self);
   }
-}
-
-// Implements FlRenderable::make_current
-static void fl_view_make_current(FlRenderable* renderable) {
-  FlView* self = FL_VIEW(renderable);
-  gtk_gl_area_make_current(GTK_GL_AREA(self->render_area));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -277,8 +278,7 @@ static FlPluginRegistrar* fl_view_get_registrar_for_plugin(
 }
 
 static void fl_renderable_iface_init(FlRenderableInterface* iface) {
-  iface->redraw = fl_view_redraw;
-  iface->make_current = fl_view_make_current;
+  iface->present_layers = fl_view_present_layers;
 }
 
 static void fl_view_plugin_registry_iface_init(
@@ -442,6 +442,10 @@ static void gesture_zoom_end_cb(FlView* self) {
 }
 
 static GdkGLContext* create_context_cb(FlView* self) {
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    return nullptr;
+  }
+
   FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
   g_autoptr(GError) error = nullptr;
   if (!fl_opengl_manager_create_contexts(
@@ -456,7 +460,26 @@ static GdkGLContext* create_context_cb(FlView* self) {
 }
 
 static void realize_cb(FlView* self) {
-  fl_compositor_setup(fl_engine_get_compositor(self->engine));
+  FlutterRendererType renderer_type = fl_engine_get_renderer_type(self->engine);
+  switch (renderer_type) {
+    case kOpenGL:
+      self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
+          self->engine,
+          self->view_id == flutter::kFlutterImplicitViewId
+              ? nullptr
+              : gtk_gl_area_get_context(GTK_GL_AREA(self->render_area))));
+      break;
+    case kSoftware:
+      self->compositor = FL_COMPOSITOR(fl_compositor_software_new());
+      break;
+    default:
+      break;
+  }
+
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    setup_cursor(self);
+    return;
+  }
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 
@@ -481,10 +504,6 @@ static void realize_cb(FlView* self) {
   setup_cursor(self);
 
   handle_geometry_changed(self);
-}
-
-static void secondary_realize_cb(FlView* self) {
-  setup_cursor(self);
 }
 
 static void paint_background(FlView* self, cairo_t* cr) {
@@ -513,9 +532,8 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
   int width = gtk_widget_get_allocated_width(self->render_area);
   int height = gtk_widget_get_allocated_height(self->render_area);
   gint scale_factor = gtk_widget_get_scale_factor(self->render_area);
-  fl_compositor_opengl_render(
-      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)),
-      self->view_id, width * scale_factor, height * scale_factor);
+  fl_compositor_opengl_render(FL_COMPOSITOR_OPENGL(self->compositor),
+                              width * scale_factor, height * scale_factor);
 
   return TRUE;
 }
@@ -524,12 +542,14 @@ static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
   paint_background(self, cr);
 
   return fl_compositor_software_render(
-      FL_COMPOSITOR_SOFTWARE(fl_engine_get_compositor(self->engine)),
-      self->view_id, cr, gtk_widget_get_scale_factor(GTK_WIDGET(self)));
+      FL_COMPOSITOR_SOFTWARE(self->compositor), cr,
+      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
 }
 
 static void unrealize_cb(FlView* self) {
-  g_autoptr(GError) error = nullptr;
+  if (self->view_id != flutter::kFlutterImplicitViewId) {
+    return;
+  }
 
   fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
 
@@ -539,8 +559,7 @@ static void unrealize_cb(FlView* self) {
     return;
   }
 
-  fl_compositor_opengl_cleanup(
-      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
+  fl_compositor_opengl_cleanup(FL_COMPOSITOR_OPENGL(self->compositor));
 }
 
 static void size_allocate_cb(FlView* self) {
@@ -589,6 +608,7 @@ static void fl_view_dispose(GObject* object) {
   }
 
   g_clear_object(&self->engine);
+  g_clear_object(&self->compositor);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -690,8 +710,7 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 // Engine related construction.
 static void setup_engine(FlView* self) {
-  FlutterRendererType renderer_type =
-      fl_compositor_get_renderer_type(fl_engine_get_compositor(self->engine));
+  FlutterRendererType renderer_type = fl_engine_get_renderer_type(self->engine);
   switch (renderer_type) {
     case kOpenGL:
       self->render_area = gtk_gl_area_new();
@@ -814,8 +833,6 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   setup_engine(self);
 
-  g_signal_connect_swapped(self->render_area, "realize",
-                           G_CALLBACK(secondary_realize_cb), self);
   return self;
 }
 
