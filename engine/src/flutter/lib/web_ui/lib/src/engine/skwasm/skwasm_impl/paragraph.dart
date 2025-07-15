@@ -899,12 +899,20 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     implements ui.ParagraphBuilder {
   factory SkwasmParagraphBuilder(SkwasmParagraphStyle style, SkwasmFontCollection collection) {
     final (paragraphStyleHandle, nativeTextStyle) = style.createNative();
-    final builder = SkwasmParagraphBuilder._(paragraphBuilderCreate(paragraphStyleHandle, collection.handle), style, nativeTextStyle);
+    final builder = SkwasmParagraphBuilder._(
+      paragraphBuilderCreate(paragraphStyleHandle, collection.handle),
+      style,
+      nativeTextStyle,
+    );
     paragraphStyleDispose(paragraphStyleHandle);
     return builder;
   }
 
-  SkwasmParagraphBuilder._(ParagraphBuilderHandle handle, this.style, SkwasmNativeTextStyle baseTextStyle) : super(handle, _registry) {
+  SkwasmParagraphBuilder._(
+    ParagraphBuilderHandle handle,
+    this.style,
+    SkwasmNativeTextStyle baseTextStyle,
+  ) : super(handle, _registry) {
     textStyleStack.add(baseTextStyle);
   }
 
