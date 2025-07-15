@@ -47,7 +47,7 @@ static sk_sp<SkData> GetRasterData(const sk_sp<SkSurface>& offscreen_surface,
 
   // Copy the GPU image snapshot into CPU memory.
   // TODO (https://github.com/flutter/flutter/issues/13498)
-  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
+  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage(nullptr);
   if (!cpu_snapshot) {
     FML_LOG(ERROR) << "Screenshot: unable to make raster image";
     return nullptr;
