@@ -486,6 +486,7 @@ class RunCommand extends RunCommandBase {
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     if (featureFlags.isWebEnabled &&
+        devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
       return loadDevConfig(
