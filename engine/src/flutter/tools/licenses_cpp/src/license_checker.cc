@@ -335,9 +335,14 @@ bool ProcessNotices(const fs::path& relative_path,
                 << match.matcher;
       }
     } else {
-      errors->push_back(absl::NotFoundError(
-          absl::StrCat(relative_path.lexically_normal().string(), " : ",
-                       matches.status().message(), "\n", license)));
+      VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
+              << matches.status().message() << "\n"
+              << license;
+      if (flags.treat_unmatched_comments_as_errors) {
+        errors->push_back(absl::NotFoundError(
+            absl::StrCat(relative_path.lexically_normal().string(), " : ",
+                         matches.status().message(), "\n", license)));
+      }
     }
   }
   // Not having a license in a NOTICES file isn't technically a problem.
