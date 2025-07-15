@@ -16,7 +16,7 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
