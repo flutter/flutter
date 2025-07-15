@@ -219,7 +219,7 @@ const htmlSample3 = '''
 </html>
 ''';
 
-const String htmlSampleStaticAssetsUrl = '''
+const htmlSampleStaticAssetsUrl = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -363,8 +363,8 @@ void main() {
   });
 
   test('applies substitutions to static assets url', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
-    const String expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
+    const indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
+    const expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
 
     expect(
       indexHtml.withSubstitutions(

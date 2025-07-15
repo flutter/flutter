@@ -33,7 +33,7 @@ const kHasWebPlugins = 'HasWebPlugins';
 const kBaseHref = 'baseHref';
 
 /// Static assets url to set in index.html in flutter build command
-const String kStaticAssetsUrl = 'staticAssetsUrl';
+const kStaticAssetsUrl = 'staticAssetsUrl';
 
 /// The caching strategy to use for service worker generation.
 const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
