@@ -336,8 +336,8 @@ class ResidentWebRunner extends ResidentRunner {
           platform: _platform,
         );
         Uri url = await device!.devFS!.create();
-        if (debuggingOptions.devConfig!.https?.certKeyPath != null &&
-            debuggingOptions.devConfig!.https?.certPath != null) {
+        if (debuggingOptions.devConfig?.https?.certKeyPath != null &&
+            debuggingOptions.devConfig?.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
