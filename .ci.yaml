@@ -3127,7 +3127,6 @@ targets:
 
   - name: Linux_android_emu native_assets_android
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
