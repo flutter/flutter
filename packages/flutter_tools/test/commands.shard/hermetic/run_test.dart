@@ -961,12 +961,14 @@ void main() {
         'can accept simple, valid values',
         () async {
           final command = RunCommand();
-          await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo = bar']),
-            throwsToolExit(),
-          );
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--no-resident',
+            '--web-header',
+            'foo=bar',
+          ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.devConfig, isNotNull);
@@ -1733,6 +1735,9 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[];
 }
 
 /// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.

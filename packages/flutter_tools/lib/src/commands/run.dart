@@ -640,7 +640,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
-    final DevConfig? devConfig = await _devConfig;
     // When running with a prebuilt application, no command validation is
     // necessary.
     if (!runningWithPrebuiltApplication) {
@@ -651,6 +650,7 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
+    final DevConfig? devConfig = await _devConfig;
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
