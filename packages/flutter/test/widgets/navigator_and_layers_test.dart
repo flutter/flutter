@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ required this.log, required this.name });
+  TestCustomPainter({required this.log, required this.name});
 
   final List<String> log;
   final String name;
@@ -20,8 +20,7 @@ class TestCustomPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(TestCustomPainter oldPainter) {
-    return name != oldPainter.name
-        || log != oldPainter.log;
+    return name != oldPainter.name || log != oldPainter.log;
   }
 }
 
@@ -36,16 +35,10 @@ void main() {
             child: RepaintBoundary(
               child: FlipWidget(
                 left: CustomPaint(
-                  painter: TestCustomPainter(
-                    log: log,
-                    name: 'left',
-                  ),
+                  painter: TestCustomPainter(log: log, name: 'left'),
                 ),
                 right: CustomPaint(
-                  painter: TestCustomPainter(
-                    log: log,
-                    name: 'right',
-                  ),
+                  painter: TestCustomPainter(log: log, name: 'right'),
                 ),
               ),
             ),
@@ -69,18 +62,6 @@ void main() {
     flipStatefulWidget(tester);
     expect(await tester.pumpAndSettle(), 1);
     log.add('7');
-    expect(log, <String>[
-      '0',
-      'left',
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      'right',
-      '6',
-      'left',
-      '7',
-    ]);
+    expect(log, <String>['0', 'left', '1', '2', '3', '4', '5', 'right', '6', 'left', '7']);
   });
 }

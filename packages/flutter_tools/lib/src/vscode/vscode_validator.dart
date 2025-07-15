@@ -14,18 +14,23 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
-  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
-    return VsCode
-        .allInstalled(fileSystem, platform, processManager)
-        .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
+  static Iterable<DoctorValidator> installedValidators(
+    FileSystem fileSystem,
+    Platform platform,
+    ProcessManager processManager,
+  ) {
+    return VsCode.allInstalled(
+      fileSystem,
+      platform,
+      processManager,
+    ).map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
   @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> validationMessages =
-      List<ValidationMessage>.from(_vsCode.validationMessages);
+  Future<ValidationResult> validateImpl() async {
+    final validationMessages = List<ValidationMessage>.from(_vsCode.validationMessages);
 
-    final String vsCodeVersionText = _vsCode.version == null
+    final vsCodeVersionText = _vsCode.version == null
         ? 'version unknown'
         : 'version ${_vsCode.version}';
 

@@ -24,11 +24,7 @@ typedef EntryPoint = FutureOr<void> Function();
 typedef EntryPointRunner = Future<void> Function(EntryPoint);
 
 /// Metadata about a web test to run
-typedef WebTest = ({
-  EntryPoint entryPoint,
-  EntryPointRunner? entryPointRunner,
-  Uri goldensUri,
-});
+typedef WebTest = ({EntryPoint entryPoint, EntryPointRunner? entryPointRunner, Uri goldensUri});
 
 /// Gets the test selector set by the test bootstrapping logic
 String get testSelector {
@@ -36,16 +32,17 @@ String get testSelector {
   if (jsTestSelector == null) {
     throw Exception('Test selector not set');
   }
-  return  jsTestSelector.toDart;
+  return jsTestSelector.toDart;
 }
 
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
-  ui_web.debugEmulateFlutterTesterEnvironment = true;
+  ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
-  webGoldenComparator = DefaultWebGoldenComparator(test.goldensUri);
+
+  goldenFileComparator = HttpProxyGoldenComparator(test.goldensUri);
 
   /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window
   /// size for the purposes of testing.
@@ -64,12 +61,17 @@ void _internalBootstrapBrowserTest(EntryPoint Function() getMain) {
   _postMessageChannel().pipe(channel);
 }
 
-StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
+StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hidePrints = true}) =>
+    RemoteListener.start(getMain, hidePrints: hidePrints);
 
 StreamChannel<Object?> _postMessageChannel() {
   final StreamChannelController<Object?> controller = StreamChannelController<Object?>(sync: true);
   final web.MessageChannel channel = web.MessageChannel();
-  web.window.parent!.postMessage('port'.toJS, web.window.location.origin, <JSObject>[channel.port2].toJS);
+  web.window.parent!.postMessage(
+    'port'.toJS,
+    web.window.location.origin,
+    <JSObject>[channel.port2].toJS,
+  );
 
   final JSFunction eventCallback = (web.Event event) {
     controller.local.sink.add(event.data.dartify());

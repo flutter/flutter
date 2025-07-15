@@ -30,7 +30,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  final String name = 'windows';
+  final name = 'windows';
 
   @override
   bool get hidden => !featureFlags.isWindowsEnabled || !globals.platform.isWindows;
@@ -50,17 +50,19 @@ class BuildWindowsCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
-      throwToolExit('"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".');
+      throwToolExit(
+        '"build windows" is not currently supported. To enable, run "flutter config --enable-windows-desktop".',
+      );
     }
     if (!globals.platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
 
-    final String defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64) ?
-            'windows-arm64' : 'windows-x64';
+    final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64)
+        ? 'windows-arm64'
+        : 'windows-x64';
     final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
 
-    displayNullSafetyMode(buildInfo);
     await buildWindows(
       project.windows,
       buildInfo,

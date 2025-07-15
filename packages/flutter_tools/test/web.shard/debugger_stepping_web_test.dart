@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 
 import '../integration.shard/test_data/stepping_project.dart';
 import '../integration.shard/test_driver.dart';
@@ -18,20 +22,23 @@ void main() {
   });
 
   testWithoutContext('Web debugger can step over statements', () async {
-    final WebSteppingProject project = WebSteppingProject();
+    final project = WebSteppingProject();
     await project.setUpIn(tempDirectory);
 
     flutter = FlutterRunTestDriver(tempDirectory);
 
     await flutter.run(
-      withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+      withDebugger: true,
+      startPaused: true,
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+    );
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
     await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
     expect((await flutter.getSourceLocation())!.line, equals(project.breakpointLine));
 
     // Issue 5 steps, ensuring that we end up on the annotated lines each time.
-    for (int i = 1; i <= project.numberOfSteps; i += 1) {
+    for (var i = 1; i <= project.numberOfSteps; i += 1) {
       await flutter.stepOverOrOverAsyncSuspension();
       final SourcePosition? location = await flutter.getSourceLocation();
       final int actualLine = location!.line;
@@ -40,8 +47,10 @@ void main() {
       // within the source code.
       final int expectedLine = project.lineForStep(i);
 
-      expect(actualLine, equals(expectedLine),
-        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine'
+      expect(
+        actualLine,
+        equals(expectedLine),
+        reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine',
       );
     }
   });

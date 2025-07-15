@@ -41,12 +41,7 @@ abstract class ChromiumDevice extends Device {
     required super.logger,
   }) : _fileSystem = fileSystem,
        _logger = logger,
-       super(
-         name,
-         category: Category.web,
-         platformType: PlatformType.web,
-         ephemeral: false,
-       );
+       super(name, category: Category.web, platformType: PlatformType.web, ephemeral: false);
 
   final ChromiumLauncher chromeLauncher;
 
@@ -77,29 +72,20 @@ abstract class ChromiumDevice extends Device {
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
-  void clearLogs() { }
+  void clearLogs() {}
 
   DeviceLogReader? _logReader;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
   @override
-  Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
@@ -111,7 +97,7 @@ abstract class ChromiumDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  bool isSupported() =>  chromeLauncher.canFindExecutable();
+  Future<bool> isSupported() async => chromeLauncher.canFindExecutable();
 
   @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
@@ -130,7 +116,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
       if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
@@ -139,7 +125,7 @@ abstract class ChromiumDevice extends Device {
     } else {
       url = platformArgs['uri']! as String;
     }
-    final bool launchChrome = platformArgs['no-launch-chrome'] != true;
+    final launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(
         url,
@@ -156,11 +142,10 @@ abstract class ChromiumDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async {
-    await _chrome?.close();
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    final Future<void>? future = _chrome?.close();
+    _chrome = null;
+    await future;
     return true;
   }
 
@@ -168,10 +153,7 @@ abstract class ChromiumDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
-  Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -195,13 +177,12 @@ class GoogleChromeDevice extends ChromiumDevice {
     required super.fileSystem,
   }) : _platform = platform,
        _processManager = processManager,
-       super(
-          name: 'chrome',
-          chromeLauncher: chromiumLauncher,
-       );
+       super(name: 'chrome', chromeLauncher: chromiumLauncher);
 
   final Platform _platform;
   final ProcessManager _processManager;
+
+  static const kChromeDeviceId = 'chrome';
 
   @override
   String get name => 'Chrome';
@@ -210,15 +191,19 @@ class GoogleChromeDevice extends ChromiumDevice {
   late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
 
   Future<String> _computeSdkNameAndVersion() async {
-    if (!isSupported()) {
+    if (!await isSupported()) {
       return 'unknown';
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
-    String version = 'unknown';
+    var version = 'unknown';
     if (_platform.isWindows) {
       if (_processManager.canRun('reg')) {
         final ProcessResult result = await _processManager.run(<String>[
-          r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
+          r'reg',
+          'query',
+          r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
+          '/v',
+          'version',
         ]);
         if (result.exitCode == 0) {
           final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
@@ -229,10 +214,7 @@ class GoogleChromeDevice extends ChromiumDevice {
       }
     } else {
       final String chrome = chromeLauncher.findExecutable();
-      final ProcessResult result = await _processManager.run(<String>[
-        chrome,
-        '--version',
-      ]);
+      final ProcessResult result = await _processManager.run(<String>[chrome, '--version']);
       if (result.exitCode == 0) {
         version = result.stdout as String;
       }
@@ -249,15 +231,14 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     required super.fileSystem,
     required ProcessManager processManager,
   }) : _processManager = processManager,
-       super(
-         name: 'edge',
-         chromeLauncher: chromiumLauncher,
-       );
+       super(name: 'edge', chromeLauncher: chromiumLauncher);
 
   final ProcessManager _processManager;
 
   // The first version of Edge with chromium support.
-  static const int _kFirstChromiumEdgeMajorVersion = 79;
+  static const _kFirstChromiumEdgeMajorVersion = 79;
+
+  static const kEdgeDeviceId = 'edge';
 
   @override
   String get name => 'Edge';
@@ -277,7 +258,11 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   Future<String> _getSdkNameAndVersion() async {
     if (_processManager.canRun('reg')) {
       final ProcessResult result = await _processManager.run(<String>[
-        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon', '/v', 'version',
+        r'reg',
+        'query',
+        r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon',
+        '/v',
+        'version',
       ]);
       if (result.exitCode == 0) {
         final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
@@ -300,11 +285,9 @@ class WebDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required FeatureFlags featureFlags,
   }) : _featureFlags = featureFlags,
-       _webServerDevice = WebServerDevice(
-         logger: logger,
-       ),
+       _webServerDevice = WebServerDevice(logger: logger),
        super('Chrome') {
-    final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
+    final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
       logger: logger,
@@ -350,23 +333,20 @@ class WebDevices extends PollingDeviceDiscovery {
   bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!_featureFlags.isWebEnabled) {
       return <Device>[];
     }
     final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
-      if (WebServerDevice.showWebServerDevice)
-        _webServerDevice,
-      if (_chromeDevice.isSupported())
-        _chromeDevice,
-      if (edgeDevice != null && await edgeDevice._meetsVersionConstraint())
-        edgeDevice,
+      if (WebServerDevice.showWebServerDevice) _webServerDevice,
+      if (await _chromeDevice.isSupported()) _chromeDevice,
+      if (edgeDevice != null && await edgeDevice._meetsVersionConstraint()) edgeDevice,
     ];
   }
 
   @override
-  bool get supportsPlatform =>  _featureFlags.isWebEnabled;
+  bool get supportsPlatform => _featureFlags.isWebEnabled;
 
   @override
   List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
@@ -377,26 +357,19 @@ String parseVersionForWindows(String input) {
   return input.split(RegExp(r'\w')).last;
 }
 
-
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
-  WebServerDevice({
-    required super.logger,
-  }) : _logger = logger,
-       super(
-         'web-server',
-          platformType: PlatformType.web,
-          category: Category.web,
-          ephemeral: false,
-       );
+  WebServerDevice({required super.logger})
+    : _logger = logger,
+      super('web-server', platformType: PlatformType.web, category: Category.web, ephemeral: false);
 
-  static const String kWebServerDeviceId = 'web-server';
-  static bool showWebServerDevice = false;
+  static const kWebServerDeviceId = 'web-server';
+  static var showWebServerDevice = false;
 
   final Logger _logger;
 
   @override
-  void clearLogs() { }
+  void clearLogs() {}
 
   @override
   Future<String?> get emulatorId async => null;
@@ -404,24 +377,15 @@ class WebServerDevice extends Device {
   DeviceLogReader? _logReader;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
   @override
-  Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async => true;
+  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => true;
 
   @override
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
@@ -436,7 +400,7 @@ class WebServerDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -453,7 +417,8 @@ class WebServerDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Flutter Tools';
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage? package, {
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -461,25 +426,25 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final String? url = platformArgs['uri'] as String?;
+    final url = platformArgs['uri'] as String?;
     if (debuggingOptions.startPaused) {
-      _logger.printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+      _logger.printStatus(
+        'Waiting for connection from Dart debug extension at $url',
+        emphasis: true,
+      );
     } else {
       _logger.printStatus('$mainPath is being served at $url', emphasis: true);
     }
     _logger.printStatus(
       'The web-server device requires the Dart Debug Chrome extension for debugging. '
-      'Consider using the Chrome or Edge devices for an improved development workflow.'
+      'Consider using the Chrome or Edge devices for an improved development workflow.',
     );
     _logger.sendEvent('app.webLaunchUrl', <String, Object?>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url): null);
+    return LaunchResult.succeeded(vmServiceUri: url != null ? Uri.parse(url) : null);
   }
 
   @override
-  Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
-  }) async {
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
   }
 
@@ -487,10 +452,7 @@ class WebServerDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
-  Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
-  }) async {
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
     return true;
   }
 

@@ -6,14 +6,18 @@ import 'template.dart';
 
 class SnackbarTemplate extends TokenTemplate {
   const SnackbarTemplate(
-      this.tokenGroup, super.blockName, super.fileName, super.tokens, {
-        super.colorSchemePrefix = '_colors.'
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
+    super.colorSchemePrefix = '_colors.',
   });
 
   final String tokenGroup;
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SnackBarThemeData {
     _${blockName}DefaultsM3(this.context);
 

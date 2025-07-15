@@ -87,9 +87,10 @@ class Icon extends StatelessWidget {
     this.textDirection,
     this.applyTextScaling,
     this.blendMode,
-  })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
-        assert(weight == null || (0.0 < weight)),
-        assert(opticalSize == null || (0.0 < opticalSize));
+    this.fontWeight,
+  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+       assert(weight == null || (0.0 < weight)),
+       assert(opticalSize == null || (0.0 < opticalSize));
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -253,6 +254,9 @@ class Icon extends StatelessWidget {
   /// Defaults to [BlendMode.srcOver]
   final BlendMode? blendMode;
 
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight? fontWeight;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -264,7 +268,9 @@ class Icon extends StatelessWidget {
 
     final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
 
-    final double iconSize = applyTextScaling ? MediaQuery.textScalerOf(context).scale(tentativeIconSize) : tentativeIconSize;
+    final double iconSize = applyTextScaling
+        ? MediaQuery.textScalerOf(context).scale(tentativeIconSize)
+        : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -309,10 +315,12 @@ class Icon extends StatelessWidget {
       color: iconColor,
       fontSize: iconSize,
       fontFamily: icon.fontFamily,
+      fontWeight: fontWeight,
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,
-      height: 1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      height:
+          1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
       foreground: foreground,
     );
@@ -320,17 +328,14 @@ class Icon extends StatelessWidget {
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
       textDirection: textDirection, // Since we already fetched it for the assert...
-      text: TextSpan(
-        text: String.fromCharCode(icon.codePoint),
-        style: fontStyle,
-      ),
+      text: TextSpan(text: String.fromCharCode(icon.codePoint), style: fontStyle),
     );
 
     if (icon.matchTextDirection) {
       switch (textDirection) {
         case TextDirection.rtl:
           iconWidget = Transform(
-            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+            transform: Matrix4.identity()..scaleByDouble(-1.0, 1.0, 1.0, 1),
             alignment: Alignment.center,
             transformHitTests: false,
             child: iconWidget,
@@ -346,9 +351,7 @@ class Icon extends StatelessWidget {
         child: SizedBox(
           width: iconSize,
           height: iconSize,
-          child: Center(
-            child: iconWidget,
-          ),
+          child: Center(child: iconWidget),
         ),
       ),
     );
@@ -367,6 +370,8 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null),
+    );
   }
 }

@@ -64,9 +64,7 @@ class ActionSheetExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoActionSheet Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoActionSheet Sample')),
       child: Center(
         child: CupertinoButton(
           onPressed: () => _showActionSheet(context),

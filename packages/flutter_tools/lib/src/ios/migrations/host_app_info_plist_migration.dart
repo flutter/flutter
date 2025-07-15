@@ -6,15 +6,13 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
-const String _kDisableMinimumFrameDurationKey = 'CADisableMinimumFrameDurationOnPhone';
-const String _kIndirectInputEventsKey = 'UIApplicationSupportsIndirectInputEvents';
+const _kDisableMinimumFrameDurationKey = 'CADisableMinimumFrameDurationOnPhone';
+const _kIndirectInputEventsKey = 'UIApplicationSupportsIndirectInputEvents';
 
 /// Update Info.plist.
 class HostAppInfoPlistMigration extends ProjectMigrator {
-  HostAppInfoPlistMigration(
-    IosProject project,
-    super.logger,
-  ) : _infoPlist = project.defaultHostInfoPlist;
+  HostAppInfoPlistMigration(IosProject project, super.logger)
+    : _infoPlist = project.defaultHostInfoPlist;
 
   final File _infoPlist;
 
@@ -30,14 +28,15 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    String newContents = fileContents;
+    var newContents = fileContents;
     if (!newContents.contains(_kDisableMinimumFrameDurationKey)) {
       logger.printTrace('Adding $_kDisableMinimumFrameDurationKey to Info.plist');
-      const String plistEnd = '''
+      const plistEnd = '''
 </dict>
 </plist>
 ''';
-      const String plistWithKey = '''
+      const plistWithKey =
+          '''
 	<key>$_kDisableMinimumFrameDurationKey</key>
 	<true/>
 </dict>
@@ -48,11 +47,12 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
 
     if (!newContents.contains(_kIndirectInputEventsKey)) {
       logger.printTrace('Adding $_kIndirectInputEventsKey to Info.plist');
-      const String plistEnd = '''
+      const plistEnd = '''
 </dict>
 </plist>
 ''';
-      const String plistWithKey = '''
+      const plistWithKey =
+          '''
 	<key>$_kIndirectInputEventsKey</key>
 	<true/>
 </dict>

@@ -7,15 +7,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    super.key,
-  });
+  const PlatformViewApp({super.key});
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
@@ -24,16 +20,12 @@ class PlatformViewApp extends StatefulWidget {
 class PlatformViewAppState extends State<PlatformViewApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      title: 'Advanced Layout',
-      home: const PlatformViewLayout(),
-    );
+    return const MaterialApp(title: 'Advanced Layout', home: PlatformViewLayout());
   }
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ super.key });
+  const PlatformViewLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +41,8 @@ class PlatformViewLayout extends StatelessWidget {
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
               child: index.isEven
-                ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
-                : const DummyPlatformView()
+                  ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
+                  : const DummyPlatformView(),
             ),
           );
         },
@@ -67,21 +59,13 @@ class DummyPlatformView extends StatelessWidget {
     const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
-      nativeView = const UiKitView(
-        viewType: viewType,
-      );
+      nativeView = const UiKitView(viewType: viewType);
     } else if (Platform.isAndroid) {
-      nativeView = const AndroidView(
-        viewType: viewType,
-      );
+      nativeView = const AndroidView(viewType: viewType);
     } else {
       assert(false, 'Invalid platform');
     }
-    return Container(
-      color: Colors.purple,
-      height: 200.0,
-      child: nativeView,
-    );
+    return Container(color: Colors.purple, height: 200.0, child: nativeView);
   }
 }
 
@@ -93,9 +77,11 @@ class ExpensivePainter extends CustomPainter {
     for (int i = 0; i < 50; i++) {
       for (int j = 0; j < 50; j++) {
         final Rect rect = Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
-        canvas.drawRect(rect, Paint()
-          ..style = PaintingStyle.fill
-          ..color = Colors.red
+        canvas.drawRect(
+          rect,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = Colors.red,
         );
       }
     }

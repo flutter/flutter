@@ -23,15 +23,39 @@ void main() {
 
   test('Typography on non-Apple platforms defaults to the correct font', () {
     expect(Typography.material2018().black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
-    expect(Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily, 'Segoe UI');
+    expect(
+      Typography.material2018(platform: TargetPlatform.fuchsia).black.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback,
+      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily,
+      'Segoe UI',
+    );
     expect(Typography.material2018().white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily, 'Roboto');
-    expect(Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback, <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial']);
-    expect(Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily, 'Segoe UI');
+    expect(
+      Typography.material2018(platform: TargetPlatform.fuchsia).white.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamily,
+      'Roboto',
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback,
+      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+    );
+    expect(
+      Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily,
+      'Segoe UI',
+    );
   });
 
   // Ref: https://developer.apple.com/design/human-interface-guidelines/typography/
@@ -100,28 +124,26 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.name!).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.name!)
+        .toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
   test('Can lerp between different typographies', () {
     final List<Typography> all = <Typography>[
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2014(platform: platform),
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2018(platform: platform),
-      for (final TargetPlatform platform in TargetPlatform.values) Typography.material2021(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2014(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2018(platform: platform),
+      for (final TargetPlatform platform in TargetPlatform.values)
+        Typography.material2021(platform: platform),
     ];
 
     for (final Typography fromTypography in all) {
       for (final Typography toTypography in all) {
-        Object? error;
-        try {
-          Typography.lerp(fromTypography, toTypography, 0.5);
-        } catch (e) {
-          error = e;
-        }
-        expect(error, isNull);
+        Typography.lerp(fromTypography, toTypography, 0.5);
       }
     }
   });
@@ -370,7 +392,7 @@ void main() {
   });
 
   test('Default M3 light textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final TextTheme textTheme = theme.textTheme;
     final Color dark = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, dark);
@@ -391,7 +413,7 @@ void main() {
   });
 
   test('Default M3 dark textTheme styles all use onSurface', () {
-    final ThemeData theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
+    final ThemeData theme = ThemeData(brightness: Brightness.dark);
     final TextTheme textTheme = theme.textTheme;
     final Color light = theme.colorScheme.onSurface;
     expect(textTheme.displayLarge!.color, light);

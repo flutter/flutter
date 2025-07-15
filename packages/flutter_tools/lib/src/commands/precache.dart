@@ -22,43 +22,67 @@ class PrecacheCommand extends FlutterCommand {
        _platform = platform,
        _logger = logger,
        _featureFlags = featureFlags {
-    argParser.addFlag('all-platforms',
-        abbr: 'a',
-        negatable: false,
-        help: 'Precache artifacts for all host platforms.',
-        aliases: const <String>['all']);
-    argParser.addFlag('force', abbr: 'f', negatable: false,
-        help: 'Force re-downloading of artifacts.');
-    argParser.addFlag('android',
-        help: 'Precache artifacts for Android development.',
-        hide: !verboseHelp);
-    argParser.addFlag('android_gen_snapshot',
-        help: 'Precache gen_snapshot for Android development.',
-        hide: !verboseHelp);
-    argParser.addFlag('android_maven',
-        help: 'Precache Gradle dependencies for Android development.',
-        hide: !verboseHelp);
-    argParser.addFlag('android_internal_build',
-        help: 'Precache dependencies for internal Android development.',
-        hide: !verboseHelp);
-    argParser.addFlag('ios',
-        help: 'Precache artifacts for iOS development.');
-    argParser.addFlag('web',
-        help: 'Precache artifacts for web development.');
-    argParser.addFlag('linux',
-        help: 'Precache artifacts for Linux desktop development.');
-    argParser.addFlag('windows',
-        help: 'Precache artifacts for Windows desktop development.');
-    argParser.addFlag('macos',
-        help: 'Precache artifacts for macOS desktop development.');
-    argParser.addFlag('fuchsia',
-        help: 'Precache artifacts for Fuchsia development.');
-    argParser.addFlag('universal', defaultsTo: true,
-        help: 'Precache artifacts required for any development platform.');
-    argParser.addFlag('flutter_runner',
-        help: 'Precache the flutter runner artifacts.', hide: !verboseHelp);
-    argParser.addFlag('use-unsigned-mac-binaries',
-        help: 'Precache the unsigned macOS binaries when available.', hide: !verboseHelp);
+    argParser.addFlag(
+      'all-platforms',
+      abbr: 'a',
+      negatable: false,
+      help: 'Precache artifacts for all host platforms.',
+      aliases: const <String>['all'],
+    );
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      negatable: false,
+      help: 'Force re-downloading of artifacts.',
+    );
+    argParser.addFlag(
+      'android',
+      help: 'Precache artifacts for Android development.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'android_gen_snapshot',
+      help: 'Precache gen_snapshot for Android development.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'android_maven',
+      help: 'Precache Gradle dependencies for Android development.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'android_internal_build',
+      help: 'Precache dependencies for internal Android development.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag('ios', help: 'Precache artifacts for iOS development.');
+    argParser.addFlag('web', help: 'Precache artifacts for web development.');
+    argParser.addFlag('linux', help: 'Precache artifacts for Linux desktop development.');
+    argParser.addFlag('windows', help: 'Precache artifacts for Windows desktop development.');
+    argParser.addFlag('macos', help: 'Precache artifacts for macOS desktop development.');
+    argParser.addFlag('fuchsia', help: 'Precache artifacts for Fuchsia development.');
+    argParser.addFlag(
+      'universal',
+      defaultsTo: true,
+      help: 'Precache artifacts required for any development platform.',
+    );
+    argParser.addFlag(
+      'informative',
+      defaultsTo: true,
+      help: 'Precache engine_stamp.json.',
+      negatable: false,
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'flutter_runner',
+      help: 'Precache the flutter runner artifacts.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'use-unsigned-mac-binaries',
+      help: 'Precache the unsigned macOS binaries when available.',
+      hide: !verboseHelp,
+    );
   }
 
   final Cache _cache;
@@ -67,12 +91,13 @@ class PrecacheCommand extends FlutterCommand {
   final FeatureFlags _featureFlags;
 
   @override
-  final String name = 'precache';
+  final name = 'precache';
 
   @override
-  final String description = "Populate the Flutter tool's cache of binary artifacts.\n\n"
-    'If no explicit platform flags are provided, this command will download the artifacts '
-    'for all currently enabled platforms';
+  final description =
+      "Populate the Flutter tool's cache of binary artifacts.\n\n"
+      'If no explicit platform flags are provided, this command will download the artifacts '
+      'for all currently enabled platforms';
 
   @override
   final String category = FlutterCommandCategory.sdk;
@@ -81,12 +106,8 @@ class PrecacheCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   /// Some flags are umbrella names that expand to include multiple artifacts.
-  static const Map<String, List<String>> _expandedArtifacts = <String, List<String>>{
-    'android': <String>[
-      'android_gen_snapshot',
-      'android_maven',
-      'android_internal_build',
-    ],
+  static const _expandedArtifacts = <String, List<String>>{
+    'android': <String>['android_gen_snapshot', 'android_maven', 'android_internal_build'],
   };
 
   /// Returns a reverse mapping of _expandedArtifacts, from child artifact name
@@ -94,8 +115,7 @@ class PrecacheCommand extends FlutterCommand {
   Map<String, String> _umbrellaForArtifactMap() {
     return <String, String>{
       for (final MapEntry<String, List<String>> entry in _expandedArtifacts.entries)
-        for (final String childArtifactName in entry.value)
-          childArtifactName: entry.key,
+        for (final String childArtifactName in entry.value) childArtifactName: entry.key,
     };
   }
 
@@ -104,7 +124,7 @@ class PrecacheCommand extends FlutterCommand {
   /// If an umbrella is chosen, its children will be included as well.
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
-    final Set<String> selections = <String>{};
+    final selections = <String>{};
     bool explicitlySelected(String name) => boolArg(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       final String? umbrellaName = umbrellaForArtifact[artifact.name];
@@ -122,7 +142,7 @@ class PrecacheCommand extends FlutterCommand {
       if (!argResults!.arguments.contains('--no-$umbrellaName')) {
         return;
       }
-      for (final String childArtifactName in childArtifactNames) {
+      for (final childArtifactName in childArtifactNames) {
         if (argResults!.arguments.contains('--$childArtifactName')) {
           throwToolExit('--$childArtifactName requires --$umbrellaName');
         }
@@ -156,7 +176,7 @@ class PrecacheCommand extends FlutterCommand {
     // all artifacts that correspond to an enabled platform.
     final bool downloadDefaultArtifacts = explicitlyEnabled.isEmpty;
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
-    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
+    final requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       if (artifact.feature != null && !_featureFlags.isEnabled(artifact.feature!)) {
         continue;

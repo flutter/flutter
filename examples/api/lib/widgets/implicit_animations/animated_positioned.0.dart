@@ -20,10 +20,7 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
         body: const Center(
-          child: AnimatedPositionedExample(
-            duration: duration,
-            curve: curve,
-          ),
+          child: AnimatedPositionedExample(duration: duration, curve: curve),
         ),
       ),
     );
@@ -31,19 +28,14 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
 }
 
 class AnimatedPositionedExample extends StatefulWidget {
-  const AnimatedPositionedExample({
-    required this.duration,
-    required this.curve,
-    super.key,
-  });
+  const AnimatedPositionedExample({required this.duration, required this.curve, super.key});
 
   final Duration duration;
 
   final Curve curve;
 
   @override
-  State<AnimatedPositionedExample> createState() =>
-      _AnimatedPositionedExampleState();
+  State<AnimatedPositionedExample> createState() => _AnimatedPositionedExampleState();
 }
 
 class _AnimatedPositionedExampleState extends State<AnimatedPositionedExample> {

@@ -39,11 +39,7 @@ void main() {
 
     await tester.tap(find.text('X'));
 
-    expect(log, equals(<String>[
-      'bottom',
-      'middle',
-      'top',
-    ]));
+    expect(log, equals(<String>['bottom', 'middle', 'top']));
   });
 
   testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
@@ -68,9 +64,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(Listener)));
 
-    expect(log, equals(<String>[
-      'bottom',
-    ]));
+    expect(log, equals(<String>['bottom']));
   });
 
   group('transformed events', () {
@@ -93,12 +87,7 @@ void main() {
             onPointerSignal: (PointerSignalEvent event) {
               events.add(event);
             },
-            child: Container(
-              key: key,
-              color: Colors.red,
-              height: 100,
-              width: 100,
-            ),
+            child: Container(key: key, color: Colors.red, height: 100, width: 100),
           ),
         ),
       );
@@ -169,12 +158,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
+              child: Container(key: key, color: Colors.red, height: 100, width: 100),
             ),
           ),
         ),
@@ -245,12 +229,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
+              child: Container(key: key, color: Colors.red, height: 100, width: 100),
             ),
           ),
         ),
@@ -322,12 +301,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
+              child: Container(key: key, color: Colors.red, height: 100, width: 100),
             ),
           ),
         ),
@@ -378,7 +352,9 @@ void main() {
     });
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when default", (
+    WidgetTester tester,
+  ) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     final RenderPointerListener renderListener = RenderPointerListener();
     addTearDown(renderListener.dispose);
@@ -386,9 +362,9 @@ void main() {
     renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'parentData: MISSING',
@@ -420,9 +396,9 @@ void main() {
     renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'parentData: MISSING',

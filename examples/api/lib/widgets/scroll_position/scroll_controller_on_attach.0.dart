@@ -21,7 +21,7 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
 
   void _handleScrollChange() {
     if (isScrolling != _controller.position.isScrollingNotifier.value) {
-      setState((){
+      setState(() {
         isScrolling = _controller.position.isScrollingNotifier.value;
       });
     }
@@ -79,19 +79,12 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
                       decoration: BoxDecoration(
                         color: Colors.blueGrey[50],
                         boxShadow: const <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.black12,
-                            offset: Offset(5, 5),
-                            blurRadius: 5,
-                          ),
+                          BoxShadow(color: Colors.black12, offset: Offset(5, 5), blurRadius: 5),
                         ],
-                        borderRadius: const BorderRadius.all(Radius.circular(10))
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12.0,
-                          horizontal: 20.0,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
                         child: Text('Item $index'),
                       ),
                     ),

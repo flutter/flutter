@@ -13,9 +13,7 @@ class NestedScrollViewExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: NestedScrollViewExample(),
-    );
+    return const MaterialApp(home: NestedScrollViewExample());
   }
 }
 
@@ -105,9 +103,7 @@ class NestedScrollViewExample extends StatelessWidget {
                               (BuildContext context, int index) {
                                 // This builder is called for each child.
                                 // In this example, we just number each list item.
-                                return ListTile(
-                                  title: Text('Item $index'),
-                                );
+                                return ListTile(title: Text('Item $index'));
                               },
                               // The childCount of the SliverChildBuilderDelegate
                               // specifies how many children this inner list

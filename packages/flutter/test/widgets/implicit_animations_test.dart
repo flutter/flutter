@@ -13,8 +13,8 @@ class MockOnEndFunction {
   }
 }
 
-const Duration animationDuration = Duration(milliseconds:1000);
-const Duration additionalDelay = Duration(milliseconds:1);
+const Duration animationDuration = Duration(milliseconds: 1000);
+const Duration additionalDelay = Duration(milliseconds: 1);
 
 void main() {
   late MockOnEndFunction mockOnEndFunction;
@@ -67,13 +67,15 @@ void main() {
   });
 
   testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedContainerWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedContainerWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -90,13 +92,15 @@ void main() {
   });
 
   testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedPaddingWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedPaddingWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -113,13 +117,15 @@ void main() {
   });
 
   testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedAlignWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedAlignWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -136,13 +142,15 @@ void main() {
   });
 
   testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedPositionedWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedPositionedWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -159,13 +167,15 @@ void main() {
   });
 
   testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedPositionedDirectionalWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedPositionedDirectionalWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -181,14 +191,16 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-   testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedSlideWidgetState(),
+  testWidgets('AnimatedSlide onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedSlideWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -204,22 +216,18 @@ void main() {
   });
 
   testWidgets('AnimatedSlide transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedSlideWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedSlideWidgetState()),
       ),
-    ));
+    );
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-      find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SlideTransition slideWidget = tester.widget<SlideTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SlideTransition),
-      ).first,
+      find.ancestor(of: find.byType(Placeholder), matching: find.byType(SlideTransition)).first,
     );
 
     expect(state.builds, equals(1));
@@ -231,24 +239,26 @@ void main() {
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(slideWidget.position.value, equals(const Offset(0.5,0.5)));
+    expect(slideWidget.position.value, equals(const Offset(0.5, 0.5)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(slideWidget.position.value, equals(const Offset(0.75,0.75)));
+    expect(slideWidget.position.value, equals(const Offset(0.75, 0.75)));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(slideWidget.position.value, equals(const Offset(1,1)));
+    expect(slideWidget.position.value, equals(const Offset(1, 1)));
     expect(state.builds, equals(2));
   });
 
   testWidgets('AnimatedScale onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedScaleWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedScaleWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -264,22 +274,18 @@ void main() {
   });
 
   testWidgets('AnimatedScale transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedScaleWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedScaleWidgetState()),
       ),
-    ));
+    );
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-      find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final ScaleTransition scaleWidget = tester.widget<ScaleTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(ScaleTransition),
-      ).first,
+      find.ancestor(of: find.byType(Placeholder), matching: find.byType(ScaleTransition)).first,
     );
 
     expect(state.builds, equals(1));
@@ -302,13 +308,15 @@ void main() {
   });
 
   testWidgets('AnimatedRotation onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedRotationWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedRotationWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -324,22 +332,18 @@ void main() {
   });
 
   testWidgets('AnimatedRotation transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedRotationWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedRotationWidgetState()),
       ),
-    ));
+    );
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final RotationTransition rotationWidget = tester.widget<RotationTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(RotationTransition),
-      ).first,
+      find.ancestor(of: find.byType(Placeholder), matching: find.byType(RotationTransition)).first,
     );
 
     expect(state.builds, equals(1));
@@ -362,13 +366,15 @@ void main() {
   });
 
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedOpacityWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedOpacityWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -384,22 +390,18 @@ void main() {
   });
 
   testWidgets('AnimatedOpacity transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedOpacityWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(switchKey: switchKey, state: _TestAnimatedOpacityWidgetState()),
       ),
-    ));
+    );
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(FadeTransition),
-      ).first,
+      find.ancestor(of: find.byType(Placeholder), matching: find.byType(FadeTransition)).first,
     );
 
     expect(state.builds, equals(1));
@@ -422,13 +424,15 @@ void main() {
   });
 
   testWidgets('AnimatedFractionallySizedBox onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedFractionallySizedBoxWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedFractionallySizedBoxWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -444,11 +448,13 @@ void main() {
   });
 
   testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(TestAnimatedWidget(
-      callback: mockOnEndFunction.handler,
-      switchKey: switchKey,
-      state: _TestSliverAnimatedOpacityWidgetState(),
-    ));
+    await tester.pumpWidget(
+      TestAnimatedWidget(
+        callback: mockOnEndFunction.handler,
+        switchKey: switchKey,
+        state: _TestSliverAnimatedOpacityWidgetState(),
+      ),
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -465,22 +471,23 @@ void main() {
   });
 
   testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestSliverAnimatedOpacityWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          switchKey: switchKey,
+          state: _TestSliverAnimatedOpacityWidgetState(),
+        ),
       ),
-    ));
+    );
 
-    final RebuildCountingState<StatefulWidget> state = tester.widget<TestAnimatedWidget>(
-        find.byType(TestAnimatedWidget)
-    ).rebuildState!;
+    final RebuildCountingState<StatefulWidget> state = tester
+        .widget<TestAnimatedWidget>(find.byType(TestAnimatedWidget))
+        .rebuildState!;
     final Finder switchFinder = find.byKey(switchKey);
     final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SliverFadeTransition),
-      ).first,
+      find
+          .ancestor(of: find.byType(Placeholder), matching: find.byType(SliverFadeTransition))
+          .first,
     );
 
     expect(state.builds, equals(1));
@@ -503,13 +510,15 @@ void main() {
   });
 
   testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedDefaultTextStyleWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedDefaultTextStyleWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -526,13 +535,15 @@ void main() {
   });
 
   testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedPhysicalModelWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedPhysicalModelWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -549,13 +560,15 @@ void main() {
   });
 
   testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestTweenAnimationBuilderWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestTweenAnimationBuilderWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -572,13 +585,15 @@ void main() {
   });
 
   testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction.handler,
-        switchKey: switchKey,
-        state: _TestAnimatedThemeWidgetState(),
+    await tester.pumpWidget(
+      wrap(
+        child: TestAnimatedWidget(
+          callback: mockOnEndFunction.handler,
+          switchKey: switchKey,
+          state: _TestAnimatedThemeWidgetState(),
+        ),
       ),
-    ));
+    );
 
     final Finder widgetFinder = find.byKey(switchKey);
 
@@ -594,23 +609,25 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgets('Ensure CurvedAnimations are disposed on widget change',
-      (WidgetTester tester) async {
+  testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
         GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final ValueNotifier<Curve> curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     addTearDown(curve.dispose);
-    await tester.pumpWidget(wrap(
-      child: ValueListenableBuilder<Curve>(
-        valueListenable: curve,
-        builder: (_, Curve c, __) => AnimatedOpacity(
+    await tester.pumpWidget(
+      wrap(
+        child: ValueListenableBuilder<Curve>(
+          valueListenable: curve,
+          builder: (_, Curve c, _) => AnimatedOpacity(
             key: key,
             opacity: 1.0,
             duration: const Duration(seconds: 1),
             curve: c,
-            child: Container(color: Colors.green)),
+            child: Container(color: Colors.green),
+          ),
+        ),
       ),
-    ));
+    );
 
     final ImplicitlyAnimatedWidgetState<AnimatedOpacity>? firstState = key.currentState;
     final Animation<double>? firstAnimation = firstState?.animation;
@@ -618,8 +635,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final CurvedAnimation firstCurvedAnimation =
-        firstAnimation as CurvedAnimation;
+    final CurvedAnimation firstCurvedAnimation = firstAnimation as CurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
@@ -640,11 +656,7 @@ void main() {
     expect(firstCurvedAnimation.isDisposed, isTrue);
     expect(secondCurvedAnimation.isDisposed, isFalse);
 
-    await tester.pumpWidget(
-      wrap(
-        child: const Offstage(),
-      ),
-    );
+    await tester.pumpWidget(wrap(child: const Offstage()));
     await tester.pumpAndSettle();
 
     expect(secondCurvedAnimation.isDisposed, isTrue);
@@ -674,8 +686,11 @@ void main() {
   });
 }
 
-Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder,
-    MockOnEndFunction mockOnEndFunction) async {
+Future<void> tapTest2and3(
+  WidgetTester tester,
+  Finder widgetFinder,
+  MockOnEndFunction mockOnEndFunction,
+) async {
   await tester.tap(widgetFinder);
 
   await tester.pump();
@@ -692,9 +707,7 @@ Future<void> tapTest2and3(WidgetTester tester, Finder widgetFinder,
 Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: Material(
-      child: Center(child: child),
-    ),
+    child: Material(child: Center(child: child)),
   );
 }
 
@@ -714,7 +727,9 @@ class TestAnimatedWidget extends StatefulWidget {
   final State<StatefulWidget> state;
 
   RebuildCountingState<StatefulWidget>? get rebuildState =>
-    state is RebuildCountingState<StatefulWidget> ? state as RebuildCountingState<StatefulWidget> : null;
+      state is RebuildCountingState<StatefulWidget>
+      ? state as RebuildCountingState<StatefulWidget>
+      : null;
 
   @override
   State<StatefulWidget> createState() => state; // ignore: no_logic_in_create_state, this test predates the lint
@@ -766,8 +781,7 @@ class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
     return AnimatedPadding(
       duration: duration,
       onEnd: widget.callback,
-      padding:
-      toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+      padding: toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
       child: child,
     );
   }
@@ -815,7 +829,7 @@ class _TestAnimatedSlideWidgetState extends _TestAnimatedWidgetState {
     return AnimatedSlide(
       duration: duration,
       onEnd: widget.callback,
-      offset: toggle ? const Offset(1,1) : Offset.zero,
+      offset: toggle ? const Offset(1, 1) : Offset.zero,
       child: child,
     );
   }
@@ -893,11 +907,7 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
           slivers: <Widget>[
             animatedWidget,
             SliverToBoxAdapter(
-              child: Switch(
-                key: widget.switchKey,
-                value: toggle,
-                onChanged: onChanged,
-              ),
+              child: Switch(key: widget.switchKey, value: toggle, onChanged: onChanged),
             ),
           ],
         ),
@@ -913,8 +923,8 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
       duration: duration,
       onEnd: widget.callback,
       style: toggle
-        ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal),
+          ? const TextStyle(fontStyle: FontStyle.italic)
+          : const TextStyle(fontStyle: FontStyle.normal),
       child: child,
     );
   }
@@ -942,11 +952,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
       onEnd: widget.callback,
       child: child,
       builder: (BuildContext context, double? size, Widget? child) {
-        return SizedBox(
-          width: size,
-          height: size,
-          child: child,
-        );
+        return SizedBox(width: size, height: size, child: child);
       },
     );
   }
@@ -956,7 +962,7 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedTheme(
-      data: toggle ? ThemeData.dark() : ThemeData.light(),
+      data: toggle ? ThemeData.dark() : ThemeData(),
       duration: duration,
       onEnd: widget.callback,
       child: child,

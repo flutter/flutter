@@ -11,12 +11,15 @@ import '../../src/logging_logger.dart';
 void main() {
   testWithoutContext('Test phases prints correctly', () {
     const Duration zero = Duration.zero;
-    const Duration combinedDuration = Duration(seconds: 42);
-    const Duration wallClockDuration = Duration(seconds: 21);
+    const combinedDuration = Duration(seconds: 42);
+    const wallClockDuration = Duration(seconds: 21);
 
     for (final TestTimePhases phase in TestTimePhases.values) {
       final TestTimeRecorder recorder = createRecorderWithTimesForPhase(
-          phase, combinedDuration, wallClockDuration);
+        phase,
+        combinedDuration,
+        wallClockDuration,
+      );
       final Set<String> prints = recorder.getPrintAsListForTesting().toSet();
 
       // Expect one entry per phase.
@@ -25,8 +28,10 @@ void main() {
       // Expect this phase to have the specified times.
       expect(
         prints,
-        contains('Runtime for phase ${phase.name}: '
-            'Wall-clock: $wallClockDuration; combined: $combinedDuration.'),
+        contains(
+          'Runtime for phase ${phase.name}: '
+          'Wall-clock: $wallClockDuration; combined: $combinedDuration.',
+        ),
       );
 
       // Expect all other phases to say 0.
@@ -36,23 +41,25 @@ void main() {
         }
         expect(
           prints,
-          contains('Runtime for phase ${innerPhase.name}: '
-              'Wall-clock: $zero; combined: $zero.'),
+          contains(
+            'Runtime for phase ${innerPhase.name}: '
+            'Wall-clock: $zero; combined: $zero.',
+          ),
         );
       }
     }
   });
 }
 
-TestTimeRecorder createRecorderWithTimesForPhase(TestTimePhases phase,
-    Duration combinedDuration, Duration wallClockDuration) {
-  final LoggingLogger logger = LoggingLogger();
-  final TestTimeRecorder recorder =
-      TestTimeRecorder(logger, stopwatchFactory: FakeStopwatchFactory());
-  final FakeStopwatch combinedStopwatch =
-      recorder.start(phase) as FakeStopwatch;
-  final FakeStopwatch wallClockStopwatch =
-      recorder.getPhaseWallClockStopwatchForTesting(phase) as FakeStopwatch;
+TestTimeRecorder createRecorderWithTimesForPhase(
+  TestTimePhases phase,
+  Duration combinedDuration,
+  Duration wallClockDuration,
+) {
+  final logger = LoggingLogger();
+  final recorder = TestTimeRecorder(logger, stopwatchFactory: FakeStopwatchFactory());
+  final combinedStopwatch = recorder.start(phase) as FakeStopwatch;
+  final wallClockStopwatch = recorder.getPhaseWallClockStopwatchForTesting(phase) as FakeStopwatch;
   wallClockStopwatch.elapsed = wallClockDuration;
   combinedStopwatch.elapsed = combinedDuration;
   recorder.stop(phase, combinedStopwatch);

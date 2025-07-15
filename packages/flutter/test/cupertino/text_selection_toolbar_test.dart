@@ -40,19 +40,13 @@ class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionContro
       anchorX,
       endpoints.first.point.dy - textLineHeight + globalEditableRegion.top,
     );
-    final Offset anchorBelow = Offset(
-      anchorX,
-      endpoints.last.point.dy + globalEditableRegion.top,
-    );
+    final Offset anchorBelow = Offset(anchorX, endpoints.last.point.dy + globalEditableRegion.top);
 
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       children: <Widget>[
-        CupertinoTextSelectionToolbarButton(
-          onPressed: () {},
-          child: const Text('Custom button'),
-        ),
+        CupertinoTextSelectionToolbarButton(onPressed: () {}, child: const Text('Custom button')),
       ],
     );
   }
@@ -98,16 +92,18 @@ void main() {
     ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
 
   Finder findOverflowNextButton() {
-    return find.byWidgetPredicate((Widget widget) =>
-    widget is CustomPaint &&
-        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    return find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
     );
   }
 
   Finder findOverflowBackButton() {
-    return find.byWidgetPredicate((Widget widget) =>
-    widget is CustomPaint &&
-        '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+    return find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
     );
   }
 
@@ -149,7 +145,7 @@ void main() {
     expect(findOverflowNextButton(), findsNothing);
 
     expect(findOverflowBackButton(), overflowBackPaintPattern());
-  }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
+  });
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -178,9 +174,7 @@ void main() {
 
     // Adding one more child makes the children overflow.
     setState(() {
-      children.add(
-        const TestBox(),
-      );
+      children.add(const TestBox());
     });
     await tester.pumpAndSettle();
     expect(find.byType(TestBox), findsNWidgets(children.length - 1));
@@ -246,7 +240,8 @@ void main() {
     final double spacerWidth = 1.0 / tester.view.devicePixelRatio;
     final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
     const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
-    final double width = 7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
+    final double width =
+        7 * TestBox.itemWidth + 6 * (dividerWidth + 2 * spacerWidth) + 2 * borderRadius;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -343,11 +338,7 @@ void main() {
               // and the built-in padding from CupertinoApp can end up canceling
               // each other out.
               return MediaQuery(
-                data: data.copyWith(
-                  padding: data.viewPadding.copyWith(
-                    top: paddingAbove,
-                  ),
-                ),
+                data: data.copyWith(padding: data.viewPadding.copyWith(top: paddingAbove)),
                 child: CupertinoTextSelectionToolbar(
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, anchorBelowY),
@@ -370,7 +361,8 @@ void main() {
     expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistance));
     expect(find.byType(CustomSingleChildLayout), findsOneWidget);
     final CustomSingleChildLayout layout = tester.widget(find.byType(CustomSingleChildLayout));
-    final TextSelectionToolbarLayoutDelegate delegate = layout.delegate as TextSelectionToolbarLayoutDelegate;
+    final TextSelectionToolbarLayoutDelegate delegate =
+        layout.delegate as TextSelectionToolbarLayoutDelegate;
     expect(delegate.anchorBelow.dy, anchorBelowY - paddingAbove);
 
     // Even when it barely doesn't fit.
@@ -387,13 +379,48 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
+    expect(
+      toolbarY,
+      equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance),
+    );
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Select me custom menu',
+  testWidgets('Arrow points upwards if toolbar is below the anchor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 59.0)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 51.0),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: const Offset(15.0, 117.0),
+                  anchorBelow: const Offset(15.0, 140.0),
+                  children: const <Widget>[SizedBox(height: 56.0)],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
+
+    expect(
+      findPrivate('_CupertinoTextSelectionToolbarShape'),
+      paints
+        ..rrect()
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[const Offset(18.0, 49.0), const Offset(25.0, 42.0)],
+            excludes: <Offset>[const Offset(18.0, 0.0), const Offset(25.0, 7.0)],
+          ),
+        ),
+    );
+  });
+
+  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'Select me custom menu');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
@@ -426,55 +453,59 @@ void main() {
 
   for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
     for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
-      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          CupertinoApp(
-            theme: CupertinoThemeData(
-              brightness: themeBrightness,
-            ),
-            home: Center(
-              child: Builder(
-                builder: (BuildContext context) {
-                  return MediaQuery(
-                    data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
-                    child: CupertinoTextSelectionToolbar(
-                      anchorAbove: const Offset(100.0, 0.0),
-                      anchorBelow: const Offset(100.0, 0.0),
-                      children: <Widget>[
-                        CupertinoTextSelectionToolbarButton.text(
-                          onPressed: () {},
-                          text: 'Button',
-                        ),
-                      ],
-                    ),
-                  );
-                },
+      testWidgets(
+        'draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            CupertinoApp(
+              theme: CupertinoThemeData(brightness: themeBrightness),
+              home: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
+                      child: CupertinoTextSelectionToolbar(
+                        anchorAbove: const Offset(100.0, 0.0),
+                        anchorBelow: const Offset(100.0, 0.0),
+                        children: <Widget>[
+                          CupertinoTextSelectionToolbarButton.text(
+                            onPressed: () {},
+                            text: 'Button',
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        );
+          );
 
-        final Finder buttonFinder = find.byType(CupertinoButton);
-        expect(buttonFinder, findsOneWidget);
+          final Finder buttonFinder = find.byType(CupertinoButton);
+          expect(buttonFinder, findsOneWidget);
 
-        final Finder textFinder = find.descendant(
-          of: find.byType(CupertinoButton),
-          matching: find.byType(Text)
-        );
-        expect(textFinder, findsOneWidget);
-        final Text text = tester.widget(textFinder);
+          final Finder textFinder = find.descendant(
+            of: find.byType(CupertinoButton),
+            matching: find.byType(Text),
+          );
+          expect(textFinder, findsOneWidget);
+          final Text text = tester.widget(textFinder);
 
-        // Theme brightness is preferred, otherwise MediaQuery brightness is
-        // used. If both are null, defaults to light.
-        final Brightness effectiveBrightness = themeBrightness ?? mediaBrightness ?? Brightness.light;
+          // Theme brightness is preferred, otherwise MediaQuery brightness is
+          // used. If both are null, defaults to light.
+          final Brightness effectiveBrightness =
+              themeBrightness ?? mediaBrightness ?? Brightness.light;
 
-        expect(
-          text.style!.color!.value,
-          effectiveBrightness == Brightness.dark
-              ? _kToolbarTextColor.darkColor.value
-              : _kToolbarTextColor.color.value,
-        );
-      }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+          expect(
+            text.style!.color!.value,
+            effectiveBrightness == Brightness.dark
+                ? _kToolbarTextColor.darkColor.value
+                : _kToolbarTextColor.color.value,
+          );
+        },
+        // [intended] We do not use Flutter-rendered context menu on the Web.
+        skip: kIsWeb,
+      );
     }
   }
 
@@ -485,9 +516,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
-          brightness: Brightness.light,
-        ),
+        theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Center(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
@@ -498,11 +527,7 @@ void main() {
               // and the built-in padding from CupertinoApp can end up canceling
               // each other out.
               return MediaQuery(
-                data: data.copyWith(
-                  padding: data.viewPadding.copyWith(
-                    top: 12.0,
-                  ),
-                ),
+                data: data.copyWith(padding: data.viewPadding.copyWith(top: 12.0)),
                 child: CupertinoTextSelectionToolbar(
                   anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, 500.0),
@@ -524,7 +549,13 @@ void main() {
     expect(
       find.byType(CupertinoTextSelectionToolbar),
       paints..rrect(
-        rrect: RRect.fromLTRBR(8.0, 515.0, 158.0 + 2 * dividerWidth, 558.0, const Radius.circular(8.0)),
+        rrect: RRect.fromLTRBR(
+          8.0,
+          515.0,
+          158.0 + 2 * dividerWidth,
+          558.0,
+          const Radius.circular(8.0),
+        ),
         color: const Color(0x33000000),
       ),
     );
@@ -539,7 +570,13 @@ void main() {
     expect(
       find.byType(CupertinoTextSelectionToolbar),
       paints..rrect(
-        rrect: RRect.fromLTRBR(8.0, 29.0, 158.0 + 2 * dividerWidth, 72.0, const Radius.circular(8.0)),
+        rrect: RRect.fromLTRBR(
+          8.0,
+          29.0,
+          158.0 + 2 * dividerWidth,
+          72.0,
+          const Radius.circular(8.0),
+        ),
         color: const Color(0x33000000),
       ),
     );
@@ -554,8 +591,13 @@ void main() {
         children: <Widget>[
           CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum'),
           CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'dolor sit amet'),
-          CupertinoTextSelectionToolbarButton.text(onPressed: () {}, text: 'Lorem ipsum \ndolor sit amet'),
-          CupertinoTextSelectionToolbarButton.buttonItem(buttonItem: ContextMenuButtonItem(onPressed: () {}, type: ContextMenuButtonType.copy)),
+          CupertinoTextSelectionToolbarButton.text(
+            onPressed: () {},
+            text: 'Lorem ipsum \ndolor sit amet',
+          ),
+          CupertinoTextSelectionToolbarButton.buttonItem(
+            buttonItem: ContextMenuButtonItem(onPressed: () {}, type: ContextMenuButtonType.copy),
+          ),
         ],
       );
       return CupertinoApp(

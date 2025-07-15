@@ -78,11 +78,21 @@ class DeferredComponent {
     };
   }
 
+  /// Returns a descriptor of the component to be used when modifying a
+  /// pubspec.yaml.
+  Map<String, Object?> get descriptor {
+    return <String, Object?>{
+      'name': name,
+      if (libraries.isNotEmpty) 'libraries': libraries.toList(),
+      if (assets.isNotEmpty) 'assets': assets.map((AssetsEntry e) => e.descriptor).toList(),
+    };
+  }
+
   /// Provides a human readable string representation of the
   /// configuration.
   @override
   String toString() {
-    final StringBuffer out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
+    final out = StringBuffer('\nDeferredComponent: $name\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n    - $lib');
     }
@@ -110,11 +120,7 @@ class LoadingUnit {
   ///
   /// Loading units must include an [id] and [libraries]. The [path] is only present when
   /// parsing the loading unit from a loading unit manifest produced by gen_snapshot.
-  LoadingUnit({
-    required this.id,
-    required this.libraries,
-    this.path,
-  });
+  LoadingUnit({required this.id, required this.libraries, this.path});
 
   /// The unique loading unit id that is used to identify the loading unit within dart.
   final int id;
@@ -132,7 +138,7 @@ class LoadingUnit {
   /// the [path] field. The [path] is not included as it is not relevant when the
   @override
   String toString() {
-    final StringBuffer out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
+    final out = StringBuffer('\nLoadingUnit $id\n  Libraries:');
     for (final String lib in libraries) {
       out.write('\n  - $lib');
     }
@@ -150,14 +156,18 @@ class LoadingUnit {
   ///
   /// This will read all existing loading units for every provided abi. If no abis are
   /// provided, loading units for all abis will be parsed.
-  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String>? abis}) {
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
+  static List<LoadingUnit> parseGeneratedLoadingUnits(
+    Directory outputDir,
+    Logger logger, {
+    List<String>? abis,
+  }) {
+    final loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
-    for (final FileSystemEntity fileEntity in files) {
+    for (final fileEntity in files) {
       if (fileEntity is File) {
         final File file = fileEntity;
         // Determine if the abi is one we build.
-        bool matchingAbi = abis == null;
+        var matchingAbi = abis == null;
         if (abis != null) {
           for (final String abi in abis) {
             if (file.parent.path.endsWith(abi)) {

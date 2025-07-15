@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// An example xcresult bundle json with invalid issues map.
-const String kSampleResultJsonInvalidIssuesMap = r'''
+const kSampleResultJsonInvalidIssuesMap = r'''
 {
   "_type" : {
     "_name" : "ActionsInvocationRecord"
@@ -13,7 +13,7 @@ const String kSampleResultJsonInvalidIssuesMap = r'''
 ''';
 
 /// An example xcresult bundle json that contains warnings and errors that needs to be discarded per https://github.com/flutter/flutter/issues/95354.
-const String kSampleResultJsonWithIssuesToBeDiscarded = r'''
+const kSampleResultJsonWithIssuesToBeDiscarded = r'''
 {
   "issues" : {
     "_type" : {
@@ -106,7 +106,7 @@ const String kSampleResultJsonWithIssuesToBeDiscarded = r'''
 ''';
 
 /// An example xcresult bundle json that contains some warning and some errors.
-const String kSampleResultJsonWithIssues = r'''
+const kSampleResultJsonWithIssues = r'''
 {
   "issues" : {
     "_type" : {
@@ -182,7 +182,7 @@ const String kSampleResultJsonWithIssues = r'''
 ''';
 
 /// An example xcresult bundle json that contains some warning and some errors.
-const String kSampleResultJsonWithNoProvisioningProfileIssue = r'''
+const kSampleResultJsonWithNoProvisioningProfileIssue = r'''
 {
   "issues" : {
     "_type" : {
@@ -258,7 +258,7 @@ const String kSampleResultJsonWithNoProvisioningProfileIssue = r'''
 ''';
 
 /// An example xcresult bundle json that contains some warning and some errors.
-const String kSampleResultJsonWithIssuesAndInvalidUrl = r'''
+const kSampleResultJsonWithIssuesAndInvalidUrl = r'''
 {
   "issues" : {
     "_type" : {
@@ -334,7 +334,7 @@ const String kSampleResultJsonWithIssuesAndInvalidUrl = r'''
 ''';
 
 /// An example xcresult bundle json that contains no issues.
-const String kSampleResultJsonNoIssues = r'''
+const kSampleResultJsonNoIssues = r'''
 {
   "issues" : {
     "_type" : {
@@ -345,7 +345,7 @@ const String kSampleResultJsonNoIssues = r'''
 ''';
 
 /// An example xcresult bundle json with some provision profile issue.
-const String kSampleResultJsonWithProvisionIssue = r'''
+const kSampleResultJsonWithProvisionIssue = r'''
 {
   "issues" : {
     "_type" : {
@@ -379,9 +379,8 @@ const String kSampleResultJsonWithProvisionIssue = r'''
 }
 ''';
 
-
 /// An example xcresult bundle json that contains action issues.
-const String kSampleResultJsonWithActionIssues = r'''
+const kSampleResultJsonWithActionIssues = r'''
 {
   "_type" : {
     "_name" : "ActionsInvocationRecord"

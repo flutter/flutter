@@ -50,10 +50,7 @@ class MainWidgetState extends State<MainWidget> {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.business),
-            label: 'Business',
-          ),
+          NavigationDestination(icon: Icon(Icons.business), label: 'Business'),
           NavigationDestination(
             selectedIcon: Icon(Icons.school),
             icon: Icon(Icons.school_outlined),
@@ -62,18 +59,9 @@ class MainWidgetState extends State<MainWidget> {
         ],
       ),
       body: <Widget>[
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 1'),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 2'),
-        ),
-        Container(
-          alignment: Alignment.center,
-          child: const Text('Page 3'),
-        ),
+        Container(alignment: Alignment.center, child: const Text('Page 1')),
+        Container(alignment: Alignment.center, child: const Text('Page 2')),
+        Container(alignment: Alignment.center, child: const Text('Page 3')),
       ][currentPageIndex],
     );
   }

@@ -22,7 +22,7 @@ List<Color> _kColors = <Color>[
 
 /// A simple model object for a dot that reacts to pointer pressure.
 class Dot {
-  Dot({ required Color color }) : _paint = Paint()..color = color;
+  Dot({required Color color}) : _paint = Paint()..color = color;
 
   final Paint _paint;
   Offset position = Offset.zero;
@@ -116,10 +116,7 @@ void main() {
   // text.
   final RenderStack stack = RenderStack(
     textDirection: TextDirection.ltr,
-    children: <RenderBox>[
-      RenderDots(),
-      paragraph,
-    ],
+    children: <RenderBox>[RenderDots(), paragraph],
   );
   // The "parentData" field of a render object is controlled by the render
   // object's parent render object. Now that we've added the paragraph as a

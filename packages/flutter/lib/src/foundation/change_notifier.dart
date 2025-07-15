@@ -11,6 +11,7 @@ import 'dart:ui' show VoidCallback;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
+import 'debug.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
 
@@ -100,8 +101,6 @@ abstract class ValueListenable<T> extends Listenable {
   T get value;
 }
 
-const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
-
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -156,7 +155,7 @@ mixin class ChangeNotifier implements Listenable {
   ///
   /// As [ChangeNotifier] is used as mixin, it does not have constructor,
   /// so we use [addListener] to dispatch the event.
-  bool _creationDispatched = false;
+  bool _debugCreationDispatched = false;
 
   /// Used by subclasses to assert that the [ChangeNotifier] has not yet been
   /// disposed.
@@ -232,16 +231,13 @@ mixin class ChangeNotifier implements Listenable {
   /// so that the method is tree-shaken away when the flag is false.
   @protected
   static void maybeDispatchObjectCreation(ChangeNotifier object) {
-    // Tree shaker does not include this method and the class MemoryAllocations
-    // if kFlutterMemoryAllocationsEnabled is false.
-    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ChangeNotifier',
-        object: object,
-      );
-      object._creationDispatched = true;
-    }
+    assert(() {
+      if (!object._debugCreationDispatched) {
+        debugMaybeDispatchCreated('foundation', 'ChangeNotifier', object);
+        object._debugCreationDispatched = true;
+      }
+      return true;
+    }());
   }
 
   /// Register a closure to be called when the object changes.
@@ -282,8 +278,10 @@ mixin class ChangeNotifier implements Listenable {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
       } else {
-        final List<VoidCallback?> newListeners =
-            List<VoidCallback?>.filled(_listeners.length * 2, null);
+        final List<VoidCallback?> newListeners = List<VoidCallback?>.filled(
+          _listeners.length * 2,
+          null,
+        );
         for (int i = 0; i < _count; i++) {
           newListeners[i] = _listeners[i];
         }
@@ -385,11 +383,11 @@ mixin class ChangeNotifier implements Listenable {
     );
     assert(() {
       _debugDisposed = true;
+      if (_debugCreationDispatched) {
+        assert(debugMaybeDispatchDisposed(this));
+      }
       return true;
     }());
-    if (kFlutterMemoryAllocationsEnabled && _creationDispatched) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
     _listeners = _emptyListeners;
     _count = 0;
   }
@@ -436,19 +434,21 @@ mixin class ChangeNotifier implements Listenable {
       try {
         _listeners[i]?.call();
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'foundation library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<ChangeNotifier>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'foundation library',
+            context: ErrorDescription('while dispatching notifications for $runtimeType'),
+            informationCollector: () => <DiagnosticsNode>[
+              DiagnosticsProperty<ChangeNotifier>(
+                'The $runtimeType sending notification was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ],
+          ),
+        );
       }
     }
 

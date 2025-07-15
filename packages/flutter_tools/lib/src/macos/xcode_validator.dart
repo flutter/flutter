@@ -9,9 +9,10 @@ import '../doctor_validator.dart';
 import '../ios/simulators.dart';
 import 'xcode.dart';
 
-String _iOSSimulatorMissing(String version) => '''
+String _iOSSimulatorMissing(String version) =>
+    '''
 iOS $version Simulator not installed; this may be necessary for iOS and macOS development.
-To download and install the platform, open Xcode, select Xcode > Settings > Platforms,
+To download and install the platform, open Xcode, select Xcode > Settings > Components,
 and click the GET button for the required platform.
 
 For more information, please visit:
@@ -22,18 +23,18 @@ class XcodeValidator extends DoctorValidator {
     required Xcode xcode,
     required IOSSimulatorUtils iosSimulatorUtils,
     required UserMessages userMessages,
-  })  : _xcode = xcode,
-        _iosSimulatorUtils = iosSimulatorUtils,
-        _userMessages = userMessages,
-        super('Xcode - develop for iOS and macOS');
+  }) : _xcode = xcode,
+       _iosSimulatorUtils = iosSimulatorUtils,
+       _userMessages = userMessages,
+       super('Xcode - develop for iOS and macOS');
 
   final Xcode _xcode;
   final IOSSimulatorUtils _iosSimulatorUtils;
   final UserMessages _userMessages;
 
   @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+  Future<ValidationResult> validateImpl() async {
+    final messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     String? xcodeVersionInfo;
 
@@ -56,10 +57,16 @@ class XcodeValidator extends DoctorValidator {
       }
       if (!_xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(_userMessages.xcodeOutdated(xcodeRequiredVersion.toString())));
+        messages.add(
+          ValidationMessage.error(_userMessages.xcodeOutdated(xcodeRequiredVersion.toString())),
+        );
       } else if (!_xcode.isRecommendedVersionSatisfactory) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.hint(_userMessages.xcodeRecommended(xcodeRecommendedVersion.toString())));
+        messages.add(
+          ValidationMessage.hint(
+            _userMessages.xcodeRecommended(xcodeRecommendedVersion.toString()),
+          ),
+        );
       }
 
       if (!_xcode.eulaSigned) {
@@ -119,8 +126,7 @@ class XcodeValidator extends DoctorValidator {
     // iphonesimulator SDK major version.
     try {
       runtimes.firstWhere(
-        (IOSSimulatorRuntime runtime) =>
-            runtime.version?.major == platformSDKVersion.major,
+        (IOSSimulatorRuntime runtime) => runtime.version?.major == platformSDKVersion.major,
       );
     } on StateError {
       return ValidationMessage.hint(_iOSSimulatorMissing(platformSDKVersion.toString()));

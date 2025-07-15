@@ -15,7 +15,8 @@ class ProgressIndicatorDemo extends StatefulWidget {
   State<ProgressIndicatorDemo> createState() => _ProgressIndicatorDemoState();
 }
 
-class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
+class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -28,17 +29,18 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
-      reverseCurve: Curves.fastOutSlowIn,
-    )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed) {
-        _controller.forward();
-      } else if (status == AnimationStatus.completed) {
-        _controller.reverse();
-      }
-    });
+    _animation =
+        CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+          reverseCurve: Curves.fastOutSlowIn,
+        )..addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.dismissed) {
+            _controller.forward();
+          } else if (status == AnimationStatus.completed) {
+            _controller.reverse();
+          }
+        });
   }
 
   @override
@@ -67,10 +69,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
   Widget _buildIndicators(BuildContext context, Widget? child) {
     final List<Widget> indicators = <Widget>[
-      const SizedBox(
-        width: 200.0,
-        child: LinearProgressIndicator(),
-      ),
+      const SizedBox(width: 200.0, child: LinearProgressIndicator()),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),
       LinearProgressIndicator(value: _animation.value),
@@ -79,14 +78,15 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
         children: <Widget>[
           const CircularProgressIndicator(),
           SizedBox(
-              width: 20.0,
-              height: 20.0,
-              child: CircularProgressIndicator(value: _animation.value),
+            width: 20.0,
+            height: 20.0,
+            child: CircularProgressIndicator(value: _animation.value),
           ),
           SizedBox(
             width: 100.0,
             height: 20.0,
-            child: Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
+            child: Text(
+              '${(_animation.value * 100.0).toStringAsFixed(1)}%',
               textAlign: TextAlign.right,
             ),
           ),
@@ -95,11 +95,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(
-          margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-          child: c,
-        ))
-        .toList(),
+          .map<Widget>(
+            (Widget c) => Container(
+              margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+              child: c,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -122,10 +124,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
                 bottom: false,
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                  child: AnimatedBuilder(
-                    animation: _animation,
-                    builder: _buildIndicators,
-                  ),
+                  child: AnimatedBuilder(animation: _animation, builder: _buildIndicators),
                 ),
               ),
             ),

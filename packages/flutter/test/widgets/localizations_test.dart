@@ -4,22 +4,44 @@
 
 import 'dart:async';
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
 
-  testWidgets('Locale is available when Localizations widget stops deferring frames', (WidgetTester tester) async {
+  testWidgets('English translations exist for all WidgetsLocalizations properties', (
+    WidgetTester tester,
+  ) async {
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+    expect(localizations.reorderItemUp, isNotNull);
+    expect(localizations.reorderItemDown, isNotNull);
+    expect(localizations.reorderItemLeft, isNotNull);
+    expect(localizations.reorderItemRight, isNotNull);
+    expect(localizations.reorderItemToEnd, isNotNull);
+    expect(localizations.reorderItemToStart, isNotNull);
+    expect(localizations.copyButtonLabel, isNotNull);
+    expect(localizations.cutButtonLabel, isNotNull);
+    expect(localizations.pasteButtonLabel, isNotNull);
+    expect(localizations.selectAllButtonLabel, isNotNull);
+    expect(localizations.lookUpButtonLabel, isNotNull);
+    expect(localizations.searchWebButtonLabel, isNotNull);
+    expect(localizations.shareButtonLabel, isNotNull);
+  });
+
+  testWidgets('Locale is available when Localizations widget stops deferring frames', (
+    WidgetTester tester,
+  ) async {
     final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
-    await tester.pumpWidget(Localizations(
-      locale: const Locale('fo'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        delegate,
-      ],
-      child: const Text('loaded'),
-    ));
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('fo'),
+        delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate(), delegate],
+        child: const Text('loaded'),
+      ),
+    );
     final dynamic state = tester.state(find.byType(Localizations));
     // ignore: avoid_dynamic_calls
     expect(state!.locale, isNull);
@@ -37,22 +59,89 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
-  testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.localeOf throws when no localizations exist', (
+    WidgetTester tester,
+  ) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
-    expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
+    expect(
+      () => Localizations.localeOf(contextKey.currentContext!),
+      throwsA(
+        isAssertionError.having(
           (AssertionError e) => e.message,
-      'message',
-      contains('does not include a Localizations ancestor'),
-    )));
+          'message',
+          contains('does not include a Localizations ancestor'),
+        ),
+      ),
+    );
   });
 
-  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (
+    WidgetTester tester,
+  ) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
     expect(Localizations.maybeLocaleOf(contextKey.currentContext!), isNull);
+  });
+
+  group('Semantics', () {
+    testWidgets('set locale semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('fo'),
+          delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate()],
+          child: Semantics(
+            container: true,
+            label: '1',
+            explicitChildNodes: true,
+            child: Column(
+              children: <Widget>[
+                const Text('2'),
+                Localizations(
+                  locale: const Locale('zh'),
+                  delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate()],
+                  child: const Text('3'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.bySemanticsLabel('1'));
+      expect(node1.getSemanticsData().locale, const Locale('fo'));
+
+      final SemanticsNode node2 = tester.getSemantics(find.bySemanticsLabel('2'));
+      expect(node2.getSemanticsData().locale, const Locale('fo'));
+
+      final SemanticsNode node3 = tester.getSemantics(find.bySemanticsLabel('3'));
+      expect(node3.getSemanticsData().locale, const Locale('zh'));
+    });
+
+    testWidgets('application level does not set semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('fo'),
+          isApplicationLevel: true,
+          delegates: <LocalizationsDelegate<dynamic>>[WidgetsLocalizationsDelegate()],
+          child: Semantics(
+            container: true,
+            label: '1',
+            explicitChildNodes: true,
+            child: const Column(children: <Widget>[Text('2'), Text('3')]),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.bySemanticsLabel('1'));
+      expect(node1.getSemanticsData().locale, isNull);
+
+      final SemanticsNode node2 = tester.getSemantics(find.bySemanticsLabel('2'));
+      expect(node2.getSemanticsData().locale, isNull);
+
+      final SemanticsNode node3 = tester.getSemantics(find.bySemanticsLabel('3'));
+      expect(node3.getSemanticsData().locale, isNull);
+    });
   });
 }
 
@@ -70,7 +159,6 @@ class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
 }
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-
   VoidCallback? onAllowFrame;
 
   @override

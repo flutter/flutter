@@ -48,16 +48,11 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
+        child: SafeArea(top: false, child: child),
       ),
     );
   }
@@ -65,14 +60,9 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoPicker Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoPicker Sample')),
       child: DefaultTextStyle(
-        style: TextStyle(
-          color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 22.0,
-        ),
+        style: TextStyle(color: CupertinoColors.label.resolveFrom(context), fontSize: 22.0),
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -88,9 +78,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     useMagnifier: true,
                     itemExtent: _kItemExtent,
                     // This sets the initial item.
-                    scrollController: FixedExtentScrollController(
-                      initialItem: _selectedFruit,
-                    ),
+                    scrollController: FixedExtentScrollController(initialItem: _selectedFruit),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
@@ -103,12 +91,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                   ),
                 ),
                 // This displays the selected fruit name.
-                child: Text(
-                  _fruitNames[_selectedFruit],
-                  style: const TextStyle(
-                    fontSize: 22.0,
-                  ),
-                ),
+                child: Text(_fruitNames[_selectedFruit], style: const TextStyle(fontSize: 22.0)),
               ),
             ],
           ),

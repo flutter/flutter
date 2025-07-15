@@ -63,10 +63,12 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
+    this.focusNode,
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
+    this.textEditingController,
     this.initialValue,
   });
 
@@ -78,6 +80,14 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// If not provided, will build a standard Material-style text field by
   /// default.
   final AutocompleteFieldViewBuilder fieldViewBuilder;
+
+  /// The [FocusNode] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [textEditingController] must also be
+  /// non-null.
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.onSelected}
   final AutocompleteOnSelected<T>? onSelected;
@@ -102,10 +112,22 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// The default value is set to 200.
   final double optionsMaxHeight;
 
+  /// The [TextEditingController] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [focusNode] must also be non-null.
+  final TextEditingController? textEditingController;
+
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
-  static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  static Widget _defaultFieldViewBuilder(
+    BuildContext context,
+    TextEditingController textEditingController,
+    FocusNode focusNode,
+    VoidCallback onFieldSubmitted,
+  ) {
     return _AutocompleteField(
       focusNode: focusNode,
       textEditingController: textEditingController,
@@ -118,18 +140,22 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
+      focusNode: focusNode,
+      textEditingController: textEditingController,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
       optionsViewOpenDirection: optionsViewOpenDirection,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
-        return _AutocompleteOptions<T>(
-          displayStringForOption: displayStringForOption,
-          onSelected: onSelected,
-          options: options,
-          openDirection: optionsViewOpenDirection,
-          maxOptionsHeight: optionsMaxHeight,
-        );
-      },
+      optionsViewBuilder:
+          optionsViewBuilder ??
+          (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+            return _AutocompleteOptions<T>(
+              displayStringForOption: displayStringForOption,
+              onSelected: onSelected,
+              options: options,
+              openDirection: optionsViewOpenDirection,
+              optionsMaxHeight: optionsMaxHeight,
+            );
+          },
       onSelected: onSelected,
     );
   }
@@ -169,59 +195,119 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.onSelected,
     required this.openDirection,
     required this.options,
-    required this.maxOptionsHeight,
+    required this.optionsMaxHeight,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
-
   final AutocompleteOnSelected<T> onSelected;
   final OptionsViewOpenDirection openDirection;
-
   final Iterable<T> options;
-  final double maxOptionsHeight;
+  final double optionsMaxHeight;
 
   @override
   Widget build(BuildContext context) {
+    final int highlightedIndex = AutocompleteHighlightedOption.of(context);
+
     final AlignmentDirectional optionsAlignment = switch (openDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
       OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
     };
+
     return Align(
       alignment: optionsAlignment,
       child: Material(
         elevation: 4.0,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxOptionsHeight),
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
-              final T option = options.elementAt(index);
-              return InkWell(
-                onTap: () {
-                  onSelected(option);
-                },
-                child: Builder(
-                  builder: (BuildContext context) {
-                    final bool highlight = AutocompleteHighlightedOption.of(context) == index;
-                    if (highlight) {
-                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-                        Scrollable.ensureVisible(context, alignment: 0.5);
-                      }, debugLabel: 'AutocompleteOptions.ensureVisible');
-                    }
-                    return Container(
-                      color: highlight ? Theme.of(context).focusColor : null,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(displayStringForOption(option)),
-                    );
-                  }
-                ),
-              );
-            },
+          constraints: BoxConstraints(maxHeight: optionsMaxHeight),
+          child: _AutocompleteOptionsList<T>(
+            displayStringForOption: displayStringForOption,
+            highlightedIndex: highlightedIndex,
+            onSelected: onSelected,
+            options: options,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AutocompleteOptionsList<T extends Object> extends StatefulWidget {
+  const _AutocompleteOptionsList({
+    required this.displayStringForOption,
+    required this.highlightedIndex,
+    required this.onSelected,
+    required this.options,
+  });
+
+  final AutocompleteOptionToString<T> displayStringForOption;
+  final int highlightedIndex;
+  final AutocompleteOnSelected<T> onSelected;
+  final Iterable<T> options;
+
+  @override
+  State<_AutocompleteOptionsList<T>> createState() => _AutocompleteOptionsListState<T>();
+}
+
+class _AutocompleteOptionsListState<T extends Object> extends State<_AutocompleteOptionsList<T>> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(_AutocompleteOptionsList<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.highlightedIndex != oldWidget.highlightedIndex) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        if (!mounted) {
+          return;
+        }
+        final BuildContext? highlightedContext = GlobalObjectKey(
+          widget.options.elementAt(widget.highlightedIndex),
+        ).currentContext;
+        if (highlightedContext == null) {
+          _scrollController.jumpTo(
+            widget.highlightedIndex == 0 ? 0.0 : _scrollController.position.maxScrollExtent,
+          );
+        } else {
+          Scrollable.ensureVisible(highlightedContext, alignment: 0.5);
+        }
+      }, debugLabel: 'AutocompleteOptions.ensureVisible');
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int highlightedIndex = AutocompleteHighlightedOption.of(context);
+
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      controller: _scrollController,
+      itemCount: widget.options.length,
+      itemBuilder: (BuildContext context, int index) {
+        final T option = widget.options.elementAt(index);
+        return InkWell(
+          key: GlobalObjectKey(option),
+          onTap: () {
+            widget.onSelected(option);
+          },
+          child: Builder(
+            builder: (BuildContext context) {
+              final bool highlight = highlightedIndex == index;
+              return Container(
+                color: highlight ? Theme.of(context).focusColor : null,
+                padding: const EdgeInsets.all(16.0),
+                child: Text(widget.displayStringForOption(option)),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

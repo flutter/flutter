@@ -5,12 +5,16 @@
 import 'template.dart';
 
 class RadioTemplate extends TokenTemplate {
-  const RadioTemplate(super.blockName, super.fileName, super.tokens, {
+  const RadioTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);
 
@@ -85,6 +89,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  WidgetStateProperty<Color> get backgroundColor =>
+      WidgetStateProperty.all<Color>(Colors.transparent);
 }
 ''';
 }

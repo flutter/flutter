@@ -91,12 +91,7 @@ void main() {
   test("ContainerLayer.findAllAnnotations returns children's opacity (true)", () {
     final Layer root = _withBackgroundAnnotation(
       1000,
-      _Layers(
-        ContainerLayer(),
-        children: <Object>[
-          _TestAnnotatedLayer(2, opaque: true),
-        ],
-      ).build(),
+      _Layers(ContainerLayer(), children: <Object>[_TestAnnotatedLayer(2, opaque: true)]).build(),
     );
 
     expect(
@@ -110,12 +105,7 @@ void main() {
   test("ContainerLayer.findAllAnnotations returns children's opacity (false)", () {
     final Layer root = _withBackgroundAnnotation(
       1000,
-      _Layers(
-        ContainerLayer(),
-        children: <Object>[
-          _TestAnnotatedLayer(2, opaque: false),
-        ],
-      ).build(),
+      _Layers(ContainerLayer(), children: <Object>[_TestAnnotatedLayer(2, opaque: false)]).build(),
     );
 
     expect(
@@ -132,9 +122,7 @@ void main() {
       1000,
       _Layers(
         ContainerLayer(),
-        children: <Object>[
-          _TestAnnotatedLayer(2, opaque: false, size: Size.zero),
-        ],
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false, size: Size.zero)],
       ).build(),
     );
 
@@ -154,9 +142,7 @@ void main() {
       1000,
       _Layers(
         OffsetLayer(offset: const Offset(-10, 0)),
-        children: <Object>[
-          _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
-        ],
+        children: <Object>[_TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10))],
       ).build(),
     );
 
@@ -359,12 +345,9 @@ void main() {
     }) {
       expect(
         root.findAllAnnotations<int>(globalPosition).entries.toList(),
-        _equalToAnnotationResult<int>(
-          <AnnotationEntry<int>>[
-            AnnotationEntry<int>(annotation: value, localPosition: localPosition),
-          ],
-          maxCoordinateRelativeDiff: 0.005,
-        ),
+        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+          AnnotationEntry<int>(annotation: value, localPosition: localPosition),
+        ], maxCoordinateRelativeDiff: 0.005),
       );
     }
 
@@ -420,9 +403,7 @@ void main() {
       1000,
       _Layers(
         TransformLayer(transform: transform),
-        children: <Object>[
-          _TestAnnotatedLayer(1, opaque: true),
-        ],
+        children: <Object>[_TestAnnotatedLayer(1, opaque: true)],
       ).build(),
     );
 
@@ -441,13 +422,8 @@ void main() {
     final Layer root = _withBackgroundAnnotation(
       1000,
       _Layers(
-        LeaderLayer(
-          link: LayerLink(),
-          offset: const Offset(-10, 0),
-        ),
-        children: <Object>[
-          _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
-        ],
+        LeaderLayer(link: LayerLink(), offset: const Offset(-10, 0)),
+        children: <Object>[_TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10))],
       ).build(),
     );
 
@@ -465,69 +441,15 @@ void main() {
     );
   });
 
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should append to the list '
-    'and return the given opacity (false) during a successful hit',
-    () {
-      const Offset position = Offset(5, 5);
-
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false),
-          ],
-        ).build(),
-      );
-
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1000, localPosition: position),
-        ]),
-      );
-    },
-  );
-
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should append to the list '
-    'and return the given opacity (true) during a successful hit',
-    () {
-      const Offset position = Offset(5, 5);
-
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: true),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false),
-          ],
-        ).build(),
-      );
-
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: position),
-        ]),
-      );
-    },
-  );
-
-  test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
+  test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
+      'and return the given opacity (false) during a successful hit', () {
     const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(
       1000,
       _Layers(
         AnnotatedRegionLayer<int>(1),
-        children: <Object>[
-          _TestAnnotatedLayer(2, opaque: false),
-        ],
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
       ).build(),
     );
 
@@ -541,179 +463,185 @@ void main() {
     );
   });
 
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should still check children and return '
-    "children's opacity (false) during a failed hit",
-    () {
-      const Offset position = Offset(5, 5);
+  test('AnnotatedRegionLayer.findAllAnnotations should append to the list '
+      'and return the given opacity (true) during a successful hit', () {
+    const Offset position = Offset(5, 5);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: true, size: Size.zero),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false),
-          ],
-        ).build(),
-      );
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, opaque: true),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1000, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: position),
+      ]),
+    );
+  });
 
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should still check children and return '
-    "children's opacity (true) during a failed hit",
-    () {
-      const Offset position = Offset(5, 5);
+  test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
+    const Offset position = Offset(5, 5);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1, size: Size.zero),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: true),
-          ],
-        ).build(),
-      );
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1000, localPosition: position),
+      ]),
+    );
+  });
 
-  test(
-    "AnnotatedRegionLayer.findAllAnnotations should not add to children's opacity "
-    'during a successful hit if it is not opaque',
-    () {
-      const Offset position = Offset(5, 5);
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
+      "children's opacity (false) during a failed hit", () {
+    const Offset position = Offset(5, 5);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false),
-          ],
-        ).build(),
-      );
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, opaque: true, size: Size.zero),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1000, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1000, localPosition: position),
+      ]),
+    );
+  });
 
-  test(
-    "AnnotatedRegionLayer.findAllAnnotations should add to children's opacity "
-    'during a successful hit if it is opaque',
-    () {
-      const Offset position = Offset(5, 5);
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
+      "children's opacity (true) during a failed hit", () {
+    const Offset position = Offset(5, 5);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(1, opaque: true),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false),
-          ],
-        ).build(),
-      );
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, size: Size.zero),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: true)],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+      ]),
+    );
+  });
 
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
-    'using size and offset (positive)',
-    () {
-      // The target position would have fallen outside if not for the offset.
-      const Offset position = Offset(100, 100);
+  test("AnnotatedRegionLayer.findAllAnnotations should not add to children's opacity "
+      'during a successful hit if it is not opaque', () {
+    const Offset position = Offset(5, 5);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(
-            1,
-            size: const Size(20, 20),
-            offset: const Offset(90, 90),
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
+      ).build(),
+    );
+
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1000, localPosition: position),
+      ]),
+    );
+  });
+
+  test("AnnotatedRegionLayer.findAllAnnotations should add to children's opacity "
+      'during a successful hit if it is opaque', () {
+    const Offset position = Offset(5, 5);
+
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, opaque: true),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false)],
+      ).build(),
+    );
+
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: position),
+      ]),
+    );
+  });
+
+  test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
+      'using size and offset (positive)', () {
+    // The target position would have fallen outside if not for the offset.
+    const Offset position = Offset(100, 100);
+
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, size: const Size(20, 20), offset: const Offset(90, 90)),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            2,
+            opaque: false,
+            // Use this offset to make sure AnnotatedRegionLayer's offset
+            // does not affect its children.
+            offset: const Offset(20, 20),
+            size: const Size(110, 110),
           ),
-          children: <Object>[
-            _TestAnnotatedLayer(
-              2,
-              opaque: false,
-              // Use this offset to make sure AnnotatedRegionLayer's offset
-              // does not affect its children.
-              offset: const Offset(20, 20),
-              size: const Size(110, 110),
-            ),
-          ],
-        ).build(),
-      );
+        ],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1, localPosition: Offset(10, 10)),
-          const AnnotationEntry<int>(annotation: 1000, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: Offset(10, 10)),
+        const AnnotationEntry<int>(annotation: 1000, localPosition: position),
+      ]),
+    );
+  });
 
-  test(
-    'AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
-    'using size and offset (negative)',
-    () {
-      // The target position would have fallen inside if not for the offset.
-      const Offset position = Offset(10, 10);
+  test('AnnotatedRegionLayer.findAllAnnotations should clip its annotation '
+      'using size and offset (negative)', () {
+    // The target position would have fallen inside if not for the offset.
+    const Offset position = Offset(10, 10);
 
-      final Layer root = _withBackgroundAnnotation(
-        1000,
-        _Layers(
-          AnnotatedRegionLayer<int>(
-            1,
-            size: const Size(20, 20),
-            offset: const Offset(90, 90),
-          ),
-          children: <Object>[
-            _TestAnnotatedLayer(2, opaque: false, size: const Size(110, 110)),
-          ],
-        ).build(),
-      );
+    final Layer root = _withBackgroundAnnotation(
+      1000,
+      _Layers(
+        AnnotatedRegionLayer<int>(1, size: const Size(20, 20), offset: const Offset(90, 90)),
+        children: <Object>[_TestAnnotatedLayer(2, opaque: false, size: const Size(110, 110))],
+      ).build(),
+    );
 
-      expect(
-        root.findAllAnnotations<int>(position).entries.toList(),
-        _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
-          const AnnotationEntry<int>(annotation: 2, localPosition: position),
-          const AnnotationEntry<int>(annotation: 1000, localPosition: position),
-        ]),
-      );
-    },
-  );
+    expect(
+      root.findAllAnnotations<int>(position).entries.toList(),
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+        const AnnotationEntry<int>(annotation: 2, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1000, localPosition: position),
+      ]),
+    );
+  });
 }
 
 /// A [ContainerLayer] that contains a stack of layers: `layer` in the front,
@@ -724,10 +652,7 @@ void main() {
 Layer _withBackgroundAnnotation(int value, Layer layer) {
   return _Layers(
     ContainerLayer(),
-    children: <Object>[
-      _TestAnnotatedLayer(value, opaque: false),
-      layer,
-    ],
+    children: <Object>[_TestAnnotatedLayer(value, opaque: false), layer],
   ).build();
 }
 
@@ -764,12 +689,7 @@ class _Layers {
 
 // This layer's [findAnnotation] can be controlled by the given arguments.
 class _TestAnnotatedLayer extends Layer {
-  _TestAnnotatedLayer(
-    this.value, {
-    required this.opaque,
-    this.offset = Offset.zero,
-    this.size,
-  });
+  _TestAnnotatedLayer(this.value, {required this.opaque, this.offset = Offset.zero, this.size});
 
   // The value added to result in [findAnnotations] during a successful hit.
   final int value;
@@ -831,13 +751,12 @@ Matcher _equalToAnnotationResult<T>(
   List<AnnotationEntry<int>> list, {
   double maxCoordinateRelativeDiff = 0,
 }) {
-  return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
-    list,
-    (AnnotationEntry<int> a, AnnotationEntry<int> b) {
-      return a.annotation == b.annotation
-          && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
-          && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
-    },
-    'equal to',
-  );
+  return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(list, (
+    AnnotationEntry<int> a,
+    AnnotationEntry<int> b,
+  ) {
+    return a.annotation == b.annotation &&
+        _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff) &&
+        _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
+  }, 'equal to');
 }

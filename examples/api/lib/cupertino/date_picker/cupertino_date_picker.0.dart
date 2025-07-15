@@ -42,16 +42,11 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         padding: const EdgeInsets.only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system
         // navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
-        child: SafeArea(
-          top: false,
-          child: child,
-        ),
+        child: SafeArea(top: false, child: child),
       ),
     );
   }
@@ -59,14 +54,9 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoDatePicker Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoDatePicker Sample')),
       child: DefaultTextStyle(
-        style: TextStyle(
-          color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 22.0,
-        ),
+        style: TextStyle(color: CupertinoColors.label.resolveFrom(context), fontSize: 22.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -94,9 +84,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // user's locale settings.
                     child: Text(
                       '${date.month}-${date.day}-${date.year}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -122,9 +110,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // the user's locale settings.
                     child: Text(
                       '${time.hour}:${time.minute}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -149,9 +135,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     // user's locale settings.
                     child: Text(
                       '${dateTime.month}-${dateTime.day}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}',
-                      style: const TextStyle(
-                        fontSize: 22.0,
-                      ),
+                      style: const TextStyle(fontSize: 22.0),
                     ),
                   ),
                 ],
@@ -175,22 +159,13 @@ class _DatePickerItem extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
-          bottom: BorderSide(
-            color: CupertinoColors.inactiveGray,
-            width: 0.0,
-          ),
+          top: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
+          bottom: BorderSide(color: CupertinoColors.inactiveGray, width: 0.0),
         ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children,
-        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
       ),
     );
   }

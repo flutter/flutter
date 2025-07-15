@@ -31,15 +31,9 @@ void main() {
           textDirection: TextDirection.ltr,
           text: TextSpan(
             children: <TextSpan>[
-              TextSpan(
-                text: 'xxxxxxxx',
-                recognizer: tapLeft,
-              ),
+              TextSpan(text: 'xxxxxxxx', recognizer: tapLeft),
               const TextSpan(text: 'yyyyyyyy'),
-              TextSpan(
-                text: 'zzzzzzzzz',
-                recognizer: tapRight,
-              ),
+              TextSpan(text: 'zzzzzzzzz', recognizer: tapRight),
             ],
           ),
         ),

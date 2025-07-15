@@ -15,8 +15,8 @@ import 'basic_types.dart';
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [
-/// Alignment] and its variants, or [AlignmentDirectional.new].
+/// A property or argument of this type accepts classes created either with
+/// [Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -25,6 +25,75 @@ abstract class AlignmentGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const AlignmentGeometry();
+
+  /// Creates an [Alignment].
+  const factory AlignmentGeometry.xy(double x, double y) = Alignment;
+
+  /// Creates a directional alignment, or [AlignmentDirectional].
+  const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
+  /// The top left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topLeft], which is the same thing.
+  static const AlignmentGeometry topLeft = Alignment.topLeft;
+
+  /// The center point along the top edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topCenter], which is the same thing.
+  static const AlignmentGeometry topCenter = Alignment.topCenter;
+
+  /// The top right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topRight], which is the same thing.
+  static const AlignmentGeometry topRight = Alignment.topRight;
+
+  /// The center point along the left edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerLeft], which is the same thing.
+  static const AlignmentGeometry centerLeft = Alignment.centerLeft;
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.center], which is the same thing.
+  static const AlignmentGeometry center = Alignment.center;
+
+  /// The center point along the right edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerRight], which is the same thing.
+  static const AlignmentGeometry centerRight = Alignment.centerRight;
+
+  /// The bottom left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomLeft], which is the same thing.
+  static const AlignmentGeometry bottomLeft = Alignment.bottomLeft;
+
+  /// The center point along the bottom edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomCenter], which is the same thing.
+  static const AlignmentGeometry bottomCenter = Alignment.bottomCenter;
+
+  /// The bottom right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomRight], which is the same thing.
+  static const AlignmentGeometry bottomRight = Alignment.bottomRight;
 
   double get _x;
 
@@ -44,11 +113,7 @@ abstract class AlignmentGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
   AlignmentGeometry add(AlignmentGeometry other) {
-    return _MixedAlignment(
-      _x + other._x,
-      _start + other._start,
-      _y + other._y,
-    );
+    return _MixedAlignment(_x + other._x, _start + other._start, _y + other._y);
   }
 
   /// Returns the negation of the given [AlignmentGeometry] object.
@@ -137,10 +202,7 @@ abstract class AlignmentGeometry {
 
   @override
   bool operator ==(Object other) {
-    return other is AlignmentGeometry
-        && other._x == _x
-        && other._start == _start
-        && other._y == _y;
+    return other is AlignmentGeometry && other._x == _x && other._start == _start && other._y == _y;
   }
 
   @override
@@ -310,10 +372,7 @@ class Alignment extends AlignmentGeometry {
   Offset withinRect(Rect rect) {
     final double halfWidth = rect.width / 2.0;
     final double halfHeight = rect.height / 2.0;
-    return Offset(
-      rect.left + halfWidth + x * halfWidth,
-      rect.top + halfHeight + y * halfHeight,
-    );
+    return Offset(rect.left + halfWidth + x * halfWidth, rect.top + halfHeight + y * halfHeight);
   }
 
   /// Returns a rect of the given size, aligned within given rect as specified
@@ -355,35 +414,18 @@ class Alignment extends AlignmentGeometry {
   Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0) {
-      return 'Alignment.topLeft';
-    }
-    if (x == 0.0 && y == -1.0) {
-      return 'Alignment.topCenter';
-    }
-    if (x == 1.0 && y == -1.0) {
-      return 'Alignment.topRight';
-    }
-    if (x == -1.0 && y == 0.0) {
-      return 'Alignment.centerLeft';
-    }
-    if (x == 0.0 && y == 0.0) {
-      return 'Alignment.center';
-    }
-    if (x == 1.0 && y == 0.0) {
-      return 'Alignment.centerRight';
-    }
-    if (x == -1.0 && y == 1.0) {
-      return 'Alignment.bottomLeft';
-    }
-    if (x == 0.0 && y == 1.0) {
-      return 'Alignment.bottomCenter';
-    }
-    if (x == 1.0 && y == 1.0) {
-      return 'Alignment.bottomRight';
-    }
-    return 'Alignment(${x.toStringAsFixed(1)}, '
-                     '${y.toStringAsFixed(1)})';
+    return switch ((x, y)) {
+      (-1.0, -1.0) => 'Alignment.topLeft',
+      (0.0, -1.0) => 'Alignment.topCenter',
+      (1.0, -1.0) => 'Alignment.topRight',
+      (-1.0, 0.0) => 'Alignment.centerLeft',
+      (0.0, 0.0) => 'Alignment.center',
+      (1.0, 0.0) => 'Alignment.centerRight',
+      (-1.0, 1.0) => 'Alignment.bottomLeft',
+      (0.0, 1.0) => 'Alignment.bottomCenter',
+      (1.0, 1.0) => 'Alignment.bottomRight',
+      _ => 'Alignment(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -550,35 +592,18 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topStart';
-    }
-    if (start == 0.0 && y == -1.0) {
-      return 'AlignmentDirectional.topCenter';
-    }
-    if (start == 1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topEnd';
-    }
-    if (start == -1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerStart';
-    }
-    if (start == 0.0 && y == 0.0) {
-      return 'AlignmentDirectional.center';
-    }
-    if (start == 1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerEnd';
-    }
-    if (start == -1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomStart';
-    }
-    if (start == 0.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomCenter';
-    }
-    if (start == 1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomEnd';
-    }
-    return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-                                '${y.toStringAsFixed(1)})';
+    return switch ((start, y)) {
+      (-1.0, -1.0) => 'AlignmentDirectional.topStart',
+      (0.0, -1.0) => 'AlignmentDirectional.topCenter',
+      (1.0, -1.0) => 'AlignmentDirectional.topEnd',
+      (-1.0, 0.0) => 'AlignmentDirectional.centerStart',
+      (0.0, 0.0) => 'AlignmentDirectional.center',
+      (1.0, 0.0) => 'AlignmentDirectional.centerEnd',
+      (-1.0, 1.0) => 'AlignmentDirectional.bottomStart',
+      (0.0, 1.0) => 'AlignmentDirectional.bottomCenter',
+      (1.0, 1.0) => 'AlignmentDirectional.bottomEnd',
+      _ => 'AlignmentDirectional(${start.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -599,29 +624,17 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator -() {
-    return _MixedAlignment(
-      -_x,
-      -_start,
-      -_y,
-    );
+    return _MixedAlignment(-_x, -_start, -_y);
   }
 
   @override
   _MixedAlignment operator *(double other) {
-    return _MixedAlignment(
-      _x * other,
-      _start * other,
-      _y * other,
-    );
+    return _MixedAlignment(_x * other, _start * other, _y * other);
   }
 
   @override
   _MixedAlignment operator /(double other) {
-    return _MixedAlignment(
-      _x / other,
-      _start / other,
-      _y / other,
-    );
+    return _MixedAlignment(_x / other, _start / other, _y / other);
   }
 
   @override
@@ -635,11 +648,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator %(double other) {
-    return _MixedAlignment(
-      _x % other,
-      _start % other,
-      _y % other,
-    );
+    return _MixedAlignment(_x % other, _start % other, _y % other);
   }
 
   @override
@@ -669,9 +678,7 @@ class _MixedAlignment extends AlignmentGeometry {
 ///    prefix, input, and suffix within an [InputDecorator].
 class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
-  const TextAlignVertical({
-    required this.y,
-  }) : assert(y >= -1.0 && y <= 1.0);
+  const TextAlignVertical({required this.y}) : assert(y >= -1.0 && y <= 1.0);
 
   /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
   /// locations of the top and bottom of the input box.
@@ -680,8 +687,10 @@ class TextAlignVertical {
   /// Aligns a TextField's input Text with the topmost location within a
   /// TextField's input box.
   static const TextAlignVertical top = TextAlignVertical(y: -1.0);
+
   /// Aligns a TextField's input Text to the center of the TextField.
   static const TextAlignVertical center = TextAlignVertical(y: 0.0);
+
   /// Aligns a TextField's input Text with the bottommost location within a
   /// TextField.
   static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);

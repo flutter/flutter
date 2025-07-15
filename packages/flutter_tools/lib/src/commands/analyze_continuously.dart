@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,16 +20,14 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.processManager,
     required super.artifacts,
     required super.suppressAnalytics,
-  }) : super(
-        repoPackages: repoPackages,
-      );
+  }) : super(repoPackages: repoPackages);
 
   String? analysisTarget;
-  bool firstAnalysis = true;
-  Set<String> analyzedPaths = <String>{};
-  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
-  final Stopwatch analysisTimer = Stopwatch();
-  int lastErrorCount = 0;
+  var firstAnalysis = true;
+  var analyzedPaths = <String>{};
+  var analysisErrors = <String, List<AnalysisError>>{};
+  final analysisTimer = Stopwatch();
+  var lastErrorCount = 0;
   Status? analysisStatus;
 
   @override
@@ -38,7 +35,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     List<String> directories;
 
     if (isFlutterRepo) {
-      final PackageDependencyTracker dependencies = PackageDependencyTracker();
+      final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories = <String>[flutterRoot];
@@ -50,7 +47,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fileSystem.currentDirectory.path;
     }
 
-    final AnalysisServer server = AnalysisServer(
+    final server = AnalysisServer(
       sdkPath,
       directories,
       fileSystem: fileSystem,
@@ -67,7 +64,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     await server.start();
     final int? exitCode = await server.onExit;
 
-    final String message = 'Analysis server exited with code $exitCode.';
+    final message = 'Analysis server exited with code $exitCode.';
     if (exitCode != 0) {
       throwToolExit(message, exitCode: exitCode);
     }
@@ -95,8 +92,8 @@ class AnalyzeContinuously extends AnalyzeBase {
       logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
-      final List<AnalysisError> sortedErrors = <AnalysisError>[];
-      final List<String> pathsToRemove = <String>[];
+      final sortedErrors = <AnalysisError>[];
+      final pathsToRemove = <String>[];
       analysisErrors.forEach((String path, List<AnalysisError> errors) {
         if (fileSystem.isFileSync(path)) {
           sortedErrors.addAll(errors);
@@ -108,7 +105,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       sortedErrors.sort();
 
-      for (final AnalysisError error in sortedErrors) {
+      for (final error in sortedErrors) {
         logger.printStatus(error.toString());
         logger.printTrace('error code: ${error.code}');
       }
@@ -130,7 +127,9 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
-        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
+        server.dispose().whenComplete(() {
+          exit(issueCount > 0 ? 1 : 0);
+        });
       }
 
       firstAnalysis = false;

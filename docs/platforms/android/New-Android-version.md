@@ -63,12 +63,21 @@ In the framework, update the following `.ci.yaml` entry:
 
 In the engine, you may follow [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) to update the AVD dependency.
 
-Example Framework PR: https://github.com/flutter/flutter/pull/152498, Example Engine PR: https://github.com/flutter/engine/pull/54186
+- Example Framework PR: <https://github.com/flutter/flutter/pull/152498>.
+- Example Engine PR: <https://github.com/flutter/engine/pull/54186>.
 
-In flutter/packages, modify https://github.com/flutter/packages/blob/main/.cirrus.yml “firebase_test_lab_script”
-Specifically the value for “--device” `./script/tool_runner.sh firebase-test-lab --device model=redfin,version=30 --exclude=script/configs/exclude_integration_Android.yaml`.
+##### Update Java Version in CI (Only for Java LTS Release)
 
-Example PR: https://github.com/flutter/packages/pull/4430
+Every few years Java releases a new Java LTS (long-term support) version, which typically
+becomes the industry standard for a few years. As users adopt the new Java LTS version, either
+directly or as part of the latest Android SDK, we want to update our CI to test against the new Java version
+to identify and address potential compatibility issues.
+
+Upload the new Java Version package to CIPD following the instructions [here](/docs/platforms/android/Uploading-New-Java-Version-to-CIPD.md).
+
+Update the usages of the current Java version to the new Java version in CI.
+
+- Example PR: <https://github.com/flutter/flutter/pull/165210>.
 
 #### Update documentation
 
@@ -96,7 +105,9 @@ https://github.com/flutter/engine/blob/9289cb6a36aa86990e3ffe0f20324dafa38e7c11/
 - Update buildroot version in DEPS file to consume the changes in the flutter/buildroot steps above
 https://github.com/flutter/engine/blob/9289cb6a36aa86990e3ffe0f20324dafa38e7c11/DEPS#L260
 
-**In flutter/packages:** Set examples to build with the new API.
+**In flutter/packages:**
+- Set examples to build with the new API.
+- Update `create_all_packages` to use new api as compile sdk [source](https://github.com/flutter/packages/blob/3515abab07d0bb2441277f43c2411c9b5e4ecf94/script/tool/lib/src/create_all_packages_app_command.dart#L245-L249).
 
 #### Test “Integration Test” package
 

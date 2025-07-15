@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// reduced-test-set:
+//   This file is run as part of a reduced test set in CI on Mac and Windows
+//   machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -14,11 +20,14 @@ void main() {
   const double kOpenScale = 1.15;
   const double kMinScaleFactor = 1.02;
 
-  Widget getChild() {
-    return Container(
-      width: 300.0,
-      height: 100.0,
-      color: CupertinoColors.activeOrange,
+  Widget getChild({double width = 300.0, double height = 100.0}) {
+    return Container(width: width, height: height, color: CupertinoColors.activeOrange);
+  }
+
+  List<Widget> getActions({int number = 10}) {
+    return List<Widget>.generate(
+      number,
+      (int index) => CupertinoContextMenuAction(child: Text('Action $index')),
     );
   }
 
@@ -39,9 +48,7 @@ void main() {
             alignment: alignment,
             child: CupertinoContextMenu(
               actions: <CupertinoContextMenuAction>[
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction $alignment'),
-                ),
+                CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction $alignment')),
               ],
               child: child ?? getChild(),
             ),
@@ -64,9 +71,7 @@ void main() {
             alignment: alignment,
             child: CupertinoContextMenu.builder(
               actions: <CupertinoContextMenuAction>[
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction $alignment'),
-                ),
+                CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction $alignment')),
               ],
               builder: builder ?? getBuilder,
             ),
@@ -88,15 +93,14 @@ void main() {
   Finder findStatic() {
     return find.descendant(
       of: find.byType(CupertinoApp),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic'),
+      matching: find.byWidgetPredicate(
+        (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
+      ),
     );
   }
 
   Finder findStaticChild(Widget child) {
-    return find.descendant(
-      of: findStatic(),
-      matching: find.byWidget(child),
-    );
+    return find.descendant(of: findStatic(), matching: find.byWidget(child));
   }
 
   Finder findStaticChildColor(WidgetTester tester) {
@@ -109,30 +113,22 @@ void main() {
   }
 
   Finder findFittedBox() {
-    return find.descendant(
-      of: findStatic(),
-      matching: find.byType(FittedBox),
-    );
+    return find.descendant(of: findStatic(), matching: find.byType(FittedBox));
   }
 
   Finder findStaticDefaultPreview() {
-    return find.descendant(
-      of: findFittedBox(),
-      matching: find.byType(ClipRRect),
-    );
+    return find.descendant(of: findFittedBox(), matching: find.byType(ClipRSuperellipse));
   }
 
   group('CupertinoContextMenu before and during opening', () {
-    testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (WidgetTester tester) async {
+    testWidgets('An unopened CupertinoContextMenu renders child in the same place as without', (
+      WidgetTester tester,
+    ) async {
       // Measure the child in the scene with no CupertinoContextMenu.
       final Widget child = getChild();
       await tester.pumpWidget(
         CupertinoApp(
-          home: CupertinoPageScaffold(
-            child: Center(
-              child: child,
-            ),
-          ),
+          home: CupertinoPageScaffold(child: Center(child: child)),
         ),
       );
       final Rect childRect = tester.getRect(find.byWidget(child));
@@ -148,7 +144,10 @@ void main() {
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsNothing,
+      );
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -159,7 +158,10 @@ void main() {
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -179,41 +181,46 @@ void main() {
       expect(findStatic(), findsOneWidget);
     });
 
-    testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (WidgetTester tester) async {
+    testWidgets('CupertinoContextMenu is in the correct position when within a nested navigator', (
+      WidgetTester tester,
+    ) async {
       final Widget child = getChild();
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800, 600)),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: SizedBox(
-                width: 700,
-                height: 500,
-                child: Navigator(
-                  onGenerateRoute: (RouteSettings settings) {
-                    return CupertinoPageRoute<void>(
-                      builder: (BuildContext context) => Align(
-                        child: CupertinoContextMenu(
-                          actions: const <CupertinoContextMenuAction>[
-                            CupertinoContextMenuAction(
-                              child: Text('CupertinoContextMenuAction'),
-                            ),
-                          ],
-                          child: child
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800, 600)),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: SizedBox(
+                  width: 700,
+                  height: 500,
+                  child: Navigator(
+                    onGenerateRoute: (RouteSettings settings) {
+                      return CupertinoPageRoute<void>(
+                        builder: (BuildContext context) => Align(
+                          child: CupertinoContextMenu(
+                            actions: const <CupertinoContextMenuAction>[
+                              CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+                            ],
+                            child: child,
+                          ),
                         ),
-                      )
-                    );
-                  }
-                )
-              )
-            )
-          )
-        )
-      ));
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsNothing,
+      );
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -224,7 +231,10 @@ void main() {
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -246,28 +256,29 @@ void main() {
 
     testWidgets('_DecoyChild preserves the child color', (WidgetTester tester) async {
       final Widget child = getChild();
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.black,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            backgroundColor: CupertinoColors.black,
             child: MediaQuery(
               data: const MediaQueryData(size: Size(800, 600)),
-                child: Center(
-                  child: CupertinoContextMenu(
+              child: Center(
+                child: CupertinoContextMenu(
                   actions: const <CupertinoContextMenuAction>[
-                    CupertinoContextMenuAction(
-                      child: Text('CupertinoContextMenuAction'),
-                    ),
+                    CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
                   ],
-                child: child
+                  child: child,
+                ),
               ),
-            )
-          )
+            ),
+          ),
         ),
-      ));
+      );
 
       // Expect no _DecoyChild to be present before the gesture.
-      final Finder decoyChild = find
-          .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
+      final Finder decoyChild = find.byWidgetPredicate(
+        (Widget w) => '${w.runtimeType}' == '_DecoyChild',
+      );
       expect(decoyChild, findsNothing);
 
       // Start press gesture on the child.
@@ -279,9 +290,11 @@ void main() {
       // find the Container descendant with the BoxDecoration,
       // then read the boxDecoration property.
       final Finder decoyChildDescendant = find.descendant(
-          of: decoyChild,
-          matching: find.byType(Container));
-      final BoxDecoration? boxDecoration = (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
+        of: decoyChild,
+        matching: find.byType(Container),
+      );
+      final BoxDecoration? boxDecoration =
+          (tester.firstWidget(decoyChildDescendant) as Container).decoration as BoxDecoration?;
       const List<Color?> expectedColors = <Color?>[null, Color(0x00000000)];
 
       // `Color(0x00000000)` -> Is `CupertinoColors.transparent`.
@@ -294,64 +307,91 @@ void main() {
       await tester.pumpAndSettle();
 
       // Expect no _DecoyChild to be present after ending the gesture.
-      final Finder decoyChildAfterEnding = find
-          .byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild');
+      final Finder decoyChildAfterEnding = find.byWidgetPredicate(
+        (Widget w) => '${w.runtimeType}' == '_DecoyChild',
+      );
       expect(decoyChildAfterEnding, findsNothing);
     });
 
-    testWidgets('CupertinoContextMenu with a basic builder opens and closes the same as when providing a child', (WidgetTester tester) async {
-      final Widget child = getChild();
-      await tester.pumpWidget(getBuilderContextMenu(builder: (BuildContext context, Animation<double> animation) {
-        return child;
-      }));
-      expect(find.byWidget(child), findsOneWidget);
-      final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
-
-      // Start a press on the child.
-      final TestGesture gesture = await tester.startGesture(childRect.center);
-      await tester.pump();
-
-      // The _DecoyChild is showing directly on top of the child.
-      expect(findDecoyChild(child), findsOneWidget);
-      Rect decoyChildRect = tester.getRect(findDecoyChild(child));
-      expect(childRect, equals(decoyChildRect));
-
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
-
-      // After a small delay, the _DecoyChild has begun to animate.
-      await tester.pump(const Duration(milliseconds: 400));
-      decoyChildRect = tester.getRect(findDecoyChild(child));
-      expect(childRect, isNot(equals(decoyChildRect)));
-
-      // Eventually the decoy fully scales by _kOpenSize.
-      await tester.pump(const Duration(milliseconds: 800));
-      decoyChildRect = tester.getRect(findDecoyChild(child));
-      expect(childRect, isNot(equals(decoyChildRect)));
-      expect(decoyChildRect.width, childRect.width * kOpenScale);
-
-      // Then the CupertinoContextMenu opens.
-      await tester.pumpAndSettle();
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(findStatic(), findsOneWidget);
-    });
-
-    testWidgets('CupertinoContextMenu with a builder can change the animation', (WidgetTester tester) async {
-      await tester.pumpWidget(getBuilderContextMenu(builder: (BuildContext context, Animation<double> animation) {
-        return Container(
-          width: 300.0,
-          height: 100.0,
-          decoration: BoxDecoration(
-            color: CupertinoColors.activeOrange,
-            borderRadius: BorderRadius.circular(25.0 * animation.value)
+    testWidgets(
+      'CupertinoContextMenu with a basic builder opens and closes the same as when providing a child',
+      (WidgetTester tester) async {
+        final Widget child = getChild();
+        await tester.pumpWidget(
+          getBuilderContextMenu(
+            builder: (BuildContext context, Animation<double> animation) {
+              return child;
+            },
           ),
         );
-      }));
+        expect(find.byWidget(child), findsOneWidget);
+        final Rect childRect = tester.getRect(find.byWidget(child));
+        expect(
+          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+          findsNothing,
+        );
 
-      final Widget child = find.descendant(of: find.byType(TickerMode), matching: find.byType(Container)).evaluate().single.widget;
+        // Start a press on the child.
+        final TestGesture gesture = await tester.startGesture(childRect.center);
+        await tester.pump();
+
+        // The _DecoyChild is showing directly on top of the child.
+        expect(findDecoyChild(child), findsOneWidget);
+        Rect decoyChildRect = tester.getRect(findDecoyChild(child));
+        expect(childRect, equals(decoyChildRect));
+
+        expect(
+          find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+          findsOneWidget,
+        );
+
+        // After a small delay, the _DecoyChild has begun to animate.
+        await tester.pump(const Duration(milliseconds: 400));
+        decoyChildRect = tester.getRect(findDecoyChild(child));
+        expect(childRect, isNot(equals(decoyChildRect)));
+
+        // Eventually the decoy fully scales by _kOpenSize.
+        await tester.pump(const Duration(milliseconds: 800));
+        decoyChildRect = tester.getRect(findDecoyChild(child));
+        expect(childRect, isNot(equals(decoyChildRect)));
+        expect(decoyChildRect.width, childRect.width * kOpenScale);
+
+        // Then the CupertinoContextMenu opens.
+        await tester.pumpAndSettle();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(findStatic(), findsOneWidget);
+      },
+    );
+
+    testWidgets('CupertinoContextMenu with a builder can change the animation', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        getBuilderContextMenu(
+          builder: (BuildContext context, Animation<double> animation) {
+            return Container(
+              width: 300.0,
+              height: 100.0,
+              decoration: BoxDecoration(
+                color: CupertinoColors.activeOrange,
+                borderRadius: BorderRadius.circular(25.0 * animation.value),
+              ),
+            );
+          },
+        ),
+      );
+
+      final Widget child = find
+          .descendant(of: find.byType(TickerMode), matching: find.byType(Container))
+          .evaluate()
+          .single
+          .widget;
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsNothing,
+      );
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -364,7 +404,8 @@ void main() {
         );
       }
 
-      final Container decoyContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final Container decoyContainer =
+          tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyDecoration = decoyContainer.decoration as BoxDecoration?;
       expect(decoyDecoration?.borderRadius, equals(BorderRadius.circular(0)));
 
@@ -372,7 +413,8 @@ void main() {
 
       // After a small delay, the _DecoyChild has begun to animate with a different border radius.
       await tester.pump(const Duration(milliseconds: 500));
-      final Container decoyLaterContainer = tester.firstElement(findBuilderDecoyChild()).widget as Container;
+      final Container decoyLaterContainer =
+          tester.firstElement(findBuilderDecoyChild()).widget as Container;
       final BoxDecoration? decoyLaterDecoration = decoyLaterContainer.decoration as BoxDecoration?;
       expect(decoyLaterDecoration?.borderRadius, isNot(equals(BorderRadius.circular(0))));
 
@@ -382,27 +424,35 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (WidgetTester tester) async {
-      final Widget child  = getChild();
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: Center(
-            child: CupertinoContextMenu(
-              actions: const <CupertinoContextMenuAction>[
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction One'),
-                ),
-              ],
-              child: child,
+    testWidgets('Hovering over Cupertino context menu updates cursor to clickable on Web', (
+      WidgetTester tester,
+    ) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: CupertinoContextMenu(
+                actions: const <CupertinoContextMenuAction>[
+                  CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction One')),
+                ],
+                child: child,
+              ),
             ),
           ),
         ),
-      ));
+      );
 
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 1,
+      );
       await gesture.addPointer(location: const Offset(10, 10));
       await tester.pumpAndSettle();
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic,
+      );
 
       final Offset contextMenu = tester.getCenter(find.byWidget(child));
       await gesture.moveTo(contextMenu);
@@ -413,32 +463,37 @@ void main() {
       );
     });
 
-    testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (WidgetTester tester) async {
+    testWidgets('CupertinoContextMenu is in the correct position when within a Transform.scale', (
+      WidgetTester tester,
+    ) async {
       final Widget child = getChild();
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: MediaQuery(
-            data: const MediaQueryData(size: Size(800, 600)),
-            child: Transform.scale(
-              scale: 0.5,
-              child: Align(
-                //alignment: Alignment.bottomRight,
-                child: CupertinoContextMenu(
-                  actions: const <CupertinoContextMenuAction>[
-                    CupertinoContextMenuAction(
-                      child: Text('CupertinoContextMenuAction'),
-                    ),
-                  ],
-                  child: child
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800, 600)),
+              child: Transform.scale(
+                scale: 0.5,
+                child: Align(
+                  //alignment: Alignment.bottomRight,
+                  child: CupertinoContextMenu(
+                    actions: const <CupertinoContextMenuAction>[
+                      CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+                    ],
+                    child: child,
+                  ),
                 ),
-              )
-            )
-          )
-        )
-      ));
+              ),
+            ),
+          ),
+        ),
+      );
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsNothing,
+      );
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -449,7 +504,10 @@ void main() {
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -472,24 +530,26 @@ void main() {
 
   group('CupertinoContextMenu when open', () {
     testWidgets('Last action does not have border', (WidgetTester tester) async {
-      final Widget child  = getChild();
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: Center(
-            child: CupertinoContextMenu(
-              actions: const <CupertinoContextMenuAction>[
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction One'),
-                ),
-              ],
-              child: child,
+      final Widget child = getChild();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: CupertinoContextMenu(
+                actions: const <CupertinoContextMenuAction>[
+                  CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction One')),
+                ],
+                child: child,
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // Open the CupertinoContextMenu
-      final TestGesture firstGesture = await tester.startGesture(tester.getCenter(find.byWidget(child)));
+      final TestGesture firstGesture = await tester.startGesture(
+        tester.getCenter(find.byWidget(child)),
+      );
       await tester.pumpAndSettle();
       await firstGesture.up();
       await tester.pumpAndSettle();
@@ -503,26 +563,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: Center(
-            child: CupertinoContextMenu(
-              actions: const <CupertinoContextMenuAction>[
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction One'),
-                ),
-                CupertinoContextMenuAction(
-                  child: Text('CupertinoContextMenuAction Two'),
-                ),
-              ],
-              child: child,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: CupertinoContextMenu(
+                actions: const <CupertinoContextMenuAction>[
+                  CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction One')),
+                  CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction Two')),
+                ],
+                child: child,
+              ),
             ),
           ),
         ),
-      ));
+      );
 
       // Open the CupertinoContextMenu
-      final TestGesture secondGesture = await tester.startGesture(tester.getCenter(find.byWidget(child)));
+      final TestGesture secondGesture = await tester.startGesture(
+        tester.getCenter(find.byWidget(child)),
+      );
       await tester.pumpAndSettle();
       await secondGesture.up();
       await tester.pumpAndSettle();
@@ -616,7 +676,9 @@ void main() {
       expect(findStatic(), findsNothing);
     });
 
-    testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
+    testWidgets("Backdrop is added using ModalRoute's filter parameter", (
+      WidgetTester tester,
+    ) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byType(BackdropFilter), findsNothing);
@@ -631,7 +693,9 @@ void main() {
       expect(find.byType(BackdropFilter), findsOneWidget);
     });
 
-    testWidgets('Preview widget should have the correct border radius', (WidgetTester tester) async {
+    testWidgets('Preview widget should have the correct border radius', (
+      WidgetTester tester,
+    ) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 
@@ -645,7 +709,8 @@ void main() {
 
       // Check border radius.
       expect(findStaticDefaultPreview(), findsOneWidget);
-      final ClipRRect previewWidget = tester.firstWidget(findStaticDefaultPreview()) as ClipRRect;
+      final ClipRSuperellipse previewWidget =
+          tester.firstWidget(findStaticDefaultPreview()) as ClipRSuperellipse;
       expect(previewWidget.borderRadius, equals(BorderRadius.circular(12.0)));
     });
 
@@ -654,7 +719,10 @@ void main() {
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
       final Rect childRect = tester.getRect(find.byWidget(child));
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsNothing,
+      );
 
       // Start a press on the child.
       final TestGesture gesture = await tester.startGesture(childRect.center);
@@ -665,7 +733,10 @@ void main() {
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -693,13 +764,13 @@ void main() {
     });
 
     testWidgets('CupertinoContextMenu minimizes scaling offscreen', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
       final Widget child = getChild();
 
       // Pump a CupertinoContextMenu on the top-left of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.topLeft,
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(alignment: Alignment.topLeft, child: child));
       await tester.pump();
       Rect childRect = tester.getRect(find.byWidget(child));
       // Start a press on the child.
@@ -711,7 +782,10 @@ void main() {
       Rect decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -728,15 +802,12 @@ void main() {
 
       // Open and then close the CupertinoContextMenu.
       await tester.pumpAndSettle();
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(599.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the bottom-right of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.bottomRight,
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(alignment: Alignment.bottomRight, child: child));
       await tester.pump();
       childRect = tester.getRect(find.byWidget(child));
       // Start a press on the child.
@@ -748,7 +819,10 @@ void main() {
       decoyChildRect = tester.getRect(findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
 
-      expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'),
+        findsOneWidget,
+      );
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 400));
@@ -772,35 +846,43 @@ void main() {
       await gesture2.up();
     });
 
-    testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (WidgetTester tester) async {
+    testWidgets("ContextMenu route animation doesn't throw exception on dismiss", (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/124597.
       final List<int> items = List<int>.generate(2, (int index) => index).toList();
 
-      await tester.pumpWidget(CupertinoApp(
-        home: CupertinoPageScaffold(
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return ListView(
-                children: items.map((int index) => CupertinoContextMenu(
-                  actions: <CupertinoContextMenuAction>[
-                    CupertinoContextMenuAction(
-                      child: const Text('DELETE'),
-                      onPressed: () {
-                        setState(() {
-                          items.remove(index);
-                          Navigator.of(context).pop();
-                        });
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                  child: Text('Item $index'),
-                )).toList(),
-              );
-            }
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListView(
+                  children: items
+                      .map(
+                        (int index) => CupertinoContextMenu(
+                          actions: <CupertinoContextMenuAction>[
+                            CupertinoContextMenuAction(
+                              child: const Text('DELETE'),
+                              onPressed: () {
+                                setState(() {
+                                  items.remove(index);
+                                  Navigator.of(context).pop();
+                                });
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                          child: Text('Item $index'),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
+            ),
           ),
         ),
-      ));
+      );
 
       // Open the CupertinoContextMenu.
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -822,13 +904,11 @@ void main() {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
 
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = getChild();
-      await tester.pumpWidget(getContextMenu(
-        screenSize: portraitScreenSize,
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(screenSize: portraitScreenSize, child: child));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       Rect childRect = tester.getRect(find.byWidget(child));
       TestGesture gesture = await tester.startGesture(childRect.center);
@@ -846,11 +926,13 @@ void main() {
       expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the left of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.centerLeft,
-        screenSize: portraitScreenSize,
-        child: child,
-      ));
+      await tester.pumpWidget(
+        getContextMenu(
+          alignment: Alignment.centerLeft,
+          screenSize: portraitScreenSize,
+          child: child,
+        ),
+      );
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       await tester.pumpAndSettle();
       childRect = tester.getRect(find.byWidget(child));
@@ -865,16 +947,18 @@ void main() {
       expect(left.dx, lessThan(center.dx));
 
       // Close the CupertinoContextMenu.
-      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.tapAt(const Offset(559.0, 799.0));
       await tester.pumpAndSettle();
       expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the right of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.centerRight,
-        screenSize: portraitScreenSize,
-        child: child,
-      ));
+      await tester.pumpWidget(
+        getContextMenu(
+          alignment: Alignment.centerRight,
+          screenSize: portraitScreenSize,
+          child: child,
+        ),
+      );
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
@@ -886,17 +970,12 @@ void main() {
       expect(find.byType(CupertinoContextMenuAction), findsOneWidget);
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, greaterThan(center.dx));
-
-      // Set the screen back to its normal size.
-      await binding.setSurfaceSize(const Size(800.0, 600.0));
     });
 
     testWidgets('Landscape', (WidgetTester tester) async {
       // Pump a CupertinoContextMenu in the center of the screen and open it.
       final Widget child = getChild();
-      await tester.pumpWidget(getContextMenu(
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       Rect childRect = tester.getRect(find.byWidget(child));
       TestGesture gesture = await tester.startGesture(childRect.center);
@@ -915,10 +994,7 @@ void main() {
       expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the left of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.centerLeft,
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(alignment: Alignment.centerLeft, child: child));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
@@ -938,10 +1014,7 @@ void main() {
       expect(findStatic(), findsNothing);
 
       // Pump a CupertinoContextMenu on the right of the screen and open it.
-      await tester.pumpWidget(getContextMenu(
-        alignment: Alignment.centerRight,
-        child: child,
-      ));
+      await tester.pumpWidget(getContextMenu(alignment: Alignment.centerRight, child: child));
       expect(find.byType(CupertinoContextMenuAction), findsNothing);
       childRect = tester.getRect(find.byWidget(child));
       gesture = await tester.startGesture(childRect.center);
@@ -967,30 +1040,30 @@ void main() {
 
     int now() => clock.now().millisecondsSinceEpoch;
 
-    await tester.pumpWidget(Listener(
-      onPointerDown: (PointerDownEvent event) => onPointerDownTime = now(),
-      onPointerUp: (PointerUpEvent event) => onPointerUpTime = now(),
-      child: CupertinoApp(
-        home: Align(
-          child: CupertinoContextMenu(
-            actions: const <CupertinoContextMenuAction>[
-              CupertinoContextMenuAction(
-                child: Text('CupertinoContextMenuAction'),
-              ),
-            ],
-            child: GestureDetector(
-              onTap: () => insideTapTriggered = true,
-              child: Container(
-                width: 200,
-                height: 200,
-                key: const Key('container'),
-                color: const Color(0xFF00FF00),
+    await tester.pumpWidget(
+      Listener(
+        onPointerDown: (PointerDownEvent event) => onPointerDownTime = now(),
+        onPointerUp: (PointerUpEvent event) => onPointerUpTime = now(),
+        child: CupertinoApp(
+          home: Align(
+            child: CupertinoContextMenu(
+              actions: const <CupertinoContextMenuAction>[
+                CupertinoContextMenuAction(child: Text('CupertinoContextMenuAction')),
+              ],
+              child: GestureDetector(
+                onTap: () => insideTapTriggered = true,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  key: const Key('container'),
+                  color: const Color(0xFF00FF00),
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     // Start a press on the child.
     final TestGesture gesture = await tester.createGesture();
@@ -1008,7 +1081,7 @@ void main() {
 
     // Judge whether _ContextMenuRouteStatic present on the screen.
     final Finder routeStatic = find.byWidgetPredicate(
-          (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
+      (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
     );
 
     // The insideTap and the route should not be triggered at the same time.
@@ -1016,10 +1089,14 @@ void main() {
       // Calculate the actual duration.
       final int actualDuration = onPointerUpTime! - onPointerDownTime!;
 
-      expect(routeStatic, findsNothing,
-          reason: 'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
-              'which means the route is pushed, '
-              'but insideTap should not be triggered at the same time.');
+      expect(
+        routeStatic,
+        findsNothing,
+        reason:
+            'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
+            'which means the route is pushed, '
+            'but insideTap should not be triggered at the same time.',
+      );
     } else {
       // The route should be pushed when the insideTap is not triggered.
       expect(routeStatic, findsOneWidget);
@@ -1036,10 +1113,7 @@ void main() {
             data: const MediaQueryData(size: Size(100, 100)),
             child: CupertinoContextMenu(
               actions: List<CupertinoContextMenuAction>.generate(numMenuItems, (int index) {
-                return CupertinoContextMenuAction(
-                  child: Text('Item $index'),
-                  onPressed: () {},
-                );
+                return CupertinoContextMenuAction(child: Text('Item $index'), onPressed: () {});
               }),
               child: child,
             ),
@@ -1081,5 +1155,302 @@ void main() {
     // Verify the first items are still visible.
     expect(find.text('Item 0'), findsOneWidget);
     expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('Pushing a new route removes overlay', (WidgetTester tester) async {
+    final Widget child = getChild();
+    const String page = 'Page 2';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: CupertinoContextMenu(
+                actions: const <Widget>[CupertinoContextMenuAction(child: Text('Test'))],
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute<Widget>(
+                        builder: (BuildContext context) =>
+                            const CupertinoPageScaffold(child: Text(page)),
+                      ),
+                    );
+                  },
+                  child: child,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+    expect(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DecoyChild'), findsNothing);
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(page), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+
+    // Kickstart the route transition.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // As the transition starts, the overlay has been removed.
+    // Only the child transitioning out is shown.
+    expect(find.text(page), findsOneWidget);
+    expect(find.byWidget(child), findsOneWidget);
+  });
+
+  testWidgets('Removing context menu from widget tree removes overlay', (
+    WidgetTester tester,
+  ) async {
+    final Widget child = getChild();
+    bool ctxMenuRemoved = false;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Center(
+              child: ctxMenuRemoved
+                  ? const SizedBox()
+                  : CupertinoContextMenu(
+                      actions: <Widget>[
+                        CupertinoContextMenuAction(child: const Text('Test'), onPressed: () {}),
+                      ],
+                      child: child,
+                    ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byWidget(child), findsOneWidget);
+    final Rect childRect = tester.getRect(find.byWidget(child));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.startGesture(childRect.center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    setState(() {
+      ctxMenuRemoved = true;
+    });
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(child), findsNothing);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in portrait orientation', (WidgetTester tester) async {
+    const Size portraitScreenSize = Size(800.0, 900.0);
+    await binding.setSurfaceSize(portraitScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.portrait.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
+  });
+
+  testWidgets('CupertinoContextMenu goldens in landscape orientation', (WidgetTester tester) async {
+    const Size landscapeScreenSize = Size(800.0, 600.0);
+    await binding.setSurfaceSize(landscapeScreenSize);
+    addTearDown(() => binding.setSurfaceSize(null));
+
+    final Widget leftChild = getChild(width: 200, height: 300);
+    final Widget rightChild = getChild(width: 200, height: 300);
+    final Widget centerChild = getChild(width: 200, height: 300);
+    final List<Widget> children = <Widget>[leftChild, centerChild, rightChild];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: GridView.count(
+          crossAxisCount: 3,
+          children: children.map((Widget child) {
+            return CupertinoContextMenu(actions: getActions(), child: child);
+          }).toList(),
+        ),
+      ),
+    );
+
+    Future<void> expectGolden(String name, Widget child) async {
+      // Open the child's CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      await expectLater(findStatic(), matchesGoldenFile('context_menu.landscape.$name.png'));
+
+      // Tap and ensure that the CupertinoContextMenu is closed.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsNothing);
+    }
+
+    await expectGolden('left', leftChild);
+    await expectGolden('center', centerChild);
+    await expectGolden('right', rightChild);
+  });
+
+  group('CupertinoContextMenu sheet shrink animation alignment - ', () {
+    Future<void> testShrinkAlignment({
+      required WidgetTester tester,
+      required Alignment alignment,
+      required Size screenSize,
+      required AlignmentDirectional expectedAlignment,
+    }) async {
+      final Widget child = getChild();
+      await tester.pumpWidget(
+        getContextMenu(alignment: alignment, screenSize: screenSize, child: child),
+      );
+
+      // Open the CupertinoContextMenu.
+      final Rect childRect = tester.getRect(find.byWidget(child));
+      final TestGesture openGesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await openGesture.up();
+      await tester.pumpAndSettle();
+      expect(findStatic(), findsOneWidget);
+
+      final Finder sheetFinder = find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_ContextMenuSheet',
+      );
+      expect(sheetFinder, findsOneWidget);
+      final Rect initialSheetRect = tester.getRect(sheetFinder);
+      final Finder staticChildFinder = findStaticChild(child);
+      expect(staticChildFinder, findsOneWidget);
+      await tester.pump();
+
+      // Drag down enough to trigger the shrink animation.
+      await tester.fling(staticChildFinder, Offset(0.0, childRect.height / 2), 1000.0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The sheet has shrunk.
+      expect(sheetFinder, findsOneWidget);
+      final Rect shrunkSheetRect = tester.getRect(sheetFinder);
+      expect(shrunkSheetRect.width, lessThan(initialSheetRect.width));
+      expect(shrunkSheetRect.height, lessThan(initialSheetRect.height));
+
+      // Verify alignment based on how the rect has shrunk.
+      switch (expectedAlignment) {
+        case AlignmentDirectional.topStart:
+          expect(
+            shrunkSheetRect.left,
+            moreOrLessEquals(initialSheetRect.left, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        case AlignmentDirectional.topCenter:
+          expect(
+            shrunkSheetRect.center.dx,
+            moreOrLessEquals(
+              initialSheetRect.center.dx,
+              epsilon: Tolerance.defaultTolerance.distance,
+            ),
+          );
+        case AlignmentDirectional.topEnd:
+          expect(
+            shrunkSheetRect.right,
+            moreOrLessEquals(initialSheetRect.right, epsilon: Tolerance.defaultTolerance.distance),
+          );
+        default:
+          fail('Unhandled alignment: $expectedAlignment');
+      }
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Portrait', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topCenter,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: portraitScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
+
+    testWidgets('Landscape', (WidgetTester tester) async {
+      const Size landscapeScreenSize = Size(800.0, 600.0);
+      await binding.setSurfaceSize(landscapeScreenSize);
+      addTearDown(() => binding.setSurfaceSize(null));
+
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerLeft,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.center,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topStart,
+      );
+      await testShrinkAlignment(
+        tester: tester,
+        alignment: Alignment.centerRight,
+        screenSize: landscapeScreenSize,
+        expectedAlignment: AlignmentDirectional.topEnd,
+      );
+    });
   });
 }

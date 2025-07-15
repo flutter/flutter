@@ -10,28 +10,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+  testWidgets(
+    'can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once',
+    (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      buildTestWidgets(
-        excludeSemantics: false,
-        label: 'label',
-        isSemanticsBoundary: true,
-      ),
-    );
+      await tester.pumpWidget(
+        buildTestWidgets(excludeSemantics: false, label: 'label', isSemanticsBoundary: true),
+      );
 
-    // The following should not trigger an assert.
-    await tester.pumpWidget(
-      buildTestWidgets(
-        excludeSemantics: true,
-        label: 'label CHANGED',
-        isSemanticsBoundary: false,
-      ),
-    );
+      // The following should not trigger an assert.
+      await tester.pumpWidget(
+        buildTestWidgets(
+          excludeSemantics: true,
+          label: 'label CHANGED',
+          isSemanticsBoundary: false,
+        ),
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+    },
+  );
 }
 
 Widget buildTestWidgets({
@@ -51,12 +50,8 @@ Widget buildTestWidgets({
           isSemanticBoundary: isSemanticsBoundary,
           child: Column(
             children: <Widget>[
-              Semantics(
-                label: 'child1',
-              ),
-              Semantics(
-                label: 'child2',
-              ),
+              Semantics(label: 'child1'),
+              Semantics(label: 'child2'),
             ],
           ),
         ),
@@ -104,7 +99,6 @@ class RenderTest extends RenderProxyBox {
       ..isSemanticBoundary = isSemanticBoundary
       ..label = label
       ..textDirection = TextDirection.ltr;
-
   }
 
   String get label => _label;
@@ -116,7 +110,6 @@ class RenderTest extends RenderProxyBox {
     _label = value;
     markNeedsSemanticsUpdate();
   }
-
 
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;

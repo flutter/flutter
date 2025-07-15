@@ -5,16 +5,20 @@
 import 'template.dart';
 
 class ChipTemplate extends TokenTemplate {
-  const ChipTemplate(super.blockName, super.fileName, super.tokens, {
+  const ChipTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   static const String tokenGroup = 'md.comp.filter-chip';
   static const String variant = '.flat';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(

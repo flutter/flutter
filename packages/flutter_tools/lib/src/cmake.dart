@@ -15,7 +15,7 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
-  final RegExp nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
+  final nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
   for (final String line in project.cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
@@ -33,12 +33,10 @@ String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
   // Prefer the build arguments for version information.
   final String buildName = buildInfo.buildName ?? project.parent.manifest.buildName ?? '1.0.0';
   final String? buildNumber = buildInfo.buildName != null
-    ? buildInfo.buildNumber
-    : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
+      ? buildInfo.buildNumber
+      : (buildInfo.buildNumber ?? project.parent.manifest.buildNumber);
 
-  return buildNumber != null
-    ? '$buildName+$buildNumber'
-    : buildName;
+  return buildNumber != null ? '$buildName+$buildNumber' : buildName;
 }
 
 Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo, Logger logger) {
@@ -93,11 +91,11 @@ void writeGeneratedCmakeConfig(
     logger.printWarning(
       'Warning: build identifier $buildIdentifier in version $version is not numeric '
       'and cannot be converted into a Windows build version number. Defaulting to 0.\n'
-      'This may cause issues with Windows installers.'
+      'This may cause issues with Windows installers.',
     );
   }
 
-  final StringBuffer buffer = StringBuffer('''
+  final buffer = StringBuffer('''
 # Generated code do not commit.
 file(TO_CMAKE_PATH "$escapedFlutterRoot" FLUTTER_ROOT)
 file(TO_CMAKE_PATH "$escapedProjectDir" PROJECT_DIR)

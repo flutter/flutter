@@ -6,7 +6,7 @@ import '../base/file_system.dart';
 import '../base/project_migrator.dart';
 import '../project.dart';
 
-const String _gitignoreBefore = '''
+const _gitignoreBefore = '''
 .DS_Store
 .atom/
 .buildlog/
@@ -15,7 +15,7 @@ const String _gitignoreBefore = '''
 migrate_working_dir/
 ''';
 
-const String _gitignoreAfter = '''
+const _gitignoreAfter = '''
 .DS_Store
 .atom/
 .build/
@@ -29,7 +29,7 @@ migrate_working_dir/
 /// Adds `.build/` and `.swiftpm/` to the .gitignore file.
 class SwiftPackageManagerGitignoreMigration extends ProjectMigrator {
   SwiftPackageManagerGitignoreMigration(FlutterProject project, super.logger)
-      : _gitignoreFile = project.gitignoreFile;
+    : _gitignoreFile = project.gitignoreFile;
 
   final File _gitignoreFile;
 
@@ -49,10 +49,7 @@ class SwiftPackageManagerGitignoreMigration extends ProjectMigrator {
       return;
     }
 
-    final String newContent = originalContent.replaceFirst(
-      _gitignoreBefore,
-      _gitignoreAfter,
-    );
+    final String newContent = originalContent.replaceFirst(_gitignoreBefore, _gitignoreAfter);
     if (newContent != originalContent) {
       logger.printWarning(
         '.gitignore does not ignore Swift Package Manager build directories, updating.',

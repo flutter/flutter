@@ -5,12 +5,11 @@
 import 'project.dart';
 
 class ProjectWithEarlyError extends Project {
-
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:
@@ -18,7 +17,7 @@ class ProjectWithEarlyError extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
   import 'dart:async';
 
   import 'package:flutter/material.dart';
@@ -37,5 +36,4 @@ class ProjectWithEarlyError extends Project {
     }
   }
   ''';
-
 }

@@ -13,20 +13,15 @@ void main() {
       ..physicalConstraints = ViewConstraints.tight(const Size(1008.0, 2198.0))
       ..devicePixelRatio = 1.912500023841858;
 
-    await tester.pumpWidget(
-      wrapWithView: false,
-      View(
-        view: view,
-        child: const SizedBox(),
-      ),
-    );
+    await tester.pumpWidget(wrapWithView: false, View(view: view, child: const SizedBox()));
 
     expect(view.sizes.single, const Size(1008.0, 2198.0));
   });
 }
 
-class FlutterViewSpy extends TestFlutterView  {
-  FlutterViewSpy({required TestFlutterView super.view}) : super(platformDispatcher: view.platformDispatcher, display: view.display);
+class FlutterViewSpy extends TestFlutterView {
+  FlutterViewSpy({required TestFlutterView super.view})
+    : super(platformDispatcher: view.platformDispatcher, display: view.display);
 
   List<Size?> sizes = <Size?>[];
 

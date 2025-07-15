@@ -13,9 +13,7 @@ class ScaffoldExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ScaffoldExample(),
-    );
+    return const MaterialApp(home: ScaffoldExample());
   }
 }
 
@@ -32,12 +30,8 @@ class _ScaffoldExampleState extends State<ScaffoldExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
-      ),
-      body: Center(
-        child: Text('You have pressed the button $_count times.'),
-      ),
+      appBar: AppBar(title: const Text('Sample Code')),
+      body: Center(child: Text('You have pressed the button $_count times.')),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         child: Container(height: 50.0),

@@ -13,11 +13,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
@@ -25,34 +26,45 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
 
-  Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
-    final BuildAarCommand command = BuildAarCommand(
-      androidSdk: FakeAndroidSdk(),
+  /// Runs the equivalent of `flutter build aar`.
+  ///
+  /// If [arguments] are provided, they are appended to the end, i.e.:
+  /// ```sh
+  /// flutter build aar [arguments]
+  /// ```
+  ///
+  /// If [androidSdk] is provided, it is used, otherwise defaults to [FakeAndroidSdk].
+  Future<BuildAarCommand> runBuildAar(
+    String target, {
+    AndroidSdk? androidSdk = const _FakeAndroidSdk(),
+    List<String>? arguments,
+  }) async {
+    final command = BuildAarCommand(
+      androidSdk: androidSdk,
       fileSystem: globals.fs,
       logger: BufferLogger.test(),
       verboseHelp: false,
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>[
-      'aar',
-      '--no-pub',
-      ...?arguments,
-      target,
-    ]);
+    await runner.run(<String>['aar', ...?arguments, target]);
     return command;
   }
 
   group('Usage', () {
     late Directory tempDir;
-    late TestUsage testUsage;
+    late FakeAnalytics analytics;
 
     setUp(() {
-      testUsage = TestUsage();
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -60,56 +72,121 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('indicate that project is a module', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=module']);
+    testUsingContext(
+      'indicate that project is a module',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
 
-      final BuildAarCommand command = await runCommandIn(projectPath);
-      expect((await command.usageValues).commandBuildAarProjectType, 'module');
+        await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+        expect(
+          analytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'aar',
+              buildAarProjectType: 'module',
+              buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
+              commandHasTerminal: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        Analytics: () => analytics,
+      },
+    );
 
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
-    });
+    testUsingContext(
+      'indicate the target platform',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
 
-    testUsingContext('indicate the target platform', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=module']);
+        await runBuildAar(
+          projectPath,
+          arguments: <String>['--no-pub', '--target-platform=android-arm'],
+        );
+        expect(
+          analytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'aar',
+              buildAarProjectType: 'module',
+              buildAarTargetPlatform: 'android-arm',
+              commandHasTerminal: false,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        Analytics: () => analytics,
+      },
+    );
 
-      final BuildAarCommand command = await runCommandIn(projectPath,
-          arguments: <String>['--target-platform=android-arm']);
-      expect((await command.usageValues).commandBuildAarTargetPlatform, 'android-arm');
+    // Regression test for https://github.com/flutter/flutter/issues/162649.
+    testUsingContext(
+      'triggers builds even with --pub',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
 
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
-    });
+        await runBuildAar(
+          projectPath,
+          arguments: <String>['--target-platform=android-arm'],
+          // If we use --no-pub, it bypasses validation that occurs only on a
+          // build with --pub, which as a consequence means that we aren't
+          // testing every code branch.
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        Analytics: () => analytics,
+        Pub: FakePub.new,
+      },
+    );
 
-    testUsingContext('logs success', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=module']);
+    testUsingContext(
+      'logs success',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
 
-      await runCommandIn(projectPath,
-          arguments: <String>['--target-platform=android-arm']);
+        await runBuildAar(
+          projectPath,
+          arguments: <String>['--no-pub', '--target-platform=android-arm'],
+        );
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'tool-command-result',
-          'aar',
-          label: 'success',
-        ),
-      ));
-    },
-    overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => testUsage,
-    });
+        final Iterable<Event> successEvent = analytics.sentEvents.where(
+          (Event e) =>
+              e.eventName == DashEvent.flutterCommandResult &&
+              e.eventData['commandPath'] == 'create' &&
+              e.eventData['result'] == 'success',
+        );
+        expect(successEvent, isNotEmpty, reason: 'Tool should send create success event');
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+        Analytics: () => analytics,
+      },
+    );
   });
 
   group('flag parsing', () {
     late Directory tempDir;
-    late FakeAndroidBuilder fakeAndroidBuilder;
+    late _CapturingFakeAndroidBuilder fakeAndroidBuilder;
 
     setUp(() {
-      fakeAndroidBuilder = FakeAndroidBuilder();
+      fakeAndroidBuilder = _CapturingFakeAndroidBuilder();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_build_aar_test.');
     });
 
@@ -118,15 +195,23 @@ void main() {
     });
 
     testUsingContext('defaults', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
-      await runCommandIn(projectPath);
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      await runBuildAar(projectPath, arguments: <String>['--no-pub']);
 
-      expect(fakeAndroidBuilder.buildNumber, '1.0');
-      expect(fakeAndroidBuilder.androidBuildInfo.length, 3);
+      expect(
+        fakeAndroidBuilder.capturedBuildAarCalls,
+        hasLength(1),
+        reason: 'A single call to buildAar was expected.',
+      );
+      final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+      expect(buildAarCall.namedArguments[#buildNumber], '1.0');
 
-      final List<BuildMode> buildModes = <BuildMode>[];
-      for (final AndroidBuildInfo androidBuildInfo in fakeAndroidBuilder.androidBuildInfo) {
+      final buildModes = <BuildMode>[];
+      for (final androidBuildInfo
+          in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
         if (buildInfo.mode.isPrecompiled) {
@@ -139,24 +224,32 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.armeabi_v7a, AndroidArch.arm64_v8a, AndroidArch.x86_64]);
+        expect(androidBuildInfo.targetArchs, <AndroidArch>[
+          AndroidArch.armeabi_v7a,
+          AndroidArch.arm64_v8a,
+          AndroidArch.x86_64,
+        ]);
       }
-      expect(buildModes.length, 3);
-      expect(buildModes, containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]));
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
-    });
+      expect(buildModes, hasLength(3));
+      expect(
+        buildModes,
+        containsAll(<BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]),
+      );
+    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
 
     testUsingContext('parses flags', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
-      await runCommandIn(
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      await runBuildAar(
         projectPath,
         arguments: <String>[
+          '--no-pub',
           '--no-debug',
           '--no-profile',
           '--target-platform',
-          'android-x86',
+          'android-x64',
           '--tree-shake-icons',
           '--flavor',
           'free',
@@ -169,10 +262,17 @@ void main() {
         ],
       );
 
-      expect(fakeAndroidBuilder.buildNumber, '200');
+      expect(
+        fakeAndroidBuilder.capturedBuildAarCalls,
+        hasLength(1),
+        reason: 'A single call to buildAar was expected.',
+      );
+      final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+      expect(buildAarCall.namedArguments[#buildNumber], '200');
 
-      final AndroidBuildInfo androidBuildInfo = fakeAndroidBuilder.androidBuildInfo.single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
+      final AndroidBuildInfo androidBuildInfo =
+          (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
+      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);
@@ -181,15 +281,11 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
-      expect(buildInfo.nullSafetyMode, NullSafetyMode.sound);
-    }, overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
-    });
+    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
   });
 
   group('Gradle', () {
     late Directory tempDir;
-    late AndroidSdk mockAndroidSdk;
     late String gradlew;
     late FakeProcessManager processManager;
     late String flutterRoot;
@@ -201,9 +297,12 @@ void main() {
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      mockAndroidSdk = FakeAndroidSdk();
-      gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', '.android',
-          globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      gradlew = globals.fs.path.join(
+        tempDir.path,
+        'flutter_project',
+        '.android',
+        globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      );
       processManager = FakeProcessManager.empty();
       flutterRoot = getFlutterRoot();
     });
@@ -213,94 +312,115 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
-        final String projectPath = await createProject(tempDir,
-            arguments: <String>['--no-pub', '--template=module']);
-
-        await expectLater(() async {
-          await runBuildAarCommand(
-            projectPath,
-            null,
-            arguments: <String>['--no-pub'],
+      testUsingContext(
+        'throws throwsToolExit if AndroidSdk is null',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--no-pub', '--template=module'],
           );
-        }, throwsToolExit(
-          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
-        ));
-      },
-      overrides: <Type, Generator>{
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-        ProcessManager: () => FakeProcessManager.any(),
-      });
+
+          await expectLater(
+            () async {
+              await runBuildAar(projectPath, androidSdk: null, arguments: <String>['--no-pub']);
+            },
+            throwsToolExit(
+              message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
     });
 
     group('throws ToolExit', () {
       testUsingContext('main.dart not found', () async {
         await expectLater(() async {
-          await runBuildAarCommand(
+          await runBuildAar(
             'missing_project',
-            mockAndroidSdk,
-            arguments: <String>['--no-pub'],
+            arguments: <String>[
+              '--no-pub',
+              globals.fs.path.join('missing_project', 'lib', 'main.dart'),
+            ],
           );
-        }, throwsToolExit(
-          message: 'main.dart does not exist',
-        ));
+        }, throwsToolExit(message: 'main.dart does not exist'));
       });
 
       testUsingContext('flutter project not valid', () async {
         await expectLater(() async {
-          await runCommandIn(
-            tempDir.path,
-            arguments: <String>['--no-pub'],
-          );
-        }, throwsToolExit(
-          message: 'is not a valid flutter project',
-        ));
+          await runBuildAar(tempDir.path, arguments: <String>['--no-pub']);
+        }, throwsToolExit(message: 'is not a valid flutter project'));
       });
     });
 
-    testUsingContext('support ExtraDartFlagOptions', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=module']);
+    testUsingContext(
+      'support ExtraDartFlagOptions',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
 
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          gradlew,
-          '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle','aar_init_script.gradle')}',
-          '-Pflutter-root=$flutterRoot',
-          '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
-          '-Pis-plugin=false',
-          '-PbuildNumber=1.0',
-          '-q',
-          '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
-          '-Pdart-obfuscation=false',
-          '-Pextra-front-end-options=foo,bar',
-          '-Ptrack-widget-creation=true',
-          '-Ptree-shake-icons=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease',
-        ],
-        exitCode: 1,
-      ));
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              gradlew,
+              '-I=${globals.fs.path.join(flutterRoot, 'packages', 'flutter_tools', 'gradle', 'aar_init_script.gradle')}',
+              '-Pflutter-root=$flutterRoot',
+              '-Poutput-dir=${globals.fs.path.join(tempDir.path, 'flutter_project', 'build', 'host')}',
+              '-Pis-plugin=false',
+              '-PbuildNumber=1.0',
+              '-q',
+              '-Ptarget=${globals.fs.path.join('lib', 'main.dart')}',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
+              '-Pdart-obfuscation=false',
+              '-Pextra-front-end-options=foo,bar',
+              '-Ptrack-widget-creation=true',
+              '-Ptree-shake-icons=true',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              'assembleAarRelease',
+            ],
+            exitCode: 1,
+          ),
+        );
 
-      await expectLater(() => runBuildAarCommand(projectPath, mockAndroidSdk, arguments: <String>[
-        '--no-debug',
-        '--no-profile',
-        '--extra-front-end-options=foo',
-        '--extra-front-end-options=bar',
-      ]), throwsToolExit(message: 'Gradle task assembleAarRelease failed with exit code 1'));
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      Java: () => null,
-      ProcessManager: () => processManager,
-      FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
-      AndroidStudio: () => FakeAndroidStudio(),
-    });
+        await expectLater(
+          () => runBuildAar(
+            projectPath,
+            arguments: <String>[
+              '--no-pub',
+              '--no-debug',
+              '--no-profile',
+              '--extra-front-end-options=foo',
+              '--extra-front-end-options=bar',
+            ],
+          ),
+          throwsToolExit(message: 'Gradle task assembleAarRelease failed with exit code 1'),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Java: () => null,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
+        AndroidStudio: () => _FakeAndroidStudio(),
+      },
+    );
 
     group('Impeller AndroidManifest.xml setting', () {
       // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
-      // cooresponding `AndroidManifest.xml` file, right before the closing
+      // corresponding `AndroidManifest.xml` file, right before the closing
       // `</application>` tag.
       void writeManifestMetadata({
         required String projectPath,
@@ -323,148 +443,144 @@ void main() {
         final String newManifest = oldManifest.replaceFirst(
           '</application>',
           '    <meta-data\n'
-          '        android:name="$name"\n'
-          '        android:value="$value" />\n'
-          '    </application>',
+              '        android:name="$name"\n'
+              '        android:value="$value" />\n'
+              '    </application>',
         );
         globals.fs.file(manifestPath).writeAsStringSync(newManifest);
       }
 
-      testUsingContext('a default AAR build reports Impeller as disabled', () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module']
-        );
+      testUsingContext(
+        'a default AAR build reports Impeller as enabled',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--no-pub', '--template=module'],
+          );
 
-        await runBuildAarCommand(projectPath, mockAndroidSdk);
+          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
 
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.flutterBuildInfo(
-              label: 'manifest-aar-impeller-disabled',
-              buildType: 'android',
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-aar-impeller-enabled', buildType: 'android'),
             ),
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        AndroidBuilder: () => FakeAndroidBuilder(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      });
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        },
+      );
 
-      testUsingContext('EnableImpeller="true" reports an enabled event', () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module']
-        );
-        final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectPath));
-        await project.android.ensureReadyForPlatformSpecificTooling();
+      testUsingContext(
+        'EnableImpeller="true" reports an enabled event',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--no-pub', '--template=module'],
+          );
+          final FlutterProject project = FlutterProject.fromDirectory(
+            globals.fs.directory(projectPath),
+          );
+          await project.android.ensureReadyForPlatformSpecificTooling();
 
-        writeManifestMetadata(
-          projectPath: projectPath,
-          name: 'io.flutter.embedding.android.EnableImpeller',
-          value: 'true',
-        );
+          writeManifestMetadata(
+            projectPath: projectPath,
+            name: 'io.flutter.embedding.android.EnableImpeller',
+            value: 'true',
+          );
 
-        await runBuildAarCommand(projectPath, mockAndroidSdk);
+          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
 
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.flutterBuildInfo(
-              label: 'manifest-aar-impeller-enabled',
-              buildType: 'android',
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-aar-impeller-enabled', buildType: 'android'),
             ),
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        AndroidBuilder: () => FakeAndroidBuilder(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      });
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        },
+      );
 
-      testUsingContext('EnableImpeller="false" reports an disabled event', () async {
-        final String projectPath = await createProject(
-          tempDir,
-          arguments: <String>['--no-pub', '--template=module']
-        );
-        final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(projectPath));
-        await project.android.ensureReadyForPlatformSpecificTooling();
+      testUsingContext(
+        'EnableImpeller="false" reports an disabled event',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--no-pub', '--template=module'],
+          );
+          final FlutterProject project = FlutterProject.fromDirectory(
+            globals.fs.directory(projectPath),
+          );
+          await project.android.ensureReadyForPlatformSpecificTooling();
 
-        writeManifestMetadata(
-          projectPath: projectPath,
-          name: 'io.flutter.embedding.android.EnableImpeller',
-          value: 'false',
-        );
+          writeManifestMetadata(
+            projectPath: projectPath,
+            name: 'io.flutter.embedding.android.EnableImpeller',
+            value: 'false',
+          );
 
-        await runBuildAarCommand(projectPath, mockAndroidSdk);
+          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
 
-        expect(
-          fakeAnalytics.sentEvents,
-          contains(
-            Event.flutterBuildInfo(
-              label: 'manifest-aar-impeller-disabled',
-              buildType: 'android',
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-aar-impeller-disabled', buildType: 'android'),
             ),
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        Analytics: () => fakeAnalytics,
-        AndroidBuilder: () => FakeAndroidBuilder(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      });
+          );
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
+          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        },
+      );
     });
   });
 }
 
-Future<BuildAarCommand> runBuildAarCommand(
-  String target, AndroidSdk? androidSdk, {
-  List<String>? arguments,
-}) async {
-  final BuildAarCommand command = BuildAarCommand(
-    androidSdk: androidSdk,
-    fileSystem: globals.fs,
-    logger: BufferLogger.test(),
-    verboseHelp: false,
-  );
-  final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>[
-    'aar',
-    '--no-pub',
-    ...?arguments,
-    globals.fs.path.join(target, 'lib', 'main.dart'),
-  ]);
-  return command;
-}
-
-class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  late FlutterProject project;
-  late Set<AndroidBuildInfo> androidBuildInfo;
-  late String target;
-  String? outputDirectoryPath;
-  late String buildNumber;
+/// A fake implementation of [AndroidBuilder] that allows [buildAar] calls.
+///
+/// Calls to [buildAar] are stored as [capturedBuildAarCalls], other calls are rejected.
+final class _CapturingFakeAndroidBuilder extends Fake implements AndroidBuilder {
+  final capturedBuildAarCalls = <Invocation>[];
 
   @override
-  Future<void> buildAar({
-    required FlutterProject project,
-    required Set<AndroidBuildInfo> androidBuildInfo,
-    required String target,
-    String? outputDirectoryPath,
-    required String buildNumber,
-  }) async {
-    this.project = project;
-    this.androidBuildInfo = androidBuildInfo;
-    this.target = target;
-    this.outputDirectoryPath = outputDirectoryPath;
-    this.buildNumber = buildNumber;
+  Object? noSuchMethod(Invocation invocation) {
+    if (invocation.memberName != #buildAar) {
+      return super.noSuchMethod(invocation);
+    }
+    capturedBuildAarCalls.add(invocation);
+    return Future<void>.value();
   }
 }
 
-class FakeAndroidSdk extends Fake implements AndroidSdk {
+final class _FakeAndroidSdk with Fake implements AndroidSdk {
+  const _FakeAndroidSdk();
 }
 
-class FakeAndroidStudio extends Fake implements AndroidStudio {
+final class _FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class FakePub extends Fake implements Pub {
+  @override
+  Future<void> get({
+    PubContext? context,
+    required FlutterProject project,
+    bool upgrade = false,
+    bool offline = false,
+    String? flutterRootOverride,
+    bool checkUpToDate = false,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
+    PubOutputMode outputMode = PubOutputMode.all,
+  }) async {}
 }

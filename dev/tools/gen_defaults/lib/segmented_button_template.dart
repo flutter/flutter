@@ -5,7 +5,11 @@
 import 'template.dart';
 
 class SegmentedButtonTemplate extends TokenTemplate {
-  const SegmentedButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const SegmentedButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -34,7 +38,8 @@ class SegmentedButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   _${blockName}DefaultsM3(this.context);
   final BuildContext context;

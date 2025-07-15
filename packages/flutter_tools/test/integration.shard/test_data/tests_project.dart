@@ -10,10 +10,10 @@ import 'project.dart';
 
 class TestsProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:
@@ -27,7 +27,7 @@ class TestsProject extends Project {
   @override
   String get main => '// Unused';
 
-  final String testContent = r'''
+  final testContent = r'''
   import 'package:flutter_test/flutter_test.dart';
 
   void main() {

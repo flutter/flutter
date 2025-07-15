@@ -20,10 +20,7 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
         body: const Center(
-          child: SliverAnimatedOpacityExample(
-            duration: duration,
-            curve: curve,
-          ),
+          child: SliverAnimatedOpacityExample(duration: duration, curve: curve),
         ),
       ),
     );
@@ -31,55 +28,47 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
 }
 
 class SliverAnimatedOpacityExample extends StatefulWidget {
-  const SliverAnimatedOpacityExample({
-    required this.duration,
-    required this.curve,
-    super.key,
-  });
+  const SliverAnimatedOpacityExample({required this.duration, required this.curve, super.key});
 
   final Duration duration;
 
   final Curve curve;
 
   @override
-  State<SliverAnimatedOpacityExample> createState() =>
-      _SliverAnimatedOpacityExampleState();
+  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
 }
 
-class _SliverAnimatedOpacityExampleState
-    extends State<SliverAnimatedOpacityExample>
+class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      SliverAnimatedOpacity(
-        opacity: _visible ? 1.0 : 0.0,
-        duration: widget.duration,
-        curve: widget.curve,
-        sliver: SliverFixedExtentList(
-          itemExtent: 100.0,
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
-              return Container(
-                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
-              );
-            },
-            childCount: 5,
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAnimatedOpacity(
+          opacity: _visible ? 1.0 : 0.0,
+          duration: widget.duration,
+          curve: widget.curve,
+          sliver: SliverFixedExtentList(
+            itemExtent: 100.0,
+            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
+            }, childCount: 5),
           ),
         ),
-      ),
-      SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _visible = !_visible;
-          });
-        },
-        tooltip: 'Toggle opacity',
-        child: const Icon(Icons.flip),
-      )),
-    ]);
+            onPressed: () {
+              setState(() {
+                _visible = !_visible;
+              });
+            },
+            tooltip: 'Toggle opacity',
+            child: const Icon(Icons.flip),
+          ),
+        ),
+      ],
+    );
   }
 }

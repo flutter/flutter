@@ -11,51 +11,39 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 class SwiftPackageManagerUtils {
-  static Future<void> enableSwiftPackageManager(
-    String flutterBin,
-    String workingDirectory,
-  ) async {
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'config',
-        '--enable-swift-package-manager',
-        '-v',
-      ],
-      workingDirectory: workingDirectory,
-    );
+  static Future<void> enableSwiftPackageManager(String flutterBin, String workingDirectory) async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'config',
+      '--enable-swift-package-manager',
+      '-v',
+    ], workingDirectory: workingDirectory);
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to enable Swift Package Manager: \n'
+      reason:
+          'Failed to enable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
-  static Future<void> disableSwiftPackageManager(
-    String flutterBin,
-    String workingDirectory,
-  ) async {
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'config',
-        '--no-enable-swift-package-manager',
-        '-v',
-      ],
-      workingDirectory: workingDirectory,
-    );
+  static Future<void> disableSwiftPackageManager(String flutterBin, String workingDirectory) async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'config',
+      '--no-enable-swift-package-manager',
+      '-v',
+    ], workingDirectory: workingDirectory);
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to disable Swift Package Manager: \n'
+      reason:
+          'Failed to disable Swift Package Manager: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
-      verbose: true,
     );
   }
 
@@ -63,40 +51,32 @@ class SwiftPackageManagerUtils {
     String flutterBin,
     String workingDirectory, {
     required String platform,
-    required String iosLanguage,
     required List<String> options,
     bool usesSwiftPackageManager = false,
   }) async {
-    final String appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
+    final appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
-    final String appName = '${platform}_${iosLanguage}_${appTemplateType}_app';
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'create',
-        '--org',
-        'io.flutter.devicelab',
-        '-i',
-        iosLanguage,
-        ...options,
-        appName,
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final appName = '${platform}_${appTemplateType}_app';
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'create',
+      '--org',
+      'io.flutter.devicelab',
+      ...options,
+      appName,
+    ], workingDirectory: workingDirectory);
 
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to create app: \n'
+      reason:
+          'Failed to create app: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
 
-    return fileSystem.path.join(
-      workingDirectory,
-      appName,
-    );
+    return fileSystem.path.join(workingDirectory, appName);
   }
 
   static Future<void> buildApp(
@@ -107,13 +87,8 @@ class SwiftPackageManagerUtils {
     List<String>? unexpectedLines,
   }) async {
     final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
-    final List<String> unexpectedLinesFound = <String>[];
-    final List<String> command = <String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      ...options,
-    ];
+    final unexpectedLinesFound = <String>[];
+    final command = <String>[flutterBin, ...getLocalEngineArguments(), 'build', ...options];
 
     final ProcessResult result = await processManager.run(
       command,
@@ -123,21 +98,24 @@ class SwiftPackageManagerUtils {
     final List<String> stdout = LineSplitter.split(result.stdout.toString()).toList();
     final List<String> stderr = LineSplitter.split(result.stderr.toString()).toList();
     final List<String> output = stdout + stderr;
-    for (final String line in output) {
+    for (final line in output) {
       // Remove "[   +3 ms] " prefix
       String trimmedLine = line.trim();
       if (trimmedLine.startsWith('[')) {
         final int prefixEndIndex = trimmedLine.indexOf(']');
         if (prefixEndIndex > 0) {
-          trimmedLine = trimmedLine
-              .substring(prefixEndIndex + 1, trimmedLine.length)
-              .trim();
+          trimmedLine = trimmedLine.substring(prefixEndIndex + 1, trimmedLine.length).trim();
         }
       }
       remainingExpectedLines.remove(trimmedLine);
-      remainingExpectedLines.removeWhere((Pattern expectedLine) => trimmedLine.contains(expectedLine));
+      remainingExpectedLines.removeWhere(
+        (Pattern expectedLine) => trimmedLine.contains(expectedLine),
+      );
       if (unexpectedLines != null) {
-        if (unexpectedLines.where((String unexpectedLine) => trimmedLine.contains(unexpectedLine)).firstOrNull != null) {
+        if (unexpectedLines
+                .where((String unexpectedLine) => trimmedLine.contains(unexpectedLine))
+                .firstOrNull !=
+            null) {
           unexpectedLinesFound.add(trimmedLine);
         }
       }
@@ -145,39 +123,40 @@ class SwiftPackageManagerUtils {
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to build app for "${command.join(' ')}":\n'
+      reason:
+          'Failed to build app for "${command.join(' ')}":\n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
     expect(
       remainingExpectedLines,
       isEmpty,
-      reason: 'Did not find expected lines for "${command.join(' ')}":\n'
+      reason:
+          'Did not find expected lines for "${command.join(' ')}":\n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
     expect(
       unexpectedLinesFound,
       isEmpty,
-      reason: 'Found unexpected lines for "${command.join(' ')}":\n'
+      reason:
+          'Found unexpected lines for "${command.join(' ')}":\n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
   }
 
   static Future<void> cleanApp(String flutterBin, String workingDirectory) async {
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'clean',
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'clean',
+    ], workingDirectory: workingDirectory);
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to clean app: \n'
+      reason:
+          'Failed to clean app: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
@@ -190,30 +169,28 @@ class SwiftPackageManagerUtils {
     required String iosLanguage,
     bool usesSwiftPackageManager = false,
   }) async {
-    final String dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
+    final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final String pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'create',
-        '--org',
-        'io.flutter.devicelab',
-        '--template=plugin',
-        '--platforms=$platform',
-        '-i',
-        iosLanguage,
-        pluginName,
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'create',
+      '--org',
+      'io.flutter.devicelab',
+      '--template=plugin',
+      '--platforms=$platform',
+      '-i',
+      iosLanguage,
+      pluginName,
+    ], workingDirectory: workingDirectory);
 
     expect(
       result.exitCode,
       0,
-      reason: 'Failed to create plugin: \n'
+      reason:
+          'Failed to create plugin: \n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
@@ -226,16 +203,20 @@ class SwiftPackageManagerUtils {
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
+      className:
+          '${_capitalize(platform)}${_capitalize(iosLanguage)}${_capitalize(dependencyManager)}Plugin',
     );
+  }
+
+  static String _capitalize(String str) {
+    return str[0].toUpperCase() + str.substring(1);
   }
 
   static void addDependency({
     required SwiftPackageManagerPlugin plugin,
     required String appDirectoryPath,
   }) {
-    final File pubspec = fileSystem.file(
-      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
-    );
+    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
     final String pubspecContent = pubspec.readAsStringSync();
     pubspec.writeAsStringSync(
       pubspecContent.replaceFirst(
@@ -249,9 +230,7 @@ class SwiftPackageManagerUtils {
     required SwiftPackageManagerPlugin plugin,
     required String appDirectoryPath,
   }) {
-    final File pubspec = fileSystem.file(
-      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
-    );
+    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
     final String pubspecContent = pubspec.readAsStringSync();
     final String updatedPubspecContent = pubspecContent.replaceFirst(
       '\n  ${plugin.pluginName}:\n    path: ${plugin.pluginPath}\n',
@@ -263,17 +242,13 @@ class SwiftPackageManagerUtils {
     pubspec.writeAsStringSync(updatedPubspecContent);
   }
 
-  static void disableSwiftPackageManagerByPubspec({
-    required String appDirectoryPath,
-  }) {
-    final File pubspec = fileSystem.file(
-      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
-    );
+  static void disableSwiftPackageManagerByPubspec({required String appDirectoryPath}) {
+    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
     final String pubspecContent = pubspec.readAsStringSync();
     pubspec.writeAsStringSync(
       pubspecContent.replaceFirst(
         '\n# The following section is specific to Flutter packages.\nflutter:\n',
-        '\n# The following section is specific to Flutter packages.\nflutter:\n  disable-swift-package-manager: true',
+        '\n# The following section is specific to Flutter packages.\nflutter:\n  config: \n    enable-swift-package-manager: false\n',
       ),
     );
   }
@@ -282,11 +257,16 @@ class SwiftPackageManagerUtils {
     final String flutterRoot = getFlutterRoot();
     return SwiftPackageManagerPlugin(
       platform: platform,
-      pluginName:
-          (platform == 'ios') ? 'integration_test' : 'integration_test_macos',
+      pluginName: (platform == 'ios') ? 'integration_test' : 'integration_test_macos',
       pluginPath: (platform == 'ios')
           ? fileSystem.path.join(flutterRoot, 'packages', 'integration_test')
-          : fileSystem.path.join(flutterRoot, 'packages', 'integration_test', 'integration_test_macos'),
+          : fileSystem.path.join(
+              flutterRoot,
+              'packages',
+              'integration_test',
+              'integration_test_macos',
+            ),
+      className: 'IntegrationTestPlugin',
     );
   }
 
@@ -298,13 +278,10 @@ class SwiftPackageManagerUtils {
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
   }) {
-    final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
-    final String appPlatformDirectoryPath = fileSystem.path.join(
-      appDirectoryPath,
-      platform,
-    );
+    final frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
 
-    final List<Pattern> expectedLines = <Pattern>[];
+    final expectedLines = <Pattern>[];
     if (swiftPackageMangerEnabled) {
       expectedLines.addAll(<String>[
         'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
@@ -315,7 +292,9 @@ class SwiftPackageManagerUtils {
       // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
-          RegExp('${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local'),
+          RegExp(
+            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
+          ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       } else {
@@ -353,8 +332,10 @@ class SwiftPackageManagerUtils {
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
   }) {
-    final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
-    final List<String> unexpectedLines = <String>[];
+    final frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
+    final String appPlatformDirectoryPath = fileSystem.path.join(appDirectoryPath, platform);
+
+    final unexpectedLines = <String>[];
     if (cocoaPodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
         'Running pod install...',
@@ -370,15 +351,13 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
-          '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+          '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       }
     }
     if (!migrated) {
-      unexpectedLines.addAll(<String>[
-        'Adding Swift Package Manager integration...',
-      ]);
+      unexpectedLines.addAll(<String>['Adding Swift Package Manager integration...']);
     }
     return unexpectedLines;
   }
@@ -389,11 +368,13 @@ class SwiftPackageManagerPlugin {
     required this.pluginName,
     required this.pluginPath,
     required this.platform,
+    required this.className,
   });
 
   final String pluginName;
   final String pluginPath;
   final String platform;
+  final String className;
   String get exampleAppPath => fileSystem.path.join(pluginPath, 'example');
   String get exampleAppPlatformPath => fileSystem.path.join(exampleAppPath, platform);
   String get swiftPackagePlatformPath => fileSystem.path.join(pluginPath, platform, pluginName);

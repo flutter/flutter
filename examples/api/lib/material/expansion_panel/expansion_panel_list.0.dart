@@ -24,11 +24,7 @@ class ExpansionPanelListExampleApp extends StatelessWidget {
 
 // stores ExpansionPanel state information
 class Item {
-  Item({
-    required this.expandedValue,
-    required this.headerValue,
-    this.isExpanded = false,
-  });
+  Item({required this.expandedValue, required this.headerValue, this.isExpanded = false});
 
   String expandedValue;
   String headerValue;
@@ -37,10 +33,7 @@ class Item {
 
 List<Item> generateItems(int numberOfItems) {
   return List<Item>.generate(numberOfItems, (int index) {
-    return Item(
-      headerValue: 'Panel $index',
-      expandedValue: 'This is item number $index',
-    );
+    return Item(headerValue: 'Panel $index', expandedValue: 'This is item number $index');
   });
 }
 
@@ -56,11 +49,7 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        child: _buildPanel(),
-      ),
-    );
+    return SingleChildScrollView(child: Container(child: _buildPanel()));
   }
 
   Widget _buildPanel() {
@@ -73,19 +62,18 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
       children: _data.map<ExpansionPanel>((Item item) {
         return ExpansionPanel(
           headerBuilder: (BuildContext context, bool isExpanded) {
-            return ListTile(
-              title: Text(item.headerValue),
-            );
+            return ListTile(title: Text(item.headerValue));
           },
           body: ListTile(
-              title: Text(item.expandedValue),
-              subtitle: const Text('To delete this panel, tap the trash can icon'),
-              trailing: const Icon(Icons.delete),
-              onTap: () {
-                setState(() {
-                  _data.removeWhere((Item currentItem) => item == currentItem);
-                });
-              }),
+            title: Text(item.expandedValue),
+            subtitle: const Text('To delete this panel, tap the trash can icon'),
+            trailing: const Icon(Icons.delete),
+            onTap: () {
+              setState(() {
+                _data.removeWhere((Item currentItem) => item == currentItem);
+              });
+            },
+          ),
           isExpanded: item.isExpanded,
         );
       }).toList(),

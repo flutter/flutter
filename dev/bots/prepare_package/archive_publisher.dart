@@ -26,13 +26,13 @@ class ArchivePublisher {
     bool subprocessOutput = true,
     required this.fs,
     this.platform = const LocalPlatform(),
-  })  : assert(revision.length == 40),
-        platformName = platform.operatingSystem.toLowerCase(),
-        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
-        _processRunner = ProcessRunner(
-          processManager: processManager,
-          subprocessOutput: subprocessOutput,
-        );
+  }) : assert(revision.length == 40),
+       platformName = platform.operatingSystem.toLowerCase(),
+       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
+       _processRunner = ProcessRunner(
+         processManager: processManager,
+         subprocessOutput: subprocessOutput,
+       );
 
   final Platform platform;
   final FileSystem fs;
@@ -45,8 +45,10 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   final bool dryRun;
-  String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
-  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
+  String get destinationArchivePath =>
+      '${branch.name}/$platformName/${path.basename(outputFile.path)}';
+  static String getMetadataFilename(Platform platform) =>
+      'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   Future<String> _getChecksum(File archiveFile) async {
     final AccumulatorSink<Digest> digestSink = AccumulatorSink<Digest>();
@@ -68,15 +70,10 @@ class ArchivePublisher {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
-        throw PreparePackageException(
-          'File $destGsPath already exists on cloud storage!',
-        );
+        throw PreparePackageException('File $destGsPath already exists on cloud storage!');
       }
     }
-    await _cloudCopy(
-      src: outputFile.absolute.path,
-      dest: destGsPath,
-    );
+    await _cloudCopy(src: outputFile.absolute.path, dest: destGsPath);
     assert(tempDir.existsSync());
     final String gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
     await _publishMetadata(gcsPath);
@@ -109,18 +106,19 @@ class ArchivePublisher {
 
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
-    jsonData['releases'] = <Map<String, dynamic>>[
-      for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
-        if (entry['hash'] != newEntry['hash'] ||
-            entry['channel'] != newEntry['channel'] ||
-            entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
-          entry,
-      newEntry,
-    ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final DateTime aDate = DateTime.parse(a['release_date'] as String);
-      final DateTime bDate = DateTime.parse(b['release_date'] as String);
-      return bDate.compareTo(aDate);
-    });
+    jsonData['releases'] =
+        <Map<String, dynamic>>[
+          for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
+            if (entry['hash'] != newEntry['hash'] ||
+                entry['channel'] != newEntry['channel'] ||
+                entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
+              entry,
+          newEntry,
+        ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+          final DateTime aDate = DateTime.parse(a['release_date'] as String);
+          final DateTime bDate = DateTime.parse(b['release_date'] as String);
+          return bDate.compareTo(aDate);
+        });
     return jsonData;
   }
 
@@ -179,7 +177,12 @@ class ArchivePublisher {
       return '';
     }
     return _processRunner.runProcess(
-      <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
+      <String>[
+        'python3',
+        path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'),
+        '--',
+        ...args,
+      ],
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
@@ -188,9 +191,7 @@ class ArchivePublisher {
   /// Determine if a file exists at a given [cloudPath].
   Future<bool> _cloudPathExists(String cloudPath) async {
     try {
-      await _runGsUtil(
-        <String>['stat', cloudPath],
-      );
+      await _runGsUtil(<String>['stat', cloudPath]);
     } on PreparePackageException {
       // `gsutil stat gs://path/to/file` will exit with 1 if file does not exist
       return false;
@@ -198,11 +199,7 @@ class ArchivePublisher {
     return true;
   }
 
-  Future<String> _cloudCopy({
-    required String src,
-    required String dest,
-    int? cacheSeconds,
-  }) async {
+  Future<String> _cloudCopy({required String src, required String dest, int? cacheSeconds}) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);

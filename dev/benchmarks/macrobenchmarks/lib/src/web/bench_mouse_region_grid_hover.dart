@@ -23,10 +23,7 @@ class _NestedMouseRegion extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget current = child;
     for (int i = 0; i < nests; i++) {
-      current = MouseRegion(
-        onEnter: (_) {},
-        child: child,
-      );
+      current = MouseRegion(onEnter: (_) {}, child: child);
     }
     return current;
   }
@@ -148,6 +145,7 @@ class _Tester {
       kind: PointerDeviceKind.mouse,
     );
   }
+
   TestGesture? _gesture;
 
   Duration currentTime = Duration.zero;

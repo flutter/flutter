@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Navigator.restorablePushReplacement].
+/// Flutter code sample for [NavigatorState.restorablePushReplacement].
 
 void main() => runApp(const RestorablePushReplacementExampleApp());
 
@@ -13,32 +13,39 @@ class RestorablePushReplacementExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RestorablePushReplacementExample(),
+    return const RootRestorationScope(
+      restorationId: 'app',
+      child: MaterialApp(restorationScopeId: 'app', home: RestorablePushReplacementExample()),
     );
   }
 }
 
 class RestorablePushReplacementExample extends StatefulWidget {
-  const RestorablePushReplacementExample({super.key});
+  const RestorablePushReplacementExample({this.wasPushed = false, super.key});
+
+  final bool wasPushed;
 
   @override
   State<RestorablePushReplacementExample> createState() => _RestorablePushReplacementExampleState();
 }
 
+@pragma('vm:entry-point')
 class _RestorablePushReplacementExampleState extends State<RestorablePushReplacementExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const RestorablePushReplacementExample(),
+      builder: (BuildContext context) => const RestorablePushReplacementExample(wasPushed: true),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sample Code'),
+      appBar: AppBar(title: const Text('Sample Code')),
+      body: Center(
+        child: widget.wasPushed
+            ? const Text('This is a new route.')
+            : const Text('This is the initial route.'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),

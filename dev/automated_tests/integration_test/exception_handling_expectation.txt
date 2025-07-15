@@ -32,7 +32,7 @@ The following message was thrown running a test:
 Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
-#4      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:16:5\)
+#4      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]integration_test[/\\]exception_handling_test\.dart:18:5\)
 <<skip until matching line>>
 The test description was:
   Exception handling in test harness - uncaught Future error

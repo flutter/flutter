@@ -12,8 +12,7 @@ import 'multi_view_testing.dart';
 void main() {
   testWidgets('can find nodes in an view when no view is specified', (WidgetTester tester) async {
     final List<FlutterView> views = <FlutterView>[
-      for (int i = 0; i < 3; i++)
-        FakeView(tester.view, viewId: i + 100)
+      for (int i = 0; i < 3; i++) FakeView(tester.view, viewId: i + 100),
     ];
     await pumpViews(tester: tester, views: views);
 
@@ -24,8 +23,7 @@ void main() {
 
   testWidgets('can find nodes only in specified view', (WidgetTester tester) async {
     final List<FlutterView> views = <FlutterView>[
-      for (int i = 0; i < 3; i++)
-        FakeView(tester.view, viewId: i + 100)
+      for (int i = 0; i < 3; i++) FakeView(tester.view, viewId: i + 100),
     ];
     await pumpViews(tester: tester, views: views);
 
@@ -63,9 +61,7 @@ Future<void> pumpViews({required WidgetTester tester, required List<FlutterView>
     wrapWithView: false,
     Directionality(
       textDirection: TextDirection.ltr,
-      child: ViewCollection(
-        views: viewWidgets,
-      ),
+      child: ViewCollection(views: viewWidgets),
     ),
   );
 }

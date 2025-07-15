@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
@@ -23,7 +24,8 @@ import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
+export 'package:flutter/services.dart'
+    show SmartDashesType, SmartQuotesType, TextCapitalization, TextInputAction, TextInputType;
 
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
@@ -98,11 +100,11 @@ enum OverlayVisibilityMode {
   always,
 }
 
-class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
-  _CupertinoTextFieldSelectionGestureDetectorBuilder({
-    required _CupertinoTextFieldState state,
-  }) : _state = state,
-       super(delegate: state);
+class _CupertinoTextFieldSelectionGestureDetectorBuilder
+    extends TextSelectionGestureDetectorBuilder {
+  _CupertinoTextFieldSelectionGestureDetectorBuilder({required _CupertinoTextFieldState state})
+    : _state = state,
+      super(delegate: state);
 
   final _CupertinoTextFieldState _state;
 
@@ -113,7 +115,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
+      final RenderBox renderBox =
+          _state._clearGlobalKey.currentContext!.findRenderObject()! as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -205,7 +208,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
+  /// to [EditableText.defaultSelectionHeightStyle] and
+  /// [EditableText.defaultSelectionWidthStyle], respectively.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
@@ -239,6 +243,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -272,6 +277,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -279,12 +285,13 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -293,14 +300,21 @@ class CupertinoTextField extends StatefulWidget {
     this.contentInsertionConfiguration,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.27.0-0.2.pre.',
+    )
     this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(obscuringCharacter.length == 1),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       smartDashesType =
+           smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType =
+           smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -316,11 +330,12 @@ class CupertinoTextField extends StatefulWidget {
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
        assert(
          !identical(textInputAction, TextInputAction.newline) ||
-         maxLines == 1 ||
-         !identical(keyboardType, TextInputType.text),
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
-       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       keyboardType =
+           keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// Creates a borderless iOS-style text field.
@@ -367,6 +382,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -387,7 +403,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -400,6 +416,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -407,12 +424,13 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -421,14 +439,21 @@ class CupertinoTextField extends StatefulWidget {
     this.contentInsertionConfiguration,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
+    @Deprecated(
+      'Use `stylusHandwritingEnabled` instead. '
+      'This feature was deprecated after v3.27.0-0.2.pre.',
+    )
     this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
   }) : assert(obscuringCharacter.length == 1),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       smartDashesType =
+           smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType =
+           smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -444,11 +469,12 @@ class CupertinoTextField extends StatefulWidget {
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
        assert(
          !identical(textInputAction, TextInputAction.newline) ||
-         maxLines == 1 ||
-         !identical(keyboardType, TextInputType.text),
+             maxLines == 1 ||
+             !identical(keyboardType, TextInputType.text),
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
-       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       keyboardType =
+           keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// {@macro flutter.widgets.editableText.groupId}
@@ -515,6 +541,13 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
+
+  /// Controls the vertical alignment of the [prefix] and the [suffix] widget in relation to content.
+  ///
+  /// Defaults to [CrossAxisAlignment.center].
+  ///
+  /// Has no effect when both the [prefix] and [suffix] are null.
+  final CrossAxisAlignment crossAxisAlignment;
 
   /// Show an iOS-style clear button to clear the current text entry.
   ///
@@ -590,7 +623,7 @@ class CupertinoTextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -662,6 +695,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onTapOutside}
   final TapRegionCallback? onTapOutside;
 
+  /// {@macro flutter.widgets.editableText.onTapUpOutside}
+  final TapRegionCallback? onTapUpOutside;
+
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -697,12 +733,12 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
-  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
-  final ui.BoxWidthStyle selectionWidthStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -716,6 +752,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
+
+  /// {@macro flutter.widgets.editableText.selectAllOnFocus}
+  final bool? selectAllOnFocus;
 
   /// {@macro flutter.widgets.editableText.selectionControls}
   final TextSelectionControls? selectionControls;
@@ -748,7 +787,14 @@ class CupertinoTextField extends StatefulWidget {
   final String? restorationId;
 
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
+  @Deprecated(
+    'Use `stylusHandwritingEnabled` instead. '
+    'This feature was deprecated after v3.27.0-0.2.pre.',
+  )
   final bool scribbleEnabled;
+
+  /// {@macro flutter.widgets.editableText.stylusHandwritingEnabled}
+  final bool stylusHandwritingEnabled;
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
@@ -765,10 +811,14 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    return CupertinoAdaptiveTextSelectionToolbar.editableText(
-      editableTextState: editableTextState,
-    );
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
+    return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
   /// Configuration for the text field magnifier.
@@ -800,11 +850,10 @@ class CupertinoTextField extends StatefulWidget {
   ///    mark misspelled words with.
   ///  * [TextField.materialMisspelledTextStyle], the style configured
   ///    to mark misspelled words with in the Material style.
-  static const TextStyle cupertinoMisspelledTextStyle =
-    TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: CupertinoColors.systemRed,
-      decorationStyle: TextDecorationStyle.dotted,
+  static const TextStyle cupertinoMisspelledTextStyle = TextStyle(
+    decoration: TextDecoration.underline,
+    decorationColor: CupertinoColors.systemRed,
+    decorationStyle: TextDecorationStyle.dotted,
   );
 
   /// The color of the selection highlight when the spell check menu is visible.
@@ -828,9 +877,7 @@ class CupertinoTextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    return CupertinoSpellCheckSuggestionsToolbar.editableText(
-      editableTextState: editableTextState,
-    );
+    return CupertinoSpellCheckSuggestionsToolbar.editableText(editableTextState: editableTextState);
   }
 
   /// {@macro flutter.widgets.undoHistory.controller}
@@ -842,94 +889,196 @@ class CupertinoTextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<UndoHistoryController>(
+        'undoController',
+        undoController,
+        defaultValue: null,
+      ),
+    );
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
     properties.add(DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle));
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
-    properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
+    properties.add(
+      DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode),
+    );
+    properties.add(
+      DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode),
+    );
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
-    properties.add(DiagnosticsProperty<String>('clearButtonSemanticLabel', clearButtonSemanticLabel));
-    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(
+      DiagnosticsProperty<String>('clearButtonSemanticLabel', clearButtonSemanticLabel),
+    );
+    properties.add(
+      DiagnosticsProperty<TextInputType>(
+        'keyboardType',
+        keyboardType,
+        defaultValue: TextInputType.text,
+      ),
+    );
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
+    properties.add(
+      DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'),
+    );
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
-    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
+    properties.add(
+      EnumProperty<SmartDashesType>(
+        'smartDashesType',
+        smartDashesType,
+        defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled,
+      ),
+    );
+    properties.add(
+      EnumProperty<SmartQuotesType>(
+        'smartQuotesType',
+        smartQuotesType,
+        defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
+    properties.add(
+      EnumProperty<MaxLengthEnforcement>(
+        'maxLengthEnforcement',
+        maxLengthEnforcement,
+        defaultValue: null,
+      ),
+    );
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('cursorOpacityAnimates', cursorOpacityAnimates, defaultValue: true));
+    properties.add(
+      DiagnosticsProperty<bool>('cursorOpacityAnimates', cursorOpacityAnimates, defaultValue: true),
+    );
     properties.add(createCupertinoColorProperty('cursorColor', cursorColor, defaultValue: null));
-    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(
+      FlagProperty(
+        'selectionEnabled',
+        value: selectionEnabled,
+        defaultValue: true,
+        ifFalse: 'selection disabled',
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextSelectionControls>(
+        'selectionControls',
+        selectionControls,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollController>(
+        'scrollController',
+        scrollController,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null),
+    );
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
-    properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextAlignVertical>(
+        'textAlignVertical',
+        textAlignVertical,
+        defaultValue: null,
+      ),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
-    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
-    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
-    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
+    properties.add(
+      DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'stylusHandwritingEnabled',
+        stylusHandwritingEnabled,
+        defaultValue: EditableText.defaultStylusHandwritingEnabled,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'enableIMEPersonalizedLearning',
+        enableIMEPersonalizedLearning,
+        defaultValue: true,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<SpellCheckConfiguration>(
+        'spellCheckConfiguration',
+        spellCheckConfiguration,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<String>>(
+        'contentCommitMimeTypes',
+        contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
+        defaultValue: contentInsertionConfiguration == null
+            ? const <String>[]
+            : kDefaultContentInsertionMimeTypes,
+      ),
+    );
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
-    magnifierBuilder: (
-    BuildContext context,
-    MagnifierController controller,
-    ValueNotifier<MagnifierInfo> magnifierInfo
-  ) {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return CupertinoTextMagnifier(
-        controller: controller,
-        magnifierInfo: magnifierInfo,
-      );
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        return null;
-    }
-  });
+    magnifierBuilder:
+        (
+          BuildContext context,
+          MagnifierController controller,
+          ValueNotifier<MagnifierInfo> magnifierInfo,
+        ) {
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.android:
+            case TargetPlatform.iOS:
+              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              return null;
+          }
+        },
+  );
 
   /// Returns a new [SpellCheckConfiguration] where the given configuration has
   /// had any missing values replaced with their defaults for the iOS platform.
   static SpellCheckConfiguration inferIOSSpellCheckConfiguration(
     SpellCheckConfiguration? configuration,
   ) {
-    if (configuration == null
-      || configuration == const SpellCheckConfiguration.disabled()) {
+    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
       return const SpellCheckConfiguration.disabled();
     }
 
     return configuration.copyWith(
-      misspelledTextStyle: configuration.misspelledTextStyle
-        ?? CupertinoTextField.cupertinoMisspelledTextStyle,
-      misspelledSelectionColor: configuration.misspelledSelectionColor
-        ?? CupertinoTextField.kMisspelledSelectionColor,
+      misspelledTextStyle:
+          configuration.misspelledTextStyle ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+      misspelledSelectionColor:
+          configuration.misspelledSelectionColor ?? CupertinoTextField.kMisspelledSelectionColor,
       spellCheckSuggestionsToolbarBuilder:
-        configuration.spellCheckSuggestionsToolbarBuilder
-          ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+          configuration.spellCheckSuggestionsToolbarBuilder ??
+          CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
     );
   }
 }
 
-class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
+class _CupertinoTextFieldState extends State<CupertinoTextField>
+    with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField>
+    implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
   RestorableTextEditingController? _controller;
@@ -938,8 +1087,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
-    ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement();
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement =>
+      widget.maxLengthEnforcement ??
+      LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement();
 
   bool _showSelectionHandles = false;
 
@@ -1036,8 +1186,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
+    // selection toolbar, we shouldn't show the handles either.
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar ||
+        !_selectionGestureDetectorBuilder.shouldShowSelectionHandles) {
       return false;
     }
 
@@ -1050,7 +1201,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       return false;
     }
 
-    if (cause == SelectionChangedCause.scribble) {
+    if (cause == SelectionChangedCause.stylusHandwriting) {
       return true;
     }
 
@@ -1113,9 +1264,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   // True if any surrounding decoration widgets will be shown.
   bool get _hasDecoration {
     return widget.placeholder != null ||
-      widget.clearButtonMode != OverlayVisibilityMode.never ||
-      widget.prefix != null ||
-      widget.suffix != null;
+        widget.clearButtonMode != OverlayVisibilityMode.never ||
+        widget.prefix != null ||
+        widget.suffix != null;
   }
 
   // Provide default behavior if widget.textAlignVertical is not set.
@@ -1140,7 +1291,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
-    final String clearLabel = widget.clearButtonSemanticLabel ?? CupertinoLocalizations.of(context).clearButtonLabel;
+    final String clearLabel =
+        widget.clearButtonSemanticLabel ?? CupertinoLocalizations.of(context).clearButtonLabel;
 
     return Semantics(
       button: true,
@@ -1160,7 +1312,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     );
   }
 
-  Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {
+  Widget _addTextDependentAttachments(
+    Widget editableText,
+    TextStyle textStyle,
+    TextStyle placeholderStyle,
+  ) {
     // If there are no surrounding widgets, just return the core editable text
     // part.
     if (!_hasDecoration) {
@@ -1175,69 +1331,79 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         final bool hasText = text.text.isNotEmpty;
         final String? placeholderText = widget.placeholder;
         final Widget? placeholder = placeholderText == null
-          ? null
-          // Make the placeholder invisible when hasText is true.
-          : Visibility(
-              maintainAnimation: true,
-              maintainSize: true,
-              maintainState: true,
-              visible: !hasText,
-              child: SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: widget.padding,
-                  child: Text(
-                    placeholderText,
-                    // This is to make sure the text field is always tall enough
-                    // to accommodate the first line of the placeholder, so the
-                    // text does not shrink vertically as you type (however in
-                    // rare circumstances, the height may still change when
-                    // there's no placeholder text).
-                    maxLines: hasText ? 1 : widget.maxLines,
-                    overflow: placeholderStyle.overflow,
-                    style: placeholderStyle,
-                    textAlign: widget.textAlign,
+            ? null
+            // Make the placeholder invisible when hasText is true.
+            : Visibility(
+                maintainAnimation: true,
+                maintainSize: true,
+                maintainState: true,
+                visible: !hasText,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: widget.padding,
+                    child: Text(
+                      placeholderText,
+                      // This is to make sure the text field is always tall enough
+                      // to accommodate the first line of the placeholder, so the
+                      // text does not shrink vertically as you type (however in
+                      // rare circumstances, the height may still change when
+                      // there's no placeholder text).
+                      maxLines: hasText ? 1 : widget.maxLines,
+                      overflow: placeholderStyle.overflow,
+                      style: placeholderStyle,
+                      textAlign: widget.textAlign,
+                    ),
                   ),
                 ),
-              ),
-          );
+              );
 
-        final Widget? prefixWidget = _shouldShowAttachment(attachment: widget.prefixMode, hasText: hasText) ? widget.prefix : null;
+        final Widget? prefixWidget =
+            _shouldShowAttachment(attachment: widget.prefixMode, hasText: hasText)
+            ? widget.prefix
+            : null;
 
         // Show user specified suffix if applicable and fall back to clear button.
-        final bool showUserSuffix = _shouldShowAttachment(attachment: widget.suffixMode, hasText: hasText);
-        final bool showClearButton = _shouldShowAttachment(attachment: widget.clearButtonMode, hasText: hasText);
+        final bool showUserSuffix = _shouldShowAttachment(
+          attachment: widget.suffixMode,
+          hasText: hasText,
+        );
+        final bool showClearButton = _shouldShowAttachment(
+          attachment: widget.clearButtonMode,
+          hasText: hasText,
+        );
         final Widget? suffixWidget = switch ((showUserSuffix, showClearButton)) {
           (false, false) => null,
           (true, false) => widget.suffix,
           (true, true) => widget.suffix ?? _buildClearButton(),
           (false, true) => _buildClearButton(),
         };
-        return Row(children: <Widget>[
-          // Insert a prefix at the front if the prefix visibility mode matches
-          // the current text state.
-          if (prefixWidget != null) prefixWidget,
-          // In the middle part, stack the placeholder on top of the main EditableText
-          // if needed.
-          Expanded(
-            child: Stack(
-              // Ideally this should be baseline aligned. However that comes at
-              // the cost of the ability to compute the intrinsic dimensions of
-              // this widget.
-              // See also https://github.com/flutter/flutter/issues/13715.
-              alignment: AlignmentDirectional.center,
-              textDirection: widget.textDirection,
-              children: <Widget>[
-                if (placeholder != null) placeholder,
-                editableText,
-              ],
+        return Row(
+          crossAxisAlignment: widget.crossAxisAlignment,
+          children: <Widget>[
+            // Insert a prefix at the front if the prefix visibility mode matches
+            // the current text state.
+            if (prefixWidget != null) prefixWidget,
+            // In the middle part, stack the placeholder on top of the main EditableText
+            // if needed.
+            Expanded(
+              child: Directionality(
+                textDirection: widget.textDirection ?? Directionality.of(context),
+                child: _BaselineAlignedStack(
+                  placeholder: placeholder,
+                  editableText: editableText,
+                  editableTextBaseline: textStyle.textBaseline ?? TextBaseline.alphabetic,
+                  placeholderBaseline: placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
+                ),
+              ),
             ),
-          ),
-          if (suffixWidget != null) suffixWidget
-        ]);
+            if (suffixWidget != null) suffixWidget,
+          ],
+        );
       },
     );
   }
+
   // AutofillClient implementation start.
   @override
   String get autofillId => _editableText.autofillId;
@@ -1249,15 +1415,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
     final AutofillConfiguration autofillConfiguration = autofillHints != null
-      ? AutofillConfiguration(
-          uniqueIdentifier: autofillId,
-          autofillHints: autofillHints,
-          currentEditingValue: _effectiveController.value,
-          hintText: widget.placeholder,
-        )
-      : AutofillConfiguration.disabled;
+        ? AutofillConfiguration(
+            uniqueIdentifier: autofillId,
+            autofillHints: autofillHints,
+            currentEditingValue: _effectiveController.value,
+            hintText: widget.placeholder,
+          )
+        : AutofillConfiguration.disabled;
 
-    return _editableText.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
+    return _editableText.textInputConfiguration.copyWith(
+      autofillConfiguration: autofillConfiguration,
+    );
   }
   // AutofillClient implementation end.
 
@@ -1269,13 +1437,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     VoidCallback? handleDidGainAccessibilityFocus;
+    VoidCallback? handleDidLoseAccessibilityFocus;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
@@ -1285,10 +1453,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             _effectiveFocusNode.requestFocus();
           }
         };
+        handleDidLoseAccessibilityFocus = () {
+          _effectiveFocusNode.unfocus();
+        };
     }
 
     final bool enabled = widget.enabled;
-    final Offset cursorOffset = Offset(_iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context), 0);
+    final Offset cursorOffset = Offset(
+      _iOSHorizontalCursorOffsetPixels / MediaQuery.devicePixelRatioOf(context),
+      0,
+    );
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
       ...?widget.inputFormatters,
       if (widget.maxLength != null)
@@ -1308,62 +1482,71 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     final TextStyle? resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith(
       color: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.color, context),
-      backgroundColor: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.backgroundColor, context),
+      backgroundColor: CupertinoDynamicColor.maybeResolve(
+        widget.placeholderStyle?.backgroundColor,
+        context,
+      ),
     );
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
-    final Color cursorColor = CupertinoDynamicColor.maybeResolve(
-      widget.cursorColor ?? DefaultSelectionStyle.of(context).cursorColor,
-      context,
-    ) ?? themeData.primaryColor;
+    final Brightness keyboardAppearance =
+        widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
+    final Color cursorColor =
+        CupertinoDynamicColor.maybeResolve(
+          widget.cursorColor ?? DefaultSelectionStyle.of(context).cursorColor,
+          context,
+        ) ??
+        themeData.primaryColor;
 
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
-    final Color? decorationColor = CupertinoDynamicColor.maybeResolve(widget.decoration?.color, context);
+    final Color? decorationColor = CupertinoDynamicColor.maybeResolve(
+      widget.decoration?.color,
+      context,
+    );
 
     final BoxBorder? border = widget.decoration?.border;
     Border? resolvedBorder = border as Border?;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
-          ? side
-          : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+            ? side
+            : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
       }
+
       resolvedBorder = border.runtimeType != Border
-        ? border
-        : Border(
-          top: resolveBorderSide(border.top),
-          left: resolveBorderSide(border.left),
-          bottom: resolveBorderSide(border.bottom),
-          right: resolveBorderSide(border.right),
-        );
+          ? border
+          : Border(
+              top: resolveBorderSide(border.top),
+              left: resolveBorderSide(border.left),
+              bottom: resolveBorderSide(border.bottom),
+              right: resolveBorderSide(border.right),
+            );
     }
 
     // Use the default disabled color only if the box decoration was not set.
-    final BoxDecoration? effectiveDecoration =
-      widget.decoration?.copyWith(
-        border: resolvedBorder,
-        color: enabled ? decorationColor
+    final BoxDecoration? effectiveDecoration = widget.decoration?.copyWith(
+      border: resolvedBorder,
+      color: enabled
+          ? decorationColor
           : (widget.decoration == _kDefaultRoundedBorderDecoration
-              ? disabledColor
-              : widget.decoration?.color
-            ),
-      );
+                ? disabledColor
+                : widget.decoration?.color),
+    );
 
-    final Color selectionColor = CupertinoDynamicColor.maybeResolve(
-      DefaultSelectionStyle.of(context).selectionColor,
-      context,
-    ) ?? CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+    final Color selectionColor =
+        CupertinoDynamicColor.maybeResolve(
+          DefaultSelectionStyle.of(context).selectionColor,
+          context,
+        ) ??
+        CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
     // Set configuration as disabled if not otherwise specified. If specified,
     // ensure that configuration uses Cupertino text style for misspelled words
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
-        CupertinoTextField.inferIOSSpellCheckConfiguration(
-          widget.spellCheckConfiguration,
-        );
+        CupertinoTextField.inferIOSSpellCheckConfiguration(widget.spellCheckConfiguration);
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -1396,11 +1579,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             maxLines: widget.maxLines,
             minLines: widget.minLines,
             expands: widget.expands,
-            magnifierConfiguration: widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
+            magnifierConfiguration:
+                widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
-            selectionControls: widget.selectionEnabled
-              ? textSelectionControls : null,
+            selectionControls: widget.selectionEnabled ? textSelectionControls : null,
             groupId: widget.groupId,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
@@ -1417,7 +1600,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             cursorOffset: cursorOffset,
             paintCursorAboveText: true,
             autocorrectionTextRectColor: selectionColor,
-            backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
+            backgroundCursorColor: CupertinoDynamicColor.resolve(
+              CupertinoColors.inactiveGray,
+              context,
+            ),
             selectionHeightStyle: widget.selectionHeightStyle,
             selectionWidthStyle: widget.selectionWidthStyle,
             scrollPadding: widget.scrollPadding,
@@ -1426,10 +1612,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             scrollController: widget.scrollController,
             scrollPhysics: widget.scrollPhysics,
             enableInteractiveSelection: widget.enableInteractiveSelection,
+            selectAllOnFocus: widget.selectAllOnFocus,
             autofillClient: this,
             clipBehavior: widget.clipBehavior,
             restorationId: 'editable',
             scribbleEnabled: widget.scribbleEnabled,
+            stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
             enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
             contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
@@ -1441,42 +1629,45 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     return Semantics(
       enabled: enabled,
-      onTap: !enabled || widget.readOnly ? null : () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
-        _requestKeyboard();
-      },
-      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      onFocus: enabled
-        ? () {
-            assert(
-              _effectiveFocusNode.canRequestFocus,
-              'Received SemanticsAction.focus from the engine. However, the FocusNode '
-              'of this text field cannot gain focus. This likely indicates a bug. '
-              'If this text field cannot be focused (e.g. because it is not '
-              'enabled), then its corresponding semantics node must be configured '
-              'such that the assistive technology cannot request focus on it.'
-            );
-
-            if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
-              _effectiveFocusNode.requestFocus();
-            } else if (!widget.readOnly) {
-              // If the platform requested focus, that means that previously the
-              // platform believed that the text field did not have focus (even
-              // though Flutter's widget system believed otherwise). This likely
-              // means that the on-screen keyboard is hidden, or more generally,
-              // there is no current editing session in this field. To correct
-              // that, keyboard must be requested.
-              //
-              // A concrete scenario where this can happen is when the user
-              // dismisses the keyboard on the web. The editing session is
-              // closed by the engine, but the text field widget stays focused
-              // in the framework.
+      onTap: !enabled || widget.readOnly
+          ? null
+          : () {
+              if (!controller.selection.isValid) {
+                controller.selection = TextSelection.collapsed(offset: controller.text.length);
+              }
               _requestKeyboard();
+            },
+      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
+      onFocus: enabled
+          ? () {
+              assert(
+                _effectiveFocusNode.canRequestFocus,
+                'Received SemanticsAction.focus from the engine. However, the FocusNode '
+                'of this text field cannot gain focus. This likely indicates a bug. '
+                'If this text field cannot be focused (e.g. because it is not '
+                'enabled), then its corresponding semantics node must be configured '
+                'such that the assistive technology cannot request focus on it.',
+              );
+
+              if (_effectiveFocusNode.canRequestFocus && !_effectiveFocusNode.hasFocus) {
+                _effectiveFocusNode.requestFocus();
+              } else if (!widget.readOnly) {
+                // If the platform requested focus, that means that previously the
+                // platform believed that the text field did not have focus (even
+                // though Flutter's widget system believed otherwise). This likely
+                // means that the on-screen keyboard is hidden, or more generally,
+                // there is no current editing session in this field. To correct
+                // that, keyboard must be requested.
+                //
+                // A concrete scenario where this can happen is when the user
+                // dismisses the keyboard on the web. The editing session is
+                // closed by the engine, but the text field widget stays focused
+                // in the framework.
+                _requestKeyboard();
+              }
             }
-          }
-        : null,
+          : null,
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,
@@ -1496,5 +1687,195 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ),
       ),
     );
+  }
+}
+
+enum _BaselineAlignedStackSlot { placeholder, editableText }
+
+class _BaselineAlignedStack
+    extends SlottedMultiChildRenderObjectWidget<_BaselineAlignedStackSlot, RenderBox> {
+  const _BaselineAlignedStack({
+    required this.editableTextBaseline,
+    required this.placeholderBaseline,
+    required this.editableText,
+    this.placeholder,
+  });
+
+  final TextBaseline editableTextBaseline;
+  final TextBaseline placeholderBaseline;
+  final Widget? placeholder;
+  final Widget editableText;
+
+  @override
+  Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
+
+  @override
+  Widget? childForSlot(_BaselineAlignedStackSlot slot) {
+    return switch (slot) {
+      _BaselineAlignedStackSlot.placeholder => placeholder,
+      _BaselineAlignedStackSlot.editableText => editableText,
+    };
+  }
+
+  @override
+  _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
+    return _RenderBaselineAlignedStack(
+      editableTextBaseline: editableTextBaseline,
+      placeholderBaseline: placeholderBaseline,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBaselineAlignedStack renderObject) {
+    renderObject
+      ..editableTextBaseline = editableTextBaseline
+      ..placeholderBaseline = placeholderBaseline;
+  }
+}
+
+class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderBaselineAlignedStack extends RenderBox
+    with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
+  _RenderBaselineAlignedStack({
+    required TextBaseline editableTextBaseline,
+    required TextBaseline placeholderBaseline,
+  }) : _editableTextBaseline = editableTextBaseline,
+       _placeholderBaseline = placeholderBaseline;
+
+  TextBaseline get editableTextBaseline => _editableTextBaseline;
+  TextBaseline _editableTextBaseline;
+  set editableTextBaseline(TextBaseline value) {
+    if (_editableTextBaseline == value) {
+      return;
+    }
+    _editableTextBaseline = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get placeholderBaseline => _placeholderBaseline;
+  TextBaseline _placeholderBaseline;
+  set placeholderBaseline(TextBaseline value) {
+    if (_placeholderBaseline == value) {
+      return;
+    }
+    _placeholderBaseline = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _BaselineAlignedStackParentData) {
+      child.parentData = _BaselineAlignedStackParentData();
+    }
+  }
+
+  RenderBox? get _placeholderChild {
+    return childForSlot(_BaselineAlignedStackSlot.placeholder);
+  }
+
+  RenderBox get _editableTextChild {
+    final RenderBox? child = childForSlot(_BaselineAlignedStackSlot.editableText);
+    assert(child != null);
+    return child!;
+  }
+
+  @override
+  void performLayout() {
+    assert(constraints.hasTightWidth);
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    final _BaselineAlignedStackParentData? placeholderParentData =
+        placeholder?.parentData as _BaselineAlignedStackParentData?;
+
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: ChildLayoutHelper.getBaseline,
+    );
+
+    final double editableTextBaselineValue = editableText.getDistanceToBaseline(
+      editableTextBaseline,
+    )!;
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
+      placeholderBaseline,
+    );
+
+    assert(placeholder != null || placeholderBaselineValue == null);
+    final double placeholderY = placeholderBaselineValue != null
+        ? editableTextBaselineValue - placeholderBaselineValue
+        : 0.0;
+
+    final double offsetYAdjustment = math.max(0, placeholderY);
+    editableTextParentData.offset = Offset(0, offsetYAdjustment);
+    placeholderParentData?.offset = Offset(0, placeholderY + offsetYAdjustment);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    if (placeholder != null) {
+      final _BaselineAlignedStackParentData placeholderParentData =
+          placeholder.parentData! as _BaselineAlignedStackParentData;
+      context.paintChild(placeholder, offset + placeholderParentData.offset);
+    }
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    context.paintChild(editableText, offset + editableTextParentData.offset);
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      getBaseline: ChildLayoutHelper.getDryBaseline,
+    );
+  }
+
+  Size _computeSize({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    required ChildBaselineGetter getBaseline,
+  }) {
+    double width = constraints.minWidth;
+    double height = constraints.minHeight;
+
+    final RenderBox editableText = _editableTextChild;
+    final Size editableTextSize = layoutChild(editableText, constraints);
+    final double editableTextBaselineValue = getBaseline(
+      editableText,
+      constraints,
+      editableTextBaseline,
+    )!;
+    final double editableTextDescent = editableTextSize.height - editableTextBaselineValue;
+
+    Size? placeholderSize;
+    double? placeholderBaselineValue;
+    final RenderBox? placeholder = _placeholderChild;
+    if (placeholder != null) {
+      placeholderSize = layoutChild(placeholder, constraints);
+      width = math.max(width, placeholderSize.width);
+      placeholderBaselineValue = getBaseline(placeholder, constraints, placeholderBaseline);
+      final double placeholderDescent = placeholderSize.height - placeholderBaselineValue!;
+      // The size is the sum of the placeholder's max ascent and descent and the
+      // editable text's max ascent and descent.
+      final double maxExtentBaseline =
+          math.max(editableTextBaselineValue, placeholderBaselineValue) +
+          math.max(editableTextDescent, placeholderDescent);
+      height = math.max(height, maxExtentBaseline);
+    }
+
+    height = math.max(height, editableTextSize.height);
+    width = math.max(width, editableTextSize.width);
+    final Size size = Size(width, height);
+    assert(size.isFinite);
+    return constraints.constrain(size);
   }
 }

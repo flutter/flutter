@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class ActionChipTemplate extends TokenTemplate {
-  const ActionChipTemplate(super.blockName, super.fileName, super.tokens, {
+  const ActionChipTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   static const String tokenGroup = 'md.comp.assist-chip';
@@ -15,7 +18,8 @@ class ActionChipTemplate extends TokenTemplate {
   static const String elevatedVariant = '.elevated';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled, this._chipVariant)
     : super(

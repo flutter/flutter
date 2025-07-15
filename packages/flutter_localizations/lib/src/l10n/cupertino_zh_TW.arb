@@ -1,4 +1,6 @@
 {
+  "cancelButtonLabel": "取消",
+  "backButtonLabel": "返回",
   "clearButtonLabel": "清除",
   "lookUpButtonLabel": "查詢",
   "searchWebButtonLabel": "搜尋",
@@ -16,7 +18,7 @@
   "anteMeridiemAbbreviation": "上午",
   "postMeridiemAbbreviation": "下午",
   "todayLabel": "今天",
-  "alertDialogLabel": "快訊",
+  "alertDialogLabel": "警告",
   "timerPickerHourLabelOne": "小時",
   "timerPickerHourLabelOther": "小時",
   "timerPickerMinuteLabelOne": "分",

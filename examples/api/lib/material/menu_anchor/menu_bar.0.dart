@@ -15,7 +15,10 @@ void main() => runApp(const MenuBarApp());
 /// menus could be done.
 class MenuEntry {
   const MenuEntry({required this.label, this.shortcut, this.onPressed, this.menuChildren})
-      : assert(menuChildren == null || onPressed == null, 'onPressed is ignored if menuChildren are provided');
+    : assert(
+        menuChildren == null || onPressed == null,
+        'onPressed is ignored if menuChildren are provided',
+      );
   final String label;
 
   final MenuSerializableShortcut? shortcut;
@@ -56,10 +59,7 @@ class MenuEntry {
 }
 
 class MyMenuBar extends StatefulWidget {
-  const MyMenuBar({
-    super.key,
-    required this.message,
-  });
+  const MyMenuBar({super.key, required this.message});
 
   final String message;
 
@@ -103,13 +103,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
       children: <Widget>[
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: MenuBar(
-                children: MenuEntry.build(_getMenus()),
-              ),
-            ),
-          ],
+          children: <Widget>[Expanded(child: MenuBar(children: MenuEntry.build(_getMenus())))],
         ),
         Expanded(
           child: Container(
@@ -230,7 +224,9 @@ class MenuBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: SafeArea(child: MyMenuBar(message: kMessage))),
+      home: Scaffold(
+        body: SafeArea(child: MyMenuBar(message: kMessage)),
+      ),
     );
   }
 }

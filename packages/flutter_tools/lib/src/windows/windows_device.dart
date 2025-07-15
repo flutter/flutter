@@ -25,20 +25,20 @@ class WindowsDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
-      super(
-      'windows',
-      platformType: PlatformType.windows,
-      ephemeral: false,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-  );
+       super(
+         'windows',
+         platformType: PlatformType.windows,
+         ephemeral: false,
+         processManager: processManager,
+         logger: logger,
+         fileSystem: fileSystem,
+         operatingSystemUtils: operatingSystemUtils,
+       );
 
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'Windows';
@@ -84,11 +84,11 @@ class WindowsDevices extends PollingDeviceDiscovery {
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
   }) : _fileSystem = fileSystem,
-      _logger = logger,
-      _processManager = processManager,
-      _operatingSystemUtils = operatingSystemUtils,
-      _windowsWorkflow = windowsWorkflow,
-      super('windows devices');
+       _logger = logger,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
+       _windowsWorkflow = windowsWorkflow,
+       super('windows devices');
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -103,7 +103,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

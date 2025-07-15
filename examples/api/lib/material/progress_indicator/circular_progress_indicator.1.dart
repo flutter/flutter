@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CircularProgressIndicator].
 
-void main() => runApp(const ProgressIndicatorApp());
+void main() => runApp(const ProgressIndicatorExampleApp());
 
-class ProgressIndicatorApp extends StatelessWidget {
-  const ProgressIndicatorApp({super.key});
+class ProgressIndicatorExampleApp extends StatelessWidget {
+  const ProgressIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
+      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4)),
       home: const ProgressIndicatorExample(),
     );
   }
@@ -27,20 +27,22 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
+    with TickerProviderStateMixin {
   late AnimationController controller;
   bool determinate = false;
 
   @override
   void initState() {
-    controller = AnimationController(
-      /// [AnimationController]s can be created with `vsync: this` because of
-      /// [TickerProviderStateMixin].
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..addListener(() {
-        setState(() {});
-      });
+    controller =
+        AnimationController(
+          /// [AnimationController]s can be created with `vsync: this` because of
+          /// [TickerProviderStateMixin].
+          vsync: this,
+          duration: const Duration(seconds: 2),
+        )..addListener(() {
+          setState(() {});
+        });
     controller.repeat(reverse: true);
     super.initState();
   }
@@ -57,25 +59,18 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          spacing: 16.0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'Circular progress indicator',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 30),
+            Text('Circular progress indicator', style: Theme.of(context).textTheme.titleLarge),
             CircularProgressIndicator(
               value: controller.value,
               semanticsLabel: 'Circular progress indicator',
             ),
-            const SizedBox(height: 10),
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(
-                    'determinate Mode',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
+                  child: Text('determinate Mode', style: Theme.of(context).textTheme.titleSmall),
                 ),
                 Switch(
                   value: determinate,

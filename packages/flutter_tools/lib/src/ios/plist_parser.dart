@@ -25,20 +25,21 @@ class PlistParser {
   final ProcessUtils _processUtils;
 
   // info.pList keys
-  static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
-  static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
-  static const String kCFBundleExecutableKey = 'CFBundleExecutable';
-  static const String kCFBundleVersionKey = 'CFBundleVersion';
-  static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
-  static const String kCFBundleNameKey = 'CFBundleName';
-  static const String kFLTEnableImpellerKey = 'FLTEnableImpeller';
-  static const String kMinimumOSVersionKey = 'MinimumOSVersion';
-  static const String kNSPrincipalClassKey = 'NSPrincipalClass';
+  static const kCFBundleIdentifierKey = 'CFBundleIdentifier';
+  static const kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+  static const kCFBundleExecutableKey = 'CFBundleExecutable';
+  static const kCFBundleVersionKey = 'CFBundleVersion';
+  static const kCFBundleDisplayNameKey = 'CFBundleDisplayName';
+  static const kCFBundleNameKey = 'CFBundleName';
+  static const kFLTEnableImpellerKey = 'FLTEnableImpeller';
+  static const kFLTEnableFlutterGpuKey = 'FLTEnableFlutterGpu';
+  static const kMinimumOSVersionKey = 'MinimumOSVersion';
+  static const kNSPrincipalClassKey = 'NSPrincipalClass';
 
   // entitlement file keys
-  static const String kAssociatedDomainsKey = 'com.apple.developer.associated-domains';
+  static const kAssociatedDomainsKey = 'com.apple.developer.associated-domains';
 
-  static const String _plutilExecutable = '/usr/bin/plutil';
+  static const _plutilExecutable = '/usr/bin/plutil';
 
   /// Returns the content, converted to XML, of the plist file located at
   /// [plistFilePath].
@@ -49,14 +50,9 @@ class PlistParser {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
-    final List<String> args = <String>[
-      _plutilExecutable, '-convert', 'xml1', '-o', '-', plistFilePath,
-    ];
+    final args = <String>[_plutilExecutable, '-convert', 'xml1', '-o', '-', plistFilePath];
     try {
-      final String xmlContent = _processUtils.runSync(
-        args,
-        throwOnError: true,
-      ).stdout.trim();
+      final String xmlContent = _processUtils.runSync(args, throwOnError: true).stdout.trim();
       return xmlContent;
     } on ProcessException catch (error) {
       _logger.printError('$error');
@@ -73,19 +69,9 @@ class PlistParser {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
-    final List<String> args = <String>[
-      _plutilExecutable,
-      '-convert',
-      'json',
-      '-o',
-      '-',
-      filePath,
-    ];
+    final args = <String>[_plutilExecutable, '-convert', 'json', '-o', '-', filePath];
     try {
-      final String jsonContent = _processUtils.runSync(
-        args,
-        throwOnError: true,
-      ).stdout.trim();
+      final String jsonContent = _processUtils.runSync(args, throwOnError: true).stdout.trim();
       return jsonContent;
     } on ProcessException catch (error) {
       _logger.printError('$error');
@@ -98,25 +84,18 @@ class PlistParser {
   /// If the value is null, then the key will be removed.
   ///
   /// Returns true if successful.
-  bool replaceKey(String plistFilePath, {required String key, String? value }) {
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
     final List<String> args;
     if (value == null) {
-      args = <String>[
-        _plutilExecutable, '-remove', key, plistFilePath,
-      ];
+      args = <String>[_plutilExecutable, '-remove', key, plistFilePath];
     } else {
-      args = <String>[
-        _plutilExecutable, '-replace', key, '-string', value, plistFilePath,
-      ];
+      args = <String>[_plutilExecutable, '-replace', key, '-string', value, plistFilePath];
     }
     try {
-      _processUtils.runSync(
-        args,
-        throwOnError: true,
-      );
+      _processUtils.runSync(args, throwOnError: true);
     } on ProcessException catch (error) {
       _logger.printError('$error');
       return false;
@@ -145,7 +124,7 @@ class PlistParser {
   }
 
   Map<String, Object> _parseXml(String xmlContent) {
-    final XmlDocument document = XmlDocument.parse(xmlContent);
+    final document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
     final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
     return _parseXmlDict(dictObject);
@@ -153,7 +132,7 @@ class PlistParser {
 
   Map<String, Object> _parseXmlDict(XmlElement node) {
     String? lastKey;
-    final Map<String, Object> result = <String, Object>{};
+    final result = <String, Object>{};
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {
@@ -169,20 +148,25 @@ class PlistParser {
     return result;
   }
 
-  static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
+  static final _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
   Object? _parseXmlNode(XmlElement node) {
     return switch (node.name.local) {
-      'string'  => node.innerText,
-      'real'    => double.parse(node.innerText),
+      'string' => node.innerText,
+      'real' => double.parse(node.innerText),
       'integer' => int.parse(node.innerText),
-      'true'    => true,
-      'false'   => false,
-      'date'    => DateTime.parse(node.innerText),
-      'data'    => base64.decode(node.innerText.replaceAll(_nonBase64Pattern, '')),
-      'array'   => node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList(),
-      'dict'    => _parseXmlDict(node),
-      _         => null,
+      'true' => true,
+      'false' => false,
+      'date' => DateTime.parse(node.innerText),
+      'data' => base64.decode(node.innerText.replaceAll(_nonBase64Pattern, '')),
+      'array' =>
+        node.children
+            .whereType<XmlElement>()
+            .map<Object?>(_parseXmlNode)
+            .whereType<Object>()
+            .toList(),
+      'dict' => _parseXmlDict(node),
+      _ => null,
     };
   }
 

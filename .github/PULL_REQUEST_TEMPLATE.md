@@ -1,3 +1,9 @@
+<!--
+Thanks for filing a pull request!
+Reviewers are typically assigned within a week of filing a request.
+To learn more about code review, see our documentation on Tree Hygiene: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md
+-->
+
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
 *List which issues are fixed by this PR. You must list at least one issue. An issue is not required if the PR fixes something trivial like a typo.*

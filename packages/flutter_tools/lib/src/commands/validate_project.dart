@@ -31,12 +31,14 @@ class ValidateProject {
   final ProcessManager processManager;
 
   Future<FlutterCommandResult> run() async {
-    final Directory workingDirectory = userPath.isEmpty ? fileSystem.currentDirectory : fileSystem.directory(userPath);
+    final Directory workingDirectory = userPath.isEmpty
+        ? fileSystem.currentDirectory
+        : fileSystem.directory(userPath);
 
-    final FlutterProject project =  FlutterProject.fromDirectory(workingDirectory);
-    final Map<ProjectValidator, Future<List<ProjectValidatorResult>>> results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
+    final FlutterProject project = FlutterProject.fromDirectory(workingDirectory);
+    final results = <ProjectValidator, Future<List<ProjectValidatorResult>>>{};
 
-    bool hasCrash = false;
+    var hasCrash = false;
     for (final ProjectValidator validator in allProjectValidators) {
       if (validator.machineOutput != machine) {
         continue;
@@ -48,30 +50,30 @@ class ValidateProject {
               (List<ProjectValidatorResult> results) => results,
               onError: (Object exception, StackTrace trace) {
                 hasCrash = true;
-                return <ProjectValidatorResult>[
-                  ProjectValidatorResult.crash(exception, trace),
-                ];
+                return <ProjectValidatorResult>[ProjectValidatorResult.crash(exception, trace)];
               },
             );
       }
     }
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     if (machine) {
       // Print properties
       buffer.write('{\n');
       for (final Future<List<ProjectValidatorResult>> resultListFuture in results.values) {
         final List<ProjectValidatorResult> resultList = await resultListFuture;
-        int count = 0;
-        for (final ProjectValidatorResult result in resultList) {
+        var count = 0;
+        for (final result in resultList) {
           count++;
-          buffer.write('  "${result.name}": ${result.value}${count < resultList.length ? ',' : ''}\n');
+          buffer.write(
+            '  "${result.name}": ${result.value}${count < resultList.length ? ',' : ''}\n',
+          );
         }
       }
       buffer.write('}');
       logger.printStatus(buffer.toString());
     } else {
-      final List<String> resultsString = <String>[];
+      final resultsString = <String>[];
       for (final ProjectValidator validator in results.keys) {
         if (results[validator] != null) {
           resultsString.add(validator.title);
@@ -88,8 +90,11 @@ class ValidateProject {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-
-  void addResultString(final String title, final List<ProjectValidatorResult>? results, final List<String> resultsString) {
+  void addResultString(
+    final String title,
+    final List<ProjectValidatorResult>? results,
+    final List<String> resultsString,
+  ) {
     if (results != null) {
       for (final ProjectValidatorResult result in results) {
         resultsString.add(getStringResult(result));
@@ -100,8 +105,8 @@ class ValidateProject {
   String getStringResult(ProjectValidatorResult result) {
     final String icon = switch (result.status) {
       StatusProjectValidator.warning => '[!]',
-      StatusProjectValidator.error   => '[✗]',
-      StatusProjectValidator.crash   => '[☠]',
+      StatusProjectValidator.error => '[✗]',
+      StatusProjectValidator.crash => '[☠]',
       StatusProjectValidator.info || StatusProjectValidator.success => '[✓]',
     };
     return '$icon $result';

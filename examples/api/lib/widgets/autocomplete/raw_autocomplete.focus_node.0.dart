@@ -13,17 +13,11 @@ class AutocompleteExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RawAutocompleteSplit(),
-    );
+    return const MaterialApp(home: RawAutocompleteSplit());
   }
 }
 
-const List<String> _options = <String>[
-  'aardvark',
-  'bobcat',
-  'chameleon',
-];
+const List<String> _options = <String>['aardvark', 'bobcat', 'chameleon'];
 
 class RawAutocompleteSplit extends StatefulWidget {
   const RawAutocompleteSplit({super.key});
@@ -45,9 +39,7 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
         title: TextFormField(
           controller: _textEditingController,
           focusNode: _focusNode,
-          decoration: const InputDecoration(
-            hintText: 'Split RawAutocomplete App',
-          ),
+          decoration: const InputDecoration(hintText: 'Split RawAutocomplete App'),
           onFieldSubmitted: (String value) {
             RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
           },
@@ -64,27 +56,28 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
               return option.contains(textEditingValue.text.toLowerCase());
             }).toList();
           },
-          optionsViewBuilder: (
-            BuildContext context,
-            AutocompleteOnSelected<String> onSelected,
-            Iterable<String> options,
-          ) {
-            return Material(
-              elevation: 4.0,
-              child: ListView(
-                children: options
-                    .map((String option) => GestureDetector(
-                          onTap: () {
-                            onSelected(option);
-                          },
-                          child: ListTile(
-                            title: Text(option),
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                return Material(
+                  elevation: 4.0,
+                  child: ListView(
+                    children: options
+                        .map(
+                          (String option) => GestureDetector(
+                            onTap: () {
+                              onSelected(option);
+                            },
+                            child: ListTile(title: Text(option)),
                           ),
-                        ))
-                    .toList(),
-              ),
-            );
-          },
+                        )
+                        .toList(),
+                  ),
+                );
+              },
         ),
       ),
     );

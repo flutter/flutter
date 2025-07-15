@@ -57,9 +57,7 @@ class AlertDialogExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('CupertinoAlertDialog Sample'),
-      ),
+      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoAlertDialog Sample')),
       child: Center(
         child: CupertinoButton(
           onPressed: () => _showAlertDialog(context),

@@ -8,22 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    super.key,
-  });
+  const PlatformViewApp({super.key});
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
 }
 
 class PlatformViewAppState extends State<PlatformViewApp> {
-
   AdWidget _getBannerWidget() {
     // Test IDs from Admob:
     // https://developers.google.com/admob/ios/test-ads
@@ -44,7 +39,6 @@ class PlatformViewAppState extends State<PlatformViewApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light(),
       title: 'Advanced Layout',
       home: Scaffold(
         appBar: AppBar(title: const Text('Platform View Ad Banners')),
@@ -53,12 +47,12 @@ class PlatformViewAppState extends State<PlatformViewApp> {
           itemCount: 250,
           itemBuilder: (BuildContext context, int index) {
             return index.isEven
-              // Use 320x50 Admob standard banner size.
-              ? SizedBox(width: 320, height: 50, child: _getBannerWidget())
-              // Adjust the height to control number of platform views on screen.
-              // TODO(hellohuanlin): Having more than 5 banners on screen causes an unknown crash.
-              // See: https://github.com/flutter/flutter/issues/144339
-              : const SizedBox(height: 150, child: ColoredBox(color: Colors.yellow));
+                // Use 320x50 Admob standard banner size.
+                ? SizedBox(width: 320, height: 50, child: _getBannerWidget())
+                // Adjust the height to control number of platform views on screen.
+                // TODO(hellohuanlin): Having more than 5 banners on screen causes an unknown crash.
+                // See: https://github.com/flutter/flutter/issues/144339
+                : const SizedBox(height: 150, child: ColoredBox(color: Colors.yellow));
           },
         ),
       ),

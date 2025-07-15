@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+@Tags(<String>['flutter-test-driver'])
+library;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -14,7 +15,7 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 Future<int> getFreePort() async {
-  int port = 0;
+  var port = 0;
   final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   port = serverSocket.port;
   await serverSocket.close();
@@ -22,7 +23,7 @@ Future<int> getFreePort() async {
 }
 
 void main() {
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late Directory tempDir;
 
   setUp(() async {
@@ -37,7 +38,7 @@ void main() {
   group('DDS in flutter run', () {
     late FlutterRunTestDriver flutterRun, flutterAttach;
     setUp(() {
-      flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
+      flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ');
       flutterAttach = FlutterRunTestDriver(
         tempDir,
         logPrefix: 'ATTACH  ',
@@ -71,11 +72,7 @@ void main() {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(flutterRun.vmServicePort!);
       await flutterAttach.quit();
-      flutterAttach = FlutterRunTestDriver(
-        tempDir,
-        logPrefix: 'ATTACH-2',
-        spawnDdsInstance: false,
-      );
+      flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2', spawnDdsInstance: false);
       await flutterAttach.attach(flutterRun.vmServicePort!);
       await flutterAttach.hotReload();
     });
@@ -100,8 +97,10 @@ void main() {
         matches: isNotEmpty,
       );
 
-      final Response response = await flutterRun.callServiceExtension('ext.flutter.connectedVmServiceUri');
-      final String vmServiceUri = response.json!['value'] as String;
+      final Response response = await flutterRun.callServiceExtension(
+        'ext.flutter.connectedVmServiceUri',
+      );
+      final vmServiceUri = response.json!['value'] as String;
 
       // Attach with a different DevTools server address.
       await flutterAttach.attach(
@@ -126,15 +125,8 @@ void main() {
   group('DDS in flutter attach', () {
     late FlutterRunTestDriver flutterRun, flutterAttach;
     setUp(() {
-      flutterRun = FlutterRunTestDriver(
-        tempDir,
-        logPrefix: '   RUN  ',
-        spawnDdsInstance: false,
-      );
-      flutterAttach = FlutterRunTestDriver(
-        tempDir,
-        logPrefix: 'ATTACH  ',
-      );
+      flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ', spawnDdsInstance: false);
+      flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH  ');
     });
 
     tearDown(() async {
@@ -148,73 +140,15 @@ void main() {
       await flutterRun.run(withDebugger: true);
       await flutterAttach.attach(
         flutterRun.vmServicePort!,
-        additionalCommandArgs: <String>[
-          '--dds-port=$ddsPort',
-        ],
+        additionalCommandArgs: <String>['--dds-port=$ddsPort'],
       );
 
-      final Response response = await flutterAttach.callServiceExtension('ext.flutter.connectedVmServiceUri');
-      final String vmServiceUriString = response.json!['value'] as String;
+      final Response response = await flutterAttach.callServiceExtension(
+        'ext.flutter.connectedVmServiceUri',
+      );
+      final vmServiceUriString = response.json!['value'] as String;
       final Uri vmServiceUri = Uri.parse(vmServiceUriString);
       expect(vmServiceUri.port, equals(ddsPort));
-    });
-  });
-
-  group('--serve-observatory', () {
-    late FlutterRunTestDriver flutterRun, flutterAttach;
-
-    setUp(() async {
-      flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
-      flutterAttach = FlutterRunTestDriver(
-        tempDir,
-        logPrefix: 'ATTACH  ',
-        // Only one DDS instance can be connected to the VM service at a time.
-        // DDS can also only initialize if the VM service doesn't have any existing
-        // clients, so we'll just let _flutterRun be responsible for spawning DDS.
-        spawnDdsInstance: false,
-      );
-    });
-
-    tearDown(() async {
-      await flutterAttach.detach();
-      await flutterRun.stop();
-    });
-
-    Future<bool> isObservatoryAvailable() async {
-      final HttpClient client = HttpClient();
-      final Uri vmServiceUri = Uri(
-        scheme: 'http',
-        host: flutterRun.vmServiceWsUri!.host,
-        port: flutterRun.vmServicePort,
-      );
-
-      final HttpClientRequest request = await client.getUrl(vmServiceUri);
-      final HttpClientResponse response = await request.close();
-      final String content = await response.transform(utf8.decoder).join();
-      return content.contains('Dart VM Observatory');
-    }
-
-    testWithoutContext('enables Observatory on run', () async {
-        await flutterRun.run(
-          withDebugger: true,
-          serveObservatory: true,
-        );
-        expect(await isObservatoryAvailable(), true);
-    });
-
-    testWithoutContext('enables Observatory on attach', () async {
-      await flutterRun.run(withDebugger: true);
-      // Bail out if Observatory is still served by default in the VM.
-      // TODO(bkonyi): replace this with the following once Observatory is disabled in the VM:
-      // expect(await isObservatoryAvailable(), isFalse);
-      if (await isObservatoryAvailable()) {
-        return;
-      }
-      await flutterAttach.attach(
-        flutterRun.vmServicePort!,
-        serveObservatory: true,
-      );
-      expect(await isObservatoryAvailable(), true);
     });
   });
 }

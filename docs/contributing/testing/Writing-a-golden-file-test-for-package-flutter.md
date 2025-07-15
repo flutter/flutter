@@ -134,8 +134,8 @@ not running on some PRs (and build breakages as a result).
 > repository (such as `flutter/engine`) the specifics will be different; consult
 > relevant documentation and/or team members about the process. Examples:
 >
-> - [`engine > testing > skia_gold_client > README.md`](https://github.com/flutter/engine/blob/main/testing/skia_gold_client/README.md)
-> - [`engine > impeller > golden_tests > README.md`](https://github.com/flutter/engine/blob/main/impeller/golden_tests/README.md)
+> - [`engine > testing > skia_gold_client > README.md`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/testing/skia_gold_client/README.md)
+> - [`engine > impeller > golden_tests > README.md`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/golden_tests/README.md)
 
 Write your test as a normal test, using `testWidgets` and `await tester.pumpWidget` and so on.
 

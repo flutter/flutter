@@ -42,12 +42,16 @@ class CardExample extends StatelessWidget {
               children: <Widget>[
                 TextButton(
                   child: const Text('BUY TICKETS'),
-                  onPressed: () {/* ... */},
+                  onPressed: () {
+                    /* ... */
+                  },
                 ),
                 const SizedBox(width: 8),
                 TextButton(
                   child: const Text('LISTEN'),
-                  onPressed: () {/* ... */},
+                  onPressed: () {
+                    /* ... */
+                  },
                 ),
                 const SizedBox(width: 8),
               ],

@@ -7,9 +7,9 @@ import '../base/template.dart';
 import '../base/version.dart';
 
 /// Swift toolchain version included with Xcode 15.0.
-const String minimumSwiftToolchainVersion = '5.9';
+const minimumSwiftToolchainVersion = '5.9';
 
-const String _swiftPackageTemplate = '''
+const _swiftPackageTemplate = '''
 // swift-tools-version: {{swiftToolsVersion}}
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -37,14 +37,14 @@ let package = Package(
 )
 ''';
 
-const String _swiftPackageSourceTemplate = '''
+const _swiftPackageSourceTemplate = '''
 //
 //  Generated file. Do not edit.
 //
 ''';
 
-const String _singleIndent = '    ';
-const String _doubleIndent = '$_singleIndent$_singleIndent';
+const _singleIndent = '    ';
+const _doubleIndent = '$_singleIndent$_singleIndent';
 
 /// A Swift Package is reusable code that can be shared across projects and
 /// with other developers in iOS and macOS applications. A Swift Package
@@ -62,13 +62,13 @@ class SwiftPackage {
     required List<SwiftPackagePackageDependency> dependencies,
     required List<SwiftPackageTarget> targets,
     required TemplateRenderer templateRenderer,
-  })  : _manifest = manifest,
-        _name = name,
-        _platforms = platforms,
-        _products = products,
-        _dependencies = dependencies,
-        _targets = targets,
-        _templateRenderer = templateRenderer;
+  }) : _manifest = manifest,
+       _name = name,
+       _platforms = platforms,
+       _products = products,
+       _dependencies = dependencies,
+       _targets = targets,
+       _templateRenderer = templateRenderer;
 
   /// [File] for Package.swift.
   final File _manifest;
@@ -91,17 +91,15 @@ class SwiftPackage {
   final TemplateRenderer _templateRenderer;
 
   /// Context for the [_swiftPackageTemplate] template.
-  Map<String, Object> get _templateContext {
-    return <String, Object>{
-      'swiftToolsVersion': minimumSwiftToolchainVersion,
-      'packageName': _name,
-      // Supported platforms can't be empty, so only include if not null.
-      'platforms': _formatPlatforms() ?? false,
-      'products': _formatProducts(),
-      'dependencies': _formatDependencies(),
-      'targets': _formatTargets(),
-    };
-  }
+  Map<String, Object> get _templateContext => <String, Object>{
+    'swiftToolsVersion': minimumSwiftToolchainVersion,
+    'packageName': _name,
+    // Supported platforms can't be empty, so only include if not null.
+    'platforms': _formatPlatforms() ?? false,
+    'products': _formatProducts(),
+    'dependencies': _formatDependencies(),
+    'targets': _formatTargets(),
+  };
 
   /// Create a Package.swift using settings from [_templateContext].
   void createSwiftPackage() {
@@ -116,9 +114,7 @@ class SwiftPackage {
           .childDirectory('Sources')
           .childDirectory(target.name);
       if (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty) {
-        final File requiredSwiftFile = targetDirectory.childFile(
-          '${target.name}.swift',
-        );
+        final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
         requiredSwiftFile.createSync(recursive: true);
         requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);
       }
@@ -166,8 +162,9 @@ class SwiftPackage {
     if (_targets.isEmpty) {
       return '';
     }
-    final List<String> targetList =
-        _targets.map((SwiftPackageTarget target) => target.format()).toList();
+    final List<String> targetList = _targets
+        .map((SwiftPackageTarget target) => target.format())
+        .toList();
     return targetList.join(',\n$_doubleIndent');
   }
 }
@@ -188,18 +185,15 @@ enum SwiftPackagePlatform {
 /// Representation of SupportedPlatform from
 /// https://developer.apple.com/documentation/packagedescription/supportedplatform.
 class SwiftPackageSupportedPlatform {
-  SwiftPackageSupportedPlatform({
-    required this.platform,
-    required this.version,
-  });
+  SwiftPackageSupportedPlatform({required this.platform, required this.version});
 
   final SwiftPackagePlatform platform;
   final Version version;
 
   String format() {
     // platforms: [
-    //     .macOS("10.14"),
-    //     .iOS("12.0"),
+    //     .macOS("10.15"),
+    //     .iOS("13.0"),
     // ],
     return '${platform.name}("$version")';
   }
@@ -224,11 +218,7 @@ enum SwiftPackageLibraryType {
 /// Representation of Product from
 /// https://developer.apple.com/documentation/packagedescription/product.
 class SwiftPackageProduct {
-  SwiftPackageProduct({
-    required this.name,
-    required this.targets,
-    this.libraryType,
-  });
+  SwiftPackageProduct({required this.name, required this.targets, this.libraryType});
 
   final String name;
   final SwiftPackageLibraryType? libraryType;
@@ -239,13 +229,12 @@ class SwiftPackageProduct {
     //     .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"]),
     //     .library(name: "FlutterDependenciesPackage", type: .dynamic, targets: ["FlutterDependenciesPackage"]),
     // ],
-    String targetsString = '';
+    var targetsString = '';
     if (targets.isNotEmpty) {
-      final List<String> quotedTargets =
-          targets.map((String target) => '"$target"').toList();
+      final List<String> quotedTargets = targets.map((String target) => '"$target"').toList();
       targetsString = ', targets: [${quotedTargets.join(', ')}]';
     }
-    String libraryTypeString = '';
+    var libraryTypeString = '';
     if (libraryType != null) {
       libraryTypeString = ', type: ${libraryType!.name}';
     }
@@ -258,10 +247,7 @@ class SwiftPackageProduct {
 /// Representation of Package.Dependency from
 /// https://developer.apple.com/documentation/packagedescription/package/dependency.
 class SwiftPackagePackageDependency {
-  SwiftPackagePackageDependency({
-    required this.name,
-    required this.path,
-  });
+  SwiftPackagePackageDependency({required this.name, required this.path});
 
   final String name;
   final String path;
@@ -293,18 +279,14 @@ enum SwiftPackageTargetType {
 /// Representation of Target from
 /// https://developer.apple.com/documentation/packagedescription/target.
 class SwiftPackageTarget {
-  SwiftPackageTarget.defaultTarget({
-    required this.name,
-    this.dependencies,
-  })  : path = null,
-        targetType = SwiftPackageTargetType.target;
+  SwiftPackageTarget.defaultTarget({required this.name, this.dependencies})
+    : path = null,
+      targetType = SwiftPackageTargetType.target;
 
-  SwiftPackageTarget.binaryTarget({
-    required this.name,
-    required String relativePath,
-  })  : path = relativePath,
-        dependencies = null,
-        targetType = SwiftPackageTargetType.binaryTarget;
+  SwiftPackageTarget.binaryTarget({required this.name, required String relativePath})
+    : path = relativePath,
+      dependencies = null,
+      targetType = SwiftPackageTargetType.binaryTarget;
 
   final String name;
   final String? path;
@@ -326,15 +308,15 @@ class SwiftPackageTarget {
     //     ),
     // ]
     const String targetIndent = _doubleIndent;
-    const String targetDetailsIndent = '$_doubleIndent$_singleIndent';
+    const targetDetailsIndent = '$_doubleIndent$_singleIndent';
 
-    final List<String> targetDetails = <String>[];
+    final targetDetails = <String>[];
 
-    final String nameString = 'name: "$name"';
+    final nameString = 'name: "$name"';
     targetDetails.add(nameString);
 
     if (path != null) {
-      final String pathString = 'path: "$path"';
+      final pathString = 'path: "$path"';
       targetDetails.add(pathString);
     }
 
@@ -342,7 +324,8 @@ class SwiftPackageTarget {
       final List<String> targetDependencies = dependencies!
           .map((SwiftPackageTargetDependency dependency) => dependency.format())
           .toList();
-      final String dependenciesString = '''
+      final dependenciesString =
+          '''
 dependencies: [
 ${targetDependencies.join(",\n")}
 $targetDetailsIndent]''';
@@ -375,16 +358,13 @@ enum SwiftPackageTargetDependencyType {
 /// Representation of Target.Dependency from
 /// https://developer.apple.com/documentation/packagedescription/target/dependency.
 class SwiftPackageTargetDependency {
-  SwiftPackageTargetDependency.product({
-    required this.name,
-    required String packageName,
-  })  : package = packageName,
-        dependencyType = SwiftPackageTargetDependencyType.product;
+  SwiftPackageTargetDependency.product({required this.name, required String packageName})
+    : package = packageName,
+      dependencyType = SwiftPackageTargetDependencyType.product;
 
-  SwiftPackageTargetDependency.target({
-    required this.name,
-  })  : package = null,
-        dependencyType = SwiftPackageTargetDependencyType.target;
+  SwiftPackageTargetDependency.target({required this.name})
+    : package = null,
+      dependencyType = SwiftPackageTargetDependencyType.target;
 
   final String name;
   final String? package;

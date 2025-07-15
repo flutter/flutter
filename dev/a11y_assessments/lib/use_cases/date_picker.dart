@@ -25,7 +25,6 @@ class _MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<_MainWidget> {
-
   String pageTitle = getUseCaseName(DatePickerUseCase());
 
   @override

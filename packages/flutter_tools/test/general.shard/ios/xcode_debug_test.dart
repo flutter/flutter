@@ -25,8 +25,8 @@ void main() {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
 
-    const String flutterRoot = '/path/to/flutter';
-    const String pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
+    const flutterRoot = '/path/to/flutter';
+    const pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
@@ -35,8 +35,8 @@ void main() {
     });
 
     group('debugApp', () {
-      const String pathToXcodeApp = '/Applications/Xcode.app';
-      const String deviceId = '0000001234';
+      const pathToXcodeApp = '/Applications/Xcode.app';
+      const deviceId = '0000001234';
 
       late Xcode xcode;
       late Directory xcodeproj;
@@ -60,185 +60,172 @@ void main() {
         );
       });
 
-      testWithoutContext('succeeds in opening and debugging with launch options, expectedConfigurationBuildDir, and verbose logging', () async {
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-              '--verbose',
-            ],
-            stdout: '''
+      testWithoutContext(
+        'succeeds in opening and debugging with launch options, expectedConfigurationBuildDir, and verbose logging',
+        () async {
+          fakeProcessManager.addCommands(<FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'check-workspace-opened',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+                '--verbose',
+              ],
+              stdout: '''
   {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
   ''',
-          ),
-          FakeCommand(
-            command: <String>[
-              'open',
-              '-a',
-              pathToXcodeApp,
-              '-g',
-              '-j',
-              '-F',
-              xcworkspace.path
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'debug',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-              '--project-name',
-              project.hostAppProjectName,
-              '--expected-configuration-build-dir',
-              '/build/ios/iphoneos',
-              '--device-id',
-              deviceId,
-              '--scheme',
-              project.scheme,
-              '--skip-building',
-              '--launch-args',
-              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
-              '--verbose',
-            ],
-            stdout: '''
+            ),
+            FakeCommand(
+              command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
+            ),
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'debug',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+                '--project-name',
+                project.hostAppProjectName,
+                '--expected-configuration-build-dir',
+                '/build/ios/iphoneos',
+                '--device-id',
+                deviceId,
+                '--scheme',
+                project.scheme,
+                '--skip-building',
+                '--launch-args',
+                r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
+                '--verbose',
+              ],
+              stdout: '''
   {"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}
   ''',
-          ),
-        ]);
+            ),
+          ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-        );
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: fakeProcessManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          );
 
-        project = XcodeDebugProject(
-          scheme: 'Runner',
-          xcodeProject: xcodeproj,
-          xcodeWorkspace: xcworkspace,
-          hostAppProjectName: 'Runner',
-          expectedConfigurationBuildDir: '/build/ios/iphoneos',
-          verboseLogging: true,
-        );
+          project = XcodeDebugProject(
+            scheme: 'Runner',
+            xcodeProject: xcodeproj,
+            xcodeWorkspace: xcworkspace,
+            hostAppProjectName: 'Runner',
+            expectedConfigurationBuildDir: '/build/ios/iphoneos',
+            verboseLogging: true,
+          );
 
-        final bool status = await xcodeDebug.debugApp(
-          project: project,
-          deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"'
-          ],
-        );
+          final bool status = await xcodeDebug.debugApp(
+            project: project,
+            deviceId: deviceId,
+            launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
+          );
 
-        expect(logger.errorText, isEmpty);
-        expect(logger.traceText, contains('Error checking if project opened in Xcode'));
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(xcodeDebug.startDebugActionProcess, isNull);
-        expect(status, true);
-      });
+          expect(logger.errorText, isEmpty);
+          expect(logger.traceText, contains('Error checking if project opened in Xcode'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(xcodeDebug.startDebugActionProcess, isNull);
+          expect(status, true);
+        },
+      );
 
-      testWithoutContext('succeeds in opening and debugging without launch options, expectedConfigurationBuildDir, and verbose logging', () async {
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
+      testWithoutContext(
+        'succeeds in opening and debugging without launch options, expectedConfigurationBuildDir, and verbose logging',
+        () async {
+          fakeProcessManager.addCommands(<FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'check-workspace-opened',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+              ],
+              stdout: '''
   {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
   ''',
-          ),
-          FakeCommand(
-            command: <String>[
-              'open',
-              '-a',
-              pathToXcodeApp,
-              '-g',
-              '-j',
-              '-F',
-              xcworkspace.path
-            ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'debug',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-              '--project-name',
-              project.hostAppProjectName,
-              '--device-id',
-              deviceId,
-              '--scheme',
-              project.scheme,
-              '--skip-building',
-              '--launch-args',
-              '[]'
-            ],
-            stdout: '''
+            ),
+            FakeCommand(
+              command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
+            ),
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'debug',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+                '--project-name',
+                project.hostAppProjectName,
+                '--device-id',
+                deviceId,
+                '--scheme',
+                project.scheme,
+                '--skip-building',
+                '--launch-args',
+                '[]',
+              ],
+              stdout: '''
   {"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}
   ''',
-          ),
-        ]);
+            ),
+          ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-        );
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: fakeProcessManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          );
 
-        final bool status = await xcodeDebug.debugApp(
-          project: project,
-          deviceId: deviceId,
-          launchArguments: <String>[],
-        );
+          final bool status = await xcodeDebug.debugApp(
+            project: project,
+            deviceId: deviceId,
+            launchArguments: <String>[],
+          );
 
-        expect(logger.errorText, isEmpty);
-        expect(logger.traceText, contains('Error checking if project opened in Xcode'));
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(xcodeDebug.startDebugActionProcess, isNull);
-        expect(status, true);
-      });
+          expect(logger.errorText, isEmpty);
+          expect(logger.traceText, contains('Error checking if project opened in Xcode'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(xcodeDebug.startDebugActionProcess, isNull);
+          expect(status, true);
+        },
+      );
 
       testWithoutContext('fails if project fails to open', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
@@ -262,31 +249,19 @@ void main() {
   ''',
           ),
           FakeCommand(
-            command: <String>[
-              'open',
+            command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
+            exception: ProcessException('open', <String>[
               '-a',
-              pathToXcodeApp,
+              '/non_existent_path',
               '-g',
               '-j',
               '-F',
-              xcworkspace.path
-            ],
-            exception: ProcessException(
-              'open',
-              <String>[
-                '-a',
-                '/non_existent_path',
-                '-g',
-                '-j',
-                '-F',
-                xcworkspace.path,
-              ],
-              'The application /non_existent_path cannot be opened for an unexpected reason',
-            ),
+              xcworkspace.path,
+            ], 'The application /non_existent_path cannot be opened for an unexpected reason'),
           ),
         ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -296,10 +271,7 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"',
-          ],
+          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
         );
 
         expect(
@@ -353,14 +325,15 @@ void main() {
               project.scheme,
               '--skip-building',
               '--launch-args',
-              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]'
+              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
             ],
             exitCode: 1,
-            stderr: "/flutter/packages/flutter_tools/bin/xcode_debug.js: execution error: Error: ReferenceError: Can't find variable: y (-2700)",
+            stderr:
+                "/flutter/packages/flutter_tools/bin/xcode_debug.js: execution error: Error: ReferenceError: Can't find variable: y (-2700)",
           ),
         ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -370,10 +343,7 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"',
-          ],
+          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
         );
 
         expect(logger.errorText, contains('Error executing osascript'));
@@ -424,7 +394,7 @@ void main() {
               project.scheme,
               '--skip-building',
               '--launch-args',
-              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]'
+              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
             ],
             stdout: '''
   {"status":false,"errorMessage":"Unable to find target device.","debugResult":null}
@@ -432,7 +402,7 @@ void main() {
           ),
         ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -442,16 +412,10 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"',
-          ],
+          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
         );
 
-        expect(
-          logger.errorText,
-          contains('Error starting debug session in Xcode'),
-        );
+        expect(logger.errorText, contains('Error starting debug session in Xcode'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
@@ -499,7 +463,7 @@ void main() {
               project.scheme,
               '--skip-building',
               '--launch-args',
-              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]'
+              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
             ],
             stdout: '''
   {"status":true,"errorMessage":null,"debugResult":null}
@@ -507,7 +471,7 @@ void main() {
           ),
         ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -517,16 +481,10 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"'
-          ],
+          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
         );
 
-        expect(
-          logger.errorText,
-          contains('Unable to get debug results from response'),
-        );
+        expect(logger.errorText, contains('Unable to get debug results from response'));
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
       });
@@ -574,7 +532,7 @@ void main() {
               project.scheme,
               '--skip-building',
               '--launch-args',
-              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]'
+              r'["--enable-dart-profiling","--trace-allowlist=\"foo,bar\""]',
             ],
             stdout: '''
   {"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"not yet started","errorMessage":null}}
@@ -582,7 +540,7 @@ void main() {
           ),
         ]);
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -592,10 +550,7 @@ void main() {
         final bool status = await xcodeDebug.debugApp(
           project: project,
           deviceId: deviceId,
-          launchArguments: <String>[
-            '--enable-dart-profiling',
-            '--trace-allowlist="foo,bar"',
-          ],
+          launchArguments: <String>['--enable-dart-profiling', '--trace-allowlist="foo,bar"'],
         );
 
         expect(logger.errorText, contains('Unexpected debug results'));
@@ -611,7 +566,7 @@ void main() {
           fileSystem: fileSystem,
           flutterRoot: flutterRoot,
         );
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -620,10 +575,7 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('not json');
 
-        expect(
-          logger.errorText,
-          contains('osascript returned non-JSON response'),
-        );
+        expect(logger.errorText, contains('osascript returned non-JSON response'));
         expect(response, isNull);
       });
 
@@ -633,7 +585,7 @@ void main() {
           fileSystem: fileSystem,
           flutterRoot: flutterRoot,
         );
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -642,10 +594,7 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('[]');
 
-        expect(
-          logger.errorText,
-          contains('osascript returned unexpected JSON response'),
-        );
+        expect(logger.errorText, contains('osascript returned unexpected JSON response'));
         expect(response, isNull);
       });
 
@@ -655,7 +604,7 @@ void main() {
           fileSystem: fileSystem,
           flutterRoot: flutterRoot,
         );
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -664,16 +613,34 @@ void main() {
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('{}');
 
-        expect(
-          logger.errorText,
-          contains('osascript returned unexpected JSON response'),
-        );
+        expect(logger.errorText, contains('osascript returned unexpected JSON response'));
         expect(response, isNull);
+      });
+
+      testWithoutContext('successfully removes any text before JSON', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse(
+          'start process_extensions{"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}',
+        );
+
+        expect(logger.errorText, isEmpty);
+        expect(response, isNotNull);
       });
     });
 
     group('exit', () {
-      const String pathToXcodeApp = '/Applications/Xcode.app';
+      const pathToXcodeApp = '/Applications/Xcode.app';
 
       late Directory projectDirectory;
       late Directory xcodeproj;
@@ -691,13 +658,13 @@ void main() {
           fileSystem: fileSystem,
           flutterRoot: flutterRoot,
         );
-        final XcodeDebugProject project = XcodeDebugProject(
+        final project = XcodeDebugProject(
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
           hostAppProjectName: 'Runner',
         );
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -749,7 +716,7 @@ void main() {
         xcodeproj.createSync(recursive: true);
         xcworkspace.createSync(recursive: true);
 
-        final XcodeDebugProject project = XcodeDebugProject(
+        final project = XcodeDebugProject(
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
@@ -757,7 +724,7 @@ void main() {
           isTemporaryProject: true,
         );
 
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -778,7 +745,7 @@ void main() {
               project.xcodeProject.path,
               '--workspace-path',
               project.xcodeWorkspace.path,
-              '--close-window'
+              '--close-window',
             ],
             stdout: '''
   {"status":true,"errorMessage":null,"debugResult":null}
@@ -807,69 +774,72 @@ void main() {
         expect(status, isTrue);
       });
 
-      testWithoutContext('prints error message when deleting temporary directory that is nonexistent', () async {
-        final Xcode xcode = setupXcode(
-          fakeProcessManager: fakeProcessManager,
-          fileSystem: fileSystem,
-          flutterRoot: flutterRoot,
-        );
-        final XcodeDebugProject project = XcodeDebugProject(
-          scheme: 'Runner',
-          xcodeProject: xcodeproj,
-          xcodeWorkspace: xcworkspace,
-          hostAppProjectName: 'Runner',
-          isTemporaryProject: true,
-        );
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-        );
+      testWithoutContext(
+        'prints error message when deleting temporary directory that is nonexistent',
+        () async {
+          final Xcode xcode = setupXcode(
+            fakeProcessManager: fakeProcessManager,
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          );
+          final project = XcodeDebugProject(
+            scheme: 'Runner',
+            xcodeProject: xcodeproj,
+            xcodeWorkspace: xcworkspace,
+            hostAppProjectName: 'Runner',
+            isTemporaryProject: true,
+          );
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: fakeProcessManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          );
 
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'stop',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-              '--close-window'
-            ],
-            stdout: '''
+          fakeProcessManager.addCommands(<FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'osascript',
+                '-l',
+                'JavaScript',
+                pathToXcodeAutomationScript,
+                'stop',
+                '--xcode-path',
+                pathToXcodeApp,
+                '--project-path',
+                project.xcodeProject.path,
+                '--workspace-path',
+                project.xcodeWorkspace.path,
+                '--close-window',
+              ],
+              stdout: '''
   {"status":true,"errorMessage":null,"debugResult":null}
   ''',
-          ),
-        ]);
+            ),
+          ]);
 
-        xcodeDebug.startDebugActionProcess = FakeProcess();
-        xcodeDebug.currentDebuggingProject = project;
+          xcodeDebug.startDebugActionProcess = FakeProcess();
+          xcodeDebug.currentDebuggingProject = project;
 
-        expect(xcodeDebug.startDebugActionProcess, isNotNull);
-        expect(xcodeDebug.currentDebuggingProject, isNotNull);
-        expect(projectDirectory.existsSync(), isFalse);
-        expect(xcodeproj.existsSync(), isFalse);
-        expect(xcworkspace.existsSync(), isFalse);
+          expect(xcodeDebug.startDebugActionProcess, isNotNull);
+          expect(xcodeDebug.currentDebuggingProject, isNotNull);
+          expect(projectDirectory.existsSync(), isFalse);
+          expect(xcodeproj.existsSync(), isFalse);
+          expect(xcworkspace.existsSync(), isFalse);
 
-        final bool status = await xcodeDebug.exit(skipDelay: true);
+          final bool status = await xcodeDebug.exit(skipDelay: true);
 
-        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
-        expect(xcodeDebug.currentDebuggingProject, isNull);
-        expect(projectDirectory.existsSync(), isFalse);
-        expect(xcodeproj.existsSync(), isFalse);
-        expect(xcworkspace.existsSync(), isFalse);
-        expect(logger.errorText, contains('Failed to delete temporary Xcode project'));
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(status, isTrue);
-      });
+          expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+          expect(xcodeDebug.currentDebuggingProject, isNull);
+          expect(projectDirectory.existsSync(), isFalse);
+          expect(xcodeproj.existsSync(), isFalse);
+          expect(xcworkspace.existsSync(), isFalse);
+          expect(logger.errorText, contains('Failed to delete temporary Xcode project'));
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(status, isTrue);
+        },
+      );
 
       testWithoutContext('kill Xcode when force exit', () async {
         final Xcode xcode = setupXcode(
@@ -877,26 +847,20 @@ void main() {
           fileSystem: fileSystem,
           flutterRoot: flutterRoot,
         );
-        final XcodeDebugProject project = XcodeDebugProject(
+        final project = XcodeDebugProject(
           scheme: 'Runner',
           xcodeProject: xcodeproj,
           xcodeWorkspace: xcworkspace,
           hostAppProjectName: 'Runner',
         );
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
-          const FakeCommand(
-            command: <String>[
-              'killall',
-              '-9',
-              'Xcode',
-            ],
-          ),
+          const FakeCommand(command: <String>['killall', '-9', 'Xcode']),
         ]);
 
         xcodeDebug.startDebugActionProcess = FakeProcess();
@@ -914,50 +878,53 @@ void main() {
         expect(exitStatus, isTrue);
       });
 
-      testWithoutContext('does not crash when deleting temporary directory that is nonexistent when force exiting', () async {
-        final Xcode xcode = setupXcode(
-          fakeProcessManager: FakeProcessManager.any(),
-          fileSystem: fileSystem,
-          flutterRoot: flutterRoot,
-        );
-        final XcodeDebugProject project = XcodeDebugProject(
-          scheme: 'Runner',
-          xcodeProject: xcodeproj,
-          xcodeWorkspace: xcworkspace,
-          hostAppProjectName: 'Runner',
-          isTemporaryProject: true,
-        );
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager:FakeProcessManager.any(),
-          xcode: xcode,
-          fileSystem: fileSystem,
-        );
+      testWithoutContext(
+        'does not crash when deleting temporary directory that is nonexistent when force exiting',
+        () async {
+          final Xcode xcode = setupXcode(
+            fakeProcessManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          );
+          final project = XcodeDebugProject(
+            scheme: 'Runner',
+            xcodeProject: xcodeproj,
+            xcodeWorkspace: xcworkspace,
+            hostAppProjectName: 'Runner',
+            isTemporaryProject: true,
+          );
+          final xcodeDebug = XcodeDebug(
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+            xcode: xcode,
+            fileSystem: fileSystem,
+          );
 
-        xcodeDebug.startDebugActionProcess = FakeProcess();
-        xcodeDebug.currentDebuggingProject = project;
+          xcodeDebug.startDebugActionProcess = FakeProcess();
+          xcodeDebug.currentDebuggingProject = project;
 
-        expect(xcodeDebug.startDebugActionProcess, isNotNull);
-        expect(xcodeDebug.currentDebuggingProject, isNotNull);
-        expect(projectDirectory.existsSync(), isFalse);
-        expect(xcodeproj.existsSync(), isFalse);
-        expect(xcworkspace.existsSync(), isFalse);
+          expect(xcodeDebug.startDebugActionProcess, isNotNull);
+          expect(xcodeDebug.currentDebuggingProject, isNotNull);
+          expect(projectDirectory.existsSync(), isFalse);
+          expect(xcodeproj.existsSync(), isFalse);
+          expect(xcworkspace.existsSync(), isFalse);
 
-        final bool status = await xcodeDebug.exit(force: true);
+          final bool status = await xcodeDebug.exit(force: true);
 
-        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
-        expect(xcodeDebug.currentDebuggingProject, isNull);
-        expect(projectDirectory.existsSync(), isFalse);
-        expect(xcodeproj.existsSync(), isFalse);
-        expect(xcworkspace.existsSync(), isFalse);
-        expect(logger.errorText, isEmpty);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(status, isTrue);
-      });
+          expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+          expect(xcodeDebug.currentDebuggingProject, isNull);
+          expect(projectDirectory.existsSync(), isFalse);
+          expect(xcodeproj.existsSync(), isFalse);
+          expect(xcworkspace.existsSync(), isFalse);
+          expect(logger.errorText, isEmpty);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          expect(status, isTrue);
+        },
+      );
     });
 
     group('stop app', () {
-      const String pathToXcodeApp = '/Applications/Xcode.app';
+      const pathToXcodeApp = '/Applications/Xcode.app';
 
       late Xcode xcode;
       late Directory xcodeproj;
@@ -981,7 +948,7 @@ void main() {
       });
 
       testWithoutContext('succeeds with all optional flags', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1003,7 +970,7 @@ void main() {
               '--workspace-path',
               project.xcodeWorkspace.path,
               '--close-window',
-              '--prompt-to-save'
+              '--prompt-to-save',
             ],
             stdout: '''
   {"status":true,"errorMessage":null,"debugResult":null}
@@ -1023,7 +990,7 @@ void main() {
       });
 
       testWithoutContext('fails if osascript output returns false status', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
@@ -1045,7 +1012,7 @@ void main() {
               '--workspace-path',
               project.xcodeWorkspace.path,
               '--close-window',
-              '--prompt-to-save'
+              '--prompt-to-save',
             ],
             stdout: '''
   {"status":false,"errorMessage":"Failed to stop app","debugResult":null}
@@ -1077,14 +1044,16 @@ void main() {
       });
 
       testWithoutContext('succeeds', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
 
-        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        final File schemeFile = fileSystem.file(
+          'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        );
         schemeFile.createSync(recursive: true);
         schemeFile.writeAsStringSync(validSchemeXml);
 
@@ -1093,44 +1062,52 @@ void main() {
       });
 
       testWithoutContext('prints error if scheme file not found', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
 
-        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        final File schemeFile = fileSystem.file(
+          'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        );
 
         xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile);
         expect(logger.errorText.contains('Failed to find'), isTrue);
       });
 
       testWithoutContext('throws error if launch action is missing debugger info', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
 
-        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        final File schemeFile = fileSystem.file(
+          'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        );
         schemeFile.createSync(recursive: true);
         schemeFile.writeAsStringSync(disabledDebugExecutableSchemeXml);
 
-        expect(() => xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile),
-            throwsToolExit(message: 'Your Xcode project is not setup to start a debugger.'));
+        expect(
+          () => xcodeDebug.ensureXcodeDebuggerLaunchAction(schemeFile),
+          throwsToolExit(message: 'Your Xcode project is not setup to start a debugger.'),
+        );
       });
 
       testWithoutContext('prints error if unable to find launch action', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
 
-        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        final File schemeFile = fileSystem.file(
+          'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        );
         schemeFile.createSync(recursive: true);
         schemeFile.writeAsStringSync('<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>');
 
@@ -1139,14 +1116,16 @@ void main() {
       });
 
       testWithoutContext('prints error if invalid xml', () async {
-        final XcodeDebug xcodeDebug = XcodeDebug(
+        final xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
         );
 
-        final File schemeFile = fileSystem.file('ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme');
+        final File schemeFile = fileSystem.file(
+          'ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+        );
         schemeFile.createSync(recursive: true);
         schemeFile.writeAsStringSync('<?xml version="1.0" encoding="UTF-8"?><Scheme>');
 
@@ -1161,7 +1140,7 @@ void main() {
     late FakeProcessManager fakeProcessManager;
     late MemoryFileSystem fileSystem;
 
-    const String flutterRoot = '/path/to/flutter';
+    const flutterRoot = '/path/to/flutter';
 
     setUp(() {
       logger = BufferLogger.test();
@@ -1176,14 +1155,16 @@ void main() {
         flutterRoot: flutterRoot,
       );
 
-      final XcodeDebug xcodeDebug = XcodeDebug(
+      final xcodeDebug = XcodeDebug(
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,
         fileSystem: globals.fs,
       );
 
-      final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_empty_xcode.');
+      final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_empty_xcode.',
+      );
 
       try {
         final XcodeDebugProject project = await xcodeDebug.createXcodeProjectWithCustomBundle(
@@ -1206,8 +1187,7 @@ void main() {
         expect(projectDirectory.childDirectory('Runner.xcworkspace').existsSync(), isTrue);
         expect(schemeFile.existsSync(), isTrue);
         expect(schemeFile.readAsStringSync(), contains('FilePath = "/path/to/bundle"'));
-
-      } catch (err) { // ignore: avoid_catches_without_on_clauses
+      } catch (err) {
         fail(err.toString());
       } finally {
         projectDirectory.deleteSync(recursive: true);
@@ -1222,14 +1202,18 @@ Xcode setupXcode({
   required String flutterRoot,
   bool xcodeSelect = true,
 }) {
-  fakeProcessManager.addCommand(const FakeCommand(
-    command: <String>['/usr/bin/xcode-select', '--print-path'],
-    stdout: '/Applications/Xcode.app/Contents/Developer',
-  ));
+  fakeProcessManager.addCommand(
+    const FakeCommand(
+      command: <String>['/usr/bin/xcode-select', '--print-path'],
+      stdout: '/Applications/Xcode.app/Contents/Developer',
+    ),
+  );
 
-  fileSystem.file('$flutterRoot/packages/flutter_tools/bin/xcode_debug.js').createSync(recursive: true);
+  fileSystem
+      .file('$flutterRoot/packages/flutter_tools/bin/xcode_debug.js')
+      .createSync(recursive: true);
 
-  final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+  final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
     processManager: FakeProcessManager.any(),
     version: Version(14, 0, 0),
   );
@@ -1243,7 +1227,7 @@ Xcode setupXcode({
 }
 
 class FakeProcess extends Fake implements Process {
-  bool killed = false;
+  var killed = false;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
@@ -1252,7 +1236,7 @@ class FakeProcess extends Fake implements Process {
   }
 }
 
-const String validSchemeXml = '''
+const validSchemeXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1510"
@@ -1295,7 +1279,7 @@ const String validSchemeXml = '''
 </Scheme>
 ''';
 
-const String disabledDebugExecutableSchemeXml = '''
+const disabledDebugExecutableSchemeXml = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1510"

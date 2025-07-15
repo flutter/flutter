@@ -265,7 +265,9 @@ void main() {
   });
 
   Offset getPaintOrigin(RenderObject render) {
-    final Vector3 transformed3 = render.getTransformTo(null).perspectiveTransform(Vector3(0.0, 0.0, 0.0));
+    final Vector3 transformed3 = render
+        .getTransformTo(null)
+        .perspectiveTransform(Vector3(0.0, 0.0, 0.0));
     return Offset(transformed3.x, transformed3.y);
   }
 
@@ -701,10 +703,7 @@ void main() {
       ),
     );
     expect(
-      const SliverGeometry(
-        scrollExtent: 100.0,
-        layoutExtent: 20.0,
-      ).toString(),
+      const SliverGeometry(scrollExtent: 100.0, layoutExtent: 20.0).toString(),
       equals(
         'SliverGeometry(scrollExtent: 100.0, hidden, layoutExtent: 20.0, maxPaintExtent: 0.0, cacheExtent: 20.0)',
       ),
@@ -715,14 +714,12 @@ void main() {
     const double height = 150.0;
 
     final RenderSliver sliver = RenderSliverToBoxAdapter(
-        child: RenderSizedBox(const Size(400.0, height)),
+      child: RenderSizedBox(const Size(400.0, height)),
     );
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      children: <RenderSliver>[
-        sliver,
-      ],
+      children: <RenderSliver>[sliver],
     );
     layout(root);
 
@@ -742,9 +739,7 @@ void main() {
       axisDirection: AxisDirection.right,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
-      children: <RenderSliver>[
-        sliver,
-      ],
+      children: <RenderSliver>[sliver],
     );
     layout(root);
 
@@ -762,9 +757,7 @@ void main() {
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      children: <RenderSliver>[
-        sliver,
-      ],
+      children: <RenderSliver>[sliver],
     );
     layout(root);
 
@@ -785,11 +778,7 @@ void main() {
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      children: <RenderSliver>[
-        sliver1,
-        sliver2,
-        sliver3,
-      ],
+      children: <RenderSliver>[sliver1, sliver2, sliver3],
     );
     layout(root);
 
@@ -811,11 +800,7 @@ void main() {
     final RenderViewport root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.fixed(100.0),
-      children: <RenderSliver>[
-        sliver1,
-        sliver2,
-        sliver3,
-      ],
+      children: <RenderSliver>[sliver1, sliver2, sliver3],
     );
     layout(root);
 
@@ -832,8 +817,7 @@ void main() {
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
       final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
-      final HitTestResult wrapped = MyHitTestResult()
-        ..publicPushTransform(transform);
+      final HitTestResult wrapped = MyHitTestResult()..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
       expect(entry1.transform, transform);
@@ -865,11 +849,16 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return true;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return true;
+            },
       );
       expect(isHit, isTrue);
       expect(mainAxisPositions.single, 0.0);
@@ -883,11 +872,16 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return false;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return false;
+            },
       );
       expect(isHit, isFalse);
       expect(mainAxisPositions.single, 10.0 - 5.0);
@@ -901,11 +895,16 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
-          mainAxisPositions.add(mainAxisPosition);
-          crossAxisPositions.add(crossAxisPosition);
-          return false;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              mainAxisPositions.add(mainAxisPosition);
+              crossAxisPositions.add(crossAxisPosition);
+              return false;
+            },
       );
       expect(isHit, isFalse);
       expect(mainAxisPositions.single, 10.0 + 5.0);
@@ -927,20 +926,22 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
-          recordedMainAxisPosition = mainAxisPosition;
-          recordedCrossAxisPosition = crossAxisPosition;
-          result.add(entry);
-          return true;
-        },
+        hitTest:
+            (
+              SliverHitTestResult result, {
+              required double mainAxisPosition,
+              required double crossAxisPosition,
+            }) {
+              recordedMainAxisPosition = mainAxisPosition;
+              recordedCrossAxisPosition = crossAxisPosition;
+              result.add(entry);
+              return true;
+            },
       );
       expect(isHit, isTrue);
       expect(recordedMainAxisPosition, 10.0 - 5.0);
       expect(recordedCrossAxisPosition, 20.0 - 6.0);
-      expect(
-        entry.transform!..translate(paintOffset.dx, paintOffset.dy),
-        Matrix4.identity(),
-      );
+      expect(entry.transform!..translate(paintOffset.dx, paintOffset.dy), Matrix4.identity());
     });
   });
 

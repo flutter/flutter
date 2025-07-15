@@ -27,14 +27,14 @@ class ComponentDemoTabData {
   final String? documentationUrl;
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ComponentDemoTabData
-        && other.tabName == tabName
-        && other.description == description
-        && other.documentationUrl == documentationUrl;
+    return other is ComponentDemoTabData &&
+        other.tabName == tabName &&
+        other.description == description &&
+        other.documentationUrl == documentationUrl;
   }
 
   @override
@@ -65,9 +65,12 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
   void _showExampleCode(BuildContext context) {
     final String? tag = widget.demos![DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
-      Navigator.push(context, MaterialPageRoute<FullScreenCodeDialog>(
-        builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag)
-      ));
+      Navigator.push(
+        context,
+        MaterialPageRoute<FullScreenCodeDialog>(
+          builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag),
+        ),
+      );
     }
   }
 
@@ -87,10 +90,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
           return SimpleDialog(
             title: const Text("Couldn't display URL:"),
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(url),
-              ),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: Text(url)),
             ],
           );
         },
@@ -128,7 +128,9 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
           ],
           bottom: TabBar(
             isScrollable: widget.isScrollable,
-            tabs: widget.demos!.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
+            tabs: widget.demos!
+                .map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName))
+                .toList(),
           ),
         ),
         body: TabBarView(
@@ -140,9 +142,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(demo.description!,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                    child: Text(demo.description!, style: Theme.of(context).textTheme.titleMedium),
                   ),
                   Expanded(child: demo.demoWidget!),
                 ],
@@ -156,7 +156,7 @@ class _TabbedComponentDemoScaffoldState extends State<TabbedComponentDemoScaffol
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  const FullScreenCodeDialog({ super.key, this.exampleCodeTag });
+  const FullScreenCodeDialog({super.key, this.exampleCodeTag});
 
   final String? exampleCodeTag;
 
@@ -165,7 +165,6 @@ class FullScreenCodeDialog extends StatefulWidget {
 }
 
 class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
-
   String? _exampleCode;
 
   @override
@@ -182,15 +181,13 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final SyntaxHighlighterStyle style = Theme.of(context).brightness == Brightness.dark
-      ? SyntaxHighlighterStyle.darkThemeStyle
-      : SyntaxHighlighterStyle.lightThemeStyle;
+    final SyntaxHighlighterStyle style = Theme.brightnessOf(context) == Brightness.dark
+        ? SyntaxHighlighterStyle.darkThemeStyle
+        : SyntaxHighlighterStyle.lightThemeStyle;
 
     Widget body;
     if (_exampleCode == null) {
-      body = const Center(
-        child: CircularProgressIndicator(),
-      );
+      body = const Center(child: CircularProgressIndicator());
     } else {
       body = SingleChildScrollView(
         child: Padding(
@@ -198,9 +195,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
           child: RichText(
             text: TextSpan(
               style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
-              children: <TextSpan>[
-                DartSyntaxHighlighter(style).format(_exampleCode),
-              ],
+              children: <TextSpan>[DartSyntaxHighlighter(style).format(_exampleCode)],
             ),
           ),
         ),
@@ -210,11 +205,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
-            Icons.clear,
-            semanticLabel: 'Close',
-          ),
-          onPressed: () { Navigator.pop(context); },
+          icon: const Icon(Icons.clear, semanticLabel: 'Close'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text('Example code'),
       ),
@@ -224,7 +218,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 }
 
 class MaterialDemoDocumentationButton extends StatelessWidget {
-  MaterialDemoDocumentationButton(String routeName, { super.key })
+  MaterialDemoDocumentationButton(String routeName, {super.key})
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
@@ -244,7 +238,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
 }
 
 class CupertinoDemoDocumentationButton extends StatelessWidget {
-  CupertinoDemoDocumentationButton(String routeName, { super.key })
+  CupertinoDemoDocumentationButton(String routeName, {super.key})
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
@@ -257,10 +251,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      child: Semantics(
-        label: 'API documentation',
-        child: const Icon(CupertinoIcons.book),
-      ),
+      child: Semantics(label: 'API documentation', child: const Icon(CupertinoIcons.book)),
       onPressed: () => launchUrl(Uri.parse(documentationUrl!), mode: LaunchMode.inAppWebView),
     );
   }

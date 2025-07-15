@@ -63,11 +63,9 @@ class FlutterInformation {
     return getFlutterInformation()['flutterRoot'] as Directory;
   }
 
-  Version getFlutterVersion() =>
-      getFlutterInformation()['frameworkVersion'] as Version;
+  Version getFlutterVersion() => getFlutterInformation()['frameworkVersion'] as Version;
 
-  Version getDartSdkVersion() =>
-      getFlutterInformation()['dartSdkVersion'] as Version;
+  Version getDartSdkVersion() => getFlutterInformation()['dartSdkVersion'] as Version;
 
   Map<String, dynamic>? _cachedFlutterInformation;
 
@@ -93,20 +91,25 @@ class FlutterInformation {
       }
       io.ProcessResult result;
       try {
-        result = processManager.runSync(
-            <String>[flutterCommand, '--version', '--machine'],
-            stdoutEncoding: utf8);
+        result = processManager.runSync(<String>[
+          flutterCommand,
+          '--version',
+          '--machine',
+        ], stdoutEncoding: utf8);
       } on io.ProcessException catch (e) {
         throw SnippetException(
-            'Unable to determine Flutter information. Either set FLUTTER_ROOT, or place flutter command in your path.\n$e');
+          'Unable to determine Flutter information. Either set FLUTTER_ROOT, or place flutter command in your path.\n$e',
+        );
       }
       if (result.exitCode != 0) {
         throw SnippetException(
-            'Unable to determine Flutter information, because of abnormal exit to flutter command.');
+          'Unable to determine Flutter information, because of abnormal exit to flutter command.',
+        );
       }
       flutterVersionJson = (result.stdout as String).replaceAll(
-          'Waiting for another flutter command to release the startup lock...',
-          '');
+        'Waiting for another flutter command to release the startup lock...',
+        '',
+      );
     }
 
     final Map<String, dynamic> flutterVersion =
@@ -115,25 +118,25 @@ class FlutterInformation {
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {
       throw SnippetException(
-          'Flutter command output has unexpected format, unable to determine flutter root location.');
+        'Flutter command output has unexpected format, unable to determine flutter root location.',
+      );
     }
 
     final Map<String, dynamic> info = <String, dynamic>{};
-    info['flutterRoot'] =
-        filesystem.directory(flutterVersion['flutterRoot']! as String);
-    info['frameworkVersion'] =
-        Version.parse(flutterVersion['frameworkVersion'] as String);
+    info['flutterRoot'] = filesystem.directory(flutterVersion['flutterRoot']! as String);
+    info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
 
-    final RegExpMatch? dartVersionRegex =
-        RegExp(r'(?<base>[\d.]+)(?:\s+\(build (?<detail>[-.\w]+)\))?')
-            .firstMatch(flutterVersion['dartSdkVersion'] as String);
+    final RegExpMatch? dartVersionRegex = RegExp(
+      r'(?<base>[\d.]+)(?:\s+\(build (?<detail>[-.\w]+)\))?',
+    ).firstMatch(flutterVersion['dartSdkVersion'] as String);
     if (dartVersionRegex == null) {
       throw SnippetException(
-          'Flutter command output has unexpected format, unable to parse dart SDK version ${flutterVersion['dartSdkVersion']}.');
+        'Flutter command output has unexpected format, unable to parse dart SDK version ${flutterVersion['dartSdkVersion']}.',
+      );
     }
     info['dartSdkVersion'] = Version.parse(
-        dartVersionRegex.namedGroup('detail') ??
-            dartVersionRegex.namedGroup('base')!);
+      dartVersionRegex.namedGroup('detail') ?? dartVersionRegex.namedGroup('base')!,
+    );
     _cachedFlutterInformation = info;
 
     return info;
@@ -154,31 +157,28 @@ String interpolateTemplate(
       return '';
     }
     // We don't wrap some sections, because otherwise they generate invalid files.
-    final String result = <String>[
-      ...contents,
-    ].join('\n');
+    final String result = <String>[...contents].join('\n');
     final RegExp wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
-    return result.replaceAllMapped(
-        wrappingNewlines, (Match match) => match.group(1)!);
+    return result.replaceAllMapped(wrappingNewlines, (Match match) => match.group(1)!);
   }
 
   return '${addCopyright ? '{{copyright}}\n\n' : ''}$template'
       .replaceAllMapped(RegExp(r'{{([^}]+)}}'), (Match match) {
-    final String name = match[1]!;
-    final int componentIndex = injections
-        .indexWhere((SkeletonInjection injection) => injection.name == name);
-    if (metadata[name] != null && componentIndex == -1) {
-      // If the match isn't found in the injections, then just return the
-      // metadata entry.
-      return wrapSectionMarker((metadata[name]! as String).split('\n'),
-          name: name);
-    }
-    return wrapSectionMarker(
-        componentIndex >= 0
-            ? injections[componentIndex].stringContents
-            : <String>[],
-        name: name);
-  }).replaceAll(RegExp(r'\n\n+'), '\n\n');
+        final String name = match[1]!;
+        final int componentIndex = injections.indexWhere(
+          (SkeletonInjection injection) => injection.name == name,
+        );
+        if (metadata[name] != null && componentIndex == -1) {
+          // If the match isn't found in the injections, then just return the
+          // metadata entry.
+          return wrapSectionMarker((metadata[name]! as String).split('\n'), name: name);
+        }
+        return wrapSectionMarker(
+          componentIndex >= 0 ? injections[componentIndex].stringContents : <String>[],
+          name: name,
+        );
+      })
+      .replaceAll(RegExp(r'\n\n+'), '\n\n');
 }
 
 class SampleStats {
@@ -213,8 +213,7 @@ class SampleStats {
 }
 
 Iterable<CodeSample> getSamplesInElements(Iterable<SourceElement>? elements) {
-  return elements
-          ?.expand<CodeSample>((SourceElement element) => element.samples) ??
+  return elements?.expand<CodeSample>((SourceElement element) => element.samples) ??
       const <CodeSample>[];
 }
 
@@ -231,9 +230,8 @@ SampleStats getSampleStats(SourceElement element) {
   final int applications = element.applicationSampleCount;
   final String sampleCount = <String>[
     if (snippets > 0) '$snippets snippet${snippets != 1 ? 's' : ''}',
-    if (applications > 0)
-      '$applications application sample${applications != 1 ? 's' : ''}',
-    if (dartpads > 0) '$dartpads dartpad sample${dartpads != 1 ? 's' : ''}'
+    if (applications > 0) '$applications application sample${applications != 1 ? 's' : ''}',
+    if (dartpads > 0) '$dartpads dartpad sample${dartpads != 1 ? 's' : ''}',
   ].join(', ');
   final int wordCount = element.wordCount;
   final int lineCount = element.lineCount;
@@ -243,8 +241,7 @@ SampleStats getSampleStats(SourceElement element) {
     '$lineCount ${lineCount == 1 ? 'line' : 'lines'}',
     if (linkCount > 0 && element.hasSeeAlso) ', ',
     if (linkCount > 0 && !element.hasSeeAlso) ' and ',
-    if (linkCount > 0)
-      'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
+    if (linkCount > 0) 'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
     if (linkCount > 0 && element.hasSeeAlso) ', and ',
     if (linkCount == 0 && element.hasSeeAlso) 'and ',
     if (element.hasSeeAlso) 'has a "See also:" section',
@@ -264,7 +261,6 @@ SampleStats getSampleStats(SourceElement element) {
 
 /// Exit the app with a message to stderr.
 /// Can be overridden by tests to avoid exits.
-// ignore: prefer_function_declarations_over_variables
 void Function(String message) errorExit = (String message) {
   io.stderr.writeln(message);
   io.exit(1);

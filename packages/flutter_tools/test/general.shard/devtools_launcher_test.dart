@@ -22,7 +22,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher launches DevTools from the SDK and saves the URI', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
@@ -54,7 +54,7 @@ void main() {
   // TODO(bkonyi): this test can be removed when DevTools is served from DDS.
   testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
@@ -85,40 +85,43 @@ Serving DevTools at http://127.0.0.1:9100.
     expect(launcher.printDtdUri, true);
   });
 
-  testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
-    final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
-    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      artifacts: artifacts,
-      logger: logger,
-      botDetector: const FakeBotDetector(false),
-      processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartBinary',
-            'devtools',
-            '--no-launch-browser',
-            // '--print-dtd',
-          ],
-          stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
-          completer: completer,
-        ),
-      ]),
-    );
+  testWithoutContext(
+    'DevtoolsLauncher does not launch a new DevTools instance if one is already active',
+    () async {
+      final (BufferLogger logger, Artifacts artifacts) = getTestState();
+      final completer = Completer<void>();
+      final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+        artifacts: artifacts,
+        logger: logger,
+        botDetector: const FakeBotDetector(false),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'Artifact.engineDartBinary',
+              'devtools',
+              '--no-launch-browser',
+              // '--print-dtd',
+            ],
+            stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
+            completer: completer,
+          ),
+        ]),
+      );
 
-    DevToolsServerAddress? address = await launcher.serve();
-    expect(address?.host, '127.0.0.1');
-    expect(address?.port, 9100);
+      DevToolsServerAddress? address = await launcher.serve();
+      expect(address?.host, '127.0.0.1');
+      expect(address?.port, 9100);
 
-    // Call `serve` again and verify that the already-running server is returned.
-    address = await launcher.serve();
-    expect(address?.host, '127.0.0.1');
-    expect(address?.port, 9100);
-  });
+      // Call `serve` again and verify that the already-running server is returned.
+      address = await launcher.serve();
+      expect(address?.host, '127.0.0.1');
+      expect(address?.port, 9100);
+    },
+  );
 
   testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'Artifact.engineDartBinary',
@@ -138,41 +141,47 @@ Serving DevTools at http://127.0.0.1:9100.
       processManager: processManager,
     );
 
-    await launcher.launch(Uri.parse('localhost:8181/abcdefg'), additionalArguments: <String>['--profile-memory=foo']);
+    await launcher.launch(
+      Uri.parse('localhost:8181/abcdefg'),
+      additionalArguments: <String>['--profile-memory=foo'],
+    );
 
     expect(launcher.processStart, completes);
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('DevtoolsLauncher prints error if exception is thrown during launch', () async {
-    final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
-      artifacts: artifacts,
-      logger: logger,
-      botDetector: const FakeBotDetector(false),
-      processManager: FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'Artifact.engineDartBinary',
-            'devtools',
-            '--no-launch-browser',
-            // '--print-dtd',
-            '--vm-uri=http://127.0.0.1:1234/abcdefg',
-          ],
-          exception: ProcessException('pub', <String>[]),
-        ),
-      ]),
-    );
+  testWithoutContext(
+    'DevtoolsLauncher prints error if exception is thrown during launch',
+    () async {
+      final (BufferLogger logger, Artifacts artifacts) = getTestState();
+      final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+        artifacts: artifacts,
+        logger: logger,
+        botDetector: const FakeBotDetector(false),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartBinary',
+              'devtools',
+              '--no-launch-browser',
+              // '--print-dtd',
+              '--vm-uri=http://127.0.0.1:1234/abcdefg',
+            ],
+            exception: ProcessException('pub', <String>[]),
+          ),
+        ]),
+      );
 
-    await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
+      await launcher.launch(Uri.parse('http://127.0.0.1:1234/abcdefg'));
 
-    expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
-  });
+      expect(logger.errorText, contains('Failed to launch DevTools: ProcessException'));
+    },
+  );
 
   testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
-    final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
+    final completer = Completer<void>();
+    final launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(true),

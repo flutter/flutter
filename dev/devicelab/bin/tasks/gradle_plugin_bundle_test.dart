@@ -20,9 +20,7 @@ Future<void> main() async {
         section('App bundle content for task bundleRelease without explicit target platform');
 
         await inDirectory(project.rootPath, () {
-          return flutter('build', options: <String>[
-            'appbundle',
-          ]);
+          return flutter('build', options: <String>['appbundle']);
         });
 
         final String releaseBundle = path.join(
@@ -41,13 +39,15 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(releaseBundle));
       });
 
       await runProjectTest((FlutterProject project) async {
         section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
-        await project.addProductFlavors(<String> [
+        await project.addProductFlavors(<String>[
           'production',
           'staging',
           'development',
@@ -55,11 +55,7 @@ Future<void> main() async {
         ]);
         // Build the production flavor in release mode.
         await inDirectory(project.rootPath, () {
-          return flutter('build', options: <String>[
-            'appbundle',
-            '--flavor',
-            'production',
-          ]);
+          return flutter('build', options: <String>['appbundle', '--flavor', 'production']);
         });
 
         final String bundleFromGradlePath = path.join(
@@ -78,19 +74,14 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(bundleFromGradlePath));
 
         section('Build app bundle using the flutter tool - flavor: flavor_underscore');
 
-        int exitCode = await inDirectory(project.rootPath, ()  {
-          return flutter(
-            'build',
-            options: <String>[
-              'appbundle',
-              '--flavor=flavor_underscore',
-              '--verbose',
-            ],
-          );
+        int exitCode = await inDirectory(project.rootPath, () {
+          return flutter('build', options: <String>['appbundle', '--flavor=flavor_underscore']);
         });
 
         if (exitCode != 0) {
@@ -113,19 +104,14 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(flavorUnderscoreBundlePath));
 
         section('Build app bundle using the flutter tool - flavor: production');
 
         exitCode = await inDirectory(project.rootPath, () {
-          return flutter(
-            'build',
-            options: <String>[
-              'appbundle',
-              '--flavor=production',
-              '--verbose',
-            ],
-          );
+          return flutter('build', options: <String>['appbundle', '--flavor=production']);
         });
 
         if (exitCode != 0) {
@@ -148,6 +134,8 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym',
+          'BUNDLE-METADATA/com.android.tools.build.debugsymbols/armeabi-v7a/libflutter.so.sym',
         ], await getFilesInAppBundle(productionBundlePath));
       });
 
@@ -155,13 +143,7 @@ Future<void> main() async {
         section('App bundle content for task bundleRelease with target platform = android-arm');
 
         await inDirectory(project.rootPath, () {
-          return flutter(
-            'build',
-            options: <String>[
-              'appbundle',
-              '--target-platform=android-arm',
-            ],
-          );
+          return flutter('build', options: <String>['appbundle', '--target-platform=android-arm']);
         });
 
         final String releaseBundle = path.join(
@@ -190,7 +172,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

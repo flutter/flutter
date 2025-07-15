@@ -22,13 +22,10 @@ class NavigationIconView {
          label: title,
          backgroundColor: color,
        ),
-       controller = AnimationController(
-         duration: kThemeAnimationDuration,
-         vsync: vsync,
-       ) {
-    _animation = controller.drive(CurveTween(
-      curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    ));
+       controller = AnimationController(duration: kThemeAnimationDuration, vsync: vsync) {
+    _animation = controller.drive(
+      CurveTween(curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)),
+    );
   }
 
   final Widget _icon;
@@ -47,7 +44,7 @@ class NavigationIconView {
         final ThemeData theme = Theme.of(context);
         iconColor = switch (theme.brightness) {
           Brightness.light => theme.colorScheme.primary,
-          Brightness.dark  => theme.colorScheme.secondary,
+          Brightness.dark => theme.colorScheme.secondary,
         };
     }
 
@@ -61,14 +58,8 @@ class NavigationIconView {
           ),
         ),
         child: IconTheme(
-          data: IconThemeData(
-            color: iconColor,
-            size: 120.0,
-          ),
-          child: Semantics(
-            label: 'Placeholder for $_title tab',
-            child: _icon,
-          ),
+          data: IconThemeData(color: iconColor, size: 120.0),
+          child: Semantics(label: 'Placeholder for $_title tab', child: _icon),
         ),
       ),
     );
@@ -100,9 +91,7 @@ class CustomInactiveIcon extends StatelessWidget {
       margin: const EdgeInsets.all(4.0),
       width: iconTheme.size! - 8.0,
       height: iconTheme.size! - 8.0,
-      decoration: BoxDecoration(
-        border: Border.all(color: iconTheme.color!, width: 2.0),
-      ),
+      decoration: BoxDecoration(border: Border.all(color: iconTheme.color!, width: 2.0)),
     );
   }
 }
@@ -116,8 +105,7 @@ class BottomNavigationDemo extends StatefulWidget {
   State<BottomNavigationDemo> createState() => _BottomNavigationDemoState();
 }
 
-class _BottomNavigationDemoState extends State<BottomNavigationDemo>
-    with TickerProviderStateMixin {
+class _BottomNavigationDemoState extends State<BottomNavigationDemo> with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   late List<NavigationIconView> _navigationViews;
@@ -230,9 +218,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           ),
         ],
       ),
-      body: Center(
-        child: _buildTransitionsStack(),
-      ),
+      body: Center(child: _buildTransitionsStack()),
       bottomNavigationBar: botNavBar,
     );
   }

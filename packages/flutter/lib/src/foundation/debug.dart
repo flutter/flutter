@@ -12,6 +12,7 @@ library;
 import 'dart:ui' as ui show Brightness;
 
 import 'assertions.dart';
+import 'memory_allocations.dart';
 import 'platform.dart';
 import 'print.dart';
 
@@ -32,7 +33,10 @@ export 'print.dart' show DebugPrintCallback;
 ///
 /// See [the foundation library](foundation/foundation-library.html)
 /// for a complete list.
-bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
+bool debugAssertAllFoundationVarsUnset(
+  String reason, {
+  DebugPrintCallback debugPrintOverride = debugPrintThrottled,
+}) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
@@ -82,8 +86,10 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> Function() acti
     return true;
   }());
   if (instrument) {
-    final Stopwatch stopwatch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
+    // dart format off
+    final Stopwatch stopwatch = Stopwatch() ..start(); // flutter_ignore: stopwatch (see analyze.dart)
     // Ignore context: The framework does not use this function internally so it will not cause flakes.
+    // dart format on
     try {
       return await action();
     } finally {
@@ -128,3 +134,38 @@ String? activeDevToolsServerAddress;
 
 /// The uri for the connected vm service protocol.
 String? connectedVmServiceUri;
+
+/// If memory allocation tracking is enabled, dispatch Flutter object creation.
+///
+/// This method is not member of FlutterMemoryAllocations, because
+/// [FlutterMemoryAllocations] should not increase size of the Flutter application
+/// if memory allocations are disabled.
+///
+/// The [flutterLibrary] argument is the name of the Flutter library where
+/// the object is declared. For example, 'widgets' for widgets.dart.
+///
+/// Should be called only from within an assert and only inside Flutter Framework.
+///
+/// Returns true to make it easier to be wrapped into `assert`.
+bool debugMaybeDispatchCreated(String flutterLibrary, String className, Object object) {
+  if (kFlutterMemoryAllocationsEnabled) {
+    FlutterMemoryAllocations.instance.dispatchObjectCreated(
+      library: 'package:flutter/$flutterLibrary.dart',
+      className: className,
+      object: object,
+    );
+  }
+  return true;
+}
+
+/// If memory allocations tracking is enabled, dispatch object disposal.
+///
+/// Should be called only from within an assert.
+///
+/// Returns true to make it easier to be wrapped into `assert`.
+bool debugMaybeDispatchDisposed(Object object) {
+  if (kFlutterMemoryAllocationsEnabled) {
+    FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: object);
+  }
+  return true;
+}

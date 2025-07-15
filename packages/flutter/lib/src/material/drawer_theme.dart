@@ -19,7 +19,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [Drawer] widgets.
 ///
 /// Descendant widgets obtain the current [DrawerThemeData] object
-/// using `DrawerTheme.of(context)`. Instances of [DrawerThemeData] can be
+/// using [DrawerTheme.of]. Instances of [DrawerThemeData] can be
 /// customized with [DrawerThemeData.copyWith].
 ///
 /// Typically a [DrawerThemeData] is specified as part of the
@@ -145,16 +145,16 @@ class DrawerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is DrawerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.scrimColor == scrimColor
-        && other.elevation == elevation
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.shape == shape
-        && other.endShape == endShape
-        && other.width == width
-        && other.clipBehavior == clipBehavior;
+    return other is DrawerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.scrimColor == scrimColor &&
+        other.elevation == elevation &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.shape == shape &&
+        other.endShape == endShape &&
+        other.width == width &&
+        other.clipBehavior == clipBehavior;
   }
 
   @override
@@ -182,17 +182,13 @@ class DrawerThemeData with Diagnosticable {
 class DrawerTheme extends InheritedTheme {
   /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
-  const DrawerTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const DrawerTheme({super.key, required this.data, required super.child});
 
   /// Specifies the background color, scrim color, elevation, and shape for
   /// descendant [Drawer] widgets.
   final DrawerThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [DrawerThemeData] from the closest ancestor [DrawerTheme].
   ///
   /// If there is no enclosing [DrawerTheme] widget, then
   /// [ThemeData.drawerTheme] is used.

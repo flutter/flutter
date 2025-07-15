@@ -24,8 +24,8 @@ Future<PackageConfig> currentPackageConfig() async {
 // TODO(sigurdm): Only call this once per run - and read in from BuildInfo.
 File? findPackageConfigFile(Directory dir) {
   final FileSystem fileSystem = dir.fileSystem;
+  Directory candidateDir = fileSystem.directory(fileSystem.path.normalize(dir.absolute.path));
 
-  Directory candidateDir = fileSystem.directory(dir.path).absolute;
   while (true) {
     final File candidatePackageConfigFile = candidateDir
         .childDirectory('.dart_tool')
@@ -34,7 +34,7 @@ File? findPackageConfigFile(Directory dir) {
       return candidatePackageConfigFile;
     }
     final Directory parentDir = candidateDir.parent;
-    if (fileSystem.identicalSync(parentDir.path, candidateDir.path)) {
+    if (fileSystem.path.equals(parentDir.path, candidateDir.path)) {
       return null;
     }
     candidateDir = parentDir;
@@ -55,12 +55,13 @@ File findPackageConfigFileOrDefault(Directory dir) {
 ///
 /// If [throwOnError] is false, in the event of an error an empty package
 /// config is returned.
-Future<PackageConfig> loadPackageConfigWithLogging(File file, {
+Future<PackageConfig> loadPackageConfigWithLogging(
+  File file, {
   required Logger logger,
   bool throwOnError = true,
 }) async {
   final FileSystem fileSystem = file.fileSystem;
-  bool didError = false;
+  var didError = false;
   final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
     loader: (Uri uri) async {
@@ -75,8 +76,11 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
         return;
       }
       logger.printTrace(error.toString());
-      String message = '${file.path} does not exist.';
-      final String pubspecPath = fileSystem.path.absolute(fileSystem.path.dirname(file.path), 'pubspec.yaml');
+      var message = '${file.path} does not exist.';
+      final String pubspecPath = fileSystem.path.absolute(
+        fileSystem.path.dirname(file.path),
+        'pubspec.yaml',
+      );
       if (fileSystem.isFileSync(pubspecPath)) {
         message += '\nDid you run "flutter pub get" in this directory?';
       } else {
@@ -84,7 +88,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
       }
       logger.printError(message);
       didError = true;
-    }
+    },
   );
   if (didError) {
     throwToolExit('');

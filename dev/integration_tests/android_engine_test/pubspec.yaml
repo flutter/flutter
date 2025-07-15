@@ -1,0 +1,25 @@
+name: android_engine_test
+publish_to: none
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  android_driver_extensions:
+    path: ../../tools/android_driver_extensions
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+  matcher: any
+  path: any
+
+dev_dependencies:
+  test: any
+
+  args: any
+
+# PUBSPEC CHECKSUM: r7umvv

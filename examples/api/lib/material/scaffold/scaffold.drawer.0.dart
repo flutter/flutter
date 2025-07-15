@@ -13,9 +13,7 @@ class DrawerExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: DrawerExample(),
-    );
+    return const MaterialApp(home: DrawerExample());
   }
 }
 
@@ -43,10 +41,7 @@ class _DrawerExampleState extends State<DrawerExample> {
       key: _scaffoldKey,
       appBar: AppBar(title: const Text('Drawer Demo')),
       body: Center(
-        child: ElevatedButton(
-          onPressed: _openDrawer,
-          child: const Text('Open Drawer'),
-        ),
+        child: ElevatedButton(onPressed: _openDrawer, child: const Text('Open Drawer')),
       ),
       drawer: Drawer(
         child: Center(
@@ -54,10 +49,7 @@ class _DrawerExampleState extends State<DrawerExample> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('This is the Drawer'),
-              ElevatedButton(
-                onPressed: _closeDrawer,
-                child: const Text('Close Drawer'),
-              ),
+              ElevatedButton(onPressed: _closeDrawer, child: const Text('Close Drawer')),
             ],
           ),
         ),

@@ -5,12 +5,16 @@
 import 'template.dart';
 
 class CheckboxTemplate extends TokenTemplate {
-  const CheckboxTemplate(super.blockName, super.fileName, super.tokens, {
+  const CheckboxTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends CheckboxThemeData {
   _${blockName}DefaultsM3(BuildContext context)
     : _theme = Theme.of(context),
@@ -131,7 +135,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
 
   @override
-  VisualDensity get visualDensity => _theme.visualDensity;
+  VisualDensity get visualDensity => VisualDensity.standard;
 
   @override
   OutlinedBorder get shape => const RoundedRectangleBorder(

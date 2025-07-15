@@ -7,10 +7,10 @@ import 'project.dart';
 
 class HotReloadWithAssetProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:
@@ -22,7 +22,7 @@ flutter:
   ''';
 
   @override
-  final String main = r'''
+  final main = r'''
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     rootBundle.evict('pubspec.yaml');
     rootBundle.load('pubspec.yaml').then((_) {
-      print('LOADED DATA');
+      print('LOADED DATA'); // HOT RELOAD PRINT
     }, onError: (dynamic error, StackTrace stackTrace) {
       print('FAILED TO LOAD');
     });
@@ -48,10 +48,10 @@ class MyApp extends StatelessWidget {
 }
 ''';
 
-  void uncommentHotReloadPrint() {
+  void replaceHotReloadPrint(String newPrint) {
     final String newMainContents = main.replaceAll(
-      'LOADED DATA',
-      'SECOND DATA',
+      RegExp(r"print\('.*'\); // HOT RELOAD PRINT"),
+      "print('$newPrint'); // HOT RELOAD PRINT",
     );
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),

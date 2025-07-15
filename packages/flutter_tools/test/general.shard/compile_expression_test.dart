@@ -50,129 +50,147 @@ void main() {
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
     final CompilerOutput? result = await generator.compileExpression(
-        '2+2', null, null, null, null, null, null, null, null, false);
+      '2+2',
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+    );
 
     expect(result, isNull);
   });
 
   testWithoutContext('compile expression can compile single expression', () async {
-    final Completer<List<int>> compileResponseCompleter =
-        Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter =
-        Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter = Completer<List<int>>();
     fileSystem.file('/path/to/main.dart.dill')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
-    processManager.process.stdout = Stream<List<int>>.fromFutures(
-      <Future<List<int>>>[
-        compileResponseCompleter.future,
-        compileExpressionResponseCompleter.future,
-      ],
+    processManager.process.stdout = Stream<List<int>>.fromFutures(<Future<List<int>>>[
+      compileResponseCompleter.future,
+      compileExpressionResponseCompleter.future,
+    ]);
+    compileResponseCompleter.complete(
+      Future<List<int>>.value(
+        utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'),
+      ),
     );
-    compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
-    )));
 
-    await generator.recompile(
-      Uri.file('/path/to/main.dart'),
-      null, /* invalidatedFiles */
-      outputPath: '/build/',
-      packageConfig: PackageConfig.empty,
-      projectRootPath: '',
-      fs: fileSystem,
-    ).then((CompilerOutput? output) {
-      expect(frontendServerStdIn.getAndClear(),
-          'compile file:///path/to/main.dart\n');
-      expect(testLogger.errorText,
-          equals('line1\nline2\n'));
-      expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
+    await generator
+        .recompile(
+          Uri.file('/path/to/main.dart'),
+          null,
+          /* invalidatedFiles */
+          outputPath: '/build/',
+          packageConfig: PackageConfig.empty,
+          projectRootPath: '',
+          fs: fileSystem,
+        )
+        .then((CompilerOutput? output) {
+          expect(frontendServerStdIn.getAndClear(), 'compile file:///path/to/main.dart\n');
+          expect(testLogger.errorText, equals('line1\nline2\n'));
+          expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
 
-      compileExpressionResponseCompleter.complete(
-          Future<List<int>>.value(utf8.encode(
-              'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n'
-          )));
-      generator.compileExpression(
-          '2+2', null, null, null, null, null, null, null, null, false).then(
-              (CompilerOutput? outputExpression) {
+          compileExpressionResponseCompleter.complete(
+            Future<List<int>>.value(
+              utf8.encode(
+                'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n',
+              ),
+            ),
+          );
+          generator
+              .compileExpression('2+2', null, null, null, null, null, null, null, null, false)
+              .then((CompilerOutput? outputExpression) {
                 expect(outputExpression, isNotNull);
                 expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
-              }
-      );
-    });
+              });
+        });
   });
 
   testWithoutContext('compile expressions without awaiting', () async {
-    final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter1 = Completer<List<int>>();
+    final compileExpressionResponseCompleter2 = Completer<List<int>>();
 
-
-    processManager.process.stdout =
-      Stream<List<int>>.fromFutures(
-          <Future<List<int>>>[
-            compileResponseCompleter.future,
-            compileExpressionResponseCompleter1.future,
-            compileExpressionResponseCompleter2.future,
-          ]);
+    processManager.process.stdout = Stream<List<int>>.fromFutures(<Future<List<int>>>[
+      compileResponseCompleter.future,
+      compileExpressionResponseCompleter1.future,
+      compileExpressionResponseCompleter2.future,
+    ]);
 
     // The test manages timing via completers.
     unawaited(
-      generator.recompile(
-        Uri.parse('/path/to/main.dart'),
-        null, /* invalidatedFiles */
-        outputPath: '/build/',
-        packageConfig: PackageConfig.empty,
-        projectRootPath: '',
-        fs: MemoryFileSystem(),
-      ).then((CompilerOutput? outputCompile) {
-        expect(testLogger.errorText,
-            equals('line1\nline2\n'));
-        expect(outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
+      generator
+          .recompile(
+            Uri.parse('/path/to/main.dart'),
+            null,
+            /* invalidatedFiles */
+            outputPath: '/build/',
+            packageConfig: PackageConfig.empty,
+            projectRootPath: '',
+            fs: MemoryFileSystem(),
+          )
+          .then((CompilerOutput? outputCompile) {
+            expect(testLogger.errorText, equals('line1\nline2\n'));
+            expect(outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
 
-        fileSystem.file('/path/to/main.dart.dill.incremental')
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(<int>[0, 1, 2, 3]);
-        compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
-            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
-        )));
-      }),
+            fileSystem.file('/path/to/main.dart.dill.incremental')
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[0, 1, 2, 3]);
+            compileExpressionResponseCompleter1.complete(
+              Future<List<int>>.value(
+                utf8.encode(
+                  'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n',
+                ),
+              ),
+            );
+          }),
     );
 
     // The test manages timing via completers.
-    final Completer<bool> lastExpressionCompleted = Completer<bool>();
+    final lastExpressionCompleted = Completer<bool>();
     unawaited(
-      generator.compileExpression('0+1', null, null, null, null, null, null,
-          null, null, false).then(
-        (CompilerOutput? outputExpression) {
-          expect(outputExpression, isNotNull);
-          expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
+      generator
+          .compileExpression('0+1', null, null, null, null, null, null, null, null, false)
+          .then((CompilerOutput? outputExpression) {
+            expect(outputExpression, isNotNull);
+            expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
 
-          fileSystem.file('/path/to/main.dart.dill.incremental')
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(<int>[4, 5, 6, 7]);
-          compileExpressionResponseCompleter2.complete(Future<List<int>>.value(utf8.encode(
-              'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
-          )));
-        },
+            fileSystem.file('/path/to/main.dart.dill.incremental')
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[4, 5, 6, 7]);
+            compileExpressionResponseCompleter2.complete(
+              Future<List<int>>.value(
+                utf8.encode(
+                  'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n',
+                ),
+              ),
+            );
+          }),
+    );
+
+    // The test manages timing via completers.
+    unawaited(
+      generator
+          .compileExpression('1+1', null, null, null, null, null, null, null, null, false)
+          .then((CompilerOutput? outputExpression) {
+            expect(outputExpression, isNotNull);
+            expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);
+            lastExpressionCompleted.complete(true);
+          }),
+    );
+
+    compileResponseCompleter.complete(
+      Future<List<int>>.value(
+        utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'),
       ),
     );
-
-    // The test manages timing via completers.
-    unawaited(
-      generator.compileExpression('1+1', null, null, null, null, null, null,
-          null, null, false).then(
-        (CompilerOutput? outputExpression) {
-          expect(outputExpression, isNotNull);
-          expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);
-          lastExpressionCompleted.complete(true);
-        },
-      ),
-    );
-
-    compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
-        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
-    )));
 
     expect(await lastExpressionCompleted.future, isTrue);
   });
@@ -180,20 +198,20 @@ void main() {
 
 class FakeProcess extends Fake implements Process {
   @override
-  Stream<List<int>> stdout = const Stream<List<int>>.empty();
+  var stdout = const Stream<List<int>>.empty();
 
   @override
-  Stream<List<int>> stderr = const Stream<List<int>>.empty();
+  var stderr = const Stream<List<int>>.empty();
 
   @override
-  IOSink stdin = IOSink(StreamController<List<int>>().sink);
+  var stdin = IOSink(StreamController<List<int>>().sink);
 
   @override
   Future<int> get exitCode => Completer<int>().future;
 }
 
 class FakeProcessManager extends Fake implements ProcessManager {
-  final FakeProcess process = FakeProcess();
+  final process = FakeProcess();
 
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {
@@ -201,7 +219,14 @@ class FakeProcessManager extends Fake implements ProcessManager {
   }
 
   @override
-  Future<Process> start(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+  Future<Process> start(
+    List<Object> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) async {
     return process;
   }
 }

@@ -14,7 +14,7 @@ void main() {
       debugInstrumentationEnabled = true;
       printBuffer = StringBuffer();
       originalDebugPrintCallback = debugPrint;
-      debugPrint = (String? message, { int? wrapWidth }) {
+      debugPrint = (String? message, {int? wrapWidth}) {
         printBuffer.writeln(message);
       };
     });
@@ -45,6 +45,59 @@ void main() {
         throwsA('Error'),
       );
       expect(printBuffer.toString(), matches(r'^Action "throws" took .+'));
+    });
+  });
+
+  group('Memory allocations', () {
+    ObjectEvent? dispatchedEvent;
+    final Object object = List<int>.filled(1, 0);
+
+    void listener(ObjectEvent event) {
+      expect(dispatchedEvent, null);
+      dispatchedEvent = event;
+    }
+
+    setUp(() {
+      dispatchedEvent = null;
+      FlutterMemoryAllocations.instance.addListener(listener);
+    });
+
+    tearDown(() {
+      FlutterMemoryAllocations.instance.removeListener(listener);
+    });
+
+    test('debugMaybeDispatchCreated', () async {
+      debugMaybeDispatchCreated('library', 'class', object);
+
+      if (kFlutterMemoryAllocationsEnabled) {
+        final ObjectEvent? theEvent = dispatchedEvent;
+
+        if (theEvent is! ObjectCreated) {
+          fail('Expected ObjectCreated event');
+        }
+
+        expect(theEvent.object, object);
+        expect(theEvent.library, 'package:flutter/library.dart');
+        expect(theEvent.className, 'class');
+      } else {
+        expect(dispatchedEvent, isNull);
+      }
+    });
+
+    test('debugMaybeDispatchDisposed', () async {
+      debugMaybeDispatchDisposed(object);
+
+      if (kFlutterMemoryAllocationsEnabled) {
+        final ObjectEvent? theEvent = dispatchedEvent;
+
+        if (theEvent is! ObjectDisposed) {
+          fail('Expected ObjectDisposed event');
+        }
+
+        expect(theEvent.object, object);
+      } else {
+        expect(dispatchedEvent, isNull);
+      }
     });
   });
 }

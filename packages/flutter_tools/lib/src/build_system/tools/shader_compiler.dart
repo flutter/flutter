@@ -31,11 +31,11 @@ class DevelopmentShaderCompiler {
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
-  final Pool _compilationPool = Pool(4);
+  final _compilationPool = Pool(4);
   final math.Random _random;
 
   late TargetPlatform _targetPlatform;
-  bool _debugConfigured = false;
+  var _debugConfigured = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
@@ -53,7 +53,7 @@ class DevelopmentShaderCompiler {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
-    bool cleanupInput = false;
+    var cleanupInput = false;
     Uint8List result;
     PoolResource? resource;
     try {
@@ -107,7 +107,6 @@ class ShaderCompiler {
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android:
@@ -115,9 +114,15 @@ class ShaderCompiler {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        return <String>['--sksl', '--runtime-stage-gles', '--runtime-stage-vulkan'];
+        return <String>[
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+        ];
 
       case TargetPlatform.ios:
+        return <String>['--runtime-stage-metal'];
       case TargetPlatform.darwin:
         return <String>['--sksl', '--runtime-stage-metal'];
 
@@ -129,14 +134,18 @@ class ShaderCompiler {
       case TargetPlatform.web_javascript:
         return <String>['--sksl'];
 
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
-  static const List<Source> inputs = <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart'),
+  static const inputs = <Source>[
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/tools/shader_compiler.dart',
+    ),
     Source.hostArtifact(HostArtifact.impellerc),
   ];
 
@@ -154,9 +163,7 @@ class ShaderCompiler {
     required TargetPlatform targetPlatform,
     bool fatal = true,
   }) async {
-    final File impellerc = _fs.file(
-      _artifacts.getHostArtifact(HostArtifact.impellerc),
-    );
+    final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
     if (!impellerc.existsSync()) {
       throw ShaderCompilerException._(
         'The impellerc utility is missing at "${impellerc.path}". '
@@ -165,12 +172,11 @@ class ShaderCompiler {
     }
 
     final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
-    final List<String> cmd = <String>[
+    final cmd = <String>[
       impellerc.path,
       ..._shaderTargetsFromTargetPlatform(targetPlatform),
       '--iplr',
-      if (targetPlatform == TargetPlatform.web_javascript)
-        '--json',
+      if (targetPlatform == TargetPlatform.web_javascript) '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',

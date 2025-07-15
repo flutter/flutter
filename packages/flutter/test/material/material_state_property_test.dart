@@ -5,12 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   test('MaterialStateProperty.resolveWith()', () {
-    final MaterialStateProperty<MaterialState> value = MaterialStateProperty.resolveWith<MaterialState>(
-      (Set<MaterialState> states) => states.first,
-    );
+    final MaterialStateProperty<MaterialState> value =
+        MaterialStateProperty.resolveWith<MaterialState>(
+          (Set<MaterialState> states) => states.first,
+        );
     expect(value.resolve(<MaterialState>{MaterialState.hovered}), MaterialState.hovered);
     expect(value.resolve(<MaterialState>{MaterialState.focused}), MaterialState.focused);
     expect(value.resolve(<MaterialState>{MaterialState.pressed}), MaterialState.pressed);
@@ -44,15 +44,19 @@ void main() {
   });
 
   test('toString formats correctly', () {
-    const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(Color(0xFFFFFFFF));
+    const MaterialStateProperty<Color?> colorProperty = MaterialStatePropertyAll<Color?>(
+      Color(0xFFFFFFFF),
+    );
     expect(colorProperty.toString(), equals('WidgetStatePropertyAll(${const Color(0xffffffff)})'));
 
-    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(33 + 1/3);
+    const MaterialStateProperty<double?> doubleProperty = MaterialStatePropertyAll<double?>(
+      33 + 1 / 3,
+    );
     expect(doubleProperty.toString(), equals('WidgetStatePropertyAll(33.3)'));
   });
 
   test("Can interpolate between two MaterialStateProperty's", () {
-    const MaterialStateProperty<TextStyle?> textStyle1 =  MaterialStatePropertyAll<TextStyle?>(
+    const MaterialStateProperty<TextStyle?> textStyle1 = MaterialStatePropertyAll<TextStyle?>(
       TextStyle(fontSize: 14.0),
     );
     const MaterialStateProperty<TextStyle?> textStyle2 = MaterialStatePropertyAll<TextStyle?>(

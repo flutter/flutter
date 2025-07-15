@@ -23,6 +23,7 @@ class ShowBottomSheetExampleApp extends StatelessWidget {
 }
 
 enum AnimationStyles { defaultStyle, custom, none }
+
 const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
   (AnimationStyles.defaultStyle, 'Default'),
   (AnimationStyles.custom, 'Custom'),
@@ -52,48 +53,47 @@ class _ShowBottomSheetExampleState extends State<ShowBottomSheetExample> {
               setState(() {
                 _animationStyle = switch (styles.first) {
                   AnimationStyles.defaultStyle => null,
-                  AnimationStyles.custom => AnimationStyle(
-                    duration: const Duration(seconds: 3),
-                    reverseDuration: const Duration(seconds: 1),
+                  AnimationStyles.custom => const AnimationStyle(
+                    duration: Duration(seconds: 3),
+                    reverseDuration: Duration(seconds: 1),
                   ),
                   AnimationStyles.none => AnimationStyle.noAnimation,
                 };
                 _animationStyleSelection = styles;
               });
             },
-            segments: animationStyleSegments
-              .map<ButtonSegment<AnimationStyles>>(((AnimationStyles, String) shirt) {
-                return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-              })
-              .toList(),
+            segments: animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+              (AnimationStyles, String) shirt,
+            ) {
+              return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
+            }).toList(),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
             child: const Text('showBottomSheet'),
             onPressed: () {
-              Scaffold.of(context).showBottomSheet(
-                sheetAnimationStyle: _animationStyle,
-                (BuildContext context) {
-                  return SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          const Text('BottomSheet'),
-                          ElevatedButton(
-                            child: const Text('Close'),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      ),
+              Scaffold.of(context).showBottomSheet(sheetAnimationStyle: _animationStyle, (
+                BuildContext context,
+              ) {
+                return SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Text('BottomSheet'),
+                        ElevatedButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
                     ),
-                  );
-                },
-              );
+                  ),
+                );
+              });
             },
           ),
         ],

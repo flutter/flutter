@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
@@ -49,8 +51,7 @@ class PluginTest {
   final bool cocoapodsTransitiveFlutterDependency;
 
   Future<TaskResult> call() async {
-    final Directory tempDir =
-        Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     // FFI plugins do not have support for `flutter test`.
     // `flutter test` does not do a native build.
     // Supporting `flutter test` would require invoking a native build.
@@ -58,8 +59,13 @@ class PluginTest {
     try {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
-          tempDir, options, buildTarget,
-          name: 'plugintest', template: template, environment: pluginCreateEnvironment);
+        tempDir,
+        options,
+        buildTarget,
+        name: 'plugintest',
+        template: template,
+        environment: pluginCreateEnvironment,
+      );
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
@@ -71,11 +77,26 @@ class PluginTest {
         await plugin.runFlutterTest();
         if (!dartOnlyPlugin) {
           await plugin.example.runNativeTests(buildTarget);
+          if (buildTarget == 'ios') {
+            bool runResult = false;
+            await testWithNewIOSSimulator('TestPluginExample', (String deviceId) async {
+              runResult = await plugin.example.runApp(options: <String>['-d', deviceId]);
+            });
+            if (!runResult) {
+              return TaskResult.failure('flutter run either failed or had an engine error.');
+            }
+          }
         }
       }
       section('Create Flutter app');
-      final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
-          name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
+      final _FlutterProject app = await _FlutterProject.create(
+        tempDir,
+        options,
+        buildTarget,
+        name: 'plugintestapp',
+        template: 'app',
+        environment: appCreateEnvironment,
+      );
       try {
         if (cocoapodsTransitiveFlutterDependency) {
           section('Disable Swift Package Manager');
@@ -83,8 +104,7 @@ class PluginTest {
         }
 
         section('Add plugins');
-        await app.addPlugin('plugintest',
-            pluginPath: path.join('..', 'plugintest'));
+        await app.addPlugin('plugintest', pluginPath: path.join('..', 'plugintest'));
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
@@ -115,7 +135,10 @@ class PluginTest {
     }
   }
 
-  Future<void> _testLocalEngineConfiguration(_FlutterProject app, String fakeEngineSourcePath) async {
+  Future<void> _testLocalEngineConfiguration(
+    _FlutterProject app,
+    String fakeEngineSourcePath,
+  ) async {
     // The tool requires that a directory that looks like an engine build
     // actually exists when passing --local-engine, so create a fake skeleton.
     final Directory buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
@@ -157,11 +180,12 @@ class _FlutterProject {
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '# The following section is specific to Flutter packages.\n'
-      'flutter:\n',
+          'flutter:\n',
       '# The following section is specific to Flutter packages.\n'
-      'flutter:\n'
-      '\n'
-      '  disable-swift-package-manager: true\n'
+          'flutter:\n'
+          '\n'
+          '  config:\n'
+          '    enable-swift-package-manager: false\n',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -169,12 +193,8 @@ class _FlutterProject {
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
-    final String dependency =
-        pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
-    content = content.replaceFirst(
-      '\ndependencies:\n',
-      '\ndependencies:\n  $dependency\n',
-    );
+    final String dependency = pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
+    content = content.replaceFirst('\ndependencies:\n', '\ndependencies:\n  $dependency\n');
     await pubspec.writeAsString(content, flush: true);
   }
 
@@ -194,7 +214,8 @@ class _FlutterProject {
     // Add the Dart registration hook that the build will generate a call to.
     final File dartCode = File(path.join(rootPath, 'lib', '$name.dart'));
     content = await dartCode.readAsString();
-    content = '''
+    content =
+        '''
 $content
 
 class $dartPluginClass {
@@ -204,13 +225,7 @@ class $dartPluginClass {
     await dartCode.writeAsString(content, flush: true);
 
     // Remove any native plugin code.
-    const List<String> platforms = <String>[
-      'android',
-      'ios',
-      'linux',
-      'macos',
-      'windows',
-    ];
+    const List<String> platforms = <String>['android', 'ios', 'linux', 'macos', 'windows'];
     for (final String platform in platforms) {
       final Directory platformDir = Directory(path.join(rootPath, platform));
       if (platformDir.existsSync()) {
@@ -232,12 +247,12 @@ class $dartPluginClass {
       throw TaskResult.failure('Missing expected darwin platform plugin keys');
     }
     pubspecContent = pubspecContent.replaceAll(
-        originalIOSKey,
-        '$originalIOSKey        sharedDarwinSource: true\n'
+      originalIOSKey,
+      '$originalIOSKey        sharedDarwinSource: true\n',
     );
     pubspecContent = pubspecContent.replaceAll(
-        originalMacOSKey,
-        '$originalMacOSKey        sharedDarwinSource: true\n'
+      originalMacOSKey,
+      '$originalMacOSKey        sharedDarwinSource: true\n',
     );
     await pubspec.writeAsString(pubspecContent, flush: true);
 
@@ -258,7 +273,10 @@ class $dartPluginClass {
 
     // Remove "s.platform = :ios" to work on all platforms, including macOS.
     podspecContent = podspecContent.replaceFirst(RegExp(r'.*s\.platform.*'), '');
-    podspecContent = podspecContent.replaceFirst("s.dependency 'Flutter'", "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'");
+    podspecContent = podspecContent.replaceFirst(
+      "s.dependency 'Flutter'",
+      "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'",
+    );
 
     await podspec.writeAsString(podspecContent, flush: true);
 
@@ -271,7 +289,8 @@ class $dartPluginClass {
     if (!pluginRegister.existsSync()) {
       pluginRegister = File(path.join(darwinDir.path, name, 'Sources', name, '$pluginClass.swift'));
     }
-    final String pluginRegisterContent = '''
+    final String pluginRegisterContent =
+        '''
 #if os(macOS)
 import FlutterMacOS
 #elseif os(iOS)
@@ -310,16 +329,17 @@ public class $pluginClass: NSObject, FlutterPlugin {
   Future<void> runNativeTests(String buildTarget) async {
     // Native unit tests rely on building the app first to generate necessary
     // build files.
-    await build(buildTarget, validateNativeBuildProject: false);
+    await build(buildTarget, validateNativeBuildProject: false, buildMode: 'debug');
 
     switch (buildTarget) {
       case 'apk':
         if (await exec(
-          path.join('.', 'gradlew'),
-          <String>['testDebugUnitTest'],
-          workingDirectory: path.join(rootPath, 'android'),
-          canFail: true,
-        ) != 0) {
+              path.join('.', 'gradlew'),
+              <String>['testDebugUnitTest'],
+              workingDirectory: path.join(rootPath, 'android'),
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'ios':
@@ -342,10 +362,20 @@ public class $pluginClass: NSObject, FlutterPlugin {
         }
       case 'linux':
         if (await exec(
-          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
-          <String>[],
-          canFail: true,
-        ) != 0) {
+              path.join(
+                rootPath,
+                'build',
+                'linux',
+                'x64',
+                'debug',
+                'plugins',
+                'plugintest',
+                'plugintest_test',
+              ),
+              <String>[],
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'macos':
@@ -354,31 +384,51 @@ public class $pluginClass: NSObject, FlutterPlugin {
           destination: 'platform=macOS',
           configuration: 'Debug',
           testName: 'native_plugin_unit_tests_macos',
+          extraOptions: <String>['-parallel-testing-enabled', 'NO'],
           skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
-        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
         if (await exec(
-          path.join(rootPath, 'build', 'windows', arch, 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
-          <String>[],
-          canFail: true,
-        ) != 0) {
+              path.join(
+                rootPath,
+                'build',
+                'windows',
+                arch,
+                'plugins',
+                'plugintest',
+                'Debug',
+                'plugintest_test.exe',
+              ),
+              <String>[],
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
     }
   }
 
   static Future<_FlutterProject> create(
-      Directory directory,
-      List<String> options,
-      String target,
-      {
-        required String name,
-        required String template,
-        Map<String, String>? environment,
-      }) async {
+    Directory directory,
+    List<String> options,
+    String target, {
+    required String name,
+    required String template,
+    Map<String, String>? environment,
+  }) async {
+    final bool isDarwin = target == 'ios' || target == 'macos';
+    if (template != 'plugin' && isDarwin) {
+      // ios-language option is only supported for plugins. Remove the -i flag and the next parameter, "swift" or
+      // "objc". This isn't proper arg parsing (for example doesn't handle -i=objc, but good enough for these tests
+      // since they blow up if -i is passed incorrectly.
+      final int indexOfIOSLanguage = options.indexOf('-i');
+      if (indexOfIOSLanguage != -1) {
+        options.removeRange(indexOfIOSLanguage, indexOfIOSLanguage + 2);
+      }
+    }
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -394,7 +444,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     });
 
     final _FlutterProject project = _FlutterProject(directory, name);
-    if (template == 'plugin' && (target == 'ios' || target == 'macos')) {
+    if (template == 'plugin' && isDarwin) {
       project._reduceDarwinPluginMinimumVersion(name, target);
     }
     return project;
@@ -405,11 +455,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
   Future<void> addCocoapodsTransitiveFlutterDependency() async {
     final String iosDirectoryPath = path.join(rootPath, 'ios');
 
-    final File nativePod = File(path.join(
-      iosDirectoryPath,
-      'NativePod',
-      'NativePod.podspec',
-    ));
+    final File nativePod = File(path.join(iosDirectoryPath, 'NativePod', 'NativePod.podspec'));
     nativePod.createSync(recursive: true);
     nativePod.writeAsStringSync('''
 Pod::Spec.new do |s|
@@ -425,12 +471,9 @@ Pod::Spec.new do |s|
 end
 ''');
 
-    final File nativePodClass = File(path.join(
-      iosDirectoryPath,
-      'NativePod',
-      'Classes',
-      'NativePodTest.m',
-    ));
+    final File nativePodClass = File(
+      path.join(iosDirectoryPath, 'NativePod', 'Classes', 'NativePodTest.m'),
+    );
     nativePodClass.createSync(recursive: true);
     nativePodClass.writeAsStringSync('''
 #import <Flutter/Flutter.h>
@@ -446,7 +489,9 @@ end
 
     final File podfileFile = File(path.join(iosDirectoryPath, 'Podfile'));
     final List<String> podfileContents = podfileFile.readAsLinesSync();
-    final int index = podfileContents.indexWhere((String line) => line.contains('flutter_install_all_ios_pods'));
+    final int index = podfileContents.indexWhere(
+      (String line) => line.contains('flutter_install_all_ios_pods'),
+    );
     podfileContents.insert(index, "pod 'NativePod', :path => 'NativePod'");
     podfileFile.writeAsStringSync(podfileContents.join('\n'));
   }
@@ -459,11 +504,13 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '12.0'"
+        ? "s.platform = :ios, '13.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
-      throw TaskResult.failure('Update this test to match plugin minimum $target deployment version');
+      throw TaskResult.failure(
+        'Update this test to match plugin minimum $target deployment version',
+      );
     }
     // Add transitive dependency on AppAuth 1.6 targeting iOS 8 and macOS 10.9, which no longer builds in Xcode
     // to test the version is forced higher and builds.
@@ -477,7 +524,10 @@ s.platform = :osx, '10.8'
 s.dependency 'AppAuth', '1.6.0'
 ''';
 
-    podspecContent = podspecContent.replaceFirst(versionString, target == 'ios' ? iosContent : macosContent);
+    podspecContent = podspecContent.replaceFirst(
+      versionString,
+      target == 'ios' ? iosContent : macosContent,
+    );
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
@@ -485,25 +535,29 @@ s.dependency 'AppAuth', '1.6.0'
     String target, {
     bool validateNativeBuildProject = true,
     bool configOnly = false,
+    String buildMode = 'release',
     Directory? localEngine,
   }) async {
+    assert(const <String>{'debug', 'release', 'profile'}.contains(buildMode));
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput =  await evalFlutter('build', options: <String>[
-        target,
-        '-v',
-        if (target == 'ios')
-          '--no-codesign',
-        if (configOnly)
-          '--config-only',
-        if (localEngine != null)
+      final String buildOutput = await evalFlutter(
+        'build',
+        options: <String>[
+          target,
+          '-v',
+          if (target == 'ios') '--no-codesign',
+          if (configOnly) '--config-only',
+          if (buildMode != 'release') '--$buildMode',
+          if (localEngine != null)
           // The engine directory is of the form <fake-source-path>/out/<fakename>,
           // which has to be broken up into the component flags.
           ...<String>[
             '--local-engine-src-path=${localEngine.parent.parent.path}',
             '--local-engine=${path.basename(localEngine.path)}',
             '--local-engine-host=${path.basename(localEngine.path)}',
-          ]
-      ]);
+          ],
+        ],
+      );
 
       if (target == 'ios' || target == 'macos') {
         // This warning is confusing and shouldn't be emitted. Plugins often support lower versions than the
@@ -512,25 +566,33 @@ s.dependency 'AppAuth', '1.6.0'
         // but the range of supported deployment target versions is 9.0 to 14.0.99.
         //
         // (or "The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET'"...)
-        if (buildOutput.contains('is set to 10.0, but the range of supported deployment target versions') ||
-            buildOutput.contains('is set to 10.8, but the range of supported deployment target versions')) {
+        if (buildOutput.contains(
+              'is set to 10.0, but the range of supported deployment target versions',
+            ) ||
+            buildOutput.contains(
+              'is set to 10.8, but the range of supported deployment target versions',
+            )) {
           throw TaskResult.failure('Minimum plugin version warning present');
         }
 
         if (validateNativeBuildProject) {
-          final File generatedSwiftManifest = File(path.join(
-            rootPath,
-            target,
-            'Flutter',
-            'ephemeral',
-            'Packages',
-            'FlutterGeneratedPluginSwiftPackage',
-            'Package.swift'
-          ));
+          final File generatedSwiftManifest = File(
+            path.join(
+              rootPath,
+              target,
+              'Flutter',
+              'ephemeral',
+              'Packages',
+              'FlutterGeneratedPluginSwiftPackage',
+              'Package.swift',
+            ),
+          );
           final bool swiftPackageManagerEnabled = generatedSwiftManifest.existsSync();
 
           if (!swiftPackageManagerEnabled) {
-            final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
+            final File podsProject = File(
+              path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'),
+            );
             if (!podsProject.existsSync()) {
               throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
             }
@@ -541,31 +603,45 @@ s.dependency 'AppAuth', '1.6.0'
               // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
               // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
               if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
-                throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+                throw TaskResult.failure(
+                  'Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed',
+                );
               }
               // Transitive dependency AppAuth targeting too-low 8.0 was not fixed.
               if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 8')) {
-                throw TaskResult.failure('Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed');
+                throw TaskResult.failure(
+                  'Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed',
+                );
               }
-              if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+              if (!podsProjectContent.contains(
+                r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";',
+              )) {
                 throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
               }
             } else if (target == 'macos') {
               // Same for macOS deployment target, but 10.8.
               // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
               if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
-                throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
+                throw TaskResult.failure(
+                  'Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed',
+                );
               }
               // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
               if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
-                throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+                throw TaskResult.failure(
+                  'Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed',
+                );
               }
             }
 
             if (localEngine != null) {
-              final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
+              final RegExp localEngineSearchPath = RegExp(
+                'FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}',
+              );
               if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
-                throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
+                throw TaskResult.failure(
+                  'FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path',
+                );
               }
             }
           }
@@ -578,8 +654,7 @@ s.dependency 'AppAuth', '1.6.0'
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
-      final String wrapperPath =
-          path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
+      final String wrapperPath = path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
       if (File(wrapperPath).existsSync()) {
         await exec(wrapperPath, <String>['--stop'], canFail: true);
       }
@@ -587,5 +662,48 @@ s.dependency 'AppAuth', '1.6.0'
       await Future<void>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
+  }
+
+  Future<bool> runApp({required List<String> options}) async {
+    return inDirectory(Directory(rootPath), () async {
+      final Process process = await startFlutter('run', options: options);
+      final Completer<void> stdoutDone = Completer<void>();
+      final Completer<void> stderrDone = Completer<void>();
+
+      bool engineError = false;
+
+      void onStdout(String line) {
+        print('stdout: $line');
+        if (line.contains('The Flutter DevTools debugger and profiler')) {
+          process.stdin.writeln('R');
+        }
+        if (line.contains('Restarted application')) {
+          // Do a hot restart.
+          process.stdin.writeln('q');
+        }
+        if (line.contains('ERROR:')) {
+          engineError = true;
+          // Quit the app. This makes the 'flutter run' process exit.
+          process.stdin.writeln('q');
+        }
+      }
+
+      process.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen(onStdout, onDone: stdoutDone.complete);
+
+      process.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
+
+      await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+      if (engineError) {
+        return false;
+      }
+      final int exitCode = await process.exitCode;
+      return exitCode == 0;
+    });
   }
 }

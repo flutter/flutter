@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
@@ -20,11 +21,7 @@ void main() {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
-        child: CircleAvatar(
-          backgroundColor: backgroundColor,
-          radius: 50.0,
-          child: const Text('Z'),
-        ),
+        child: CircleAvatar(backgroundColor: backgroundColor, radius: 50.0, child: const Text('Z')),
       ),
     );
 
@@ -42,11 +39,7 @@ void main() {
     final Color backgroundColor = Colors.blue.shade100;
     await tester.pumpWidget(
       wrap(
-        child: CircleAvatar(
-          backgroundColor: backgroundColor,
-          radius: 50.0,
-          child: const Text('Z'),
-        ),
+        child: CircleAvatar(backgroundColor: backgroundColor, radius: 50.0, child: const Text('Z')),
       ),
     );
 
@@ -94,7 +87,9 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (
+    WidgetTester tester,
+  ) async {
     addTearDown(imageCache.clear);
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
@@ -102,10 +97,10 @@ void main() {
       wrap(
         child: RepaintBoundary(
           child: CircleAvatar(
-          foregroundImage: errorImage,
-          backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
-          radius: 50.0,
-          onForegroundImageError: (_,__) => caughtForegroundImageError = true,
+            foregroundImage: errorImage,
+            backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+            radius: 50.0,
+            onForegroundImageError: (_, _) => caughtForegroundImageError = true,
           ),
         ),
       ),
@@ -117,20 +112,14 @@ void main() {
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
-    await expectLater(
-      find.byType(CircleAvatar),
-      matchesGoldenFile('circle_avatar.fallback.png'),
-    );
+    await expectLater(find.byType(CircleAvatar), matchesGoldenFile('circle_avatar.fallback.png'));
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
-        child: CircleAvatar(
-          foregroundColor: foregroundColor,
-          child: const Text('Z'),
-        ),
+        child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z')),
       ),
     );
 
@@ -152,9 +141,7 @@ void main() {
       wrap(
         child: Theme(
           data: theme,
-          child: const CircleAvatar(
-            child: Text('Z'),
-          ),
+          child: const CircleAvatar(child: Text('Z')),
         ),
       ),
     );
@@ -172,10 +159,7 @@ void main() {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
-        child: CircleAvatar(
-          foregroundColor: foregroundColor,
-          child: const Text('Z'),
-        ),
+        child: CircleAvatar(foregroundColor: foregroundColor, child: const Text('Z')),
       ),
     );
 
@@ -258,7 +242,9 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
+  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (
+    WidgetTester tester,
+  ) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -286,15 +272,15 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Material2 - CircleAvatar default colors with light theme', (WidgetTester tester) async {
+    testWidgets('Material2 - CircleAvatar default colors with light theme', (
+      WidgetTester tester,
+    ) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
           child: Theme(
             data: theme,
-            child: const CircleAvatar(
-              child: Text('Z'),
-            ),
+            child: const CircleAvatar(child: Text('Z')),
           ),
         ),
       );
@@ -308,15 +294,15 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
 
-    testWidgets('Material2 - CircleAvatar default colors with dark theme', (WidgetTester tester) async {
+    testWidgets('Material2 - CircleAvatar default colors with dark theme', (
+      WidgetTester tester,
+    ) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(
           child: Theme(
             data: theme,
-            child: const CircleAvatar(
-              child: Text('Z'),
-            ),
+            child: const CircleAvatar(child: Text('Z')),
           ),
         ),
       );
@@ -332,14 +318,15 @@ void main() {
   });
 }
 
-Widget wrap({ required Widget child }) {
+Widget wrap({required Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
       data: const MediaQueryData(),
       child: MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: Center(child: child)),
+        home: Center(child: child),
+      ),
     ),
   );
 }

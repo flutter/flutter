@@ -5,13 +5,17 @@
 import 'template.dart';
 
 class PopupMenuTemplate extends TokenTemplate {
-  const PopupMenuTemplate(super.blockName, super.fileName, super.tokens, {
+  const PopupMenuTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
     super.textThemePrefix = '_textTheme.',
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(elevation: ${elevation('md.comp.menu.container')});

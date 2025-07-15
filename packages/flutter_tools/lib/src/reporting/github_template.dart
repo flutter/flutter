@@ -26,8 +26,8 @@ class GitHubTemplateCreator {
     required Logger logger,
     required FlutterProjectFactory flutterProjectFactory,
   }) : _fileSystem = fileSystem,
-      _logger = logger,
-      _flutterProjectFactory = flutterProjectFactory;
+       _logger = logger,
+       _flutterProjectFactory = flutterProjectFactory;
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -51,15 +51,15 @@ class GitHubTemplateCreator {
     } else if (error is DevFSException) {
       // Suppress underlying error.
       return 'DevFSException: ${error.message}';
-    } else if (error is NoSuchMethodError
-      || error is ArgumentError
-      || error is VersionCheckError
-      || error is MissingDefineException
-      || error is UnsupportedError
-      || error is UnimplementedError
-      || error is StateError
-      || error is ProcessExit
-      || error is OSError) {
+    } else if (error is NoSuchMethodError ||
+        error is ArgumentError ||
+        error is VersionCheckError ||
+        error is MissingDefineException ||
+        error is UnsupportedError ||
+        error is UnimplementedError ||
+        error is StateError ||
+        error is ProcessExit ||
+        error is OSError) {
       // These exception objects only reference tool internals, print the whole error.
       return '${error.runtimeType}: $error';
     } else if (error is Error) {
@@ -76,14 +76,15 @@ class GitHubTemplateCreator {
   ///
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
-      String command,
-      Object error,
-      StackTrace stackTrace,
-      String doctorText
-    ) async {
+    String command,
+    Object error,
+    StackTrace stackTrace,
+    String doctorText,
+  ) async {
     final String errorString = sanitizedCrashException(error);
-    final String title = '[tool_crash] $errorString';
-    final String body = '''
+    final title = '[tool_crash] $errorString';
+    final body =
+        '''
 ## Command
 ```sh
 $command
@@ -108,10 +109,10 @@ ${_projectMetadataInformation()}
 ''';
 
     return 'https://github.com/flutter/flutter/issues'
-      '/new' // We split this here to appease our lint that looks for bad "new bug" links.
-      '?title=${Uri.encodeQueryComponent(title)}'
-      '&body=${Uri.encodeQueryComponent(body)}'
-      '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
+        '/new' // We split this here to appease our lint that looks for bad "new bug" links.
+        '?title=${Uri.encodeQueryComponent(title)}'
+        '&body=${Uri.encodeQueryComponent(body)}'
+        '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}';
   }
 
   /// Provide information about the Flutter project in the working directory, if present.
@@ -128,9 +129,9 @@ ${_projectMetadataInformation()}
       if (manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
-      final FlutterProjectType? projectType = metadata.projectType;
-      final StringBuffer description = StringBuffer()
+      final metadata = FlutterProjectMetadata(project.metadataFile, _logger);
+      final FlutterTemplateType? projectType = metadata.projectType;
+      final description = StringBuffer()
         ..writeln('**Type**: ${projectType == null ? 'malformed' : projectType.cliName}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
@@ -142,26 +143,62 @@ ${_projectMetadataInformation()}
         ..writeln('**Creation channel**: ${metadata.versionChannel}')
         ..writeln('**Creation framework version**: ${metadata.versionRevision}');
 
-      final File file = project.flutterPluginsFile;
+      final File file = project.flutterPluginsDependenciesFile;
       if (file.existsSync()) {
-        description.writeln('### Plugins');
-        // Format is:
-        // camera=/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/
-        for (final String plugin in project.flutterPluginsFile.readAsLinesSync()) {
-          final List<String> pluginParts = plugin.split('=');
-          if (pluginParts.length != 2) {
-            continue;
-          }
-          // Write the last part of the path, which includes the plugin name and version.
-          // Example: camera-0.5.7+2
-          final List<String> pathParts = _fileSystem.path.split(pluginParts[1]);
-          description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
-        }
+        _writePlugins(description, file);
       }
-
       return description.toString();
     } on Exception catch (exception) {
       return exception.toString();
+    }
+  }
+
+  void _writePlugins(StringBuffer description, File file) {
+    description.writeln('### Plugins');
+    // Format is:
+    // {
+    //   "plugins": {
+    //     "ios": [
+    //       {
+    //         "path": "/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/",
+    //       }
+    //     ]
+    //   }
+    // }
+    final Object? json = jsonDecode(file.readAsStringSync());
+    if (json is! Map<String, Object?>) {
+      return;
+    }
+    final Object? plugins = json['plugins'];
+    if (plugins is! Map<String, Object?>) {
+      return;
+    }
+    final pluginPaths = <String>{};
+    for (final Object? pluginList in plugins.values) {
+      if (pluginList is! List<Object?>) {
+        continue;
+      }
+      for (final Object? plugin in pluginList) {
+        if (plugin is! Map<String, Object?>) {
+          continue;
+        }
+        final path = plugin['path'] as String?;
+        if (path != null) {
+          pluginPaths.add(path);
+        }
+      }
+    }
+    if (pluginPaths.isEmpty) {
+      return;
+    }
+    for (final path in pluginPaths) {
+      // Write the last part of the path, which includes the plugin name and version.
+      // Example: camera-0.5.7+2
+      final List<String> pathParts = _fileSystem.path.split(path);
+      if (pathParts.isEmpty) {
+        continue;
+      }
+      description.writeln(pathParts.last);
     }
   }
 }

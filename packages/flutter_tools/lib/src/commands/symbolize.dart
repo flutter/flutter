@@ -14,7 +14,7 @@ import '../base/io.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
-const int rootLoadingUnitId = 1;
+const rootLoadingUnitId = 1;
 
 /// Support for symbolizing a Dart stack trace.
 ///
@@ -34,25 +34,26 @@ class SymbolizeCommand extends FlutterCommand {
       'debug-info',
       abbr: 'd',
       valueHelp: '/out/android/app.arm64.symbols',
-      help: 'A path to the symbols file generated with "--split-debug-info".'
+      help: 'A path to the symbols file generated with "--split-debug-info".',
     );
     argParser.addMultiOption(
       'unit-id-debug-info',
       abbr: 'u',
       valueHelp: '2:/out/android/app.arm64.symbols-2.part.so',
-      help: 'A loading unit id and the path to the symbols file for that'
-          ' unit generated with "--split-debug-info".'
+      help:
+          'A loading unit id and the path to the symbols file for that'
+          ' unit generated with "--split-debug-info".',
     );
     argParser.addOption(
       'input',
       abbr: 'i',
       valueHelp: '/crashes/stack_trace.err',
-      help: 'A file path containing a Dart stack trace.'
+      help: 'A file path containing a Dart stack trace.',
     );
     argParser.addOption(
       'output',
       abbr: 'o',
-      help: 'A file path for a symbolized stack trace to be written to.'
+      help: 'A file path for a symbolized stack trace to be written to.',
     );
   }
 
@@ -97,7 +98,7 @@ class SymbolizeCommand extends FlutterCommand {
   }
 
   Map<int, File> _unitDebugInfoPathMap() {
-    final Map<int, File> map = <int, File>{};
+    final map = <int, File>{};
     final String? rootInfo = stringArg('debug-info');
     if (rootInfo != null) {
       map[rootLoadingUnitId] = _handleDSYM(rootInfo);
@@ -108,8 +109,10 @@ class SymbolizeCommand extends FlutterCommand {
       final int unitId = int.parse(unitIdString);
       final String unitDebugPath = arg.substring(separatorIndex + 1);
       if (map.containsKey(unitId) && map[unitId]!.path != unitDebugPath) {
-        throw StateError('Different paths were given for the same loading unit'
-            ' $unitId: "${map[unitId]!.path}" and "$unitDebugPath".');
+        throw StateError(
+          'Different paths were given for the same loading unit'
+          ' $unitId: "${map[unitId]!.path}" and "$unitDebugPath".',
+        );
       }
       map[unitId] = _handleDSYM(unitDebugPath);
     }
@@ -121,20 +124,24 @@ class SymbolizeCommand extends FlutterCommand {
     if (argResults?.wasParsed('debug-info') != true &&
         argResults?.wasParsed('unit-id-debug-info') != true) {
       throwToolExit(
-          'Either "--debug-info" or "--unit-id-debug-info" is required to symbolize stack traces.');
+        'Either "--debug-info" or "--unit-id-debug-info" is required to symbolize stack traces.',
+      );
     }
     for (final String arg in stringsArg('unit-id-debug-info')) {
       final int separatorIndex = arg.indexOf(':');
       if (separatorIndex == -1) {
         throwToolExit(
-            'The argument to "--unit-id-debug-info" must contain a unit ID and path,'
-            ' separated by ":": "$arg".');
+          'The argument to "--unit-id-debug-info" must contain a unit ID and path,'
+          ' separated by ":": "$arg".',
+        );
       }
       final String unitIdString = arg.substring(0, separatorIndex);
       final int? unitId = int.tryParse(unitIdString);
       if (unitId == null) {
-        throwToolExit('The argument to "--unit-id-debug-info" must begin with'
-            ' a unit ID: "$unitIdString" is not an integer.');
+        throwToolExit(
+          'The argument to "--unit-id-debug-info" must begin with'
+          ' a unit ID: "$unitIdString" is not an integer.',
+        );
       }
     }
     late final Map<int, File> map;
@@ -144,8 +151,10 @@ class SymbolizeCommand extends FlutterCommand {
       throwToolExit(e.toString());
     }
     if (!map.containsKey(rootLoadingUnitId)) {
-      throwToolExit('Missing debug info for the root loading unit'
-          ' (id $rootLoadingUnitId).');
+      throwToolExit(
+        'Missing debug info for the root loading unit'
+        ' (id $rootLoadingUnitId).',
+      );
     }
     if ((argResults?.wasParsed('input') ?? false) &&
         !await _fileSystem.isFile(stringArg('input')!)) {
@@ -165,11 +174,8 @@ class SymbolizeCommand extends FlutterCommand {
       }
       output = outputFile.openWrite();
     } else {
-      final StreamController<List<int>> outputController =
-          StreamController<List<int>>();
-      outputController.stream
-          .transform(utf8.decoder)
-          .listen(_stdio.stdoutWrite);
+      final outputController = StreamController<List<int>>();
+      outputController.stream.transform(utf8.decoder).listen(_stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 
@@ -178,7 +184,7 @@ class SymbolizeCommand extends FlutterCommand {
         ? _fileSystem.file(stringArg('input')).openRead()
         : _stdio.stdin;
 
-    final Map<int, Uint8List> unitSymbols = <int, Uint8List>{
+    final unitSymbols = <int, Uint8List>{
       for (final MapEntry<int, File> entry in _unitDebugInfoPathMap().entries)
         entry.key: entry.value.readAsBytesSync(),
     };
@@ -197,11 +203,11 @@ typedef SymbolsTransformer = StreamTransformer<String, String> Function(Uint8Lis
 typedef UnitSymbolsTransformer = StreamTransformer<String, String> Function(Map<int, Uint8List>);
 
 StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
-  return _defaultUnitsTransformer(<int, Uint8List>{ rootLoadingUnitId: symbols});
+  return _defaultUnitsTransformer(<int, Uint8List>{rootLoadingUnitId: symbols});
 }
 
 StreamTransformer<String, String> _defaultUnitsTransformer(Map<int, Uint8List> unitSymbols) {
-  final Map<int, Dwarf> map = <int, Dwarf>{};
+  final map = <int, Dwarf>{};
   for (final int unitId in unitSymbols.keys) {
     final Uint8List symbols = unitSymbols[unitId]!;
     final Dwarf? dwarf = Dwarf.fromBytes(symbols);
@@ -231,16 +237,15 @@ StreamTransformer<String, String> _testUnitsTransformer(Map<int, Uint8List> buff
     },
     handleError: (Object error, StackTrace stackTrace, EventSink<String> sink) {
       sink.addError(error, stackTrace);
-    }
+    },
   );
 }
 
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolizationService {
-  const DwarfSymbolizationService({
-    SymbolsTransformer symbolsTransformer = _defaultTransformer,
-  }) : _transformer = symbolsTransformer,
-       _unitsTransformer = _defaultUnitsTransformer;
+  const DwarfSymbolizationService({SymbolsTransformer symbolsTransformer = _defaultTransformer})
+    : _transformer = symbolsTransformer,
+      _unitsTransformer = _defaultUnitsTransformer;
 
   const DwarfSymbolizationService.withUnits({
     UnitSymbolsTransformer unitSymbolsTransformer = _defaultUnitsTransformer,
@@ -250,9 +255,7 @@ class DwarfSymbolizationService {
   /// Create a DwarfSymbolizationService with a no-op transformer for testing.
   @visibleForTesting
   factory DwarfSymbolizationService.test() {
-    return const DwarfSymbolizationService.withUnits(
-      unitSymbolsTransformer: _testUnitsTransformer,
-    );
+    return const DwarfSymbolizationService.withUnits(unitSymbolsTransformer: _testUnitsTransformer);
   }
 
   final SymbolsTransformer? _transformer;
@@ -271,11 +274,9 @@ class DwarfSymbolizationService {
     required Uint8List symbols,
   }) async {
     await decodeWithUnits(
-        input: input,
-        output: output,
-        unitSymbols: <int, Uint8List>{
-          rootLoadingUnitId: symbols,
-        },
+      input: input,
+      output: output,
+      unitSymbols: <int, Uint8List>{rootLoadingUnitId: symbols},
     );
   }
 
@@ -294,24 +295,28 @@ class DwarfSymbolizationService {
     final UnitSymbolsTransformer unitSymbolsTransformer = _transformer != null
         ? ((Map<int, Uint8List> m) => _transformer(m[rootLoadingUnitId]!))
         : _unitsTransformer;
-    final Completer<void> onDone = Completer<void>();
+    final onDone = Completer<void>();
     StreamSubscription<void>? subscription;
     subscription = input
-      .cast<List<int>>()
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
-      .transform(unitSymbolsTransformer(unitSymbols))
-      .listen((String line) {
-        try {
-          output.writeln(line);
-        } on Exception catch (e, s) {
-          subscription?.cancel().whenComplete(() {
-            if (!onDone.isCompleted) {
-              onDone.completeError(e, s);
+        .cast<List<int>>()
+        .transform(const Utf8Decoder())
+        .transform(const LineSplitter())
+        .transform(unitSymbolsTransformer(unitSymbols))
+        .listen(
+          (String line) {
+            try {
+              output.writeln(line);
+            } on Exception catch (e, s) {
+              subscription?.cancel().whenComplete(() {
+                if (!onDone.isCompleted) {
+                  onDone.completeError(e, s);
+                }
+              });
             }
-          });
-        }
-      }, onDone: onDone.complete, onError: onDone.completeError);
+          },
+          onDone: onDone.complete,
+          onError: onDone.completeError,
+        );
 
     try {
       await onDone.future;

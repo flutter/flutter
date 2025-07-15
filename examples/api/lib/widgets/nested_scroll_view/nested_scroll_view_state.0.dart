@@ -13,9 +13,7 @@ class NestedScrollViewStateExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: NestedScrollViewStateExample(),
-    );
+    return const MaterialApp(home: NestedScrollViewStateExample());
   }
 }
 
@@ -25,21 +23,20 @@ class NestedScrollViewStateExample extends StatelessWidget {
   const NestedScrollViewStateExample({super.key});
 
   @override
-  @override
   Widget build(BuildContext context) {
     return NestedScrollView(
       key: globalKey,
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return const <Widget>[
-          SliverAppBar(
-            title: Text('NestedScrollViewState Demo!'),
-          ),
-        ];
+        return const <Widget>[SliverAppBar(title: Text('NestedScrollViewState Demo!'))];
       },
       body: const CustomScrollView(
-          // Body slivers go here!
-          ),
+        // Body slivers go here!
+      ),
     );
+  }
+
+  ScrollController get outerController {
+    return globalKey.currentState!.outerController;
   }
 
   ScrollController get innerController {

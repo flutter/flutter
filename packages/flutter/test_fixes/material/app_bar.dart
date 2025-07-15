@@ -19,6 +19,6 @@ void main() {
 
   AppBar appBar = AppBar();
   appBar = AppBar(backwardsCompatibility: true);
-  appBar = AppBar(backwardsCompatibility: false));
+  appBar = AppBar(backwardsCompatibility: false);
   appBar.backwardsCompatibility; // Removing field reference not supported.
 }

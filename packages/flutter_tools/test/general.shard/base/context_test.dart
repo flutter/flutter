@@ -35,47 +35,59 @@ void main() {
 
       test('returns child context after run', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () {
-          expect(context, isNot(rootContext));
-          expect(context.name, 'child');
-          called = true;
-        });
+        await rootContext.run<void>(
+          name: 'child',
+          body: () {
+            expect(context, isNot(rootContext));
+            expect(context.name, 'child');
+            called = true;
+          },
+        );
         expect(called, isTrue);
       });
 
       test('returns grandchild context after nested run', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () async {
-          final AppContext childContext = context;
-          await childContext.run<void>(name: 'grandchild', body: () {
-            expect(context, isNot(rootContext));
-            expect(context, isNot(childContext));
-            expect(context.name, 'grandchild');
-            called = true;
-          });
-        });
+        await rootContext.run<void>(
+          name: 'child',
+          body: () async {
+            final AppContext childContext = context;
+            await childContext.run<void>(
+              name: 'grandchild',
+              body: () {
+                expect(context, isNot(rootContext));
+                expect(context, isNot(childContext));
+                expect(context.name, 'grandchild');
+                called = true;
+              },
+            );
+          },
+        );
         expect(called, isTrue);
       });
 
       test('scans up zone hierarchy for first context', () async {
         final AppContext rootContext = context;
-        await rootContext.run<void>(name: 'child', body: () {
-          final AppContext childContext = context;
-          runZoned<void>(() {
-            expect(context, isNot(rootContext));
-            expect(context, same(childContext));
-            expect(context.name, 'child');
-            called = true;
-          });
-        });
+        await rootContext.run<void>(
+          name: 'child',
+          body: () {
+            final AppContext childContext = context;
+            runZoned<void>(() {
+              expect(context, isNot(rootContext));
+              expect(context, same(childContext));
+              expect(context.name, 'child');
+              called = true;
+            });
+          },
+        );
         expect(called, isTrue);
       });
     });
 
     group('operator[]', () {
       test('still finds values if async code runs after body has finished', () async {
-        final Completer<void> outer = Completer<void>();
-        final Completer<void> inner = Completer<void>();
+        final outer = Completer<void>();
+        final inner = Completer<void>();
         String? value;
         await context.run<void>(
           body: () {
@@ -84,9 +96,7 @@ void main() {
               inner.complete();
             });
           },
-          fallbacks: <Type, Generator>{
-            String: () => 'value',
-          },
+          fallbacks: <Type, Generator>{String: () => 'value'},
         );
         expect(value, isNull);
         outer.complete();
@@ -95,15 +105,17 @@ void main() {
       });
 
       test('caches generated override values', () async {
-        int consultationCount = 0;
+        var consultationCount = 0;
         String? value;
         await context.run<void>(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>()!);
+            final buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
-            await context.run<void>(body: () {
-              buf.write(context.get<String>());
-            });
+            await context.run<void>(
+              body: () {
+                buf.write(context.get<String>());
+              },
+            );
             value = buf.toString();
           },
           overrides: <Type, Generator>{
@@ -118,15 +130,17 @@ void main() {
       });
 
       test('caches generated fallback values', () async {
-        int consultationCount = 0;
+        var consultationCount = 0;
         String? value;
         await context.run(
           body: () async {
-            final StringBuffer buf = StringBuffer(context.get<String>()!);
+            final buf = StringBuffer(context.get<String>()!);
             buf.write(context.get<String>());
-            await context.run<void>(body: () {
-              buf.write(context.get<String>());
-            });
+            await context.run<void>(
+              body: () {
+                buf.write(context.get<String>());
+              },
+            );
             value = buf.toString();
           },
           fallbacks: <Type, Generator>{
@@ -143,9 +157,7 @@ void main() {
       test('returns null if generated value is null', () async {
         final String? value = await context.run<String?>(
           body: () => context.get<String>(),
-          overrides: <Type, Generator>{
-            String: () => null,
-          },
+          overrides: <Type, Generator>{String: () => null},
         );
         expect(value, isNull);
       });
@@ -165,12 +177,16 @@ void main() {
           () => value,
           throwsA(
             isA<ContextDependencyCycleException>()
-              .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
-              .having(
-                (ContextDependencyCycleException error) => error.toString(),
-                'toString()',
-                'Dependency cycle detected: String -> double -> int',
-              ),
+                .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[
+                  String,
+                  double,
+                  int,
+                ])
+                .having(
+                  (ContextDependencyCycleException error) => error.toString(),
+                  'toString()',
+                  'Dependency cycle detected: String -> double -> int',
+                ),
           ),
         );
       });
@@ -184,9 +200,12 @@ void main() {
       });
 
       test('passes name to child context', () async {
-        await context.run<void>(name: 'child', body: () {
-          expect(context.name, 'child');
-        });
+        await context.run<void>(
+          name: 'child',
+          body: () {
+            expect(context.name, 'child');
+          },
+        );
       });
 
       group('fallbacks', () {
@@ -204,9 +223,7 @@ void main() {
                   called = true;
                   return context.get<String>();
                 },
-                fallbacks: <Type, Generator>{
-                  String: () => 'child',
-                },
+                fallbacks: <Type, Generator>{String: () => 'child'},
               );
             },
           );
@@ -215,7 +232,7 @@ void main() {
         });
 
         test('are not applied if parent context supplies value', () async {
-          bool childConsulted = false;
+          var childConsulted = false;
           final String? value = await context.run<String?>(
             body: () {
               return context.run<String?>(
@@ -231,9 +248,7 @@ void main() {
                 },
               );
             },
-            fallbacks: <Type, Generator>{
-              String: () => 'parent',
-            },
+            fallbacks: <Type, Generator>{String: () => 'parent'},
           );
           expect(called, isTrue);
           expect(value, 'parent');
@@ -245,10 +260,7 @@ void main() {
             body: () {
               return context.get<String>();
             },
-            fallbacks: <Type, Generator>{
-              int: () => 123,
-              String: () => '-${context.get<int>()}-',
-            },
+            fallbacks: <Type, Generator>{int: () => 123, String: () => '-${context.get<int>()}-'},
           );
           expect(value, '-123-');
         });
@@ -256,14 +268,12 @@ void main() {
 
       group('overrides', () {
         test('intercept consultation of parent context', () async {
-          bool parentConsulted = false;
+          var parentConsulted = false;
           final String? value = await context.run<String?>(
             body: () {
               return context.run<String?>(
                 body: () => context.get<String>(),
-                overrides: <Type, Generator>{
-                  String: () => 'child',
-                },
+                overrides: <Type, Generator>{String: () => 'child'},
               );
             },
             fallbacks: <Type, Generator>{

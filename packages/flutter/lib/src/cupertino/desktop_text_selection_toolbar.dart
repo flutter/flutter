@@ -10,7 +10,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -37,13 +36,11 @@ const List<BoxShadow> _kToolbarShadow = <BoxShadow>[
 
 // These values were measured from a screenshot of the native context menu on
 // macOS 13.2 on a Macbook Pro.
-const CupertinoDynamicColor _kToolbarBorderColor =
-    CupertinoDynamicColor.withBrightness(
+const CupertinoDynamicColor _kToolbarBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFB8B8B8),
   darkColor: Color(0xFF5B5B5B),
 );
-const CupertinoDynamicColor _kToolbarBackgroundColor =
-    CupertinoDynamicColor.withBrightness(
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xB2FFFFFF),
   darkColor: Color(0xB2303030),
 );
@@ -105,39 +102,24 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
     return Container(
       width: _kToolbarWidth,
       clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
-        boxShadow: _kToolbarShadow,
-        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
+      decoration: const ShapeDecoration(
+        shadows: _kToolbarShadow,
+        shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kToolbarBorderRadius)),
       ),
       child: BackdropFilter(
-        // Flutter web doesn't support ImageFilter.compose on CanvasKit yet
-        // (https://github.com/flutter/flutter/issues/120123).
-        filter: kIsWeb
-            ? ImageFilter.blur(
-                sigmaX: _kToolbarBlurSigma,
-                sigmaY: _kToolbarBlurSigma,
-              )
-            : ImageFilter.compose(
-                outer: ColorFilter.matrix(
-                  _matrixWithSaturation(_kToolbarSaturationBoost),
-                ),
-                inner: ImageFilter.blur(
-                  sigmaX: _kToolbarBlurSigma,
-                  sigmaY: _kToolbarBlurSigma,
-                ),
-              ),
+        filter: ImageFilter.compose(
+          outer: ColorFilter.matrix(_matrixWithSaturation(_kToolbarSaturationBoost)),
+          inner: ImageFilter.blur(sigmaX: _kToolbarBlurSigma, sigmaY: _kToolbarBlurSigma),
+        ),
         child: DecoratedBox(
-          decoration: BoxDecoration(
+          decoration: ShapeDecoration(
             color: _kToolbarBackgroundColor.resolveFrom(context),
-            border: Border.all(
-              color: _kToolbarBorderColor.resolveFrom(context),
+            shape: RoundedSuperellipseBorder(
+              side: BorderSide(color: _kToolbarBorderColor.resolveFrom(context)),
+              borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
             ),
-            borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
           ),
-          child: Padding(
-            padding: _kToolbarPadding,
-            child: child,
-          ),
+          child: Padding(padding: _kToolbarPadding, child: child),
         ),
       ),
     );
@@ -147,8 +129,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
-    final double paddingAbove =
-        MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
+    final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;
     final Offset localAdjustment = Offset(_kToolbarScreenPadding, paddingAbove);
 
     return Padding(
@@ -159,15 +140,10 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
-        delegate: DesktopTextSelectionToolbarLayoutDelegate(
-          anchor: anchor - localAdjustment,
-        ),
+        delegate: DesktopTextSelectionToolbarLayoutDelegate(anchor: anchor - localAdjustment),
         child: _defaultToolbarBuilder(
           context,
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: children,
-          ),
+          Column(mainAxisSize: MainAxisSize.min, children: children),
         ),
       ),
     );

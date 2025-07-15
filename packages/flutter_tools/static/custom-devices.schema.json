@@ -59,7 +59,7 @@
             "required": false
           },
           "postBuild": {
-            "description": "The command to be invoked after the build process is done, to do any additional packaging for example.",
+            "description": "The command to be invoked after the build process is done, to do any additional packaging for example. The following variables are available via string interpolation:\n- ${appName}\n- ${localPath}\n- ${buildMode}\n- ${icuDataPath}\n- ${engineRevision}",
             "type": ["array", "null"],
             "items": {
               "type": "string"
@@ -91,7 +91,7 @@
             ]
           },
           "runDebug": {
-            "description": "The command to be invoked to run the app in debug mode. The name of the app to be started is available via the ${appName} string interpolation. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"VM Service is now listening on ...\" message to function. If the forwardPort command is not specified, the VM Service URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--vm-service-host=<ip>\" engine flag.",
+            "description": "The command to be invoked to run the app in debug mode. Make sure the flutter cmdline output is available via this commands stdout/stderr since the SDK needs the \"VM Service is now listening on ...\" message to function. If the forwardPort command is not specified, the VM Service URL will be connected to as-is, without any port forwarding. In that case you need to make sure it is reachable from your host device, possibly via the \"--vm-service-host=<ip>\" engine flag. The following variables are available via string interpolation:\n- ${appName}\n- ${engineOptions}\n- ${buildMode}\n- ${icuDataPath}\n- ${engineRevision}",
             "type": "array",
             "items": {
               "type": "string"

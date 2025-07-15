@@ -404,4 +404,51 @@ transforms:
       fillColor:
         kind: fragment
         value: 'arguments[fillColor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/161295
+  - title: "Migrate 'minSize' to 'minimumSize'"
+    date: 2025-01-09
+    element:
+      uris: [ 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'CupertinoButton'
+    oneOf:
+      - if: "minSize != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 7
+            name: 'minimumSize'
+            style: optional_named
+            argumentValue:
+              expression: 'Size({% minSize %}, {% minSize %})'
+              requiredIf: "minSize != ''"
+          - kind: 'removeParameter'
+            name: 'minSize'
+    variables:
+      minSize:
+        kind: fragment
+        value: 'arguments[minSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170625
+  - title: "Migrate to 'builder'"
+    date: 2025-06-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "pageBuilder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'builder'
+            style: optional_named
+            argumentValue:
+              expression: '{% pageBuilder %}'
+              requiredIf: "pageBuilder != ''"
+          - kind: 'removeParameter'
+            name: 'pageBuilder'
+    variables:
+      pageBuilder:
+        kind: fragment
+        value: 'arguments[pageBuilder]'
 # Before adding a new fix: read instructions at the top of this file.

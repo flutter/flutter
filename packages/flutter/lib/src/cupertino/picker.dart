@@ -89,6 +89,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required List<Widget> children,
@@ -99,8 +100,8 @@ class CupertinoPicker extends StatefulWidget {
        assert(itemExtent > 0),
        assert(squeeze > 0),
        childDelegate = looping
-                       ? ListWheelChildLoopingListDelegate(children: children)
-                       : ListWheelChildListDelegate(children: children);
+           ? ListWheelChildLoopingListDelegate(children: children)
+           : ListWheelChildListDelegate(children: children);
 
   /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
   /// is dynamically invoked during layout.
@@ -128,6 +129,7 @@ class CupertinoPicker extends StatefulWidget {
     this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
     required this.itemExtent,
     required this.onSelectedItemChanged,
     required NullableIndexedWidgetBuilder itemBuilder,
@@ -186,13 +188,19 @@ class CupertinoPicker extends StatefulWidget {
   /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
 
-  /// An option callback when the currently centered item changes.
+  /// The behavior of reporting the selected item index.
   ///
-  /// Value changes when the item closest to the center changes.
+  /// This determines when the [onSelectedItemChanged] callback is called.
   ///
-  /// This can be called during scrolls and during ballistic flings. To get the
-  /// value only when the scrolling settles, use a [NotificationListener],
-  /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
+  /// Native iOS 18 behavior is [ChangeReportingBehavior.onScrollEnd], which
+  /// calls the callback only when the scrolling stops.
+  ///
+  /// Defaults to [ChangeReportingBehavior.onScrollUpdate].
+  final ChangeReportingBehavior changeReportingBehavior;
+
+  /// Called when the selected item changes.
+  ///
+  /// The timing of this callback is controlled by [changeReportingBehavior].
   final ValueChanged<int>? onSelectedItemChanged;
 
   /// A delegate that lazily instantiates children.
@@ -215,8 +223,13 @@ class CupertinoPicker extends StatefulWidget {
 }
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
-  int? _lastHapticIndex;
+  // Initial value set to skip haptic feedback for the first item.
+  late int _lastHapticIndex = _effectiveController.initialItem;
+  int? _lastMiddlePosition;
   FixedExtentScrollController? _controller;
+  bool _enableHapticFeedback = true;
+
+  FixedExtentScrollController get _effectiveController => widget.scrollController ?? _controller!;
 
   @override
   void initState() {
@@ -224,6 +237,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (widget.scrollController == null) {
       _controller = FixedExtentScrollController();
     }
+
+    _effectiveController.addListener(_handleScroll);
   }
 
   @override
@@ -232,46 +247,78 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (widget.scrollController != null && oldWidget.scrollController == null) {
       _controller?.dispose();
       _controller = null;
+      widget.scrollController!.addListener(_handleScroll);
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);
+      oldWidget.scrollController!.removeListener(_handleScroll);
       _controller = FixedExtentScrollController();
+      _controller!.addListener(_handleScroll);
     }
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    if (widget.scrollController != null) {
+      widget.scrollController!.removeListener(_handleScroll);
+    }
     super.dispose();
   }
 
-  void _handleSelectedItemChanged(int index) {
-    // Only the haptic engine hardware on iOS devices would produce the
-    // intended effects.
-    final bool hasSuitableHapticHardware;
+  void _handleHapticFeedback(int index) {
+    if (!_enableHapticFeedback) {
+      return;
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        hasSuitableHapticHardware = true;
+        if (index != _lastHapticIndex) {
+          _lastHapticIndex = index;
+          HapticFeedback.selectionClick();
+          SystemSound.play(SystemSoundType.tick);
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        hasSuitableHapticHardware = false;
+        // No haptic feedback on these platforms.
+        return;
     }
-    if (hasSuitableHapticHardware && index != _lastHapticIndex) {
-      _lastHapticIndex = index;
-      HapticFeedback.selectionClick();
-    }
-
-    widget.onSelectedItemChanged?.call(index);
   }
 
-  void _handleChildTap(int index, FixedExtentScrollController controller) {
-    controller.animateToItem(
+  void _handleScroll() {
+    final int index = _effectiveController.selectedItem;
+
+    // This switches from the current index to the next index
+    // when we pass the middle of the item.
+    final double fractionalOffset = _effectiveController.offset / widget.itemExtent;
+    final int currentPosition = fractionalOffset.floor();
+
+    final double currentItemOffset = fractionalOffset - index;
+    // Check that we either passed in the middle of the new item or
+    // that we are very close.
+    // The second check is to avoid the rounding error when the
+    // scroll position is very close to the middle of the item,
+    // but not exactly in the middle.
+    if (currentPosition != _lastMiddlePosition || currentItemOffset.abs() <= 0.1) {
+      // Middle is checked with currentPosition, but we pass the real index
+      // to avoid multiple haptics for the same item and to avoid
+      // calling haptic feedback when overscrolling.
+      _handleHapticFeedback(index);
+    }
+
+    _lastMiddlePosition = currentPosition;
+  }
+
+  Future<void> _handleChildTap(int index) async {
+    _enableHapticFeedback = false;
+    await _effectiveController.animateToItem(
       index,
       duration: _kCupertinoPickerTapToScrollDuration,
       curve: _kCupertinoPickerTapToScrollCurve,
     );
+    _enableHapticFeedback = true;
+    _lastHapticIndex = _effectiveController.selectedItem;
   }
 
   /// Draws the selectionOverlay.
@@ -281,9 +328,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     return IgnorePointer(
       child: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints.expand(
-            height: height,
-          ),
+          constraints: BoxConstraints.expand(height: height),
           child: selectionOverlay,
         ),
       ),
@@ -293,19 +338,23 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
-    final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
+    final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(
+      widget.backgroundColor,
+      context,
+    );
 
     assert(RenderListWheelViewport.defaultPerspective == _kDefaultPerspective);
-    final FixedExtentScrollController controller = widget.scrollController ?? _controller!;
     final Widget result = DefaultTextStyle(
-      style: textStyle.copyWith(color: CupertinoDynamicColor.maybeResolve(textStyle.color, context)),
+      style: textStyle.copyWith(
+        color: CupertinoDynamicColor.maybeResolve(textStyle.color, context),
+      ),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
             child: _CupertinoPickerSemantics(
-              scrollController: controller,
+              scrollController: _effectiveController,
               child: ListWheelScrollView.useDelegate(
-                controller: controller,
+                controller: _effectiveController,
                 physics: const FixedExtentScrollPhysics(),
                 diameterRatio: widget.diameterRatio,
                 offAxisFraction: widget.offAxisFraction,
@@ -314,17 +363,17 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 overAndUnderCenterOpacity: _kOverAndUnderCenterOpacity,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
-                onSelectedItemChanged: _handleSelectedItemChanged,
+                onSelectedItemChanged: widget.onSelectedItemChanged,
                 dragStartBehavior: DragStartBehavior.down,
+                changeReportingBehavior: widget.changeReportingBehavior,
                 childDelegate: _CupertinoPickerListWheelChildDelegateWrapper(
                   widget.childDelegate,
-                  onTappedChild: (int index) => _handleChildTap(index, controller),
+                  onTappedChild: _handleChildTap,
                 ),
               ),
             ),
           ),
-          if (widget.selectionOverlay != null)
-            _buildSelectionOverlay(widget.selectionOverlay!),
+          if (widget.selectionOverlay != null) _buildSelectionOverlay(widget.selectionOverlay!),
         ],
       ),
     );
@@ -354,7 +403,6 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 ///
 ///  * [CupertinoPicker], which uses this widget as its default [CupertinoPicker.selectionOverlay].
 class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
-
   /// Creates an iOS 14 style selection overlay that highlights the magnified
   /// area (or the currently selected item, depending on how you described it
   /// elsewhere) of a [CupertinoPicker].
@@ -401,10 +449,12 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
         start: capStartEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
         end: capEndEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
       ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadiusDirectional.horizontal(
-          start: capStartEdge ? radius : Radius.zero,
-          end: capEndEdge ? radius : Radius.zero,
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadiusDirectional.horizontal(
+            start: capStartEdge ? radius : Radius.zero,
+            end: capEndEdge ? radius : Radius.zero,
+          ),
         ),
         color: CupertinoDynamicColor.resolve(background, context),
       ),
@@ -419,10 +469,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 // adjustable semantic node, with adjustment callbacks wired to move the
 // scroll controller.
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
-  const _CupertinoPickerSemantics({
-    super.child,
-    required this.scrollController,
-  });
+  const _CupertinoPickerSemantics({super.child, required this.scrollController});
 
   final FixedExtentScrollController scrollController;
 
@@ -433,7 +480,10 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderCupertinoPickerSemantics renderObject,
+  ) {
     assert(debugCheckHasDirectionality(context));
     renderObject
       ..textDirection = Directionality.of(context)
@@ -491,6 +541,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     _currentIndex = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -499,7 +550,11 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
     if (children.isEmpty) {
       return super.assembleSemanticsNode(node, config, children);
     }
@@ -535,10 +590,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
 }
 
 class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDelegate {
-  _CupertinoPickerListWheelChildDelegateWrapper(
-    this._wrapped, {
-    required this.onTappedChild,
-  });
+  _CupertinoPickerListWheelChildDelegateWrapper(this._wrapped, {required this.onTappedChild});
   final ListWheelChildDelegate _wrapped;
   final void Function(int index) onTappedChild;
 
@@ -560,7 +612,8 @@ class _CupertinoPickerListWheelChildDelegateWrapper implements ListWheelChildDel
   int? get estimatedChildCount => _wrapped.estimatedChildCount;
 
   @override
-  bool shouldRebuild(covariant _CupertinoPickerListWheelChildDelegateWrapper oldDelegate) => _wrapped.shouldRebuild(oldDelegate._wrapped);
+  bool shouldRebuild(covariant _CupertinoPickerListWheelChildDelegateWrapper oldDelegate) =>
+      _wrapped.shouldRebuild(oldDelegate._wrapped);
 
   @override
   int trueIndexOf(int index) => _wrapped.trueIndexOf(index);

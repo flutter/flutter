@@ -13,23 +13,19 @@ import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
 
-const int kNetworkProblemExitCode = 50;
-const String kFlutterStorageBaseUrl = 'FLUTTER_STORAGE_BASE_URL';
+const kNetworkProblemExitCode = 50;
+const kFlutterStorageBaseUrl = 'FLUTTER_STORAGE_BASE_URL';
 
 typedef HttpClientFactory = HttpClient Function();
 
 typedef UrlTunneller = Future<String> Function(String url);
 
-/// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
-  Net({
-    HttpClientFactory? httpClientFactory,
-    required Logger logger,
-    required Platform platform,
-  }) :
-    _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
-    _logger = logger,
-    _platform = platform;
+  /// If [httpClientFactory] is `null`, a default [HttpClient] is used.
+  Net({HttpClientFactory? httpClientFactory, required Logger logger, required Platform platform})
+    : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
+      _logger = logger,
+      _platform = platform;
 
   final HttpClientFactory _httpClientFactory;
 
@@ -45,13 +41,14 @@ class Net {
   /// returns an empty list.
   ///
   /// If [maxAttempts] is exceeded, returns null.
-  Future<List<int>?> fetchUrl(Uri url, {
+  Future<List<int>?> fetchUrl(
+    Uri url, {
     int? maxAttempts,
     File? destFile,
     @visibleForTesting Duration? durationOverride,
   }) async {
-    int attempts = 0;
-    int durationSeconds = 1;
+    var attempts = 0;
+    var durationSeconds = 1;
     while (true) {
       attempts += 1;
       _MemoryIOSink? memorySink;
@@ -63,10 +60,7 @@ class Net {
         sink = destFile.openWrite();
       }
 
-      final bool result = await _attempt(
-        url,
-        destSink: sink,
-      );
+      final bool result = await _attempt(url, destSink: sink);
       if (result) {
         return memorySink?.writes.takeBytes() ?? <int>[];
       }
@@ -77,7 +71,7 @@ class Net {
       }
       _logger.printStatus(
         'Download failed -- attempting retry $attempts in '
-        '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...',
+        '$durationSeconds second${durationSeconds == 1 ? "" : "s"}...',
       );
       await Future<void>.delayed(durationOverride ?? Duration(seconds: durationSeconds));
       if (durationSeconds < 64) {
@@ -90,10 +84,7 @@ class Net {
   Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
 
   // Returns true on success and false on failure.
-  Future<bool> _attempt(Uri url, {
-    IOSink? destSink,
-    bool onlyHeaders = false,
-  }) async {
+  Future<bool> _attempt(Uri url, {IOSink? destSink, bool onlyHeaders = false}) async {
     assert(onlyHeaders || destSink != null);
     _logger.printTrace('Downloading: $url');
     final HttpClient httpClient = _httpClientFactory();
@@ -174,7 +165,7 @@ class _MemoryIOSink implements IOSink {
   @override
   Encoding encoding = utf8;
 
-  final BytesBuilder writes = BytesBuilder(copy: false);
+  final writes = BytesBuilder(copy: false);
 
   @override
   void add(List<int> data) {
@@ -183,7 +174,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
@@ -199,13 +190,13 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([ Object? obj = '' ]) {
+  void writeln([Object? obj = '']) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
-    bool addSeparator = false;
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
@@ -216,7 +207,7 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [ StackTrace? stackTrace ]) {
+  void addError(dynamic error, [StackTrace? stackTrace]) {
     throw UnimplementedError();
   }
 
@@ -224,13 +215,13 @@ class _MemoryIOSink implements IOSink {
   Future<void> get done => close();
 
   @override
-  Future<void> close() async { }
+  Future<void> close() async {}
 
   @override
-  Future<void> flush() async { }
+  Future<void> flush() async {}
 }
 
-/// Returns [true] if [address] is an IPv6 address.
+/// Whether [address] is an IPv6 address.
 bool isIPv6Address(String address) {
   try {
     Uri.parseIPv6Address(address);

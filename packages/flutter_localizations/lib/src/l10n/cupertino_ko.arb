@@ -4,7 +4,7 @@
   "datePickerMinuteSemanticsLabelOne": "1분",
   "datePickerMinuteSemanticsLabelOther": "$minute분",
   "datePickerDateOrder": "ymd",
-  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "datePickerDateTimeOrder": "date_dayPeriod_time",
   "anteMeridiemAbbreviation": "오전",
   "postMeridiemAbbreviation": "오후",
   "todayLabel": "오늘",
@@ -27,5 +27,7 @@
   "lookUpButtonLabel": "찾기",
   "searchWebButtonLabel": "웹 검색",
   "shareButtonLabel": "공유...",
-  "clearButtonLabel": "삭제"
+  "clearButtonLabel": "삭제",
+  "cancelButtonLabel": "취소",
+  "backButtonLabel": "뒤로"
 }

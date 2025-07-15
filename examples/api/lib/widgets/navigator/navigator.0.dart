@@ -64,10 +64,7 @@ class CollectPersonalInfoPage extends StatelessWidget {
 }
 
 class ChooseCredentialsPage extends StatelessWidget {
-  const ChooseCredentialsPage({
-    super.key,
-    required this.onSignupComplete,
-  });
+  const ChooseCredentialsPage({super.key, required this.onSignupComplete});
 
   final VoidCallback onSignupComplete;
 
@@ -107,15 +104,15 @@ class SignUpPage extends StatelessWidget {
             // Assume ChooseCredentialsPage collects new credentials and then
             // invokes 'onSignupComplete()'.
             builder = (BuildContext _) => ChooseCredentialsPage(
-                  onSignupComplete: () {
-                    // Referencing Navigator.of(context) from here refers to the
-                    // top level Navigator because SignUpPage is above the
-                    // nested Navigator that it created. Therefore, this pop()
-                    // will pop the entire "sign up" journey and return to the
-                    // "/" route, AKA HomePage.
-                    Navigator.of(context).pop();
-                  },
-                );
+              onSignupComplete: () {
+                // Referencing Navigator.of(context) from here refers to the
+                // top level Navigator because SignUpPage is above the
+                // nested Navigator that it created. Therefore, this pop()
+                // will pop the entire "sign up" journey and return to the
+                // "/" route, AKA HomePage.
+                Navigator.of(context).pop();
+              },
+            );
           default:
             throw Exception('Invalid route: ${settings.name}');
         }

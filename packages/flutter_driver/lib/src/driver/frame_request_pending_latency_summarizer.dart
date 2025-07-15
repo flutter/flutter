@@ -21,8 +21,7 @@ class FrameRequestPendingLatencySummarizer {
 
   /// Computes the average `FrameRequestPendingLatency` over the period of the timeline.
   double computeAverageFrameRequestPendingLatency() {
-    final List<double> frameRequestPendingLatencies =
-        _computeFrameRequestPendingLatencies();
+    final List<double> frameRequestPendingLatencies = _computeFrameRequestPendingLatencies();
     if (frameRequestPendingLatencies.isEmpty) {
       return 0;
     }
@@ -34,8 +33,7 @@ class FrameRequestPendingLatencySummarizer {
   /// Computes the [percentile]-th percentile `FrameRequestPendingLatency` over the
   /// period of the timeline.
   double computePercentileFrameRequestPendingLatency(double percentile) {
-    final List<double> frameRequestPendingLatencies =
-        _computeFrameRequestPendingLatencies();
+    final List<double> frameRequestPendingLatencies = _computeFrameRequestPendingLatencies();
     if (frameRequestPendingLatencies.isEmpty) {
       return 0;
     }
@@ -45,18 +43,16 @@ class FrameRequestPendingLatencySummarizer {
   List<double> _computeFrameRequestPendingLatencies() {
     final List<double> result = <double>[];
     final Map<String, int> starts = <String, int>{};
-    for (int i = 0; i < frameRequestPendingEvents.length; i++) {
-      final TimelineEvent event = frameRequestPendingEvents[i];
-      if (event.phase == 'b') {
-        final String? id = event.json['id'] as String?;
-        if (id != null) {
+    for (final TimelineEvent event in frameRequestPendingEvents) {
+      switch (event) {
+        case TimelineEvent(phase: 'b', json: {'id': final String id}):
           starts[id] = event.timestampMicros!;
-        }
-      } else if (event.phase == 'e') {
-        final int? start = starts[event.json['id']];
-        if (start != null) {
-          result.add((event.timestampMicros! - start).toDouble());
-        }
+
+        case TimelineEvent(phase: 'e', json: {'id': final String id}):
+          final int? start = starts[id];
+          if (start != null) {
+            result.add((event.timestampMicros! - start).toDouble());
+          }
       }
     }
     return result;

@@ -34,21 +34,15 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 18.0, h
 /// A button in the style of the iOS text selection toolbar buttons.
 class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
-  const CupertinoTextSelectionToolbarButton({
-    super.key,
-    this.onPressed,
-    required Widget this.child,
-  }) : text = null,
-       buttonItem = null;
+  const CupertinoTextSelectionToolbarButton({super.key, this.onPressed, required Widget this.child})
+    : text = null,
+      buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
   /// a [Text] widget styled like the default iOS text selection toolbar button.
-  const CupertinoTextSelectionToolbarButton.text({
-    super.key,
-    this.onPressed,
-    required this.text,
-  }) : buttonItem = null,
-       child = null;
+  const CupertinoTextSelectionToolbarButton.text({super.key, this.onPressed, required this.text})
+    : buttonItem = null,
+      child = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
@@ -93,16 +87,16 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
     assert(debugCheckHasCupertinoLocalizations(context));
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     return switch (buttonItem.type) {
-      ContextMenuButtonType.cut       => localizations.cutButtonLabel,
-      ContextMenuButtonType.copy      => localizations.copyButtonLabel,
-      ContextMenuButtonType.paste     => localizations.pasteButtonLabel,
+      ContextMenuButtonType.cut => localizations.cutButtonLabel,
+      ContextMenuButtonType.copy => localizations.copyButtonLabel,
+      ContextMenuButtonType.paste => localizations.pasteButtonLabel,
       ContextMenuButtonType.selectAll => localizations.selectAllButtonLabel,
-      ContextMenuButtonType.lookUp    => localizations.lookUpButtonLabel,
+      ContextMenuButtonType.lookUp => localizations.lookUpButtonLabel,
       ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
-      ContextMenuButtonType.share     => localizations.shareButtonLabel,
-      ContextMenuButtonType.liveTextInput
-        || ContextMenuButtonType.delete
-        || ContextMenuButtonType.custom => '',
+      ContextMenuButtonType.share => localizations.shareButtonLabel,
+      ContextMenuButtonType.liveTextInput ||
+      ContextMenuButtonType.delete ||
+      ContextMenuButtonType.custom => '',
     };
   }
 
@@ -130,9 +124,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
   Widget build(BuildContext context) {
     final Widget content = _getContentWidget(context);
     final Widget child = CupertinoButton(
-      color: isPressed
-        ? _kToolbarPressedColor.resolveFrom(context)
-        : CupertinoColors.transparent,
+      color: isPressed ? _kToolbarPressedColor.resolveFrom(context) : CupertinoColors.transparent,
       disabledColor: CupertinoColors.transparent,
       // This CupertinoButton does not actually handle the onPressed callback,
       // this is only here to correctly enable/disable the button (see
@@ -165,7 +157,8 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       return widget.child!;
     }
     final Widget textWidget = Text(
-      widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
+      widget.text ??
+          CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
       overflow: TextOverflow.ellipsis,
       style: _kToolbarButtonFontStyle.copyWith(
         color: widget.onPressed != null

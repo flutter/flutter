@@ -13,9 +13,7 @@ class PopupSurfaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      home: PopupSurfaceExample(),
-    );
+    return const CupertinoApp(home: PopupSurfaceExample());
   }
 }
 
@@ -89,10 +87,7 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                         ? null
                         : CupertinoTheme.of(context).scaffoldBackgroundColor,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
-                      'Close',
-                      style: TextStyle(color: CupertinoColors.systemBlue),
-                    ),
+                    child: const Text('Close', style: TextStyle(color: CupertinoColors.systemBlue)),
                   ),
                 ),
               ],

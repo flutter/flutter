@@ -83,7 +83,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: Container(
               alignment: Alignment.topLeft,
@@ -91,15 +91,11 @@ void main() {
                 children: <Widget>[
                   TextField(
                     key: textField1,
-                    decoration: const InputDecoration(
-                      labelText: 'label',
-                    ),
+                    decoration: const InputDecoration(labelText: 'label'),
                   ),
                   TextField(
                     key: textField2,
-                    decoration: const InputDecoration(
-                      labelText: 'label',
-                    ),
+                    decoration: const InputDecoration(labelText: 'label'),
                   ),
                 ],
               ),
@@ -139,24 +135,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: ListView(
               children: <Widget>[
-                const TextField(
-                  decoration: InputDecoration(
-                    labelText: 'label1',
-                  ),
-                ),
-                const TextField(
-                  decoration: InputDecoration(
-                    labelText: 'label2',
-                  ),
-                ),
-                Container(
-                  height: 1000.0,
-                  color: const Color(0xFF00FF00),
-                ),
+                const TextField(decoration: InputDecoration(labelText: 'label1')),
+                const TextField(decoration: InputDecoration(labelText: 'label2')),
+                Container(height: 1000.0, color: const Color(0xFF00FF00)),
               ],
             ),
           ),

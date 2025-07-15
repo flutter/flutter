@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
+# Use git ls-files '<pattern>' to see the list of matching files.
+
 'a: accessibility':
   - changed-files:
     - any-glob-to-any-file:
@@ -23,6 +25,7 @@
       - '**/linux/**/*'
       - '**/macos/**/*'
       - '**/windows/**/*'
+      - engine/src/flutter/shell/platform/darwin/common/**/*
 
 'a: internationalization':
   - changed-files:
@@ -39,9 +42,10 @@
 
 'a: text input':
   - changed-files:
-    - any-glob-to-any-file:
-      - '**/text/*'
+    - all-globs-to-any-file:
       - '**/*text*'
+      - '!**/*context*'
+      - '!**/*texture*'
 
 'd: api docs':
   - changed-files:
@@ -58,10 +62,21 @@
     - any-glob-to-any-file:
       - examples/**/*
 
+'e: embedder':
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/embedder
+
+'e: impeller':
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/impeller/**/*
+
 engine:
   - changed-files:
     - any-glob-to-any-file:
-      - bin/internal/engine.version
+      - DEPS
+      - engine/**/*
       - docs/engine/**/*
 
 'f: cupertino':
@@ -136,16 +151,44 @@ platform-android:
   - changed-files:
     - any-glob-to-any-file:
       - docs/platform/android/**/*
+      - engine/src/flutter/shell/platform/android/**/*
+      - packages/flutter_tools/*android*'
+      - packages/flutter_tools/gradle/**/*
 
 platform-ios:
   - changed-files:
     - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/darwin/common/**/*
+      - engine/src/flutter/shell/platform/darwin/ios/**/*
       - packages/flutter_tools/lib/src/ios/**/*
+
+platform-fuchsia:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/fuchsia/**/*
+
+platform-linux:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/linux/**/*
+
+platform-macos:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/src/flutter/shell/platform/darwin/common/**/*
+      - engine/src/flutter/shell/platform/darwin/macos/**/*
 
 platform-web:
   - changed-files:
     - any-glob-to-any-file:
-      - packages/flutter_web_plugins/**/*
+      - '**/web_sdk/**/*'
+      - engine/src/flutter/lib/web_ui/**/*
+      - packages/flutter_web_plugins
+
+platform-windows:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/shell/platform/windows/**/*
 
 'customer: gallery':
   - changed-files:
@@ -158,18 +201,19 @@ platform-web:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
-
-team:
+'c: contributor-productivity':
   - changed-files:
     - any-glob-to-any-file:
-      - docs/about/**/*
       - docs/contributing/**/*
-      - docs/postmortems/**/*
 
+# Keep this synced with CODEOWNERS.
 team-android:
   - changed-files:
     - any-glob-to-any-file:
       - docs/platform/android/**/*
+      - engine/src/flutter/shell/platform/android/**/*
+      - packages/flutter_tools/**/*android*
+      - packages/flutter_tools/**/*gradle*
 
 team-ecosystem:
   - changed-files:
@@ -185,11 +229,19 @@ team-infra:
   - changed-files:
     - any-glob-to-any-file:
       - docs/infra/**/*
+      - docs/releases/**/*
 
-team-release:
+# Keep this synced with CODEOWNERS.
+team-ios:
   - changed-files:
     - any-glob-to-any-file:
-      - docs/releases/**/*
+      - engine/src/flutter/shell/platform/darwin/common/**/*
+      - engine/src/flutter/shell/platform/darwin/ios/framework/**/*
+      - packages/flutter_tools/**/ios/*
+      - packages/flutter_tools/**/macos/*
+      - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*ios*
+      - packages/flutter_tools/**/*macos*
 
 team-tool:
   - changed-files:

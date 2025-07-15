@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'analyze.dart';
+/// @docImport 'analyze_continuously.dart';
+/// @docImport 'analyze_once.dart';
+library;
+
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -19,7 +24,8 @@ import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
-  AnalyzeBase(this.argResults, {
+  AnalyzeBase(
+    this.argResults, {
     required this.repoPackages,
     required this.fileSystem,
     required this.logger,
@@ -58,7 +64,9 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fileSystem.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = fileSystem
+            .file(argResults['write'])
+            .openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -72,8 +80,8 @@ abstract class AnalyzeBase {
   }
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount) {
-    const String benchmarkOut = 'analysis_benchmark.json';
-    final Map<String, dynamic> data = <String, dynamic>{
+    const benchmarkOut = 'analysis_benchmark.json';
+    final data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
     };
@@ -83,9 +91,10 @@ abstract class AnalyzeBase {
 
   bool get isFlutterRepo => argResults['flutter-repo'] as bool;
   String get sdkPath {
-    final String? dartSdk = argResults['dart-sdk'] as String?;
+    final dartSdk = argResults['dart-sdk'] as String?;
     return dartSdk ?? artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   }
+
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
@@ -96,9 +105,9 @@ abstract class AnalyzeBase {
     int? files,
     required String seconds,
   }) {
-    final StringBuffer errorsMessage = StringBuffer(issueCount > 0
-      ? '$issueCount ${pluralize('issue', issueCount)} found.'
-      : 'No issues found!');
+    final errorsMessage = StringBuffer(
+      issueCount > 0 ? '$issueCount ${pluralize('issue', issueCount)} found.' : 'No issues found!',
+    );
 
     // Only [AnalyzeContinuously] has issueDiff message.
     if (issueDiff != null) {
@@ -121,22 +130,24 @@ abstract class AnalyzeBase {
 class PackageDependency {
   // This is a map from dependency targets (lib directories) to a list
   // of places that ask for that target (.packages or pubspec.yaml files)
-  Map<String, List<String>> values = <String, List<String>>{};
+  var values = <String, List<String>>{};
   String? canonicalSource;
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
     canonicalSource = pubSpecYamlPath;
   }
+
   void add(String packagePath, String sourcePath) {
     values.putIfAbsent(packagePath, () => <String>[]).add(sourcePath);
   }
+
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
     final String? flutterRoot = Cache.flutterRoot;
     assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
-      for (final String source in targetSources) {
+      for (final source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
         if (globals.fs.path.isWithin(flutterRoot!, source)) {
           return true;
@@ -145,33 +156,37 @@ class PackageDependency {
     }
     return false;
   }
+
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
-    for (final String target in targets) {
+    for (final target in targets) {
       final List<String> targetList = values[target]!;
       final int count = targetList.length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
-      bool canonical = false;
-      for (final String source in targetList) {
+      var canonical = false;
+      for (final source in targetList) {
         result.writeln('    $source');
         if (source == canonicalSource) {
           canonical = true;
         }
       }
       if (canonical) {
-        result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
+        result.writeln(
+          '    (This is the actual package definition, so it is considered the canonical "right answer".)',
+        );
       }
     }
   }
+
   String get target => values.keys.single;
 }
 
 class PackageDependencyTracker {
   // This is a map from package names to objects that track the paths
   // involved (sources and targets).
-  Map<String, PackageDependency> packages = <String, PackageDependency>{};
+  var packages = <String, PackageDependency>{};
 
   PackageDependency getPackageDependency(String packageName) {
     return packages.putIfAbsent(packageName, () => PackageDependency());
@@ -185,19 +200,26 @@ class PackageDependencyTracker {
     getPackageDependency(packageName).add(packagePath, dotPackagesPath);
   }
 
-  void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
-    for (final Directory directory in pubSpecDirectories) {
+  void checkForConflictingDependencies(
+    Iterable<Directory> pubSpecDirectories,
+    PackageDependencyTracker dependencies,
+  ) {
+    for (final directory in pubSpecDirectories) {
       final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
       final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final dynamic pubSpecYaml = yaml.loadYaml(globals.fs.file(pubSpecYamlPath).readAsStringSync());
+        final dynamic pubSpecYaml = yaml.loadYaml(
+          globals.fs.file(pubSpecYamlPath).readAsStringSync(),
+        );
         if (pubSpecYaml is yaml.YamlMap) {
           final dynamic packageName = pubSpecYaml['name'];
           if (packageName is String) {
-            final String packagePath = globals.fs.path.normalize(globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')));
+            final String packagePath = globals.fs.path.normalize(
+              globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')),
+            );
             dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
           } else {
             throwToolExit('pubspec.yaml is malformed. The name should be a String.');
@@ -209,19 +231,21 @@ class PackageDependencyTracker {
     }
 
     if (dependencies.hasConflicts) {
-      final StringBuffer message = StringBuffer();
+      final message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
-      message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
+      message.writeln(
+        'Make sure you have run "pub upgrade" in all the directories mentioned above.',
+      );
       if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
-          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)'
+          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)',
         );
       }
       message.write(
         'If this does not help, to track down the conflict you can use '
-        '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.'
+        '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.',
       );
       throwToolExit(message.toString());
     }
@@ -232,12 +256,14 @@ class PackageDependencyTracker {
   }
 
   bool get hasConflictsAffectingFlutterRepo {
-    return packages.values.any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
+    return packages.values.any(
+      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo,
+    );
   }
 
   String generateConflictReport() {
     assert(hasConflicts);
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     packages.forEach((String package, PackageDependency dependency) {
       if (dependency.hasConflict) {
         result.writeln('Package "$package" has conflicts:');
@@ -248,7 +274,7 @@ class PackageDependencyTracker {
   }
 
   Map<String, String> asPackageMap() {
-    final Map<String, String> result = <String, String>{};
+    final result = <String, String>{};
     packages.forEach((String package, PackageDependency dependency) {
       result[package] = dependency.target;
     });
@@ -258,10 +284,11 @@ class PackageDependencyTracker {
 
 /// Find directories or files from argResults.rest.
 Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
-  final Set<String> items = Set<String>.of(argResults.rest
-      .map<String>((String path) => fileSystem.path.canonicalize(path)));
+  final items = Set<String>.of(
+    argResults.rest.map<String>((String path) => fileSystem.path.canonicalize(path)),
+  );
   if (items.isNotEmpty) {
-    for (final String item in items) {
+    for (final item in items) {
       final FileSystemEntityType type = fileSystem.typeSync(item);
 
       if (type == FileSystemEntityType.notFound) {

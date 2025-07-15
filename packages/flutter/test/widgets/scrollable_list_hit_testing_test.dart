@@ -23,7 +23,9 @@ void main() {
               scrollDirection: Axis.horizontal,
               children: items.map<Widget>((int item) {
                 return GestureDetector(
-                  onTap: () { tapped.add(item); },
+                  onTap: () {
+                    tapped.add(item);
+                  },
                   dragStartBehavior: DragStartBehavior.down,
                   child: Text('$item'),
                 );
@@ -64,7 +66,9 @@ void main() {
               itemExtent: 290.0,
               children: items.map<Widget>((int item) {
                 return GestureDetector(
-                  onTap: () { tapped.add(item); },
+                  onTap: () {
+                    tapped.add(item);
+                  },
                   dragStartBehavior: DragStartBehavior.down,
                   child: Text('$item'),
                 );
@@ -91,7 +95,10 @@ void main() {
     await tester.tap(find.text('1'));
     expect(tapped, equals(<int>[1]));
     await tester.tap(find.text('3'), warnIfMissed: false);
-    expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
+    expect(
+      tapped,
+      equals(<int>[1]),
+    ); // the center of the third item is off-screen so it shouldn't get hit
   });
 
   testWidgets('Padding scroll anchor start', (WidgetTester tester) async {
@@ -105,7 +112,9 @@ void main() {
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),
@@ -138,7 +147,9 @@ void main() {
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),
@@ -170,7 +181,9 @@ void main() {
           itemExtent: 200.0,
           children: items.map<Widget>((int item) {
             return GestureDetector(
-              onTap: () { tapped.add(item); },
+              onTap: () {
+                tapped.add(item);
+              },
               child: Text('$item'),
             );
           }).toList(),

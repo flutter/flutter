@@ -2,52 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/config.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
+import 'package:flutter_tools/src/flutter_features_config.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
   group('Features', () {
-    late Config testConfig;
-    late FakePlatform platform;
-    late FlutterFeatureFlags featureFlags;
-
-    setUp(() {
-      testConfig = Config.test();
-      platform = FakePlatform(environment: <String, String>{});
-
-      for (final Feature feature in allConfigurableFeatures) {
-        testConfig.setValue(feature.configSetting!, false);
-      }
-
-      featureFlags = FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(),
-        config: testConfig,
-        platform: platform,
-      );
-    });
-
-    FeatureFlags createFlags(String channel) {
-      return FlutterFeatureFlags(
-        flutterVersion: FakeFlutterVersion(branch: channel),
-        config: testConfig,
-        platform: platform,
-      );
-    }
-
     testWithoutContext('setting has safe defaults', () {
-      const FeatureChannelSetting featureSetting = FeatureChannelSetting();
+      const featureSetting = FeatureChannelSetting();
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
     });
 
     testWithoutContext('has safe defaults', () {
-      const Feature feature = Feature(name: 'example');
+      const feature = Feature(name: 'example');
 
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
@@ -55,10 +31,10 @@ void main() {
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
-      const FeatureChannelSetting masterSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting betaSetting = FeatureChannelSetting(available: true);
-      const FeatureChannelSetting stableSetting = FeatureChannelSetting(available: true);
-      const Feature feature = Feature(
+      const masterSetting = FeatureChannelSetting(available: true);
+      const betaSetting = FeatureChannelSetting(available: true);
+      const stableSetting = FeatureChannelSetting(available: true);
+      const feature = Feature(
         name: 'example',
         master: masterSetting,
         beta: betaSetting,
@@ -71,345 +47,424 @@ void main() {
       expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
 
-    testWithoutContext('env variables are only enabled with "true" string', () {
-      platform.environment = <String, String>{'FLUTTER_WEB': 'hello'};
-
-      expect(featureFlags.isWebEnabled, false);
-
-      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(),
-      'Enable or disable Flutter for web.');
-    });
-
-    testWithoutContext('Flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on macOS.');
-    });
-
-    testWithoutContext('Flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Linux.');
-    });
-
-    testWithoutContext('Flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable support for desktop on Windows.');
-    });
-
-    testWithoutContext('help string on multiple channels', () {
-      const Feature testWithoutContextFeature = Feature(
+    testWithoutContext('reads from configuration if available', () {
+      const exampleFeature = Feature(
         name: 'example',
         master: FeatureChannelSetting(available: true),
-        beta: FeatureChannelSetting(available: true),
-        stable: FeatureChannelSetting(available: true),
-        configSetting: 'foo',
       );
 
-      expect(testWithoutContextFeature.generateHelpMessage(), 'Enable or disable example.');
+      final flags = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
+        platform: FakePlatform(),
+      );
+      expect(flags.isEnabled(exampleFeature), true);
     });
 
-    /// Flutter Web
+    testWithoutContext('returns false if not available', () {
+      const exampleFeature = Feature(name: 'example');
 
-    testWithoutContext('Flutter web off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isWebEnabled, false);
+      final flags = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: _FakeFeaturesConfig()..cannedResponse[exampleFeature] = true,
+        platform: FakePlatform(),
+      );
+      expect(flags.isEnabled(exampleFeature), false);
     });
 
-    testWithoutContext('Flutter web enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-web', true);
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web enabled with environment variable on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web off by default on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-
-      expect(featureFlags.isWebEnabled, false);
-    });
-
-    testWithoutContext('Flutter web enabled with config on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      testConfig.setValue('enable-web', true);
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web not enabled with environment variable on beta', () {
-     final FeatureFlags featureFlags = createFlags('beta');
-      platform.environment = <String, String>{'FLUTTER_WEB': 'true'};
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web on by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.removeValue('enable-web');
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-web', true);
-
-      expect(featureFlags.isWebEnabled, true);
-    });
-
-    testWithoutContext('Flutter web not enabled with environment variable on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      platform.environment = <String, String>{'FLUTTER_WEB': 'enabled'};
-
-      expect(featureFlags.isWebEnabled, false);
-    });
-
-    /// Flutter macOS desktop.
-
-    testWithoutContext('Flutter macos desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isMacOSEnabled, false);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-macos-desktop', true);
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with environment variable on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    testWithoutContext('Flutter macos desktop off by default on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-
-      expect(featureFlags.isMacOSEnabled, false);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with config on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      testConfig.setValue('enable-macos-desktop', true);
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with environment variable on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    testWithoutContext('Flutter macos desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isMacOSEnabled, false);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-macos-desktop', true);
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    testWithoutContext('Flutter macos desktop enabled with environment variable on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      platform.environment = <String, String>{'FLUTTER_MACOS': 'true'};
-
-      expect(featureFlags.isMacOSEnabled, true);
-    });
-
-    /// Flutter Linux Desktop
-    testWithoutContext('Flutter linux desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isLinuxEnabled, false);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-linux-desktop', true);
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with environment variable on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    testWithoutContext('Flutter linux desktop off by default on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-
-      expect(featureFlags.isLinuxEnabled, false);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with config on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      testConfig.setValue('enable-linux-desktop', true);
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with environment variable on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    testWithoutContext('Flutter linux desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isLinuxEnabled, false);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-linux-desktop', true);
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    testWithoutContext('Flutter linux desktop enabled with environment variable on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      platform.environment = <String, String>{'FLUTTER_LINUX': 'true'};
-
-      expect(featureFlags.isLinuxEnabled, true);
-    });
-
-    /// Flutter Windows desktop.
-    testWithoutContext('Flutter Windows desktop off by default on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-
-      expect(featureFlags.isWindowsEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with config on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      testConfig.setValue('enable-windows-desktop', true);
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on master', () {
-      final FeatureFlags featureFlags = createFlags('master');
-      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows desktop off by default on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-
-      expect(featureFlags.isWindowsEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with config on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      testConfig.setValue('enable-windows-desktop', true);
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on beta', () {
-      final FeatureFlags featureFlags = createFlags('beta');
-      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows desktop off by default on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-
-      expect(featureFlags.isWindowsEnabled, false);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with config on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      testConfig.setValue('enable-windows-desktop', true);
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    testWithoutContext('Flutter Windows desktop enabled with environment variable on stable', () {
-      final FeatureFlags featureFlags = createFlags('stable');
-      platform.environment = <String, String>{'FLUTTER_WINDOWS': 'true'};
-
-      expect(featureFlags.isWindowsEnabled, true);
-    });
-
-    for (final Feature feature in <Feature>[
-      flutterWindowsDesktopFeature,
-      flutterMacOSDesktopFeature,
-      flutterLinuxDesktopFeature,
-    ]) {
-      test('${feature.name} available and enabled by default on master', () {
-        expect(feature.master.enabledByDefault, true);
-        expect(feature.master.available, true);
-      });
-      test('${feature.name} available and enabled by default on beta', () {
-        expect(feature.beta.enabledByDefault, true);
-        expect(feature.beta.available, true);
-      });
-      test('${feature.name} available and enabled by default on stable', () {
-        expect(feature.stable.enabledByDefault, true);
-        expect(feature.stable.available, true);
-      });
+    FileSystem createFsWithPubspec() {
+      final FileSystem fs = MemoryFileSystem.test();
+      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+        flutter:
+          config:
+            enable-foo: true
+            enable-bar: false
+            enable-baz: true
+      ''');
+      return fs;
     }
 
-    // Custom devices on all channels
-    for (final String channel in <String>['master', 'beta', 'stable']) {
-      testWithoutContext('Custom devices are enabled with flag on $channel', () {
-        final FeatureFlags featureFlags = createFlags(channel);
-        testConfig.setValue('enable-custom-devices', true);
-        expect(featureFlags.areCustomDevicesEnabled, true);
-      });
+    testUsingContext(
+      'FeatureFlags is influenced by the CWD',
+      () {
+        // This test intentionally uses Context, as featureFlags is read that way at runtime.
+        final FeatureFlags featureFlagsFromContext = featureFlags;
 
-      testWithoutContext('Custom devices are enabled with environment variable on $channel', () {
-        final FeatureFlags featureFlags = createFlags(channel);
-        platform.environment = <String, String>{'FLUTTER_CUSTOM_DEVICES': 'true'};
-        expect(featureFlags.areCustomDevicesEnabled, true);
-      });
-    }
+        // Try a few flags that don't actually exist, but we want to check configuration more e2e-y.
+        expect(
+          featureFlagsFromContext.isEnabled(
+            const Feature(
+              name: 'foo',
+              configSetting: 'enable-foo',
+              master: FeatureChannelSetting(available: true),
+            ),
+          ),
+          isTrue,
+          reason: 'enable-foo: true is in pubspec.yaml',
+        );
 
-    test('${nativeAssets.name} availability and default enabled', () {
-      expect(nativeAssets.master.enabledByDefault, false);
-      expect(nativeAssets.master.available, true);
-      expect(nativeAssets.beta.enabledByDefault, false);
-      expect(nativeAssets.beta.available, false);
-      expect(nativeAssets.stable.enabledByDefault, false);
-      expect(nativeAssets.stable.available, false);
+        expect(
+          featureFlagsFromContext.isEnabled(
+            const Feature.fullyEnabled(name: 'bar', configSetting: 'enable-bar'),
+          ),
+          isFalse,
+          reason: 'enable-bar: false is in pubspec.yaml',
+        );
+
+        expect(
+          featureFlagsFromContext.isEnabled(
+            const Feature(name: 'baz', configSetting: 'enable-baz'),
+          ),
+          isFalse,
+          reason: 'Is not available',
+        );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: FakeProcessManager.empty,
+        FileSystem: createFsWithPubspec,
+      },
+    );
+
+    testUsingContext('Test feature flags match feature flags', () {
+      final FeatureFlags testFeatureFlags = TestFeatureFlags();
+
+      expect(featureFlags.allFeatures.length, equals(testFeatureFlags.allFeatures.length));
+
+      final List<String> featureNames = featureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+      final List<String> testFeatureNames = testFeatureFlags.allFeatures
+          .map((Feature feature) => feature.name)
+          .toList();
+
+      expect(featureNames, unorderedEquals(testFeatureNames));
     });
 
-    test('${swiftPackageManager.name} availability and default enabled', () {
-      expect(swiftPackageManager.master.enabledByDefault, false);
-      expect(swiftPackageManager.master.available, true);
-      expect(swiftPackageManager.beta.enabledByDefault, false);
-      expect(swiftPackageManager.beta.available, false);
-      expect(swiftPackageManager.stable.enabledByDefault, false);
-      expect(swiftPackageManager.stable.available, false);
+    testUsingContext('Feature runtime IDs are valid', () {
+      // Verify features' runtime IDs can be encoded into a Dart define.
+      final runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
+      assert(runtimeIdPattern.hasMatch('multi_window'));
+      assert(!runtimeIdPattern.hasMatch('multi-window'));
+
+      final Iterable<String> runtimeIds = featureFlags.allFeatures
+          .map((Feature feature) => feature.runtimeId)
+          .nonNulls;
+
+      expect(
+        runtimeIds,
+        everyElement(matches(runtimeIdPattern)),
+        reason: 'Feature runtime ID must contain only alphabetical or underscore characters',
+      );
     });
   });
+
+  group('Linux Destkop', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterLinuxDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterLinuxDesktopFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterLinuxDesktopFeature.configSetting, 'enable-linux-desktop');
+      expect(flutterLinuxDesktopFeature.environmentOverride, 'FLUTTER_LINUX');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterLinuxDesktopFeature);
+      expect(checkFlags.isLinuxEnabled, isTrue);
+    });
+  });
+
+  group('MacOS Desktop', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterMacOSDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterMacOSDesktopFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterMacOSDesktopFeature.configSetting, 'enable-macos-desktop');
+      expect(flutterMacOSDesktopFeature.environmentOverride, 'FLUTTER_MACOS');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterMacOSDesktopFeature);
+      expect(checkFlags.isMacOSEnabled, isTrue);
+    });
+  });
+
+  group('Windows Desktop', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterWindowsDesktopFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWindowsDesktopFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterWindowsDesktopFeature.configSetting, 'enable-windows-desktop');
+      expect(flutterWindowsDesktopFeature.environmentOverride, 'FLUTTER_WINDOWS');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWindowsDesktopFeature);
+      expect(checkFlags.isWindowsEnabled, isTrue);
+    });
+  });
+
+  group('Web', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterWebFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterWebFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterWebFeature.configSetting, 'enable-web');
+      expect(flutterWebFeature.environmentOverride, 'FLUTTER_WEB');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterWebFeature);
+      expect(checkFlags.isWebEnabled, isTrue);
+    });
+  });
+
+  group('Android', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterAndroidFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterAndroidFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterAndroidFeature.configSetting, 'enable-android');
+      expect(flutterAndroidFeature.environmentOverride, isNull);
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterAndroidFeature);
+      expect(checkFlags.isAndroidEnabled, isTrue);
+    });
+  });
+
+  group('iOS', () {
+    testUsingContext('is fully enabled', () {
+      expect(flutterIOSFeature, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(flutterIOSFeature));
+    });
+
+    test('can be configured', () {
+      expect(flutterIOSFeature.configSetting, 'enable-ios');
+      expect(flutterIOSFeature.environmentOverride, isNull);
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterIOSFeature);
+      expect(checkFlags.isIOSEnabled, isTrue);
+    });
+  });
+
+  group('Fuchsia', () {
+    test('is only available on master', () {
+      expect(
+        flutterFuchsiaFeature,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: false, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(flutterFuchsiaFeature.configSetting, 'enable-fuchsia');
+      expect(flutterFuchsiaFeature.environmentOverride, 'FLUTTER_FUCHSIA');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterFuchsiaFeature);
+      expect(checkFlags.isFuchsiaEnabled, isTrue);
+    });
+  });
+
+  group('Custom Devices', () {
+    test('is always available but not enabled by default', () {
+      expect(
+        flutterCustomDevicesFeature,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(flutterCustomDevicesFeature.configSetting, 'enable-custom-devices');
+      expect(flutterCustomDevicesFeature.environmentOverride, 'FLUTTER_CUSTOM_DEVICES');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: flutterCustomDevicesFeature);
+      expect(checkFlags.areCustomDevicesEnabled, isTrue);
+    });
+  });
+
+  group('CLI Animations', () {
+    testUsingContext('is always enabled', () {
+      expect(cliAnimation, _isFullyEnabled);
+      expect(featureFlags.allEnabledFeatures, contains(cliAnimation));
+    });
+
+    test('can be disabled by TERM=dumb', () {
+      final features = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: _FakeFeaturesConfig(),
+        platform: FakePlatform(environment: <String, String>{'TERM': 'dumb'}),
+      );
+
+      expect(features.isCliAnimationEnabled, isFalse);
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: cliAnimation);
+      expect(checkFlags.isCliAnimationEnabled, isTrue);
+    });
+  });
+
+  group('Native Assets', () {
+    test('is available on master', () {
+      expect(
+        nativeAssets,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: true),
+          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: true),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(nativeAssets.configSetting, 'enable-native-assets');
+      expect(nativeAssets.environmentOverride, 'FLUTTER_NATIVE_ASSETS');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: nativeAssets);
+      expect(checkFlags.isNativeAssetsEnabled, isTrue);
+    });
+  });
+
+  group('Swift Package Manager', () {
+    test('is available on all channels', () {
+      expect(
+        swiftPackageManager,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(swiftPackageManager.configSetting, 'enable-swift-package-manager');
+      expect(swiftPackageManager.environmentOverride, 'FLUTTER_SWIFT_PACKAGE_MANAGER');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: swiftPackageManager);
+      expect(checkFlags.isSwiftPackageManagerEnabled, isTrue);
+    });
+  });
+}
+
+final class _FakeFeaturesConfig implements FlutterFeaturesConfig {
+  final cannedResponse = <Feature, bool?>{};
+
+  @override
+  bool? isEnabled(Feature feature) => cannedResponse[feature];
+}
+
+Matcher _onChannelIs(String channel, {required bool available, required bool enabledByDefault}) {
+  return _FeaturesMatcher(
+    channel: channel,
+    available: available,
+    enabledByDefault: enabledByDefault,
+  );
+}
+
+Matcher get _isFullyEnabled {
+  return allOf(const <_FeaturesMatcher>[
+    _FeaturesMatcher(channel: 'master', available: true, enabledByDefault: true),
+    _FeaturesMatcher(channel: 'stable', available: true, enabledByDefault: true),
+    _FeaturesMatcher(channel: 'beta', available: true, enabledByDefault: true),
+  ]);
+}
+
+final class _FeaturesMatcher extends Matcher {
+  const _FeaturesMatcher({
+    required this.channel,
+    required this.available,
+    required this.enabledByDefault,
+  });
+
+  final String channel;
+  final bool available;
+  final bool enabledByDefault;
+
+  @override
+  Description describe(Description description) {
+    description = description.add('feature on the "$channel" channel ');
+    if (available) {
+      description = description.add('is available ');
+    } else {
+      description = description.add('is not available');
+    }
+    description = description.add('and is ');
+    if (enabledByDefault) {
+      description = description.add('is enabled by default');
+    } else {
+      description = description.add('is not enabled by default');
+    }
+    return description;
+  }
+
+  @override
+  bool matches(Object? item, Map<Object?, Object?> matchState) {
+    if (item is! Feature) {
+      return false;
+    }
+    final FeatureChannelSetting setting = switch (channel) {
+      'master' => item.master,
+      'stable' => item.stable,
+      'beta' => item.beta,
+      _ => throw StateError('Invalid channel: "$channel"'),
+    };
+    if (setting.available != available) {
+      return false;
+    }
+    if (setting.enabledByDefault != enabledByDefault) {
+      return false;
+    }
+    return true;
+  }
+}
+
+final class _TestIsGetterForwarding with FlutterFeatureFlagsIsEnabled {
+  _TestIsGetterForwarding({required this.shouldInvoke});
+
+  final Feature shouldInvoke;
+  @override
+  final Platform platform = FakePlatform();
+
+  @override
+  bool isEnabled(Feature feature) {
+    return feature == shouldInvoke;
+  }
+
+  @override
+  List<Feature> get allFeatures => throw UnimplementedError();
+
+  @override
+  List<Feature> get allConfigurableFeatures => throw UnimplementedError();
+
+  @override
+  Iterable<Feature> get allEnabledFeatures => throw UnimplementedError();
 }

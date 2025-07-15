@@ -5,11 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-enum RadiusType {
-  Sharp,
-  Shifting,
-  Round
-}
+enum RadiusType { Sharp, Shifting, Round }
 
 void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
   final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
@@ -55,8 +51,7 @@ void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
 // This depends on the exact structure of objects built by the Material and
 // MergeableMaterial widgets.
 BorderRadius? getBorderRadius(WidgetTester tester, int index) {
-  final List<Element> containers = tester.elementList(find.byType(Container))
-                                   .toList();
+  final List<Element> containers = tester.elementList(find.byType(Container)).toList();
 
   final Container container = containers[index].widget as Container;
   final BoxDecoration? boxDecoration = container.decoration as BoxDecoration?;
@@ -68,11 +63,7 @@ void main() {
   testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: MergeableMaterial(),
-          ),
-        ),
+        home: Scaffold(body: SingleChildScrollView(child: MergeableMaterial())),
       ),
     );
 
@@ -89,10 +80,7 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -112,10 +100,7 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 200.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 200.0),
                 ),
               ],
             ),
@@ -137,17 +122,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -170,17 +149,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -210,10 +183,7 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -245,10 +215,7 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -257,10 +224,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.byType(MergeableMaterial),
-      isNot(paints..shadow(elevation: 0.0)),
-    );
+    expect(find.byType(MergeableMaterial), isNot(paints..shadow(elevation: 0.0)));
     debugDisableShadows = true;
   });
 
@@ -273,20 +237,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -309,17 +265,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -350,17 +300,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -383,20 +327,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -427,17 +363,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -452,7 +382,6 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Sharp);
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
 
-
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -461,20 +390,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -503,17 +424,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -542,20 +457,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -586,17 +493,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -619,24 +520,15 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -661,24 +553,15 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -702,17 +585,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -737,17 +614,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -770,30 +641,17 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('y'),
-                ),
+                MaterialGap(key: ValueKey<String>('y')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -826,30 +684,17 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('y'),
-                ),
+                MaterialGap(key: ValueKey<String>('y')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -873,17 +718,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -914,20 +753,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -950,30 +781,17 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('y'),
-                ),
+                MaterialGap(key: ValueKey<String>('y')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('z'),
-                ),
+                MaterialGap(key: ValueKey<String>('z')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1006,30 +824,17 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('y'),
-                ),
+                MaterialGap(key: ValueKey<String>('y')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1053,20 +858,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('z'),
-                ),
+                MaterialGap(key: ValueKey<String>('z')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1097,10 +894,7 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1122,20 +916,12 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1160,12 +946,13 @@ void main() {
   bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
-    return decoration == BoxDecoration(
-      border: Border(
-        top: top ? side : BorderSide.none,
-        bottom: bottom ? side : BorderSide.none,
-      ),
-    );
+    return decoration ==
+        BoxDecoration(
+          border: Border(
+            top: top ? side : BorderSide.none,
+            bottom: bottom ? side : BorderSide.none,
+          ),
+        );
   }
 
   testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
@@ -1179,31 +966,19 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('D'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1212,9 +987,7 @@ void main() {
       ),
     );
 
-    List<Widget> animatedContainers = tester.widgetList(
-      find.byType(AnimatedContainer),
-    ).toList();
+    List<Widget> animatedContainers = tester.widgetList(find.byType(AnimatedContainer)).toList();
     List<BoxDecoration> boxes = <BoxDecoration>[];
     for (final Widget container in animatedContainers) {
       boxes.add((container as AnimatedContainer).decoration! as BoxDecoration);
@@ -1237,34 +1010,20 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('x'),
-                ),
+                MaterialGap(key: ValueKey<String>('x')),
                 MaterialSlice(
                   key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('D'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1276,9 +1035,7 @@ void main() {
     // Wait for dividers to shrink.
     await tester.pump(const Duration(milliseconds: 200));
 
-    animatedContainers = tester.widgetList(
-      find.byType(AnimatedContainer),
-    ).toList();
+    animatedContainers = tester.widgetList(find.byType(AnimatedContainer)).toList();
     boxes = <BoxDecoration>[];
 
     for (final Widget container in animatedContainers) {
@@ -1305,17 +1062,11 @@ void main() {
               children: <MergeableMaterialItem>[
                 MaterialSlice(
                   key: ValueKey<String>('A'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
                 MaterialSlice(
                   key: ValueKey<String>('B'),
-                  child: SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                  ),
+                  child: SizedBox(width: 100.0, height: 100.0),
                 ),
               ],
             ),
@@ -1336,9 +1087,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          cardColor: themeCardColor,
-        ),
+        theme: ThemeData(cardColor: themeCardColor),
         home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
@@ -1346,21 +1095,10 @@ void main() {
                 MaterialSlice(
                   key: ValueKey<String>('A'),
                   color: materialSliceColor,
-                  child: SizedBox(
-                    height: 100,
-                    width: 100,
-                  ),
+                  child: SizedBox(height: 100, width: 100),
                 ),
-                MaterialGap(
-                  key: ValueKey<String>('B'),
-                ),
-                MaterialSlice(
-                  key: ValueKey<String>('C'),
-                  child: SizedBox(
-                    height: 100,
-                    width: 100,
-                  ),
-                ),
+                MaterialGap(key: ValueKey<String>('B')),
+                MaterialSlice(key: ValueKey<String>('C'), child: SizedBox(height: 100, width: 100)),
               ],
             ),
           ),
@@ -1368,10 +1106,12 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration = tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
+    BoxDecoration boxDecoration =
+        tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration;
     expect(boxDecoration.color, materialSliceColor);
 
-    boxDecoration = tester.widget<Container>(find.byType(Container).last).decoration! as BoxDecoration;
+    boxDecoration =
+        tester.widget<Container>(find.byType(Container).last).decoration! as BoxDecoration;
     expect(boxDecoration.color, themeCardColor);
   });
 }

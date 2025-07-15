@@ -49,7 +49,9 @@ void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, d
   const JsonDecoder decoder = JsonDecoder();
   for (final String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
-      stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
+      stderr.writeln(
+        '  encodedTranslation for $key does not match original value "${bundle[key]}"',
+      );
       errorFound = true;
     }
   }

@@ -13,9 +13,7 @@ class LoadingBuilderExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LoadingBuilderExample(),
-    );
+    return const MaterialApp(home: LoadingBuilderExample());
   }
 }
 

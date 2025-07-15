@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -17,7 +21,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   group('Clients of flutter run on web with DDS enabled', () {
@@ -34,28 +38,29 @@ void main() {
 
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
-        withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        withDebugger: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+      );
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client =
-        await vmServiceConnectUri('${flutter.vmServiceWsUri}');
+      final VmService client = await vmServiceConnectUri('${flutter.vmServiceWsUri}');
       await validateFlutterVersion(client);
     });
 
     testWithoutContext('can validate flutter version in parallel', () async {
       await flutter.run(
-        withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        withDebugger: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+      );
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client1 =
-        await vmServiceConnectUri('${flutter.vmServiceWsUri}');
+      final VmService client1 = await vmServiceConnectUri('${flutter.vmServiceWsUri}');
 
-      final VmService client2 =
-        await vmServiceConnectUri('${flutter.vmServiceWsUri}');
+      final VmService client2 = await vmServiceConnectUri('${flutter.vmServiceWsUri}');
 
       await Future.wait(<Future<void>>[
         validateFlutterVersion(client1),
@@ -78,13 +83,14 @@ void main() {
 
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
-        withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        withDebugger: true,
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
+      );
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
-      final VmService client =
-        await vmServiceConnectUri('${flutter.vmServiceWsUri}');
+      final VmService client = await vmServiceConnectUri('${flutter.vmServiceWsUri}');
       await validateFlutterVersion(client);
     });
   });
@@ -95,24 +101,28 @@ Future<void> validateFlutterVersion(VmService client) async {
 
   final Future<dynamic> registration = expectLater(
     client.onEvent('Service'),
-      emitsThrough(predicate((Event e) {
-        if (e.kind == EventKind.kServiceRegistered &&
-            e.service == kFlutterVersionServiceName) {
+    emitsThrough(
+      predicate((Event e) {
+        if (e.kind == EventKind.kServiceRegistered && e.service == kFlutterVersionServiceName) {
           method = e.method;
           return true;
         }
         return false;
-      }))
-    );
+      }),
+    ),
+  );
 
   await client.streamListen('Service');
   await registration;
   await client.streamCancel('Service');
 
   final dynamic version1 = await client.callServiceExtension(method!);
-  expect(version1, const TypeMatcher<Success>()
-    .having((Success r) => r.type, 'type', 'Success')
-    .having((Success r) => r.json!['frameworkVersion'], 'frameworkVersion', isNotNull));
+  expect(
+    version1,
+    const TypeMatcher<Success>()
+        .having((Success r) => r.type, 'type', 'Success')
+        .having((Success r) => r.json!['frameworkVersion'], 'frameworkVersion', isNotNull),
+  );
 
   await client.dispose();
 }

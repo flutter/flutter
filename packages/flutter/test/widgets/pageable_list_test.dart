@@ -26,7 +26,9 @@ Widget buildFrame({
 }) {
   final PageView child = PageView(
     reverse: reverse,
-    onPageChanged: (int page) { currentPage = page; },
+    onPageChanged: (int page) {
+      currentPage = page;
+    },
     children: pages.map<Widget>(buildPage).toList(),
   );
 
@@ -35,9 +37,7 @@ Widget buildFrame({
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: SizedBox(
-        width: pageSize.width, height: pageSize.height, child: child,
-      ),
+      child: SizedBox(width: pageSize.width, height: pageSize.height, child: child),
     ),
   );
 }
@@ -63,9 +63,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: PageView(),
-        ),
+        child: Center(child: PageView()),
       ),
     );
   });

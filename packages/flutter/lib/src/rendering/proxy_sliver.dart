@@ -31,7 +31,8 @@ import 'sliver.dart';
 ///
 ///  * [RenderProxyBox], a base class for render boxes that resemble their
 ///    children.
-abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
+abstract class RenderProxySliver extends RenderSliver
+    with RenderObjectWithChildMixin<RenderSliver> {
   /// Creates a proxy render sliver.
   ///
   /// Proxy render slivers aren't created directly because they proxy
@@ -39,6 +40,14 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   /// the subclasses.
   RenderProxySliver([RenderSliver? child]) {
     this.child = child;
+  }
+
+  @override
+  Rect get semanticBounds {
+    if (child != null) {
+      return child!.semanticBounds;
+    }
+    return super.semanticBounds;
   }
 
   @override
@@ -63,14 +72,18 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
-    return child != null
-      && child!.geometry!.hitTestExtent > 0
-      && child!.hitTest(
-        result,
-        mainAxisPosition: mainAxisPosition,
-        crossAxisPosition: crossAxisPosition,
-      );
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    return child != null &&
+        child!.geometry!.hitTestExtent > 0 &&
+        child!.hitTest(
+          result,
+          mainAxisPosition: mainAxisPosition,
+          crossAxisPosition: crossAxisPosition,
+        );
   }
 
   @override
@@ -167,12 +180,7 @@ class RenderSliverOpacity extends RenderProxySliver {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(
-        offset,
-        _alpha,
-        super.paint,
-        oldLayer: layer as OpacityLayer?,
-      );
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer?);
       assert(() {
         layer!.debugCreator = debugCreator;
         return true;
@@ -191,7 +199,13 @@ class RenderSliverOpacity extends RenderProxySliver {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(
+      FlagProperty(
+        'alwaysIncludeSemantics',
+        value: alwaysIncludeSemantics,
+        ifTrue: 'alwaysIncludeSemantics',
+      ),
+    );
   }
 }
 
@@ -217,7 +231,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
     bool ignoring = true,
     @Deprecated(
       'Create a custom sliver ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.'
+      'This feature was deprecated after v3.8.0-12.0.pre.',
     )
     bool? ignoringSemantics,
   }) : _ignoring = ignoring,
@@ -249,7 +263,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   @Deprecated(
     'Create a custom sliver ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.'
+    'This feature was deprecated after v3.8.0-12.0.pre.',
   )
   bool? get ignoringSemantics => _ignoringSemantics;
   bool? _ignoringSemantics;
@@ -262,13 +276,17 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   }
 
   @override
-  bool hitTest(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
-    return !ignoring
-      && super.hitTest(
-        result,
-        mainAxisPosition: mainAxisPosition,
-        crossAxisPosition: crossAxisPosition,
-      );
+  bool hitTest(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    return !ignoring &&
+        super.hitTest(
+          result,
+          mainAxisPosition: mainAxisPosition,
+          crossAxisPosition: crossAxisPosition,
+        );
   }
 
   @override
@@ -306,10 +324,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
 /// without taking any room in the parent.
 class RenderSliverOffstage extends RenderProxySliver {
   /// Creates an offstage render object.
-  RenderSliverOffstage({
-    bool offstage = true,
-    RenderSliver? sliver,
-  }) : _offstage = offstage {
+  RenderSliverOffstage({bool offstage = true, RenderSliver? sliver}) : _offstage = offstage {
     child = sliver;
   }
 
@@ -343,24 +358,33 @@ class RenderSliverOffstage extends RenderProxySliver {
   }
 
   @override
-  bool hitTest(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
-    return !offstage && super.hitTest(
-      result,
-      mainAxisPosition: mainAxisPosition,
-      crossAxisPosition: crossAxisPosition,
-    );
+  bool hitTest(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    return !offstage &&
+        super.hitTest(
+          result,
+          mainAxisPosition: mainAxisPosition,
+          crossAxisPosition: crossAxisPosition,
+        );
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
-    return !offstage
-      && child != null
-      && child!.geometry!.hitTestExtent > 0
-      && child!.hitTest(
-        result,
-        mainAxisPosition: mainAxisPosition,
-        crossAxisPosition: crossAxisPosition,
-      );
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    return !offstage &&
+        child != null &&
+        child!.geometry!.hitTestExtent > 0 &&
+        child!.hitTest(
+          result,
+          mainAxisPosition: mainAxisPosition,
+          crossAxisPosition: crossAxisPosition,
+        );
   }
 
   @override
@@ -403,7 +427,8 @@ class RenderSliverOffstage extends RenderProxySliver {
 ///
 /// This is a variant of [RenderSliverOpacity] that uses an [Animation<double>]
 /// rather than a [double] to control the opacity.
-class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver> {
+class RenderSliverAnimatedOpacity extends RenderProxySliver
+    with RenderAnimatedOpacityMixin<RenderSliver> {
   /// Creates a partially transparent render object.
   RenderSliverAnimatedOpacity({
     required Animation<double> opacity,
@@ -425,10 +450,9 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   /// Creates a render object that constrains the cross axis extent of its sliver child.
   ///
   /// The [maxExtent] parameter must be nonnegative.
-  RenderSliverConstrainedCrossAxis({
-    required double maxExtent
-  }) : _maxExtent = maxExtent,
-       assert(maxExtent >= 0.0);
+  RenderSliverConstrainedCrossAxis({required double maxExtent})
+    : _maxExtent = maxExtent,
+      assert(maxExtent >= 0.0);
 
   /// The cross axis extent to apply to the sliver child.
   ///
@@ -452,6 +476,35 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       parentUsesSize: true,
     );
     final SliverGeometry childLayoutGeometry = child!.geometry!;
-    geometry = childLayoutGeometry.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent));
+    geometry = childLayoutGeometry.copyWith(
+      crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
+    );
+  }
+}
+
+/// Add annotations to the [SemanticsNode] for this subtree.
+class RenderSliverSemanticsAnnotations extends RenderProxySliver with SemanticsAnnotationsMixin {
+  /// Creates a render object that attaches a semantic annotation.
+  ///
+  /// If the [SemanticsProperties.attributedLabel] is not null, the [textDirection] must also not be null.
+  RenderSliverSemanticsAnnotations({
+    RenderSliver? child,
+    required SemanticsProperties properties,
+    bool container = false,
+    bool explicitChildNodes = false,
+    bool excludeSemantics = false,
+    bool blockUserActions = false,
+    Locale? localeForSubtree,
+    TextDirection? textDirection,
+  }) : super(child) {
+    initSemanticsAnnotations(
+      properties: properties,
+      container: container,
+      explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
+      localeForSubtree: localeForSubtree,
+      textDirection: textDirection,
+    );
   }
 }

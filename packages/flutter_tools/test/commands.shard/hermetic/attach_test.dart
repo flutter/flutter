@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -25,12 +26,12 @@ import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -43,15 +44,19 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  bool stdinHasTerminal = false;
+  var stdinHasTerminal = false;
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  int maxRss = 0;
+  var maxRss = 0;
 }
 
 void main() {
+  tearDown(() {
+    MacOSDesignedForIPadDevices.allowDiscovery = false;
+  });
+
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -79,8 +84,8 @@ void main() {
     });
 
     group('with one device and no specified target file', () {
-      const int devicePort = 499;
-      const int hostPort = 42;
+      const devicePort = 499;
+      const hostPort = 42;
       final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
 
       late FakeDeviceLogReader fakeLogReader;
@@ -90,7 +95,7 @@ void main() {
 
       setUp(() {
         fakeLogReader = FakeDeviceLogReader();
-        portForwarder = RecordingPortForwarder(hostPort);
+        portForwarder = RecordingPortForwarder(defaultHostPort: hostPort);
         fakeDds = FakeDartDevelopmentService();
         device = FakeAndroidDevice(id: '1')
           ..portForwarder = portForwarder
@@ -101,773 +106,1134 @@ void main() {
         fakeLogReader.dispose();
       });
 
-      testUsingContext('succeeds with iOS device with protocol discovery', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 12,
-          onGetLogReader: () {
+      testUsingContext(
+        'succeeds with iOS device with protocol discovery',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 12,
+            onGetLogReader: () {
+              fakeLogReader.addLine('Foo');
+              fakeLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+              );
+              return fakeLogReader;
+            },
+          );
+          testDeviceManager.devices = <Device>[device];
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+              // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+              completer.complete();
+            }
+          });
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach']);
+
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
+
+          await fakeLogReader.dispose();
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+        },
+      );
+
+      testUsingContext(
+        'restores terminal to singleCharMode == false on command exit',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 12,
+            onGetLogReader: () {
+              fakeLogReader.addLine('Foo');
+              fakeLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+              );
+              return fakeLogReader;
+            },
+          );
+          testDeviceManager.devices = <Device>[device];
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+              // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+              completer.complete();
+            }
+          });
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async {
+                appStartedCompleter?.complete();
+                return 0;
+              };
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach']);
+          await completer.future;
+          await Future.wait<void>(<Future<void>>[
+            fakeLogReader.dispose(),
+            loggerSubscription.cancel(),
+          ]);
+
+          expect(terminal.singleCharMode, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+          Signals: () => FakeSignals(),
+        },
+      );
+
+      testUsingContext(
+        'local engine artifacts are passed to runner',
+        () async {
+          const localEngineSrc = '/path/to/local/engine/src';
+          const localEngineDir = 'host_debug_unopt';
+          testFileSystem
+              .directory('$localEngineSrc/out/$localEngineDir')
+              .createSync(recursive: true);
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 12,
+            onGetLogReader: () {
+              fakeLogReader.addLine('Foo');
+              fakeLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+              );
+              return fakeLogReader;
+            },
+          );
+          testDeviceManager.devices = <Device>[device];
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+              // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+              completer.complete();
+            }
+          });
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          var passedArtifactTest = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()
+            ..hotRunner = hotRunner
+            .._artifactTester = (Artifacts artifacts) {
+              expect(artifacts, isA<CachedLocalEngineArtifacts>());
+              // expecting this to be true ensures this test ran
+              passedArtifactTest = true;
+            };
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>[
+            'attach',
+            '--local-engine-src-path=$localEngineSrc',
+            '--local-engine=$localEngineDir',
+            '--local-engine-host=$localEngineDir',
+          ]);
+          await completer.future;
+          await Future.wait<void>(<Future<void>>[
+            fakeLogReader.dispose(),
+            loggerSubscription.cancel(),
+          ]);
+          expect(passedArtifactTest, isTrue);
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => testFileSystem,
+          Logger: () => logger,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+          ProcessManager: () => FakeProcessManager.empty(),
+        },
+      );
+
+      testUsingContext(
+        'succeeds with iOS device with mDNS',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 16,
+            onGetLogReader: () {
+              fakeLogReader.addLine('Foo');
+              fakeLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+              );
+              return fakeLogReader;
+            },
+          );
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach']);
+          await fakeLogReader.dispose();
+
+          // Listen to the URI before checking port forwarder. Port forwarding
+          // is done as a side effect when generating the uri.
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
+          expect(hotRunnerFactory.devices, hasLength(1));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
+              <String, List<SrvResourceRecord>>{
+                'bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'bar',
+                    future,
+                    port: devicePort,
+                    weight: 1,
+                    priority: 1,
+                    target: 'appId',
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'bar': <TxtResourceRecord>[
+                  TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+        },
+      );
+
+      testUsingContext(
+        'succeeds with iOS device with mDNS wireless device',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 16,
+            connectionInterface: DeviceConnectionInterface.wireless,
+          );
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach']);
+          await fakeLogReader.dispose();
+
+          // Listen to the URI before checking port forwarder. Port forwarding
+          // is done as a side effect when generating the uri.
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+          expect(portForwarder.forwardedPorts, isEmpty);
+          expect(hotRunnerFactory.devices, hasLength(1));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
+              <String, List<SrvResourceRecord>>{
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+        },
+      );
+
+      testUsingContext(
+        'succeeds with iOS device with mDNS wireless device with debug-port',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 16,
+            connectionInterface: DeviceConnectionInterface.wireless,
+          );
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--debug-port', '123']);
+          await fakeLogReader.dispose();
+
+          // Listen to the URI before checking port forwarder. Port forwarding
+          // is done as a side effect when generating the uri.
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+          expect(portForwarder.forwardedPorts, isEmpty);
+          expect(hotRunnerFactory.devices, hasLength(1));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[
+                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+              ],
+              <String, List<SrvResourceRecord>>{
+                'srv-bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-bar',
+                    future,
+                    port: 321,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-bar',
+                  ),
+                ],
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+        },
+      );
+
+      testUsingContext(
+        'succeeds with iOS device with mDNS wireless device with debug-url',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 16,
+            connectionInterface: DeviceConnectionInterface.wireless,
+          );
+          testDeviceManager.devices = <Device>[device];
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
+          await fakeLogReader.dispose();
+
+          // Listen to the URI before checking port forwarder. Port forwarding
+          // is done as a side effect when generating the uri.
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+          expect(portForwarder.forwardedPorts, isEmpty);
+          expect(hotRunnerFactory.devices, hasLength(1));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[
+                PtrResourceRecord('bar', future, domainName: 'srv-bar'),
+                PtrResourceRecord('foo', future, domainName: 'srv-foo'),
+              ],
+              <String, List<SrvResourceRecord>>{
+                'srv-bar': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-bar',
+                    future,
+                    port: 321,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-bar',
+                  ),
+                ],
+                'srv-foo': <SrvResourceRecord>[
+                  SrvResourceRecord(
+                    'srv-foo',
+                    future,
+                    port: 123,
+                    weight: 1,
+                    priority: 1,
+                    target: 'target-foo',
+                  ),
+                ],
+              },
+              ipResponse: <String, List<IPAddressResourceRecord>>{
+                'target-foo': <IPAddressResourceRecord>[
+                  IPAddressResourceRecord(
+                    'target-foo',
+                    0,
+                    address: InternetAddress.tryParse('111.111.111.111')!,
+                  ),
+                ],
+              },
+              txtResponse: <String, List<TxtResourceRecord>>{
+                'srv-foo': <TxtResourceRecord>[
+                  TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
+                ],
+              },
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          ),
+        },
+      );
+
+      testUsingContext(
+        'finds VM Service port and forwards',
+        () async {
+          device.onGetLogReader = () {
             fakeLogReader.addLine('Foo');
-            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            fakeLogReader.addLine(
+              'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+            );
             return fakeLogReader;
-          },
-        );
-        testDeviceManager.devices = <Device>[device];
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
-            completer.complete();
-          }
-        });
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']);
-        await completer.future;
-
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-
-        await fakeLogReader.dispose();
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
-
-      testUsingContext('restores terminal to singleCharMode == false on command exit', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 12,
-          onGetLogReader: () {
-            fakeLogReader.addLine('Foo');
-            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-            return fakeLogReader;
-          },
-        );
-        testDeviceManager.devices = <Device>[device];
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
-            completer.complete();
-          }
-        });
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async {
-          appStartedCompleter?.complete();
-          return 0;
-        };
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']);
-        await completer.future;
-        await Future.wait<void>(<Future<void>>[
-          fakeLogReader.dispose(),
-          loggerSubscription.cancel(),
-        ]);
-
-        expect(terminal.singleCharMode, isFalse);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-        Signals: () => FakeSignals(),
-      });
-
-      testUsingContext('local engine artifacts are passed to runner', () async {
-        const String localEngineSrc = '/path/to/local/engine/src';
-        const String localEngineDir = 'host_debug_unopt';
-        testFileSystem.directory('$localEngineSrc/out/$localEngineDir').createSync(recursive: true);
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 12,
-          onGetLogReader: () {
-            fakeLogReader.addLine('Foo');
-            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-            return fakeLogReader;
-          },
-        );
-        testDeviceManager.devices = <Device>[device];
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
-            completer.complete();
-          }
-        });
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        bool passedArtifactTest = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner
-          .._artifactTester = (Artifacts artifacts) {
-            expect(artifacts, isA<CachedLocalEngineArtifacts>());
-            // expecting this to be true ensures this test ran
-            passedArtifactTest = true;
           };
+          testDeviceManager.devices = <Device>[device];
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+              // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+              completer.complete();
+            }
+          });
+          final Future<void> task = createTestCommandRunner(
+            AttachCommand(
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach']);
+          await completer.future;
 
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach', '--local-engine-src-path=$localEngineSrc', '--local-engine=$localEngineDir', '--local-engine-host=$localEngineDir']);
-        await completer.future;
-        await Future.wait<void>(<Future<void>>[
-          fakeLogReader.dispose(),
-          loggerSubscription.cancel(),
-        ]);
-        expect(passedArtifactTest, isTrue);
-      }, overrides: <Type, Generator>{
-        Artifacts: () => artifacts,
-        DeviceManager: () => testDeviceManager,
-        FileSystem: () => testFileSystem,
-        Logger: () => logger,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-        ProcessManager: () => FakeProcessManager.empty(),
-      });
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
 
-      testUsingContext('succeeds with iOS device with mDNS', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 16,
-          onGetLogReader: () {
+          await fakeLogReader.dispose();
+          await expectLoggerInterruptEndsTask(task, logger);
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'Fails with tool exit on bad VmService uri',
+        () async {
+          device.onGetLogReader = () {
             fakeLogReader.addLine('Foo');
-            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            fakeLogReader.addLine(
+              'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+            );
+            fakeLogReader.dispose();
             return fakeLogReader;
-          },
-        );
-        testDeviceManager.devices = <Device>[device];
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
+          };
+          testDeviceManager.devices = <Device>[device];
+          expect(
+            () => createTestCommandRunner(
+              AttachCommand(
+                stdio: stdio,
+                logger: logger,
+                terminal: terminal,
+                signals: signals,
+                platform: platform,
+                processInfo: processInfo,
+                fileSystem: testFileSystem,
+              ),
+            ).run(<String>['attach']),
+            throwsToolExit(),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
 
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']);
-        await fakeLogReader.dispose();
-
-        // Listen to the URI before checking port forwarder. Port forwarding
-        // is done as a side effect when generating the uri.
-        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
-
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(
-            <PtrResourceRecord>[
-              PtrResourceRecord('foo', future, domainName: 'bar'),
-            ],
-            <String, List<SrvResourceRecord>>{
-              'bar': <SrvResourceRecord>[
-                SrvResourceRecord('bar', future, port: devicePort, weight: 1, priority: 1, target: 'appId'),
-              ],
-            },
-            txtResponse: <String, List<TxtResourceRecord>>{
-              'bar': <TxtResourceRecord>[
-                TxtResourceRecord('bar', future, text: 'authCode=xyz\n'),
-              ],
-            },
-          ),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
-
-      testUsingContext('succeeds with iOS device with mDNS wireless device', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 16,
-          connectionInterface: DeviceConnectionInterface.wireless,
-        );
-        testDeviceManager.devices = <Device>[device];
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']);
-        await fakeLogReader.dispose();
-
-        // Listen to the URI before checking port forwarder. Port forwarding
-        // is done as a side effect when generating the uri.
-        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
-
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(
-            <PtrResourceRecord>[
-              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-            ],
-            <String, List<SrvResourceRecord>>{
-              'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
-              ],
-            },
-            ipResponse: <String, List<IPAddressResourceRecord>>{
-              'target-foo': <IPAddressResourceRecord>[
-                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
-              ],
-            },
-            txtResponse: <String, List<TxtResourceRecord>>{
-              'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-              ],
-            },
-          ),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
-
-      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-port', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 16,
-          connectionInterface: DeviceConnectionInterface.wireless,
-        );
-        testDeviceManager.devices = <Device>[device];
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach', '--debug-port', '123']);
-        await fakeLogReader.dispose();
-
-        // Listen to the URI before checking port forwarder. Port forwarding
-        // is done as a side effect when generating the uri.
-        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
-
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(
-            <PtrResourceRecord>[
-              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-            ],
-            <String, List<SrvResourceRecord>>{
-              'srv-bar': <SrvResourceRecord>[
-                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
-              ],
-              'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
-              ],
-            },
-            ipResponse: <String, List<IPAddressResourceRecord>>{
-              'target-foo': <IPAddressResourceRecord>[
-                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
-              ],
-            },
-            txtResponse: <String, List<TxtResourceRecord>>{
-              'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-              ],
-            },
-          ),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
-
-      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-url', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 16,
-          connectionInterface: DeviceConnectionInterface.wireless,
-        );
-        testDeviceManager.devices = <Device>[device];
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
-        await fakeLogReader.dispose();
-
-        // Listen to the URI before checking port forwarder. Port forwarding
-        // is done as a side effect when generating the uri.
-        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-        final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
-        expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
-
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(
-            <PtrResourceRecord>[
-              PtrResourceRecord('bar', future, domainName: 'srv-bar'),
-              PtrResourceRecord('foo', future, domainName: 'srv-foo'),
-            ],
-            <String, List<SrvResourceRecord>>{
-              'srv-bar': <SrvResourceRecord>[
-                SrvResourceRecord('srv-bar', future, port: 321, weight: 1, priority: 1, target: 'target-bar'),
-              ],
-              'srv-foo': <SrvResourceRecord>[
-                SrvResourceRecord('srv-foo', future, port: 123, weight: 1, priority: 1, target: 'target-foo'),
-              ],
-            },
-            ipResponse: <String, List<IPAddressResourceRecord>>{
-              'target-foo': <IPAddressResourceRecord>[
-                IPAddressResourceRecord('target-foo', 0, address: InternetAddress.tryParse('111.111.111.111')!),
-              ],
-            },
-            txtResponse: <String, List<TxtResourceRecord>>{
-              'srv-foo': <TxtResourceRecord>[
-                TxtResourceRecord('srv-foo', future, text: 'authCode=xyz\n'),
-              ],
-            },
-          ),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
-
-      testUsingContext('finds VM Service port and forwards', () async {
-        device.onGetLogReader = () {
-          fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-          return fakeLogReader;
-        };
-        testDeviceManager.devices = <Device>[device];
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
-            completer.complete();
-          }
-        });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']);
-        await completer.future;
-
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-
-        await fakeLogReader.dispose();
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('Fails with tool exit on bad VmService uri', () async {
-        device.onGetLogReader = () {
-          fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-          fakeLogReader.dispose();
-          return fakeLogReader;
-        };
-        testDeviceManager.devices = <Device>[device];
-        expect(() => createTestCommandRunner(AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach']), throwsToolExit());
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('accepts filesystem parameters', () async {
-        device.onGetLogReader = () {
-          fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-          return fakeLogReader;
-        };
-        testDeviceManager.devices = <Device>[device];
-
-        const String filesystemScheme = 'foo';
-        const String filesystemRoot = '/build-output/';
-        const String projectRoot = '/build-output/project-root';
-        const String outputDill = '/tmp/output.dill';
-
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
-
-        final AttachCommand command = AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
-        await createTestCommandRunner(command).run(<String>[
-          'attach',
-          '--filesystem-scheme',
-          filesystemScheme,
-          '--filesystem-root',
-          filesystemRoot,
-          '--project-root',
-          projectRoot,
-          '--output-dill',
-          outputDill,
-          '-v', // enables verbose logging
-        ]);
-
-        // Validate the attach call built a fake runner with the right
-        // project root and output dill.
-        expect(hotRunnerFactory.projectRootPath, projectRoot);
-        expect(hotRunnerFactory.dillOutputPath, outputDill);
-        expect(hotRunnerFactory.devices, hasLength(1));
-
-        // Validate that the attach call built a flutter device with the right
-        // output dill, filesystem scheme, and filesystem root.
-        final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-
-        expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
-        expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('exits when ipv6 is specified and debug-port is not on non-iOS device', () async {
-        testDeviceManager.devices = <Device>[device];
-
-        final AttachCommand command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
-        await expectLater(
-          createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
-          throwsToolExit(
-            message: 'When the --debug-port or --debug-url is unknown, this command determines '
-                     'the value of --ipv6 on its own.',
-          ),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
-        final FakeIOSDevice device = FakeIOSDevice(
-          portForwarder: portForwarder,
-          majorSdkVersion: 12,
-          onGetLogReader: () {
+      testUsingContext(
+        'accepts filesystem parameters',
+        () async {
+          device.onGetLogReader = () {
             fakeLogReader.addLine('Foo');
-            fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
+            fakeLogReader.addLine(
+              'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+            );
             return fakeLogReader;
-          },
-        );
-        testDeviceManager.devices = <Device>[device];
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
-            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
-            completer.complete();
-          }
-        });
-        final FakeHotRunner hotRunner = FakeHotRunner();
-        hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
-        ) async => 0;
-        hotRunner.exited = false;
-        hotRunner.isWaitingForVmService = false;
-        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-          ..hotRunner = hotRunner;
+          };
+          testDeviceManager.devices = <Device>[device];
 
-        await createTestCommandRunner(AttachCommand(
-          hotRunnerFactory: hotRunnerFactory,
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(<String>['attach', '--ipv6']);
-        await completer.future;
+          const filesystemScheme = 'foo';
+          const filesystemRoot = '/build-output/';
+          const projectRoot = '/build-output/project-root';
+          const outputDill = '/tmp/output.dill';
 
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
 
-        await fakeLogReader.dispose();
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
-          logger: logger,
-          flutterUsage: TestUsage(),
-          analytics: const NoOpAnalytics(),
-        ),
-      });
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
 
-      testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
-        device.onGetLogReader = () {
-          fakeLogReader.addLine('Foo');
-          fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
-          return fakeLogReader;
-        };
-        testDeviceManager.devices = <Device>[device];
+          final command = AttachCommand(
+            hotRunnerFactory: hotRunnerFactory,
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await createTestCommandRunner(command).run(<String>[
+            'attach',
+            '--filesystem-scheme',
+            filesystemScheme,
+            '--filesystem-root',
+            filesystemRoot,
+            '--project-root',
+            projectRoot,
+            '--output-dill',
+            outputDill,
+            '-v', // enables verbose logging
+          ]);
 
-        final AttachCommand command = AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        );
-        await expectLater(
-          createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
-          throwsToolExit(
-            message: 'When the --debug-port or --debug-url is unknown, this command does not use '
-                     'the value of --vm-service-port.',
+          // Validate the attach call built a fake runner with the right
+          // project root and output dill.
+          expect(hotRunnerFactory.projectRootPath, projectRoot);
+          expect(hotRunnerFactory.dillOutputPath, outputDill);
+          expect(hotRunnerFactory.devices, hasLength(1));
+
+          // Validate that the attach call built a flutter device with the right
+          // output dill, filesystem scheme, and filesystem root.
+          final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
+
+          expect(flutterDevice.buildInfo.fileSystemScheme, filesystemScheme);
+          expect(flutterDevice.buildInfo.fileSystemRoots, const <String>[filesystemRoot]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'exits when ipv6 is specified and debug-port is not on non-iOS device',
+        () async {
+          testDeviceManager.devices = <Device>[device];
+
+          final command = AttachCommand(
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await expectLater(
+            createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
+            throwsToolExit(
+              message:
+                  'When the --debug-port or --debug-url is unknown, this command determines '
+                  'the value of --ipv6 on its own.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when ipv6 is specified and debug-port is not on iOS device',
+        () async {
+          final device = FakeIOSDevice(
+            portForwarder: portForwarder,
+            majorSdkVersion: 12,
+            onGetLogReader: () {
+              fakeLogReader.addLine('Foo');
+              fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
+              return fakeLogReader;
+            },
+          );
+          testDeviceManager.devices = <Device>[device];
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
+              // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+              completer.complete();
+            }
+          });
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool allowExistingDdsInstance,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          await createTestCommandRunner(
+            AttachCommand(
+              hotRunnerFactory: hotRunnerFactory,
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--ipv6']);
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
+
+          await fakeLogReader.dispose();
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+            mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+            preliminaryMDnsClient: FakeMDnsClient(
+              <PtrResourceRecord>[],
+              <String, List<SrvResourceRecord>>{},
+            ),
+            logger: logger,
+            analytics: const NoOpAnalytics(),
           ),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-      },);
+        },
+      );
+
+      testUsingContext(
+        'exits when vm-service-port is specified and debug-port is not',
+        () async {
+          device.onGetLogReader = () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine(
+              'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+            );
+            return fakeLogReader;
+          };
+          testDeviceManager.devices = <Device>[device];
+
+          final command = AttachCommand(
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await expectLater(
+            createTestCommandRunner(command).run(<String>['attach', '--vm-service-port', '100']),
+            throwsToolExit(
+              message:
+                  'When the --debug-port or --debug-url is unknown, this command does not use '
+                  'the value of --vm-service-port.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
     });
 
     group('forwarding to given port', () {
-      const int devicePort = 499;
-      const int hostPort = 42;
+      const devicePort = 499;
+      const hostPort = 42;
       late RecordingPortForwarder portForwarder;
       late FakeAndroidDevice device;
 
       setUp(() {
-        final FakeDartDevelopmentService fakeDds = FakeDartDevelopmentService();
-        portForwarder = RecordingPortForwarder(hostPort);
+        final fakeDds = FakeDartDevelopmentService();
+        portForwarder = RecordingPortForwarder(defaultHostPort: 42);
         device = FakeAndroidDevice(id: '1')
           ..portForwarder = portForwarder
           ..dds = fakeDds;
       });
 
-      testUsingContext('succeeds in ipv4 mode', () async {
-        testDeviceManager.devices = <Device>[device];
+      testUsingContext(
+        'succeeds in ipv4 mode',
+        () async {
+          testDeviceManager.devices = <Device>[device];
 
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
-            // Wait until resident_runner.dart tries to connect.
-            // There's nothing to connect _to_, so that's as far as we care to go.
-            completer.complete();
-          }
-        });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+              // Wait until resident_runner.dart tries to connect.
+              // There's nothing to connect _to_, so that's as far as we care to go.
+              completer.complete();
+            }
+          });
+          final Future<void> task = createTestCommandRunner(
+            AttachCommand(
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--debug-port', '$devicePort']);
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
+
+          await expectLoggerInterruptEndsTask(task, logger);
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds in ipv6 mode',
+        () async {
+          testDeviceManager.devices = <Device>[device];
+
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+              // Wait until resident_runner.dart tries to connect.
+              // There's nothing to connect _to_, so that's as far as we care to go.
+              completer.complete();
+            }
+          });
+          final Future<void> task = createTestCommandRunner(
+            AttachCommand(
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
+            isA<ForwardedPort>()
+                .having((ForwardedPort d) => d.devicePort, 'devicePort', devicePort)
+                .having((ForwardedPort d) => d.hostPort, 'hostPort', hostPort),
+          ]);
+
+          await expectLoggerInterruptEndsTask(task, logger);
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'skips in ipv4 mode with a provided VM Service port',
+        () async {
+          testDeviceManager.devices = <Device>[device];
+
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+              // Wait until resident_runner.dart tries to connect.
+              // There's nothing to connect _to_, so that's as far as we care to go.
+              completer.complete();
+            }
+          });
+          final Future<void> task =
+              createTestCommandRunner(
+                AttachCommand(
+                  stdio: stdio,
+                  logger: logger,
+                  terminal: terminal,
+                  signals: signals,
+                  platform: platform,
+                  processInfo: processInfo,
+                  fileSystem: testFileSystem,
+                ),
+              ).run(<String>[
+                'attach',
+                '--debug-port',
+                '$devicePort',
+                '--vm-service-port',
+                '$hostPort',
+                // Ensure DDS doesn't use hostPort by binding to a random port.
+                '--dds-port',
+                '0',
+              ]);
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, isEmpty);
+
+          await expectLoggerInterruptEndsTask(task, logger);
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'skips in ipv6 mode with a provided VM Service port',
+        () async {
+          testDeviceManager.devices = <Device>[device];
+
+          final completer = Completer<void>();
+          final StreamSubscription<String> loggerSubscription = logger.stream.listen((
+            String message,
+          ) {
+            if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+              // Wait until resident_runner.dart tries to connect.
+              // There's nothing to connect _to_, so that's as far as we care to go.
+              completer.complete();
+            }
+          });
+          final Future<void> task =
+              createTestCommandRunner(
+                AttachCommand(
+                  stdio: stdio,
+                  logger: logger,
+                  terminal: terminal,
+                  signals: signals,
+                  platform: platform,
+                  processInfo: processInfo,
+                  fileSystem: testFileSystem,
+                ),
+              ).run(<String>[
+                'attach',
+                '--debug-port',
+                '$devicePort',
+                '--vm-service-port',
+                '$hostPort',
+                '--ipv6',
+                // Ensure DDS doesn't use hostPort by binding to a random port.
+                '--dds-port',
+                '0',
+              ]);
+          await completer.future;
+
+          expect(portForwarder.forwardedPorts, isEmpty);
+
+          await expectLoggerInterruptEndsTask(task, logger);
+          await loggerSubscription.cancel();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+    });
+
+    testUsingContext(
+      'exits when no device connected',
+      () async {
+        final command = AttachCommand(
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -875,112 +1241,51 @@ void main() {
           platform: platform,
           processInfo: processInfo,
           fileSystem: testFileSystem,
-        ))
-          .run(<String>['attach', '--debug-port', '$devicePort']);
-        await completer.future;
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('succeeds in ipv6 mode', () async {
-        testDeviceManager.devices = <Device>[device];
-
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
-            // Wait until resident_runner.dart tries to connect.
-            // There's nothing to connect _to_, so that's as far as we care to go.
-            completer.complete();
-          }
-        });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        ))
-          .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
-        await completer.future;
-
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-        DeviceManager: () => testDeviceManager,
-      });
-
-      testUsingContext('skips in ipv4 mode with a provided VM Service port', () async {
-        testDeviceManager.devices = <Device>[device];
-
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
-            // Wait until resident_runner.dart tries to connect.
-            // There's nothing to connect _to_, so that's as far as we care to go.
-            completer.complete();
-          }
-        });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
-          stdio: stdio,
-          logger: logger,
-          terminal: terminal,
-          signals: signals,
-          platform: platform,
-          processInfo: processInfo,
-          fileSystem: testFileSystem,
-        )).run(
-          <String>[
-            'attach',
-            '--debug-port',
-            '$devicePort',
-            '--vm-service-port',
-            '$hostPort',
-            // Ensure DDS doesn't use hostPort by binding to a random port.
-            '--dds-port',
-            '0',
-          ],
         );
-        await completer.future;
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, 42);
-
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(),
+        );
+        expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
+      },
+      overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
-      });
+      },
+    );
 
-      testUsingContext('skips in ipv6 mode with a provided VM Service port', () async {
+    testUsingContext(
+      'fails when targeted device is not Android with --device-user',
+      () async {
+        final device = FakeIOSDevice();
         testDeviceManager.devices = <Device>[device];
+        expect(
+          createTestCommandRunner(
+            AttachCommand(
+              stdio: stdio,
+              logger: logger,
+              terminal: terminal,
+              signals: signals,
+              platform: platform,
+              processInfo: processInfo,
+              fileSystem: testFileSystem,
+            ),
+          ).run(<String>['attach', '--device-user', '10']),
+          throwsToolExit(message: '--device-user is only supported for Android'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
 
-        final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
-            // Wait until resident_runner.dart tries to connect.
-            // There's nothing to connect _to_, so that's as far as we care to go.
-            completer.complete();
-          }
-        });
-        final Future<void> task = createTestCommandRunner(AttachCommand(
+    testUsingContext(
+      'exits when multiple devices connected',
+      () async {
+        final command = AttachCommand(
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -988,220 +1293,265 @@ void main() {
           platform: platform,
           processInfo: processInfo,
           fileSystem: testFileSystem,
-        )).run(
-          <String>[
-            'attach',
-            '--debug-port',
-            '$devicePort',
-            '--vm-service-port',
-            '$hostPort',
-            '--ipv6',
-            // Ensure DDS doesn't use hostPort by binding to a random port.
-            '--dds-port',
-            '0',
-          ],
         );
-        await completer.future;
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, 42);
-
-        await expectLoggerInterruptEndsTask(task, logger);
-        await loggerSubscription.cancel();
-      }, overrides: <Type, Generator>{
+        testDeviceManager.devices = <Device>[
+          FakeAndroidDevice(id: 'xx1'),
+          FakeAndroidDevice(id: 'yy2'),
+        ];
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(),
+        );
+        expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
+        expect(testLogger.statusText, contains('xx1'));
+        expect(testLogger.statusText, contains('yy2'));
+        expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
+      },
+      overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
+        AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
+      },
+    );
+
+    testUsingContext(
+      'Catches service disappeared error',
+      () async {
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kServiceDisappeared.code,
+                '',
+              );
+            };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(message: 'Lost connection to device.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'Catches "Service connection disposed" error by code',
+      () async {
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kConnectionDisposed.code,
+                'dummy text not matched',
+              );
+            };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(message: 'Lost connection to device.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'Catches "Service connection disposed" error by text',
+      () async {
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kServerError.code,
+                'Service connection disposed',
+              );
+            };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(message: 'Lost connection to device.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'Does not catch generic RPC error',
+      () async {
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool allowExistingDdsInstance,
+              bool enableDevTools,
+            ) async {
+              await null;
+              throw vm_service.RPCError(
+                'flutter._listViews',
+                vm_service.RPCErrorKind.kInvalidParams.code,
+                '',
+              );
+            };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsA(isA<vm_service.RPCError>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    group('prints warning when too slow', () {
+      late SlowWarningCallbackBufferLogger logger;
+
+      setUp(() {
+        logger = SlowWarningCallbackBufferLogger.test();
       });
-    });
 
-    testUsingContext('exits when no device connected', () async {
-      final AttachCommand command = AttachCommand(
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
+      testUsingContext(
+        'to find on iOS Simulator',
+        () async {
+          final device = FakeIOSSimulator();
+          testDeviceManager.devices = <Device>[device];
+          FakeAsync().run((FakeAsync fakeAsync) {
+            createTestCommandRunner(
+              AttachCommand(
+                stdio: stdio,
+                logger: logger,
+                terminal: terminal,
+                signals: signals,
+                platform: platform,
+                processInfo: processInfo,
+                fileSystem: testFileSystem,
+              ),
+            ).run(<String>['attach']);
+
+            logger.expectedWarning =
+                'The Dart VM Service was not discovered after 30 seconds. '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
+                'app or use the Dart VM service URL from the Xcode console with '
+                '"flutter attach --debug-url=<URL>".\n';
+            fakeAsync.elapse(const Duration(seconds: 30));
+          });
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
       );
-      await expectLater(
-        createTestCommandRunner(command).run(<String>['attach']),
-        throwsToolExit(),
-      );
-      expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
-    });
-
-    testUsingContext('fails when targeted device is not Android with --device-user', () async {
-      final FakeIOSDevice device = FakeIOSDevice();
-      testDeviceManager.devices = <Device>[device];
-      expect(createTestCommandRunner(AttachCommand(
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
-      )).run(<String>[
-        'attach',
-        '--device-user',
-        '10',
-      ]), throwsToolExit(message: '--device-user is only supported for Android'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
-    });
-
-    testUsingContext('exits when multiple devices connected', () async {
-      final AttachCommand command = AttachCommand(
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
-      );
-      testDeviceManager.devices = <Device>[
-        FakeAndroidDevice(id: 'xx1'),
-        FakeAndroidDevice(id: 'yy2'),
-      ];
-      await expectLater(
-        createTestCommandRunner(command).run(<String>['attach']),
-        throwsToolExit(),
-      );
-      expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
-      expect(testLogger.statusText, contains('xx1'));
-      expect(testLogger.statusText, contains('yy2'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
-      AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
-    });
-
-    testUsingContext('Catches service disappeared error', () async {
-      final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
-        ..portForwarder = const NoOpDevicePortForwarder()
-        ..onGetLogReader = () => NoOpDeviceLogReader('test');
-      final FakeHotRunner hotRunner = FakeHotRunner();
-      final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-        ..hotRunner = hotRunner;
-      hotRunner.onAttach = (
-        Completer<DebugConnectionInfo>? connectionInfoCompleter,
-        Completer<void>? appStartedCompleter,
-        bool allowExistingDdsInstance,
-        bool enableDevTools,
-      ) async {
-        await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
-      };
-
-      testDeviceManager.devices = <Device>[device];
-      testFileSystem.file('lib/main.dart').createSync();
-
-      final AttachCommand command = AttachCommand(
-        hotRunnerFactory: hotRunnerFactory,
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
-      );
-      await expectLater(createTestCommandRunner(command).run(<String>[
-        'attach',
-      ]), throwsToolExit(message: 'Lost connection to device.'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
-    });
-
-    testUsingContext('Catches "Service connection disposed" error', () async {
-      final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
-        ..portForwarder = const NoOpDevicePortForwarder()
-        ..onGetLogReader = () => NoOpDeviceLogReader('test');
-      final FakeHotRunner hotRunner = FakeHotRunner();
-      final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-        ..hotRunner = hotRunner;
-      hotRunner.onAttach = (
-        Completer<DebugConnectionInfo>? connectionInfoCompleter,
-        Completer<void>? appStartedCompleter,
-        bool allowExistingDdsInstance,
-        bool enableDevTools,
-      ) async {
-        await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServerError, 'Service connection disposed');
-      };
-
-      testDeviceManager.devices = <Device>[device];
-      testFileSystem.file('lib/main.dart').createSync();
-
-      final AttachCommand command = AttachCommand(
-        hotRunnerFactory: hotRunnerFactory,
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
-      );
-      await expectLater(createTestCommandRunner(command).run(<String>[
-        'attach',
-      ]), throwsToolExit(message: 'Lost connection to device.'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
-    });
-
-    testUsingContext('Does not catch generic RPC error', () async {
-      final FakeAndroidDevice device = FakeAndroidDevice(id: '1')
-        ..portForwarder = const NoOpDevicePortForwarder()
-        ..onGetLogReader = () => NoOpDeviceLogReader('test');
-      final FakeHotRunner hotRunner = FakeHotRunner();
-      final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
-        ..hotRunner = hotRunner;
-
-      hotRunner.onAttach = (
-        Completer<DebugConnectionInfo>? connectionInfoCompleter,
-        Completer<void>? appStartedCompleter,
-        bool allowExistingDdsInstance,
-        bool enableDevTools,
-      ) async {
-        await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
-      };
-
-      testDeviceManager.devices = <Device>[device];
-      testFileSystem.file('lib/main.dart').createSync();
-
-      final AttachCommand command = AttachCommand(
-        hotRunnerFactory: hotRunnerFactory,
-        stdio: stdio,
-        logger: logger,
-        terminal: terminal,
-        signals: signals,
-        platform: platform,
-        processInfo: processInfo,
-        fileSystem: testFileSystem,
-      );
-      await expectLater(createTestCommandRunner(command).run(<String>[
-        'attach',
-      ]), throwsA(isA<vm_service.RPCError>()));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => testDeviceManager,
     });
   });
 }
@@ -1210,10 +1560,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool, bool) onAttach;
 
   @override
-  bool exited = false;
+  var exited = false;
 
   @override
-  bool isWaitingForVmService = true;
+  var isWaitingForVmService = true;
 
   @override
   Future<int> attach({
@@ -1223,17 +1573,22 @@ class FakeHotRunner extends Fake implements HotRunner {
     bool enableDevTools = false,
     bool needsFullRestart = true,
   }) {
-    return onAttach(connectionInfoCompleter, appStartedCompleter, allowExistingDdsInstance, enableDevTools);
+    return onAttach(
+      connectionInfoCompleter,
+      appStartedCompleter,
+      allowExistingDdsInstance,
+      enableDevTools,
+    );
   }
 
   @override
-  bool supportsServiceProtocol = false;
+  var supportsServiceProtocol = false;
 
   @override
-  bool stayResident = true;
+  var stayResident = true;
 
   @override
-  void printHelp({required bool details}) {}
+  void printHelp({required bool details, bool reloadIsRestart = false}) {}
 }
 
 class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
@@ -1259,10 +1614,9 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     FlutterProject? flutterProject,
     Analytics? analytics,
     String? nativeAssetsYamlFile,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
     if (_artifactTester != null) {
-      for (final FlutterDevice device in devices) {
+      for (final device in devices) {
         _artifactTester!((device.generator! as DefaultResidentCompiler).artifacts);
       }
     }
@@ -1274,26 +1628,44 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
 }
 
 class RecordingPortForwarder implements DevicePortForwarder {
-  RecordingPortForwarder([this.hostPort]);
-
-  int? devicePort;
-  int? hostPort;
+  RecordingPortForwarder({required this.defaultHostPort});
+  final int defaultHostPort;
 
   @override
-  Future<void> dispose() async { }
-
-  @override
-  Future<int> forward(int devicePort, {int? hostPort}) async {
-    this.devicePort = devicePort;
-    this.hostPort ??= hostPort;
-    return this.hostPort!;
+  Future<void> dispose() async {
+    forwardedPorts.clear();
   }
 
   @override
-  List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
+  Future<int> forward(int devicePort, {int? hostPort}) async {
+    hostPort ??= defaultHostPort;
+    final forwardedPort = ForwardedPort(hostPort, devicePort);
+    forwardedPorts.add(forwardedPort);
+    return forwardedPort.hostPort;
+  }
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async { }
+  var forwardedPorts = <ForwardedPort>[];
+
+  @override
+  Future<void> unforward(ForwardedPort forwardedPort) async {
+    // Find a matching forwarded port.
+    int? n;
+    for (final (int i, ForwardedPort possibleMatch) in forwardedPorts.indexed) {
+      if (possibleMatch.hostPort != forwardedPort.hostPort ||
+          possibleMatch.devicePort != forwardedPort.devicePort) {
+        continue;
+      }
+      if (n != null) {
+        throw StateError('Multiple matching ports for $forwardedPort');
+      }
+      n = i;
+    }
+    if (n == null) {
+      throw StateError('No port found for $forwardedPort');
+    }
+    forwardedPorts.removeAt(n);
+  }
 }
 
 class StreamLogger extends Logger {
@@ -1342,10 +1714,7 @@ class StreamLogger extends Logger {
   }
 
   @override
-  void printBox(
-    String message, {
-    String? title,
-  }) {
+  void printBox(String message, {String? title}) {
     if (title == null) {
       _log('[stdout] $message');
     } else {
@@ -1368,9 +1737,7 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(
-      stopwatch: Stopwatch(),
-    )..start();
+    return SilentStatus(stopwatch: Stopwatch())..start();
   }
 
   @override
@@ -1380,19 +1747,16 @@ class StreamLogger extends Logger {
     SlowWarningCallback? slowWarningCallback,
     TerminalColor? warningColor,
   }) {
-    return SilentStatus(
-      stopwatch: Stopwatch(),
-      onFinish: onFinish,
-    )..start();
+    return SilentStatus(stopwatch: Stopwatch(), onFinish: onFinish)..start();
   }
 
-  bool _interrupt = false;
+  var _interrupt = false;
 
   void interrupt() {
     _interrupt = true;
   }
 
-  final StreamController<String> _controller = StreamController<String>.broadcast();
+  final _controller = StreamController<String>.broadcast();
 
   void _log(String message) {
     _controller.add(message);
@@ -1405,7 +1769,7 @@ class StreamLogger extends Logger {
   Stream<String> get stream => _controller.stream;
 
   @override
-  void sendEvent(String name, [Map<String, dynamic>? args]) { }
+  void sendEvent(String name, [Map<String, dynamic>? args]) {}
 
   @override
   bool get supportsColor => throw UnimplementedError();
@@ -1435,7 +1799,7 @@ Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logge
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   @override
   Future<void> get done => noopCompleter.future;
-  final Completer<void> noopCompleter = Completer<void>();
+  final noopCompleter = Completer<void>();
 
   @override
   Future<void> startDartDevelopmentService(
@@ -1467,6 +1831,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   String get name => 'd$id';
 
   @override
+  String get displayName => name;
+
+  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
@@ -1479,11 +1846,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
-  DeviceConnectionInterface get connectionInterface =>
-      DeviceConnectionInterface.attached;
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool get isConnected => true;
@@ -1503,10 +1869,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceLogReader Function()? onGetLogReader;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
-  }) {
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
         'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',
@@ -1532,15 +1895,19 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
     int? expectedHostPort,
     required bool ipv6,
     required Logger logger,
-  }) =>
-      LogScanningVMServiceDiscoveryForAttach(
-        Future<DeviceLogReader>.value(getLogReader()),
-        portForwarder: portForwarder,
-        devicePort: filterDevicePort,
-        hostPort: expectedHostPort,
-        ipv6: ipv6,
-        logger: logger,
-      );
+  }) => LogScanningVMServiceDiscoveryForAttach(
+    Future<DeviceLogReader>.value(getLogReader()),
+    portForwarder: portForwarder,
+    devicePort: filterDevicePort,
+    hostPort: expectedHostPort,
+    ipv6: ipv6,
+    logger: logger,
+  );
+
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
+  }
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
@@ -1559,8 +1926,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final DeviceConnectionInterface connectionInterface;
 
   @override
-  bool get isWirelesslyConnected =>
-      connectionInterface == DeviceConnectionInterface.wireless;
+  bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
@@ -1585,7 +1951,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 
   @override
-  final String name = 'name';
+  final name = 'name';
+
+  @override
+  String get displayName => name;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
@@ -1594,7 +1963,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final PlatformType platformType = PlatformType.ios;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject project) => true;
@@ -1614,9 +1983,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     required bool ipv6,
     required Logger logger,
   }) {
-    final bool compatibleWithProtocolDiscovery = majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
-          !isWirelesslyConnected;
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+    final bool compatibleWithProtocolDiscovery =
+        majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+        !isWirelesslyConnected;
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
@@ -1643,8 +2013,65 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 }
 
+class FakeIOSSimulator extends Fake implements IOSSimulator {
+  @override
+  final name = 'name';
+
+  @override
+  String get displayName => name;
+
+  @override
+  Future<bool> isSupported() async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
+
+  @override
+  bool get ephemeral => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
+  final PlatformType platformType = PlatformType.ios;
+
+  @override
+  bool get isWirelesslyConnected => false;
+
+  @override
+  DevicePortForwarder portForwarder = RecordingPortForwarder(defaultHostPort: 42);
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
+    return mdnsVMServiceDiscoveryForAttach;
+  }
+}
+
 class FakeMDnsClient extends Fake implements MDnsClient {
-  FakeMDnsClient(this.ptrRecords, this.srvResponse, {
+  FakeMDnsClient(
+    this.ptrRecords,
+    this.srvResponse, {
     this.txtResponse = const <String, List<TxtResourceRecord>>{},
     this.ipResponse = const <String, List<IPAddressResourceRecord>>{},
     this.osErrorOnStart = false,
@@ -1662,6 +2089,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
+    Function? onError,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);
@@ -1673,20 +2101,26 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     ResourceRecordQuery query, {
     Duration timeout = const Duration(seconds: 5),
   }) {
-    if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
+    if (T == PtrResourceRecord &&
+        query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
     }
     if (T == SrvResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[]) as Stream<T>;
+      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[])
+          as Stream<T>;
     }
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[])
+          as Stream<T>;
     }
     if (T == IPAddressResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<IPAddressResourceRecord>.fromIterable(ipResponse[key] ?? <IPAddressResourceRecord>[]) as Stream<T>;
+      return Stream<IPAddressResourceRecord>.fromIterable(
+            ipResponse[key] ?? <IPAddressResourceRecord>[],
+          )
+          as Stream<T>;
     }
     throw UnsupportedError('Unsupported query type $T');
   }
@@ -1697,11 +2131,11 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({required super.logger});
-  List<Device> devices = <Device>[];
+  var devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
-    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    final discoverer = FakePollingDeviceDiscovery();
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
@@ -1714,11 +2148,29 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   final bool stdinHasTerminal;
 
   @override
-  bool usesTerminalUi = false;
+  var usesTerminalUi = false;
 
   @override
-  bool singleCharMode = false;
+  var singleCharMode = false;
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;
+}
+
+class SlowWarningCallbackBufferLogger extends BufferLogger {
+  SlowWarningCallbackBufferLogger.test() : super.test();
+
+  String? expectedWarning;
+
+  @override
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
+  }) {
+    expect(slowWarningCallback, isNotNull);
+    expect(slowWarningCallback!(), expectedWarning);
+    return SilentStatus(stopwatch: Stopwatch(), onFinish: onFinish)..start();
+  }
 }

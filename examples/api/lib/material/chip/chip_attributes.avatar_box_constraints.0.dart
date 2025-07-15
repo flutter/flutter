@@ -14,11 +14,7 @@ class AvatarBoxConstraintsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: AvatarBoxConstraintsExample(),
-        ),
-      ),
+      home: Scaffold(body: Center(child: AvatarBoxConstraintsExample())),
     );
   }
 }
@@ -36,11 +32,7 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
           avatar: Icon(Icons.star),
           label: SizedBox(
             width: 150,
-            child: Text(
-              'One line text.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text('One line text.', maxLines: 3, overflow: TextOverflow.ellipsis),
           ),
         ),
         SizedBox(height: 10),

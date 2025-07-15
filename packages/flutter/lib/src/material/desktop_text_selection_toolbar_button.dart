@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -17,12 +16,7 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontWeight: FontWeight.w400,
 );
 
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
-  20.0,
-  0.0,
-  20.0,
-  3.0,
-);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 3.0);
 
 /// A [TextButton] for the Material desktop text selection toolbar.
 class DesktopTextSelectionToolbarButton extends StatelessWidget {

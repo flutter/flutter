@@ -16,10 +16,10 @@ import '../src/common.dart';
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  for (final bool asyncScanning in <bool>[true, false]) {
+  for (final asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -47,7 +47,7 @@ void main() {
 
     testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: fileSystem,
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -75,7 +75,7 @@ void main() {
 
     testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      final projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem.test(),
         platform: FakePlatform(),
         logger: BufferLogger.test(),
@@ -92,7 +92,7 @@ void main() {
       expect(
         (await projectFileInvalidator.findInvalidated(
           lastCompiled: inFuture,
-          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore')],
           packagesPath: '.dart_tool/package_config.json',
           asyncScanning: asyncScanning,
           packageConfig: PackageConfig.empty,
@@ -101,35 +101,36 @@ void main() {
       );
     });
 
-    testWithoutContext('Works with MultiRootFileSystem uris, asyncScanning: $asyncScanning', () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final FileSystem multiRootFileSystem = MultiRootFileSystem(
-        delegate: fileSystem,
-        scheme: 'scheme',
-        roots: <String>[
-          '/root',
-        ],
-      );
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        fileSystem: multiRootFileSystem,
-        platform: FakePlatform(),
-        logger: BufferLogger.test(),
-      );
+    testWithoutContext(
+      'Works with MultiRootFileSystem uris, asyncScanning: $asyncScanning',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final FileSystem multiRootFileSystem = MultiRootFileSystem(
+          delegate: fileSystem,
+          scheme: 'scheme',
+          roots: <String>['/root'],
+        );
+        final projectFileInvalidator = ProjectFileInvalidator(
+          fileSystem: multiRootFileSystem,
+          platform: FakePlatform(),
+          logger: BufferLogger.test(),
+        );
 
-      expect(
-        (await projectFileInvalidator.findInvalidated(
-          lastCompiled: inFuture,
-          urisToMonitor: <Uri>[
-            Uri.parse('file1'),
-            Uri.parse('file:///file2'),
-            Uri.parse('scheme:///file3'),
-          ],
-          packagesPath: '.dart_tool/package_config.json',
-          asyncScanning: asyncScanning,
-          packageConfig: PackageConfig.empty,
-        )).uris,
-        isEmpty,
-      );
-    });
+        expect(
+          (await projectFileInvalidator.findInvalidated(
+            lastCompiled: inFuture,
+            urisToMonitor: <Uri>[
+              Uri.parse('file1'),
+              Uri.parse('file:///file2'),
+              Uri.parse('scheme:///file3'),
+            ],
+            packagesPath: '.dart_tool/package_config.json',
+            asyncScanning: asyncScanning,
+            packageConfig: PackageConfig.empty,
+          )).uris,
+          isEmpty,
+        );
+      },
+    );
   }
 }

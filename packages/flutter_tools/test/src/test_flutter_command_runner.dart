@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
 
-CommandRunner<void> createTestCommandRunner([ FlutterCommand? command ]) {
+CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();
   if (command != null) {
     runner.addCommand(command);
@@ -29,10 +29,14 @@ CommandRunner<void> createTestCommandRunner([ FlutterCommand? command ]) {
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
 /// Returns the path to the flutter project.
-Future<String> createProject(Directory temp, { List<String>? arguments }) async {
+Future<String> createProject(
+  Directory temp, {
+  String name = 'flutter_project',
+  List<String>? arguments,
+}) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = globals.fs.path.join(temp.path, 'flutter_project');
-  final CreateCommand command = CreateCommand();
+  final String projectPath = globals.fs.path.join(temp.path, name);
+  final command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
@@ -42,9 +46,8 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = globals.logger;
-    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
-      if (topLevelResults['verbose'] as bool)
-        Logger: VerboseLogger(topLevelLogger),
+    final contextOverrides = <Type, dynamic>{
+      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
     };
     return context.run<void>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
@@ -59,7 +62,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         // For compatibility with tests that set this to a relative path.
         Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
-      }
+      },
     );
   }
 }

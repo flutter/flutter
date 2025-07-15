@@ -15,28 +15,27 @@ import 'io.dart' as io;
 import 'logger.dart';
 
 export 'package:dds/dds.dart'
-    show
-        DartDevelopmentServiceException,
-        ExistingDartDevelopmentServiceException;
+    show DartDevelopmentServiceException, ExistingDartDevelopmentServiceException;
 
-typedef DDSLauncherCallback = Future<DartDevelopmentServiceLauncher> Function({
-  required Uri remoteVmServiceUri,
-  Uri? serviceUri,
-  bool enableAuthCodes,
-  bool serveDevTools,
-  Uri? devToolsServerAddress,
-  bool enableServicePortFallback,
-  List<String> cachedUserTags,
-  String? dartExecutable,
-  String? google3WorkspaceRoot,
-});
+typedef DDSLauncherCallback =
+    Future<DartDevelopmentServiceLauncher> Function({
+      required Uri remoteVmServiceUri,
+      Uri? serviceUri,
+      bool enableAuthCodes,
+      bool serveDevTools,
+      Uri? devToolsServerAddress,
+      bool enableServicePortFallback,
+      List<String> cachedUserTags,
+      String? dartExecutable,
+      String? google3WorkspaceRoot,
+    });
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
 /// Used by tests to override the DDS spawn behavior for mocking purposes.
 @visibleForTesting
 DDSLauncherCallback ddsLauncherCallback = DartDevelopmentServiceLauncher.start;
 
-/// Helper class to launch a [dds.DartDevelopmentService]. Allows for us to
+/// Helper class to launch a [DartDevelopmentServiceLauncher]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   DartDevelopmentService({required Logger logger}) : _logger = logger;
@@ -47,7 +46,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   Uri? _existingDdsUri;
 
   Future<void> get done => _completer.future;
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 
   final Logger _logger;
 
@@ -63,11 +62,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
     Uri? devToolsServerAddress,
   }) async {
     assert(_ddsInstance == null);
-    final Uri ddsUri = Uri(
+    final ddsUri = Uri(
       scheme: 'http',
-      host: ((ipv6 ?? false)
-              ? io.InternetAddress.loopbackIPv6
-              : io.InternetAddress.loopbackIPv4)
+      host: ((ipv6 ?? false) ? io.InternetAddress.loopbackIPv6 : io.InternetAddress.loopbackIPv4)
           .host,
       port: ddsPort ?? 0,
     );
@@ -87,31 +84,16 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
         serviceUri: ddsUri,
         enableAuthCodes: disableServiceAuthCodes != true,
         // Enables caching of CPU samples collected during application startup.
-        cachedUserTags: cacheStartupProfile
-            ? const <String>['AppStartUp']
-            : const <String>[],
+        cachedUserTags: cacheStartupProfile ? const <String>['AppStartUp'] : const <String>[],
         devToolsServerAddress: devToolsServerAddress,
         google3WorkspaceRoot: google3WorkspaceRoot,
-        dartExecutable: globals.artifacts!.getArtifactPath(
-          Artifact.engineDartBinary,
-        ),
+        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       );
-
-      // Complete the future if the DDS process is null, which happens in
-      // testing.
       unawaited(_ddsInstance!.done.whenComplete(completeFuture));
     } on DartDevelopmentServiceException catch (e) {
       _logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e is ExistingDartDevelopmentServiceException) {
         _existingDdsUri = e.ddsUri;
-      } else {
-        _logger.printError(
-            'DDS has failed to start and there is not an existing DDS instance '
-            'available to connect to. Please file an issue at https://github.com/flutter/flutter/issues '
-            'with the following error message:\n\n ${e.message}.');
-        // DDS was unable to start for an unknown reason. Raise a StateError
-        // so it can be reported by the crash reporter.
-        throw StateError(e.message);
       }
       completeFuture();
       rethrow;
@@ -140,15 +122,14 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
     required DebuggingOptions debuggingOptions,
-  }) =>
-      startDartDevelopmentService(
-        vmServiceUri,
-        ddsPort: debuggingOptions.ddsPort,
-        disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
-        ipv6: debuggingOptions.ipv6,
-        enableDevTools: debuggingOptions.enableDevTools,
-        cacheStartupProfile: debuggingOptions.cacheStartupProfile,
-        google3WorkspaceRoot: debuggingOptions.google3WorkspaceRoot,
-        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-      );
+  }) => startDartDevelopmentService(
+    vmServiceUri,
+    ddsPort: debuggingOptions.ddsPort,
+    disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
+    ipv6: debuggingOptions.ipv6,
+    enableDevTools: debuggingOptions.enableDevTools,
+    cacheStartupProfile: debuggingOptions.cacheStartupProfile,
+    google3WorkspaceRoot: debuggingOptions.google3WorkspaceRoot,
+    devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+  );
 }

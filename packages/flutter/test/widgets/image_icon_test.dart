@@ -8,24 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
-
 void main() {
   late ImageProvider image;
 
   setUpAll(() async {
-    image = TestImageProvider(
-      21,
-      42,
-      image: await createTestImage(width: 10, height: 10),
-    );
+    image = TestImageProvider(21, 42, image: await createTestImage(width: 10, height: 10));
   });
 
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Center(
-        child: ImageIcon(image),
-      ),
-    );
+    await tester.pumpWidget(Center(child: ImageIcon(image)));
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
@@ -37,10 +28,7 @@ void main() {
   testWidgets('Icon opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
-        child: IconTheme(
-          data: const IconThemeData(opacity: 0.5),
-          child: ImageIcon(image),
-        ),
+        child: IconTheme(data: const IconThemeData(opacity: 0.5), child: ImageIcon(image)),
       ),
     );
 
@@ -50,14 +38,7 @@ void main() {
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Center(
-        child: ImageIcon(
-          null,
-          size: 96.0,
-        ),
-      ),
-    );
+    await tester.pumpWidget(const Center(child: ImageIcon(null, size: 96.0)));
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(96.0)));
@@ -66,10 +47,7 @@ void main() {
   testWidgets('ImageIcon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: IconTheme(
-          data: IconThemeData(size: 36.0),
-          child: ImageIcon(null),
-        ),
+        child: IconTheme(data: IconThemeData(size: 36.0), child: ImageIcon(null)),
       ),
     );
 
@@ -80,13 +58,7 @@ void main() {
   testWidgets('ImageIcon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: IconTheme(
-          data: IconThemeData(size: 36.0),
-          child: ImageIcon(
-            null,
-            size: 48.0,
-          ),
-        ),
+        child: IconTheme(data: IconThemeData(size: 36.0), child: ImageIcon(null, size: 48.0)),
       ),
     );
 
@@ -97,10 +69,7 @@ void main() {
   testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: IconTheme(
-          data: IconThemeData(),
-          child: ImageIcon(null),
-        ),
+        child: IconTheme(data: IconThemeData(), child: ImageIcon(null)),
       ),
     );
 
@@ -122,11 +91,10 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byType(ImageIcon)), matchesSemantics(
-      label: 'test',
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+      tester.getSemantics(find.byType(ImageIcon)),
+      matchesSemantics(label: 'test', textDirection: TextDirection.ltr),
+    );
     handle.dispose();
   });
-
 }

@@ -17,9 +17,7 @@ void main() {
     RenderObject boundary, inner;
     final RenderOpacity root = RenderOpacity(
       child: boundary = RenderRepaintBoundary(
-        child: inner = RenderDecoratedBox(
-          decoration: const BoxDecoration(),
-        ),
+        child: inner = RenderDecoratedBox(decoration: const BoxDecoration()),
       ),
     );
     layout(root, phase: EnginePhase.paint);
@@ -170,7 +168,10 @@ void main() {
     final LayerLink link = LayerLink();
     final LeaderLayer leaderLayer = LeaderLayer(link: link);
     final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
-    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
+    final RenderView view = RenderView(
+      configuration: ViewConfiguration.fromView(flutterView),
+      view: flutterView,
+    );
     leaderLayer.attach(view);
     final LayerLink link2 = LayerLink();
     leaderLayer.link = link2;
@@ -184,7 +185,10 @@ void main() {
     final LeaderLayer leaderLayer1 = LeaderLayer(link: link);
     final LeaderLayer leaderLayer2 = LeaderLayer(link: link);
     final FlutterView flutterView = RendererBinding.instance.platformDispatcher.views.single;
-    final RenderView view = RenderView(configuration: ViewConfiguration.fromView(flutterView), view: flutterView);
+    final RenderView view = RenderView(
+      configuration: ViewConfiguration.fromView(flutterView),
+      view: flutterView,
+    );
     leaderLayer1.attach(view);
     leaderLayer2.attach(view);
     leaderLayer2.detach();
@@ -259,9 +263,7 @@ void main() {
     final LayerLink link = LayerLink();
     late RenderLeaderLayer leader;
     final RenderRepaintBoundary root = RenderRepaintBoundary(
-      child:RenderRepaintBoundary(
-        child: leader = RenderLeaderLayer(link: link),
-      ),
+      child: RenderRepaintBoundary(child: leader = RenderLeaderLayer(link: link)),
     );
     layout(root, phase: EnginePhase.composite);
 
@@ -307,10 +309,7 @@ void main() {
     c.append(g);
     g.append(j);
 
-    expect(
-      a.depthFirstIterateChildren(),
-      <Layer>[b, d, h, i, e, f, c, g, j],
-    );
+    expect(a.depthFirstIterateChildren(), <Layer>[b, d, h, i, e, f, c, g, j]);
 
     d.remove();
     //        a____
@@ -320,10 +319,7 @@ void main() {
     //        e  f  g
     //              |
     //              j
-    expect(
-      a.depthFirstIterateChildren(),
-      <Layer>[b, e, f, c, g, j],
-    );
+    expect(a.depthFirstIterateChildren(), <Layer>[b, e, f, c, g, j]);
   });
 
   void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
@@ -340,7 +336,8 @@ void main() {
     layer.debugFillProperties(builder);
     return builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -359,6 +356,14 @@ void main() {
     );
   });
 
+  test('ClipRSuperellipseLayer prints clipBehavior in debug info', () {
+    expect(getDebugInfo(ClipRSuperellipseLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      getDebugInfo(ClipRSuperellipseLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
   test('ClipPathLayer prints clipBehavior in debug info', () {
     expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
@@ -368,14 +373,18 @@ void main() {
   });
 
   test('BackdropFilterLayer prints filter and blendMode in debug info', () {
-    final ImageFilter filter = ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0, tileMode: TileMode.repeated);
-    final BackdropFilterLayer layer = BackdropFilterLayer(filter: filter, blendMode: BlendMode.clear);
+    final ImageFilter filter = ImageFilter.blur(
+      sigmaX: 1.0,
+      sigmaY: 1.0,
+      tileMode: TileMode.repeated,
+    );
+    final BackdropFilterLayer layer = BackdropFilterLayer(
+      filter: filter,
+      blendMode: BlendMode.clear,
+    );
     final List<String> info = getDebugInfo(layer);
 
-    expect(
-      info,
-      contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'),
-    );
+    expect(info, contains('filter: ImageFilter.blur(${1.0}, ${1.0}, repeated)'));
     expect(info, contains('blendMode: clear'));
   });
 
@@ -462,6 +471,18 @@ void main() {
     });
   });
 
+  test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
+    final ClipRSuperellipseLayer layer = ClipRSuperellipseLayer(
+      clipRSuperellipse: RSuperellipse.zero,
+    );
+    checkNeedsAddToScene(layer, () {
+      layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
   test('mutating ClipPath fields triggers needsAddToScene', () {
     final ClipPathLayer layer = ClipPathLayer(clipPath: Path());
     checkNeedsAddToScene(layer, () {
@@ -496,7 +517,11 @@ void main() {
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
     const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
-    final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
+    final ShaderMaskLayer layer = ShaderMaskLayer(
+      shader: shader,
+      maskRect: Rect.zero,
+      blendMode: BlendMode.clear,
+    );
     checkNeedsAddToScene(layer, () {
       layer.maskRect = unitRect;
     });
@@ -531,7 +556,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  });
 
   test('ContainerLayer.toImageSync can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
@@ -549,7 +574,7 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  });
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);
@@ -720,12 +745,16 @@ void main() {
     expect(layer.describeClipBounds(), null);
 
     const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
-    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    final RRect rrBounds = RRect.fromRectXY(bounds, 2, 2);
+    final RSuperellipse rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
     layer = ClipRectLayer(clipRect: bounds);
     expect(layer.describeClipBounds(), bounds);
 
-    layer = ClipRRectLayer(clipRRect: rbounds);
-    expect(layer.describeClipBounds(), rbounds.outerRect);
+    layer = ClipRRectLayer(clipRRect: rrBounds);
+    expect(layer.describeClipBounds(), rrBounds.outerRect);
+
+    layer = ClipRSuperellipseLayer(clipRSuperellipse: rseBounds);
+    expect(layer.describeClipBounds(), rseBounds.outerRect);
 
     layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
     expect(layer.describeClipBounds(), bounds);
@@ -789,7 +818,7 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a2.subtreeHasCompositionCallbacks, false);
 
-    b1.addCompositionCallback((_) { });
+    b1.addCompositionCallback((_) {});
 
     expect(b1.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -946,8 +975,8 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a1.subtreeHasCompositionCallbacks, false);
 
-    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
-    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover1 = a1.addCompositionCallback((_) {});
+    final VoidCallback remover2 = a1.addCompositionCallback((_) {});
 
     expect(root.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -965,7 +994,7 @@ void main() {
 
   test('Double removing a observe callback throws', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     callback();
 
     expect(() => callback(), throwsAssertionError);
@@ -973,7 +1002,7 @@ void main() {
 
   test('Removing an observe callback on a disposed layer does not throw', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((_) {});
     root.dispose();
     expect(() => callback(), returnsNormally);
   });
@@ -984,6 +1013,7 @@ void main() {
     final OpacityLayer opacityLayer = OpacityLayer();
     final ClipRectLayer clipRectLayer = ClipRectLayer();
     final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ClipRSuperellipseLayer clipRSuperellipseLayer = ClipRSuperellipseLayer();
     final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
     final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
@@ -993,6 +1023,7 @@ void main() {
     expect(opacityLayer.supportsRasterization(), true);
     expect(clipRectLayer.supportsRasterization(), true);
     expect(clipRRectLayer.supportsRasterization(), true);
+    expect(clipRSuperellipseLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);

@@ -17,9 +17,7 @@ class SingleActivatorExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SingleActivator Sample')),
-        body: const Center(
-          child: SingleActivatorExample(),
-        ),
+        body: const Center(child: SingleActivatorExample()),
       ),
     );
   }

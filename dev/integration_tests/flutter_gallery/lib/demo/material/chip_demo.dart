@@ -6,21 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const List<String> _defaultMaterialsA = <String>[
-  'poker',
-  'tortilla',
-  'fish and',
-  'micro',
-  'wood',
-];
+const List<String> _defaultMaterialsA = <String>['poker', 'tortilla', 'fish and', 'micro', 'wood'];
 
-const List<String> _defaultMaterialsB = <String>[
-  'apple',
-  'orange',
-  'tomato',
-  'grape',
-  'lettuce',
-];
+const List<String> _defaultMaterialsB = <String>['apple', 'orange', 'tomato', 'grape', 'lettuce'];
 
 const List<String> _defaultActions = <String>[
   'flake',
@@ -46,21 +34,9 @@ const Map<String, String> _results = <String, String>{
   'eat': 'eating',
 };
 
-const List<String> _defaultToolsA = <String>[
-  'hammer',
-  'chisel',
-  'fryer',
-  'fabricator',
-  'customer',
-];
+const List<String> _defaultToolsA = <String>['hammer', 'chisel', 'fryer', 'fabricator', 'customer'];
 
-const List<String> _defaultToolsB = <String>[
-  'keyboard',
-  'mouse',
-  'monitor',
-  'printer',
-  'cable',
-];
+const List<String> _defaultToolsB = <String>['keyboard', 'mouse', 'monitor', 'printer', 'cable'];
 
 const Map<String, String> _avatars = <String, String>{
   'hammer': 'people/square/ali.png',
@@ -87,10 +63,7 @@ const Map<String, Set<String>> _materialActions = <String, Set<String>>{
 };
 
 class _ChipsTile extends StatelessWidget {
-  const _ChipsTile({
-    this.label,
-    this.children,
-  });
+  const _ChipsTile({this.label, this.children});
 
   final String? label;
   final List<Widget>? children;
@@ -111,10 +84,7 @@ class _ChipsTile extends StatelessWidget {
           if (children!.isNotEmpty)
             Wrap(
               children: children!.map<Widget>((Widget chip) {
-                return Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: chip,
-                );
+                return Padding(padding: const EdgeInsets.all(2.0), child: chip);
               }).toList(),
             )
           else
@@ -124,7 +94,12 @@ class _ChipsTile extends StatelessWidget {
                 alignment: Alignment.center,
                 constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
                 padding: const EdgeInsets.all(8.0),
-                child: Text('None', style: Theme.of(context).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic)),
+                child: Text(
+                  'None',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
+                ),
               ),
             ),
         ],
@@ -209,10 +184,7 @@ class _ChipDemoState extends State<ChipDemo> {
 
   AssetImage _nameToAvatar(String name) {
     assert(_avatars.containsKey(name));
-    return AssetImage(
-      _avatars[name]!,
-      package: 'flutter_gallery_assets',
-    );
+    return AssetImage(_avatars[name]!, package: 'flutter_gallery_assets');
   }
 
   String _createResult() {
@@ -241,16 +213,15 @@ class _ChipDemoState extends State<ChipDemo> {
 
     final List<Widget> inputChips = _toolsA.map<Widget>((String name) {
       return InputChip(
-          key: ValueKey<String>(name),
-          avatar: CircleAvatar(
-            backgroundImage: _nameToAvatar(name),
-          ),
-          label: Text(_capitalize(name)),
-          onDeleted: () {
-            setState(() {
-              _removeTool(name);
-            });
+        key: ValueKey<String>(name),
+        avatar: CircleAvatar(backgroundImage: _nameToAvatar(name)),
+        label: Text(_capitalize(name)),
+        onDeleted: () {
+          setState(() {
+            _removeTool(name);
           });
+        },
+      );
     }).toList();
 
     final List<Widget> choiceChips = _materialsB.map<Widget>((String name) {
@@ -315,12 +286,7 @@ class _ChipDemoState extends State<ChipDemo> {
       const Divider(),
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Text(
-            _createResult(),
-            style: theme.textTheme.titleLarge,
-          ),
-        ),
+        child: Center(child: Text(_createResult(), style: theme.textTheme.titleLarge)),
       ),
     ];
 
@@ -343,16 +309,12 @@ class _ChipDemoState extends State<ChipDemo> {
         data: _showShapeBorder
             ? theme.chipTheme.copyWith(
                 shape: BeveledRectangleBorder(
-                side: const BorderSide(width: 0.66, color: Colors.grey),
-                borderRadius: BorderRadius.circular(10.0),
-              ))
+                  side: const BorderSide(width: 0.66, color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              )
             : theme.chipTheme,
-        child: Scrollbar(
-          child: ListView(
-            primary: true,
-            children: tiles,
-          )
-        ),
+        child: Scrollbar(child: ListView(primary: true, children: tiles)),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(_reset),

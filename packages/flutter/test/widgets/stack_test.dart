@@ -20,12 +20,7 @@ class TestPaintingContext implements PaintingContext {
 
 void main() {
   testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(),
-      ),
-    );
+    await tester.pumpWidget(const Directionality(textDirection: TextDirection.ltr, child: Stack()));
   });
 
   testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) async {
@@ -44,14 +39,7 @@ void main() {
       const Stack(
         alignment: Alignment.topLeft,
         children: <Widget>[
-          Positioned(
-            left: 10.0,
-            child: SizedBox(
-              key: key,
-              width: 10.0,
-              height: 10.0,
-            ),
-          ),
+          Positioned(left: 10.0, child: SizedBox(key: key, width: 10.0, height: 10.0)),
         ],
       ),
     );
@@ -72,14 +60,7 @@ void main() {
       const Stack(
         alignment: Alignment.topLeft,
         children: <Widget>[
-          Positioned(
-            right: 10.0,
-            child: SizedBox(
-              key: key,
-              width: 10.0,
-              height: 10.0,
-            ),
-          ),
+          Positioned(right: 10.0, child: SizedBox(key: key, width: 10.0, height: 10.0)),
         ],
       ),
     );
@@ -101,7 +82,7 @@ void main() {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
+        children: <Widget>[Positioned(left: 10.0, child: sizedBox)],
       ),
     );
     Element containerElement = tester.element(find.byKey(key));
@@ -116,10 +97,7 @@ void main() {
     expect(parentData.height, isNull);
 
     await tester.pumpWidget(
-      const Stack(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[ sizedBox ],
-      ),
+      const Stack(textDirection: TextDirection.ltr, children: <Widget>[sizedBox]),
     );
     containerElement = tester.element(find.byKey(key));
 
@@ -152,11 +130,13 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
+    final StackParentData child0RenderObjectParentData =
+        child0.renderObject!.parentData! as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
+    final StackParentData child1RenderObjectParentData =
+        child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -198,11 +178,13 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject!.parentData! as StackParentData;
+    final StackParentData child0RenderObjectParentData =
+        child0.renderObject!.parentData! as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(Offset.zero));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject!.parentData! as StackParentData;
+    final StackParentData child1RenderObjectParentData =
+        child1.renderObject!.parentData! as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -226,10 +208,7 @@ void main() {
 
   testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: IndexedStack(),
-      ),
+      const Directionality(textDirection: TextDirection.ltr, child: IndexedStack()),
     );
   });
 
@@ -251,17 +230,15 @@ void main() {
       final List<Widget> items = List<Widget>.generate(itemCount, (int i) {
         return CustomPaint(
           painter: TestCallbackPainter(
-            onPaint: () { itemsPainted.add(i); },
+            onPaint: () {
+              itemsPainted.add(i);
+            },
           ),
           child: Text('$i', textDirection: TextDirection.ltr),
         );
       });
       return Center(
-        child: IndexedStack(
-          alignment: Alignment.topLeft,
-          index: index,
-          children: items,
-        ),
+        child: IndexedStack(alignment: Alignment.topLeft, index: index, children: items),
       );
     }
 
@@ -282,11 +259,11 @@ void main() {
     expect(itemsPainted, equals(<int>[0]));
 
     await tester.pumpWidget(buildFrame(1));
-      expectFindsChild(1);
+    expectFindsChild(1);
     expect(itemsPainted, equals(<int>[1]));
 
     await tester.pumpWidget(buildFrame(2));
-      expectFindsChild(2);
+    expectFindsChild(2);
     expect(itemsPainted, equals(<int>[2]));
   });
 
@@ -298,15 +275,15 @@ void main() {
     Widget buildFrame(int index) {
       itemsTapped = <int>[];
       final List<Widget> items = List<Widget>.generate(itemCount, (int i) {
-        return GestureDetector(child: Text('$i', textDirection: TextDirection.ltr), onTap: () { itemsTapped.add(i); });
+        return GestureDetector(
+          child: Text('$i', textDirection: TextDirection.ltr),
+          onTap: () {
+            itemsTapped.add(i);
+          },
+        );
       });
       return Center(
-        child: IndexedStack(
-          alignment: Alignment.topLeft,
-          key: key,
-          index: index,
-          children: items,
-        ),
+        child: IndexedStack(alignment: Alignment.topLeft, key: key, index: index, children: items),
       );
     }
 
@@ -321,17 +298,16 @@ void main() {
     expect(itemsTapped, <int>[2]);
   });
 
-  testWidgets('IndexedStack sets non-selected indexes to visible=false', (WidgetTester tester) async {
+  testWidgets('IndexedStack sets non-selected indexes to visible=false', (
+    WidgetTester tester,
+  ) async {
     Widget buildStack({required int itemCount, required int? selectedIndex}) {
       final List<Widget> children = List<Widget>.generate(itemCount, (int i) {
         return _ShowVisibility(index: i);
       });
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: IndexedStack(
-          index: selectedIndex,
-          children: children,
-        ),
+        child: IndexedStack(index: selectedIndex, children: children),
       );
     }
 
@@ -359,9 +335,7 @@ void main() {
   testWidgets('Can set width and height', (WidgetTester tester) async {
     const Key key = Key('container');
 
-    const BoxDecoration kBoxDecoration = BoxDecoration(
-      color: Color(0xFF00FF00),
-    );
+    const BoxDecoration kBoxDecoration = BoxDecoration(color: Color(0xFF00FF00));
 
     await tester.pumpWidget(
       const Stack(
@@ -434,17 +408,24 @@ void main() {
   });
 
   testWidgets('Clip.none is respected by describeApproximateClip', (WidgetTester tester) async {
-    await tester.pumpWidget(const Stack(
-      textDirection: TextDirection.ltr,
-      children: <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
-    ));
+    await tester.pumpWidget(
+      const Stack(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000)),
+        ],
+      ),
+    );
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     bool visited = false;
     renderObject.visitChildren((RenderObject child) {
       visited = true;
-      expect(renderObject.describeApproximatePaintClip(child), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
+      expect(
+        renderObject.describeApproximatePaintClip(child),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+      );
     });
     expect(visited, true);
     visited = false;
@@ -468,11 +449,10 @@ void main() {
             children: <Widget>[
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () { tapped = true; },
-                child: const SizedBox(
-                  width: 200.0,
-                  height: 200.0,
-                ),
+                onTap: () {
+                  tapped = true;
+                },
+                child: const SizedBox(width: 200.0, height: 200.0),
               ),
             ],
           ),
@@ -487,19 +467,14 @@ void main() {
   });
 
   testWidgets('IndexedStack reports hidden children as offstage', (WidgetTester tester) async {
-    final List<Widget> children = <Widget>[
-      for (int i = 0; i < 5; i++) Text('child $i'),
-    ];
+    final List<Widget> children = <Widget>[for (int i = 0; i < 5; i++) Text('child $i')];
 
-    Future<void> pumpIndexedStack(int? activeIndex) async{
+    Future<void> pumpIndexedStack(int? activeIndex) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: IndexedStack(
-            index: activeIndex,
-            children: children,
-          ),
-        )
+          child: IndexedStack(index: activeIndex, children: children),
+        ),
       );
     }
 
@@ -520,6 +495,77 @@ void main() {
     }
   });
 
+  testWidgets('IndexedStack excludes focus for hidden children', (WidgetTester tester) async {
+    const List<Widget> children = <Widget>[
+      Focus(child: Text('child 0')),
+      Focus(child: Text('child 1')),
+    ];
+
+    Future<void> pumpIndexedStack(int? activeIndex) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IndexedStack(index: activeIndex, children: children),
+        ),
+      );
+    }
+
+    Future<void> requestFocusAndPump(FocusNode node) async {
+      node.requestFocus();
+      await tester.pump();
+    }
+
+    await pumpIndexedStack(0);
+
+    final Element child0 = tester.element(find.text('child 0', skipOffstage: false));
+    final Element child1 = tester.element(find.text('child 1', skipOffstage: false));
+    final FocusNode child0FocusNode = Focus.of(child0);
+    final FocusNode child1FocusNode = Focus.of(child1);
+
+    await requestFocusAndPump(child0FocusNode);
+
+    expect(child0FocusNode.hasFocus, true);
+    expect(child1FocusNode.hasFocus, false);
+
+    await requestFocusAndPump(child1FocusNode);
+
+    expect(child0FocusNode.hasFocus, true);
+    expect(child1FocusNode.hasFocus, false);
+
+    await pumpIndexedStack(1);
+    await requestFocusAndPump(child1FocusNode);
+
+    expect(child0FocusNode.hasFocus, false);
+    expect(child1FocusNode.hasFocus, true);
+
+    await requestFocusAndPump(child0FocusNode);
+
+    expect(child0FocusNode.hasFocus, false);
+    expect(child1FocusNode.hasFocus, true);
+  });
+
+  testWidgets('IndexedStack: hidden children can not receive tap events', (
+    WidgetTester tester,
+  ) async {
+    bool tapped = false;
+    final List<Widget> children = <Widget>[
+      const Text('child'),
+      GestureDetector(onTap: () => tapped = true, child: const Text('hiddenChild')),
+    ];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(children: children),
+      ),
+    );
+
+    await tester.tap(find.text('hiddenChild', skipOffstage: false), warnIfMissed: false);
+    await tester.pump();
+
+    expect(tapped, false);
+  });
+
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -527,18 +573,8 @@ void main() {
         child: Center(
           child: Stack(
             children: <Widget>[
-              SizedBox(
-                width: 100.0,
-                height: 100.0,
-              ),
-              Positioned(
-                top: 0.0,
-                left: 0.0,
-                child: SizedBox(
-                  width: 200.0,
-                  height: 200.0,
-                ),
-              ),
+              SizedBox(width: 100.0, height: 100.0),
+              Positioned(top: 0.0, left: 0.0, child: SizedBox(width: 200.0, height: 200.0)),
             ],
           ),
         ),
@@ -557,18 +593,8 @@ void main() {
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
-              SizedBox(
-                width: 100.0,
-                height: 100.0,
-              ),
-              Positioned(
-                top: 0.0,
-                left: 0.0,
-                child: SizedBox(
-                  width: 200.0,
-                  height: 200.0,
-                ),
-              ),
+              SizedBox(width: 100.0, height: 100.0),
+              Positioned(top: 0.0, left: 0.0, child: SizedBox(width: 200.0, height: 200.0)),
             ],
           ),
         ),
@@ -639,6 +665,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildStack(StackFit.loose));
     logs.add('=1=');
     await tester.pumpWidget(buildStack(StackFit.expand));
@@ -726,21 +753,9 @@ void main() {
   });
 
   testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Stack(
-        alignment: Alignment.center,
-      ),
-    );
-    await tester.pumpWidget(
-      const Stack(
-        textDirection: TextDirection.rtl,
-      ),
-    );
-    await tester.pumpWidget(
-      const Stack(
-        alignment: Alignment.center,
-      ),
-    );
+    await tester.pumpWidget(const Stack(alignment: Alignment.center));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.rtl));
+    await tester.pumpWidget(const Stack(alignment: Alignment.center));
   });
 
   testWidgets('Alignment with partially-positioned children', (WidgetTester tester) async {
@@ -763,15 +778,42 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), const Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), const Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), const Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), const Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), const Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(
+      tester.getRect(find.byType(SizedBox).at(0)),
+      const Rect.fromLTWH(350.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(1)),
+      const Rect.fromLTWH(0.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(2)),
+      const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(3)),
+      const Rect.fromLTWH(350.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(4)),
+      const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(5)),
+      const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(6)),
+      const Rect.fromLTWH(0.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(7)),
+      const Rect.fromLTWH(350.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(8)),
+      const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0),
+    );
 
     await tester.pumpWidget(
       const Directionality(
@@ -792,15 +834,42 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), const Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), const Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), const Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), const Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), const Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(
+      tester.getRect(find.byType(SizedBox).at(0)),
+      const Rect.fromLTWH(350.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(1)),
+      const Rect.fromLTWH(0.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(2)),
+      const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(3)),
+      const Rect.fromLTWH(350.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(4)),
+      const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(5)),
+      const Rect.fromLTWH(0.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(6)),
+      const Rect.fromLTWH(700.0, 250.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(7)),
+      const Rect.fromLTWH(350.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(8)),
+      const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0),
+    );
 
     await tester.pumpWidget(
       const Directionality(
@@ -821,15 +890,42 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), const Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), const Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), const Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), const Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(
+      tester.getRect(find.byType(SizedBox).at(0)),
+      const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(1)),
+      const Rect.fromLTWH(0.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(2)),
+      const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(3)),
+      const Rect.fromLTWH(700.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(4)),
+      const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(5)),
+      const Rect.fromLTWH(0.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(6)),
+      const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(7)),
+      const Rect.fromLTWH(700.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(8)),
+      const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0),
+    );
 
     await tester.pumpWidget(
       const Directionality(
@@ -850,61 +946,93 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(SizedBox).at(0)), const Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(1)), const Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(2)), const Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(3)), const Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(4)), const Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(5)), const Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(6)), const Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(7)), const Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
-    expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
-  });
-
-  testWidgets('Stack error messages',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
-  (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Stack(),
+    expect(
+      tester.getRect(find.byType(SizedBox).at(0)),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
     );
-    final String exception = tester.takeException().toString();
-
     expect(
-      exception, startsWith(
-      'No Directionality widget found.\n'
-      "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
-      "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
-      'The specific widget that could not find a Directionality ancestor was:\n'
-      '  Stack\n'
-      'The ownership chain for the affected widget is: "Stack ← ', // Omitted full ownership chain because it is not relevant for the test.
-    ));
+      tester.getRect(find.byType(SizedBox).at(1)),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+    );
     expect(
-      exception, endsWith(
-      '_ViewScope ← ⋯"\n' // End of ownership chain.
-      'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
-      'top of your application widget tree. It determines the ambient reading direction and is used, for '
-      'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
-      'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
-      'Instead of providing a Directionality widget, another solution would be passing a non-directional '
-      "'alignment', or an explicit 'textDirection', to the Stack.",
-    ));
+      tester.getRect(find.byType(SizedBox).at(2)),
+      const Rect.fromLTWH(700.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(3)),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(4)),
+      const Rect.fromLTWH(0.0, 500.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(5)),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(6)),
+      const Rect.fromLTWH(700.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(7)),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+    );
+    expect(
+      tester.getRect(find.byType(SizedBox).at(8)),
+      const Rect.fromLTWH(0.0, 500.0, 100.0, 100.0),
+    );
   });
 
-  testWidgets('Can update clipBehavior of IndexedStack',
-      (WidgetTester tester) async {
+  testWidgets(
+    'Stack error messages',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const Stack());
+      final String exception = tester.takeException().toString();
+
+      expect(
+        exception,
+        startsWith(
+          'No Directionality widget found.\n'
+          "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
+          "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
+          'The specific widget that could not find a Directionality ancestor was:\n'
+          '  Stack\n'
+          'The ownership chain for the affected widget is: "Stack ← ', // Omitted full ownership chain because it is not relevant for the test.
+        ),
+      );
+      expect(
+        exception,
+        endsWith(
+          '_ViewScope ← ⋯"\n' // End of ownership chain.
+          'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
+          'top of your application widget tree. It determines the ambient reading direction and is used, for '
+          'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
+          'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
+          'Instead of providing a Directionality widget, another solution would be passing a non-directional '
+          "'alignment', or an explicit 'textDirection', to the Stack.",
+        ),
+      );
+    },
+  );
+
+  testWidgets('Can update clipBehavior of IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(const IndexedStack(textDirection: TextDirection.ltr));
-    final RenderIndexedStack renderObject =
-      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
+    final RenderIndexedStack renderObject = tester.renderObject<RenderIndexedStack>(
+      find.byType(IndexedStack),
+    );
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // Update clipBehavior to Clip.antiAlias
 
-    await tester.pumpWidget(const IndexedStack(
-      textDirection: TextDirection.ltr,
-      clipBehavior: Clip.antiAlias,
-    ));
-    final RenderIndexedStack renderIndexedObject =
-      tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
+    await tester.pumpWidget(
+      const IndexedStack(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias),
+    );
+    final RenderIndexedStack renderIndexedObject = tester.renderObject<RenderIndexedStack>(
+      find.byType(IndexedStack),
+    );
     expect(renderIndexedObject.clipBehavior, equals(Clip.antiAlias));
   });
 
@@ -936,6 +1064,7 @@ void main() {
         ),
       );
     }
+
     await tester.pumpWidget(buildIndexedStack(StackFit.loose));
     logs.add('=1=');
     await tester.pumpWidget(buildIndexedStack(StackFit.expand));
@@ -948,6 +1077,51 @@ void main() {
       '=2=',
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
+  });
+
+  testWidgets('IndexedStack does not assert with the default parameters', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(textDirection: TextDirection.ltr, child: IndexedStack()),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('IndexedStack does not assert when index is null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: null, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('IndexedStack asserts when index is negative', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: -1, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isA<AssertionError>());
+  });
+
+  testWidgets('IndexedStack asserts when index is not in children range', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(index: 2, children: <Widget>[SizedBox.shrink(), SizedBox.shrink()]),
+      ),
+    );
+
+    expect(tester.takeException(), isA<AssertionError>());
   });
 }
 

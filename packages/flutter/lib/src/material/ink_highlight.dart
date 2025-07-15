@@ -63,10 +63,7 @@ class InkHighlight extends InteractiveInkFeature {
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
       ..forward();
-    _alpha = _alphaController.drive(IntTween(
-      begin: 0,
-      end: color.alpha,
-    ));
+    _alpha = _alphaController.drive(IntTween(begin: 0, end: color.alpha));
 
     controller.addInkFeature(this);
   }
@@ -120,8 +117,10 @@ class InkHighlight extends InteractiveInkFeature {
         if (_borderRadius != BorderRadius.zero) {
           final RRect clipRRect = RRect.fromRectAndCorners(
             rect,
-            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+            topLeft: _borderRadius.topLeft,
+            topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft,
+            bottomRight: _borderRadius.bottomRight,
           );
           canvas.drawRRect(clipRRect, paint);
         } else {

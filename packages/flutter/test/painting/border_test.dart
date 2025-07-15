@@ -38,37 +38,26 @@ void main() {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const BorderSide yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const BorderSide yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     expect(
-      Border.merge(
-        const Border(top: yellow2),
-        const Border(right: magenta3),
-      ),
+      Border.merge(const Border(top: yellow2), const Border(right: magenta3)),
       const Border(top: yellow2, right: magenta3),
     );
     expect(
-      Border.merge(
-        const Border(bottom: magenta3),
-        const Border(bottom: magenta3),
-      ),
+      Border.merge(const Border(bottom: magenta3), const Border(bottom: magenta3)),
       const Border(bottom: magenta6),
     );
     expect(
-      Border.merge(
-        const Border(left: magenta3, right: yellowNone0),
-        const Border(right: yellow2),
-      ),
+      Border.merge(const Border(left: magenta3, right: yellowNone0), const Border(right: yellow2)),
       const Border(left: magenta3, right: yellow2),
     );
+    expect(Border.merge(const Border(), const Border()), const Border());
     expect(
-      Border.merge(const Border(), const Border()),
-      const Border(),
-    );
-    expect(
-      () => Border.merge(
-        const Border(left: magenta3),
-        const Border(left: yellow2),
-      ),
+      () => Border.merge(const Border(left: magenta3), const Border(left: yellow2)),
       throwsAssertionError,
     );
   });
@@ -77,7 +66,11 @@ void main() {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const BorderSide yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const BorderSide yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     expect(
       const Border(top: yellow2) + const Border(right: magenta3),
       const Border(top: yellow2, right: magenta3),
@@ -90,10 +83,7 @@ void main() {
       const Border(left: magenta3, right: yellowNone0) + const Border(right: yellow2),
       const Border(left: magenta3, right: yellow2),
     );
-    expect(
-      const Border() + const Border(),
-      const Border(),
-    );
+    expect(const Border() + const Border(), const Border());
     expect(
       const Border(left: magenta3) + const Border(left: yellow2),
       isNot(isA<Border>()), // see shape_border_test.dart for better tests of this case
@@ -113,7 +103,11 @@ void main() {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);
     const BorderSide yellow2 = BorderSide(color: Color(0xFFFFFF00), width: 2.0);
-    const BorderSide yellowNone0 = BorderSide(color: Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const BorderSide yellowNone0 = BorderSide(
+      color: Color(0xFFFFFF00),
+      width: 0.0,
+      style: BorderStyle.none,
+    );
     const Border b3 = Border(left: magenta3);
     const Border b6 = Border(left: magenta6);
     expect(b3.scale(2.0), b6);
@@ -206,14 +200,8 @@ void main() {
       ).isUniform,
       false,
     );
-    expect(
-      const Border().isUniform,
-      true,
-    );
-    expect(
-      const Border().isUniform,
-      true,
-    );
+    expect(const Border().isUniform, true);
+    expect(const Border().isUniform, true);
   });
 
   test('Border.lerp', () {
@@ -288,15 +276,33 @@ void main() {
     expect(outsideBorder.dimensions, EdgeInsets.zero);
 
     const BorderSide insideSide = BorderSide(width: 10);
-    const BorderDirectional insideBorderDirectional = BorderDirectional(top: insideSide, bottom: insideSide, start: insideSide, end: insideSide);
+    const BorderDirectional insideBorderDirectional = BorderDirectional(
+      top: insideSide,
+      bottom: insideSide,
+      start: insideSide,
+      end: insideSide,
+    );
     expect(insideBorderDirectional.dimensions, const EdgeInsetsDirectional.all(10));
 
     const BorderSide centerSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter);
-    const BorderDirectional centerBorderDirectional = BorderDirectional(top: centerSide, bottom: centerSide, start: centerSide, end: centerSide);
+    const BorderDirectional centerBorderDirectional = BorderDirectional(
+      top: centerSide,
+      bottom: centerSide,
+      start: centerSide,
+      end: centerSide,
+    );
     expect(centerBorderDirectional.dimensions, const EdgeInsetsDirectional.all(5));
 
-    const BorderSide outsideSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
-    const BorderDirectional outsideBorderDirectional = BorderDirectional(top: outsideSide, bottom: outsideSide, start: outsideSide, end: outsideSide);
+    const BorderSide outsideSide = BorderSide(
+      width: 10,
+      strokeAlign: BorderSide.strokeAlignOutside,
+    );
+    const BorderDirectional outsideBorderDirectional = BorderDirectional(
+      top: outsideSide,
+      bottom: outsideSide,
+      start: outsideSide,
+      end: outsideSide,
+    );
     expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
 
     const Border nonUniformBorder = Border(
@@ -313,20 +319,44 @@ void main() {
       end: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
       bottom: BorderSide(width: 20),
     );
-    expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
+    expect(
+      nonUniformBorderDirectional.dimensions,
+      const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20),
+    );
+
+    const Border uniformWidthNonUniformStrokeAlignBorder = Border(
+      left: BorderSide(width: 10),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 10),
+    );
+    expect(
+      uniformWidthNonUniformStrokeAlignBorder.dimensions,
+      const EdgeInsets.fromLTRB(10, 5, 0, 10),
+    );
+
+    const BorderDirectional uniformWidthNonUniformStrokeAlignBorderDirectional = BorderDirectional(
+      start: BorderSide(width: 10),
+      top: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 10),
+    );
+    expect(
+      uniformWidthNonUniformStrokeAlignBorderDirectional.dimensions,
+      const EdgeInsetsDirectional.fromSTEB(10, 5, 0, 10),
+    );
   });
 
   testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
-
-    Widget buildWidget({ required BoxBorder border, BorderRadius? borderRadius, BoxShape boxShape = BoxShape.rectangle}) {
+    Widget buildWidget({
+      required BoxBorder border,
+      BorderRadius? borderRadius,
+      BoxShape boxShape = BoxShape.rectangle,
+    }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            shape: boxShape,
-            border: border,
-            borderRadius: borderRadius,
-          ),
+          decoration: BoxDecoration(shape: boxShape, border: border, borderRadius: borderRadius),
         ),
       );
     }
@@ -341,16 +371,20 @@ void main() {
 
     // This falls into non-uniform border because of strokeAlign.
     await tester.pumpWidget(buildWidget(border: allowedBorderVariations));
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with non-uniform strokeAlign should fail.');
+    expect(
+      tester.takeException(),
+      isAssertionError,
+      reason: 'Border with non-uniform strokeAlign should fail.',
+    );
 
-    await tester.pumpWidget(buildWidget(
-      border: allowedBorderVariations,
-      borderRadius: BorderRadius.circular(25),
-    ));
+    await tester.pumpWidget(
+      buildWidget(border: allowedBorderVariations, borderRadius: BorderRadius.circular(25)),
+    );
     expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(buildWidget(border: allowedBorderVariations, boxShape: BoxShape.circle));
+    await tester.pumpWidget(
+      buildWidget(border: allowedBorderVariations, boxShape: BoxShape.circle),
+    );
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(
@@ -364,8 +398,11 @@ void main() {
         borderRadius: BorderRadius.circular(25),
       ),
     );
-    expect(tester.takeException(), isNull,
-        reason: 'Border with non-uniform styles should work with borderRadius.');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'Border with non-uniform styles should work with borderRadius.',
+    );
 
     await tester.pumpWidget(
       buildWidget(
@@ -378,8 +415,11 @@ void main() {
         borderRadius: BorderRadius.circular(20),
       ),
     );
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with non-uniform colors should fail with borderRadius.');
+    expect(
+      tester.takeException(),
+      isAssertionError,
+      reason: 'Border with non-uniform colors should fail with borderRadius.',
+    );
 
     await tester.pumpWidget(
       buildWidget(
@@ -387,8 +427,11 @@ void main() {
         borderRadius: BorderRadius.zero,
       ),
     );
-    expect(tester.takeException(), isNull,
-        reason: 'Border with a side.width == 0 should work without borderRadius (hairline border).');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'Border with a side.width == 0 should work without borderRadius (hairline border).',
+    );
 
     await tester.pumpWidget(
       buildWidget(
@@ -396,8 +439,11 @@ void main() {
         borderRadius: BorderRadius.circular(40),
       ),
     );
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with width == 0 and borderRadius should fail (hairline border).');
+    expect(
+      tester.takeException(),
+      isAssertionError,
+      reason: 'Border with width == 0 and borderRadius should fail (hairline border).',
+    );
 
     // Tests for BorderDirectional.
     const BorderDirectional allowedBorderDirectionalVariations = BorderDirectional(
@@ -410,14 +456,21 @@ void main() {
     await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations));
     expect(tester.takeException(), isAssertionError);
 
-    await tester.pumpWidget(buildWidget(
-      border: allowedBorderDirectionalVariations,
-      borderRadius: BorderRadius.circular(25),
-    ));
-    expect(tester.takeException(), isNull,
-        reason:'BorderDirectional should not fail with uniform styles and colors.');
+    await tester.pumpWidget(
+      buildWidget(
+        border: allowedBorderDirectionalVariations,
+        borderRadius: BorderRadius.circular(25),
+      ),
+    );
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'BorderDirectional should not fail with uniform styles and colors.',
+    );
 
-    await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle));
+    await tester.pumpWidget(
+      buildWidget(border: allowedBorderDirectionalVariations, boxShape: BoxShape.circle),
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -428,6 +481,27 @@ void main() {
     expect((ShapeWithInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
     expect((ShapeWithoutInterior() + ShapeWithInterior()).preferPaintInterior, isFalse);
     expect((ShapeWithoutInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
+  });
+
+  test('BoxBorder factories', () {
+    const BorderSide side1 = BorderSide();
+    const BorderSide side2 = BorderSide(width: 2);
+    const BorderSide side3 = BorderSide(width: 3);
+    const BorderSide side4 = BorderSide(width: 4);
+    expect(
+      BoxBorder.fromLTRB(left: side1, top: side2, right: side3, bottom: side4),
+      const Border(left: side1, top: side2, right: side3, bottom: side4),
+    );
+    expect(BoxBorder.all(width: 4), Border.all(width: 4));
+    expect(const BoxBorder.fromBorderSide(side3), const Border.fromBorderSide(side3));
+    expect(
+      const BoxBorder.symmetric(horizontal: side2, vertical: side3),
+      const Border.symmetric(horizontal: side2, vertical: side3),
+    );
+    expect(
+      BoxBorder.fromSTEB(start: side1, top: side2, end: side3, bottom: side4),
+      const BorderDirectional(start: side1, top: side2, end: side3, bottom: side4),
+    );
   });
 }
 
@@ -444,20 +518,20 @@ class ShapeWithInterior extends ShapeBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path();
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path();
   }
 
   @override
-  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {}
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 }
 
 class ShapeWithoutInterior extends ShapeBorder {
@@ -473,18 +547,18 @@ class ShapeWithoutInterior extends ShapeBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path();
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path();
   }
 
   @override
-  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) { }
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {}
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 }

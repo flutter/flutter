@@ -29,14 +29,19 @@ Future<void> main() async {
     await runProjectTest((FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
-        final File build = File(path.join(
-          flutterProject.rootPath, 'android', 'app', 'build.gradle',
-        ));
-        build.writeAsStringSync(
+        final File buildFile = getAndroidBuildFile(
+          path.join(flutterProject.rootPath, 'android', 'app'),
+        );
+        buildFile.writeAsStringSync(
           '''
-task printEngineMavenUrl() {
+tasks.register("printEngineMavenUrl") {
     doLast {
-        println project.repositories.find { it.name == 'maven' }.url
+        project.repositories.forEach { repo ->
+            if (repo.name == "maven") {
+                repo as MavenArtifactRepository
+                logger.quiet(repo.url.toString())
+            }
+        }
     }
 }
           ''',
@@ -46,17 +51,14 @@ task printEngineMavenUrl() {
 
         section('Checking default maven URL');
 
-        String gradleOutput = await eval(
-          gradlewExecutable,
-          <String>['printEngineMavenUrl', '-q'],
-        );
+        String gradleOutput = await eval(gradlewExecutable, <String>['printEngineMavenUrl', '-q']);
         const LineSplitter splitter = LineSplitter();
         List<String> outputLines = splitter.convert(gradleOutput);
         String mavenUrl = outputLines.last;
         print('Returned maven url: $mavenUrl');
 
         String realm = File(
-          path.join(flutterDirectory.path, 'bin', 'internal', 'engine.realm'),
+          path.join(flutterDirectory.path, 'bin', 'cache', 'engine.realm'),
         ).readAsStringSync().trim();
         if (realm.isNotEmpty) {
           realm = '$realm/';
@@ -73,10 +75,8 @@ task printEngineMavenUrl() {
         section('Checking overridden maven URL');
         gradleOutput = await eval(
           gradlewExecutable,
-          <String>['printEngineMavenUrl','-q'],
-          environment: <String, String>{
-            'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy',
-          },
+          <String>['printEngineMavenUrl', '-q'],
+          environment: <String, String>{'FLUTTER_STORAGE_BASE_URL': 'https://my.special.proxy'},
         );
         outputLines = splitter.convert(gradleOutput);
         mavenUrl = outputLines.last;
