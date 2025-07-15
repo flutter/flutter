@@ -20,7 +20,7 @@ void testAll({
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadConstProject project = HotReloadConstProject();
+    final project = HotReloadConstProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -38,8 +38,9 @@ void testAll({
       'hot reload displays a formatted error message when removing a field from a const class, and hot restart succeeds',
       () async {
         await flutter.run(
-          device:
-              chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+          device: chrome
+              ? GoogleChromeDevice.kChromeDeviceId
+              : FlutterTesterDevices.kTesterDeviceId,
           additionalCommandArgs: additionalCommandArgs,
         );
 
@@ -62,8 +63,9 @@ void testAll({
       'Expression evaluation succeeds after a hot reload rejection error',
       () async {
         await flutter.run(
-          device:
-              chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+          device: chrome
+              ? GoogleChromeDevice.kChromeDeviceId
+              : FlutterTesterDevices.kTesterDeviceId,
           withDebugger: true,
           additionalCommandArgs: additionalCommandArgs,
         );

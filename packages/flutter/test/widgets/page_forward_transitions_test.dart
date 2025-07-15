@@ -127,8 +127,8 @@ void main() {
       ),
     );
 
-    final NavigatorState navigator =
-        insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
+    final NavigatorState navigator = insideKey.currentContext!
+        .findAncestorStateOfType<NavigatorState>()!;
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 
@@ -207,16 +207,15 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute:
-            (RouteSettings settings) => switch (settings.name) {
-              '/' => TestRoute<void>(settings: settings, child: const Text('A')),
-              '/1' => TestRoute<void>(
-                settings: settings,
-                barrierColor: const Color(0xFFFFFF00),
-                child: const Text('B'),
-              ),
-              _ => null,
-            },
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          '/' => TestRoute<void>(settings: settings, child: const Text('A')),
+          '/1' => TestRoute<void>(
+            settings: settings,
+            barrierColor: const Color(0xFFFFFF00),
+            child: const Text('B'),
+          ),
+          _ => null,
+        },
       ),
     );
     expect(find.byType(ModalBarrier), findsOneWidget);

@@ -34,7 +34,7 @@ void main() {
       await previewDetector.dispose();
     });
 
-    const String simplePreviewSource = '''
+    const simplePreviewSource = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -42,7 +42,7 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Hello world!');
 ''';
 
-    const String noPreviewSource = '''
+    const noPreviewSource = '''
 import 'package:flutter/material.dart';
 
 Widget foo() => Text('Hello world!');
@@ -86,8 +86,8 @@ Widget foo() => Text('Hello world!');
           // The new preview in baz.dart should be included in the preview mapping.
           expect(updated.nodesWithPreviews.length, 3);
         },
-        changeOperation:
-            () => projectBaz.writeFile((path: 'baz.dart', source: simplePreviewSource)),
+        changeOperation: () =>
+            projectBaz.writeFile((path: 'baz.dart', source: simplePreviewSource)),
       );
 
       // Update the file with an existing preview to remove the preview and ensure it triggers
@@ -121,10 +121,9 @@ Widget foo() => Text('Hello world!');
           // The new preview in baz.dart should be included in the preview mapping.
           expect(updated.nodesWithPreviews.length, 3);
         },
-        changeOperation:
-            () =>
-                workspace.createWorkspaceProject(name: 'baz')
-                  ..writeFile((path: 'baz.dart', source: simplePreviewSource)),
+        changeOperation: () =>
+            workspace.createWorkspaceProject(name: 'baz')
+              ..writeFile((path: 'baz.dart', source: simplePreviewSource)),
       );
     });
 

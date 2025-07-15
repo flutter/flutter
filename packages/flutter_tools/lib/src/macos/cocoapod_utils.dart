@@ -57,19 +57,20 @@ Future<void> processPodsIfNeeded(
     }
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
-    final SwiftPackageManager swiftPackageManager = SwiftPackageManager(
+    final swiftPackageManager = SwiftPackageManager(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
     );
-    final FlutterDarwinPlatform platform =
-        xcodeProject is IosProject ? FlutterDarwinPlatform.ios : FlutterDarwinPlatform.macos;
+    final FlutterDarwinPlatform platform = xcodeProject is IosProject
+        ? FlutterDarwinPlatform.ios
+        : FlutterDarwinPlatform.macos;
 
     await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
   }
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
-  final Fingerprinter fingerprinter = Fingerprinter(
+  final fingerprinter = Fingerprinter(
     fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,

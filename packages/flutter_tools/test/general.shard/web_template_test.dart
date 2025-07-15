@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
 
-const String htmlSample1 = '''
+const htmlSample1 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +24,8 @@ const String htmlSample1 = '''
 </html>
 ''';
 
-const String htmlSample2 = '''
+const htmlSample2 =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,7 +47,7 @@ const String htmlSample2 = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrap = '''
+const htmlSampleInlineFlutterJsBootstrap = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +71,7 @@ const String htmlSampleInlineFlutterJsBootstrap = '''
 </html>
 ''';
 
-const String htmlSampleInlineFlutterJsBootstrapOutput = '''
+const htmlSampleInlineFlutterJsBootstrapOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -94,7 +95,7 @@ const String htmlSampleInlineFlutterJsBootstrapOutput = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacement = '''
+const htmlSampleFullFlutterBootstrapReplacement = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -112,7 +113,7 @@ const String htmlSampleFullFlutterBootstrapReplacement = '''
 </html>
 ''';
 
-const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
+const htmlSampleFullFlutterBootstrapReplacementOutput = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,7 +131,8 @@ const String htmlSampleFullFlutterBootstrapReplacementOutput = '''
 </html>
 ''';
 
-const String htmlSampleLegacyVar = '''
+const htmlSampleLegacyVar =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -152,7 +154,8 @@ const String htmlSampleLegacyVar = '''
 </html>
 ''';
 
-const String htmlSampleLegacyLoadEntrypoint = '''
+const htmlSampleLegacyLoadEntrypoint =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,7 +181,8 @@ const String htmlSampleLegacyLoadEntrypoint = '''
 </html>
 ''';
 
-String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) => '''
+String htmlSample2Replaced({required String baseHref, required String serviceWorkerVersion}) =>
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -200,7 +204,7 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
 </html>
 ''';
 
-const String htmlSample3 = '''
+const htmlSample3 = '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -278,7 +282,7 @@ String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) => '
 ''';
 
 void main() {
-  final MemoryFileSystem fs = MemoryFileSystem();
+  final fs = MemoryFileSystem();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
@@ -303,7 +307,7 @@ void main() {
   });
 
   test('applies substitutions', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+    const indexHtml = WebTemplate(htmlSample2);
 
     expect(
       indexHtml.withSubstitutions(
@@ -316,7 +320,7 @@ void main() {
   });
 
   test('applies substitutions with legacy var version syntax', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     expect(
       indexHtml.withSubstitutions(
         baseHref: '/foo/333/',
@@ -328,7 +332,7 @@ void main() {
   });
 
   test('applies substitutions to inline flutter.js bootstrap script', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
+    const indexHtml = WebTemplate(htmlSampleInlineFlutterJsBootstrap);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -343,7 +347,7 @@ void main() {
   });
 
   test('applies substitutions to full flutter_bootstrap.js replacement', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
+    const indexHtml = WebTemplate(htmlSampleFullFlutterBootstrapReplacement);
     expect(indexHtml.getWarnings(), isEmpty);
 
     expect(
@@ -374,7 +378,7 @@ void main() {
   });
 
   test('re-parses after substitutions', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSample2);
+    const indexHtml = WebTemplate(htmlSample2);
     expect(WebTemplate.baseHref(htmlSample2), ''); // Placeholder base href.
 
     final String substituted = indexHtml.withSubstitutions(
@@ -387,7 +391,7 @@ void main() {
   });
 
   test('warns on legacy service worker patterns', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyVar);
+    const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
     expect(warnings.length, 2);
 
@@ -396,7 +400,7 @@ void main() {
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
-    const WebTemplate indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
+    const indexHtml = WebTemplate(htmlSampleLegacyLoadEntrypoint);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
 
     expect(warnings.length, 1);
