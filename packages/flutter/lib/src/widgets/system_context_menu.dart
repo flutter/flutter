@@ -458,5 +458,63 @@ final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
   }
 }
 
+/// Creates an instance of [IOSSystemContextMenuItem] for custom action buttons
+/// defined by the developer.
+///
+/// Only supported on iOS 16.0 and above.
+///
+/// The [title] and [onPressed] callback must be provided.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [IOSSystemContextMenuItemDataCustom], which specifies the data to be sent
+///    to the platform for this button.
+@immutable
+class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
+  /// Creates an instance of [IOSSystemContextMenuItemCustom].
+  const IOSSystemContextMenuItemCustom({
+    required this.title,
+    required this.onPressed,
+  });
+
+  @override
+  final String title;
+
+  /// The callback that is called when the button is pressed.
+  final VoidCallback onPressed;
+
+  @override
+  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
+    final String callbackId = '${DateTime.now().millisecondsSinceEpoch}_${title.hashCode}';
+    SystemContextMenuController.registerCustomAction(callbackId, onPressed);
+    return IOSSystemContextMenuItemDataCustom(
+      title: title,
+      callbackId: callbackId,
+    );
+  }
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is IOSSystemContextMenuItemCustom &&
+        other.title == title &&
+        other.onPressed == onPressed;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('title', title));
+    properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
+  }
+}
+
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
