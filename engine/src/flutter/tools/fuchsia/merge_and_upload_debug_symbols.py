@@ -82,18 +82,18 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
   _packaging_dir = GetPackagingDir(out_dir)
   package_name = 'flutter/fuchsia-debug-symbols-%s' % target_arch
 
-  gitTag = 'git_revision:%s' % engine_version
-  already_exists = CheckCIPDPackageExists(package_name, gitTag)
+  git_tag = 'git_revision:%s' % engine_version
+  already_exists = CheckCIPDPackageExists(package_name, git_tag)
   if already_exists:
-    print('CIPD package %s tag %s already exists!' % (package_name, gitTag))
+    print('CIPD package %s tag %s already exists!' % (package_name, git_tag))
 
-  contentTag = ''
+  content_tag = ''
   if content_hash:
-    contentTag = 'content_aware_hash:%s' % content_hash
-    content_already_exists = CheckCIPDPackageExists(package_name, contentTag)
+    content_tag = 'content_aware_hash:%s' % content_hash
+    content_already_exists = CheckCIPDPackageExists(package_name, content_tag)
     if content_already_exists:
-      print('CIPD package %s tag %s already exists!' % (package_name, contentTag))
-      contentTag = ''
+      print('CIPD package %s tag %s already exists!' % (package_name, content_tag))
+      content_tag = ''
       # do not return; content hash can match multiple PRs (reverts, framework only)
 
   if upload and IsLinux() and not already_exists:
@@ -105,12 +105,12 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
         '-ref',
         'latest',
         '-tag',
-        gitTag,
+        git_tag,
         '-verification-timeout',
         '10m0s',
     ]
-    if contentTag:
-      command.extend(['-tag', contentTag])
+    if content_tag:
+      command.extend(['-tag', content_tag])
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
@@ -224,13 +224,13 @@ def main():
   should_upload = args.upload
   engine_version = args.engine_version
   content_hash = ''
-  if not engine_version:
-    engine_version = 'HEAD'
-    should_upload = False
-  else:
+  if engine_version:
     # When content hashing is enabled, the engine version will be a content
     # hash instead of a git revision.
     content_hash = get_content_hash()
+  else:
+    engine_version = 'HEAD'
+    should_upload = False
 
   ProcessCIPDPackage(should_upload, cipd_def, engine_version, content_hash, out_dir, arch)
   return 0
