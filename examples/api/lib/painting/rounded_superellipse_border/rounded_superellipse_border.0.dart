@@ -91,7 +91,7 @@ class RoundedSuperellipseBorderExampleState extends State<RoundedSuperellipseBor
                   label: 'Radius',
                   slider: CupertinoSlider(
                     value: _borderRadius,
-                    max: 200,
+                    max: 100,
                     onChanged: (double value) {
                       setState(() {
                         _borderRadius = value;
