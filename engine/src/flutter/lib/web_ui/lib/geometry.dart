@@ -1180,9 +1180,13 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   /// `path` and the `offset` to the `addPath` method.
   (Path, Offset) toPathOffset() {
     if (_uniformRadii) {
-      return (_RSuperellipseCache.instance.get(width, height, tlRadius), center);
+      final Radius radius = Radius.elliptical(
+        math.min(width / 2, tlRadiusX),
+        math.min(height / 2, tlRadiusY),
+      );
+      return (_RSuperellipseCache.instance.get(width, height, radius), center);
     } else {
-      return (_RSuperellipsePathBuilder.exact(this).path, Offset.zero);
+      return (_RSuperellipsePathBuilder.exact(toScaledRadii()).path, Offset.zero);
     }
   }
 
@@ -1209,6 +1213,79 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
     );
+  }
+
+  /// Returns a [RSuperellipse] whose corner radii are scaled based on this one,
+  /// ensuring that the sum of the corner radii on each side does not exceed the
+  /// width or height of the given bounds.
+  ///
+  /// See the [Skia scaling
+  /// implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
+  /// for more details.
+  RSuperellipse toScaledRadii() {
+    if (!(width > 0 && height > 0)) {
+      return RSuperellipse.fromLTRBXY(left, top, right, bottom, 0.0, 0.0);
+    }
+
+    (double, double) normalizeEmptyToZero(double inputX, double inputY) {
+      return (inputX > 0 && inputY > 0) ? (inputX, inputY) : (0, 0);
+    }
+
+    double adjustScale(double radius1, double radius2, double dimension, double scale) {
+      assert(radius1 >= 0.0 && radius2 >= 0.0 && dimension > 0.0);
+      if (radius1 + radius2 > dimension) {
+        return math.min(scale, dimension / (radius1 + radius2));
+      }
+      return scale;
+    }
+
+    // If any corner is flat or has a negative value, normalize it to zeros
+    // We do this first so that the unnecessary non-flat part of that radius
+    // does not contribute to the global scaling below.
+    final (double tlRadiusX, double tlRadiusY) = normalizeEmptyToZero(
+      this.tlRadiusX,
+      this.tlRadiusY,
+    );
+    final (double trRadiusX, double trRadiusY) = normalizeEmptyToZero(
+      this.trRadiusX,
+      this.trRadiusY,
+    );
+    final (double blRadiusX, double blRadiusY) = normalizeEmptyToZero(
+      this.blRadiusX,
+      this.blRadiusY,
+    );
+    final (double brRadiusX, double brRadiusY) = normalizeEmptyToZero(
+      this.brRadiusX,
+      this.brRadiusY,
+    );
+
+    // Now determine a global scale to apply to all of the radii to ensure
+    // that none of the adjacent pairs of radius values sum to larger than
+    // the corresponding dimension of the rectangle.
+    double scale = 1.0;
+    scale = adjustScale(tlRadiusX, trRadiusX, width, scale);
+    scale = adjustScale(blRadiusX, brRadiusX, width, scale);
+    scale = adjustScale(tlRadiusY, blRadiusY, height, scale);
+    scale = adjustScale(trRadiusY, brRadiusY, height, scale);
+    if (scale < 1.0) {
+      return _create(
+        left: left,
+        top: top,
+        right: right,
+        bottom: bottom,
+        tlRadiusX: tlRadiusX,
+        tlRadiusY: tlRadiusY,
+        trRadiusX: trRadiusX,
+        trRadiusY: trRadiusY,
+        brRadiusX: brRadiusX,
+        brRadiusY: brRadiusY,
+        blRadiusX: blRadiusX,
+        blRadiusY: blRadiusY,
+        uniformRadii: _uniformRadii,
+      );
+    } else {
+      return this;
+    }
   }
 
   static const RSuperellipse zero = RSuperellipse._raw();
