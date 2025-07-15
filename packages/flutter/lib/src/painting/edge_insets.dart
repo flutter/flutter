@@ -10,9 +10,9 @@ library;
 import 'dart:ui' as ui show ViewPadding, lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/painting/debug.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [EdgeInsets] that allows for text-direction aware
 /// resolution.
