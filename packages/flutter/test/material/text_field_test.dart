@@ -77,7 +77,6 @@ void main() {
     );
   }
 
-  /*
   testWidgets('Live Text button shows and hides correctly when LiveTextStatus changes', (
     WidgetTester tester,
   ) async {
@@ -18241,7 +18240,6 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.hintLocales, hintLocales);
   });
-  */
 
   testWidgets(
     'readOnly disallows SystemContextMenu',
