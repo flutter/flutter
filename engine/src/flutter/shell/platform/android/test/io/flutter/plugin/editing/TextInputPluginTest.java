@@ -1231,7 +1231,7 @@ public class TextInputPluginTest {
   }
 
   @Test
-  public void clearTextInputClient_restartsImmWhenIMEHidden() {
+  public void imeVisibilityListener_and_clearTextInputClient_restartsImmWhenIMEHidden() {
     // Initialize a general TextInputPlugin.
     InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
     TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
@@ -1271,6 +1271,10 @@ public class TextInputPluginTest {
     ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
     imeSyncCallback.getImeVisibilityListener().onImeVisibilityChanged(false);
     assertEquals(2, testImm.getRestartCount(testView));
+
+    // Imm restarts when clearTextInputClient is called while the IME is hidden.
+    textInputPlugin.clearTextInputClient();
+    assertEquals(3, testImm.getRestartCount(testView));
   }
 
   @Test
