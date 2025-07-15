@@ -706,9 +706,10 @@ deps = {
   repo.Add("DEPS");
   ASSERT_TRUE(repo.Commit().ok());
 
+  fs::current_path(*temp_path / "child");
   std::stringstream ss;
   std::vector<absl::Status> errors =
-      LicenseChecker::Run((*temp_path / "child").string(), ss, *data);
+      LicenseChecker::Run(".", ss, *data);
   EXPECT_EQ(errors.size(), 0u) << (errors.empty() ? "" : errors[0].message());
 
   EXPECT_EQ(ss.str(), R"output(foobar

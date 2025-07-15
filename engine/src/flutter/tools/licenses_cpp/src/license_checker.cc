@@ -430,7 +430,7 @@ namespace {
 // Searches parent directories for `file_name` starting from `starting_dir`.
 fs::path FindFileInParentDirectories(const fs::path& starting_dir,
                                      const std::string_view file_name) {
-  fs::path current_dir = starting_dir;
+  fs::path current_dir = fs::absolute(starting_dir);
   while (!current_dir.empty() && current_dir != current_dir.root_path()) {
     fs::path file_path = current_dir / file_name;
     if (fs::exists(file_path)) {
@@ -455,7 +455,8 @@ std::vector<absl::Status> LicenseChecker::Run(
     const Data& data,
     const LicenseChecker::Flags& flags) {
   std::vector<fs::path> git_repos = GetGitRepos(working_dir);
-  fs::path working_dir_path(working_dir);
+  fs::path working_dir_path =
+      fs::absolute(fs::path(working_dir)).lexically_normal();
 
   size_t count = 0;
   ProcessState state;
@@ -499,16 +500,15 @@ std::vector<absl::Status> LicenseChecker::Run(
       PrintProgress(count++, git_repos.size());
     }
 
-    absl::StatusOr<std::vector<std::string>> git_files =
-    GitLsFiles(git_repo); if (!git_files.ok()) {
+    absl::StatusOr<std::vector<std::string>> git_files = GitLsFiles(git_repo);
+    if (!git_files.ok()) {
       state.errors.push_back(git_files.status());
       return state.errors;
     }
     for (const std::string& git_file : git_files.value()) {
       fs::path full_path = git_repo / git_file;
       absl::Status process_result = ProcessFile(working_dir_path, licenses,
-                                                data, full_path, flags,
-                                                &state);
+                                                data, full_path, flags, &state);
       if (!process_result.ok()) {
         return state.errors;
       }
