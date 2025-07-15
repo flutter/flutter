@@ -25,8 +25,7 @@ deps =   {
 )";
   std::vector<std::string> expected = {
       "engine/src/flutter/third_party/dart/tools/sdks/dart-sdk",
-      "third_party/doof"
-  };
+      "third_party/doof"};
 
   std::vector<std::string> actual = parser.Parse(input);
 
