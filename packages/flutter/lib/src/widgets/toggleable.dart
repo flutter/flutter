@@ -623,24 +623,23 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     required Offset origin,
   }) {
     if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
-      final Paint reactionPaint =
-          Paint()
-            ..color =
-                Color.lerp(
-                  Color.lerp(
-                    Color.lerp(inactiveReactionColor, reactionColor, position.value),
-                    hoverColor,
-                    reactionHoverFade.value,
-                  ),
-                  focusColor,
-                  reactionFocusFade.value,
-                )!;
+      final Paint reactionPaint = Paint()
+        ..color = Color.lerp(
+          Color.lerp(
+            Color.lerp(inactiveReactionColor, reactionColor, position.value),
+            hoverColor,
+            reactionHoverFade.value,
+          ),
+          focusColor,
+          reactionFocusFade.value,
+        )!;
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,
       );
-      final double reactionRadius =
-          isFocused || isHovered ? splashRadius : radialReactionRadiusTween.evaluate(reaction);
+      final double reactionRadius = isFocused || isHovered
+          ? splashRadius
+          : radialReactionRadiusTween.evaluate(reaction);
       if (reactionRadius > 0.0) {
         canvas.drawCircle(origin + offset, reactionRadius, reactionPaint);
       }

@@ -156,8 +156,11 @@ void main() {
     expect(ShapeBorder.lerp(r, c, 0.1).hashCode, ShapeBorder.lerp(r, c, 0.1).hashCode);
 
     final ShapeBorder direct50 = ShapeBorder.lerp(r, c, 0.5)!;
-    final ShapeBorder indirect50 =
-        ShapeBorder.lerp(ShapeBorder.lerp(c, r, 0.1), ShapeBorder.lerp(c, r, 0.9), 0.5)!;
+    final ShapeBorder indirect50 = ShapeBorder.lerp(
+      ShapeBorder.lerp(c, r, 0.1),
+      ShapeBorder.lerp(c, r, 0.9),
+      0.5,
+    )!;
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());

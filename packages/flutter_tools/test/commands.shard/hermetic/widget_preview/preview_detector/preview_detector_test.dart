@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
@@ -26,12 +28,12 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) {
-    final List<WidgetPreviewSourceFile> initialSources = <WidgetPreviewSourceFile>[];
-    for (final String path in pathsWithPreviews) {
+    final initialSources = <WidgetPreviewSourceFile>[];
+    for (final path in pathsWithPreviews) {
       initialSources.add((path: path, source: _previewContainingFileContents));
       librariesWithPreviews.add(toPreviewPath(path));
     }
-    for (final String path in pathsWithoutPreviews) {
+    for (final path in pathsWithoutPreviews) {
       initialSources.add((path: path, source: _nonPreviewContainingFileContents));
       librariesWithoutPreviews.add(toPreviewPath(path));
     }
@@ -42,7 +44,7 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     required List<String> pathsWithPreviews,
     required List<String> pathsWithoutPreviews,
   }) async {
-    final BasicProjectWithExhaustivePreviews project = BasicProjectWithExhaustivePreviews._(
+    final project = BasicProjectWithExhaustivePreviews._(
       projectRoot: projectRoot,
       pathsWithPreviews: pathsWithPreviews,
       pathsWithoutPreviews: pathsWithoutPreviews,
@@ -56,8 +58,8 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
         for (final PreviewPath path in librariesWithPreviews) path: _expectedPreviewDetails,
       };
 
-  final Set<PreviewPath> librariesWithPreviews = <PreviewPath>{};
-  final Set<PreviewPath> librariesWithoutPreviews = <PreviewPath>{};
+  final librariesWithPreviews = <PreviewPath>{};
+  final librariesWithoutPreviews = <PreviewPath>{};
 
   /// Adds a file containing previews at [path].
   void addPreviewContainingFile({required String path}) {
@@ -83,7 +85,8 @@ class BasicProjectWithExhaustivePreviews extends WidgetPreviewProject {
     final String partPath = path.replaceAll('.dart', '_part.dart');
     writeFile((
       path: partPath,
-      source: '''
+      source:
+          '''
 part of '$path';
 
 $_previewContainingFileContents
@@ -92,7 +95,8 @@ $_previewContainingFileContents
 
     writeFile((
       path: path,
-      source: '''
+      source:
+          '''
 part '$partPath';
 ''',
     ));
@@ -107,7 +111,7 @@ part '$partPath';
     throw UnimplementedError('Not supported for $BasicProjectWithExhaustivePreviews');
   }
 
-  late final List<PreviewDetailsMatcher> _expectedPreviewDetails = <PreviewDetailsMatcher>[
+  late final _expectedPreviewDetails = <PreviewDetailsMatcher>[
     PreviewDetailsMatcher(
       packageName: packageName,
       functionName: 'previews',
@@ -152,7 +156,7 @@ part '$partPath';
     ),
   ];
 
-  static const String _previewContainingFileContents = '''
+  static const _previewContainingFileContents = '''
 @Preview(name: 'Top-level preview')
 Widget previews() => Text('Foo');
 
@@ -223,7 +227,7 @@ class MyWidget extends StatelessWidget {
 }
 ''';
 
-  static const String _nonPreviewContainingFileContents = '''
+  static const _nonPreviewContainingFileContents = '''
 String foo() => 'bar';
 ''';
 }
@@ -236,14 +240,31 @@ void main() {
     // of wrapper logic.
     late PreviewDetector previewDetector;
     late BasicProjectWithExhaustivePreviews project;
+    late FakeAnalytics analytics;
 
     setUp(() {
       previewDetector = createTestPreviewDetector();
+      analytics = previewDetector.previewAnalytics.analytics as FakeAnalytics;
     });
 
     tearDown(() async {
       await previewDetector.dispose();
     });
+
+    void expectNPreviewReloadTimingEvents(int n) {
+      expect(analytics.sentEvents, hasLength(n));
+      for (final Event event in analytics.sentEvents) {
+        if (event.eventData case {
+          'workflow': final String workflow,
+          'variableName': final String variableName,
+        }) {
+          expect(workflow, WidgetPreviewAnalytics.kWorkflow);
+          expect(variableName, WidgetPreviewAnalytics.kPreviewReloadTime);
+        } else {
+          throw StateError('${event.eventData} is missing keys!');
+        }
+      }
+    }
 
     testUsingContext('can detect previews in existing files', () async {
       project = await BasicProjectWithExhaustivePreviews.create(
@@ -272,6 +293,7 @@ void main() {
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
       expectContainsPreviews(initialPreviews, project.matcherMapping);
+      expectNPreviewReloadTimingEvents(0);
 
       await waitForChangeDetected(
         onChangeDetected: (PreviewDependencyGraph updated) {
@@ -280,6 +302,7 @@ void main() {
         },
         changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
       );
+      expectNPreviewReloadTimingEvents(1);
 
       // Update the file with an existing preview to remove the preview and ensure it triggers
       // the preview detector.
@@ -290,6 +313,7 @@ void main() {
         },
         changeOperation: () => project.addNonPreviewContainingFile(path: 'baz.dart'),
       );
+      expectNPreviewReloadTimingEvents(2);
     });
 
     testUsingContext('can detect previews in newly added files', () async {
@@ -299,11 +323,12 @@ void main() {
         pathsWithoutPreviews: <String>[],
       );
       // The initial mapping should be empty as there's no files containing previews.
-      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+      const expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
       expect(initialPreviews, expectedInitialMapping);
+      expectNPreviewReloadTimingEvents(0);
 
       await waitForChangeDetected(
         onChangeDetected: (PreviewDependencyGraph updated) {
@@ -313,15 +338,17 @@ void main() {
         // Create baz.dart, which contains previews.
         changeOperation: () => project.addPreviewContainingFile(path: 'baz.dart'),
       );
+      expectNPreviewReloadTimingEvents(1);
     });
 
     testUsingContext('can detect previews in existing libraries with parts', () async {
-      project = await BasicProjectWithExhaustivePreviews.create(
-          projectRoot: previewDetector.projectRoot,
-          pathsWithPreviews: <String>[],
-          pathsWithoutPreviews: <String>[],
-        )
-        ..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
+      project =
+          await BasicProjectWithExhaustivePreviews.create(
+              projectRoot: previewDetector.projectRoot,
+              pathsWithPreviews: <String>[],
+              pathsWithoutPreviews: <String>[],
+            )
+            ..addLibraryWithPartsContainingPreviews(path: 'foo.dart');
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
     });
@@ -333,10 +360,11 @@ void main() {
         pathsWithoutPreviews: <String>[],
       );
       // The initial mapping should be empty as there's no files containing previews.
-      const PreviewDependencyGraph expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+      const expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
 
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews, expectedInitialMapping);
+      expectNPreviewReloadTimingEvents(0);
 
       // Add a library with a part file, which will cause a change detected event for each file.
       await waitForNChangesDetected(
@@ -347,6 +375,7 @@ void main() {
           previewDetector.dependencyGraph.nodesWithPreviews;
       expect(nodesWithPreviews, isNotEmpty);
       expect(nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
+      expectNPreviewReloadTimingEvents(2);
     });
 
     testUsingContext('can detect changes in the pubspec.yaml', () async {
@@ -363,6 +392,9 @@ void main() {
 
       // Change the contents of the pubspec and verify the callback is invoked.
       await waitForPubspecChangeDetected(changeOperation: () => project.touchPubspec());
+
+      // There should be no reload timing events for a pubspec change.
+      expectNPreviewReloadTimingEvents(0);
     });
   });
 }

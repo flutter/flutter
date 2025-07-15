@@ -22,11 +22,11 @@ class PreviewManifest {
     required this.cache,
   });
 
-  static const String previewManifestPath = 'preview_manifest.json';
-  static final Version previewManifestVersion = Version(0, 0, 2);
-  static const String kManifestVersion = 'version';
-  static const String kSdkVersion = 'sdk-version';
-  static const String kPubspecHashes = 'pubspec-hashes';
+  static const previewManifestPath = 'preview_manifest.json';
+  static final previewManifestVersion = Version(0, 0, 2);
+  static const kManifestVersion = 'version';
+  static const kSdkVersion = 'sdk-version';
+  static const kPubspecHashes = 'pubspec-hashes';
 
   final Logger logger;
   final FlutterProject rootProject;
@@ -49,7 +49,7 @@ class PreviewManifest {
     logger.printStatus('Creating the Widget Preview Scaffold manifest at ${_manifest.path}');
     assert(!_manifest.existsSync());
     _manifest.createSync(recursive: true);
-    final PreviewManifestContents manifestContents = <String, Object?>{
+    final manifestContents = <String, Object?>{
       kManifestVersion: previewManifestVersion.toString(),
       kSdkVersion: cache.dartSdkVersion,
       kPubspecHashes: _calculatePubspecHashes(),
@@ -65,12 +65,10 @@ class PreviewManifest {
     if (updatedPubspecPath != null) {
       final PreviewManifestContents? manifest = _tryLoadManifest();
       if (manifest != null) {
-        final FlutterProject project = <FlutterProject>[
-          rootProject,
-          ...rootProject.workspaceProjects,
-        ].firstWhere(
-          (FlutterProject project) => project.pubspecFile.absolute.path == updatedPubspecPath,
-        );
+        final FlutterProject project =
+            <FlutterProject>[rootProject, ...rootProject.workspaceProjects].firstWhere(
+              (FlutterProject project) => project.pubspecFile.absolute.path == updatedPubspecPath,
+            );
         final Map<String, String> pubspecHashes =
             (manifest[kPubspecHashes]! as Map<String, Object?>).cast<String, String>();
         pubspecHashes[updatedPubspecPath] = project.manifest.computeMD5Hash();
@@ -118,7 +116,7 @@ class PreviewManifest {
     // If the SDK version of the widget preview scaffold doesn't match the current SDK version
     // the widget preview scaffold should also be regenerated to pick up any new functionality and
     // avoid possible binary compatibility issues.
-    final bool sdkVersionMismatch = manifest[kSdkVersion] != cache.dartSdkVersion;
+    final sdkVersionMismatch = manifest[kSdkVersion] != cache.dartSdkVersion;
     if (sdkVersionMismatch) {
       logger.printStatus(
         'The existing Widget Preview Scaffold was generated with Dart SDK '
@@ -138,8 +136,8 @@ class PreviewManifest {
       );
       return true;
     }
-    final Map<String, String> pubspecHashes =
-        (manifest[kPubspecHashes]! as Map<String, Object?>).cast<String, String>();
+    final Map<String, String> pubspecHashes = (manifest[kPubspecHashes]! as Map<String, Object?>)
+        .cast<String, String>();
     return !const MapEquality<String, String>().equals(pubspecHashes, _calculatePubspecHashes());
   }
 
