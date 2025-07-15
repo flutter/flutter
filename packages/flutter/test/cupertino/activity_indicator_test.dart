@@ -134,17 +134,14 @@ void main() {
 
   testWidgets('Can specify color', (WidgetTester tester) async {
     final Key key = UniqueKey();
+    const Color color = Color(0xFF5D3FD3);
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
           key: key,
           child: const ColoredBox(
             color: CupertinoColors.white,
-            child: CupertinoActivityIndicator(
-              animating: false,
-              color: Color(0xFF5D3FD3),
-              radius: 100,
-            ),
+            child: CupertinoActivityIndicator(animating: false, color: color, radius: 100),
           ),
         ),
       ),
@@ -154,7 +151,9 @@ void main() {
       find.byType(CupertinoActivityIndicator),
       paints..rsuperellipse(
         rsuperellipse: const RSuperellipse.fromLTRBXY(-10, -100 / 3, 10, -100, 10, 10),
-        color: const Color(0x935d3fd3),
+        // The value of 47 comes from the alpha that is applied to the first
+        // tick.
+        color: color.withAlpha(47),
       ),
     );
   });
