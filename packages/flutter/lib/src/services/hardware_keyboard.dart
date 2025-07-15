@@ -521,18 +521,18 @@ class HardwareKeyboard {
       if (event is KeyDownEvent) {
         assert(
           !_pressedKeys.containsKey(event.physicalKey),
-          'A  [1m${event.runtimeType} [0m is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is already pressed. $common$event',
         );
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
         assert(
           _pressedKeys.containsKey(event.physicalKey),
-          'A  [1m${event.runtimeType} [0m is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is not pressed. $common$event',
         );
         assert(
           _pressedKeys[event.physicalKey] == event.logicalKey,
-          'A  [1m${event.runtimeType} [0m is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is pressed on a different logical key. $common$event '
           'and the recorded logical key ${_pressedKeys[event.physicalKey]}',
         );
