@@ -6,6 +6,7 @@ validate the engine repository.  There are 3 main divisions of this data:
 - include.txt -- A list of all the files that will be checked.
 - exclude.txt -- A list of all the files that will be excluded.
 - data/ -- A catalog of all the accepted and known licenses.
+- secondary/ -- Secondary licenses to be included.
 
 All regex are in the [re2 format](https://github.com/google/re2/wiki/syntax).
 
@@ -34,3 +35,8 @@ show up in source code or in its own LICENSE file.  The format is the following:
    regexes.
 3) Remaining lines - Matcher regex that will be used to extract the full text
    of the accepted license.
+
+## secondary/
+
+This directory structure needs to match the one found in the working directory.
+License files here will be added verbatim to the output.
