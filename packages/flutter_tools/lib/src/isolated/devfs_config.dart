@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:source_span/source_span.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
+import '../base/file_system.dart' as fs;
 import '../globals.dart' as globals;
 import 'devfs_proxy.dart';
 
@@ -158,7 +158,7 @@ Future<DevConfig> loadDevConfig({
   int? debugPort,
   List<String>? browserFlags,
 }) async {
-  final io.File devConfigFile = globals.fs.file(devConfigFilePath);
+  final fs.File devConfigFile = globals.fs.file(devConfigFilePath);
   var fileConfig = const DevConfig();
 
   if (!devConfigFile.existsSync()) {
