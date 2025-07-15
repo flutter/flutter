@@ -170,17 +170,22 @@ extension String.UTF16View {
     }
     assert(utf16Offset <= length)
     let index = utf16Offset - 1
-    // Under the hood, rangeOfComposedCharacterSequencet calls
-    // CFStringGetRangeOfCharacterClusterAtIndex with type = kCFStringComposedCharacterCluster
+    // This implementation tries to match the behavior of CFStringGetRangeOfCharacterClusterAtIndex 
+    // with type = kCFStringBackwardDeletionCluster. Instead of implementing from scratch, since under 
+    // the hood rangeOfComposedCharacterSequence calls CFStringGetRangeOfCharacterClusterAtIndex with 
+    // type = kCFStringComposedCharacterCluster, and the call paths don't seem to be very different for
+    // these two different input types, this implementation calls rangeOfComposedCharacterSequence
+    // and tries to handle the special cases that kCFStringBackwardDeletionCluster handles differently.
     let graphemeClusterRange = rangeOfComposedCharacterSequence(at: Int(index)).range
 
-    // Codepoints from the [Armenian, Limbu] blocks are deleted codepoint by codepoint.
-    // All these codepoints are in BMP.
+    // SPECIAL CASE:
+    // Codepoints from the [Armenian, Limbu] blocks are deleted codepoint by codepoint (all codepoints are 
+    // in BMP, no surrogate pairs).
     let breakCodepoints: Range<Unicode.UTF16.CodeUnit> = 0x0530..<0x1950
-    // ... except for jamos. The jamos block is not continous (for instance
-    // 0x11FA ... 0x11FF are not assigned in Unicode so they're for private use).
-    // The core foundation implementation doesn't consider those those codepoints
-    // jamos.
+    // ... except for jamos which are deleted by grapheme clusteres. The jamos block is not continous 
+    // (for instance 0x11FA ... 0x11FF are not assigned in Unicode so they're for private use).
+    // CFStringGetRangeOfCharacterClusterAtIndex doesn't consider those private codepoints jamos, but 
+    // this implementation does, for simplicity's sake.
     let jamoCodepoints: Range<Unicode.UTF16.CodeUnit> = 0x1100..<0x1200
 
     func shouldBreak(_ offset: UInt) -> Bool {
