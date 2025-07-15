@@ -219,7 +219,8 @@ const htmlSample3 = '''
 </html>
 ''';
 
-const htmlSampleStaticAssetsUrl = '''
+const htmlSampleStaticAssetsUrl =
+    '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -250,7 +251,8 @@ const htmlSampleStaticAssetsUrl = '''
 </html>
 ''';
 
-String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) => '''
+String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
+    '''
 <!DOCTYPE html>
 <html>
 <head>
