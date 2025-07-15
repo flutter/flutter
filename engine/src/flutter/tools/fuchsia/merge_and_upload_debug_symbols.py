@@ -93,7 +93,8 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
     content_already_exists = CheckCIPDPackageExists(package_name, contentTag)
     if content_already_exists:
       print('CIPD package %s tag %s already exists!' % (package_name, contentTag))
-      already_exists = True
+      contentTag = ''
+      # do not return; content hash can match multiple PRs (reverts, framework only)
 
   if upload and IsLinux() and not already_exists:
     command = [
