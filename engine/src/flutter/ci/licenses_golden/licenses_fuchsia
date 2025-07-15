@@ -1,4 +1,4 @@
-Signature: 96766702cb9fad68fcd614c5f6c55c67
+Signature: 2e02d3f7b34e132d64d6f2dd80dcbb10
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14835,6 +14835,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/compon
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_logging_cpp/include/lib/driver/logging/cpp/internal/panic.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/suspend.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/suspend.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -14867,6 +14869,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/componen
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_logging_cpp/include/lib/driver/logging/cpp/internal/panic.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/suspend.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/suspend.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h
