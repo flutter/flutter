@@ -217,6 +217,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
@@ -228,6 +229,7 @@ class Feature {
     required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.runtimeId,
     this.extraHelpText,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -258,6 +260,12 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no config setting.
   final String? configSetting;
+
+  /// The unique identifier for this feature at runtime.
+  ///
+  /// If not `null`, the Flutter framework's enabled feature flags will
+  /// contain this value if this feature is enabled.
+  final String? runtimeId;
 
   /// Additional text to add to the end of the help message.
   ///
