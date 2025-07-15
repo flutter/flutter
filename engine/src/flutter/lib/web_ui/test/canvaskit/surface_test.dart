@@ -289,13 +289,12 @@ void testMain() {
       final Surface surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final JSObject originalTransferToImageBitmap =
-          offscreenCanvas['transferToImageBitmap']! as JSObject;
-      offscreenCanvas['originalTransferToImageBitmap'] = originalTransferToImageBitmap;
+      final JSFunction transferToImageBitmap =
+          offscreenCanvas['transferToImageBitmap']! as JSFunction;
       int transferToImageBitmapCalls = 0;
       offscreenCanvas['transferToImageBitmap'] = () {
         transferToImageBitmapCalls++;
-        return offscreenCanvas.callMethod<JSObject>('originalTransferToImageBitmap'.toJS);
+        return transferToImageBitmap.callAsFunction(offscreenCanvas);
       }.toJS;
       final RenderCanvas renderCanvas = RenderCanvas();
       final CkPictureRecorder recorder = CkPictureRecorder();
@@ -311,13 +310,9 @@ void testMain() {
     }, skip: !Surface.offscreenCanvasSupported);
 
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
-      final JSObject originalMakeGrContext = canvasKit['MakeGrContext']! as JSObject;
-      canvasKit
-        ..['originalMakeGrContext'] = originalMakeGrContext
-        ..['MakeGrContext'] = ((int glContext) => null).toJS;
+      canvasKit['MakeGrContext'] = ((int glContext) => null).toJS;
       final Surface surface = Surface();
       expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
-      canvasKit['MakeGrContext'] = originalMakeGrContext;
       // Skipping on Firefox for now since Firefox headless doesn't support WebGL
     }, skip: isFirefox);
 
