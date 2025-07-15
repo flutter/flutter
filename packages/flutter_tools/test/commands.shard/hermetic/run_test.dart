@@ -1087,16 +1087,14 @@ void main() {
         'accepts headers with commas in them',
         () async {
           final command = RunCommand();
-          await expectLater(
-            () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--no-hot',
-              '--web-header',
-              'hurray=flutter,flutter=hurray',
-            ]),
-            throwsToolExit(),
-          );
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--no-resident',
+            '--web-header',
+            'hurray=flutter,flutter=hurray',
+          ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.devConfig, isNotNull);
@@ -1114,8 +1112,6 @@ void main() {
         },
       );
     });
-
-    // ... (rest of the file)
   });
 
   group('terminal', () {
