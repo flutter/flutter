@@ -42807,6 +42807,11 @@ DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
+icu
+
+This file was generated from RFC 3454 (http://www.ietf.org/rfc/rfc3454.txt)
+Copyright (C) The Internet Society (2002).  All Rights Reserved. 
+--------------------------------------------------------------------------------
 libjpeg-turbo
 
 This file was part of the Independent JPEG Group's software:
