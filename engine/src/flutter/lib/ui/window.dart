@@ -176,17 +176,21 @@ class FlutterView {
 
     return ViewConstraints(
       minWidth: _computeMinConstraintValue(
-          _viewConfiguration.viewConstraints.minWidth,
-          physicalSize.width),
+        _viewConfiguration.viewConstraints.minWidth,
+        physicalSize.width,
+      ),
       minHeight: _computeMinConstraintValue(
-          _viewConfiguration.viewConstraints.minHeight,
-          physicalSize.height),
+        _viewConfiguration.viewConstraints.minHeight,
+        physicalSize.height,
+      ),
       maxWidth: _computeMaxConstraintValue(
-          _viewConfiguration.viewConstraints.maxWidth,
-          physicalSize.width),
+        _viewConfiguration.viewConstraints.maxWidth,
+        physicalSize.width,
+      ),
       maxHeight: _computeMaxConstraintValue(
-          _viewConfiguration.viewConstraints.maxHeight,
-          physicalSize.height),
+        _viewConfiguration.viewConstraints.maxHeight,
+        physicalSize.height,
+      ),
     );
   }
 
@@ -195,7 +199,6 @@ class FlutterView {
     assert(desired == null || desired.isFinite, 'Minimum constraint must be finite.');
     return desired ?? available;
   }
-
 
   double _computeMaxConstraintValue(double? desired, double available) {
     assert(desired == null || desired >= 0, 'Maximum constraint must be >= 0 if set.');
@@ -408,19 +411,13 @@ class FlutterView {
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
   void render(Scene scene, {Size? size}) {
-    // print('window.dart 378');
-    print(size);
-    print("physical constraints : ${physicalConstraints}");
-    print("view constraints : ${_viewConfiguration.viewConstraints}");
-    // print(physicalSize);
     _render(
       viewId,
       scene as _NativeScene,
-      size?.width ?? physicalConstraints.maxWidth,
-      size?.height ?? physicalConstraints.maxHeight,
+      size?.width ?? physicalSize.width,
+      size?.height ?? physicalSize.height,
     );
   }
-
 
   @Native<Void Function(Int64, Pointer<Void>, Double, Double)>(
     symbol: 'PlatformConfigurationNativeApi::Render',

@@ -90,7 +90,6 @@ void PlatformView::ScheduleFrame() {
 void PlatformView::AddView(int64_t view_id,
                            const ViewportMetrics& viewport_metrics,
                            AddViewCallback callback) {
-  // TODO: This is a breadcrumb in the AddView call chain.
   delegate_.OnPlatformViewAddView(view_id, viewport_metrics,
                                   std::move(callback));
 }

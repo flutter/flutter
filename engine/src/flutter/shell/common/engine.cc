@@ -330,7 +330,6 @@ tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
 void Engine::AddView(int64_t view_id,
                      const ViewportMetrics& view_metrics,
                      std::function<void(bool added)> callback) {
-  // TODO: this is a breadcrumb in the AddView call chain.
   runtime_controller_->AddView(view_id, view_metrics, std::move(callback));
 }
 
@@ -528,8 +527,7 @@ void Engine::UpdateSemantics(int64_t view_id,
                                     std::move(actions));
 }
 
-void Engine::UpdateViewportMetrics(int64_t view_id,
-                                   SkISize size) {
+void Engine::UpdateViewportMetrics(int64_t view_id, SkISize size) {
   delegate_.OnEngineUpdateViewportMetrics(view_id, size);
 }
 

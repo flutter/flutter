@@ -135,8 +135,6 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
 
   for (auto const& [view_id, viewport_metrics] :
        platform_data_.viewport_metrics_for_views) {
-    // TODO: this is a breadcrumb in the AddView call chain. Probably need to
-    // cache the physical constraints per view in the map.
     bool added = platform_configuration->AddView(view_id, viewport_metrics);
 
     // Callbacks will have been already invoked if the engine was restarted.
@@ -165,7 +163,6 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
 void RuntimeController::AddView(int64_t view_id,
                                 const ViewportMetrics& view_metrics,
                                 AddViewCallback callback) {
-  // TODO: this is a breadcrumb in the AddView call chain.
 
   // If the Dart isolate is not running, |FlushRuntimeStateToIsolate| will
   // add the view and invoke the callback when the isolate is started.
@@ -420,8 +417,7 @@ void RuntimeController::Render(int64_t view_id,
                                double height) {
   const ViewportMetrics* view_metrics =
       UIDartState::Current()->platform_configuration()->GetMetrics(view_id);
-  std::cout << "width: " << width << std::endl;
-  std::cout << "height: " << height << std::endl;
+
   if (view_metrics == nullptr) {
     return;
   }

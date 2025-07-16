@@ -823,8 +823,6 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   weak_platform_view_ = platform_view_->GetWeakPtr();
 
   // Add the implicit view with empty metrics.
-  // TODO: This is a breadcrumb in the AddView call chain. Default to tight
-  // constraints if we need to provide a default.
   engine_->AddView(kFlutterImplicitViewId, ViewportMetrics{}, [](bool added) {
     FML_DCHECK(added) << "Failed to add the implicit view";
   });
@@ -1389,9 +1387,9 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
 }
 
 void Shell::OnEngineUpdateViewportMetrics(int64_t index, SkISize size) {
-    FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
-    std::scoped_lock<std::mutex> lock(resize_mutex_);
-    expected_frame_sizes_[index] = size;
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+  std::scoped_lock<std::mutex> lock(resize_mutex_);
+  expected_frame_sizes_[index] = size;
 }
 
 // |Engine::Delegate|
@@ -2125,7 +2123,6 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
 void Shell::OnPlatformViewAddView(int64_t view_id,
                                   const ViewportMetrics& viewport_metrics,
                                   AddViewCallback callback) {
-  // TODO: This is a breadcrumb in the AddView call chain.
   TRACE_EVENT0("flutter", "Shell::AddView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -2349,9 +2346,13 @@ Shell::GetConcurrentWorkerTaskRunner() const {
 
 SkISize Shell::ExpectedFrameSize(int64_t view_id) {
   auto found = expected_frame_sizes_.find(view_id);
+
   if (found == expected_frame_sizes_.end()) {
     return SkISize::MakeEmpty();
   }
+  std::cout << "expected frame size" << std::endl;
+  std::cout << found->second.fWidth << std::endl;
+  std::cout << found->second.fWidth << std::endl;
   return found->second;
 }
 
