@@ -1387,7 +1387,9 @@ void main() {
     () => testbed.run(() async {
       const extraHeaderKey = 'hurray';
       const extraHeaderValue = 'flutter';
-      const devConfig = WebDevServerConfig(headers: <String, String>{extraHeaderKey: extraHeaderValue});
+      const devConfig = WebDevServerConfig(
+        headers: <String, String>{extraHeaderKey: extraHeaderValue},
+      );
 
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
