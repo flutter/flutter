@@ -909,7 +909,7 @@ void main() {
       final ResidentCompiler residentCompiler = FakeResidentCompiler()
         ..output = const CompilerOutput('a', 0, <Uri>[]);
 
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -1016,7 +1016,7 @@ void main() {
       final ResidentCompiler residentCompiler = FakeResidentCompiler()
         ..output = const CompilerOutput('a', 0, <Uri>[]);
 
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -1127,7 +1127,7 @@ void main() {
         outputFile.parent.childFile('a.json').writeAsStringSync('{}');
         outputFile.parent.childFile('a.map').writeAsStringSync('{}');
         outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-        const devConfig = DevConfig();
+        const devConfig = WebDevServerConfig();
         final webDevFS = WebDevFS(
           // if this is any other value, we will do a real ip lookup
           packagesFilePath: '.dart_tool/package_config.json',
@@ -1208,7 +1208,7 @@ void main() {
       outputFile.parent.childFile('a.sources').writeAsStringSync('');
       outputFile.parent.childFile('a.json').writeAsStringSync('{}');
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -1250,7 +1250,7 @@ void main() {
       outputFile.parent.childFile('a.sources').writeAsStringSync('');
       outputFile.parent.childFile('a.json').writeAsStringSync('{}');
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -1307,7 +1307,7 @@ void main() {
 
       final String dummyCertPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
       final String dummyCertKeyPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
-      final devConfig = DevConfig(
+      final devConfig = WebDevServerConfig(
         https: HttpsConfig(certPath: dummyCertPath, certKeyPath: dummyCertKeyPath),
       );
       final webDevFS = WebDevFS(
@@ -1350,7 +1350,7 @@ void main() {
     'allows frame embedding',
     () => testbed.run(() async {
       // Wrap the original async block in testbed.run()
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
 
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
@@ -1387,7 +1387,7 @@ void main() {
     () => testbed.run(() async {
       const extraHeaderKey = 'hurray';
       const extraHeaderValue = 'flutter';
-      const devConfig = DevConfig(headers: <String, String>{extraHeaderKey: extraHeaderValue});
+      const devConfig = WebDevServerConfig(headers: <String, String>{extraHeaderKey: extraHeaderValue});
 
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
@@ -1482,7 +1482,7 @@ void main() {
       outputFile.parent.childFile('a.json').writeAsStringSync('{}');
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
-      const devConfig = DevConfig();
+      const devConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,

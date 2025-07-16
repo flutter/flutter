@@ -110,7 +110,7 @@ class WebDevFS implements DevFS {
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
-  final DevConfig devConfig;
+  final WebDevServerConfig devConfig;
   final bool useDwdsWebSocketConnection;
   final FileSystem fileSystem;
   final Logger logger;

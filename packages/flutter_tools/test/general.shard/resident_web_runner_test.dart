@@ -1868,8 +1868,8 @@ flutter:
     'throws when port is an integer outside the valid TCP range',
     () async {
       final logger = BufferLogger.test();
-      const devConfig = DevConfig(port: 65536);
-      const devConfig2 = DevConfig(port: -1);
+      const devConfig = WebDevServerConfig(port: 65536);
+      const devConfig2 = WebDevServerConfig(port: -1);
 
       var debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, devConfig: devConfig);
       ResidentRunner residentWebRunner = setUpResidentRunner(
