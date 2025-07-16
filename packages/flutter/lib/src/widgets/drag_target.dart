@@ -594,7 +594,7 @@ class DraggableDetails {
 /// Represents the details when a pointer event occurred on the [DragTarget].
 class DragTargetDetails<T> {
   /// Creates details for a [DragTarget] callback.
-  DragTargetDetails({required this.data, required this.offset});
+  DragTargetDetails({required this.data, required this.offset, required this.velocity});
 
   /// The data that was dropped onto this [DragTarget].
   final T data;
@@ -602,6 +602,10 @@ class DragTargetDetails<T> {
   /// The global position when the specific pointer event occurred on
   /// the draggable.
   final Offset offset;
+
+  /// The velocity at which the pointer was moving when the specific pointer
+  /// event occurred on the draggable.
+  final Velocity velocity;
 }
 
 /// A widget that receives data when a [Draggable] widget is dropped.
@@ -757,9 +761,11 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
         (widget.onWillAccept != null && widget.onWillAccept!(avatar.data as T?)) ||
         (widget.onWillAcceptWithDetails != null &&
             avatar.data != null &&
-            widget.onWillAcceptWithDetails!(
-              DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
-            ));
+            widget.onWillAcceptWithDetails!(DragTargetDetails<T>(
+              data: avatar.data! as T,
+              offset: avatar._lastOffset!,
+              velocity: avatar.velocity,
+            )));
     if (resolvedWillAccept) {
       setState(() {
         _candidateAvatars.add(avatar);
@@ -795,9 +801,11 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     });
     if (avatar.data != null) {
       widget.onAccept?.call(avatar.data! as T);
-      widget.onAcceptWithDetails?.call(
-        DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!),
-      );
+      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(
+        data: avatar.data! as T,
+        offset: avatar._lastOffset!,
+        velocity: avatar.velocity,
+      ));
     }
   }
 
@@ -805,7 +813,11 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     if (!mounted || avatar.data == null) {
       return;
     }
-    widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    widget.onMove?.call(DragTargetDetails<T>(
+      data: avatar.data! as T,
+      offset: avatar._lastOffset!,
+      velocity: avatar.velocity,
+    ));
   }
 
   @override
@@ -868,11 +880,13 @@ class _DragAvatar<T extends Object> extends Drag {
   Offset? _lastOffset;
   late Offset _overlayOffset;
   OverlayEntry? _entry;
+  Velocity velocity = Velocity.zero;
 
   @override
   void update(DragUpdateDetails details) {
     final Offset oldPosition = _position;
     _position += _restrictAxis(details.delta);
+    velocity = Velocity(pixelsPerSecond: _position);
     updateDrag(_position);
     if (onDragUpdate != null && _position != oldPosition) {
       onDragUpdate!(details);
