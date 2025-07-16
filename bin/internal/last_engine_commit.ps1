@@ -26,7 +26,9 @@ $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 $gitToplevel = (git rev-parse --show-toplevel).Trim()
 
-$RELEASE_CANDIDATE_VERSION_PATH = Join-Path $gitToplevel "bin" "internal" "release-candidate-branch.version"
+$Path1 = Join-Path $gitToplevel "bin"
+$Path2 = Join-Path $Path1 "internal"
+$RELEASE_CANDIDATE_VERSION_PATH = Join-Path $Path2 "release-candidate-branch.version"
 
 # 1. Determine the reference commit: the last commit that changed
 #    'bin/internal/release-candidate-branch.version'.
