@@ -88,7 +88,9 @@ void main() {
     final Widget app = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(
-        body: Center(child: TextField(key: key, controller: controller, focusNode: focusNode)),
+        body: Center(
+          child: TextField(key: key, controller: controller, focusNode: focusNode),
+        ),
       ),
     );
 
