@@ -173,6 +173,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     /// @param[in]  message  The message from the Flutter application to send to
     ///                      the underlying platform.
     ///
+
+    virtual void OnEngineUpdateViewportMetrics(int64_t index, SkISize size) = 0;
+
     virtual void OnEngineHandlePlatformMessage(
         std::unique_ptr<PlatformMessage> message) = 0;
 
@@ -1009,6 +1012,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void UpdateSemantics(int64_t view_id,
                        SemanticsNodeUpdates update,
                        CustomAccessibilityActionUpdates actions) override;
+
+  void UpdateViewportMetrics(int64_t view_id, SkISize size) override;
 
   // |RuntimeDelegate|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

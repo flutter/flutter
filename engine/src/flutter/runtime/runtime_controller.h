@@ -763,6 +763,8 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
 
+  void UpdateViewportMetrics(int64_t view_id, SkISize size) override;
+
   // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 

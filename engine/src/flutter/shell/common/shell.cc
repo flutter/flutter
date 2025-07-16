@@ -1388,6 +1388,12 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
       });
 }
 
+void Shell::OnEngineUpdateViewportMetrics(int64_t index, SkISize size) {
+    FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+    std::scoped_lock<std::mutex> lock(resize_mutex_);
+    expected_frame_sizes_[index] = size;
+}
+
 // |Engine::Delegate|
 void Shell::OnEngineHandlePlatformMessage(
     std::unique_ptr<PlatformMessage> message) {

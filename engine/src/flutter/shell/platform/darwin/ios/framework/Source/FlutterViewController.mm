@@ -197,6 +197,7 @@ typedef struct MouseState {
     _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                   opaque:self.isViewOpaque
                                          enableWideGamut:engine.project.isWideGamutEnabled];
+    _flutterView.contentMode = UIViewContentModeCenter;
     _ongoingTouches = [[NSMutableSet alloc] init];
 
     // TODO(cbracken): https://github.com/flutter/flutter/issues/157140

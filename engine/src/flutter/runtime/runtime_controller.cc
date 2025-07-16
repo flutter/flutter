@@ -453,6 +453,10 @@ void RuntimeController::UpdateSemantics(int64_t view_id,
   }
 }
 
+void RuntimeController::UpdateViewportMetrics(int64_t view_id, SkISize size) {
+  client_.UpdateViewportMetrics(view_id, size);
+}
+
 // |PlatformConfigurationClient|
 void RuntimeController::HandlePlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
