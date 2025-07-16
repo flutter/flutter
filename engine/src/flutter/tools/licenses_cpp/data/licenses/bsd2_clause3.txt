@@ -1,5 +1,5 @@
 bsd2 clause 3
-(?s)Redistribution and use in source and binary forms.*   \* Redistributions of source code must retain.*distribution\.\s+THIS SOFTWARE
+(?s)All rights reserved\..*Redistribution and use in source and binary forms.*   \* Redistributions of source code must retain.*distribution\.\s+THIS SOFTWARE
 (?s)Copyright.*All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
