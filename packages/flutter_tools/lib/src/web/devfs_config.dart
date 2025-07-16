@@ -16,8 +16,8 @@ import 'devfs_proxy.dart';
 const devConfigFilePath = 'web_dev_config.yaml';
 
 @immutable
-class DevConfig {
-  const DevConfig({
+class WebDevServerConfig {
+  const WebDevServerConfig({
     this.headers = const <String, String>{},
     this.host = 'any',
     this.port,
@@ -25,7 +25,7 @@ class DevConfig {
     this.proxy = const <ProxyRule>[],
   });
 
-  factory DevConfig.fromYaml(YamlMap yaml) {
+  factory WebDevServerConfig.fromYaml(YamlMap yaml) {
     final headers = <String, String>{};
     if (yaml['headers'] != null) {
       if (yaml['headers'] is! YamlList) {
@@ -79,7 +79,7 @@ class DevConfig {
       }
     }
 
-    return DevConfig(
+    return WebDevServerConfig(
       headers: headers,
       host: yaml['host'] as String?,
       port: yaml['port'] as int?,
@@ -149,7 +149,7 @@ T? _getOverriddenValue<T>(String filedName, T? fileValue, T? cliValue) {
   return fileValue;
 }
 
-Future<DevConfig> loadDevConfig({
+Future<WebDevServerConfig> loadDevConfig({
   String? hostname,
   String? port,
   String? tlsCertPath,
@@ -159,7 +159,7 @@ Future<DevConfig> loadDevConfig({
   List<String>? browserFlags,
 }) async {
   final fs.File devConfigFile = globals.fs.file(devConfigFilePath);
-  var fileConfig = const DevConfig();
+  var fileConfig = const WebDevServerConfig();
 
   if (!devConfigFile.existsSync()) {
     globals.printStatus('No $devConfigFilePath found');
@@ -186,7 +186,7 @@ Future<DevConfig> loadDevConfig({
       }
 
       final serverYaml = contents['server'] as YamlMap;
-      fileConfig = DevConfig.fromYaml(serverYaml);
+      fileConfig = WebDevServerConfig.fromYaml(serverYaml);
       globals.printStatus('\nLoaded configuration from $devConfigFilePath');
       globals.printTrace(fileConfig.toString());
     } on YamlException catch (e) {
@@ -238,7 +238,7 @@ Future<DevConfig> loadDevConfig({
     finalHeaders.addAll(headers);
   }
 
-  return DevConfig(
+  return WebDevServerConfig(
     host: finalHost,
     port: finalPort,
     https: finalHttpsConfig,

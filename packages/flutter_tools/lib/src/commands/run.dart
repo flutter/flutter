@@ -17,7 +17,6 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../web/devfs_config.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -26,6 +25,7 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -270,7 +270,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
-  Future<DebuggingOptions> createDebuggingOptions({DevConfig? devConfig}) async {
+  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? devConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
@@ -482,7 +482,7 @@ class RunCommand extends RunCommandBase {
   String get category => FlutterCommandCategory.project;
 
   List<Device>? devices;
-  late final Future<DevConfig?> _devConfig = (() async {
+  late final Future<WebDevServerConfig?> _devConfig = (() async {
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     if (featureFlags.isWebEnabled &&
@@ -650,7 +650,7 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-    final DevConfig? devConfig = await _devConfig;
+    final WebDevServerConfig? devConfig = await _devConfig;
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -696,7 +696,7 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final DevConfig? devConfig = await _devConfig;
+    final WebDevServerConfig? devConfig = await _devConfig;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(devConfig: devConfig);
 
     if (hotMode && devConfig == null) {
@@ -755,7 +755,7 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
-    final DevConfig? devConfig = await _devConfig;
+    final WebDevServerConfig? devConfig = await _devConfig;
 
     if (outputMachineFormat) {
       if (devices!.length > 1) {

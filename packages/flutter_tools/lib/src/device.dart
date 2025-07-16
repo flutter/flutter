@@ -975,7 +975,7 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.devConfig = const DevConfig(),
+    this.devConfig = const WebDevServerConfig(),
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
@@ -1001,7 +1001,7 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-    this.devConfig = const DevConfig(),
+    this.devConfig = const WebDevServerConfig(),
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1131,7 +1131,7 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
-  final DevConfig? devConfig;
+  final WebDevServerConfig? devConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///

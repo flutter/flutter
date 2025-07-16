@@ -278,7 +278,7 @@ void main() {
       final WebDriverService service = setUpDriverService();
       final device = FakeDevice();
       final webHeaders = <String, String>{'test-header': 'test-value'};
-      final devConfig = DevConfig(headers: webHeaders);
+      final devConfig = WebDevServerConfig(headers: webHeaders);
       await service.start(
         BuildInfo.profile,
         device,

@@ -275,11 +275,11 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        final DevConfig originalDevConfig = debuggingOptions.devConfig ?? const DevConfig();
+        final WebDevServerConfig originalDevConfig = debuggingOptions.devConfig ?? const WebDevServerConfig();
 
         final int resolvedPort = await resolvePort(originalDevConfig.port);
 
-        final updatedDevConfig = DevConfig(
+        final updatedDevConfig = WebDevServerConfig(
           host: originalDevConfig.host,
           port: resolvedPort,
           headers: originalDevConfig.headers,
