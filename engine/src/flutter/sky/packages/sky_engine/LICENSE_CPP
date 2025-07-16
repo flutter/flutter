@@ -45,6 +45,112 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+Authors/contributors include:
+
+Alex Dowad
+Alexander Monakov
+Anthony G. Basile
+Arvid Picciani
+Bobby Bingham
+Boris Brezillon
+Brent Cook
+Chris Spiegel
+Clément Vasseur
+Daniel Micay
+Denys Vlasenko
+Emil Renner Berthing
+Felix Fietkau
+Felix Janda
+Gianluca Anzolin
+Hauke Mehrtens
+Hiltjo Posthuma
+Isaac Dunham
+Jaydeep Patil
+Jens Gustedt
+Jeremy Huntwork
+Jo-Philipp Wich
+Joakim Sindholt
+John Spencer
+Josiah Worcester
+Justin Cormack
+Khem Raj
+Kylie McClain
+Luca Barbato
+Luka Perkov
+M Farkas-Dyck (Strake)
+Mahesh Bodapati
+Michael Forney
+Natanael Copa
+Nicholas J. Kain
+orc
+Pascal Cuoq
+Petr Hosek
+Pierre Carrier
+Rich Felker
+Richard Pennington
+Shiz
+sin
+Solar Designer
+Stefan Kristiansson
+Szabolcs Nagy
+Timo Teräs
+Trutz Behn
+Valentin Ochs
+William Haddon
+
+Portions of this software are derived from third-party works licensed
+under terms compatible with the above MIT license:
+
+Much of the math library code (third_party/math/* and
+third_party/complex/*, and third_party/include/libm.h) is
+Copyright © 1993,2004 Sun Microsystems or
+Copyright © 2003-2011 David Schultz or
+Copyright © 2003-2009 Steven G. Kargl or
+Copyright © 2003-2009 Bruce D. Evans or
+Copyright © 2008 Stephen L. Moshier
+and labelled as such in comments in the individual source files. All
+have been licensed under extremely permissive terms.
+
+The smoothsort implementation (third_party/smoothsort/qsort.c) is
+Copyright © 2011 Valentin Ochs and is licensed under an MIT-style
+license.
+
+The x86_64 files in third_party/arch were written by Nicholas J. Kain
+and is licensed under the standard MIT terms.
+
+All other files which have no copyright comments are original works
+produced specifically for use as part of this library, written either
+by Rich Felker, the main author of the library, or by one or more
+contibutors listed above. Details on authorship of individual files
+can be found in the git version control history of the project. The
+omission of copyright and license comments in each file is in the
+interest of source tree size.
+
+In addition, permission is hereby granted for all public header files
+(include/* and arch/*/bits/*) and crt files intended to be linked into
+applications (crt/*, ldso/dlstart.c, and arch/*/crt_arch.h) to omit
+the copyright notice and permission notice otherwise required by the
+license, and to use these files without any requirement of
+attribution. These files include substantial contributions from:
+
+Bobby Bingham
+John Spencer
+Nicholas J. Kain
+Rich Felker
+Richard Pennington
+Stefan Kristiansson
+Szabolcs Nagy
+
+all of whom have explicitly granted such permission.
+
+This file previously contained text expressing a belief that most of
+the files covered by the above exception were sufficiently trivial not
+to be subject to copyright, resulting in confusion over whether it
+negated the permissions granted in the license. In the spirit of
+permissive licensing, and of not having licensing issues being an
+obstacle to adoption, that text has been removed.
 --------------------------------------------------------------------------------
 harfbuzz
 
