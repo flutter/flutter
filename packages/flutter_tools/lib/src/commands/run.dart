@@ -17,7 +17,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../isolated/devfs_config.dart';
+import '../web/devfs_config.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';

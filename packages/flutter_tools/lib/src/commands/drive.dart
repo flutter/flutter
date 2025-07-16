@@ -21,12 +21,12 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
+import '../web/devfs_config.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../isolated/devfs_config.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
