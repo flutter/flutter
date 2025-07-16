@@ -886,7 +886,7 @@ class _DragAvatar<T extends Object> extends Drag {
   void update(DragUpdateDetails details) {
     final Offset oldPosition = _position;
     _position += _restrictAxis(details.delta);
-    velocity = Velocity(pixelsPerSecond: _position);
+    velocity = Velocity(pixelsPerSecond: _position - oldPosition);
     updateDrag(_position);
     if (onDragUpdate != null && _position != oldPosition) {
       onDragUpdate!(details);

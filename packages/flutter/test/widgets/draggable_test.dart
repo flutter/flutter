@@ -87,7 +87,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1254,7 +1254,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1992,7 +1992,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2137,7 +2137,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2233,7 +2233,7 @@ void main() {
     expect(acceptedDoubles, equals(<double>[1.0]));
     expect(acceptedDoublesDetails, hasLength(1));
     expect(acceptedDoublesDetails.first.offset, const Offset(112.0, 122.0));
-    expect(acceptedDoublesDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDoublesDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('IntDragging'), findsNothing);
     expect(find.text('DoubleDragging'), findsNothing);
 
@@ -2267,7 +2267,7 @@ void main() {
     expect(acceptedInts, equals(<int>[1]));
     expect(acceptedIntsDetails, hasLength(1));
     expect(acceptedIntsDetails.first.offset, const Offset(184.0, 122.0));
-    expect(acceptedIntsDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedIntsDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(acceptedDoubles, isEmpty);
     expect(acceptedDoublesDetails, isEmpty);
     expect(find.text('IntDragging'), findsNothing);
@@ -2340,7 +2340,7 @@ void main() {
       expect(acceptedDragTargetDatas, equals(<DragTargetData>[dragTargetData]));
       expect(acceptedDragTargetDataDetails, hasLength(1));
       expect(acceptedDragTargetDataDetails.first.offset, const Offset(256.0, 74.0));
-      expect(acceptedDragTargetDataDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+      expect(acceptedDragTargetDataDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
       expect(acceptedExtendedDragTargetDatas, isEmpty);
       expect(acceptedExtendedDragTargetDataDetails, isEmpty);
 
@@ -2450,7 +2450,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
@@ -2461,9 +2461,9 @@ void main() {
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
     expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[0].velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails[0].velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails[1].velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2474,9 +2474,9 @@ void main() {
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
     expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[0].velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails[0].velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails[1].velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2771,7 +2771,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, const Offset(256.0, 26.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsNothing);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2883,7 +2883,7 @@ void main() {
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
     expect(acceptedDetails.first.offset, expectedDropOffset);
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(256.0, 74.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2968,7 +2968,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(400.0, 150.0)));
+    expect(acceptedDetails.first.velocity, const Velocity(pixelsPerSecond: Offset(0.0, 52.0)));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
