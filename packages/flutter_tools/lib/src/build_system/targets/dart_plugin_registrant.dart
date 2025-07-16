@@ -38,11 +38,8 @@ class DartPluginRegistrantTarget extends Target {
     final String targetFilePath =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File mainFile = environment.fileSystem.file(targetFilePath);
-    final Uri mainFileUri = mainFile.absolute.uri;
-    final String mainFileUriString =
-        packageConfig.toPackageUri(mainFileUri)?.toString() ?? mainFileUri.toString();
 
-    await generateMainDartWithPluginRegistrant(project, packageConfig, mainFileUriString, mainFile);
+    await generateProjectPluginRegistrant(project, packageConfig, mainFile);
   }
 
   @override
