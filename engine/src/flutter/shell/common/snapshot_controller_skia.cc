@@ -42,7 +42,7 @@ sk_sp<SkImage> DrawSnapshot(
 
   {
     TRACE_EVENT0("flutter", "DeviceHostTransfer");
-    if (auto raster_image = device_snapshot->makeRasterImage()) {
+    if (auto raster_image = device_snapshot->makeRasterImage(nullptr)) {
       return raster_image;
     }
   }
