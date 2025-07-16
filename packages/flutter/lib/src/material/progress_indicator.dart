@@ -428,7 +428,22 @@ class LinearProgressIndicator extends ProgressIndicator {
   )
   final bool? year2023;
 
-  /// The animation controller for the linear progress indicator.
+  /// ## Animation synchronization
+  /// 
+  /// When multiple [ProgressIndicator] widgets are animating on screen
+  /// simultaneously (e.g., in a list of loading items), their uncoordinated
+  /// animations can appear visually cluttered. To address this, the animation of
+  /// an indicator can be driven by a custom [AnimationController].
+  /// 
+  /// This allows multiple indicators to be synchronized to a single animation
+  /// source. The most convenient way to achieve this for a group of indicators is
+  /// by providing a controller via [ProgressIndicatorTheme]. All
+  /// [ProgressIndicator] widgets within that theme's subtree will then share
+  /// the same animation, resulting in a more coordinated and visually pleasing
+  /// effect.
+  /// 
+  /// Alternatively, a specific [AnimationController] can be passed directly to the
+  /// [controller] property of an individual indicator.
   final AnimationController? controller;
 
   /// The default duration for [LinearProgressIndicator] animation.
@@ -874,7 +889,22 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// padding. Otherwise, defaults to zero padding.
   final EdgeInsetsGeometry? padding;
 
-  /// The animation controller for the circular progress indicator.
+  /// ## Animation synchronization
+  /// 
+  /// When multiple [ProgressIndicator] widgets are animating on screen
+  /// simultaneously (e.g., in a list of loading items), their uncoordinated
+  /// animations can appear visually cluttered. To address this, the animation of
+  /// an indicator can be driven by a custom [AnimationController].
+  /// 
+  /// This allows multiple indicators to be synchronized to a single animation
+  /// source. The most convenient way to achieve this for a group of indicators is
+  /// by providing a controller via [ProgressIndicatorTheme]. All
+  /// [ProgressIndicator] widgets within that theme's subtree will then share
+  /// the same animation, resulting in a more coordinated and visually pleasing
+  /// effect.
+  /// 
+  /// Alternatively, a specific [AnimationController] can be passed directly to the
+  /// [controller] property of an individual indicator.
   final AnimationController? controller;
 
   /// The indicator stroke is drawn fully inside of the indicator path.
