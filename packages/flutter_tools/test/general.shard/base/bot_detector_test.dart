@@ -35,7 +35,7 @@ void main() {
         fakePlatform.environment['BOT'] = 'false';
         fakePlatform.environment['TRAVIS'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -48,7 +48,7 @@ void main() {
       testWithoutContext('does not cache BOT environment variable', () async {
         fakePlatform.environment['BOT'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -67,7 +67,7 @@ void main() {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -78,7 +78,7 @@ void main() {
       });
 
       testWithoutContext('returns false with and without a terminal attached', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
             FakeRequest(
@@ -100,7 +100,7 @@ void main() {
         fakePlatform.environment['TRAVIS'] = 'true';
         fakePlatform.environment['FLUTTER_ANALYTICS_LOG_FILE'] = '/some/file';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -111,7 +111,7 @@ void main() {
       });
 
       testWithoutContext('returns true when azure metadata is reachable', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -122,7 +122,7 @@ void main() {
       });
 
       testWithoutContext('caches azure bot detection results across instances', () async {
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -142,7 +142,7 @@ void main() {
       testWithoutContext('returns true when running on borg', () async {
         fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
 
-        final BotDetector botDetector = BotDetector(
+        final botDetector = BotDetector(
           platform: fakePlatform,
           httpClientFactory: () => FakeHttpClient.any(),
           persistentToolState: persistentToolState,
@@ -156,7 +156,7 @@ void main() {
 
   group('AzureDetector', () {
     testWithoutContext('isRunningOnAzure returns false when connection times out', () async {
-      final AzureDetector azureDetector = AzureDetector(
+      final azureDetector = AzureDetector(
         httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
           FakeRequest(azureUrl, responseError: const SocketException('HTTP connection timed out')),
         ]),
@@ -166,7 +166,7 @@ void main() {
     });
 
     testWithoutContext('isRunningOnAzure returns false when OsError is thrown', () async {
-      final AzureDetector azureDetector = AzureDetector(
+      final azureDetector = AzureDetector(
         httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[
           FakeRequest(azureUrl, responseError: const OSError('Connection Refused', 111)),
         ]),
@@ -176,7 +176,7 @@ void main() {
     });
 
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {
-      final AzureDetector azureDetector = AzureDetector(
+      final azureDetector = AzureDetector(
         httpClientFactory: () => FakeHttpClient.list(<FakeRequest>[FakeRequest(azureUrl)]),
       );
 

@@ -583,19 +583,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     final double trackActive = offset.dx + _thumbCenter;
 
     final Canvas canvas = context.canvas;
-
     if (visualPosition > 0.0) {
       final Paint paint = Paint()..color = rightColor;
-      canvas.drawRSuperellipse(
-        RSuperellipse.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
+      // Use RRect instead of RSuperellipse here since the radius is too
+      // small to make enough visual difference.
+      canvas.drawRRect(
+        RRect.fromLTRBXY(trackLeft, trackTop, trackActive, trackBottom, 1.0, 1.0),
         paint,
       );
     }
 
     if (visualPosition < 1.0) {
       final Paint paint = Paint()..color = leftColor;
-      canvas.drawRSuperellipse(
-        RSuperellipse.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
+      // Use RRect instead of RSuperellipse here since the radius is too
+      // small to make enough visual difference.
+      canvas.drawRRect(
+        RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0),
         paint,
       );
     }

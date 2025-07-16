@@ -34,22 +34,22 @@ void testMain() {
 
     test('counts frames', () async {
       final instance = FrameService.instance;
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
 
       final frameCompleter = Completer<void>();
       instance.onFinishedRenderingFrame = () {
         frameCompleter.complete();
       };
 
-      expect(instance.debugFrameNumber, 0);
+      expect(instance.frameData.frameNumber, 0);
       instance.scheduleFrame();
       await frameCompleter.future;
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
     });
 
-    test('isFrameScheduled is true iff the frame is scheduled', () async {
+    test('isFrameScheduled is true if the frame is scheduled', () async {
       final instance = FrameService.instance;
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
 
       var frameCompleter = Completer<void>();
       instance.onFinishedRenderingFrame = () {
@@ -62,10 +62,10 @@ void testMain() {
       expect(instance.isFrameScheduled, isTrue);
       await frameCompleter.future;
       expect(instance.isFrameScheduled, isFalse);
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
 
       // Test idempotency
-      instance.debugResetFrameNumber();
+      instance.debugResetFrameData();
       frameCompleter = Completer<void>();
       instance.scheduleFrame();
       instance.scheduleFrame();
@@ -75,7 +75,7 @@ void testMain() {
       expect(instance.isFrameScheduled, isTrue);
       await frameCompleter.future;
       expect(instance.isFrameScheduled, isFalse);
-      expect(instance.debugFrameNumber, 1);
+      expect(instance.frameData.frameNumber, 1);
     });
 
     test('onBeginFrame and onDrawFrame are called with isRenderingFrame set to true', () async {

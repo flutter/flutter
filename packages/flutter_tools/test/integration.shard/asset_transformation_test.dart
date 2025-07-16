@@ -12,7 +12,7 @@ import 'test_utils.dart';
 
 final class _AssetTransformationTestProject extends Project {
   @override
-  final String pubspec = '''
+  final pubspec = '''
 name: test
 environment:
   sdk: ^3.7.0-0
@@ -30,7 +30,7 @@ flutter:
 ''';
 
   @override
-  final String main = '''
+  final main = '''
 import 'package:flutter/material.dart';
 
 void main() {
