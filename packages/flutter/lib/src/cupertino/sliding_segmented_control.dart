@@ -125,7 +125,7 @@ class _Segment<T> extends StatefulWidget {
 
   bool get shouldFadeoutContent => pressed && !highlighted && enabled && !isMomentary;
   bool get shouldScaleContent =>
-      (pressed && highlighted && isDragging && enabled) || (pressed && enabled && isMomentary);
+      pressed && enabled && (highlighted && isDragging) || isMomentary;
   bool get shouldHighlightContent => highlighted && !isMomentary;
 
   @override
