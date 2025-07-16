@@ -17,10 +17,10 @@ import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
-import 'isolated/devfs_config.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
+import 'web/devfs_config.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
