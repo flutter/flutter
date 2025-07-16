@@ -564,12 +564,14 @@ void main() {
 
   testWidgets('Slider respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoSlider(onChanged: (double value) {}, value: 0.5))),
+      CupertinoApp(
+        home: Center(child: CupertinoSlider(onChanged: (double value) {}, value: 0.5)),
+      ),
     );
     expect(
       find.byType(CupertinoSlider),
       // First line it paints is blue.
-      paints..rsuperellipse(color: CupertinoColors.systemBlue.color),
+      paints..rrect(color: CupertinoColors.systemBlue.color),
     );
 
     await tester.pumpWidget(
@@ -581,7 +583,7 @@ void main() {
 
     expect(
       find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: CupertinoColors.systemBlue.darkColor),
+      paints..rrect(color: CupertinoColors.systemBlue.darkColor),
     );
   });
 
@@ -600,7 +602,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: CupertinoColors.systemGreen.darkColor),
+      paints..rrect(color: CupertinoColors.systemGreen.darkColor),
     );
   });
 
@@ -642,30 +644,24 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.base, false)),
     );
-    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.color));
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.color));
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.base, false)),
     );
-    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.darkColor));
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkColor));
 
     await tester.pumpWidget(
       CupertinoApp(
         home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.elevated, false),
       ),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: activeColor.darkElevatedColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkElevatedColor));
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.dark, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: activeColor.darkHighContrastColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.darkHighContrastColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -674,23 +670,20 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: activeColor.darkHighContrastElevatedColor),
+      paints..rrect(color: activeColor.darkHighContrastElevatedColor),
     );
 
     await tester.pumpWidget(
       CupertinoApp(home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.base, true)),
     );
-    expect(
-      find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: activeColor.highContrastColor),
-    );
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.highContrastColor));
 
     await tester.pumpWidget(
       CupertinoApp(
         home: withTraits(Brightness.light, CupertinoUserInterfaceLevelData.elevated, false),
       ),
     );
-    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: activeColor.elevatedColor));
+    expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.elevatedColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -699,7 +692,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rsuperellipse(color: activeColor.highContrastElevatedColor),
+      paints..rrect(color: activeColor.highContrastElevatedColor),
     );
   });
 
@@ -717,12 +710,9 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: _kSystemFill.color));
+    expect(find.byType(CupertinoSlider), paints..rrect(color: _kSystemFill.color));
 
-    expect(
-      find.byType(CupertinoSlider),
-      isNot(paints..rsuperellipse(color: _kSystemFill.darkColor)),
-    );
+    expect(find.byType(CupertinoSlider), isNot(paints..rrect(color: _kSystemFill.darkColor)));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -737,9 +727,9 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoSlider), paints..rsuperellipse(color: _kSystemFill.darkColor));
+    expect(find.byType(CupertinoSlider), paints..rrect(color: _kSystemFill.darkColor));
 
-    expect(find.byType(CupertinoSlider), isNot(paints..rsuperellipse(color: _kSystemFill.color)));
+    expect(find.byType(CupertinoSlider), isNot(paints..rrect(color: _kSystemFill.color)));
   });
 
   testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
@@ -758,12 +748,12 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       paints
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse(color: CupertinoColors.systemPurple.color),
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -781,12 +771,12 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       paints
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse()
-        ..rsuperellipse(color: CupertinoColors.activeOrange.color),
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.activeOrange.color),
     );
   });
 

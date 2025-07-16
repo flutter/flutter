@@ -15,13 +15,11 @@ void main() {
     root = RenderPositionedBox(
       child: RenderConstrainedBox(
         additionalConstraints: BoxConstraints.tight(const Size(200.0, 200.0)),
-        child:
-            test = RenderFractionallySizedOverflowBox(
-              widthFactor: 2.0,
-              heightFactor: 0.5,
-              child:
-                  leaf = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand()),
-            ),
+        child: test = RenderFractionallySizedOverflowBox(
+          widthFactor: 2.0,
+          heightFactor: 0.5,
+          child: leaf = RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand()),
+        ),
       ),
     );
     layout(root);

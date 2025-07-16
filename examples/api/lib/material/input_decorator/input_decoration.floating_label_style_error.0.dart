@@ -35,10 +35,9 @@ class InputDecoratorExample extends StatelessWidget {
         // by default, but the theme's error color if the input decorator
         // is in its error state.
         floatingLabelStyle: WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
-          final Color color =
-              states.contains(WidgetState.error)
-                  ? Theme.of(context).colorScheme.error
-                  : Colors.orange;
+          final Color color = states.contains(WidgetState.error)
+              ? Theme.of(context).colorScheme.error
+              : Colors.orange;
           return TextStyle(color: color, letterSpacing: 1.3);
         }),
       ),

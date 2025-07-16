@@ -45,24 +45,23 @@ void main() {
       MaterialApp(
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/':
-              (BuildContext buildContext) => Scaffold(
-                body: StatefulBuilder(
-                  builder: (BuildContext buildContext, StateSetter stateSetter) {
-                    context = buildContext;
-                    setState = stateSetter;
-                    return PopScope<Object?>(
-                      canPop: canPop,
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[Text('Home/PopScope Page')],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+          '/': (BuildContext buildContext) => Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext buildContext, StateSetter stateSetter) {
+                context = buildContext;
+                setState = stateSetter;
+                return PopScope<Object?>(
+                  canPop: canPop,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[Text('Home/PopScope Page')],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         },
       ),
     );
@@ -194,27 +193,26 @@ void main() {
               ),
             );
           },
-          '/one':
-              (BuildContext context) => Scaffold(
-                body: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter stateSetter) {
-                    oneContext = context;
-                    setState = stateSetter;
-                    return PopScope<Object?>(
-                      canPop: canPop,
-                      onPopInvokedWithResult: (bool didPop, Object? result) {
-                        lastPopSuccess = didPop;
-                      },
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[Text('PopScope Page')],
-                        ),
-                      ),
-                    );
+          '/one': (BuildContext context) => Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                oneContext = context;
+                setState = stateSetter;
+                return PopScope<Object?>(
+                  canPop: canPop,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    lastPopSuccess = didPop;
                   },
-                ),
-              ),
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[Text('PopScope Page')],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         },
       ),
     );
@@ -338,25 +336,24 @@ void main() {
         MaterialApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/':
-                (BuildContext buildContext) => Scaffold(
-                  body: StatefulBuilder(
-                    builder: (BuildContext buildContext, StateSetter stateSetter) {
-                      context = buildContext;
-                      setState = stateSetter;
-                      const Widget child = Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[Text('Home/PopScope Page')],
-                        ),
-                      );
-                      if (!usePopScope) {
-                        return child;
-                      }
-                      return const PopScope<Object?>(canPop: false, child: child);
-                    },
-                  ),
-                ),
+            '/': (BuildContext buildContext) => Scaffold(
+              body: StatefulBuilder(
+                builder: (BuildContext buildContext, StateSetter stateSetter) {
+                  context = buildContext;
+                  setState = stateSetter;
+                  const Widget child = Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[Text('Home/PopScope Page')],
+                    ),
+                  );
+                  if (!usePopScope) {
+                    return child;
+                  }
+                  return const PopScope<Object?>(canPop: false, child: child);
+                },
+              ),
+            ),
           },
         ),
       );

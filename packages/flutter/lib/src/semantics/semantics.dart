@@ -805,6 +805,108 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   }
 }
 
+typedef _LabelPart = (String text, TextDirection? textDirection);
+
+/// Builder for creating semantically correct concatenated labels with proper
+/// text direction handling and spacing.
+///
+/// This builder helps address the complexity of concatenating multiple text
+/// parts while handling language-specific nuances like RTL vs LTR text direction
+/// and proper spacing.
+///
+/// Example usage:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder()
+///   ..addPart('Hello')
+///   ..addPart('world');
+/// String label = builder.build(); // "Hello world"
+/// ```
+///
+/// For multilingual text with proper RTL support:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
+///   ..addPart('Welcome', textDirection: TextDirection.ltr)
+///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
+/// String label = builder.build(); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
+/// ```
+final class SemanticsLabelBuilder {
+  /// Creates a new [SemanticsLabelBuilder].
+  ///
+  /// The [separator] is used between text parts (defaults to space).
+  /// The [textDirection] specifies the overall text direction for the concatenated label.
+  SemanticsLabelBuilder({this.separator = ' ', this.textDirection});
+
+  /// The separator used between text parts.
+  final String separator;
+
+  /// The overall text direction for the concatenated label.
+  final TextDirection? textDirection;
+
+  final List<_LabelPart> _parts = <_LabelPart>[];
+
+  /// Adds a text part.
+  ///
+  /// If [textDirection] is specified, it will be used for this specific part.
+  /// Empty parts are ignored.
+  void addPart(String label, {TextDirection? textDirection}) {
+    if (label.isNotEmpty) {
+      _parts.add((label, textDirection));
+    }
+  }
+
+  /// Returns true if no parts have been added to this builder.
+  bool get isEmpty => _parts.isEmpty;
+
+  /// Returns the number of parts added to this builder.
+  int get length => _parts.length;
+
+  /// Builds and returns the concatenated label from the added parts.
+  ///
+  /// This method concatenates all parts with proper text direction handling
+  /// and spacing.
+  String build() {
+    if (_parts.isEmpty) {
+      return '';
+    }
+
+    if (_parts.length == 1) {
+      final (String text, TextDirection? _) = _parts.first;
+      return text;
+    }
+
+    // Concatenate multiple parts with proper text direction handling
+    final StringBuffer buffer = StringBuffer();
+    final (String firstText, TextDirection? _) = _parts.first;
+    buffer.write(firstText);
+
+    for (final (String partText, TextDirection? partTextDirection) in _parts.skip(1)) {
+      final TextDirection? partDirection = partTextDirection ?? textDirection;
+
+      if (separator.isNotEmpty) {
+        buffer.write(separator);
+      }
+
+      String processedText = partText;
+      if (textDirection != null && partDirection != null && textDirection != partDirection) {
+        final String directionalEmbedding = switch (partDirection) {
+          TextDirection.rtl => Unicode.RLE,
+          TextDirection.ltr => Unicode.LRE,
+        };
+        processedText = directionalEmbedding + partText + Unicode.PDF;
+      }
+
+      buffer.write(processedText);
+    }
+
+    return buffer.toString();
+  }
+
+  /// Clears all parts from this builder, allowing it to be reused.
+  void clear() {
+    _parts.clear();
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -1137,10 +1239,9 @@ class SemanticsData with Diagnosticable {
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
     ];
-    final List<String?> customSemanticsActionSummary =
-        customSemanticsActionIds!
-            .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
-            .toList();
+    final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
+        .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
@@ -3702,10 +3803,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
             )
             .toList()
           ..sort();
-    final List<String?> customSemanticsActions =
-        _customSemanticsActions.keys
-            .map<String?>((CustomSemanticsAction action) => action.label)
-            .toList();
+    final List<String?> customSemanticsActions = _customSemanticsActions.keys
+        .map<String?>((CustomSemanticsAction action) => action.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
@@ -3970,16 +4070,16 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
     final List<int> sortedIds = <int>[];
     final Set<int> visitedIds = <int>{};
-    final List<SemanticsNode> startNodes =
-        nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
-          final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
-          final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
-          final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
-          if (verticalDiff != 0) {
-            return -verticalDiff;
-          }
-          return -aTopLeft.dx.compareTo(bTopLeft.dx);
-        });
+    final List<SemanticsNode> startNodes = nodes.toList()
+      ..sort((SemanticsNode a, SemanticsNode b) {
+        final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
+        final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
+        final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
+        if (verticalDiff != 0) {
+          return -verticalDiff;
+        }
+        return -aTopLeft.dx.compareTo(bTopLeft.dx);
+      });
 
     void search(int id) {
       if (visitedIds.contains(id)) {
@@ -4207,8 +4307,9 @@ class SemanticsOwner extends ChangeNotifier {
     final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      final List<SemanticsNode> localDirtyNodes =
-          _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes
+          .where((SemanticsNode node) => !_detachedNodes.contains(node))
+          .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
