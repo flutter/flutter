@@ -21602,6 +21602,13 @@ license, LICENSE.TXT.  By continuing to use, modify, or distribute
 this file you indicate that you have read the license and
 understand and accept it fully.
 --------------------------------------------------------------------------------
+zlib
+
+Copyright (C) 2017 ARM, Inc.
+Copyright 2017 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the Chromium source repository LICENSE file.
+--------------------------------------------------------------------------------
 shaderc
 
 Copyright (C) 2017 Google Inc.
@@ -31779,6 +31786,12 @@ zlib
 
 Copyright 2017 The Chromium Authors
 Use of this source code is governed by a BSD-style license that can be
+found in the Chromium source repository LICENSE file.
+--------------------------------------------------------------------------------
+zlib
+
+Copyright 2017 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
 accessibility
@@ -32212,6 +32225,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
+zlib
+
+Copyright 2018 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the Chromium source repository LICENSE file.
+--------------------------------------------------------------------------------
 _devtools
 accessibility
 angle
@@ -32569,6 +32588,12 @@ Copyright 2019 The Android Open Source Project
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
+zlib
+
+Copyright 2019 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the Chromium source repository LICENSE file.
+--------------------------------------------------------------------------------
 accessibility
 devtools_test
 
@@ -32895,12 +32920,6 @@ angle
 Copyright 2020 The ANGLE Project Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
---------------------------------------------------------------------------------
-angle
-
-Copyright 2020 The ANGLE Project Authors. All rights reserved. Use of this
-source code is governed by a BSD-style license that can be found in the
-LICENSE file.
 --------------------------------------------------------------------------------
 angle
 
@@ -33495,7 +33514,19 @@ zlib
 
 Copyright 2022 The Chromium Authors
 Use of this source code is governed by a BSD-style license that can be
+found in the Chromium source repository LICENSE file.
+--------------------------------------------------------------------------------
+zlib
+
+Copyright 2022 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
+--------------------------------------------------------------------------------
+zlib
+
+Copyright 2022 The Chromium Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the chromium source repository LICENSE file.
 --------------------------------------------------------------------------------
 dart
 skia
