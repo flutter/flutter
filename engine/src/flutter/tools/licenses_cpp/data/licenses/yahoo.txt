@@ -1,6 +1,6 @@
 yahoo
-(?s)Copyright[^\n]+\s+Permission is hereby granted, free of charge.*dealings in these Data Files or Software without prior written
-Copyright[^\n]+
+(?s)Copyright.*All Rights Reserved\.\s+Permission is hereby granted, free of charge.*dealings in these Data Files or Software without prior written
+(?s)Copyright.*All Rights Reserved\.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of data files and any associated documentation \(the "Data Files"\) or
