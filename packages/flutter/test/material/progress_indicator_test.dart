@@ -597,6 +597,7 @@ void main() {
     await tester.pump(); // triggers rebuild via AnimatedBuilder
 
     expect(find.byType(LinearProgressIndicator), paints..rect());
+    controller.dispose();
   });
 
   testWidgets('LinearProgressIndicator paints at 50% when controller value is 0.5', (
@@ -637,6 +638,7 @@ void main() {
         ..rect(rect: const Rect.fromLTWH(0.0, 0.0, 200.0, 4.0)) // background
         ..rect(rect: const Rect.fromLTWH(0.0, 0.0, 100.0, 4.0)), // progress at 50%
     );
+    controller.dispose();
   });
 
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
