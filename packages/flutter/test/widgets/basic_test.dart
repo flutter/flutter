@@ -1592,6 +1592,7 @@ void main() {
         contains('crossAxisAlignment: start'),
         contains('textDirection: ltr'),
         contains('verticalDirection: up'),
+        contains('maxLines: unlimited'),
       ]),
     );
   });

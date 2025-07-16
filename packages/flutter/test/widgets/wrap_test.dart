@@ -1039,4 +1039,253 @@ void main() {
     );
     verify(tester, <Offset>[const Offset(700.0, 0.0)]);
   });
+
+  group('Wrap maxLines', () {
+    testWidgets('maxLines limits the number of lines in horizontal direction', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines limits the number of lines in vertical direction', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Wrap(
+          direction: Axis.vertical,
+          textDirection: TextDirection.ltr,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 100.0, height: 300.0),
+            SizedBox(width: 100.0, height: 300.0),
+            SizedBox(width: 100.0, height: 300.0),
+            SizedBox(width: 100.0, height: 300.0),
+            SizedBox(width: 100.0, height: 300.0),
+            SizedBox(width: 100.0, height: 300.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines 1 shows only first line', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(2));
+    });
+
+    testWidgets('maxLines works with spacing and runSpacing', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          spacing: 10.0,
+          runSpacing: 10.0,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines works with RTL text direction', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.rtl,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines works with different alignments', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          alignment: WrapAlignment.center,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines can be updated dynamically', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      List<RenderBox> children = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).toList();
+      List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(2));
+
+      // Update maxLines to 2
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          maxLines: 2,
+          children: <Widget>[
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+            SizedBox(width: 300.0, height: 100.0),
+          ],
+        ),
+      );
+      children = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).toList();
+      visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(4));
+    });
+
+    testWidgets('maxLines works with empty children list', (WidgetTester tester) async {
+      await tester.pumpWidget(const Wrap(textDirection: TextDirection.ltr, maxLines: 5));
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(0));
+    });
+
+    testWidgets('maxLines works with single child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Wrap(
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+          children: <Widget>[SizedBox(width: 300.0, height: 100.0)],
+        ),
+      );
+      final List<RenderBox> children = tester
+          .renderObjectList<RenderBox>(find.byType(SizedBox))
+          .toList();
+      final List<RenderBox> visibleChildren = children.where((RenderBox child) {
+        final Offset offset = (child.parentData as dynamic).offset as Offset;
+        return child.size.width > 0 &&
+            child.size.height > 0 &&
+            (offset != Offset.zero || children.indexOf(child) == 0);
+      }).toList();
+      expect(visibleChildren.length, equals(1));
+    });
+  });
 }
