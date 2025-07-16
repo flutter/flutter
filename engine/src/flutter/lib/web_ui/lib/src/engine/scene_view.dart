@@ -97,6 +97,7 @@ class EngineSceneView {
     final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
     final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
+    final List<ScenePicture> picturesToFree = <ScenePicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
@@ -111,7 +112,9 @@ class EngineSceneView {
         picturesToRender.add(slice.picture);
       } else {
         originalPicturesToRender.add(slice.picture);
-        picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
+        final clippedPicture = pictureRenderer.clipPicture(slice.picture, clippedRect);
+        picturesToRender.add(clippedPicture);
+        picturesToFree.add(clippedPicture);
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
@@ -129,6 +132,10 @@ class EngineSceneView {
       recorder?.recordRasterFinish();
     }
     recorder?.submitTimings();
+
+    for (final p in picturesToFree) {
+      p.dispose();
+    }
 
     final List<SliceContainer?> reusableContainers = List<SliceContainer?>.from(containers);
     final List<SliceContainer> newContainers = <SliceContainer>[];
