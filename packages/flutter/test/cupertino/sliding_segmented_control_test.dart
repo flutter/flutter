@@ -2150,7 +2150,8 @@ void main() {
     await tester.tap(find.text('A'));
     await tester.pumpAndSettle();
 
-    expect(getHighlightedIndex(tester), null); // The highlighted index doesn't change
+    // The highlighted index doesn't change.
+    expect(getHighlightedIndex(tester), null);
   });
 
   testWidgets('CupertinoSlidingSegmentedControl with momentary scales up selected segment', (
@@ -2158,14 +2159,12 @@ void main() {
   ) async {
     const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
 
-    groupValue = 1;
     await tester.pumpWidget(
       boilerplate(
         builder: (BuildContext context) {
           return CupertinoSlidingSegmentedControl<int>(
             isMomentary: true,
             children: children,
-            groupValue: groupValue,
             onValueChanged: defaultCallback,
           );
         },

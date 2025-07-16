@@ -124,8 +124,7 @@ class _Segment<T> extends StatefulWidget {
   final bool isDragging;
 
   bool get shouldFadeoutContent => pressed && !highlighted && enabled && !isMomentary;
-  bool get shouldScaleContent =>
-      pressed && enabled && (highlighted && isDragging) || isMomentary;
+  bool get shouldScaleContent => pressed && enabled && (highlighted && isDragging || isMomentary);
   bool get shouldHighlightContent => highlighted && !isMomentary;
 
   @override
@@ -156,25 +155,24 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
     assert(oldWidget.key == widget.key);
 
     if (oldWidget.shouldScaleContent != widget.shouldScaleContent) {
-      final Animatable<double> scaleAnimation =
-          widget.isMomentary && widget.shouldScaleContent
-              ? TweenSequence<double>(<TweenSequenceItem<double>>[
-                TweenSequenceItem<double>(
-                  tween: Tween<double>(
-                    begin: highlightPressScaleAnimation.value,
-                    end: _kMaxThumbScaleForMomentary,
-                  ),
-                  weight: 50,
+      final Animatable<double> scaleAnimation = widget.isMomentary && widget.shouldScaleContent
+          ? TweenSequence<double>(<TweenSequenceItem<double>>[
+              TweenSequenceItem<double>(
+                tween: Tween<double>(
+                  begin: highlightPressScaleAnimation.value,
+                  end: _kMaxThumbScaleForMomentary,
                 ),
-                TweenSequenceItem<double>(
-                  tween: Tween<double>(begin: _kMaxThumbScaleForMomentary, end: 1.0),
-                  weight: 50,
-                ),
-              ])
-              : Tween<double>(
-                begin: highlightPressScaleAnimation.value,
-                end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
-              );
+                weight: 50,
+              ),
+              TweenSequenceItem<double>(
+                tween: Tween<double>(begin: _kMaxThumbScaleForMomentary, end: 1.0),
+                weight: 50,
+              ),
+            ])
+          : Tween<double>(
+              begin: highlightPressScaleAnimation.value,
+              end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
+            );
       highlightPressScaleAnimation = highlightPressScaleController.drive(scaleAnimation);
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
     }
@@ -207,8 +205,9 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
             child: AnimatedDefaultTextStyle(
               style: DefaultTextStyle.of(context).style.merge(
                 TextStyle(
-                  fontWeight:
-                      widget.shouldHighlightContent ? _kHighlightedFontWeight : _kFontWeight,
+                  fontWeight: widget.shouldHighlightContent
+                      ? _kHighlightedFontWeight
+                      : _kFontWeight,
                   fontSize: _kFontSize,
                   color: widget.enabled ? null : _kDisabledContentColor,
                 ),
@@ -506,7 +505,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// to true, providing feedback to the user when the segment is selected with a
   /// text scaling effect.
   ///
-  /// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.1.dart **
+  /// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.0.dart **
   /// {@end-tool}
   final bool isMomentary;
 
