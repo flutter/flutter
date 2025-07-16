@@ -348,7 +348,21 @@ external JsFlutterConfiguration? get _jsConfiguration;
 
 /// The JS bindings for the object that's set as `window.flutterConfiguration`.
 extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
-  factory JsFlutterConfiguration() => JSObject() as JsFlutterConfiguration;
+  external JsFlutterConfiguration({
+    String? assetBase,
+    String? canvasKitBaseUrl,
+    String? canvasKitVariant,
+    bool? canvasKitForceCpuOnly,
+    bool? canvasKitForceMultiSurfaceRasterizer,
+    double? canvasKitMaximumSurfaces,
+    bool? debugShowSemanticsNodes,
+    DomElement? hostElement,
+    bool? multiViewEnabled,
+    String? nonce,
+    String? renderer,
+    String? fontFallbackBaseUrl,
+    bool? forceSingleThreadedSkwasm,
+  });
 
   external String? get assetBase;
   external String? get canvasKitBaseUrl;

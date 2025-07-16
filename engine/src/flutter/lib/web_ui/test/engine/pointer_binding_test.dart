@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 
 import 'package:meta/meta.dart';
 import 'package:test/bootstrap/browser.dart';
@@ -2311,7 +2311,7 @@ void testMain() {
     expect(data[1].physicalDeltaY, equals(0));
     packets.clear();
 
-    // Pointer move with coaleasced events
+    // Pointer move with coalesced events
     context
         .multiTouchMove(const <_TouchDetails>[
           _TouchDetails(
@@ -3069,11 +3069,11 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     });
     // timeStamp can't be set in the constructor, need to override the getter.
     if (timeStamp != null) {
-      js_util.callMethod<void>(objectConstructor, 'defineProperty', <dynamic>[
+      objectConstructor.defineProperty(
         event,
         'timeStamp',
-        js_util.jsify(<String, dynamic>{'value': timeStamp, 'configurable': true}),
-      ]);
+        DomPropertyDataDescriptor(value: timeStamp, configurable: true),
+      );
     }
     return event;
   }
@@ -3266,13 +3266,7 @@ class _PointerEventContext extends _BasicEventContext
           )
           .toJSAnyDeep;
 
-      js_util.setProperty(
-        event,
-        'getCoalescedEvents',
-        js_util.allowInterop(() {
-          return coalescedEventJs;
-        }),
-      );
+      event['getCoalescedEvents'] = (() => coalescedEventJs).toJS;
     }
 
     return event;
