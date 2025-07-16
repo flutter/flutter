@@ -48,7 +48,7 @@ void resizeWindow() {
 }
 
 void _throwIfWindowingDisabled() {
-  if (isWindowingEnabled) {
+  if (!isWindowingEnabled) {
     throw UnsupportedError('''
 Windowing APIs are not enabled.
 
