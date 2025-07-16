@@ -676,7 +676,19 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    if (this is CupertinoSheetRoute<dynamic>) {
+      return (this as CupertinoSheetRoute<dynamic>)._topGap == null;
+    }
+    return true;
+  }
+
+  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (this is CupertinoSheetRoute<dynamic>) {
+      final bool hasCustomTopGap = (this as CupertinoSheetRoute<dynamic>)._topGap != null;
+      return !hasCustomTopGap && nextRoute is _CupertinoSheetRouteTransitionMixin;
+    }
     return nextRoute is _CupertinoSheetRouteTransitionMixin;
   }
 
