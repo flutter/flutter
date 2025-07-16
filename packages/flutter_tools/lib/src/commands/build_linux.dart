@@ -43,9 +43,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     argParser.addFlag(
       'config-only',
       help:
-          'Update the project configuration without performing a build. '
-          'This can be used in CI/CD process that create an archive to avoid '
-          'performing duplicate work.',
+          'Update the project configuration without performing a build.'
     );
   }
 
