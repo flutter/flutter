@@ -319,7 +319,7 @@ class _TabStyle extends AnimatedWidget {
     }
     selectedStyle = selectedStyle.copyWith(inherit: true);
 
-    TextStyle? unselectedStyle = unselectedLabelStyle ?? tabBarTheme.unselectedLabelStyle;
+    TextStyle? unselectedStyle = unselectedLabelStyle ?? tabBarTheme.unselectedLabelStyle ?? labelStyle;
     if (unselectedStyle == null || unselectedStyle.inherit) {
       // Apply the font family specified in TextStyle from the theme.
       unselectedStyle = defaults.unselectedLabelStyle!.merge(unselectedStyle);
