@@ -1006,6 +1006,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.borderRadius,
     this.padding,
     this.barrierDismissible = true,
+    this.effectiveMouseCursor = SystemMouseCursors.basic,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1626,9 +1627,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
-    // TODO(camsim99): Figure out if I even need this variable.
-    const MouseCursor effectiveMouseCursor = SystemMouseCursors.basic;
-
     // When an InputDecoration is provided, use it instead of using an InkWell
     // that overflows in some cases (such as showing an errorText) and requires
     // additional logic to manage clipping properly.
@@ -1685,7 +1683,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               });
             }
           },
-          cursor: effectiveMouseCursor,
+          cursor: widget.effectiveMouseCursor,
           child: GestureDetector(
             onTap: _enabled ? _handleTap : null,
             behavior: HitTestBehavior.opaque,
@@ -1703,7 +1701,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     } else {
       result = InkWell(
-        mouseCursor: effectiveMouseCursor,
+        mouseCursor: widget.effectiveMouseCursor,
         onTap: _enabled ? _handleTap : null,
         canRequestFocus: _enabled,
         borderRadius: widget.borderRadius,
