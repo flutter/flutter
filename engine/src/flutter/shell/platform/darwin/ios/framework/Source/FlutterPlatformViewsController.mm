@@ -538,7 +538,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
           break;
         }
         [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRRect()
+        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRSEApproximation()
                                                         matrix:transformMatrix];
         break;
       }

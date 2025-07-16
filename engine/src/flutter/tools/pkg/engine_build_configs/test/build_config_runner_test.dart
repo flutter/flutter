@@ -827,16 +827,14 @@ FakeProcessManager _fakeProcessManager({
   );
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
-    onRun:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
-        },
-    onStart:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
-          [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
-          [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),
-          _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
-        },
+    onRun: (FakeCommandLogEntry entry) => switch (entry.command) {
+      _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
+    },
+    onStart: (FakeCommandLogEntry entry) => switch (entry.command) {
+      [final String exe, ...] when exe.endsWith('gn') => fakeProcess(gnResult),
+      [final String exe, ...] when exe.endsWith('bootstrap') => fakeProcess(bootstrapResult),
+      [final String exe, ...] when exe.endsWith('ninja') => fakeProcess(ninjaResult),
+      _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
+    },
   );
 }

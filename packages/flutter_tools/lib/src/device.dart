@@ -83,7 +83,7 @@ abstract class DeviceManager {
   }
 
   /// A minimum duration to use when discovering wireless iOS devices.
-  static const Duration minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
+  static const minimumWirelessDeviceDiscoveryTimeout = Duration(seconds: 5);
 
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
@@ -112,22 +112,23 @@ abstract class DeviceManager {
     // Some discoverers have hard-coded device IDs and return quickly, and others
     // shell out to other processes and can take longer.
     // If an ID was specified, first check if it was a "well-known" device id.
-    final Set<String> wellKnownIds =
-        _platformDiscoverers.expand((DeviceDiscovery discovery) => discovery.wellKnownIds).toSet();
+    final Set<String> wellKnownIds = _platformDiscoverers
+        .expand((DeviceDiscovery discovery) => discovery.wellKnownIds)
+        .toSet();
     final bool hasWellKnownId = hasSpecifiedDeviceId && wellKnownIds.contains(specifiedDeviceId);
 
     // Process discoverers as they can return results, so if an exact match is
     // found quickly, we don't wait for all the discoverers to complete.
-    final List<Device> prefixMatches = <Device>[];
-    final Completer<Device> exactMatchCompleter = Completer<Device>();
-    final List<Future<List<Device>?>> futureDevices = <Future<List<Device>?>>[
+    final prefixMatches = <Device>[];
+    final exactMatchCompleter = Completer<Device>();
+    final futureDevices = <Future<List<Device>?>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         if (!hasWellKnownId || discoverer.wellKnownIds.contains(specifiedDeviceId))
           discoverer
               .devices(filter: filter)
               .then(
                 (List<Device> devices) {
-                  for (final Device device in devices) {
+                  for (final device in devices) {
                     if (exactlyMatchesDeviceId(device)) {
                       exactMatchCompleter.complete(device);
                       return null;
@@ -459,14 +460,14 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = Duration(seconds: 4);
-  static const Duration _pollingTimeout = Duration(seconds: 30);
+  static const _pollingInterval = Duration(seconds: 4);
+  static const _pollingTimeout = Duration(seconds: 30);
 
   final String name;
 
   @protected
   @visibleForTesting
-  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
+  final deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
@@ -811,12 +812,12 @@ abstract class Device {
     }
 
     // Extract device information
-    final List<List<String>> table = <List<String>>[];
-    for (final Device device in devices) {
-      String supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
+    final table = <List<String>>[];
+    for (final device in devices) {
+      var supportIndicator = await device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -828,9 +829,9 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final List<String> row in table) {
+    for (final row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -938,6 +939,7 @@ class DebuggingOptions {
     this.traceSystrace = false,
     this.traceToFile,
     this.endlessTraceBuffer = false,
+    this.profileMicrotasks = false,
     this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
@@ -966,6 +968,7 @@ class DebuggingOptions {
     this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -999,6 +1002,7 @@ class DebuggingOptions {
     this.webUseWasm = false,
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
+    this.enableFlutterGpu = false,
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
@@ -1019,6 +1023,7 @@ class DebuggingOptions {
        traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
+       profileMicrotasks = false,
        purgePersistentCache = false,
        verboseSystemLogs = false,
        hostVmServicePort = null,
@@ -1053,6 +1058,7 @@ class DebuggingOptions {
     required this.traceSystrace,
     required this.traceToFile,
     required this.endlessTraceBuffer,
+    required this.profileMicrotasks,
     required this.purgePersistentCache,
     required this.useTestFonts,
     required this.verboseSystemLogs,
@@ -1081,6 +1087,7 @@ class DebuggingOptions {
     required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
+    required this.enableFlutterGpu,
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
@@ -1110,6 +1117,7 @@ class DebuggingOptions {
   final bool traceSystrace;
   final String? traceToFile;
   final bool endlessTraceBuffer;
+  final bool profileMicrotasks;
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
@@ -1127,6 +1135,7 @@ class DebuggingOptions {
   final bool webUseSseForDebugBackend;
   final bool webUseSseForInjectedClient;
   final ImpellerStatus enableImpeller;
+  final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
@@ -1213,12 +1222,14 @@ class DebuggingOptions {
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
       if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
+      if (profileMicrotasks) '--profile-microtasks',
       if (verboseSystemLogs) '--verbose-logging',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
       if (enableImpeller == ImpellerStatus.enabled) '--enable-impeller=true',
       if (enableImpeller == ImpellerStatus.disabled) '--enable-impeller=false',
+      if (enableFlutterGpu) '--enable-flutter-gpu',
       if (environmentType == EnvironmentType.physical && deviceVmServicePort != null)
         '--vm-service-port=$deviceVmServicePort',
       // The simulator "device" is actually on the host machine so no ports will be forwarded.
@@ -1248,6 +1259,7 @@ class DebuggingOptions {
     'traceSystrace': traceSystrace,
     'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
+    'profileMicrotasks': profileMicrotasks,
     'purgePersistentCache': purgePersistentCache,
     'useTestFonts': useTestFonts,
     'verboseSystemLogs': verboseSystemLogs,
@@ -1276,6 +1288,7 @@ class DebuggingOptions {
     'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
+    'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
@@ -1313,6 +1326,7 @@ class DebuggingOptions {
         traceSystrace: json['traceSystrace']! as bool,
         traceToFile: json['traceToFile'] as String?,
         endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
+        profileMicrotasks: json['profileMicrotasks']! as bool,
         purgePersistentCache: json['purgePersistentCache']! as bool,
         useTestFonts: json['useTestFonts']! as bool,
         verboseSystemLogs: json['verboseSystemLogs']! as bool,
@@ -1320,10 +1334,9 @@ class DebuggingOptions {
         deviceVmServicePort: json['deviceVmServicePort'] as int?,
         disablePortPublication: json['disablePortPublication']! as bool,
         ddsPort: json['ddsPort'] as int?,
-        devToolsServerAddress:
-            json['devToolsServerAddress'] != null
-                ? Uri.parse(json['devToolsServerAddress']! as String)
-                : null,
+        devToolsServerAddress: json['devToolsServerAddress'] != null
+            ? Uri.parse(json['devToolsServerAddress']! as String)
+            : null,
         port: json['port'] as String?,
         hostname: json['hostname'] as String?,
         tlsCertPath: json['tlsCertPath'] as String?,
@@ -1344,6 +1357,7 @@ class DebuggingOptions {
         fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
+        enableFlutterGpu: json['enableFlutterGpu']! as bool,
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
@@ -1369,7 +1383,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer('started=$started');
+    final buf = StringBuffer('started=$started');
     if (vmServiceUri != null) {
       buf.write(', vmService=$vmServiceUri');
     }

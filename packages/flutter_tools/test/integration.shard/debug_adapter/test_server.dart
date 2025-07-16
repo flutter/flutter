@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 /// Enable to run from local source when running out-of-process (useful in
 /// development to avoid having to keep rebuilding the flutter tool).
-const bool _runFromSource = false;
+const _runFromSource = false;
 
 abstract class DapTestServer {
   Future<void> stop();
@@ -42,8 +42,8 @@ class InProcessDapTestServer extends DapTestServer {
   }
 
   late final DapServer _server;
-  final StreamController<List<int>> stdinController = StreamController<List<int>>();
-  final StreamController<List<int>> stdoutController = StreamController<List<int>>();
+  final stdinController = StreamController<List<int>>();
+  final stdoutController = StreamController<List<int>>();
 
   @override
   StreamSink<List<int>> get sink => stdinController.sink;
@@ -93,7 +93,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
         });
     unawaited(
       _process.exitCode.then((int code) {
-        final String message = 'Out-of-process DAP server terminated with code $code';
+        final message = 'Out-of-process DAP server terminated with code $code';
         logger?.call(message);
         if (!_isShuttingDown && code != 0 && onStderrOutput == null) {
           throw Exception(message);
@@ -102,7 +102,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
     );
   }
 
-  bool _isShuttingDown = false;
+  var _isShuttingDown = false;
   final Process _process;
 
   Future<int> get exitCode => _process.exitCode;
@@ -144,7 +144,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // When running from source, run "dart bin/flutter_tools.dart debug_adapter"
     // instead of directly using "flutter debug_adapter".
     final String executable = _runFromSource ? Platform.resolvedExecutable : flutterToolPath;
-    final List<String> args = <String>[
+    final args = <String>[
       if (_runFromSource) flutterToolsEntryScript,
       'debug-adapter',
       ...?additionalArgs,

@@ -14,11 +14,13 @@ import 'package:watcher/watcher.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
+import 'analytics.dart';
 import 'dependency_graph.dart';
 import 'utils.dart';
 
 class PreviewDetector {
   PreviewDetector({
+    required this.previewAnalytics,
     required this.projectRoot,
     required this.fs,
     required this.logger,
@@ -26,20 +28,21 @@ class PreviewDetector {
     required this.onPubspecChangeDetected,
   });
 
+  final WidgetPreviewAnalytics previewAnalytics;
   final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
   final void Function(PreviewDependencyGraph) onChangeDetected;
-  final void Function() onPubspecChangeDetected;
+  final void Function(String path) onPubspecChangeDetected;
 
   StreamSubscription<WatchEvent>? _fileWatcher;
-  final PreviewDetectorMutex _mutex = PreviewDetectorMutex();
+  final _mutex = PreviewDetectorMutex();
 
   @visibleForTesting
   PreviewDependencyGraph get dependencyGraph => _dependencyGraph;
   final PreviewDependencyGraph _dependencyGraph = PreviewDependencyGraph();
 
-  late final AnalysisContextCollection collection = AnalysisContextCollection(
+  late final collection = AnalysisContextCollection(
     includedPaths: <String>[projectRoot.absolute.path],
     resourceProvider: PhysicalResourceProvider.INSTANCE,
   );
@@ -53,7 +56,7 @@ class PreviewDetector {
     // Determine which files have transitive dependencies with compile time errors.
     _propagateErrors();
 
-    final Watcher watcher = Watcher(projectRoot.path);
+    final watcher = Watcher(projectRoot.path);
     _fileWatcher = watcher.events.listen(_onFileSystemEvent);
 
     // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
@@ -79,7 +82,7 @@ class PreviewDetector {
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
       // the preview scaffold's pubspec to be updated.
       if (eventPath.isPubspec && !eventPath.doesContainDartTool) {
-        onPubspecChangeDetected();
+        onPubspecChangeDetected(eventPath);
         return;
       }
       // Only trigger a reload when changes to Dart sources are detected. We
@@ -87,6 +90,9 @@ class PreviewDetector {
       if (!eventPath.isDartFile || eventPath.doesContainDartTool) {
         return;
       }
+
+      // Start tracking how long it takes to reload a preview after the file change is detected.
+      previewAnalytics.startPreviewReloadStopwatch();
 
       // TODO(bkonyi): investigate batching change detection to handle cases where directories are
       // deleted or moved. Currently, analysis, preview detection, and error propagation will be
@@ -99,7 +105,7 @@ class PreviewDetector {
       // extension which may be worth using here.
 
       // We need to notify the analyzer that this file has changed so it can reanalyze the file.
-      final AnalysisContext context = collection.contexts.single;
+      final AnalysisContext context = collection.contextFor(eventPath);
       final File file = fs.file(eventPath);
       context.changeFile(file.path);
       await context.applyPendingFileChanges();
@@ -113,6 +119,10 @@ class PreviewDetector {
       // Determine which files have transitive dependencies with compile time errors.
       _propagateErrors();
       onChangeDetected(_dependencyGraph);
+
+      // Report how long it took to analyze the changed file, find preview instances, update the
+      // dependency graph, generate code, and reload the widget preview scaffold with the changes.
+      previewAnalytics.reportPreviewReloadTiming();
     });
   }
 
@@ -138,10 +148,9 @@ class PreviewDetector {
       _dependencyGraph[location] = libraryDetails;
     } else {
       // Why is this working with an empty file system on Linux?
-      final PreviewPath removedLibraryPath =
-          _dependencyGraph.values
-              .firstWhere((LibraryPreviewNode element) => element.files.contains(eventPath))
-              .path;
+      final PreviewPath removedLibraryPath = _dependencyGraph.values
+          .firstWhere((LibraryPreviewNode element) => element.files.contains(eventPath))
+          .path;
       // The library previously had previews that were removed.
       logger.printStatus('Previews removed from $eventPath');
       _dependencyGraph.remove(removedLibraryPath);
@@ -152,45 +161,46 @@ class PreviewDetector {
   Future<PreviewDependencyGraph> _findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewDependencyGraph updatedPreviews = PreviewDependencyGraph();
 
-    final AnalysisContext context = collection.contexts.single;
     logger.printStatus('Finding previews in ${entity.path}...');
-    for (final String filePath in context.contextRoot.analyzedFiles()) {
-      logger.printTrace('Checking file: $filePath');
-      if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
-        logger.printTrace('Skipping $filePath');
-        continue;
-      }
-      SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(filePath);
-      // If filePath points to a file that's part of a library, retrieve its compilation unit first
-      // in order to get the actual path to the library.
-      if (lib is NotLibraryButPartResult) {
-        final ResolvedUnitResult unit =
-            (await context.currentSession.getResolvedUnit(filePath)) as ResolvedUnitResult;
-        lib = await context.currentSession.getResolvedLibrary(
-          unit.libraryElement2.firstFragment.source.fullName,
-        );
-      }
-      if (lib is ResolvedLibraryResult) {
-        final ResolvedLibraryResult resolvedLib = lib;
-        final PreviewPath previewPath = lib.element2.toPreviewPath();
-        // This library has already been processed.
-        if (updatedPreviews.containsKey(previewPath)) {
+    for (final AnalysisContext context in collection.contexts) {
+      for (final String filePath in context.contextRoot.analyzedFiles()) {
+        logger.printTrace('Checking file: $filePath');
+        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+          logger.printTrace('Skipping $filePath');
           continue;
         }
+        SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(filePath);
+        // If filePath points to a file that's part of a library, retrieve its compilation unit first
+        // in order to get the actual path to the library.
+        if (lib is NotLibraryButPartResult) {
+          final unit =
+              (await context.currentSession.getResolvedUnit(filePath)) as ResolvedUnitResult;
+          lib = await context.currentSession.getResolvedLibrary(
+            unit.libraryElement2.firstFragment.source.fullName,
+          );
+        }
+        if (lib is ResolvedLibraryResult) {
+          final ResolvedLibraryResult resolvedLib = lib;
+          final PreviewPath previewPath = lib.element2.toPreviewPath();
+          // This library has already been processed.
+          if (updatedPreviews.containsKey(previewPath)) {
+            continue;
+          }
 
-        final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
-          previewPath,
-          () => LibraryPreviewNode(library: resolvedLib.element2, logger: logger),
-        );
+          final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
+            previewPath,
+            () => LibraryPreviewNode(library: resolvedLib.element2, logger: logger),
+          );
 
-        previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
-        updatedPreviews[previewPath] = previewsForLibrary;
+          previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
+          updatedPreviews[previewPath] = previewsForLibrary;
 
-        // Check for errors in the library.
-        await previewsForLibrary.populateErrors(context: context);
+          // Check for errors in the library.
+          await previewsForLibrary.populateErrors(context: context);
 
-        // Iterate over each compilation unit's AST to find previews.
-        previewsForLibrary.findPreviews(units: lib.units);
+          // Iterate over each library's AST to find previews.
+          previewsForLibrary.findPreviews(lib: lib);
+        }
       }
     }
     final int previewCount = updatedPreviews.values.fold<int>(
@@ -212,7 +222,7 @@ class PreviewDetector {
       (LibraryPreviewNode e) => e.files.contains(file.path),
     );
 
-    final Set<LibraryPreviewNode> visitedNodes = <LibraryPreviewNode>{};
+    final visitedNodes = <LibraryPreviewNode>{};
     Future<void> populateErrorsDownstream({required LibraryPreviewNode node}) async {
       visitedNodes.add(node);
       await node.populateErrors(context: context);

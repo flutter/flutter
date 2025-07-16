@@ -393,8 +393,8 @@ class _RadioPaintState extends State<_RadioPaint> {
   Widget build(BuildContext context) {
     // Colors need to be resolved in selected and non selected states separately.
     final Set<WidgetState> activeStates = widget.toggleableState.states..add(WidgetState.selected);
-    final Set<WidgetState> inactiveStates =
-        widget.toggleableState.states..remove(WidgetState.selected);
+    final Set<WidgetState> inactiveStates = widget.toggleableState.states
+      ..remove(WidgetState.selected);
 
     // Since the states getter always makes a new set, make a copy to use
     // throughout the lifecycle of this build method.
@@ -417,21 +417,20 @@ class _RadioPaintState extends State<_RadioPaint> {
 
     return CustomPaint(
       size: _size,
-      painter:
-          _painter
-            ..position = widget.toggleableState.position
-            ..reaction = widget.toggleableState.reaction
-            ..focusColor = effectiveFocusOverlayColor
-            ..downPosition = widget.toggleableState.downPosition
-            ..isFocused = widget.focused
-            ..activeColor = effectiveActiveColor
-            ..inactiveColor = effectiveInactiveColor
-            ..fillColor = effectiveFillColor
-            ..value = widget.toggleableState.value
-            ..checkmarkStyle = widget.useCheckmarkStyle
-            ..isActive = widget.isActive
-            ..borderColor = effectiveBorderColor
-            ..brightness = CupertinoTheme.of(context).brightness,
+      painter: _painter
+        ..position = widget.toggleableState.position
+        ..reaction = widget.toggleableState.reaction
+        ..focusColor = effectiveFocusOverlayColor
+        ..downPosition = widget.toggleableState.downPosition
+        ..isFocused = widget.focused
+        ..activeColor = effectiveActiveColor
+        ..inactiveColor = effectiveInactiveColor
+        ..fillColor = effectiveFillColor
+        ..value = widget.toggleableState.value
+        ..checkmarkStyle = widget.useCheckmarkStyle
+        ..isActive = widget.isActive
+        ..borderColor = effectiveBorderColor
+        ..brightness = CupertinoTheme.of(context).brightness,
     );
   }
 }
@@ -488,12 +487,10 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawPressedOverlay(Canvas canvas, Offset center, double radius) {
-    final Paint pressedPaint =
-        Paint()
-          ..color =
-              brightness == Brightness.light
-                  ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
-                  : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
+    final Paint pressedPaint = Paint()
+      ..color = brightness == Brightness.light
+          ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
+          : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
     canvas.drawCircle(center, radius, pressedPaint);
   }
 
@@ -515,11 +512,10 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   void _drawOuterBorder(Canvas canvas, Offset center) {
-    final Paint borderPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..color = borderColor
-          ..strokeWidth = _kBorderOutlineStrokeWidth;
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = borderColor
+      ..strokeWidth = _kBorderOutlineStrokeWidth;
     canvas.drawCircle(center, _kOuterRadius, borderPaint);
   }
 
@@ -530,12 +526,11 @@ class _RadioPainter extends ToggleablePainter {
     if (checkmarkStyle) {
       if (value ?? false) {
         final Path path = Path();
-        final Paint checkPaint =
-            Paint()
-              ..color = activeColor
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = _kCheckmarkStrokeWidth
-              ..strokeCap = StrokeCap.round;
+        final Paint checkPaint = Paint()
+          ..color = activeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _kCheckmarkStrokeWidth
+          ..strokeCap = StrokeCap.round;
         final double width = _size.width;
         final Offset origin = Offset(center.dx - (width / 2), center.dy - (width / 2));
         final Offset start = Offset(width * 0.25, width * 0.52);
@@ -603,11 +598,10 @@ class _RadioPainter extends ToggleablePainter {
       }
     }
     if (isFocused) {
-      final Paint focusPaint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..color = focusColor
-            ..strokeWidth = _kFocusOutlineStrokeWidth;
+      final Paint focusPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..color = focusColor
+        ..strokeWidth = _kFocusOutlineStrokeWidth;
       canvas.drawCircle(center, _kOuterRadius + _kFocusOutlineStrokeWidth / 2, focusPaint);
     }
   }

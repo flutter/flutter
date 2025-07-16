@@ -14,7 +14,8 @@ class NavigationBarTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

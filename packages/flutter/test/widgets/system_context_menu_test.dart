@@ -110,12 +110,12 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(editableTextState: editableTextState);
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -153,11 +153,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -173,6 +174,7 @@ void main() {
       const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
         IOSSystemContextMenuItemCopy(),
         IOSSystemContextMenuItemShare(title: 'My Share Title'),
+        IOSSystemContextMenuItemLiveText(),
       ];
       final TextEditingController controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
@@ -187,15 +189,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -221,6 +221,7 @@ void main() {
         itemsReceived.last[1],
         equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
       );
+      expect(itemsReceived.last[2], equals(const IOSSystemContextMenuItemDataLiveText()));
 
       state.hideToolbar();
       await tester.pump();
@@ -242,11 +243,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -273,15 +275,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -322,11 +322,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -358,15 +359,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -444,12 +443,12 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(editableTextState: editableTextState);
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -499,14 +498,12 @@ void main() {
                         setState = localSetState;
                         return TextField(
                           controller: controller,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         );
                       },
                     ),
@@ -557,28 +554,24 @@ void main() {
                         TextField(
                           key: field1Key,
                           controller: controller1,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              key: menu1Key,
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  key: menu1Key,
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         ),
                         TextField(
                           key: field2Key,
                           controller: controller2,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              key: menu2Key,
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  key: menu2Key,
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         ),
                       ],
                     ),
@@ -698,6 +691,22 @@ void main() {
       );
     },
   );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
+    () {
+      const IOSSystemContextMenuItemLiveText item = IOSSystemContextMenuItemLiveText();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final IOSSystemContextMenuItemData data = item.getData(localizations);
+      expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
+    },
+  );
+
+  test('systemContextMenuItemDataFromJson handles Live Text', () {
+    final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};
+    final IOSSystemContextMenuItemData item = systemContextMenuItemDataFromJson(json);
+    expect(item, isA<IOSSystemContextMenuItemDataLiveText>());
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/169696.
   test('IOSSystemContextMenuItemLookUp debugFillProperties', () {
