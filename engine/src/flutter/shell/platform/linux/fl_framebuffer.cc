@@ -74,9 +74,10 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   if (shareable) {
     EGLDisplay egl_display = eglGetCurrentDisplay();
     EGLContext egl_context = eglGetCurrentContext();
-    self->image =
-        eglCreateImage(egl_display, egl_context, EGL_GL_TEXTURE_2D,
-                       (EGLClientBuffer)(intptr_t)self->texture_id, nullptr);
+    self->image = eglCreateImage(egl_display, egl_context, EGL_GL_TEXTURE_2D,
+                                 reinterpret_cast<EGLClientBuffer>(
+                                     static_cast<intptr_t>(self->texture_id)),
+                                 nullptr);
   }
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
