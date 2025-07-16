@@ -29,10 +29,7 @@ class RoundedSuperellipseBorderExampleState extends State<RoundedSuperellipseBor
   @override
   Widget build(BuildContext context) {
     final BorderRadiusGeometry radius = BorderRadiusGeometry.circular(_borderRadius);
-    final BorderSide side = BorderSide(
-      width: _borderThickness,
-      color: const Color(0xFF111111),
-    );
+    final BorderSide side = BorderSide(width: _borderThickness, color: const Color(0xFF111111));
     final ShapeBorder shape = _toggle
         ? RoundedSuperellipseBorder(side: side, borderRadius: radius)
         : RoundedRectangleBorder(side: side, borderRadius: radius);

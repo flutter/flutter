@@ -16,7 +16,7 @@ dependencies:
   flutter_lints: 6.0.0
   google_fonts: 6.2.1
   stack_trace: 1.12.1
-  url_launcher: 6.3.1
+  url_launcher: 6.3.2
 
   async: 2.13.0
   boolean_selector: 2.1.2
@@ -62,4 +62,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: mlb1k3
+# PUBSPEC CHECKSUM: jug770
