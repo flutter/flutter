@@ -58,13 +58,13 @@ extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject
   });
 
   @JS('initializeEngine')
-  external JSPromise<JSAny> _initializeEngine([JsFlutterConfiguration? config]);
+  external JSPromise<FlutterAppRunner> _initializeEngine([JsFlutterConfiguration? config]);
   Future<FlutterAppRunner> initializeEngine([JsFlutterConfiguration? config]) =>
-      _initializeEngine(config).toDart.then((JSAny value) => value as FlutterAppRunner);
+      _initializeEngine(config).toDart;
 
   @JS('autoStart')
-  external JSPromise<JSAny> _autoStart();
-  Future<FlutterApp> autoStart() => _autoStart().toDart.then((JSAny value) => value as FlutterApp);
+  external JSPromise<FlutterApp> _autoStart();
+  Future<FlutterApp> autoStart() => _autoStart().toDart;
 }
 
 // FlutterAppRunner
@@ -81,9 +81,8 @@ extension type FlutterAppRunner._primary(JSObject _) implements JSObject {
   });
 
   @JS('runApp')
-  external JSPromise<JSAny> _runApp([RunAppFnParameters? args]);
-  Future<FlutterApp> runApp([RunAppFnParameters? args]) =>
-      _runApp(args).toDart.then((JSAny value) => value as FlutterApp);
+  external JSPromise<FlutterApp> _runApp([RunAppFnParameters? args]);
+  Future<FlutterApp> runApp([RunAppFnParameters? args]) => _runApp(args).toDart;
 }
 
 /// The shape of the object that can be passed as parameter to the

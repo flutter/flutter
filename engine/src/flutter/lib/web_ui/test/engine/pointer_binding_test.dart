@@ -3069,11 +3069,10 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     });
     // timeStamp can't be set in the constructor, need to override the getter.
     if (timeStamp != null) {
-      objectConstructor.callMethod(
-        'defineProperty'.toJS,
+      objectConstructor.defineProperty(
         event,
-        'timeStamp'.toJS,
-        <String, Object>{'value': timeStamp, 'configurable': true}.jsify(),
+        'timeStamp',
+        DomPropertyDataDescriptor(value: timeStamp, configurable: true),
       );
     }
     return event;

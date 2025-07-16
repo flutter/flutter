@@ -73,6 +73,37 @@ external DomObjectConstructor get objectConstructor;
 
 extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
+
+  external void defineProperty(
+    JSObject object,
+    String property,
+    DomPropertyDataDescriptor descriptor,
+  );
+}
+
+extension type DomPropertyDataDescriptor._primary(JSObject _) implements JSObject {
+  factory DomPropertyDataDescriptor({
+    Object? value,
+    bool configurable = false,
+    bool enumerable = false,
+    bool writable = false,
+  }) => DomPropertyDataDescriptor._(
+    value: value?.toJSAnyDeep,
+    configurable: configurable,
+    enumerable: enumerable,
+    writable: writable,
+  );
+  external factory DomPropertyDataDescriptor._({
+    required JSAny? value,
+    required bool configurable,
+    required bool enumerable,
+    required bool writable,
+  });
+
+  external JSAny? get value;
+  external bool get configurable;
+  external bool get enumerable;
+  external bool get writable;
 }
 
 @JS('Window')
