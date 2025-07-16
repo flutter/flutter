@@ -383,5 +383,3 @@ void main() {
     );
   });
 }
-
-double nonconst(double value) => value;
