@@ -262,12 +262,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      containerWithBorder(const Size(120, 300), const BorderRadius.only(
-        topLeft: Radius.elliptical(1000, 1000),
-        topRight: Radius.elliptical(0, 1000),
-        bottomRight: Radius.elliptical(800, 1000),
-        bottomLeft: Radius.elliptical(100, 500),
-      )),
+      containerWithBorder(
+        const Size(120, 300),
+        const BorderRadius.only(
+          topLeft: Radius.elliptical(1000, 1000),
+          topRight: Radius.elliptical(0, 1000),
+          bottomRight: Radius.elliptical(800, 1000),
+          bottomLeft: Radius.elliptical(100, 500),
+        ),
+      ),
     );
     await expectLater(
       find.byType(Container),

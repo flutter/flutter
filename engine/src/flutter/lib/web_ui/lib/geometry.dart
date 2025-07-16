@@ -1289,12 +1289,12 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   Radius _scaledUniformRadii() {
     assert(_uniformRadii);
     if (!(width > 0 && height > 0)) {
-      return Radius.circular(0);
+      return const Radius.circular(0);
     }
     final (double radiusX, double radiusY) = _normalizeEmptyToZero(tlRadiusX, tlRadiusY);
     double scale = 1.0;
-    _adjustScale(radiusX, radiusX, width, 1.0);
-    _adjustScale(radiusY, radiusY, height, 1.0);
+    scale = _adjustScale(radiusX, radiusX, width, scale);
+    scale = _adjustScale(radiusY, radiusY, height, scale);
     return Radius.elliptical(radiusX * scale, radiusY * scale);
   }
 
