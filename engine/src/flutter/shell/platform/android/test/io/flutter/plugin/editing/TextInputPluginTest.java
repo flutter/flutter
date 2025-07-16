@@ -1314,7 +1314,8 @@ public class TextInputPluginTest {
             FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
             when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
             assertEquals(0, testImm.getRestartCount(testView));
-            // FlutterView restarts the input method to inform the Android framework that an engine has
+            // FlutterView restarts the input method to inform the Android framework that an engine
+            // has
             // been attached.
             testView.attachToFlutterEngine(flutterEngine);
             assertEquals(1, testImm.getRestartCount(testView));
@@ -1340,7 +1341,6 @@ public class TextInputPluginTest {
             // Imm restarts when clearTextInputClient is called while the IME is hidden.
             textInputPlugin.clearTextInputClient();
             assertEquals(3, testImm.getRestartCount(testView));
-
           });
     }
   }
