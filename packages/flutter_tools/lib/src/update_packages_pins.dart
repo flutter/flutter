@@ -18,11 +18,13 @@
 /// prevent upstream changes from causing our CI to fail randomly in ways
 /// unrelated to the commits. It also, more importantly, risks breaking users
 /// in ways that prevent them from ever upgrading Flutter again!
-const Map<String, String> kManuallyPinnedDependencies = <String, String>{
+const kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
   'code_assets':
       '0.19.4', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+  'dds':
+      '5.0.3', // 5.0.4 contains bugs described in https://github.com/Dart-Code/Dart-Code/issues/4678.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
@@ -35,7 +37,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
 
 /// These are packages that are explicitly excluded from appearing in the list
 /// of pinned packages added to each pubspec.yaml.
-const List<String> kExplicitlyExcludedPackages = <String>[
+const kExplicitlyExcludedPackages = <String>[
   '_macros', // Synthetic dependency for macros package, which isn't published.
   // This is effectively pinned via the Dart SDK pin, see
   // https://github.com/flutter/flutter/issues/148004 for more context.

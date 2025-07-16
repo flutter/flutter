@@ -12,19 +12,28 @@ void main() {
   ) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
-      const ColoredBox(color: Colors.red, child: Opacity(opacity: 0.0, child: TestWidget())),
+      const ColoredBox(
+        color: Colors.red,
+        child: Opacity(opacity: 0.0, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 0);
 
     await tester.pumpWidget(
-      const ColoredBox(color: Colors.red, child: Opacity(opacity: 0.1, child: TestWidget())),
+      const ColoredBox(
+        color: Colors.red,
+        child: Opacity(opacity: 0.1, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
-      const ColoredBox(color: Colors.red, child: Opacity(opacity: 1, child: TestWidget())),
+      const ColoredBox(
+        color: Colors.red,
+        child: Opacity(opacity: 1, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
@@ -36,13 +45,19 @@ void main() {
     RenderTestObject.paintCount = 0;
 
     await tester.pumpWidget(
-      const ColoredBox(color: Colors.red, child: Opacity(opacity: 0.5, child: TestWidget())),
+      const ColoredBox(
+        color: Colors.red,
+        child: Opacity(opacity: 0.5, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
 
     await tester.pumpWidget(
-      const ColoredBox(color: Colors.red, child: Opacity(opacity: 0.0, child: TestWidget())),
+      const ColoredBox(
+        color: Colors.red,
+        child: Opacity(opacity: 0.0, child: TestWidget()),
+      ),
     );
 
     expect(RenderTestObject.paintCount, 1);
