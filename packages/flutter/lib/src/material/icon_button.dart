@@ -502,9 +502,7 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If set to null, will default to
-  /// - [SystemMouseCursors.basic], if [onPressed] is null
-  /// - [SystemMouseCursors.click], otherwise
+  /// If set to null, will default to [SystemMouseCursors.basic].
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -978,9 +976,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `iconSize` - 24
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - SystemMouseCursors.basic
   /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
