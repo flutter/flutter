@@ -92,7 +92,6 @@ public class PlatformViewsChannel {
                   : null;
 
           try {
-            // if hcpp go take the other path
             if (handler.isHcppEnabled()) {
               Log.e("HI GRAY", "USING HCPP");
               final PlatformViewCreationRequest request =
@@ -129,8 +128,8 @@ public class PlatformViewsChannel {
                   PlatformViewCreationRequest.createTLHCWithFallbacksRequest(
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
-                      (double) createArgs.get("top"),
-                      (double) createArgs.get("left"),
+                      createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
+                      createArgs.containsKey("left") ? (double) createArgs.get("left") : 0.0,
                       (double) createArgs.get("width"),
                       (double) createArgs.get("height"),
                       (int) createArgs.get("direction"),
