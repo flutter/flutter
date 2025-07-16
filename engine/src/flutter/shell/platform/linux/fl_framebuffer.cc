@@ -31,6 +31,25 @@ struct _FlFramebuffer {
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
 
+static EGLImage create_egl_image(GLuint texture_id) {
+  EGLDisplay egl_display = eglGetCurrentDisplay();
+  if (egl_display == EGL_NO_DISPLAY) {
+    g_warning("Failed to create EGL image: Failed to get current EGL display");
+    return nullptr;
+  }
+
+  EGLContext egl_context = eglGetCurrentContext();
+  if (egl_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL image: Failed to get current EGL context");
+    return nullptr;
+  }
+
+  return eglCreateImage(
+      egl_display, egl_context, EGL_GL_TEXTURE_2D,
+      reinterpret_cast<EGLClientBuffer>(static_cast<intptr_t>(texture_id)),
+      nullptr);
+}
+
 static void fl_framebuffer_dispose(GObject* object) {
   FlFramebuffer* self = FL_FRAMEBUFFER(object);
 
@@ -72,12 +91,7 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   glBindTexture(GL_TEXTURE_2D, 0);
 
   if (shareable) {
-    EGLDisplay egl_display = eglGetCurrentDisplay();
-    EGLContext egl_context = eglGetCurrentContext();
-    self->image = eglCreateImage(egl_display, egl_context, EGL_GL_TEXTURE_2D,
-                                 reinterpret_cast<EGLClientBuffer>(
-                                     static_cast<intptr_t>(self->texture_id)),
-                                 nullptr);
+    self->image = create_egl_image(self->texture_id);
   }
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
