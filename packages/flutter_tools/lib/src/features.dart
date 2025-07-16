@@ -215,6 +215,7 @@ const multiWindowFeature = Feature(
   configSetting: 'enable-multi-window',
   environmentOverride: 'FLUTTER_MULTI_WINDOW',
   runtimeId: 'multi_window',
+  master: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
