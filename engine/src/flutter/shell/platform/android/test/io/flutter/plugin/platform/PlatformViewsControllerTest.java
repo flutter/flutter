@@ -600,7 +600,8 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
-    PlatformViewsControllerDelegator platformViewsControllerDelegator = new PlatformViewsControllerDelegator(platformViewsController, null);
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
@@ -1752,11 +1753,11 @@ public class PlatformViewsControllerTest {
               }
             });
 
-
     PlatformViewsController2 secondController = new PlatformViewsController2();
     secondController.setRegistry(new PlatformViewRegistryImpl());
 
-    PlatformViewsControllerDelegator platformViewsControllerDelegator = new PlatformViewsControllerDelegator(platformViewsController, secondController);
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, secondController);
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
