@@ -119,6 +119,6 @@ or
 ///
 /// Does not normalize paths that have repeated separators.
 String pathJoin(List<String> segments) {
-  final separator = Platform.isWindows ? r'\' : '/';
+  final separator = Platform.isWindows ? r'\\' : '/';
   return segments.join(separator);
 }
