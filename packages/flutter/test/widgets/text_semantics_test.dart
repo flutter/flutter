@@ -173,12 +173,12 @@ void main() {
     expect(labelToNodeId['has been created.'], '');
     expect(labelToNodeId.length, 3);
   });
-  
+
   testWidgets('GIVEN a Text widget with a locale '
-    'WHEN semantics are built '
-    'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
+      'WHEN semantics are built '
+      'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
     const Locale locale = Locale('de', 'DE');
-    
+
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -193,14 +193,16 @@ void main() {
     expect(node.label, 'Flutter 2050');
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
   });
-  
+
   testWidgets('GIVEN a Text with a locale is within a SelectionContainer '
-    'WHEN semantics are built '
-    'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
+      'WHEN semantics are built '
+      'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
     const Locale locale = Locale('de', 'DE');
     const String text = 'Flutter 2050';
     await tester.pumpWidget(
-      const MaterialApp(home: SelectionArea(child: Text(text, locale: locale))),
+      const MaterialApp(
+        home: SelectionArea(child: Text(text, locale: locale)),
+      ),
     );
     await tester.pumpAndSettle();
 
