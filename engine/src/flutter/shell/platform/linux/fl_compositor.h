@@ -16,8 +16,6 @@ G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 struct _FlCompositorClass {
   GObjectClass parent_class;
 
-  FlutterRendererType (*get_renderer_type)(FlCompositor* compositor);
-
   gboolean (*present_layers)(FlCompositor* compositor,
                              const FlutterLayer** layers,
                              size_t layers_count);
@@ -32,16 +30,6 @@ struct _FlCompositorClass {
  *
  * #FlCompositor is an abstract class that implements Flutter compositing.
  */
-
-/**
- * fl_compositor_get_renderer_type:
- * @compositor: an #FlCompositor.
- *
- * Gets the rendering method this compositor uses.
- *
- * Returns: a FlutterRendererType.
- */
-FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
 
 /**
  * fl_compositor_present_layers:

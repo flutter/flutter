@@ -261,7 +261,7 @@ static bool create_opengl_backing_store(
   }
 
   FlFramebuffer* framebuffer = fl_framebuffer_new(
-      general_format, config->size.width, config->size.height);
+      general_format, config->size.width, config->size.height, FALSE);
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return false;
@@ -668,6 +668,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
     }
     self->renderer_type = kOpenGL;
   }
+
   if (binary_messenger != nullptr) {
     self->binary_messenger =
         FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
