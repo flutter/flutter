@@ -1098,8 +1098,15 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
 
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
-    expected_frame_sizes_[view_id] =
-        SkISize::Make(metrics.physical_width, metrics.physical_height);
+//    expected_frame_sizes_[view_id] =
+//        SkISize::Make(metrics.physical_width, metrics.physical_height);
+
+    expected_frame_constraints_[view_id] = {
+      .min_width = metrics.min_width_constraint,
+      .max_width = metrics.max_width_constraint,
+      .min_height = metrics.min_height_constraint,
+      .max_height = metrics.max_height_constraint,
+    };
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1389,7 +1396,7 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
 void Shell::OnEngineUpdateViewportMetrics(int64_t index, SkISize size) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-  expected_frame_sizes_[index] = size;
+//  expected_frame_sizes_[index] = size;
 }
 
 // |Engine::Delegate|
@@ -1739,9 +1746,8 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-  auto expected_frame_size = ExpectedFrameSize(view_id);
-  return !expected_frame_size.isEmpty() &&
-         ToSkISize(tree.frame_size()) != expected_frame_size;
+  auto expected_frame_constraints = ExpectedFrameSize(view_id);
+  return !isSizeWithinConstraints(tree.frame_size(), expected_frame_constraints);
 }
 
 // |ServiceProtocol::Handler|
@@ -2151,7 +2157,8 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
       << "Unexpected request to remove the implicit view #"
       << kFlutterImplicitViewId << ". This view should never be removed.";
 
-  expected_frame_sizes_.erase(view_id);
+//  expected_frame_sizes_.erase(view_id);
+  expected_frame_constraints_.erase(view_id);
   task_runners_.GetUITaskRunner()->RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
       [&task_runners = task_runners_,           //
@@ -2344,16 +2351,34 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-SkISize Shell::ExpectedFrameSize(int64_t view_id) {
-  auto found = expected_frame_sizes_.find(view_id);
+SizeConstraints Shell::ExpectedFrameSize(int64_t view_id) {
+  auto found = expected_frame_constraints_.find(view_id);
 
-  if (found == expected_frame_sizes_.end()) {
-    return SkISize::MakeEmpty();
+  if (found == expected_frame_constraints_.end()) {
+    return {};
   }
-  std::cout << "expected frame size" << std::endl;
-  std::cout << found->second.fWidth << std::endl;
-  std::cout << found->second.fWidth << std::endl;
+
   return found->second;
+}
+
+bool Shell:: isSizeWithinConstraints(const DlISize& size, const SizeConstraints& constraints) {
+    if (constraints.min_width > 0.0 && size.width < constraints.min_width) {
+        return false;
+    }
+
+    if (constraints.max_width > 0.0 && size.width > constraints.max_width) {
+        return false;
+    }
+
+    if (constraints.min_height > 0.0 && size.height < constraints.min_height) {
+        return false;
+    }
+
+    if (constraints.max_height > 0.0 && size.height > constraints.max_height) {
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace flutter

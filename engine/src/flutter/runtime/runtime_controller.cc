@@ -163,7 +163,6 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
 void RuntimeController::AddView(int64_t view_id,
                                 const ViewportMetrics& view_metrics,
                                 AddViewCallback callback) {
-
   // If the Dart isolate is not running, |FlushRuntimeStateToIsolate| will
   // add the view and invoke the callback when the isolate is started.
   auto* platform_configuration = GetPlatformConfigurationIfAvailable();

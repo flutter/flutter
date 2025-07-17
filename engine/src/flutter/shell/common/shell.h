@@ -45,6 +45,13 @@
 
 namespace flutter {
 
+typedef struct {
+    double min_width = 0.0;
+    double max_width = 0.0;
+    double min_height = 0.0;
+    double max_height = 0.0;
+} SizeConstraints;
+
 /// Error exit codes for the Dart isolate.
 enum class DartErrorCode {
   // NOLINTBEGIN(readability-identifier-naming)
@@ -519,6 +526,8 @@ class Shell final : public PlatformView::Delegate,
   // resizing
   std::unordered_map<int64_t, SkISize> expected_frame_sizes_;
 
+  std::unordered_map<int64_t, SizeConstraints> expected_frame_constraints_;
+
   // Used to communicate the right frame bounds via service protocol.
   double device_pixel_ratio_ = 0.0;
 
@@ -804,7 +813,9 @@ class Shell final : public PlatformView::Delegate,
   // directory.
   std::unique_ptr<DirectoryAssetBundle> RestoreOriginalAssetResolver();
 
-  SkISize ExpectedFrameSize(int64_t view_id);
+  SizeConstraints ExpectedFrameSize(int64_t view_id);
+
+  bool isSizeWithinConstraints(const DlISize& size, const SizeConstraints& constraints);
 
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
