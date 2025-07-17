@@ -72,7 +72,7 @@ class _DefaultShutdownHooks implements ShutdownHooks {
       for (final ShutdownHook shutdownHook in registeredHooks) {
         try {
           final Future<void> future = asyncGuard<void>(
-            shutdownHook,
+            () async => shutdownHook(),
             onError: (Object e, StackTrace s) {
               uncaught.add((e, s));
             },
