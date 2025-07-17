@@ -158,7 +158,11 @@ void main() {
         );
         await completer.future;
 
-        expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report when using --local-engine',
+        );
       },
       overrides: <Type, Generator>{
         Platform: () => FakePlatform(
