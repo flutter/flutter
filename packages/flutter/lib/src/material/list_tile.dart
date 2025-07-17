@@ -1284,12 +1284,7 @@ class _RenderListTile extends RenderBox
   @override
   Iterable<RenderBox> get children {
     final RenderBox? title = childForSlot(_ListTileSlot.title);
-    return <RenderBox>[
-      ?leading,
-      ?title,
-      ?subtitle,
-      ?trailing,
-    ];
+    return <RenderBox>[?leading, ?title, ?subtitle, ?trailing];
   }
 
   bool get isDense => _isDense;
