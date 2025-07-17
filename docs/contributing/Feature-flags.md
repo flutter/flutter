@@ -21,6 +21,7 @@ Table of Contents
   - [Tool](#tool)
   - [Framework](#framework)
   - [Tests](#tests)
+- [Limitations](#limitations) 
 
 ## Overview
 
@@ -435,5 +436,5 @@ On iOS and macOS, use `Info.plist`:
 See Impeller and UI thread merging for prior art.
  
 > [!IMPORTANT]  
-> If possible, prefer to use Flutter flags instead of platform-specific configuration files.
+> If possible, prefer to use Flutter feature flags instead of platform-specific configuration files.
 > Flutter feature flags are easier for Flutter app developers.
