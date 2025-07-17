@@ -828,6 +828,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           break;
         }
 
+        // Filter nodes that belong to same scrollabe as focused child 
+        // This should prevent list from losing a focus and allows scroll
+        // Axis scrollabe should match to prevent issues 
+        // in vericals + horizontal list combinations
         final ScrollableState? focusedScrollable = Scrollable.maybeOf(
           focusedChild.context!,
           axis: Axis.vertical,
