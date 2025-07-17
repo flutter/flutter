@@ -1693,7 +1693,7 @@ class _SearchBarState extends State<SearchBar> {
                 child: Row(
                   textDirection: textDirection,
                   children: <Widget>[
-                    if (leading != null) leading,
+                    ?leading,
                     Expanded(
                       child: Padding(
                         padding: effectivePadding,
