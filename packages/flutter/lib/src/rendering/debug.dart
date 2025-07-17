@@ -38,6 +38,15 @@ bool debugPaintSizeEnabled = false;
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
 
+/// Causes each RenderParagraph to paint the layout boxes of its text.
+///
+/// {@macro flutter.painting.textPainter.debugPaintTextLayoutBoxes}
+///
+/// See also:
+///
+///  * [debugPaintBaselinesEnabled] which helps debug text alignment.
+bool debugPaintTextLayoutBoxes = false;
+
 /// Causes each Layer to paint a box around its bounds.
 bool debugPaintLayerBordersEnabled = false;
 
@@ -321,6 +330,7 @@ bool debugAssertAllRenderVarsUnset(String reason, {bool debugCheckIntrinsicSizes
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
         debugPaintLayerBordersEnabled ||
+        debugPaintTextLayoutBoxes ||
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
         debugRepaintTextRainbowEnabled ||
