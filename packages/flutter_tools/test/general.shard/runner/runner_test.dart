@@ -120,6 +120,60 @@ void main() {
     );
 
     testUsingContext(
+      'error handling crash report (local engine)',
+      () async {
+        fileSystem
+            .directory('engine')
+            .childDirectory('src')
+            .childDirectory('out')
+            .createSync(recursive: true);
+
+        final completer = Completer<void>();
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>[
+                    '--local-engine=host_debug',
+                    '--local-engine-src-path=./engine/src',
+                    'crash',
+                  ],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
       'error handling crash report (bot)',
       () async {
         final completer = Completer<void>();
