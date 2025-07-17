@@ -1,0 +1,6 @@
+ibm header 2
+(?s)^Copyright \([cC]\) IBM Corporation[^\n]*All rights reserved..*ICU 1.8.1 and later
+Copyright \([cC]\) IBM Corporation[^\n]*All rights reserved.
+
+This software is made available under the terms of the
+ICU License -- ICU 1.8.1 and later.
