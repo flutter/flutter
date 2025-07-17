@@ -420,6 +420,11 @@ abstract final class SystemChrome {
   ///
   /// ### Android
   ///
+  /// If your Flutter app is targeting Android 16 (API 36) or later and you are using
+  /// a device with a display width >= 600 dp, then you cannot set the device
+  /// orientation via [SystemChrome.setPreferredOrientations]. For more details see
+  /// Android 16 docs [here](https://developer.android.com/about/versions/16/behavior-changes-16#ignore-orientation).
+  ///
   /// Android limits the [orientations](https://developer.android.com/reference/android/R.attr#screenOrientation)
   /// to the following combinations:
   ///

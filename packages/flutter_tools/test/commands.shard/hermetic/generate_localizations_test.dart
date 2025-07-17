@@ -50,7 +50,7 @@ void main() {
 }''');
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -85,7 +85,7 @@ void main() {
       fileSystem.file('pubspec.yaml').writeAsStringSync('''
 flutter:
   generate: true''');
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -119,7 +119,7 @@ flutter:
       fileSystem.file('l10n.yaml').createSync();
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -157,7 +157,7 @@ flutter:
       fileSystem.file('l10n.yaml').createSync();
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -197,7 +197,7 @@ flutter:
         ),
       );
 
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -233,7 +233,7 @@ flutter:
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
 
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -282,7 +282,7 @@ format: true
           ],
         ),
       );
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -320,7 +320,7 @@ format: false
 ''');
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -375,7 +375,7 @@ untranslated-messages-file: lib/l10n/untranslated.json
           ],
         ),
       );
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -430,7 +430,7 @@ format: true
           ],
         ),
       );
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
         processManager: processManager,
@@ -465,7 +465,7 @@ format: false
     pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
 
     processManager.addCommand(const FakeCommand(command: <String>[]));
-    final Environment environment = Environment.test(
+    final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
       processManager: processManager,
@@ -478,7 +478,7 @@ format: false
     final File dependencyFile = environment.buildDir.childFile(buildTarget.depfiles.single);
     final Depfile depfile = environment.depFileService.parse(dependencyFile);
 
-    final String oppositeSeparator = fileSystem.path.separator == '/' ? r'\' : '/';
+    final oppositeSeparator = fileSystem.path.separator == '/' ? r'\' : '/';
     expect(depfile.inputs, everyElement(isNot(contains(oppositeSeparator))));
     expect(depfile.outputs, everyElement(isNot(contains(oppositeSeparator))));
   });
@@ -497,7 +497,7 @@ format: false
 }''');
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -545,7 +545,7 @@ format: false
   flutter:
     generate: false
   ''');
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -590,7 +590,7 @@ format: false
   flutter:
     generate: false
   ''');
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -611,7 +611,7 @@ format: false
   );
 
   testUsingContext('throws error when unexpected positional argument is provided', () {
-    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+    final command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
       artifacts: artifacts,
@@ -624,7 +624,7 @@ format: false
   });
 
   testUsingContext('throws error when synthetic-package is provided', () async {
-    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+    final command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
       artifacts: artifacts,
@@ -639,7 +639,7 @@ format: false
   testUsingContext(
     'prints warning when --no-synthetic-package is provided',
     () async {
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      final command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
@@ -671,7 +671,7 @@ format: false
             .createSync(recursive: true);
         final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
         pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-        final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+        final command = GenerateLocalizationsCommand(
           fileSystem: fileSystem,
           logger: logger,
           artifacts: artifacts,

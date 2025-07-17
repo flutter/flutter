@@ -60,10 +60,8 @@ void main() {
       CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) =>
           CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
-      final Map<String, String> environmentDefines = <String, String>{
-        kBuildMode: BuildMode.release.cliName,
-      };
-      final List<CodeAsset> codeAssets = <CodeAsset>[
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.release.cliName};
+      final codeAssets = <CodeAsset>[
         makeCodeAsset('malloc', LookupInProcess()),
         makeCodeAsset('free', LookupInExecutable()),
         makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
@@ -132,9 +130,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
 
-      final Map<String, String> environmentDefines = <String, String>{
-        kBuildMode: BuildMode.debug.cliName,
-      };
+      final environmentDefines = <String, String>{kBuildMode: BuildMode.debug.cliName};
       final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,

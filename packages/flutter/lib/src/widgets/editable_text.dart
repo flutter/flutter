@@ -25,7 +25,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_web_browser_detection_io.dart' if (dart.library.js_util) '_web_browser_detection_web.dart';
+import '_web_browser_detection_io.dart'
+    if (dart.library.js_interop) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';

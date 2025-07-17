@@ -19,7 +19,7 @@ void main() {
       bool includeLinkLocal = true,
       InternetAddressType type = InternetAddressType.any,
     }) async {
-      final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
+      final interfaces = <FakeNetworkInterface>[
         FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('127.0.0.1')]),
         FakeNetworkInterface(<FakeInternetAddress>[const FakeInternetAddress('::1')]),
       ];

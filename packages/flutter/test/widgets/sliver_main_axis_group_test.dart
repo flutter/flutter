@@ -1062,6 +1062,69 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('SliverMainAxisGroup reverse hitTest', (WidgetTester tester) async {
+    bool onTapCalled = false;
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        reverse: true,
+        viewportHeight: 70,
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                onTapCalled = true;
+              },
+              child: const SizedBox(height: 50),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+        ],
+      ),
+    );
+    await tester.tapAt(const Offset(0, 10));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isFalse);
+    await tester.tapAt(const Offset(0, 69));
+    await tester.pumpAndSettle();
+    expect(onTapCalled, isTrue);
+  });
+
+  testWidgets('SliverMainAxisGroup with center', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    const Key centerKey = Key('center');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          center: centerKey,
+          controller: controller,
+          slivers: const <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
+              ],
+            ),
+            SliverMainAxisGroup(
+              key: centerKey,
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    controller.jumpTo(-51);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('-1')), const Offset(0, 1));
+    expect(tester.getTopLeft(find.text('1')), const Offset(0, 51));
+    expect(tester.getTopLeft(find.text('2')), const Offset(0, 101));
+    expect(tester.getTopLeft(find.text('-2')), const Offset(0, -49));
+  });
 }
 
 Widget _buildSliverList({

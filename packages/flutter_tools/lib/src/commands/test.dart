@@ -31,7 +31,7 @@ import '../web/web_constants.dart';
 /// When there are test files specified for the test command that are part of
 /// this directory, *relative to the package root*, the files will be executed
 /// as Integration Tests.
-const String _kIntegrationTestDirectory = 'integration_test';
+const _kIntegrationTestDirectory = 'integration_test';
 
 /// A command to run tests.
 ///
@@ -78,6 +78,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
 
     argParser
@@ -164,14 +165,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             'If unset, matches the current package name.',
         valueHelp: 'package-name-regexp',
         splitCommas: false,
-      )
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input '
-            'and provide output and progress in machine friendly format.',
       )
       ..addFlag(
         'update-goldens',
@@ -310,9 +303,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @visibleForTesting
   bool get isIntegrationTest => _isIntegrationTest;
-  bool _isIntegrationTest = false;
+  var _isIntegrationTest = false;
 
-  final Set<Uri> _testFileUris = <Uri>{};
+  final _testFileUris = <Uri>{};
 
   bool get isWeb => stringArg('platform') == 'chrome';
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
@@ -356,7 +349,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         );
       }
     } else {
-      for (final Uri uri in testUris) {
+      for (final uri in testUris) {
         // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
         String testPath = uri.replace(query: '').toFilePath();
@@ -457,7 +450,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+    final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
@@ -568,7 +561,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final bool machine = boolArg('machine');
     CoverageCollector? collector;
     if (boolArg('coverage') || boolArg('merge-coverage') || boolArg('branch-coverage')) {
       final Set<String> packagesToInclude = _getCoveragePackages(
@@ -577,7 +569,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildInfo.packageConfig,
       );
       collector = CoverageCollector(
-        verbose: !machine,
+        verbose: !outputMachineFormat,
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
         resolver: await CoverageCollector.getResolver(buildInfo.packageConfigPath),
@@ -587,7 +579,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     TestWatcher? watcher;
-    if (machine) {
+    if (outputMachineFormat) {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
@@ -649,7 +641,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         plainNames: plainNames,
         tags: tags,
         excludeTags: excludeTags,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
@@ -677,7 +669,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
-        machine: machine,
+        machine: outputMachineFormat,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
         testAssetDirectory: testAssetPath,
@@ -729,7 +721,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final Set<String> packagesToInclude = <String>{};
+    final packagesToInclude = <String>{};
     if (packagesRegExps.isEmpty) {
       void addProject(FlutterProject project) {
         packagesToInclude.add(project.manifest.appName);
@@ -739,8 +731,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       addProject(flutterProject);
     }
     try {
-      for (final String regExpStr in packagesRegExps) {
-        final RegExp regExp = RegExp(regExpStr);
+      for (final regExpStr in packagesRegExps) {
+        final regExp = RegExp(regExpStr);
         packagesToInclude.addAll(
           packageConfig.packages.map((Package e) => e.name).where((String e) => regExp.hasMatch(e)),
         );
@@ -828,7 +820,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final Iterable<DevFSFileContent> files = entries.values
         .map((AssetBundleEntry asset) => asset.content)
         .whereType<DevFSFileContent>();
-    for (final DevFSFileContent entry in files) {
+    for (final entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

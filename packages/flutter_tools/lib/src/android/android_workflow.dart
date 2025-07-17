@@ -20,9 +20,9 @@ import '../features.dart';
 import 'android_sdk.dart';
 import 'java.dart';
 
-const int kAndroidSdkMinVersion = 29;
-final Version kAndroidJavaMinVersion = Version(1, 8, 0);
-final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
+const kAndroidSdkMinVersion = 29;
+final kAndroidJavaMinVersion = Version(1, 8, 0);
+final kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
@@ -30,9 +30,9 @@ AndroidLicenseValidator? get androidLicenseValidator => context.get<AndroidLicen
 
 enum LicensesAccepted { none, some, all, unknown }
 
-final RegExp licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
-final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
-final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
+final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
+final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -82,7 +82,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
         .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
 
     if (versionLine.isNotEmpty) {
-      final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
+      final regex = RegExp(r'Android emulator version\s+(.*)');
       final Match? match = regex.firstMatch(versionLine);
       if (match != null && match.groupCount >= 1) {
         return match.group(1)?.trim();
@@ -177,7 +177,7 @@ class AndroidValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
       // No Android SDK found.
@@ -323,7 +323,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
     if (_androidSdk == null ||
@@ -467,7 +467,7 @@ class AndroidLicenseValidator extends DoctorValidator {
             ),
       );
 
-      final List<String> stderrLines = <String>[];
+      final stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {

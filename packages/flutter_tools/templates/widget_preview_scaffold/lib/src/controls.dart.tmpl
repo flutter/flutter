@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:widget_preview_scaffold/src/dtd_services.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
 class _WidgetPreviewIconButton extends StatelessWidget {
   const _WidgetPreviewIconButton({

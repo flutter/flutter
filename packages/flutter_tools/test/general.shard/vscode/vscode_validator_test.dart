@@ -30,7 +30,7 @@ void main() {
     testUsingContext(
       'Warns if VS Code version could not be found',
       () async {
-        final VsCodeValidator validator = VsCodeValidator(_FakeVsCode());
+        final validator = VsCodeValidator(_FakeVsCode());
         final ValidationResult result = await validator.validate();
         expect(
           result.messages,

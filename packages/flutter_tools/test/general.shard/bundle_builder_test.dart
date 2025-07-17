@@ -67,13 +67,13 @@ void main() {
   testWithoutContext(
     'writeBundle applies transformations to any assets that have them defined',
     () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final fileSystem = MemoryFileSystem.test();
       final File asset = fileSystem.file('my-asset.txt')
         ..createSync()
         ..writeAsBytesSync(<int>[1, 2, 3]);
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
 
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: <Pattern>[
             artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -102,7 +102,7 @@ void main() {
         ),
       ]);
 
-      final FakeAssetBundle bundle = FakeAssetBundle()
+      final bundle = FakeAssetBundle()
         ..entries['my-asset.txt'] = AssetBundleEntry(
           DevFSFileContent(asset),
           kind: AssetKind.regular,
@@ -161,8 +161,8 @@ void main() {
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
       final String mainPath = globals.fs.path.join('lib', 'main.dart');
-      const String assetDirPath = 'example';
-      const String depfilePath = 'example.d';
+      const assetDirPath = 'example';
+      const depfilePath = 'example.d';
       Environment? env;
       final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -219,7 +219,7 @@ void main() {
 
   testWithoutContext('--enable-experiment is removed from getDefaultCachedKernelPath hash', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final Config config = Config.test();
+    final config = Config.test();
 
     expect(
       getDefaultCachedKernelPath(
@@ -269,7 +269,7 @@ void main() {
   testUsingContext(
     'Release bundle includes native assets',
     () async {
-      final List<String> dependencies = <String>[];
+      final dependencies = <String>[];
       final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -298,5 +298,5 @@ void main() {
 
 class FakeAssetBundle extends Fake implements AssetBundle {
   @override
-  final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
+  final entries = <String, AssetBundleEntry>{};
 }

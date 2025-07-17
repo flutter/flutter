@@ -184,8 +184,8 @@ class ProcessSignal {
   static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
   static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);
   static const ProcessSignal sigusr2 = PosixProcessSignal(io.ProcessSignal.sigusr2);
-  static const ProcessSignal sigint = ProcessSignal(io.ProcessSignal.sigint);
-  static const ProcessSignal sigkill = ProcessSignal(io.ProcessSignal.sigkill);
+  static const sigint = ProcessSignal(io.ProcessSignal.sigint);
+  static const sigkill = ProcessSignal(io.ProcessSignal.sigkill);
 
   final io.ProcessSignal _delegate;
   final Platform _platform;
@@ -267,8 +267,8 @@ class Stdio {
   // These flags exist to remember when the done Futures on stdout and stderr
   // complete to avoid trying to write to a closed stream sink, which would
   // generate a [StateError].
-  bool _stdoutDone = false;
-  bool _stderrDone = false;
+  var _stdoutDone = false;
+  var _stderrDone = false;
 
   Stream<List<int>> get stdin => io.stdin;
 
@@ -325,7 +325,7 @@ class Stdio {
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
     }
-    final io.Stdin ioStdin = stdin as io.Stdin;
+    final ioStdin = stdin as io.Stdin;
     if (!ioStdin.hasTerminal) {
       return _stdinHasTerminal = false;
     }
@@ -432,10 +432,10 @@ class _TestProcessInfo implements ProcessInfo {
   final FileSystem _fileSystem;
 
   @override
-  int currentRss = 1000;
+  var currentRss = 1000;
 
   @override
-  int maxRss = 2000;
+  var maxRss = 2000;
 
   @override
   File writePidFile(String pidFile) {

@@ -100,7 +100,6 @@ export 'engine/pointer_converter.dart';
 export 'engine/profiler.dart';
 export 'engine/raw_keyboard.dart';
 export 'engine/renderer.dart';
-export 'engine/rrect_renderer.dart';
 export 'engine/safe_browser_api.dart';
 export 'engine/scene_builder.dart';
 export 'engine/scene_painting.dart';

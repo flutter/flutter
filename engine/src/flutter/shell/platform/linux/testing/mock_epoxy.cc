@@ -47,12 +47,16 @@ typedef struct {
 typedef struct {
 } MockSurface;
 
+typedef struct {
+} MockImage;
+
 static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
+static MockImage mock_image;
 
 static EGLint mock_error = EGL_SUCCESS;
 
@@ -145,6 +149,10 @@ EGLContext _eglCreateContext(EGLDisplay dpy,
   }
 
   mock_error = EGL_SUCCESS;
+  return &mock_context;
+}
+
+EGLContext _eglGetCurrentContext() {
   return &mock_context;
 }
 
@@ -271,6 +279,10 @@ EGLDisplay _eglGetDisplay(EGLNativeDisplayType display_id) {
   return &mock_display;
 }
 
+EGLDisplay _eglGetCurrentDisplay() {
+  return &mock_display;
+}
+
 EGLint _eglGetError() {
   EGLint error = mock_error;
   mock_error = EGL_SUCCESS;
@@ -355,6 +367,15 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   }
 
   return bool_success();
+}
+
+EGLImage _eglCreateImage(EGLDisplay dpy,
+                         EGLContext ctx,
+                         EGLenum target,
+                         EGLClientBuffer buffer,
+                         const EGLAttrib* attrib_list) {
+  mock->eglCreateImage(dpy, ctx, target, buffer, attrib_list);
+  return &mock_image;
 }
 
 static GLuint bound_texture_2d;
@@ -599,6 +620,11 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLSurface read,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
+EGLImage (*epoxy_eglCreateImage)(EGLDisplay dpy,
+                                 EGLContext ctx,
+                                 EGLenum target,
+                                 EGLClientBuffer buffer,
+                                 const EGLAttrib* attrib_list);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -661,16 +687,19 @@ static void library_init() {
   epoxy_eglBindAPI = _eglBindAPI;
   epoxy_eglChooseConfig = _eglChooseConfig;
   epoxy_eglCreateContext = _eglCreateContext;
+  epoxy_eglGetCurrentContext = _eglGetCurrentContext;
   epoxy_eglCreatePbufferSurface = _eglCreatePbufferSurface;
   epoxy_eglCreateWindowSurface = _eglCreateWindowSurface;
   epoxy_eglGetConfigAttrib = _eglGetConfigAttrib;
   epoxy_eglGetDisplay = _eglGetDisplay;
+  epoxy_eglGetCurrentDisplay = _eglGetCurrentDisplay;
   epoxy_eglGetError = _eglGetError;
   epoxy_eglGetProcAddress = _eglGetProcAddress;
   epoxy_eglInitialize = _eglInitialize;
   epoxy_eglMakeCurrent = _eglMakeCurrent;
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
+  epoxy_eglCreateImage = _eglCreateImage;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;

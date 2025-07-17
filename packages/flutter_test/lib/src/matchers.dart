@@ -44,7 +44,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsNothing = _FindsCountMatcher(null, 0);
 
-/// Asserts that the [Finder] locates at least one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at least one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAny] method.
 ///
@@ -78,7 +78,7 @@ const Matcher findsWidgets = _FindsCountMatcher(1, null);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsAny = _FindsCountMatcher(1, null);
 
-/// Asserts that the [Finder] locates at exactly one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at exactly one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsOne] method.
 ///
@@ -112,7 +112,7 @@ const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsOne = _FindsCountMatcher(1, 1);
 
-/// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates the specified number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsExactly] method.
 ///
@@ -146,7 +146,7 @@ Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 
-/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates at least a number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAtLeast] method.
 ///
@@ -644,7 +644,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -840,7 +840,7 @@ Matcher matchesSemantics({
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code

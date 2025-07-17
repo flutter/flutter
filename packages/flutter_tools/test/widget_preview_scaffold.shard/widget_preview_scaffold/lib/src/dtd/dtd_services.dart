@@ -5,9 +5,10 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
+import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
-class WidgetPreviewScaffoldDtdServices {
+class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Environment variable for the DTD URI.
   static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
 
@@ -29,23 +30,26 @@ class WidgetPreviewScaffoldDtdServices {
     final Uri dtdWsUri =
         dtdUri ??
         Uri.parse(const String.fromEnvironment(kWidgetPreviewDtdUriEnvVar));
-    _dtd = await DartToolingDaemon.connect(dtdWsUri);
+    dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
-      _dtd.postEvent(
+      dtd.postEvent(
         'WidgetPreviewScaffold',
         'Connected',
         const <String, Object?>{},
       ),
     );
+
+    await initializeEditorService();
   }
 
   Future<DTDResponse> _call(
     String methodName, {
     Map<String, Object?>? params,
-  }) => _dtd.call(kWidgetPreviewService, methodName, params: params);
+  }) => dtd.call(kWidgetPreviewService, methodName, params: params);
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
 
-  late final DartToolingDaemon _dtd;
+  @override
+  late final DartToolingDaemon dtd;
 }

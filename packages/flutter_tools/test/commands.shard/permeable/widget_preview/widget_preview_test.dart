@@ -56,7 +56,7 @@ void main() {
   late Logger logger;
   // We perform this initialization just so we can build the generated file path for test
   // descriptions.
-  LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
+  var fs = LocalFileSystem.test(signals: Signals.test());
   late BotDetector botDetector;
   late Platform platform;
   late FakeDeviceManager fakeDeviceManager;
@@ -74,8 +74,8 @@ void main() {
     platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     // Create a fake device manager which only contains a single Chrome device.
-    const String kChromeDeviceId = 'chrome-id';
-    final FakeDevice fakeChromeDevice = FakeDevice('chrome', kChromeDeviceId)
+    const kChromeDeviceId = 'chrome-id';
+    final fakeChromeDevice = FakeDevice('chrome', kChromeDeviceId)
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
     fakeDeviceManager = FakeDeviceManager()
       ..addAttachedDevice(fakeChromeDevice)
@@ -261,14 +261,14 @@ void main() {
       },
     );
 
-    const String samplePreviewFile = '''
+    const samplePreviewFile = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
 @Preview(name: 'preview')
 Widget preview() => Text('Foo');''';
 
-    const String expectedGeneratedFileContents = '''
+    const expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 import 'package:flutter_project/foo.dart' as _i2;
@@ -384,7 +384,7 @@ List<_i1.WidgetPreview> previews() => [
         final Directory rootProject = await createRootProject();
         loggingProcessManager.clear();
 
-        final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
+        final dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
 
         await startWidgetPreview(rootProject: rootProject);
         expect(

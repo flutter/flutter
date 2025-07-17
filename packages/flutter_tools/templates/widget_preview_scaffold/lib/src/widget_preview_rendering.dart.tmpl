@@ -17,7 +17,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
-import 'dtd_services.dart';
+import 'dtd/dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';

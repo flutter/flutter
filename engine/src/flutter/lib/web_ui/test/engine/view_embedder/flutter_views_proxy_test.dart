@@ -25,9 +25,8 @@ Future<void> doTests() async {
     late int viewId;
     late DomElement hostElement;
 
-    int registerViewWithOptions(Map<String, Object?> options) {
-      final JsFlutterViewOptions jsOptions = options.toJSAnyDeep as JsFlutterViewOptions;
-      viewManager.registerView(view, jsViewOptions: jsOptions);
+    int registerViewWithOptions(JsFlutterViewOptions options) {
+      viewManager.registerView(view, jsViewOptions: options);
       return viewId;
     }
 
@@ -48,7 +47,7 @@ Future<void> doTests() async {
       });
 
       test('can retrieve hostElement for a known view', () {
-        final int viewId = registerViewWithOptions(<String, Object?>{'hostElement': hostElement});
+        final int viewId = registerViewWithOptions(JsFlutterViewOptions(hostElement: hostElement));
 
         final JSAny? element = views.getHostElement(viewId);
 
@@ -85,14 +84,16 @@ Future<void> doTests() async {
       });
 
       test('can retrieve initialData for a known view', () {
-        final int viewId = registerViewWithOptions(<String, Object?>{
-          'hostElement': hostElement,
-          'initialData': <String, Object?>{
-            'someInt': 42,
-            'someString': 'A String',
-            'decimals': <double>[math.pi, math.e],
-          },
-        });
+        final int viewId = registerViewWithOptions(
+          JsFlutterViewOptions(
+            hostElement: hostElement,
+            initialData: InitialData(
+              someInt: 42,
+              someString: 'A String',
+              decimals: <double>[math.pi, math.e],
+            ),
+          ),
+        );
 
         final InitialData? element = views.getInitialData(viewId) as InitialData?;
 
@@ -106,7 +107,22 @@ Future<void> doTests() async {
 }
 
 // The JS-interop definition of the `initialData` object passed to the views of this app.
-extension type InitialData._(JSObject _) implements JSObject {
+extension type InitialData._primary(JSObject _) implements JSObject {
+  factory InitialData({
+    required int someInt,
+    required String? someString,
+    required List<double> decimals,
+  }) => InitialData._(
+    someInt: someInt,
+    someString: someString,
+    decimals: decimals.map((double d) => d.toJS).toList().toJS,
+  );
+  external factory InitialData._({
+    required int someInt,
+    required String? someString,
+    required JSArray<JSNumber> decimals,
+  });
+
   external int get someInt;
   external String? get someString;
 

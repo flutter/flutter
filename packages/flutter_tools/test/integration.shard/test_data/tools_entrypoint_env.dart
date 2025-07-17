@@ -13,7 +13,7 @@ import '../test_utils.dart';
 /// - [packagesFlutterToolsPubspecYaml]
 /// - [packagesFlutterToolsPubspecLock]
 void setupToolsEntrypointNewerPubpsec() {
-  final DateTime now = DateTime.now();
+  final now = DateTime.now();
   packagesFlutterToolsPubspecYaml.setLastModifiedSync(now);
 
   final DateTime before = now.subtract(const Duration(hours: 1));

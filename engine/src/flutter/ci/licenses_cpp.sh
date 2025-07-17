@@ -83,5 +83,10 @@ fi
   --licenses_path "$LICENSES_OUTPUT_PATH" \
   --v $VERBOSITY
 
-git diff --no-index  --ignore-cr-at-eol "$LICENSES_PATH" "$LICENSES_OUTPUT_PATH"
+git diff \
+  --no-index \
+  --ignore-cr-at-eol \
+  --ignore-matching-lines="^You may obtain a copy of this library's Source Code Form from:.*" \
+  "$LICENSES_PATH" \
+  "$LICENSES_OUTPUT_PATH"
 rm "$LICENSES_OUTPUT_PATH"

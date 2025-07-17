@@ -33,12 +33,12 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
-  final FakePlatform linuxPlatform = FakePlatform();
-  final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
+  final macPlatform = FakePlatform(operatingSystem: 'macos');
+  final linuxPlatform = FakePlatform();
+  final windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   group('IOSDevice', () {
-    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
+    final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     late Cache cache;
     late Logger logger;
     late IOSDeploy iosDeploy;
@@ -48,7 +48,7 @@ void main() {
     late XcodeDebug xcodeDebug;
 
     setUp(() {
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
@@ -70,7 +70,7 @@ void main() {
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () async {
-      final IOSDevice device = IOSDevice(
+      final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -93,7 +93,7 @@ void main() {
     });
 
     testWithoutContext('32-bit devices are unsupported', () async {
-      final IOSDevice device = IOSDevice(
+      final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -247,7 +247,7 @@ void main() {
         devModeEnabled: true,
         isCoreDevice: false,
       ).sdkVersion;
-      Version expectedVersion = Version(13, 3, 1, text: '13.3.1');
+      var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
       expect(sdkVersion!.toString(), expectedVersion.toString());
       expect(sdkVersion.compareTo(expectedVersion), 0);
@@ -367,7 +367,7 @@ void main() {
     });
 
     testWithoutContext('has build number in sdkNameAndVersion', () async {
-      final IOSDevice device = IOSDevice(
+      final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -391,7 +391,7 @@ void main() {
     });
 
     testWithoutContext('Supports debug, profile, and release modes', () {
-      final IOSDevice device = IOSDevice(
+      final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -417,7 +417,7 @@ void main() {
       expect(device.supportsRuntimeMode(BuildMode.jitRelease), false);
     });
 
-    for (final Platform platform in unsupportedPlatforms) {
+    for (final platform in unsupportedPlatforms) {
       testWithoutContext(
         'throws UnsupportedError exception if instantiated on ${platform.operatingSystem}',
         () {
@@ -465,7 +465,7 @@ void main() {
 
       IOSDevicePortForwarder createPortForwarder(ForwardedPort forwardedPort, IOSDevice device) {
         iproxy = IProxy.test(logger: logger, processManager: FakeProcessManager.any());
-        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(
+        final portForwarder = IOSDevicePortForwarder(
           id: device.id,
           logger: logger,
           operatingSystemUtils: OperatingSystemUtils(
@@ -481,7 +481,7 @@ void main() {
       }
 
       IOSDeviceLogReader createLogReader(IOSDevice device, IOSApp appPackage, Process process) {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader.create(
+        final logReader = IOSDeviceLogReader.create(
           device: device,
           app: appPackage,
           iMobileDevice: IMobileDevice.test(processManager: FakeProcessManager.any()),
@@ -560,7 +560,7 @@ void main() {
 
     setUp(() {
       xcdevice = FakeXcdevice();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       iosWorkflow = FakeIOSWorkflow();
@@ -623,7 +623,7 @@ void main() {
     });
 
     testWithoutContext('start polling without Xcode', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -636,7 +636,7 @@ void main() {
     });
 
     testWithoutContext('start polling', () async {
-      final TestIOSDevices iosDevices = TestIOSDevices(
+      final iosDevices = TestIOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -647,8 +647,8 @@ void main() {
         ..add(<IOSDevice>[])
         ..add(<IOSDevice>[device1, device2]);
 
-      int addedCount = 0;
-      final Completer<void> added = Completer<void>();
+      var addedCount = 0;
+      final added = Completer<void>();
       iosDevices.onAdded.listen((Device device) {
         addedCount++;
         // 2 devices will be added.
@@ -658,7 +658,7 @@ void main() {
         }
       });
 
-      final Completer<void> removed = Completer<void>();
+      final removed = Completer<void>();
       iosDevices.onRemoved.listen((Device device) {
         // Will throw over-completion if called more than once.
         removed.complete();
@@ -737,7 +737,7 @@ void main() {
     });
 
     testWithoutContext('polling can be restarted if stream is closed', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -747,8 +747,7 @@ void main() {
       xcdevice.devices.add(<IOSDevice>[]);
       xcdevice.devices.add(<IOSDevice>[]);
 
-      final StreamController<XCDeviceEventNotification> rescheduledStream =
-          StreamController<XCDeviceEventNotification>();
+      final rescheduledStream = StreamController<XCDeviceEventNotification>();
 
       unawaited(
         xcdevice.deviceEventController.done.whenComplete(() {
@@ -774,7 +773,7 @@ void main() {
     });
 
     testWithoutContext('dispose cancels polling subscription', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -791,12 +790,12 @@ void main() {
       expect(xcdevice.deviceEventController.hasListener, isFalse);
     });
 
-    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (final Platform unsupportedPlatform in unsupportedPlatforms) {
+    final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
+    for (final unsupportedPlatform in unsupportedPlatforms) {
       testWithoutContext(
         'pollingGetDevices throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}',
         () async {
-          final IOSDevices iosDevices = IOSDevices(
+          final iosDevices = IOSDevices(
             platform: unsupportedPlatform,
             xcdevice: xcdevice,
             iosWorkflow: iosWorkflow,
@@ -811,7 +810,7 @@ void main() {
     }
 
     testWithoutContext('pollingGetDevices returns attached devices', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -838,12 +837,12 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (final Platform unsupportedPlatform in unsupportedPlatforms) {
+    final unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
+    for (final unsupportedPlatform in unsupportedPlatforms) {
       testWithoutContext(
         'throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}',
         () async {
-          final IOSDevices iosDevices = IOSDevices(
+          final iosDevices = IOSDevices(
             platform: unsupportedPlatform,
             xcdevice: xcdevice,
             iosWorkflow: iosWorkflow,
@@ -859,7 +858,7 @@ void main() {
     }
 
     testWithoutContext('returns diagnostics', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -888,7 +887,7 @@ void main() {
 
     setUp(() {
       xcdevice = FakeXcdevice();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
       iosWorkflow = FakeIOSWorkflow();
@@ -930,7 +929,7 @@ void main() {
     });
 
     testWithoutContext('wait for device to connect via wifi', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -951,7 +950,7 @@ void main() {
     });
 
     testWithoutContext('wait for device to connect via usb', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -972,7 +971,7 @@ void main() {
     });
 
     testWithoutContext('wait for device returns null', () async {
-      final IOSDevices iosDevices = IOSDevices(
+      final iosDevices = IOSDevices(
         platform: macPlatform,
         xcdevice: xcdevice,
         iosWorkflow: iosWorkflow,
@@ -1004,8 +1003,8 @@ class TestIOSDevices extends IOSDevices {
     required super.logger,
   });
 
-  Completer<void> receivedEvent = Completer<void>();
-  int eventsReceived = 0;
+  var receivedEvent = Completer<void>();
+  var eventsReceived = 0;
 
   void resetEventCompleter() {
     receivedEvent = Completer<void>();
@@ -1025,16 +1024,15 @@ class TestIOSDevices extends IOSDevices {
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 
 class FakeXcdevice extends Fake implements XCDevice {
-  int getAvailableIOSDevicesCount = 0;
-  final List<List<IOSDevice>> devices = <List<IOSDevice>>[];
-  final List<String> diagnostics = <String>[];
-  StreamController<XCDeviceEventNotification> deviceEventController =
-      StreamController<XCDeviceEventNotification>();
+  var getAvailableIOSDevicesCount = 0;
+  final devices = <List<IOSDevice>>[];
+  final diagnostics = <String>[];
+  var deviceEventController = StreamController<XCDeviceEventNotification>();
 
   XCDeviceEventNotification? waitForDeviceEvent;
 
   @override
-  bool isInstalled = true;
+  var isInstalled = true;
 
   @override
   Future<List<String>> getDiagnostics() async {
@@ -1067,7 +1065,7 @@ class FakeXcdevice extends Fake implements XCDevice {
 }
 
 class FakeProcess extends Fake implements Process {
-  bool killed = false;
+  var killed = false;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

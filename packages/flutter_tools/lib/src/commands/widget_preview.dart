@@ -153,13 +153,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
   }
 
-  static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
-  static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kHeadless = 'headless';
-  static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
+  static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
+  static const kLaunchPreviewer = 'launch-previewer';
+  static const kHeadless = 'headless';
+  static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
+  static const kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -196,11 +196,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
-  late final WidgetPreviewAnalytics previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
+  late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
   late final FlutterProject rootProject = getRootProject();
 
-  late final PreviewPubspecBuilder _previewPubspecBuilder = PreviewPubspecBuilder(
+  late final _previewPubspecBuilder = PreviewPubspecBuilder(
     logger: logger,
     verbose: verbose,
     offline: offline,
@@ -208,7 +208,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewManifest: _previewManifest,
   );
 
-  late final PreviewDetector _previewDetector = PreviewDetector(
+  late final _previewDetector = PreviewDetector(
     previewAnalytics: previewAnalytics,
     projectRoot: rootProject.directory,
     logger: logger,
@@ -218,14 +218,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final PreviewCodeGenerator _previewCodeGenerator;
-  late final PreviewManifest _previewManifest = PreviewManifest(
+  late final _previewManifest = PreviewManifest(
     logger: logger,
     rootProject: rootProject,
     fs: fs,
     cache: cache,
   );
 
-  late WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
+  late var _dtdService = WidgetPreviewDtdServices(
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
@@ -374,7 +374,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
       logger.printStatus('Launching the Widget Preview Scaffold...');
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      final debuggingOptions = DebuggingOptions.enabled(
         BuildInfo(
           BuildMode.debug,
           null,
@@ -406,7 +406,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
 
       if (boolArg(kLaunchPreviewer)) {
-        final Completer<void> appStarted = Completer<void>();
+        final appStarted = Completer<void>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,

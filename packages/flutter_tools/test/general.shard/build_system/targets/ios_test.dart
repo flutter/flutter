@@ -30,7 +30,7 @@ final Platform macPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
-const List<String> _kSharedConfig = <String>[
+const _kSharedConfig = <String>[
   '-dynamiclib',
   '-miphoneos-version-min=13.0',
   '-Xlinker',
@@ -627,7 +627,7 @@ void main() {
     'AotAssemblyRelease throws exception if asked to build for simulator',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{
           kTargetPlatform: 'ios',
@@ -664,7 +664,7 @@ void main() {
     'AotAssemblyRelease throws exception if sdk root is missing',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kTargetPlatform: 'ios'},
         processManager: processManager,
@@ -769,7 +769,7 @@ void main() {
     });
 
     testWithoutContext('iphonesimulator', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -808,7 +808,7 @@ void main() {
     });
 
     testWithoutContext('fails when frameworks missing', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -842,7 +842,7 @@ void main() {
       );
       dSYM.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -870,7 +870,7 @@ void main() {
     testWithoutContext('fails when requested archs missing from framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -910,7 +910,7 @@ void main() {
     testWithoutContext('fails when lipo extract fails', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1044,7 +1044,7 @@ void main() {
     testWithoutContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1074,7 +1074,7 @@ void main() {
     testWithoutContext('thins fat framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1114,7 +1114,7 @@ void main() {
     testWithoutContext('strips framework', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1139,7 +1139,7 @@ void main() {
     testWithoutContext('fails when codesign fails', () async {
       binary.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1201,7 +1201,7 @@ void main() {
       );
       dSYM.createSync(recursive: true);
 
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: artifacts,
@@ -1248,7 +1248,7 @@ void main() {
     testUsingContext(
       'prints warning if missing LLDB Init File in all schemes',
       () async {
-        const String projectPath = 'path/to/project';
+        const projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
         environment.defines
           ..[kIosArchs] = 'arm64'
@@ -1275,7 +1275,7 @@ void main() {
     testUsingContext(
       'skips if targetting simulator',
       () async {
-        const String projectPath = 'path/to/project';
+        const projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
         environment.defines
           ..[kIosArchs] = 'arm64'
@@ -1296,7 +1296,7 @@ void main() {
     testUsingContext(
       'skips if iOS version is less than 26.0',
       () async {
-        const String projectPath = 'path/to/project';
+        const projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
         environment.defines
           ..[kIosArchs] = 'arm64'
@@ -1317,7 +1317,7 @@ void main() {
     testUsingContext(
       'does not throw error if there is an LLDB Init File in any scheme',
       () async {
-        const String projectPath = 'path/to/project';
+        const projectPath = 'path/to/project';
         fileSystem.directory(projectPath).createSync(recursive: true);
         fileSystem
             .directory(projectPath)
@@ -1360,7 +1360,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeStdio extends Fake implements Stdio {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
 
   @override
   void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {

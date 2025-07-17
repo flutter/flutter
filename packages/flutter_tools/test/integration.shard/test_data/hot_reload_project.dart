@@ -11,7 +11,7 @@ class HotReloadProject extends Project {
   final bool constApp;
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0

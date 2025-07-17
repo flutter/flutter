@@ -174,12 +174,12 @@ class FlutterPlugin : Plugin<Project> {
             // settings will take precedence over these defaults.
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
                 buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
                     val abiValue: String =
                         FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
                             ?: throw GradleException("Invalid platform: $platform")
                     buildType.ndk.abiFilters.add(abiValue)
-                })
+                }
             }
         }
         val propDeferredComponentNames = "deferred-component-names"
@@ -755,10 +755,12 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     dependsOn(compileTask)
                     with(compileTask.assets)
-                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
-                    //   minimum supported Gradle version is 8.3.
-                    @Suppress("DEPRECATION")
-                    fileMode = 420 // corresponds to unix 0644 in base 8
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
                         dependsOn(packageAssets)

@@ -45,7 +45,7 @@ class GenSnapshot {
   }
 
   /// Ignored warning messages from gen_snapshot.
-  static const Set<String> kIgnoredWarnings = <String>{
+  static const kIgnoredWarnings = <String>{
     // --strip on elf snapshot.
     'Warning: Generating ELF library without DWARF debugging information.',
     // --strip on ios-assembly snapshot.
@@ -62,7 +62,7 @@ class GenSnapshot {
   }) {
     assert(darwinArch != DarwinArch.armv7);
     assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
-    final List<String> args = <String>[...additionalArgs];
+    final args = <String>[...additionalArgs];
 
     // iOS and macOS have separate gen_snapshot binaries for each target
     // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
@@ -136,7 +136,7 @@ class AOTSnapshotter {
     final Directory outputDir = _fileSystem.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final List<String> genSnapshotArgs = <String>['--deterministic'];
+    final genSnapshotArgs = <String>['--deterministic'];
 
     final bool targetingApplePlatform =
         platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
@@ -148,10 +148,10 @@ class AOTSnapshotter {
 
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
-    bool shouldStrip = true;
+    var shouldStrip = true;
     if (extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
-      for (final String option in extraGenSnapshotOptions) {
+      for (final option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {
           shouldStrip = false;
           continue;
@@ -197,7 +197,7 @@ class AOTSnapshotter {
     // the architecture, since a single build command may produce
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
-    final String debugFilename = 'app.$archName.symbols';
+    final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
       _fileSystem.directory(splitDebugInfo).createSync(recursive: true);
@@ -215,7 +215,7 @@ class AOTSnapshotter {
 
     genSnapshotArgs.add(mainPath);
 
-    final SnapshotType snapshotType = SnapshotType(platform, buildMode);
+    final snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await _genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
@@ -261,7 +261,7 @@ class AOTSnapshotter {
       _logger.printStatus('Building App.framework for $targetArch...');
     }
 
-    final List<String> commonBuildOptions = <String>[
+    final commonBuildOptions = <String>[
       '-arch',
       targetArch,
       if (isIOS)
@@ -291,7 +291,7 @@ class AOTSnapshotter {
     final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
     _fileSystem.directory(frameworkDir).createSync(recursive: true);
     final String appLib = _fileSystem.path.join(frameworkDir, 'App');
-    final List<String> linkArgs = <String>[
+    final linkArgs = <String>[
       ...commonBuildOptions,
       '-dynamiclib',
       '-Xlinker',

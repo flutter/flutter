@@ -75,7 +75,7 @@ class PreviewDetailsMatcher extends Matcher {
       return false;
     }
 
-    bool matches = true;
+    var matches = true;
     void checkPropertyMatch({
       required String name,
       required Object? actual,

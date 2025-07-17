@@ -49,7 +49,7 @@ class EmulatorManager {
 
   // Constructing EmulatorManager is cheap; they only do expensive work if some
   // of their methods are called.
-  final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators()];
+  final _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators()];
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();
@@ -61,7 +61,7 @@ class EmulatorManager {
         emulator.name.toLowerCase().startsWith(searchText);
 
     Emulator? exactMatch;
-    for (final Emulator emulator in emulators) {
+    for (final emulator in emulators) {
       if (exactlyMatchesEmulatorId(emulator)) {
         exactMatch = emulator;
         break;
@@ -83,7 +83,7 @@ class EmulatorManager {
 
   /// Return the list of all available emulators.
   Future<List<Emulator>> getAllAvailableEmulators() async {
-    final List<Emulator> emulators = <Emulator>[];
+    final emulators = <Emulator>[];
     await Future.forEach<EmulatorDiscovery>(_platformDiscoverers, (
       EmulatorDiscovery discoverer,
     ) async {
@@ -95,7 +95,7 @@ class EmulatorManager {
   /// Return the list of all available emulators.
   Future<CreateEmulatorResult> createEmulator({String? name}) async {
     if (name == null || name.isEmpty) {
-      const String autoName = 'flutter_emulator';
+      const autoName = 'flutter_emulator';
       // Don't use getEmulatorsMatching here, as it will only return one
       // if there's an exact match and we need all those with this prefix
       // so we can keep adding suffixes until we miss.
@@ -104,7 +104,7 @@ class EmulatorManager {
           .map<String>((Emulator e) => e.id)
           .where((String id) => id.startsWith(autoName))
           .toSet();
-      int suffix = 1;
+      var suffix = 1;
       name = autoName;
       while (takenNames.contains(name)) {
         name = '${autoName}_${++suffix}';
@@ -176,10 +176,10 @@ class EmulatorManager {
     );
   }
 
-  static const List<String> preferredDevices = <String>['pixel', 'pixel_xl'];
+  static const preferredDevices = <String>['pixel', 'pixel_xl'];
 
   Future<String?> _getPreferredAvailableDevice(String avdManagerPath) async {
-    final List<String> args = <String>[avdManagerPath, 'list', 'device', '-c'];
+    final args = <String>[avdManagerPath, 'list', 'device', '-c'];
     final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
     if (runResult.exitCode != 0) {
       return null;
@@ -198,12 +198,12 @@ class EmulatorManager {
     return null;
   }
 
-  static final RegExp _androidApiVersion = RegExp(r';android-(\d+);');
+  static final _androidApiVersion = RegExp(r';android-(\d+);');
 
   Future<String?> _getPreferredSdkId(String avdManagerPath) async {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
-    final List<String> args = <String>[avdManagerPath, 'create', 'avd', '-n', 'temp'];
+    final args = <String>[avdManagerPath, 'create', 'avd', '-n', 'temp'];
     final RunResult runResult = await _processUtils.run(args, environment: _java?.environment);
 
     // Get the list of IDs that match our criteria
@@ -226,7 +226,7 @@ class EmulatorManager {
 
     // We're out of preferences, we just have to return the first one with the high
     // API version.
-    for (final String id in availableIDs) {
+    for (final id in availableIDs) {
       if (id.contains(';android-$apiVersion;')) {
         return id;
       }
@@ -285,10 +285,10 @@ abstract class Emulator {
       return <String>[];
     }
 
-    const List<String> tableHeader = <String>['Id', 'Name', 'Manufacturer', 'Platform'];
+    const tableHeader = <String>['Id', 'Name', 'Manufacturer', 'Platform'];
 
     // Extract emulators information
-    final List<List<String>> table = <List<String>>[
+    final table = <List<String>>[
       tableHeader,
       for (final Emulator emulator in emulators)
         <String>[
@@ -300,14 +300,14 @@ abstract class Emulator {
     ];
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final List<String> row in table) {
+    for (final row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
-    final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
+    final whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
         .map<String>((List<String> row) {
           return indices

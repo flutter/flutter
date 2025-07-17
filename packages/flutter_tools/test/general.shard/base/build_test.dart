@@ -12,14 +12,11 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const FakeCommand kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
-const FakeCommand kARMCheckCommand = FakeCommand(
-  command: <String>['sysctl', 'hw.optional.arm64'],
-  exitCode: 1,
-);
+const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
 
-const List<String> kDefaultClang = <String>[
+const kDefaultClang = <String>[
   '-miphoneos-version-min=13.0',
   '-isysroot',
   'path/to/sdk',

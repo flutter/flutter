@@ -73,6 +73,37 @@ external DomObjectConstructor get objectConstructor;
 
 extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
+
+  external void defineProperty(
+    JSObject object,
+    String property,
+    DomPropertyDataDescriptor descriptor,
+  );
+}
+
+extension type DomPropertyDataDescriptor._primary(JSObject _) implements JSObject {
+  factory DomPropertyDataDescriptor({
+    Object? value,
+    bool configurable = false,
+    bool enumerable = false,
+    bool writable = false,
+  }) => DomPropertyDataDescriptor._(
+    value: value?.toJSAnyDeep,
+    configurable: configurable,
+    enumerable: enumerable,
+    writable: writable,
+  );
+  external factory DomPropertyDataDescriptor._({
+    required JSAny? value,
+    required bool configurable,
+    required bool enumerable,
+    required bool writable,
+  });
+
+  external JSAny? get value;
+  external bool get configurable;
+  external bool get enumerable;
+  external bool get writable;
 }
 
 @JS('Window')
@@ -235,7 +266,6 @@ extension type DomDocument._(JSObject _) implements DomNode {
     }
   }
 
-  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
   external DomText createTextNode(String data);
@@ -826,6 +856,7 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   return canvas;
 }
 
+@JS('WebGLRenderingContext')
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
@@ -834,6 +865,20 @@ extension type WebGLContext._(JSObject _) implements JSObject {
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  external JSAny? getExtension(String name);
+
+  WebGLLoseContextExtension get loseContextExtension {
+    return getExtension('WEBGL_lose_context')! as WebGLLoseContextExtension;
+  }
+
+  external bool isContextLost();
+}
+
+extension type WebGLLoseContextExtension._(JSObject _) implements JSObject {
+  external void loseContext();
+
+  external void restoreContext();
 }
 
 extension type DomCanvasImageSource._(JSObject _) implements JSObject {}
@@ -993,11 +1038,6 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
-}
-
-@JS('WebGLRenderingContext')
-extension type DomWebGLRenderingContext._(JSObject _) implements JSObject {
-  external bool isContextLost();
 }
 
 @JS('ImageBitmapRenderingContext')

@@ -2,15 +2,19 @@
 # This file describes all the files we don't need to do a copyright header
 # check on.
 ################################################################################
+.*/CMakeLists\.txt$
 .*/test/.*
 .*/testing/.*
 .*/tests/.*
 .*third_party/googletest/.*
 ^build/.*
+^buildtools/.*
 ^impeller/fixtures/.*
+^prebuilts/.*
 ^shell/platform/fuchsia/dart-pkg/zircon_ffi/lib/zircon_ffi.dart
 ^sky/packages/sky_engine/LICENSE
 ^testing/.*
+^third_party/android_tools/.*
 ^third_party/angle/third_party/.*
 ^third_party/angle/tools/.*
 ^third_party/angle/util/.*
@@ -19,9 +23,14 @@
 ^third_party/dart/third_party/binary_size/.*
 ^third_party/dart/third_party/binaryen/.*
 ^third_party/dart/third_party/d3/.*
+^third_party/dart/third_party/devtools/web/.*\.frag$
+^third_party/dart/third_party/devtools/web/.*\.js$
 ^third_party/dart/third_party/pkg/.*
 ^third_party/dart/third_party/requirejs/.*
 ^third_party/depot_tools/.*
+^third_party/freetype2/docs/.*
+^third_party/google_fonts_for_unit_tests/.*
+^third_party/gradle/.*
 ^third_party/harfbuzz/.*\.py
 ^third_party/harfbuzz/perf/.*
 ^third_party/harfbuzz/src/harfbuzz.cc
@@ -30,6 +39,7 @@
 ^third_party/imgui/.*
 ^third_party/inja/third_party/amalgamate/.*
 ^third_party/inja/third_party/include/doctest/.*
+^third_party/java/.*
 ^third_party/libpng/contrib/.*
 ^third_party/libwebp/.*\.py
 ^third_party/libwebp/examples/.*
@@ -55,6 +65,8 @@
 ^third_party/swiftshader/third_party/llvm-16.0/.*
 ^third_party/vulkan-deps/spirv-headers/.*
 ^third_party/vulkan-deps/vulkan-loader/.*
+^tools/android_sdk/packages\.txt$
+^tools/licenses_cpp/data/.*
 ################################################################################
 # Instances that don't have a clear resolution yet.
 ################################################################################
@@ -80,6 +92,20 @@
 ^third_party/harfbuzz/src/hb-ot-shaper-vowel-constraints.cc
 # These files don't seem to be explicitly excluded but aren't present in the 
 # sky license.
-^third_party/freetype2/.*
-# These files have a license that doesn't show up in the sky license.
-^third_party/vulkan-deps/glslang/src/.*
+third_party/freetype2/autogen.sh
+third_party/freetype2/builds/.*
+third_party/freetype2/docs/markdown/javascripts/extra.js
+third_party/freetype2/include/freetype-flutter-config/.*
+third_party/freetype2/include/freetype/config/ftmodule.h
+third_party/freetype2/include/freetype/ftchapters.h
+third_party/freetype2/LICENSE.TXT
+third_party/freetype2/src/gxvalid/gxvfgen.c
+third_party/freetype2/src/gzip/.*
+third_party/freetype2/src/pcf/pcfutil.c
+third_party/freetype2/src/psaux/.*
+third_party/freetype2/src/tools/.*
+third_party/freetype2/src/truetype/ttpload.c
+# This file is a conglomeration of licenses found in files.
+third_party/vulkan-deps/glslang/src/LICENSE.TXT
+# This file has a copyright but isn't included in legacy tool
+^third_party/freetype2/meson_options\.txt$

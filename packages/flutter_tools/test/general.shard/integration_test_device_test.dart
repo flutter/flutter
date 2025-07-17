@@ -22,7 +22,7 @@ import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
-final vm_service.Isolate isolate = vm_service.Isolate(
+final isolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
@@ -40,9 +40,9 @@ final vm_service.Isolate isolate = vm_service.Isolate(
   extensionRPCs: <String>[kIntegrationTestMethod],
 );
 
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
+final fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
 
-final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
+final listViewsRequest = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],

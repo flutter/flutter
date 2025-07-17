@@ -52,7 +52,7 @@ void main() {
       });
 
       testWithoutContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
-        final Xcode xcode = Xcode.test(
+        final xcode = Xcode.test(
           platform: FakePlatform(operatingSystem: 'windows'),
           processManager: fakeProcessManager,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
@@ -65,7 +65,7 @@ void main() {
         fakeProcessManager.addCommand(
           const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         );
-        final Xcode xcode = Xcode.test(
+        final xcode = Xcode.test(
           processManager: fakeProcessManager,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
@@ -82,7 +82,7 @@ void main() {
             exitCode: 1,
           ),
         );
-        final Xcode xcode = Xcode.test(
+        final xcode = Xcode.test(
           processManager: fakeProcessManager,
           xcodeProjectInterpreter: xcodeProjectInterpreter,
           logger: logger,
@@ -103,7 +103,7 @@ void main() {
               exception: ProcessException('xcrun', <String>['simctl']),
             ),
           );
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
             logger: logger,
@@ -123,7 +123,7 @@ void main() {
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version']),
           );
           xcodeProjectInterpreter.version = Version(15, 0, 0);
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
@@ -137,7 +137,7 @@ void main() {
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version'], exitCode: 1),
           );
           xcodeProjectInterpreter.version = Version(15, 0, 0);
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
             logger: logger,
@@ -158,7 +158,7 @@ void main() {
             ),
           );
           xcodeProjectInterpreter.version = Version(15, 0, 0);
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
             logger: logger,
@@ -173,7 +173,7 @@ void main() {
 
         testWithoutContext('is false when Xcode is less than 15', () {
           xcodeProjectInterpreter.version = Version(14, 0, 0);
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
@@ -191,7 +191,7 @@ void main() {
         });
 
         testWithoutContext('parses correctly', () {
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
@@ -208,7 +208,7 @@ void main() {
         });
 
         testWithoutContext('throws error if not found', () {
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: FakeProcessManager.any(),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
@@ -217,7 +217,7 @@ void main() {
         });
 
         testWithoutContext('throws error with unexpected outcome', () {
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
@@ -235,7 +235,7 @@ void main() {
       });
 
       group('pathToXcodeAutomationScript', () {
-        const String flutterRoot = '/path/to/flutter';
+        const flutterRoot = '/path/to/flutter';
 
         late MemoryFileSystem fileSystem;
 
@@ -244,7 +244,7 @@ void main() {
         });
 
         testWithoutContext('returns path when file is found', () {
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
             fileSystem: fileSystem,
@@ -262,7 +262,7 @@ void main() {
         });
 
         testWithoutContext('throws error when not found', () {
-          final Xcode xcode = Xcode.test(
+          final xcode = Xcode.test(
             processManager: fakeProcessManager,
             xcodeProjectInterpreter: xcodeProjectInterpreter,
             fileSystem: fileSystem,
@@ -288,7 +288,7 @@ void main() {
         });
 
         testWithoutContext('xcodeSelectPath returns path when xcode-select is installed', () {
-          const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+          const xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -472,7 +472,7 @@ void main() {
         });
 
         group('SDK location', () {
-          const String sdkroot =
+          const sdkroot =
               'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
 
           testWithoutContext('--show-sdk-path iphoneos', () async {
@@ -651,9 +651,9 @@ void main() {
     });
 
     testWithoutContext('shutdown hooks disposes xcdevice observers', () async {
-      final ShutdownHooks shutdownHooks = ShutdownHooks();
+      final shutdownHooks = ShutdownHooks();
 
-      final XCDevice xcdevice = XCDevice(
+      final xcdevice = XCDevice(
         processManager: FakeProcessManager.any(),
         logger: logger,
         xcode: Xcode.test(processManager: FakeProcessManager.any()),
@@ -669,7 +669,7 @@ void main() {
       );
 
       expect(shutdownHooks.registeredHooks, hasLength(1));
-      final Completer<void> doneCompleter = Completer<void>();
+      final doneCompleter = Completer<void>();
       xcdevice.observedDeviceEvents()!.listen(
         null,
         onDone: () {
@@ -756,11 +756,11 @@ void main() {
             ),
           );
 
-          final Completer<void> attach1 = Completer<void>();
-          final Completer<void> attach2 = Completer<void>();
-          final Completer<void> detach1 = Completer<void>();
-          final Completer<void> attach3 = Completer<void>();
-          final Completer<void> detach2 = Completer<void>();
+          final attach1 = Completer<void>();
+          final attach2 = Completer<void>();
+          final detach1 = Completer<void>();
+          final attach3 = Completer<void>();
+          final detach2 = Completer<void>();
 
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
@@ -826,7 +826,7 @@ void main() {
             ),
           );
 
-          final Completer<void> doneCompleter = Completer<void>();
+          final doneCompleter = Completer<void>();
           xcdevice.observedDeviceEvents()!.listen(
             null,
             onDone: () {
@@ -841,7 +841,7 @@ void main() {
 
       group('wait device events', () {
         testUsingContext('relays events', () async {
-          const String deviceId = '00000001-0000000000000000';
+          const deviceId = '00000001-0000000000000000';
 
           fakeProcessManager.addCommand(
             const FakeCommand(
@@ -888,7 +888,7 @@ void main() {
         });
 
         testUsingContext('handles exit code', () async {
-          const String deviceId = '00000001-0000000000000000';
+          const deviceId = '00000001-0000000000000000';
 
           fakeProcessManager.addCommand(
             const FakeCommand(
@@ -933,7 +933,7 @@ void main() {
         });
 
         testUsingContext('handles cancel', () async {
-          const String deviceId = '00000001-0000000000000000';
+          const deviceId = '00000001-0000000000000000';
 
           fakeProcessManager.addCommand(
             const FakeCommand(
@@ -980,11 +980,11 @@ void main() {
       });
 
       group('available devices', () {
-        final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
+        final macPlatform = FakePlatform(operatingSystem: 'macos');
         testUsingContext(
           'returns devices',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : true,
@@ -1159,7 +1159,7 @@ void main() {
         testUsingContext(
           'ignores "Preparing debugger support for iPhone" error',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1203,7 +1203,7 @@ void main() {
         testUsingContext(
           'handles unknown architectures',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1250,7 +1250,7 @@ void main() {
         );
 
         testUsingContext('Sdk Version is parsed correctly', () async {
-          const String devicesOutput = '''
+          const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1305,7 +1305,7 @@ void main() {
         testUsingContext(
           'use connected entry when filtering out duplicates',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1368,7 +1368,7 @@ void main() {
         testUsingContext(
           'use entry with sdk when filtering out duplicates',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1437,7 +1437,7 @@ void main() {
         testUsingContext(
           'use entry with higher sdk when filtering out duplicates',
           () async {
-            const String devicesOutput = '''
+            const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1521,7 +1521,7 @@ void main() {
           testUsingContext(
             'returns devices with corresponding CoreDevices',
             () async {
-              const String devicesOutput = '''
+              const devicesOutput = '''
 [
   {
     "simulator" : true,
@@ -1705,9 +1705,9 @@ void main() {
       });
 
       group('diagnostics', () {
-        final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
+        final macPlatform = FakePlatform(operatingSystem: 'macos');
         testUsingContext('uses cache', () async {
-          const String devicesOutput = '''
+          const devicesOutput = '''
 [
   {
     "simulator" : false,
@@ -1753,7 +1753,7 @@ void main() {
         });
 
         testUsingContext('returns error message', () async {
-          const String devicesOutput = '''
+          const devicesOutput = '''
 [
    {
     "simulator" : false,
@@ -1897,10 +1897,10 @@ void main() {
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  Version version = Version(0, 0, 0);
+  var version = Version(0, 0, 0);
 
   @override
-  bool isInstalled = false;
+  var isInstalled = false;
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
@@ -1914,7 +1914,7 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
 }
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-  List<FakeIOSCoreDevice> devices = <FakeIOSCoreDevice>[];
+  var devices = <FakeIOSCoreDevice>[];
 
   @override
   Future<List<IOSCoreDevice>> getCoreDevices({Duration timeout = Duration.zero}) async {

@@ -76,6 +76,7 @@ class CupertinoButton extends StatefulWidget {
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
+    this.foregroundColor,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     @Deprecated(
       'Use minimumSize instead. '
@@ -112,6 +113,7 @@ class CupertinoButton extends StatefulWidget {
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
+    this.foregroundColor,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
       'Use minimumSize instead. '
@@ -143,6 +145,7 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
+    this.foregroundColor,
     @Deprecated(
       'Use minimumSize instead. '
       'This feature was deprecated after v3.28.0-3.0.pre.',
@@ -188,6 +191,12 @@ class CupertinoButton extends StatefulWidget {
   /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
   /// specified.
   final Color disabledColor;
+
+  /// The color of the button's text and icons.
+  ///
+  /// Defaults to the [CupertinoTheme]'s `primaryColor` when the
+  /// [CupertinoButton.filled] constructor is used.
+  final Color? foregroundColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -470,11 +479,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                         : kCupertinoButtonTintedOpacityDark
                   : widget.color?.opacity ?? 1.0,
             );
-    final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
-        ? themeData.primaryContrastingColor
-        : enabled
-        ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
+    final Color effectiveForegroundColor =
+        widget.foregroundColor ??
+        switch ((widget._style, enabled)) {
+          (_CupertinoButtonStyle.filled, _) => themeData.primaryContrastingColor,
+          (_, true) => primaryColor,
+          (_, false) => CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context),
+        };
 
     final Color effectiveFocusOutlineColor =
         widget.focusColor ??
@@ -491,9 +502,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         (widget.sizeStyle == CupertinoButtonSize.small
                 ? themeData.textTheme.actionSmallTextStyle
                 : themeData.textTheme.actionTextStyle)
-            .copyWith(color: foregroundColor);
+            .copyWith(color: effectiveForegroundColor);
     final IconThemeData iconTheme = IconTheme.of(context).copyWith(
-      color: foregroundColor,
+      color: effectiveForegroundColor,
       size: textStyle.fontSize != null
           ? textStyle.fontSize! * 1.2
           : kCupertinoButtonDefaultIconSize,
