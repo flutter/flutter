@@ -170,9 +170,6 @@ class FlutterView {
   //   stored view constraints on the FlutterView object.
   ViewConstraints get physicalConstraints {
     final double dpr = devicePixelRatio;
-    // print('dpr:$dpr');
-    // final Size currentLogicalSize = physicalSize / dpr;
-    // print('currentLogicalSize:$currentLogicalSize');
 
     return ViewConstraints(
       minWidth: _computeMinConstraintValue(
