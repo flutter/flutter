@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
+import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
 
