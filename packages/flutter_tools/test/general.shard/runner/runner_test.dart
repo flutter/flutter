@@ -27,13 +27,14 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
-const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
+const kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
   group('runner (crash reporting)', () {
     int? firstExitCode;
     late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
+    late FakeStdio fakeStdio;
 
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
@@ -58,6 +59,7 @@ void main() {
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      fakeStdio = FakeStdio();
     });
 
     tearDown(() {
@@ -68,7 +70,7 @@ void main() {
     testUsingContext(
       'error handling crash report (synchronous crash)',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -105,18 +107,72 @@ void main() {
         expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
         Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'error handling crash report (bot)',
+      () async {
+        final completer = Completer<void>();
+        // runner.run() asynchronously calls the exit function set above, so we
+        // catch it in a zone.
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>['crash'],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report on a bot',
+        );
+
+        expect(
+          fakeStdio.writtenToStderr,
+          contains(contains('Feature flags enabled:')),
+          reason: 'Should emit feature flags (ignore specifics for test stability)',
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+        BotDetector: () => const FakeBotDetector(true),
+        io.Stdio: () => fakeStdio,
       },
     );
 
@@ -125,11 +181,11 @@ void main() {
     // runner.run. Currently the distinction does not matter, but if it ever
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
-    final Completer<void> commandCompleter = Completer<void>();
+    final commandCompleter = Completer<void>();
     testUsingContext(
       'error handling crash report (asynchronous crash)',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -160,18 +216,15 @@ void main() {
         await completer.future;
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         CrashReporter: () => WaitingCrashReporter(commandCompleter.future),
         Artifacts: () => Artifacts.test(),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
@@ -186,7 +239,7 @@ void main() {
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -234,35 +287,36 @@ void main() {
         expect(sentDetails.command, 'flutter crash');
         expect(sentDetails.error.toString(), 'Exception: an exception % --');
         expect(sentDetails.stackTrace.toString(), contains('CrashingFlutterCommand.runCommand'));
-        expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
+        expect(
+          await sentDetails.doctorText.text,
+          stringContainsInOrder(<String>['[!] Flutter', 'Dart version 12']),
+          reason: 'Captures flutter doctor -v, which includes Dart version',
+        );
       },
       overrides: <Type, Generator>{
-        Platform:
-            () => FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                'FLUTTER_ROOT': '/',
-              },
-            ),
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         UserMessages: () => CustomBugInstructions(),
         Artifacts: () => Artifacts.test(),
         CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-        HttpClientFactory: () => () => FakeHttpClient.any(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
       },
     );
 
     group('in directory without permission', () {
       setUp(() {
-        bool inTestSetup = true;
+        var inTestSetup = true;
         fileSystem = MemoryFileSystem(
           opHandle: (String context, FileSystemOp operation) {
             if (inTestSetup) {
               // Allow all operations during test setup.
               return;
             }
-            const Set<FileSystemOp> disallowedOperations = <FileSystemOp>{
+            const disallowedOperations = <FileSystemOp>{
               FileSystemOp.create,
               FileSystemOp.delete,
               FileSystemOp.copy,
@@ -282,6 +336,7 @@ void main() {
         fileSystem.currentDirectory = currentDirectory;
         inTestSetup = false;
       });
+
       testUsingContext(
         'create local report in temporary directory',
         () async {
@@ -293,7 +348,7 @@ void main() {
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           // runner.run() asynchronously calls the exit function set above, so we
           // catch it in a zone.
           unawaited(
@@ -345,19 +400,19 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
-          Platform:
-              () => FakePlatform(
-                environment: <String, String>{
-                  'FLUTTER_ANALYTICS_LOG_FILE': 'test',
-                  'FLUTTER_ROOT': '/',
-                },
-              ),
+          Platform: () => FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+              'FLUTTER_ROOT': '/',
+            },
+          ),
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           UserMessages: () => CustomBugInstructions(),
           Artifacts: () => Artifacts.test(),
           CrashReporter: () => WaitingCrashReporter(Future<void>.value()),
-          HttpClientFactory: () => () => FakeHttpClient.any(),
+          HttpClientFactory: () =>
+              () => FakeHttpClient.any(),
         },
       );
     });
@@ -382,7 +437,7 @@ void main() {
     testUsingContext(
       "catches ProcessException calling git because it's not available",
       () async {
-        final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+        final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
           <String>[command.name],
@@ -412,7 +467,7 @@ void main() {
     testUsingContext(
       'handles ProcessException calling git when ProcessManager.canRun fails',
       () async {
-        final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+        final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
           <String>[command.name],
@@ -643,12 +698,12 @@ class CrashingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Exception error = Exception('an exception % --'); // Test URL encoding.
+    final error = Exception('an exception % --'); // Test URL encoding.
     if (!_asyncCrash) {
       throw error;
     }
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     Timer.run(() {
       completer.complete();
       throw error;
@@ -699,7 +754,7 @@ class WaitingCrashReporter implements CrashReporter {
 }
 
 class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManager {
-  final FakeProcessManager delegate = FakeProcessManager.any();
+  final delegate = FakeProcessManager.any();
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {
     if (executable == 'git') {

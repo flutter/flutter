@@ -1010,15 +1010,13 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base]
   /// elevation level).
   CupertinoDynamicColor resolveFrom(BuildContext context) {
-    final Brightness brightness =
-        _isPlatformBrightnessDependent
-            ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
-            : Brightness.light;
+    final Brightness brightness = _isPlatformBrightnessDependent
+        ? CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light
+        : Brightness.light;
 
-    final CupertinoUserInterfaceLevelData level =
-        _isInterfaceElevationDependent
-            ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
-            : CupertinoUserInterfaceLevelData.base;
+    final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
+        ? CupertinoUserInterfaceLevel.maybeOf(context) ?? CupertinoUserInterfaceLevelData.base
+        : CupertinoUserInterfaceLevelData.base;
 
     final bool highContrast =
         _isHighContrastDependent && (MediaQuery.maybeHighContrastOf(context) ?? false);

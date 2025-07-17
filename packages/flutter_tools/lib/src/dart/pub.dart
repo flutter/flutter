@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -29,10 +28,10 @@ import '../version.dart';
 Pub get pub => context.get<Pub>()!;
 
 /// The console environment key used by the pub tool.
-const String _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
+const _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
 
 /// The console environment key used by the pub tool to find the cache directory.
-const String _kPubCacheEnvironmentKey = 'PUB_CACHE';
+const _kPubCacheEnvironmentKey = 'PUB_CACHE';
 
 typedef MessageFilter = String? Function(String message);
 
@@ -65,23 +64,23 @@ class PubContext {
   static PubContext getVerifyContext(String commandName) =>
       PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
 
-  static final PubContext create = PubContext._(<String>['create']);
-  static final PubContext createPackage = PubContext._(<String>['create_pkg']);
-  static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
-  static final PubContext interactive = PubContext._(<String>['interactive']);
-  static final PubContext pubGet = PubContext._(<String>['get']);
-  static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
-  static final PubContext pubAdd = PubContext._(<String>['add']);
-  static final PubContext pubRemove = PubContext._(<String>['remove']);
-  static final PubContext pubForward = PubContext._(<String>['forward']);
-  static final PubContext pubPassThrough = PubContext._(<String>['passthrough']);
-  static final PubContext runTest = PubContext._(<String>['run_test']);
-  static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
-  static final PubContext updatePackages = PubContext._(<String>['update_packages']);
+  static final create = PubContext._(<String>['create']);
+  static final createPackage = PubContext._(<String>['create_pkg']);
+  static final createPlugin = PubContext._(<String>['create_plugin']);
+  static final interactive = PubContext._(<String>['interactive']);
+  static final pubGet = PubContext._(<String>['get']);
+  static final pubUpgrade = PubContext._(<String>['upgrade']);
+  static final pubAdd = PubContext._(<String>['add']);
+  static final pubRemove = PubContext._(<String>['remove']);
+  static final pubForward = PubContext._(<String>['forward']);
+  static final pubPassThrough = PubContext._(<String>['passthrough']);
+  static final runTest = PubContext._(<String>['run_test']);
+  static final flutterTests = PubContext._(<String>['flutter_tests']);
+  static final updatePackages = PubContext._(<String>['update_packages']);
 
   final List<String> _values;
 
-  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
+  static final _validContext = RegExp('[a-z][a-z_]*[a-z]');
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';
@@ -152,6 +151,7 @@ abstract class Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   });
 
@@ -243,6 +243,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     final String directory = project.directory.path;
@@ -324,14 +325,15 @@ class _DefaultPub implements Pub {
       }
     }
 
-    final String command = upgrade ? 'upgrade' : 'get';
-    final List<String> args = <String>[
+    final command = upgrade ? 'upgrade' : 'get';
+    final args = <String>[
       if (_logger.supportsColor) '--color',
       '--directory',
       _fileSystem.path.relative(directory),
       ...<String>[command],
       if (offline) '--offline',
       '--example',
+      if (enforceLockfile) '--enforce-lockfile',
     ];
     await _runWithStdioInherited(
       args,
@@ -365,7 +367,7 @@ class _DefaultPub implements Pub {
   }) async {
     int exitCode;
 
-    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
+    final pubCommand = <String>[..._pubCommand, ...arguments];
     final Map<String, String> pubEnvironment = await _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
@@ -433,9 +435,10 @@ class _DefaultPub implements Pub {
         pubStderr = result.stderr;
       }
     } on io.ProcessException catch (exception) {
-      final StringBuffer buffer = StringBuffer('${exception.message}\n');
-      final String directoryExistsMessage =
-          _fileSystem.directory(directory).existsSync() ? 'exists' : 'does not exist';
+      final buffer = StringBuffer('${exception.message}\n');
+      final directoryExistsMessage = _fileSystem.directory(directory).existsSync()
+          ? 'exists'
+          : 'does not exist';
       buffer.writeln('Working directory: "$directory" ($directoryExistsMessage)');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       throw io.ProcessException(
@@ -446,10 +449,10 @@ class _DefaultPub implements Pub {
       );
     }
 
-    final int code = exitCode;
+    final code = exitCode;
 
     if (code != 0) {
-      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      final buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
@@ -481,7 +484,7 @@ class _DefaultPub implements Pub {
     if (map.isEmpty) {
       return '';
     }
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.writeln('$prefix: {');
     for (final MapEntry<String, String> entry in map.entries) {
       buffer.writeln('  "${entry.key}": "${entry.value}",');
@@ -501,7 +504,7 @@ class _DefaultPub implements Pub {
   }) async {
     final bool showTraceForErrors = await _botDetector.isRunningOnBot;
 
-    String lastPubMessage = 'no message';
+    var lastPubMessage = 'no message';
     String? filterWrapper(String line) {
       lastPubMessage = line;
       if (filter == null) {
@@ -517,7 +520,7 @@ class _DefaultPub implements Pub {
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
-    final List<String> pubCommand = <String>[..._pubCommand, ...arguments];
+    final pubCommand = <String>[..._pubCommand, ...arguments];
     final int code = await _processUtils.stream(
       pubCommand,
       workingDirectory: directory,
@@ -526,7 +529,7 @@ class _DefaultPub implements Pub {
     );
 
     if (code != 0) {
-      final StringBuffer buffer = StringBuffer('$failureMessage\n');
+      final buffer = StringBuffer('$failureMessage\n');
       buffer.writeln('command: "${pubCommand.join(' ')}"');
       buffer.write(_stringifyPubEnv(pubEnvironment));
       buffer.writeln('exit code: $code');
@@ -590,7 +593,7 @@ class _DefaultPub implements Pub {
     // DO NOT update this function without contacting kevmoo.
     // We have server-side tooling that assumes the values are consistent.
     final String? existing = _platform.environment[_kPubEnvironmentKey];
-    final List<String> values = <String>[
+    final values = <String>[
       if (existing != null && existing.isNotEmpty) existing,
       if (await _botDetector.isRunningOnBot) 'flutter_bot',
       'flutter_cli',
@@ -645,7 +648,7 @@ class _DefaultPub implements Pub {
     String? flutterRootOverride,
     bool? summaryOnly = false,
   }) async {
-    final Map<String, String> environment = <String, String>{
+    final environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot!,
       _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
@@ -659,9 +662,6 @@ class _DefaultPub implements Pub {
 
   /// Updates the .dart_tool/version file to be equal to current Flutter
   /// version.
-  ///
-  /// Calls [_updatePackageConfig] for [project] and [FlutterProject.example]
-  /// (if it exists).
   ///
   /// This should be called after pub invocations that are expected to update
   /// the packageConfig.
@@ -680,7 +680,6 @@ class _DefaultPub implements Pub {
     );
     lastVersion.writeAsStringSync(currentVersion.readAsStringSync());
 
-    await _updatePackageConfig(project, packageConfig);
     if (project.hasExampleApp && project.example.pubspecFile.existsSync()) {
       final File? examplePackageConfig = findPackageConfigFile(project.example.directory);
       if (examplePackageConfig == null) {
@@ -688,36 +687,6 @@ class _DefaultPub implements Pub {
           '${project.directory}: pub did not create example/.dart_tools/package_config.json file.',
         );
       }
-      await _updatePackageConfig(project.example, examplePackageConfig);
     }
-  }
-
-  /// Update the package configuration file in [project].
-  ///
-  /// Creates a corresponding `package_config_subset` file that is used by the
-  /// build system to avoid rebuilds caused by an updated pub timestamp.
-  Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: _logger,
-    );
-
-    packageConfigFile.parent
-        .childFile('package_config_subset')
-        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
-  }
-
-  // Subset the package config file to only the parts that are relevant for
-  // rerunning the dart compiler.
-  String _computePackageConfigSubset(PackageConfig packageConfig, FileSystem fileSystem) {
-    final StringBuffer buffer = StringBuffer();
-    for (final Package package in packageConfig.packages) {
-      buffer.writeln(package.name);
-      buffer.writeln(package.languageVersion);
-      buffer.writeln(package.root);
-      buffer.writeln(package.packageUriRoot);
-    }
-    buffer.writeln(packageConfig.version);
-    return buffer.toString();
   }
 }

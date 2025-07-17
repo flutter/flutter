@@ -7,30 +7,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
-#ifdef FML_OS_ANDROID
-#include <sys/system_properties.h>
-#endif  // FML_OS_ANDROID
-
 namespace impeller {
-
-namespace {
-// Workaround for crashes in Vivante GL driver on Android.
-//
-// See:
-//   * https://github.com/flutter/flutter/issues/167850
-//   * http://crbug.com/141785
-#ifdef FML_OS_ANDROID
-bool IsVivante() {
-  char product_model[PROP_VALUE_MAX];
-  __system_property_get("ro.hardware.egl", product_model);
-  return strcmp(product_model, "VIVANTE") == 0;
-}
-#else
-bool IsVivante() {
-  return false;
-}
-#endif  // FML_OS_ANDROID
-}  // namespace
 
 // https://registry.khronos.org/OpenGL/extensions/EXT/EXT_shader_framebuffer_fetch.txt
 static const constexpr char* kFramebufferFetchExt =
@@ -147,7 +124,7 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
     supports_decal_sampler_address_mode_ = true;
   }
 
-  if (desc->HasExtension(kMultisampledRenderToTextureExt) && !IsVivante()) {
+  if (desc->HasExtension(kMultisampledRenderToTextureExt)) {
     supports_implicit_msaa_ = true;
 
     if (desc->HasExtension(kMultisampledRenderToTexture2Ext)) {

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -138,7 +138,7 @@ void main() {
   });
 
   group('radioGroup', () {
-    testWidgets('failure case, child is not mutually exclusive', (WidgetTester tester) async {
+    testWidgets('success case, child is not mutually exclusive', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -154,9 +154,7 @@ void main() {
         ),
       );
       final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'Radio buttons in a radio group must be in a mutually exclusive group');
+      expect(exception, isNull);
     });
 
     testWidgets('failure case, multiple checked children', (WidgetTester tester) async {
@@ -187,40 +185,6 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
       expect(error.message, 'Radio groups must not have multiple checked children');
-    });
-
-    testWidgets('error case, reports first error', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Semantics(
-            role: SemanticsRole.radioGroup,
-            explicitChildNodes: true,
-            child: Column(
-              children: <Widget>[
-                Semantics(
-                  label: 'Option A',
-                  child: Semantics(checked: true, child: const SizedBox.square(dimension: 1)),
-                ),
-                Semantics(
-                  label: 'Option B',
-                  child: Semantics(
-                    checked: true,
-                    inMutuallyExclusiveGroup: true,
-                    child: const SizedBox.square(dimension: 1),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      // The widget tree has multiple errors. The validation walk should stop
-      // on the first error.
-      final Object? exception = tester.takeException();
-      expect(exception, isFlutterError);
-      final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'Radio buttons in a radio group must be in a mutually exclusive group');
     });
 
     testWidgets('success case', (WidgetTester tester) async {
@@ -293,6 +257,54 @@ void main() {
             role: SemanticsRole.radioGroup,
             explicitChildNodes: true,
             child: Semantics(toggled: true, child: const SizedBox.square(dimension: 1)),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio group can have checkbox children', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Material(
+          child: Material(
+            child: RadioGroup<int>(
+              groupValue: 0,
+              onChanged: (int? value) {},
+              child: Column(
+                children: <Widget>[
+                  Checkbox(value: false, onChanged: (bool? value) {}),
+                  const Radio<int>(value: 0),
+                  const Radio<int>(value: 1),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: Material(
+            child: RadioGroup<int>(
+              groupValue: 0,
+              onChanged: (int? value) {},
+              child: Column(
+                children: <Widget>[
+                  RadioGroup<String>(
+                    groupValue: 'string',
+                    onChanged: (String? value) {},
+                    child: const Radio<String>(value: 'string'),
+                  ),
+                  const Radio<int>(value: 0),
+                  const Radio<int>(value: 1),
+                ],
+              ),
+            ),
           ),
         ),
       );
@@ -677,6 +689,385 @@ void main() {
             explicitChildNodes: true,
             child: Semantics(toggled: true, child: const SizedBox.square(dimension: 1)),
           ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('landmarks', () {
+    testWidgets('failure case, complementary role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.main,
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.complementary, child: const Text('some child')),
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The complementary landmark role should not contained within any other landmark roles.',
+        ),
+      );
+    });
+
+    testWidgets('failure case, multiple nodes have the same complementary role', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                role: SemanticsRole.complementary,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                container: true,
+                child: SizedBox(
+                  child: Semantics(
+                    role: SemanticsRole.complementary,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The complementary landmark role should have a unique label as it is used more than once.',
+        ),
+      );
+    });
+
+    testWidgets('Success case, complementary role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.complementary, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, complementary role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'complementary 1',
+                role: SemanticsRole.complementary,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'complementary 2',
+                role: SemanticsRole.complementary,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, multiple nodes have the same contentInfo role', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                role: SemanticsRole.contentInfo,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                container: true,
+                child: SizedBox(
+                  child: Semantics(
+                    role: SemanticsRole.contentInfo,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The contentInfo landmark role should have a unique label as it is used more than once.',
+        ),
+      );
+    });
+
+    testWidgets('failure case, contentInfo role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.complementary,
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.contentInfo, child: const Text('some child')),
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The contentInfo landmark role should not contained within any other landmark roles.',
+        ),
+      );
+    });
+
+    testWidgets('Success case, contentInfo role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.contentInfo, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, contentInfo role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'contentInfo 1',
+                role: SemanticsRole.contentInfo,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'contentInfo 2',
+                role: SemanticsRole.contentInfo,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, multiple nodes have the same main role', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(role: SemanticsRole.main, child: const SizedBox.square(dimension: 1)),
+              Semantics(
+                container: true,
+                child: SizedBox(
+                  child: Semantics(
+                    role: SemanticsRole.main,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The main landmark role should have a unique label as it is used more than once.',
+        ),
+      );
+    });
+
+    testWidgets('failure case, main role is contained by other landmark roles', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.contentInfo,
+            child: SizedBox(
+              child: Semantics(role: SemanticsRole.main, child: const Text('some child')),
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('The main landmark role should not contained within any other landmark roles.'),
+      );
+    });
+
+    testWidgets('Success case, main role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.main, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, main role is used more than once', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'main 1',
+                role: SemanticsRole.main,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'main 2',
+                role: SemanticsRole.main,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, multiple nodes have the same navigation role', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(role: SemanticsRole.navigation, child: const SizedBox.square(dimension: 1)),
+              Semantics(
+                container: true,
+                child: SizedBox(
+                  child: Semantics(
+                    role: SemanticsRole.navigation,
+                    child: const SizedBox.square(dimension: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'The navigation landmark role should have a unique label as it is used more than once.',
+        ),
+      );
+    });
+
+    testWidgets('Success case, navigation role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.navigation, child: const Text('some child')),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case, navigation role is used more than once', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                label: 'navigation 1',
+                role: SemanticsRole.navigation,
+                child: const SizedBox.square(dimension: 1),
+              ),
+              Semantics(
+                label: 'navigation 2',
+                role: SemanticsRole.navigation,
+                child: const SizedBox.square(dimension: 1),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('failure case, region role without label', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.region, child: const SizedBox()),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith(
+          'A region role should include a label that describes the purpose of the content.',
+        ),
+      );
+    });
+
+    testWidgets('Success case, region role', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'Header 1', role: SemanticsRole.region, child: const SizedBox()),
         ),
       );
       expect(tester.takeException(), isNull);

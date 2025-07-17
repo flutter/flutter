@@ -31,7 +31,7 @@ export 'source.dart';
 /// This number is somewhat arbitrary - it is difficult to detect whether
 /// or not we'll run out of file descriptors when using async dart:io
 /// APIs.
-const int kMaxOpenFiles = 64;
+const kMaxOpenFiles = 64;
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -152,7 +152,7 @@ abstract class Target {
   ///
   /// Returning `true` will cause [build] to be skipped. This is equivalent
   /// to a build that produces no outputs.
-  bool canSkip(Environment environment) => false;
+  Future<bool> canSkip(Environment environment) async => false;
 
   /// The action which performs this build step.
   Future<void> build(Environment environment);
@@ -180,7 +180,7 @@ abstract class Target {
 
   void _writeStamp(List<File> inputs, List<File> outputs, Environment environment) {
     String getPath(File file) => file.path;
-    final Map<String, Object> result = <String, Object>{
+    final result = <String, Object>{
       'inputs': inputs.map(getPath).toList(),
       'outputs': outputs.map(getPath).toList(),
       if (buildKey case final String key) 'buildKey': key,
@@ -234,7 +234,7 @@ abstract class Target {
 
   /// Locate the stamp file for a particular target name and environment.
   File _findStampFile(Environment environment) {
-    final String fileName = '$name.stamp';
+    final fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
 
@@ -244,8 +244,8 @@ abstract class Target {
     Environment environment, {
     bool inputs = true,
   }) {
-    final SourceVisitor collector = SourceVisitor(environment, inputs);
-    for (final Source source in config) {
+    final collector = SourceVisitor(environment, inputs);
+    for (final source in config) {
       source.accept(collector);
     }
     depfiles.forEach(collector.visitDepfile);
@@ -347,17 +347,17 @@ class Environment {
     // include the engine and dart versions.
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     // The engine revision is `null` for local or custom engines.
     if (engineVersion != null) {
       buffer.write(engineVersion);
     }
-    for (final String key in keys) {
+    for (final key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
     buffer.write(outputDir.path);
-    final String output = buffer.toString();
+    final output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
 
@@ -448,24 +448,24 @@ class Environment {
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
-  static const String kProjectDirectory = '{PROJECT_DIR}';
+  static const kProjectDirectory = '{PROJECT_DIR}';
 
   /// The [Source] value which is substituted with the path to the directory
   /// that contains `.dart_tool/package_config.json`.
   /// That is the grand-parent of [BuildInfo.packageConfigPath].
-  static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
+  static const kWorkspaceDirectory = '{WORKSPACE_DIR}';
 
   /// The [Source] value which is substituted with the path to [buildDir].
-  static const String kBuildDirectory = '{BUILD_DIR}';
+  static const kBuildDirectory = '{BUILD_DIR}';
 
   /// The [Source] value which is substituted with the path to [cacheDir].
-  static const String kCacheDirectory = '{CACHE_DIR}';
+  static const kCacheDirectory = '{CACHE_DIR}';
 
   /// The [Source] value which is substituted with a path to the flutter root.
-  static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
+  static const kFlutterRootDirectory = '{FLUTTER_ROOT}';
 
   /// The [Source] value which is substituted with a path to [outputDir].
-  static const String kOutputDirectory = '{OUTPUT_DIR}';
+  static const kOutputDirectory = '{OUTPUT_DIR}';
 
   /// The `PROJECT_DIR` environment variable.
   ///
@@ -543,7 +543,7 @@ class Environment {
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
 
-  late final DepfileService depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
+  late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
 }
 
 /// The result information from the build system.
@@ -612,13 +612,13 @@ class FlutterBuildSystem extends BuildSystem {
 
     // Load file store from previous builds.
     final File cacheFile = environment.buildDir.childFile(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
+    final fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache,
       buildSystemConfig: buildSystemConfig,
@@ -626,7 +626,7 @@ class FlutterBuildSystem extends BuildSystem {
       fileSystem: _fileSystem,
       platform: _platform,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
@@ -666,16 +666,14 @@ class FlutterBuildSystem extends BuildSystem {
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
-      inputFiles:
-          buildInstance.inputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
-      outputFiles:
-          buildInstance.outputFiles.values.toList()
-            ..sort((File a, File b) => a.path.compareTo(b.path)),
+      inputFiles: buildInstance.inputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 
-  static final Expando<FileStore> _incrementalFileStore = Expando<FileStore>();
+  static final _incrementalFileStore = Expando<FileStore>();
 
   @override
   Future<BuildResult> buildIncremental(
@@ -698,7 +696,7 @@ class FlutterBuildSystem extends BuildSystem {
       fileCache = _incrementalFileStore[previousBuild];
     }
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(
+    final buildInstance = _BuildInstance(
       environment: environment,
       fileCache: fileCache!,
       buildSystemConfig: const BuildSystemConfig(),
@@ -706,13 +704,13 @@ class FlutterBuildSystem extends BuildSystem {
       fileSystem: _fileSystem,
       platform: _platform,
     );
-    bool passed = true;
+    var passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
     } finally {
       fileCache.persistIncremental();
     }
-    final BuildResult result = BuildResult(
+    final result = BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
@@ -771,9 +769,9 @@ class FlutterBuildSystem extends BuildSystem {
       // edited .last_config or deleted .dart_tool.
       return;
     }
-    final List<String> lastOutputs =
-        (json.decode(outputsFile.readAsStringSync()) as List<Object?>).cast<String>();
-    for (final String lastOutput in lastOutputs) {
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
+        .cast<String>();
+    for (final lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
         ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
@@ -797,17 +795,17 @@ class _BuildInstance {
   final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
+  final pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileStore fileCache;
-  final Map<String, File> inputFiles = <String, File>{};
-  final Map<String, File> outputFiles = <String, File>{};
+  final inputFiles = <String, File>{};
+  final outputFiles = <String, File>{};
 
   // Timings collected during target invocation.
-  final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
+  final stepTimings = <String, PerformanceMeasurement>{};
 
   // Exceptions caught during the build process.
-  final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
+  final exceptionMeasurements = <String, ExceptionMeasurement>{};
 
   Future<bool> invokeTarget(Node node) async {
     final List<bool> results = await Future.wait(node.dependencies.map(invokeTarget));
@@ -820,9 +818,9 @@ class _BuildInstance {
 
   Future<bool> _invokeInternal(Node node) async {
     final PoolResource resource = await resourcePool.request();
-    final Stopwatch stopwatch = Stopwatch()..start();
-    bool succeeded = true;
-    bool skipped = false;
+    final stopwatch = Stopwatch()..start();
+    var succeeded = true;
+    var skipped = false;
 
     // The build system produces a list of aggregate input and output
     // files for the overall build. This list is provided to a hosting build
@@ -866,7 +864,7 @@ class _BuildInstance {
       node.outputs.clear();
 
       // Check if we can skip via runtime dependencies.
-      final bool runtimeSkip = node.target.canSkip(environment);
+      final bool runtimeSkip = await node.target.canSkip(environment);
       if (runtimeSkip) {
         logger.printTrace('Skipping target: ${node.target.name}');
         skipped = true;
@@ -981,8 +979,8 @@ void checkCycles(Target initial) {
 void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final List<File> missingOutputs = <File>[];
-  for (final File sourceFile in outputs) {
+  final missingOutputs = <File>[];
+  for (final sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
       missingOutputs.add(sourceFile);
       continue;
@@ -1026,7 +1024,7 @@ class Node {
       }
     }
     if (stampValues != null) {
-      final String? previousBuildKey = stampValues['buildKey'] as String?;
+      final previousBuildKey = stampValues['buildKey'] as String?;
       final Object? stampInputs = stampValues['inputs'];
       final Object? stampOutputs = stampValues['outputs'];
       if (stampInputs is List<Object?> && stampOutputs is List<Object?>) {
@@ -1113,12 +1111,11 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Map<InvalidatedReasonKind, InvalidatedReason> invalidatedReasons =
-      <InvalidatedReasonKind, InvalidatedReason>{};
+  final invalidatedReasons = <InvalidatedReasonKind, InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
-  bool _dirty = false;
+  var _dirty = false;
 
   InvalidatedReason _invalidate(InvalidatedReasonKind kind) {
     return invalidatedReasons[kind] ??= InvalidatedReason(kind);
@@ -1137,11 +1134,11 @@ class Node {
       _invalidate(InvalidatedReasonKind.buildKeyChanged);
       _dirty = true;
     }
-    final Set<String> currentOutputPaths = <String>{for (final File file in outputs) file.path};
+    final currentOutputPaths = <String>{for (final File file in outputs) file.path};
     // For each input, first determine if we've already computed the key
     // for it. Then collect it to be sent off for diffing as a group.
-    final List<File> sourcesToDiff = <File>[];
-    final List<File> missingInputs = <File>[];
+    final sourcesToDiff = <File>[];
+    final missingInputs = <File>[];
     for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);
@@ -1165,10 +1162,10 @@ class Node {
     // For each output, first determine if we've already computed the key
     // for it. Then collect it to be sent off for hashing as a group.
     for (final String previousOutput in previousOutputs) {
-      // output paths changed.
+      // Output paths changed - an output was removed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetChanged);
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetRemoval);
         reason.data.add(previousOutput);
         // if this isn't a current output file there is no reason to compute the key.
         continue;
@@ -1191,6 +1188,16 @@ class Node {
         }
       } else {
         sourcesToDiff.add(file);
+      }
+    }
+
+    for (final currentOutput in currentOutputPaths) {
+      // Output paths changed - a new output was added.
+      if (!previousOutputs.contains(currentOutput)) {
+        _dirty = true;
+        final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.outputSetAddition);
+        reason.data.add(currentOutput);
+        continue;
       }
     }
 
@@ -1226,7 +1233,7 @@ class InvalidatedReason {
   final InvalidatedReasonKind kind;
 
   /// Absolute file paths of inputs or outputs, depending on [kind].
-  final List<String> data = <String>[];
+  final data = <String>[];
 
   @override
   String toString() {
@@ -1238,8 +1245,10 @@ class InvalidatedReason {
         'The following outputs have updated contents: ${data.join(',')}',
       InvalidatedReasonKind.outputMissing =>
         'The following outputs were missing: ${data.join(',')}',
-      InvalidatedReasonKind.outputSetChanged =>
+      InvalidatedReasonKind.outputSetRemoval =>
         'The following outputs were removed from the output set: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetAddition =>
+        'The following outputs were added to the output set: ${data.join(',')}',
       InvalidatedReasonKind.buildKeyChanged => 'The target build key changed.',
     };
   }
@@ -1260,8 +1269,11 @@ enum InvalidatedReasonKind {
   /// An output file that is expected is missing.
   outputMissing,
 
-  /// The set of expected output files changed.
-  outputSetChanged,
+  /// An output file was added to the set of expected output files.
+  outputSetAddition,
+
+  /// An output file was removed from the set of expected output files.
+  outputSetRemoval,
 
   /// The build key changed
   buildKeyChanged,

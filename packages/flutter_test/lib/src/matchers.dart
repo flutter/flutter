@@ -44,7 +44,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsNothing = _FindsCountMatcher(null, 0);
 
-/// Asserts that the [Finder] locates at least one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at least one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAny] method.
 ///
@@ -78,7 +78,7 @@ const Matcher findsWidgets = _FindsCountMatcher(1, null);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsAny = _FindsCountMatcher(1, null);
 
-/// Asserts that the [Finder] locates at exactly one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at exactly one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsOne] method.
 ///
@@ -112,7 +112,7 @@ const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsOne = _FindsCountMatcher(1, 1);
 
-/// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates the specified number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsExactly] method.
 ///
@@ -146,7 +146,7 @@ Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 
-/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates at least a number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAtLeast] method.
 ///
@@ -644,7 +644,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -762,8 +762,6 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -842,7 +840,7 @@ Matcher matchesSemantics({
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -960,8 +958,6 @@ Matcher containsSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
@@ -1260,8 +1256,9 @@ class _IsSystemTextScaler extends Matcher {
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation =
-        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
+    final String scaleFactorExpectation = expectedUserTextScaleFactor == null
+        ? ''
+        : '(${expectedUserTextScaleFactor}x)';
     return description.add(
       'A SystemTextScaler that reflects the font scale settings in the system user preference $scaleFactorExpectation',
     );
@@ -2392,8 +2389,6 @@ class _MatchesSemanticsData extends Matcher {
     required this.textDirection,
     required this.rect,
     required this.size,
-    required this.elevation,
-    required this.thickness,
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
@@ -2525,10 +2520,9 @@ class _MatchesSemanticsData extends Matcher {
            SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
          if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
        },
-       hintOverrides =
-           onTapHint == null && onLongPressHint == null
-               ? null
-               : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
+       hintOverrides = onTapHint == null && onLongPressHint == null
+           ? null
+           : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
 
   final String? identifier;
   final String? label;
@@ -2547,8 +2541,6 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection? textDirection;
   final Rect? rect;
   final Size? size;
-  final double? elevation;
-  final double? thickness;
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
@@ -2604,16 +2596,14 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
-      final List<SemanticsAction> expectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
-      final List<SemanticsAction> notExpectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
+      final List<SemanticsAction> expectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
+      final List<SemanticsAction> notExpectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
 
       if (expectedActions.isNotEmpty) {
         description.add(' with actions: ${_createEnumsSummary(expectedActions)} ');
@@ -2623,16 +2613,14 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> expectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
-      final List<SemanticsFlag> notExpectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
+      final List<SemanticsFlag> expectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
+      final List<SemanticsFlag> notExpectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
 
       if (expectedFlags.isNotEmpty) {
         description.add(' with flags: ${_createEnumsSummary(expectedFlags)} ');
@@ -2649,12 +2637,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null) {
       description.add(' with size: $size');
-    }
-    if (elevation != null) {
-      description.add(' with elevation: $elevation');
-    }
-    if (thickness != null) {
-      description.add(' with thickness: $thickness');
     }
     if (platformViewId != null) {
       description.add(' with platformViewId: $platformViewId');
@@ -2794,12 +2776,6 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (size != null && size != data.rect.size) {
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
-    }
-    if (elevation != null && elevation != data.elevation) {
-      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
-    }
-    if (thickness != null && thickness != data.thickness) {
-      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
     }
     if (platformViewId != null && platformViewId != data.platformViewId) {
       return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');

@@ -57,6 +57,8 @@ class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({
     super.key,
     required this.children,
+    this.header,
+    this.footer,
     this.backgroundColor,
     this.shadowColor,
     this.surfaceTintColor,
@@ -120,6 +122,16 @@ class NavigationDrawer extends StatelessWidget {
   /// widgets like headlines and dividers.
   final List<Widget> children;
 
+  /// A widget to display at the top of the layout.
+  ///
+  /// Typically used for titles, navigation bars, or other header content.
+  final Widget? header;
+
+  /// A widget to display at the bottom of the layout.
+  ///
+  /// Typically used for actions, navigation controls, or other footer content.
+  final Widget? footer;
+
   /// The index into destinations for the current selected
   /// [NavigationDrawerDestination] or null if no destination is selected.
   ///
@@ -141,8 +153,10 @@ class NavigationDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int totalNumberOfDestinations =
-        children.whereType<NavigationDrawerDestination>().toList().length;
+    final int totalNumberOfDestinations = children
+        .whereType<NavigationDrawerDestination>()
+        .toList()
+        .length;
 
     int destinationIndex = 0;
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
@@ -173,7 +187,16 @@ class NavigationDrawer extends StatelessWidget {
       shadowColor: shadowColor ?? navigationDrawerTheme.shadowColor,
       surfaceTintColor: surfaceTintColor ?? navigationDrawerTheme.surfaceTintColor,
       elevation: elevation ?? navigationDrawerTheme.elevation,
-      child: SafeArea(bottom: false, child: ListView(children: wrappedChildren)),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            if (header != null) header!,
+            Expanded(child: ListView(children: wrappedChildren)),
+            if (footer != null) footer!,
+          ],
+        ),
+      ),
     );
   }
 }
@@ -241,8 +264,9 @@ class NavigationDrawerDestination extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final Animation<double> animation =
-        _NavigationDrawerDestinationInfo.of(context).selectedAnimation;
+    final Animation<double> animation = _NavigationDrawerDestinationInfo.of(
+      context,
+    ).selectedAnimation;
 
     return _NavigationDestinationBuilder(
       buildIcon: (BuildContext context) {
@@ -274,10 +298,9 @@ class NavigationDrawerDestination extends StatelessWidget {
             defaults.labelTextStyle!.resolve(enabled ? unselectedState : disabledState);
 
         return DefaultTextStyle(
-          style:
-              animation.isForwardOrCompleted
-                  ? effectiveSelectedLabelTextStyle!
-                  : effectiveUnselectedLabelTextStyle!,
+          style: animation.isForwardOrCompleted
+              ? effectiveSelectedLabelTextStyle!
+              : effectiveUnselectedLabelTextStyle!,
           child: label,
         );
       },
@@ -567,8 +590,8 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// Used by widgets that are implementing a navigation destination info to
   /// get information like the selected animation and destination number.
   static _NavigationDrawerDestinationInfo of(BuildContext context) {
-    final _NavigationDrawerDestinationInfo? result =
-        context.dependOnInheritedWidgetOfExactType<_NavigationDrawerDestinationInfo>();
+    final _NavigationDrawerDestinationInfo? result = context
+        .dependOnInheritedWidgetOfExactType<_NavigationDrawerDestinationInfo>();
     assert(
       result != null,
       'Navigation destinations need a _NavigationDrawerDestinationInfo parent, '

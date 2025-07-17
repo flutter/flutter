@@ -196,10 +196,9 @@ void testMain() {
     });
 
     test('using a colorFilter', () async {
-      final CkColorFilter colorFilter =
-          createCkColorFilter(
-            const EngineColorFilter.mode(ui.Color.fromARGB(255, 0, 255, 0), ui.BlendMode.srcIn),
-          )!;
+      final CkColorFilter colorFilter = createCkColorFilter(
+        const EngineColorFilter.mode(ui.Color.fromARGB(255, 0, 255, 0), ui.BlendMode.srcIn),
+      )!;
 
       const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
 
@@ -233,10 +232,9 @@ void testMain() {
         sigmaY: 5,
         tileMode: ui.TileMode.clamp,
       );
-      final CkColorFilter colorFilter =
-          createCkColorFilter(
-            const EngineColorFilter.mode(ui.Color.fromARGB(255, 0, 255, 0), ui.BlendMode.srcIn),
-          )!;
+      final CkColorFilter colorFilter = createCkColorFilter(
+        const EngineColorFilter.mode(ui.Color.fromARGB(255, 0, 255, 0), ui.BlendMode.srcIn),
+      )!;
       final CkImageFilter colorImageFilter = CkImageFilter.color(colorFilter: colorFilter);
       final CkImageFilter composeFilter = CkImageFilter.compose(
         outer: blurFilter,

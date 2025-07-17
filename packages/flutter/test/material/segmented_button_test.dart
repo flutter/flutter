@@ -24,7 +24,10 @@ void main() {
   }
 
   Widget boilerplate({required Widget child}) {
-    return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: child),
+    );
   }
 
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -66,7 +69,10 @@ void main() {
     final Key key = UniqueKey();
 
     Widget buildApp(Widget button) {
-      return MaterialApp(theme: theme, home: Scaffold(body: Center(child: button)));
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(body: Center(child: button)),
+      );
     }
 
     await tester.pumpWidget(

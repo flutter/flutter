@@ -45,7 +45,7 @@ void main() {
     AndroidSdk? androidSdk = const _FakeAndroidSdk(),
     List<String>? arguments,
   }) async {
-    final BuildAarCommand command = BuildAarCommand(
+    final command = BuildAarCommand(
       androidSdk: androidSdk,
       fileSystem: globals.fs,
       logger: BufferLogger.test(),
@@ -209,8 +209,8 @@ void main() {
       final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
       expect(buildAarCall.namedArguments[#buildNumber], '1.0');
 
-      final List<BuildMode> buildModes = <BuildMode>[];
-      for (final AndroidBuildInfo androidBuildInfo
+      final buildModes = <BuildMode>[];
+      for (final androidBuildInfo
           in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
         final BuildInfo buildInfo = androidBuildInfo.buildInfo;
         buildModes.add(buildInfo.mode);
@@ -249,7 +249,7 @@ void main() {
           '--no-debug',
           '--no-profile',
           '--target-platform',
-          'android-x86',
+          'android-x64',
           '--tree-shake-icons',
           '--flavor',
           'free',
@@ -272,7 +272,7 @@ void main() {
 
       final AndroidBuildInfo androidBuildInfo =
           (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86]);
+      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);
@@ -549,7 +549,7 @@ void main() {
 ///
 /// Calls to [buildAar] are stored as [capturedBuildAarCalls], other calls are rejected.
 final class _CapturingFakeAndroidBuilder extends Fake implements AndroidBuilder {
-  final List<Invocation> capturedBuildAarCalls = <Invocation>[];
+  final capturedBuildAarCalls = <Invocation>[];
 
   @override
   Object? noSuchMethod(Invocation invocation) {
@@ -577,10 +577,10 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {}
 }

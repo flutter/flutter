@@ -13,7 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-const SemanticsFlags allFlags = SemanticsFlags(
+SemanticsFlags allFlags = SemanticsFlags(
   hasCheckedState: true,
   isChecked: true,
   isSelected: true,
@@ -465,13 +465,12 @@ void main() {
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.0)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
       expect(
         linePath,
         coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)),
@@ -480,13 +479,12 @@ void main() {
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.5)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
       expect(
         linePath,
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -746,8 +744,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -764,6 +760,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1048,8 +1045,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1066,6 +1061,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1139,7 +1135,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1150,8 +1146,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1167,6 +1161,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1245,7 +1240,7 @@ void main() {
       }
 
       final SemanticsData emptyData = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1256,8 +1251,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1273,6 +1266,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1289,8 +1283,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1307,6 +1299,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1368,7 +1361,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flagsCollection: SemanticsFlags.kNone,
+        flagsCollection: SemanticsFlags.none,
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1379,8 +1372,6 @@ void main() {
         tooltip: 'f',
         textDirection: TextDirection.ltr,
         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-        elevation: 3.0,
-        thickness: 4.0,
         textSelection: null,
         scrollIndex: null,
         scrollChildCount: null,
@@ -1397,6 +1388,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

@@ -9,8 +9,9 @@ class AppBarTemplate extends TokenTemplate {
     : super(colorSchemePrefix: '_colors.', textThemePrefix: '_textTheme.');
 
   @override
-  String generate() => '''
-class _${blockName}DefaultsM3 extends AppBarTheme {
+  String generate() =>
+      '''
+class _${blockName}DefaultsM3 extends AppBarThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
       elevation: ${elevation('md.comp.top-app-bar.small.container')},

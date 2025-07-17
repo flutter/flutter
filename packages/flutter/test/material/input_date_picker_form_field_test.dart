@@ -313,13 +313,13 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('ThemeData.inputDecorationTheme is honored', (WidgetTester tester) async {
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(
         inputDatePickerField(
           theme: ThemeData.from(
             colorScheme: const ColorScheme.light(),
-          ).copyWith(inputDecorationTheme: const InputDecorationTheme(border: border)),
+          ).copyWith(inputDecorationTheme: const InputDecorationThemeData(border: border)),
         ),
       );
       await tester.pumpAndSettle();
@@ -420,7 +420,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -440,7 +439,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -463,7 +461,6 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: InputDatePickerFormField(
               initialDate: DateTime(2025, DateTime.february, 26),

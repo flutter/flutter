@@ -78,7 +78,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   private FlutterJNI flutterJNI = null;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
-  @Nullable private TextureRegistry textureRegistry;
+  @VisibleForTesting @Nullable TextureRegistry textureRegistry;
 
   @Nullable private TextInputPlugin textInputPlugin;
 
@@ -999,7 +999,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       TextureRegistry textureRegistry) {
     if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       TextureRegistry.SurfaceLifecycle lifecycle =
-          Build.VERSION.SDK_INT == API_LEVELS.API_34
+          Build.VERSION.SDK_INT <= API_LEVELS.API_34
               ? TextureRegistry.SurfaceLifecycle.resetInBackground
               : TextureRegistry.SurfaceLifecycle.manual;
       final TextureRegistry.SurfaceProducer textureEntry =

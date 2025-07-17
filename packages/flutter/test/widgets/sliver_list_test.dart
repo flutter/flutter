@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -218,7 +218,7 @@ void main() {
     items.insert(0, -1);
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -258,7 +258,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -285,7 +285,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,

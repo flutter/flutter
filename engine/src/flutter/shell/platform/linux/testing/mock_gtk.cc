@@ -128,6 +128,8 @@ void gtk_window_deiconify(GtkWindow* window) {
   mock->gtk_window_deiconify(window);
 }
 
+void gtk_widget_realize(GtkWidget* widget) {}
+
 void gtk_widget_show(GtkWidget* widget) {}
 
 void gtk_widget_destroy(GtkWidget* widget) {

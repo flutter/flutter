@@ -11,18 +11,15 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String minimalV2EmbeddingManifest = r'''
+const minimalV2EmbeddingManifest = r'''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:name="${applicationName}">
@@ -38,15 +35,6 @@ void main() {
   late FakePub pub;
   late BufferLogger logger;
 
-  // TODO(matanlurey): Remove after `flutter_gen` is removed.
-  // See https://github.com/flutter/flutter/issues/102983 for details.
-  FeatureFlags disableExplicitPackageDependencies() {
-    return TestFeatureFlags(
-      // ignore: avoid_redundant_argument_values
-      isExplicitPackageDependenciesEnabled: false,
-    );
-  }
-
   setUp(() {
     Cache.disableLocking();
     fileSystem = MemoryFileSystem.test();
@@ -59,7 +47,7 @@ void main() {
   });
 
   testUsingContext('pub shows help', () async {
-    final PackagesCommand command = PackagesCommand();
+    final command = PackagesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['pub']);
 
@@ -82,7 +70,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -118,7 +106,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -148,7 +136,7 @@ void main() {
       final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
       targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
@@ -180,7 +168,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
       await commandRunner.run(<String>['get', '--unknown-flag']);
@@ -197,7 +185,7 @@ void main() {
     () async {
       fileSystem.currentDirectory.childDirectory('target').createSync();
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
       pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
       await commandRunner.run(<String>['get', '-v']);
@@ -221,15 +209,15 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('add', '', PubContext.pubAdd);
+      final command = PackagesGetCommand('add', '', PubContext.pubAdd);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-      const List<String> availableSyntax = <String>[
+      const availableSyntax = <String>[
         'foo:{"path":"../foo"}',
         'foo:{"hosted":"my-pub.dev"}',
         'foo:{"sdk":"flutter"}',
         'foo:{"git":"https://github.com/foo/foo"}',
       ];
-      for (final String syntax in availableSyntax) {
+      for (final syntax in availableSyntax) {
         pub.expectedArguments = <String>['add', syntax, '--example', '--directory', '.'];
         await commandRunner.run(<String>['add', syntax]);
       }
@@ -250,7 +238,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -276,7 +264,7 @@ void main() {
   testUsingContext(
     'pub get throws error on missing directory',
     () async {
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
+      final command = PackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       try {
@@ -290,53 +278,6 @@ void main() {
       Pub: () => pub,
       ProcessManager: () => FakeProcessManager.any(),
       FileSystem: () => fileSystem,
-    },
-  );
-
-  testUsingContext(
-    'pub get triggers localizations generation when generate: true',
-    () async {
-      final File pubspecFile = fileSystem.currentDirectory.childFile('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync('''
-name: my_app
-flutter:
-  generate: true
-''');
-      fileSystem.currentDirectory.childFile('l10n.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
-        arb-dir: lib/l10n
-        ''');
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-        ..createSync(recursive: true);
-      arbFile.writeAsStringSync('''
-      {
-        "helloWorld": "Hello, World!",
-        "@helloWorld": {
-          "description": "Sample description"
-        }
-      }
-      ''');
-
-      final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-
-      await commandRunner.run(<String>['get']);
-      final FlutterCommandResult result = await command.runCommand();
-
-      expect(result.exitStatus, ExitStatus.success);
-      final Directory outputDirectory = fileSystem.directory(
-        fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'),
-      );
-      expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-    },
-    overrides: <Type, Generator>{
-      Pub: () => pub,
-      ProcessManager: () => FakeProcessManager.any(),
-      FileSystem: () => fileSystem,
-      FeatureFlags: disableExplicitPackageDependencies,
     },
   );
 }
@@ -353,7 +294,6 @@ class FakePub extends Fake implements Pub {
     required PubContext context,
     required String command,
     bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     if (project != null) {

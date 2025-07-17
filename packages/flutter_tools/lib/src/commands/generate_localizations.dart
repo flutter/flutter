@@ -8,7 +8,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../features.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
@@ -36,15 +35,15 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     argParser.addOption(
       'output-dir',
       help:
-          'The directory where the generated localization classes will be written '
-          'if the synthetic-package flag is set to false.\n'
-          '\n'
-          'If output-dir is specified and the synthetic-package flag is enabled, '
-          'this option will be ignored by the tool.\n'
+          'The directory where the generated localization classes will be written.'
           '\n'
           'The app must import the file specified in the "--output-localization-file" '
           'option from this directory. If unspecified, this defaults to the same '
           'directory as the input directory specified in "--arb-dir".',
+    );
+    argParser.addFlag(
+      'synthetic-package',
+      help: 'DEPRECATED. This flag cannot be enabled and should be removed.',
     );
     argParser.addOption(
       'template-arb-file',
@@ -149,19 +148,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
           '\n'
           'When null, the JSON file will not be generated.',
     );
-    argParser.addFlag(
-      'synthetic-package',
-      defaultsTo: !featureFlags.isExplicitPackageDependenciesEnabled,
-      help:
-          'Determines whether or not the generated output files will be '
-          'generated as a synthetic package or at a specified directory in '
-          'the Flutter project.\n'
-          '\n'
-          'DEPRECATED: https://flutter.dev/to/flutter-gen-deprecation.\n'
-          '\n'
-          'When synthetic-package is set to false, it will generate the '
-          'localizations files in the directory specified by arb-dir by default.\n',
-    );
     argParser.addOption(
       'project-dir',
       valueHelp: 'absolute/path/to/flutter/project',
@@ -262,7 +248,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         logger: _logger,
         fileSystem: _fileSystem,
         defaultArbDir: defaultArbDir,
-        defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '

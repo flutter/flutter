@@ -78,7 +78,7 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
             ),
@@ -92,7 +92,7 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
             ),
@@ -837,7 +837,7 @@ void main() {
 }
 
 Future<BuildApkCommand> runBuildApkCommand(String target, {List<String>? arguments}) async {
-  final BuildApkCommand command = BuildApkCommand(logger: BufferLogger.test());
+  final command = BuildApkCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',

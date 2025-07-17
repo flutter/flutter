@@ -38,7 +38,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * This was introduced to help users migrate code from the FlutterAppDelegate
  * when UISceneDelegate was adopted. Using
- * FlutterViewController.pluginRegistrant should be preferred.
+ * FlutterViewController.pluginRegistrant should be preferred since it doesn't
+ * rely on the FlutterAppDelegate.
  */
 @property(nonatomic, strong, nullable) NSObject<FlutterPluginRegistrant>* pluginRegistrant;
 

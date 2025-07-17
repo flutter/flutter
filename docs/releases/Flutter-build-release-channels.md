@@ -58,6 +58,5 @@ If you really need a particular patch and it's a fix to the flutter/flutter repo
 
 ## See also
 
-* [Release process](Release-process.md), which describes the details for how we push builds from channel to channel.
 * [Cherrypick process](Flutter-Cherrypick-Process.md), where we cover how to request an issue for cherrypicking.
 * [Release notes](https://docs.flutter.dev/release/release-notes), where we document changes to each version of the stable channel.

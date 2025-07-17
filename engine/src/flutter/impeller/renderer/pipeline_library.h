@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_LIBRARY_H_
 
 #include <optional>
+#include <unordered_map>
 
 #include "compute_pipeline_descriptor.h"
 #include "impeller/renderer/pipeline.h"

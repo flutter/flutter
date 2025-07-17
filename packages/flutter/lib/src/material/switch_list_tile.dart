@@ -635,12 +635,11 @@ class SwitchListTile extends StatelessWidget {
         dense: dense,
         contentPadding: contentPadding,
         enabled: onChanged != null,
-        onTap:
-            onChanged != null
-                ? () {
-                  onChanged!(!value);
-                }
-                : null,
+        onTap: onChanged != null
+            ? () {
+                onChanged!(!value);
+              }
+            : null,
         selected: selected,
         selectedTileColor: selectedTileColor,
         autofocus: autofocus,
