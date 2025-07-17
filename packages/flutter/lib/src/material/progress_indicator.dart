@@ -429,19 +429,19 @@ class LinearProgressIndicator extends ProgressIndicator {
   final bool? year2023;
 
   /// ## Animation synchronization
-  /// 
+  ///
   /// When multiple [ProgressIndicator] widgets are animating on screen
   /// simultaneously (e.g., in a list of loading items), their uncoordinated
   /// animations can appear visually cluttered. To address this, the animation of
   /// an indicator can be driven by a custom [AnimationController].
-  /// 
+  ///
   /// This allows multiple indicators to be synchronized to a single animation
   /// source. The most convenient way to achieve this for a group of indicators is
   /// by providing a controller via [ProgressIndicatorTheme]. All
   /// [ProgressIndicator] widgets within that theme's subtree will then share
   /// the same animation, resulting in a more coordinated and visually pleasing
   /// effect.
-  /// 
+  ///
   /// Alternatively, a specific [AnimationController] can be passed directly to the
   /// [controller] property of an individual indicator.
   final AnimationController? controller;
@@ -890,19 +890,19 @@ class CircularProgressIndicator extends ProgressIndicator {
   final EdgeInsetsGeometry? padding;
 
   /// ## Animation synchronization
-  /// 
+  ///
   /// When multiple [ProgressIndicator] widgets are animating on screen
   /// simultaneously (e.g., in a list of loading items), their uncoordinated
   /// animations can appear visually cluttered. To address this, the animation of
   /// an indicator can be driven by a custom [AnimationController].
-  /// 
+  ///
   /// This allows multiple indicators to be synchronized to a single animation
   /// source. The most convenient way to achieve this for a group of indicators is
   /// by providing a controller via [ProgressIndicatorTheme]. All
   /// [ProgressIndicator] widgets within that theme's subtree will then share
   /// the same animation, resulting in a more coordinated and visually pleasing
   /// effect.
-  /// 
+  ///
   /// Alternatively, a specific [AnimationController] can be passed directly to the
   /// [controller] property of an individual indicator.
   final AnimationController? controller;
