@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -437,24 +437,20 @@ Future<void> testMain() async {
     bool simulateError = false;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{
-        'orientation': <Object?, Object?>{
-          'lock': (String lockType) {
-            lockCalls.add(lockType);
-            if (simulateError) {
-              throw Error();
-            }
-            return Future<JSNumber>.value(0.toJS).toJS;
-          }.toJS,
-          'unlock': () {
-            unlockCount += 1;
-          }.toJS,
-        },
-      }),
-    );
+    domWindow['screen'] = <String, Object?>{
+      'orientation': <String, Object?>{
+        'lock': (String lockType) {
+          lockCalls.add(lockType);
+          if (simulateError) {
+            throw Error();
+          }
+          return Future<JSNumber>.value(0.toJS).toJS;
+        }.toJS,
+        'unlock': () {
+          unlockCount += 1;
+        }.toJS,
+      },
+    }.jsify();
 
     // Sanity-check the test setup.
     expect(lockCalls, <String>[]);
@@ -510,7 +506,7 @@ Future<void> testMain() async {
     expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
 
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow['screen'] = original;
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/66128.
@@ -518,14 +514,10 @@ Future<void> testMain() async {
     final DomScreen? original = domWindow.screen;
 
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
-    js_util.setProperty(
-      domWindow,
-      'screen',
-      js_util.jsify(<Object?, Object?>{'orientation': null}),
-    );
+    domWindow['screen'] = <Object?, Object?>{'orientation': null}.jsify();
     expect(domWindow.screen!.orientation, isNull);
     expect(await sendSetPreferredOrientations(<dynamic>[]), isFalse);
-    js_util.setProperty(domWindow, 'screen', original);
+    domWindow['screen'] = original;
   });
 
   test(
