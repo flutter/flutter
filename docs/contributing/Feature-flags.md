@@ -6,10 +6,6 @@ The Flutter tool (`flutter`) supports the concept of _feature flags_, or boolean
 flags that can inform, change, allow, or deny access to behavior, either in the
 tool itself, or in the framework (`package:flutter`, and related).
 
-> [!WARNING]
->
-> This document is based on the unmerged PR [#168437](https://github.com/flutter/flutter/pull/168437).
-
 ---
 
 Table of Contents
@@ -405,3 +401,39 @@ test('sensitive content should fail if the flag is disabled', () {
 
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
+
+# Limitations
+
+The Flutter engine and embedders cannot use Flutter's feature flags directly.
+
+If an embedder needs feature flags, you can instead use the project's platform-specific configuration.
+
+On Android, use `AndroidManifest.xml`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application ...>
+    <meta-data
+      android:name="io.flutter.embedding.android.EnableUnicornEmojis"
+      android:value="true" />
+  </application>
+</manifest>
+```
+
+On iOS and macOS, use `Info.plist`:
+
+```xml
+...
+<plist version="1.0">
+<dict>
+  <key>FLTEnableUnicornEmojis</key>
+  <true />
+</dict>
+</plist>
+```
+
+See Impeller and UI thread merging for prior art.
+ 
+> [!IMPORTANT]  
+> If possible, prefer to use Flutter flags instead of platform-specific configuration files.
+> Flutter feature flags are easier for Flutter app developers.
