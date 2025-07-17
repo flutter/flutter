@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
-
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
@@ -174,8 +172,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                 unusedLayers:
                     (const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
                surfaceFrames:
-                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames
-                   frameSize:(CGSize)frameSize;
+                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames;
 
 - (void)onCreate:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)onDispose:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -761,7 +758,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
-               frameSize = self.frameSize,                                //
                unusedLayers = std::move(unusedLayers),                    //
                surfaceFrames = std::move(surfaceFrames)                   //
   ]() mutable {
@@ -770,8 +766,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
               viewsToRecomposite:viewsToRecomposite
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
-                   surfaceFrames:surfaceFrames
-                       frameSize:CGSizeMake(frameSize.width(), frameSize.height())];
+                   surfaceFrames:surfaceFrames];
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
@@ -812,16 +807,15 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                 unusedLayers:
                     (const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
                surfaceFrames:
-                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames
-                   frameSize:(CGSize)frameSize {
+                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
-
-  self.flutterView.bounds = CGRectMake(0, 0, frameSize.width, frameSize.height);
-  // TODO: Setting the bounds above will trigger [FlutterViewController viewDidLayoutSubviews], but
-  // does it do it immediately and not after any kind of frame delay? If we find that
-  // adjusting the bounds does this immediately, then we can remove this line.
-  [self.flutterViewController viewDidLayoutSubviews];
+//
+//  self.flutterView.bounds = CGRectMake(0, 0, frameSize.width, frameSize.height);
+//  // TODO: Setting the bounds above will trigger [FlutterViewController viewDidLayoutSubviews], but
+//  // does it do it immediately and not after any kind of frame delay? If we find that
+//  // adjusting the bounds does this immediately, then we can remove this line.
+//  [self.flutterViewController viewDidLayoutSubviews];
 
   [CATransaction begin];
 

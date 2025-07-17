@@ -1099,27 +1099,26 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
-    bool has_given_constraints =
-        (metrics.min_width_constraint != 0.0 ||
-         metrics.max_width_constraint != 0.0 ||
-         metrics.min_height_constraint != 0.0 ||
-         metrics.max_height_constraint != 0.0);
+    bool has_given_constraints = (metrics.min_width_constraint != 0.0 ||
+                                  metrics.max_width_constraint != 0.0 ||
+                                  metrics.min_height_constraint != 0.0 ||
+                                  metrics.max_height_constraint != 0.0);
 
     if (has_given_constraints) {
-        expected_frame_constraints_[view_id] = {
+      expected_frame_constraints_[view_id] = {
           .min_width = metrics.min_width_constraint,
           .max_width = metrics.max_width_constraint,
           .min_height = metrics.min_height_constraint,
           .max_height = metrics.max_height_constraint,
 
-        };
+      };
     } else {
-        expected_frame_constraints_[view_id] = {
+      expected_frame_constraints_[view_id] = {
           .min_width = metrics.physical_width,
           .max_width = metrics.physical_width,
           .min_height = metrics.physical_height,
           .max_height = metrics.physical_height,
-        };
+      };
     }
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
