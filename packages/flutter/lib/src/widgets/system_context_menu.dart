@@ -114,8 +114,29 @@ class SystemContextMenu extends StatefulWidget {
   /// Whether the current device supports showing the system context menu.
   ///
   /// Currently, this is only supported on newer versions of iOS.
+  ///
+  /// See also:
+  ///
+  ///  * [isSupportedByField], which uses this method and determines whether an
+  ///    individual [EditableTextState] supports the system context menu.
   static bool isSupported(BuildContext context) {
-    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
+    return defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
+  /// Whether the given field supports showing the system context menu.
+  ///
+  /// Currently [SystemContextMenu] is only supported with an active
+  /// [TextInputConnection]. In cases where this isn't possible, such as in a
+  /// read-only field, fall back to using a Flutter-rendered context menu like
+  /// [AdaptiveTextSelectionToolbar].
+  ///
+  /// See also:
+  ///
+  ///  * [isSupported], which is used by this method and determines whether the
+  ///    platform in general supports showing the system context menu.
+  static bool isSupportedByField(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly && isSupported(editableTextState.context);
   }
 
   /// The default [items] for the given [EditableTextState].
