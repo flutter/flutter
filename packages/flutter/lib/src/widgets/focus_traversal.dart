@@ -828,10 +828,14 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           break;
         }
 
-        final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!, axis: Axis.vertical);
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(
+          focusedChild.context!,
+          axis: Axis.vertical,
+        );
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
-            (FocusNode node) => Scrollable.maybeOf(node.context!, axis: Axis.vertical) == focusedScrollable,
+            (FocusNode node) =>
+                Scrollable.maybeOf(node.context!, axis: Axis.vertical) == focusedScrollable,
           );
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
@@ -881,10 +885,14 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           break;
         }
 
-        final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!, axis: Axis.horizontal);
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(
+          focusedChild.context!,
+          axis: Axis.horizontal,
+        );
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
-            (FocusNode node) => Scrollable.maybeOf(node.context!, axis: Axis.horizontal) == focusedScrollable,
+            (FocusNode node) =>
+                Scrollable.maybeOf(node.context!, axis: Axis.horizontal) == focusedScrollable,
           );
           if (filteredEligibleNodes.isNotEmpty) {
             eligibleNodes = filteredEligibleNodes;
