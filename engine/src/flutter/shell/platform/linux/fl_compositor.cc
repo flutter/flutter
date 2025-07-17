@@ -12,12 +12,6 @@ static void fl_compositor_class_init(FlCompositorClass* klass) {}
 
 static void fl_compositor_init(FlCompositor* self) {}
 
-FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* self) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR(self),
-                       static_cast<FlutterRendererType>(0));
-  return FL_COMPOSITOR_GET_CLASS(self)->get_renderer_type(self);
-}
-
 void fl_compositor_wait_for_frame(FlCompositor* self,
                                   int target_width,
                                   int target_height) {

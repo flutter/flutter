@@ -18,11 +18,6 @@ G_DEFINE_TYPE(FlCompositorSoftware,
               fl_compositor_software,
               fl_compositor_get_type())
 
-static FlutterRendererType fl_compositor_software_get_renderer_type(
-    FlCompositor* compositor) {
-  return kSoftware;
-}
-
 static void fl_compositor_software_wait_for_frame(FlCompositor* compositor,
                                                   int target_width,
                                                   int target_height) {}
@@ -72,8 +67,6 @@ static void fl_compositor_software_dispose(GObject* object) {
 
 static void fl_compositor_software_class_init(
     FlCompositorSoftwareClass* klass) {
-  FL_COMPOSITOR_CLASS(klass)->get_renderer_type =
-      fl_compositor_software_get_renderer_type;
   FL_COMPOSITOR_CLASS(klass)->wait_for_frame =
       fl_compositor_software_wait_for_frame;
   FL_COMPOSITOR_CLASS(klass)->present_layers =
@@ -93,6 +86,8 @@ FlCompositorSoftware* fl_compositor_software_new() {
 gboolean fl_compositor_software_render(FlCompositorSoftware* self,
                                        cairo_t* cr,
                                        gint scale_factor) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_SOFTWARE(self), FALSE);
+
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
   if (self->surface == nullptr) {
