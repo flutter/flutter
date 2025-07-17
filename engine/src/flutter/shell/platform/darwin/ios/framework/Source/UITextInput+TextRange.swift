@@ -6,7 +6,8 @@ import UIKit
 
 @objc(FlutterTextPosition)
 final class TextPosition: UITextPosition, NSCopying {
-  let offset: UInt
+  // offset is exposed as `range` in an extension on UITextPosition.
+  fileprivate let offset: UInt
   @objc let affinity: UITextStorageDirection
 
   init(index: UInt, affinity: UITextStorageDirection = .forward) {
@@ -33,7 +34,8 @@ final class TextPosition: UITextPosition, NSCopying {
 
 @objc(FlutterTextRange)
 final class TextRange: UITextRange, NSCopying {
-  let nsRange: NSRange
+  // nsRange is exposed as `range` in an extension on UITextPosition.
+  fileprivate let nsRange: NSRange
 
   init(NSRange range: NSRange) {
     assert(range.location != NSNotFound)
@@ -66,9 +68,9 @@ final class TextRange: UITextRange, NSCopying {
   /// This method assumes the receiver is a valid range with in the given document, and the text of the
   /// document is a well-formed string.
   ///
-  /// On iOS 13, the default standard Korean keyboard incorrectly may delete the low surrogate and
-  /// leaves the high surrogate in the string, resulting in a malformed string and subsequently a crash during
-  /// UTF8 encoding. See: https://github.com/flutter/flutter/issues/111494.
+  /// Manipulating text with an "unsafe" TextRange may result in malformed strings and subsequently
+  /// a crash during UTF8 encoding (see: https://github.com/flutter/flutter/issues/111494
+  /// for an example).
   @objc func safeRange(in document: UITextInput) -> TextRange {
     let fullText = document.fullText
     let start = self.start.index
@@ -93,6 +95,7 @@ final class TextRange: UITextRange, NSCopying {
 
 // MARK: Class methods for initializing in Objective-C
 
+@available(swift, obsoleted: 1.0)
 @objc extension TextPosition {
   class func position(withIndex index: UInt, affinity: UITextStorageDirection)
     -> TextPosition
@@ -124,7 +127,7 @@ final class TextRange: UITextRange, NSCopying {
 @objc extension UITextPosition {
   /// The offset from the start of the document to this FlutterTextPosition, in UTF16 code units.
   ///
-  /// This computed property throws if the receiver is not a FlutterTextRange.
+  /// This computed property throws if the receiver is not a FlutterTextPosition.
   var index: UInt { (self as! TextPosition).offset }
 
   func compare(to other: UITextPosition) -> ComparisonResult {

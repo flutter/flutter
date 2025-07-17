@@ -1309,6 +1309,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 // Change the range of selected text, without notifying the framework.
 - (void)setSelectedTextRangeLocal:(UITextRange*)selectedTextRange {
+  if (_selectedTextRange == selectedTextRange) {
+    return;
+  }
   // The `hasText` check isn't really necessary but that's what UITextView does.
   if (self.hasText) {
     _selectedTextRange = [selectedTextRange copy];
@@ -1835,7 +1838,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // Get the selectionRect of the characters before and after the requested caret position.
   NSInteger start = MAX(0, index - 1);
   NSInteger end = MIN((NSInteger)self.text.length, start + 2);
-  NSRange characterRange = NSMakeRange(start, end - start);
+  NSRange characterRange = [self.text rangeOfComposedCharacterSequencesForRange: NSMakeRange(start, end - start)];
   NSArray<UITextSelectionRect*>* rects =
       [self selectionRectsForRange:[FlutterTextRange rangeWithNSRange:characterRange]];
   if (rects.count == 0) {
