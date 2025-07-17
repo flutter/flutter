@@ -1339,10 +1339,12 @@ void main() {
       WidgetTester tester,
     ) async {
       final GlobalKey containerKey = GlobalKey();
+      final TransitionDurationObserver observer = TransitionDurationObserver();
 
       // Default MaterialPageRoute transition duration should be 300ms.
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<dynamic>(
               builder: (BuildContext context) {
@@ -1376,11 +1378,11 @@ void main() {
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container should be present halfway through the transition.
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(observer.transitionDuration ~/ 2);
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container should be present at the very end of the transition.
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(observer.transitionDuration ~/ 2);
       expect(find.byKey(containerKey), findsOneWidget);
 
       // Container have transitioned out after 300ms.

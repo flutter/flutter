@@ -40,7 +40,7 @@ class IOSCoreDeviceControl {
   /// When the `--timeout` flag is used with `devicectl`, it must be at
   /// least 5 seconds. If lower than 5 seconds, `devicectl` will error and not
   /// run the command.
-  static const int _minimumTimeoutInSeconds = 5;
+  static const _minimumTimeoutInSeconds = 5;
 
   /// Executes `devicectl` command to get list of devices. The command will
   /// likely complete before [timeout] is reached. If [timeout] is reached,
@@ -54,7 +54,7 @@ class IOSCoreDeviceControl {
     }
 
     // Default to minimum timeout if needed to prevent error.
-    Duration validTimeout = timeout;
+    var validTimeout = timeout;
     if (timeout.inSeconds < _minimumTimeoutInSeconds) {
       _logger.printError(
         'Timeout of ${timeout.inSeconds} seconds is below the minimum timeout value '
@@ -67,7 +67,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('core_device_list.json');
     output.createSync();
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'list',
@@ -80,7 +80,7 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
-      bool isToolPossiblyShutdown = false;
+      var isToolPossiblyShutdown = false;
       if (_fileSystem is ErrorHandlingFileSystem) {
         final FileSystem delegate = _fileSystem.fileSystem;
         if (delegate is LocalFileSystem) {
@@ -155,7 +155,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('core_device_app_list.json');
     output.createSync();
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -230,7 +230,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('install_results.json');
     output.createSync();
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -279,7 +279,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('uninstall_results.json');
     output.createSync();
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -330,7 +330,7 @@ class IOSCoreDeviceControl {
     final File output = tempDirectory.childFile('launch_results.json');
     output.createSync();
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'devicectl',
       'device',
@@ -395,7 +395,7 @@ class IOSCoreDevice {
   ///   "visibilityClass" : "default"
   /// }
   factory IOSCoreDevice.fromBetaJson(Map<String, Object?> data, {required Logger logger}) {
-    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[
+    final capabilitiesList = <_IOSCoreDeviceCapability>[
       if (data case {'capabilities': final List<Object?> capabilitiesData})
         for (final Object? capabilityData in capabilitiesData)
           if (capabilityData != null && capabilityData is Map<String, Object?>)
