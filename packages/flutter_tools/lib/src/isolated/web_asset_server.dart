@@ -177,7 +177,7 @@ class WebAssetServer implements AssetReader {
   }
 
   Uri get baseUri => _baseUri;
-  late final Uri _baseUri;
+  late Uri _baseUri;
 
   /// Start the web asset server on a [hostname] and [port].
   ///
