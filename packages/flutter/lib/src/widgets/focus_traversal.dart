@@ -815,7 +815,6 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     TraversalDirection direction, {
     bool forward = true,
   }) {
-    final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!);
     switch (direction) {
       case TraversalDirection.down:
       case TraversalDirection.up:
@@ -828,6 +827,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
+
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!, axis: Axis.vertical);
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
             (FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable,
@@ -879,6 +880,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
+
+        final ScrollableState? focusedScrollable = Scrollable.maybeOf(focusedChild.context!, axis: Axis.horizontal);
         if (focusedScrollable != null && !focusedScrollable.position.atEdge) {
           final Iterable<FocusNode> filteredEligibleNodes = eligibleNodes.where(
             (FocusNode node) => Scrollable.maybeOf(node.context!) == focusedScrollable,
