@@ -7,7 +7,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../dart/analysis.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
@@ -129,7 +129,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
         server.dispose().whenComplete(() {
-          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: shutdownHooks);
+          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: globals.shutdownHooks);
         });
       }
 
