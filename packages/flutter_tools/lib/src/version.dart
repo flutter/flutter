@@ -208,12 +208,7 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _runGit(
-      FlutterVersion.gitLog(<String>[
-        '-n',
-        '1',
-        '--pretty=format:%ar',
-        ?revision,
-      ]).join(' '),
+      FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar', ?revision]).join(' '),
       globals.processUtils,
       flutterRoot,
     );
