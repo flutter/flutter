@@ -5,7 +5,7 @@
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 import 'package:yaml/yaml.dart';
-import '/src/base/logger.dart';
+import '../base/logger.dart';
 import '../globals.dart' as globals;
 
 String _normalizePath(String path) {
