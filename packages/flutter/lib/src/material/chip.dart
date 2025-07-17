@@ -1799,9 +1799,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final RenderBox? label = childForSlot(_ChipSlot.label);
     final RenderBox? deleteIcon = childForSlot(_ChipSlot.deleteIcon);
     return <RenderBox>[
-      if (avatar != null) avatar,
-      if (label != null) label,
-      if (deleteIcon != null) deleteIcon,
+      ?avatar,
+      ?label,
+      ?deleteIcon,
     ];
   }
 
