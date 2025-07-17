@@ -103,11 +103,11 @@ FLUTTER_DARWIN_EXPORT
                          bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)initWithEngine:(FlutterEngine*)engine
-                        nibName:(nullable NSString*)nibName
-                         bundle:(nullable NSBundle*)nibBundle
-                       minWidth:(CGFloat)minWidth
-                       maxWidth:(CGFloat)maxWidth
-                      minHeight:(CGFloat)minHeight
+                       nibName:(nullable NSString*)nibName
+                        bundle:(nullable NSBundle*)nibBundle
+                      minWidth:(CGFloat)minWidth
+                      maxWidth:(CGFloat)maxWidth
+                     minHeight:(CGFloat)minHeight
                      maxHeight:(CGFloat)maxHeight;
 
 /**

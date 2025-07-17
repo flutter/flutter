@@ -414,8 +414,8 @@ class FlutterView {
     _render(
       viewId,
       scene as _NativeScene,
-      600,
-      600,
+      size?.width ?? physicalSize.width,
+      size?.height ?? physicalSize.height,
     );
   }
 

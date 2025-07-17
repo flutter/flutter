@@ -90,9 +90,6 @@ void PlatformConfiguration::DidCreateIsolate() {
 
 bool PlatformConfiguration::AddView(int64_t view_id,
                                     const ViewportMetrics& view_metrics) {
-  // TODO: This is calling "_addView" in hooks.dart with a bunch of params.
-  // _addView instantiates a new FlutterView via the FlutterView._()
-  // constructor. We need to pass the physicalConstraints view constraints.
   auto [view_iterator, insertion_happened] =
       metrics_.emplace(view_id, view_metrics);
   if (!insertion_happened) {

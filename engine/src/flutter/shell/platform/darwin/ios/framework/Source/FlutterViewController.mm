@@ -244,12 +244,12 @@ typedef struct MouseState {
 }
 
 - (instancetype)initWithEngine:(FlutterEngine*)engine
-                        nibName:(nullable NSString*)nibName
-                         bundle:(nullable NSBundle*)nibBundle
-                       minWidth:(CGFloat)minWidth
-                       maxWidth:(CGFloat)maxWidth
-                      minHeight:(CGFloat)minHeight
-                      maxHeight:(CGFloat)maxHeight {
+                       nibName:(nullable NSString*)nibName
+                        bundle:(nullable NSBundle*)nibBundle
+                      minWidth:(CGFloat)minWidth
+                      maxWidth:(CGFloat)maxWidth
+                     minHeight:(CGFloat)minHeight
+                     maxHeight:(CGFloat)maxHeight {
   if (self) {
     _minWidth = minWidth;
     _maxWidth = maxWidth;
@@ -884,24 +884,6 @@ static void SendFakeTouchEvent(UIScreen* screen,
     _rotationGestureRecognizer.delegate = self;
     [self.flutterView addGestureRecognizer:_rotationGestureRecognizer];
   }
-
-//  BOOL hasConstraints =
-//      self.minWidth > 0 || self.maxWidth > 0 || self.minHeight > 0 || self.maxHeight > 0;
-//  if (hasConstraints) {
-//    self.view.translatesAutoresizingMaskIntoConstraints = NO;
-//    if (self.minWidth > 0) {
-//      [self.view.widthAnchor constraintGreaterThanOrEqualToConstant:self.minWidth].active = YES;
-//    }
-//    if (self.maxWidth > 0) {
-//      [self.view.widthAnchor constraintLessThanOrEqualToConstant:self.maxWidth].active = YES;
-//    }
-//    if (self.minHeight > 0) {
-//      [self.view.heightAnchor constraintGreaterThanOrEqualToConstant:self.minHeight].active = YES;
-//    }
-//    if (self.maxHeight > 0) {
-//      [self.view.heightAnchor constraintLessThanOrEqualToConstant:self.maxHeight].active = YES;
-//    }
-//  }
 
   [super viewDidLoad];
 }
