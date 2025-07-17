@@ -186,7 +186,7 @@ void main() {
       ),
     );
 
-    final SemanticsNode node = tester.getSemantics(find.text('Flutter 2025'));
+    final SemanticsNode node = tester.getSemantics(find.byType(Directionality));
     final LocaleStringAttribute localeStringAttribute =
         node.attributedLabel.attributes[0] as LocaleStringAttribute;
 
