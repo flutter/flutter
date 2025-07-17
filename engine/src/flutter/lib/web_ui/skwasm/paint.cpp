@@ -54,8 +54,9 @@ SKWASM_EXPORT void paint_setImageFilter(DlPaint* paint,
   paint->setImageFilter(filter->shared());
 }
 
-SKWASM_EXPORT void paint_setColorFilter(DlPaint* paint,
-                                        sp_wrapper<const DlColorFilter>* filter) {
+SKWASM_EXPORT void paint_setColorFilter(
+    DlPaint* paint,
+    sp_wrapper<const DlColorFilter>* filter) {
   paint->setColorFilter(filter->shared());
 }
 

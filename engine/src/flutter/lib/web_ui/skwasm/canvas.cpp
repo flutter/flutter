@@ -25,8 +25,7 @@ class SkwasmParagraphPainter : public ParagraphPainter {
                             SkScalar x,
                             SkScalar y,
                             const SkPaintOrID& paint) {
-    _builder.DrawText(DlTextSkia::Make(blob), x, y,
-                           flutter::DlPaint());
+    _builder.DrawText(DlTextSkia::Make(blob), x, y, flutter::DlPaint());
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -147,24 +146,25 @@ SKWASM_EXPORT void canvas_drawLine(DisplayListBuilder* canvas,
                                    DlScalar x2,
                                    DlScalar y2,
                                    DlPaint* paint) {
-  canvas->DrawLine(DlPoint{x1, y1}, DlPoint{x2, y2}, *paint);
+  canvas->DrawLine(DlPoint{x1, y1}, DlPoint{x2, y2},
+                   paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawPaint(DisplayListBuilder* canvas,
                                     DlPaint* paint) {
-  canvas->DrawPaint(*paint);
+  canvas->DrawPaint(paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawRect(DisplayListBuilder* canvas,
                                    DlRect* rect,
                                    DlPaint* paint) {
-  canvas->DrawRect(*rect, *paint);
+  canvas->DrawRect(*rect, paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawRRect(DisplayListBuilder* canvas,
                                     const DlScalar* rrectValues,
                                     DlPaint* paint) {
-  canvas->DrawRoundRect(createDlRRect(rrectValues), *paint);
+  canvas->DrawRoundRect(createDlRRect(rrectValues), paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawDRRect(DisplayListBuilder* canvas,
@@ -172,13 +172,14 @@ SKWASM_EXPORT void canvas_drawDRRect(DisplayListBuilder* canvas,
                                      const DlScalar* innerRrectValues,
                                      DlPaint* paint) {
   canvas->DrawDiffRoundRect(createDlRRect(outerRrectValues),
-                            createDlRRect(innerRrectValues), *paint);
+                            createDlRRect(innerRrectValues),
+                            paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawOval(DisplayListBuilder* canvas,
                                    const DlRect* rect,
                                    DlPaint* paint) {
-  canvas->DrawOval(*rect, *paint);
+  canvas->DrawOval(*rect, paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawCircle(DisplayListBuilder* canvas,
@@ -186,7 +187,7 @@ SKWASM_EXPORT void canvas_drawCircle(DisplayListBuilder* canvas,
                                      DlScalar y,
                                      DlScalar radius,
                                      DlPaint* paint) {
-  canvas->DrawCircle(DlPoint{x, y}, radius, *paint);
+  canvas->DrawCircle(DlPoint{x, y}, radius, paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawArc(DisplayListBuilder* canvas,
@@ -197,13 +198,13 @@ SKWASM_EXPORT void canvas_drawArc(DisplayListBuilder* canvas,
                                   DlPaint* paint) {
   // TODO(jacksongardner): Double check the units here (radians vs degrees)
   canvas->DrawArc(*rect, startAngleDegrees, sweepAngleDegrees, useCenter,
-                  *paint);
+                  paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawPath(DisplayListBuilder* canvas,
                                    SkPath* path,
                                    DlPaint* paint) {
-  canvas->DrawPath(DlPath(*path), *paint);
+  canvas->DrawPath(DlPath(*path), paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawShadow(DisplayListBuilder* canvas,
@@ -265,7 +266,8 @@ SKWASM_EXPORT void canvas_drawVertices(DisplayListBuilder* canvas,
                                        DlVertices* vertices,
                                        DlBlendMode mode,
                                        DlPaint* paint) {
-  canvas->DrawVertices(vertices->shared_from_this(), mode, *paint);
+  canvas->DrawVertices(vertices->shared_from_this(), mode,
+                       paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
@@ -273,7 +275,7 @@ SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
                                      DlPoint* points,
                                      int pointCount,
                                      DlPaint* paint) {
-  canvas->DrawPoints(mode, pointCount, points, *paint);
+  canvas->DrawPoints(mode, pointCount, points, paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
@@ -295,7 +297,8 @@ SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
       samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
 }
 
-SKWASM_EXPORT void canvas_getTransform(DisplayListBuilder* canvas, DlMatrix* outTransform) {
+SKWASM_EXPORT void canvas_getTransform(DisplayListBuilder* canvas,
+                                       DlMatrix* outTransform) {
   *outTransform = canvas->GetMatrix();
 }
 

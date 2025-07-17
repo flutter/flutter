@@ -155,8 +155,10 @@ void Surface::renderPicturesOnWorker(sk_sp<DisplayList>* pictures,
     auto canvas = _surface->getCanvas();
     canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
     auto dispatcher = DlSkCanvasDispatcher(canvas);
+    dispatcher.save();
     dispatcher.translate(-roundedOutRect.GetLeft(), -roundedOutRect.GetTop());
     dispatcher.drawDisplayList(picture, 1.0f);
+    dispatcher.restore();
 
     _grContext->flush(_surface.get());
     imagePromiseArray = skwasm_captureImageBitmap(

@@ -31,7 +31,9 @@ class SkwasmPaint implements ui.Paint {
 
     final localColorFilter = _colorFilter;
     if (localColorFilter != null) {
-      SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((nativeFilterHandle) {
+      SkwasmColorFilter.fromEngineColorFilter(localColorFilter).withRawColorFilter((
+        nativeFilterHandle,
+      ) {
         paintSetColorFilter(rawPaint, nativeFilterHandle);
       });
     }
