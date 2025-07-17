@@ -318,7 +318,6 @@ class _TabStyle extends AnimatedWidget {
     final TextStyle unselectedStyle = defaults.unselectedLabelStyle!
         .merge(unselectedLabelStyle ?? tabBarTheme.unselectedLabelStyle ?? labelStyle)
         .copyWith(inherit: true);
-
     final TextStyle textStyle = isSelected
         ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
         : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
