@@ -2759,6 +2759,74 @@ void main() {
     );
 
     testWidgets(
+      'Horizontal list inside verical list should not prevent focus traversal',
+      (WidgetTester tester) async {
+        final List<FocusNode> nodes = List<FocusNode>.generate(
+          3,
+          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+        ).toList();
+        addTearDown(() {
+          for (final FocusNode node in nodes) {
+            node.dispose();
+          }
+        });
+        final FocusNode topNode = FocusNode(debugLabel: 'Top');
+        addTearDown(topNode.dispose);
+        final FocusNode bottomNode = FocusNode(debugLabel: 'Bottom');
+        addTearDown(bottomNode.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Column(
+              children: <Widget>[
+                Focus(focusNode: topNode, child: Container(height: 100)),
+                Expanded(
+                  child: ListView(
+                    children: nodes.map<Widget>((FocusNode node) {
+                      return SizedBox(
+                        height: 100,
+                        child: ListView(
+                          children: <Widget>[
+                            Focus(focusNode: node, child: Container(height: 100))
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Focus(focusNode: bottomNode, child: Container(height: 100)),
+              ],
+            ),
+          ),
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(topNode.hasPrimaryFocus, isTrue);
+
+        for (int i = 0; i < nodes.length; i++) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+          await tester.pump();
+          expect(nodes[i].hasPrimaryFocus, isTrue, reason: 'Node $i expect to receive focuse');
+        }
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        expect(bottomNode.hasPrimaryFocus, isTrue);
+
+        for (int i = nodes.length - 1; i >=0 ; i--) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+          await tester.pump();
+          expect(nodes[i].hasPrimaryFocus, isTrue, reason: 'Node $i expect to receive focuse');
+        }
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+        expect(topNode.hasPrimaryFocus, isTrue);
+      }
+    );
+
+    testWidgets(
       'Arrow focus traversal actions can be re-enabled for text fields.',
       (WidgetTester tester) async {
         final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
