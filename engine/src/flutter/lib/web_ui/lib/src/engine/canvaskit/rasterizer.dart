@@ -18,7 +18,9 @@ abstract class Rasterizer {
 }
 
 abstract class ViewRasterizer {
-  ViewRasterizer(this.view);
+  ViewRasterizer(this.view) {
+    view.dom.sceneHost.append(sceneElement);
+  }
 
   /// The view this rasterizer renders into.
   final EngineFlutterView view;
@@ -33,13 +35,13 @@ abstract class ViewRasterizer {
   final CompositorContext context = CompositorContext();
 
   /// The platform view embedder.
-  late final HtmlViewEmbedder viewEmbedder = HtmlViewEmbedder(sceneHost, this);
+  late final HtmlViewEmbedder viewEmbedder = HtmlViewEmbedder(sceneElement, this);
 
   /// A factory for creating overlays.
   DisplayCanvasFactory<DisplayCanvas> get displayFactory;
 
-  /// The scene host which this rasterizer should raster into.
-  DomElement get sceneHost => view.dom.sceneHost;
+  /// The DOM element which this rasterizer should raster into.
+  final DomElement sceneElement = domDocument.createElement('flt-scene');
 
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.

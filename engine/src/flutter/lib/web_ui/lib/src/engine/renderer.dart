@@ -229,4 +229,7 @@ abstract class Renderer {
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view);
 
   void dumpDebugInfo();
+
+  /// Clears the state of this renderer. Used in tests.
+  void debugClear();
 }
