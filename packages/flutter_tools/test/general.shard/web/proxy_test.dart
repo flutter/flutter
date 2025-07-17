@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
