@@ -737,4 +737,162 @@ void main() {
     expect(diagnosticsNodes.first.name, 'title');
     expect(diagnosticsNodes.first.value, title);
   });
+
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, isSupported is false',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      buildContext = context;
+                      return TextField(
+                        controller: controller,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(SystemContextMenu.isSupported(buildContext), isFalse);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'when supportsShowingSystemContextMenu is true and the platform is iOS, isSupported is true',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      buildContext = context;
+                      return TextField(
+                        controller: controller,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(SystemContextMenu.isSupported(buildContext), switch (defaultTargetPlatform) {
+        TargetPlatform.iOS => isTrue,
+        _ => isFalse,
+      });
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  for (final bool readOnly in <bool>[true, false]) {
+    testWidgets(
+      'read only fields do not support the system context menu',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              final MediaQueryData mediaQueryData = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+                child: MaterialApp(
+                  home: Scaffold(body: TextField(readOnly: readOnly)),
+                ),
+              );
+            },
+          ),
+        );
+
+        final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+        expect(SystemContextMenu.isSupportedByField(editableTextState), switch (readOnly) {
+          true => isFalse,
+          false => isTrue,
+        });
+      },
+      skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/170521.
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, SystemContextMenu throws',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(tester.takeException(), isAssertionError);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+  );
 }

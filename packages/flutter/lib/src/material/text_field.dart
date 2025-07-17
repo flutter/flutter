@@ -879,7 +879,7 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
