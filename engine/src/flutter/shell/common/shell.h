@@ -684,9 +684,6 @@ class Shell final : public PlatformView::Delegate,
       CustomAccessibilityActionUpdates actions) override;
 
   // |Engine::Delegate|
-  void OnEngineUpdateViewportMetrics(int64_t index, SkISize size) override;
-
-  // |Engine::Delegate|
   void OnEngineHandlePlatformMessage(
       std::unique_ptr<PlatformMessage> message) override;
 

@@ -65,10 +65,6 @@ class MockDelegate : public Engine::Delegate {
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
               (override));
   MOCK_METHOD(void,
-              OnEngineUpdateViewportMetrics,
-              (int64_t, SkISize),
-              (override));
-  MOCK_METHOD(void,
               OnEngineHandlePlatformMessage,
               (std::unique_ptr<PlatformMessage>),
               (override));
@@ -119,7 +115,6 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               UpdateSemantics,
               (int64_t, SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
               (override));
-  MOCK_METHOD(void, UpdateViewportMetrics, (int64_t, SkISize), (override));
   MOCK_METHOD(void,
               HandlePlatformMessage,
               (std::unique_ptr<PlatformMessage>),

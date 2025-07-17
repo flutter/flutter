@@ -98,8 +98,6 @@ class PlatformConfigurationClient {
   ///
   virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
-  virtual void UpdateViewportMetrics(int64_t viewId, SkISize size) = 0;
-
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
   ///             underlying platform, the message needs to be forwarded to

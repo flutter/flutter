@@ -517,10 +517,6 @@ void PlatformConfigurationNativeApi::Render(int64_t view_id,
                                             double width,
                                             double height) {
   UIDartState::ThrowIfUIOperationsProhibited();
-//  UIDartState::Current()
-//      ->platform_configuration()
-//      ->client()
-//      ->UpdateViewportMetrics(view_id, SkISize::Make(width, height));
   UIDartState::Current()->platform_configuration()->client()->Render(
       view_id, scene, width, height);
 }
