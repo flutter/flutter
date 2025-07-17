@@ -46,8 +46,6 @@ dependencies:
   stream_channel: 2.1.4
   shelf_web_socket: 2.0.1
   shelf_static: 1.1.3
-  shelf_router: ^1.1.4
-  shelf_test_handler: ^2.0.2
   pub_semver: 2.2.0
   pool: 1.5.1
   path: 1.9.1
@@ -116,7 +114,6 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.2
-  mockito: ^5.4.6
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -131,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ldj9b4
+# PUBSPEC CHECKSUM: fts3al
