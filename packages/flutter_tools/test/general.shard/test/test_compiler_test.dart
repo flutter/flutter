@@ -24,7 +24,7 @@ import '../../src/throwing_pub.dart';
 
 final Platform linuxPlatform = FakePlatform(environment: <String, String>{});
 
-final BuildInfo debugBuild = BuildInfo(
+final debugBuild = BuildInfo(
   BuildMode.debug,
   '',
   treeShakeIcons: false,
@@ -54,7 +54,7 @@ name: foo
     'TestCompiler reports a dill file when compile is successful',
     () async {
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -79,7 +79,7 @@ name: foo
     'TestCompiler does not try to cache the dill file when precompiled dill is passed',
     () async {
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -110,7 +110,7 @@ name: foo
         <Uri>[],
         errorMessage: 'A big bad happened',
       );
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -136,8 +136,8 @@ name: foo
     'TestCompiler records test timings when provided TestTimeRecorder',
     () async {
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-      final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testTimeRecorder = TestTimeRecorder(logger);
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -176,7 +176,7 @@ name: foo
   testUsingContext(
     'TestCompiler disposing test compiler shuts down backing compiler',
     () async {
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -231,7 +231,7 @@ environment:
 ''');
 
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-      final FakeTestCompiler testCompiler = FakeTestCompiler(
+      final testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
@@ -281,7 +281,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   final FileSystem? fileSystem;
 
   CompilerOutput? compilerOutput;
-  bool didShutdown = false;
+  var didShutdown = false;
 
   @override
   Future<CompilerOutput?> recompile(
