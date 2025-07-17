@@ -446,7 +446,7 @@ void main() {
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
-        final ShutdownHooks shutdownHooks = ShutdownHooks();
+        final shutdownHooks = ShutdownHooks();
         shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
         await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
         expect(
@@ -462,7 +462,7 @@ void main() {
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
-        final ShutdownHooks shutdownHooks = ShutdownHooks();
+        final shutdownHooks = ShutdownHooks();
         shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
         await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
         expect(
