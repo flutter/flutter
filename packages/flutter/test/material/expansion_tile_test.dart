@@ -1634,7 +1634,7 @@ void main() {
     final Finder tileFinder = find.byType(ListTile);
     final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
     expect(tileWidget.dense, dense);
-    expect(tile.splashColor, splashColor);
+    expect(tileWidget.splashColor, splashColor);
     expect(tileWidget.enableFeedback, enableFeedback);
     expect(tileWidget.visualDensity, visualDensity);
   });
