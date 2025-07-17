@@ -78,7 +78,9 @@ class Badge extends StatelessWidget {
     int maxCount = 999,
     this.isLabelVisible = true,
     this.child,
-  }) : label = Text(count > maxCount ? '$maxCount+' : '$count');
+  }) : assert(count >= 0, 'count must be non-negative'),
+       assert(maxCount > 0, 'maxCount must be positive'),
+       label = Text(count > maxCount ? '$maxCount+' : '$count');
 
   /// The badge's fill color.
   ///

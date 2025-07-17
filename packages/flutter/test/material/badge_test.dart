@@ -474,4 +474,44 @@ void main() {
     await tester.pumpWidget(buildFrame(1001));
     expect(find.text('999+'), findsOneWidget);
   });
+
+  testWidgets('Badge.count asserts on negative count', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    expect(() => buildFrame(-1), throwsAssertionError);
+  });
+
+  testWidgets('Badge.count asserts on non-positive maxCount', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    expect(() => buildFrame(5, 0), throwsAssertionError);
+  });
+
+  testWidgets('Badge.count displays "0" when count is zero', (WidgetTester tester) async {
+    Widget buildFrame(int count, [int maxCount = 999]) {
+      return MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Badge.count(count: count, maxCount: maxCount, child: const Icon(Icons.add)),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(0, 5));
+    expect(find.text('0'), findsOneWidget);
+  });
 }
