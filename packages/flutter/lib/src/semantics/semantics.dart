@@ -3072,6 +3072,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
   String get identifier => _identifier;
   String _identifier = _kEmptyConfig.identifier;
 
+  bool get _isOverlayPortalParent => getSemanticsData().identifier.endsWith('parent');
+  bool get _isOverlayPortalChild => getSemanticsData().identifier.endsWith('child');
+
   /// A textual description of this node.
   ///
   /// The reading direction is given by [textDirection].
@@ -3610,7 +3613,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || identifier.endsWith('parent'));
+    assert(_dirty || _isOverlayPortalParent);
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -3625,10 +3628,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder = _kEmptyChildList;
       childrenInHitTestOrder = _kEmptyChildList;
     } else {
-      List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      childrenInTraversalOrder = Int32List(updatedChildren!.length);
-      for (int i = 0; i < updatedChildren.length; i += 1) {
+      childrenInTraversalOrder = Int32List(sortedChildren!.length);
+      for (int i = 0; i < sortedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
       final int childCount = _children!.length;
@@ -3715,26 +3717,36 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _dirty = false;
   }
 
-  List<SemanticsNode>? updateChildrenInTraversalOrder() {
+  // Generate a children list in traversal order. Add tree grafting when needed
+  // so that any overlay portal child nodes  to On web, the childrenInTraversalOrder
+  // is kept the same as the _children list because of the assumption that requires
+  // both childrenInTraversalOrder and childrenInHitTestOrder
+  List<SemanticsNode>? _updateChildrenInTraversalOrder() {
     if (kIsWeb) {
       return _children;
     }
 
-    List<SemanticsNode> updatedChildren = [];
-    bool isOverlayPortalParent = getSemanticsData().identifier.endsWith('parent');
+    final List<SemanticsNode> updatedChildren = <SemanticsNode>[];
     for (final SemanticsNode child in _children!) {
-      bool isOverlayPortalChild = child.getSemanticsData().identifier.endsWith('child');
-      if (isOverlayPortalChild && !isOverlayPortalParent) {
-        // then we should remove child from children; we don't add it to updatedChildren list.
+      if (child._isOverlayPortalChild && !_isOverlayPortalParent) {
+        // If the child node is an overlay portal child, but the current node is
+        // not an overlay portal parent, it means the child node should be
+        // grafted to be a child of an overlay portal parent node that has the
+        // same identifier as the child. So this child should be removed from
+        // the current node's children list; i.e., we don't add it to
+        // updatedChildren list.
         continue;
       }
 
       updatedChildren.add(child);
     }
-    if (isOverlayPortalParent) {
-      String parentIdentifier = identifier.split(' ')[0];
+
+    // If the current node is an overlay portal parent, the according overlay
+    // portal child should be added to this current node children list.
+    if (_isOverlayPortalParent) {
+      final String parentIdentifier = identifier.split(' ')[0];
       if (owner != null && owner!._overlayPortalChildNodes.containsKey(parentIdentifier)) {
-        SemanticsNode overlayChildNode = owner!._overlayPortalChildNodes[parentIdentifier]!;
+        final SemanticsNode overlayChildNode = owner!._overlayPortalChildNodes[parentIdentifier]!;
         if (overlayChildNode.attached) {
           updatedChildren.add(overlayChildNode);
         }
@@ -3745,7 +3757,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    List<SemanticsNode>? updatedChildren = updateChildrenInTraversalOrder();
+    final List<SemanticsNode>? updatedChildren = _updateChildrenInTraversalOrder();
 
     TextDirection? inheritedTextDirection = textDirection;
     SemanticsNode? ancestor = parent;
@@ -4593,22 +4605,22 @@ class SemanticsOwner extends ChangeNotifier {
     for (final SemanticsNode node in visitedNodes) {
       final String identifier = node.identifier.split(' ')[0];
 
-      final bool isOverlayPortalParent = node.identifier.endsWith('parent');
-      final bool isOverlayPortalChild = node.identifier.endsWith('child');
+      final bool isOverlayPortalParent = node._isOverlayPortalParent;
+      final bool isOverlayPortalChild = node._isOverlayPortalChild;
       if (kIsWeb) {
         updatedVisitedNodes.add(node);
       } else {
-        if (node.identifier.isEmpty) {
-          // If the node has no identifier, it is not an overlay portal node.
+        if (!isOverlayPortalParent && !isOverlayPortalChild) {
           updatedVisitedNodes.add(node);
           continue;
         }
 
         if (isOverlayPortalChild) {
-          // If the node is a child of an overlay portal, we need to add parent node before node.
+          // If the node is a child of an overlay portal, we add its parent
+          // node in the `updatedVisitedNodes` list for later grafting to generate
+          // a correct traversal order.
           final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
           if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
-            print('parentNode: ${parentNode.id}');
             updatedVisitedNodes.add(parentNode);
           }
         }
@@ -4616,23 +4628,20 @@ class SemanticsOwner extends ChangeNotifier {
         updatedVisitedNodes.add(node);
       }
 
+      // If the node is an overlay portal parent, then add it to the
+      // _overlayPortalParentNodes map. Similarly, add the node to the
+      // _overlayPortalChildNodes map if it is an overlay portal child.
       if (isOverlayPortalParent) {
-        // If the node is an overlay portal parent, we need to update the parent node.
         _overlayPortalParentNodes[identifier] = node;
       } else if (isOverlayPortalChild) {
-        // If the node is a child of an overlay portal, we need to add parent node before node.
-        final SemanticsNode? parentNode = _overlayPortalParentNodes[identifier];
-        if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
-          print('parentNode: ${parentNode.id}');
-          updatedVisitedNodes.add(parentNode);
-        }
         _overlayPortalChildNodes[identifier] = node;
       }
     }
 
     for (final SemanticsNode node in updatedVisitedNodes) {
+      final bool isOverlayPortalParent = node._isOverlayPortalParent;
       assert(
-        node.parent?._dirty != true || node.identifier.endsWith('parent'),
+        node.parent?._dirty != true || isOverlayPortalParent,
       ); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -4644,7 +4653,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || node.identifier.endsWith('parent')) && node.attached) {
+      if ((node._dirty || isOverlayPortalParent) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
