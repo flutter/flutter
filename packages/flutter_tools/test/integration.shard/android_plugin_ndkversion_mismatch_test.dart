@@ -40,7 +40,7 @@ void main() {
     final String pluginBuildGradle = pluginGradleFile.readAsStringSync();
 
     // Bump up plugin ndkVersion to 21.4.7075529.
-    final RegExp androidNdkVersionRegExp = RegExp(
+    final androidNdkVersionRegExp = RegExp(
       r'ndkVersion = (\"[0-9\.]+\"|flutter.ndkVersion|android.ndkVersion)',
     );
     final String newPluginGradleFile = pluginBuildGradle.replaceAll(

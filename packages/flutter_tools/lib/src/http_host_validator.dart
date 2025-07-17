@@ -11,14 +11,14 @@ import 'doctor_validator.dart';
 import 'features.dart';
 
 /// Common Flutter HTTP hosts.
-const String kCloudHost = 'https://storage.googleapis.com/';
-const String kCocoaPods = 'https://cocoapods.org/';
-const String kGitHub = 'https://github.com/';
-const String kMaven = 'https://maven.google.com/';
-const String kPubDev = 'https://pub.dev/';
+const kCloudHost = 'https://storage.googleapis.com/';
+const kCocoaPods = 'https://cocoapods.org/';
+const kGitHub = 'https://github.com/';
+const kMaven = 'https://maven.google.com/';
+const kPubDev = 'https://pub.dev/';
 
 // Overridable environment variables.
-const String kPubDevOverride = 'PUB_HOSTED_URL'; // https://dart.dev/tools/pub/environment-variables
+const kPubDevOverride = 'PUB_HOSTED_URL'; // https://dart.dev/tools/pub/environment-variables
 
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
@@ -35,7 +35,7 @@ class HttpHostValidator extends DoctorValidator {
   final FeatureFlags _featureFlags;
   final HttpClient _httpClient;
 
-  final Set<Uri> _activeHosts = <Uri>{};
+  final _activeHosts = <Uri>{};
 
   @override
   String get slowWarning {
@@ -83,9 +83,9 @@ class HttpHostValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<String?> availabilityResults = <String?>[];
+    final availabilityResults = <String?>[];
 
-    final List<Uri> requiredHosts = <Uri>[];
+    final requiredHosts = <Uri>[];
     if (_platform.environment.containsKey(kPubDevOverride)) {
       final Uri? url = _parseUrl(_platform.environment[kPubDevOverride]!);
       if (url == null) {
@@ -126,10 +126,10 @@ class HttpHostValidator extends DoctorValidator {
       await Future.wait<String?>(requiredHosts.map(_checkHostAvailability)),
     );
 
-    int failures = 0;
-    int successes = 0;
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    for (final String? message in availabilityResults) {
+    var failures = 0;
+    var successes = 0;
+    final messages = <ValidationMessage>[];
+    for (final message in availabilityResults) {
       if (message == null) {
         successes += 1;
       } else {

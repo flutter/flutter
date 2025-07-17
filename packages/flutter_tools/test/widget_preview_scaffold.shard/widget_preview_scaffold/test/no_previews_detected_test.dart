@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:widget_preview_scaffold/src/dtd_services.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 

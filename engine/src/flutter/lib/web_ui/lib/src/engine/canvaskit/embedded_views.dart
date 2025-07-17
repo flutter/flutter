@@ -815,6 +815,12 @@ class MutatorsStack extends Iterable<Mutator> {
     _mutators.add(Mutator.clipRRect(rrect));
   }
 
+  void pushClipRSuperellipse(ui.RSuperellipse rsuperellipse) {
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
+    pushClipRRect(rsuperellipse.toApproximateRRect());
+  }
+
   void pushClipPath(ui.Path path) {
     _mutators.add(Mutator.clipPath(path));
   }

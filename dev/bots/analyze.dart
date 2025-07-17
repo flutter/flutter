@@ -363,7 +363,7 @@ Future<void> verifyTargetPlatform(String workingDirectory) async {
       foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
       return;
     }
-    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+    if (lines[index].trim().startsWith('const platforms = <String>[')) {
       index += 1;
       break;
     }

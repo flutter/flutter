@@ -61,7 +61,7 @@ class BuildAarCommand extends BuildSubCommand {
   final FileSystem _fileSystem;
 
   @override
-  final String name = 'aar';
+  final name = 'aar';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -91,7 +91,7 @@ class BuildAarCommand extends BuildSubCommand {
   }
 
   @override
-  final String description =
+  final description =
       'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
@@ -115,7 +115,7 @@ class BuildAarCommand extends BuildSubCommand {
     if (_androidSdk == null) {
       exitWithNoSdkMessage();
     }
-    final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
+    final androidBuildInfo = <AndroidBuildInfo>{};
 
     final Iterable<AndroidArch> targetArchitectures = stringsArg(
       'target-platform',
@@ -130,7 +130,7 @@ class BuildAarCommand extends BuildSubCommand {
         : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
-    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
+    for (final buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
@@ -160,7 +160,7 @@ class BuildAarCommand extends BuildSubCommand {
     // is enabled or disabled. Note that 'computeImpellerEnabled' will default
     // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
-    final String buildLabel = impellerEnabled
+    final buildLabel = impellerEnabled
         ? 'manifest-aar-impeller-enabled'
         : 'manifest-aar-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));

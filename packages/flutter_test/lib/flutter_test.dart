@@ -77,6 +77,7 @@ export 'src/image.dart';
 export 'src/matchers.dart';
 export 'src/mock_canvas.dart';
 export 'src/mock_event_channel.dart';
+export 'src/navigator.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
 export 'src/recording_canvas.dart';

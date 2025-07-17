@@ -21,9 +21,9 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-const String kElfAot = '--snapshot_kind=app-aot-elf';
-const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
+const kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+const kElfAot = '--snapshot_kind=app-aot-elf';
+const kAssemblyAot = '--snapshot_kind=app-aot-assembly';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -616,7 +616,7 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-    final Environment testEnvironment = Environment.test(
+    final testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,

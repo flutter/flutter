@@ -50,9 +50,9 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   _DefaultShutdownHooks();
 
   @override
-  final List<ShutdownHook> registeredHooks = <ShutdownHook>[];
+  final registeredHooks = <ShutdownHook>[];
 
-  bool _shutdownHooksRunning = false;
+  var _shutdownHooksRunning = false;
 
   @override
   void addShutdownHook(ShutdownHook shutdownHook) {
@@ -66,13 +66,13 @@ class _DefaultShutdownHooks implements ShutdownHooks {
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
     _shutdownHooksRunning = true;
-    final List<(Object, StackTrace)> uncaught = <(Object, StackTrace)>[];
+    final uncaught = <(Object, StackTrace)>[];
     try {
-      final List<Future<void>> futures = <Future<void>>[];
+      final futures = <Future<void>>[];
       for (final ShutdownHook shutdownHook in registeredHooks) {
         try {
           final Future<void> future = asyncGuard<void>(
-            () async => shutdownHook(),
+            shutdownHook,
             onError: (Object e, StackTrace s) {
               uncaught.add((e, s));
             },
@@ -122,7 +122,7 @@ class RunResult {
 
   @override
   String toString() {
-    final StringBuffer out = StringBuffer();
+    final out = StringBuffer();
     if (stdout.isNotEmpty) {
       out.writeln(stdout);
     }
@@ -296,7 +296,7 @@ abstract class ProcessUtils {
     required String content,
     required bool isLine,
   }) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     void handleError(Object error, StackTrace stackTrace) {
       completer.completeError(error, stackTrace);
@@ -355,7 +355,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
       );
-      final RunResult runResult = RunResult(results, cmd);
+      final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
       if (throwOnError &&
           runResult.exitCode != 0 &&
@@ -380,8 +380,8 @@ class _DefaultProcessUtils implements ProcessUtils {
         environment: environment,
       );
 
-      final StringBuffer stdoutBuffer = StringBuffer();
-      final StringBuffer stderrBuffer = StringBuffer();
+      final stdoutBuffer = StringBuffer();
+      final stderrBuffer = StringBuffer();
       final Future<void> stdoutFuture = process.stdout
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .listen(stdoutBuffer.write)
@@ -421,13 +421,8 @@ class _DefaultProcessUtils implements ProcessUtils {
       stdoutString = stdoutBuffer.toString();
       stderrString = stderrBuffer.toString();
 
-      final ProcessResult result = ProcessResult(
-        process.pid,
-        exitCode ?? -1,
-        stdoutString,
-        stderrString,
-      );
-      final RunResult runResult = RunResult(result, cmd);
+      final result = ProcessResult(process.pid, exitCode ?? -1, stdoutString, stderrString);
+      final runResult = RunResult(result, cmd);
 
       // If the process did not timeout. We are done.
       if (exitCode != null) {
@@ -477,11 +472,11 @@ class _DefaultProcessUtils implements ProcessUtils {
       stderrEncoding: encoding,
       stdoutEncoding: encoding,
     );
-    final RunResult runResult = RunResult(results, cmd);
+    final runResult = RunResult(results, cmd);
 
     _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
-    bool failedExitCode = runResult.exitCode != 0;
+    var failedExitCode = runResult.exitCode != 0;
     if (allowedFailures != null && failedExitCode) {
       failedExitCode = !allowedFailures(runResult.exitCode);
     }
@@ -503,7 +498,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      String message = 'The command failed with exit code ${runResult.exitCode}';
+      var message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message =
             'The command failed\nStdout:\n${runResult.stdout}\n'
@@ -560,7 +555,7 @@ class _DefaultProcessUtils implements ProcessUtils {
             mappedLine = mapFunction(line);
           }
           if (mappedLine != null) {
-            final String message = '$prefix$mappedLine';
+            final message = '$prefix$mappedLine';
             if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
               _logger.printError(message, wrap: false);
             } else if (trace) {
@@ -671,7 +666,7 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
   // Run shutdown hooks before flushing logs
   await shutdownHooks.runShutdownHooks(globals.logger);
 
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
 
   await globals.analytics.close();
 
