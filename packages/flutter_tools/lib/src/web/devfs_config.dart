@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:source_span/source_span.dart';
+// import 'package:source_span/source_span.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
@@ -176,12 +176,12 @@ Future<WebDevServerConfig> loadDevConfig({
       }
 
       if (!contents.containsKey('server') || contents['server'] is! YamlMap) {
-        final SourceSpan span = (contents.containsKey('server') && contents['server'] is YamlNode)
-            ? (contents['server'] as YamlNode).span
-            : contents.span;
+        // final SourceSpan span = (contents.containsKey('server') && contents['server'] is YamlNode)
+        //     ? (contents['server'] as YamlNode).span
+        //     : contents.span;
         throw YamlException(
           '"$devConfigFilePath" file found, but the "server" key is missing or malformed. It must be a YAML map.',
-          span,
+          null,
         );
       }
 
