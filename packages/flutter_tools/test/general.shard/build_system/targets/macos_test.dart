@@ -350,7 +350,7 @@ void main() {
     () async {
       binary.createSync(recursive: true);
       frameworkDsym.createSync(recursive: true);
-      final FakeCommand failedCopyFrameworkDsymCommand = FakeCommand(
+      final failedCopyFrameworkDsymCommand = FakeCommand(
         command: <String>[
           'rsync',
           '-av',
@@ -437,7 +437,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
@@ -498,7 +498,7 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
-      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      final inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
         ..createSync(recursive: true)
         ..writeAsStringSync('testing');
