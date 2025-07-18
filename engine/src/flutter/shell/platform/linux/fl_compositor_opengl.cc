@@ -56,10 +56,6 @@ struct _FlCompositorOpenGL {
   // Last rendered frame pixels (only set if shareable is TRUE).
   uint8_t* pixels;
 
-  // target dimension for resizing
-  int target_width;
-  int target_height;
-
   // whether the renderer waits for frame render
   bool blocking_main_thread;
 
@@ -79,16 +75,11 @@ struct _FlCompositorOpenGL {
   // Verticies for the uniform square.
   GLuint vertex_buffer;
 
-  // Mutex used when blocking the raster thread until a task is completed on
-  // platform thread.
-  GMutex present_mutex;
-
-  // Condition to unblock the raster thread after task is completed on platform
-  // thread.
-  GCond present_condition;
-
-  // Control thread access to the frame.
+  // Ensure Flutter and GTK can access the frame data (framebuffer or pixels).
   GMutex frame_mutex;
+
+  // Allow GTK to wait for Flutter to generate a suitable frame.
+  GCond frame_cond;
 };
 
 G_DEFINE_TYPE(FlCompositorOpenGL,
@@ -119,17 +110,6 @@ static gchar* get_program_log(GLuint program) {
   glGetProgramInfoLog(program, log_length, nullptr, log);
 
   return log;
-}
-
-static void fl_compositor_opengl_unblock_main_thread(FlCompositorOpenGL* self) {
-  if (self->blocking_main_thread) {
-    self->blocking_main_thread = false;
-
-    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-    if (engine != nullptr) {
-      fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
-    }
-  }
 }
 
 static void setup_shader(FlCompositorOpenGL* self) {
@@ -203,21 +183,14 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-static gboolean present_layers(FlCompositorOpenGL* self,
-                               const FlutterLayer** layers,
-                               size_t layers_count) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
+static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
+                                                    const FlutterLayer** layers,
+                                                    size_t layers_count) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
-  // ignore incoming frame with wrong dimensions in trivial case with just one
-  // layer
-  if (self->blocking_main_thread && layers_count == 1 &&
-      layers[0]->offset.x == 0 && layers[0]->offset.y == 0 &&
-      (layers[0]->size.width != self->target_width ||
-       layers[0]->size.height != self->target_height)) {
-    return TRUE;
-  }
 
   if (layers_count == 0) {
     return TRUE;
@@ -258,8 +231,6 @@ static gboolean present_layers(FlCompositorOpenGL* self,
   }
 
   self->had_first_frame = true;
-
-  fl_compositor_opengl_unblock_main_thread(self);
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
@@ -338,106 +309,26 @@ static gboolean present_layers(FlCompositorOpenGL* self,
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
 
+  // Signal a frame is ready.
+  g_cond_signal(&self->frame_cond);
+
   return TRUE;
-}
-
-typedef struct {
-  FlCompositorOpenGL* self;
-
-  const FlutterLayer** layers;
-  size_t layers_count;
-
-  gboolean result;
-
-  gboolean finished;
-} PresentLayersData;
-
-// Perform the present on the main thread.
-static void present_layers_task_cb(gpointer user_data) {
-  PresentLayersData* data = static_cast<PresentLayersData*>(user_data);
-  FlCompositorOpenGL* self = data->self;
-
-  // Perform the present.
-  fl_opengl_manager_make_current(self->opengl_manager);
-  data->result = present_layers(self, data->layers, data->layers_count);
-  fl_opengl_manager_clear_current(self->opengl_manager);
-
-  // Complete fl_compositor_opengl_present_layers().
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->present_mutex);
-  data->finished = TRUE;
-  g_cond_signal(&self->present_condition);
-}
-
-static void fl_compositor_opengl_wait_for_frame(FlCompositor* compositor,
-                                                int target_width,
-                                                int target_height) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  self->target_width = target_width;
-  self->target_height = target_height;
-
-  if (self->had_first_frame && !self->blocking_main_thread) {
-    self->blocking_main_thread = true;
-    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-    if (engine != nullptr) {
-      fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
-    }
-  }
-}
-
-static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
-                                                    const FlutterLayer** layers,
-                                                    size_t layers_count) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  // Detach the context from raster thread. Needed because blitting
-  // will be done on the main thread, which will make the context current.
-  fl_opengl_manager_clear_current(self->opengl_manager);
-
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-
-  // Schedule the present to run on the main thread.
-  FlTaskRunner* task_runner = fl_engine_get_task_runner(engine);
-  PresentLayersData data = {
-      .self = self,
-      .layers = layers,
-      .layers_count = layers_count,
-      .result = FALSE,
-      .finished = FALSE,
-  };
-  fl_task_runner_post_callback(task_runner, present_layers_task_cb, &data);
-
-  // Block until present completes.
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->present_mutex);
-  while (!data.finished) {
-    g_cond_wait(&self->present_condition, &self->present_mutex);
-  }
-
-  // Restore the context to the raster thread in case the engine needs it
-  // to do some cleanup.
-  fl_opengl_manager_make_current(self->opengl_manager);
-
-  return data.result;
 }
 
 static void fl_compositor_opengl_dispose(GObject* object) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
 
-  fl_compositor_opengl_unblock_main_thread(self);
-
   g_weak_ref_clear(&self->engine);
   g_clear_object(&self->opengl_manager);
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
-  g_mutex_clear(&self->present_mutex);
-  g_cond_clear(&self->present_condition);
+  g_mutex_clear(&self->frame_mutex);
+  g_cond_clear(&self->frame_cond);
 
   G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
 }
 
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
-  FL_COMPOSITOR_CLASS(klass)->wait_for_frame =
-      fl_compositor_opengl_wait_for_frame;
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_opengl_present_layers;
 
@@ -445,8 +336,8 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 }
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
-  g_mutex_init(&self->present_mutex);
-  g_cond_init(&self->present_condition);
+  g_mutex_init(&self->frame_mutex);
+  g_cond_init(&self->frame_cond);
 }
 
 FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
@@ -466,7 +357,9 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
   return self;
 }
 
-void fl_compositor_opengl_render(FlCompositorOpenGL* self) {
+void fl_compositor_opengl_render(FlCompositorOpenGL* self,
+                                 size_t width,
+                                 size_t height) {
   g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
@@ -475,8 +368,12 @@ void fl_compositor_opengl_render(FlCompositorOpenGL* self) {
     return;
   }
 
-  size_t width = fl_framebuffer_get_width(self->framebuffer);
-  size_t height = fl_framebuffer_get_height(self->framebuffer);
+  // If frame not ready, then wait for it.
+  while (fl_framebuffer_get_width(self->framebuffer) != width ||
+         fl_framebuffer_get_height(self->framebuffer) != height) {
+    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+  }
+
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);

@@ -194,19 +194,6 @@ static void handle_geometry_changed(FlView* self) {
   fl_engine_send_window_metrics_event(
       self->engine, display_id, self->view_id, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
-
-  // Make sure the view has been realized and its size has been allocated before
-  // waiting for a frame. `fl_view_realize()` and `fl_view_size_allocate()` may
-  // be called in either order depending on the order in which the window is
-  // shown and the view is added to a container in the app runner.
-  //
-  // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
-  if (allocation.width > 1 && allocation.height > 1 &&
-      gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_compositor_wait_for_frame(self->compositor,
-                                 allocation.width * scale_factor,
-                                 allocation.height * scale_factor);
-  }
 }
 
 static void view_added_cb(GObject* object,
@@ -533,7 +520,11 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
     return FALSE;
   }
 
-  fl_compositor_opengl_render(FL_COMPOSITOR_OPENGL(self->compositor));
+  int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->render_area));
+  int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->render_area));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_compositor_opengl_render(FL_COMPOSITOR_OPENGL(self->compositor),
+                              width * scale_factor, height * scale_factor);
 
   return TRUE;
 }
@@ -541,9 +532,12 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
 static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
   paint_background(self, cr);
 
+  int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->render_area));
+  int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->render_area));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_compositor_software_render(
-      FL_COMPOSITOR_SOFTWARE(self->compositor), cr,
-      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
+      FL_COMPOSITOR_SOFTWARE(self->compositor), cr, width * scale_factor,
+      height * scale_factor, gtk_widget_get_scale_factor(GTK_WIDGET(self)));
 }
 
 static void unrealize_cb(FlView* self) {

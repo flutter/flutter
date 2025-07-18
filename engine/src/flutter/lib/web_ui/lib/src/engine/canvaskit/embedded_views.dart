@@ -672,6 +672,7 @@ class HtmlViewEmbedder {
       }
     }
     _svgClipDefs.clear();
+    _clipPathCount = 0;
   }
 
   static void removeElement(DomElement element) {

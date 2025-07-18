@@ -11,8 +11,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
@@ -153,7 +153,7 @@ void testMain() {
     List<String> getTransformChain(DomElement viewHost) {
       final List<String> chain = <String>[];
       DomElement? element = viewHost;
-      while (element != null && element.tagName.toLowerCase() != 'flt-scene-host') {
+      while (element != null && element.tagName.toLowerCase() != 'flt-scene') {
         chain.add(element.style.transform);
         element = element.parent;
       }
@@ -596,7 +596,7 @@ void testMain() {
       skip: isSafari || isFirefox,
     );
 
-    test('removes the DOM node of an unrendered platform view', () async {
+    test('preserves the DOM node of an unrendered platform view', () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
@@ -1475,8 +1475,9 @@ const Map<String, _EmbeddedViewMarker> _tagToViewMarker = <String, _EmbeddedView
 };
 
 void _expectSceneMatches(List<_EmbeddedViewMarker> expectedMarkers, {String? reason}) {
+  final DomElement fltScene = sceneHost.querySelector('flt-scene')!;
   // Convert the scene elements to its corresponding array of _EmbeddedViewMarker
-  final List<_EmbeddedViewMarker> sceneElements = sceneHost.children
+  final List<_EmbeddedViewMarker> sceneElements = fltScene.children
       .where((DomElement element) => element.tagName != 'svg')
       .map((DomElement element) => _tagToViewMarker[element.tagName.toLowerCase()]!)
       .toList();

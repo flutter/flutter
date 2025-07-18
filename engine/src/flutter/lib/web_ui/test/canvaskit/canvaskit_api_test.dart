@@ -8,14 +8,13 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
