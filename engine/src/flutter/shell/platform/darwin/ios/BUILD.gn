@@ -13,6 +13,28 @@ import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
 import("//flutter/testing/testing.gni")
 
+
+config("utilities_subframework_config") {
+
+  # TODO: also check >= ios 26 version
+  if (is_ios) {
+  #  framework_dirs = [ "$ios_sdk_path/System/Library/SubFrameworks" ]
+  #  frameworks += [ "UIUtilities.framework" ]
+
+    cflags_objc = [ 
+      "-F$ios_sdk_path/System/Library/SubFrameworks",
+    ]
+    cflags_objcc = [
+      "-F$ios_sdk_path/System/Library/SubFrameworks",
+    ]
+
+    ldflags = [
+      "-F$ios_sdk_path/System/Library/SubFrameworks",
+    ]
+  }
+}
+
+
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
 shell_gpu_configuration("ios_gpu_configuration") {
@@ -72,6 +94,7 @@ source_set("flutter_framework_source") {
   configs += [
     "//flutter/shell/platform/darwin/common:config",
     "//build/config/ios:ios_application_extension",
+    ":utilities_subframework_config",
   ]
 
   sources = [
@@ -209,11 +232,15 @@ source_set("flutter_framework_source") {
   public_deps = [ ":InternalFlutterSwift" ]
 }
 
+
 if (enable_ios_unittests) {
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    configs += [ 
+      "//flutter/shell/platform/darwin/common:test_config",
+#      ":utilities_subframework_config",
+    ]
     sources = [
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
@@ -238,7 +265,10 @@ if (enable_ios_unittests) {
     frameworks = [ "XCTest.framework" ]
     include_dirs = [ target_gen_dir ]
 
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    configs += [ 
+      "//flutter/shell/platform/darwin/common:test_config",
+      ":utilities_subframework_config",
+    ]
     configs -= [
       "//build/config/gcc:symbol_visibility_hidden",
       "//build/config:symbol_visibility_hidden",
@@ -409,7 +439,9 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [ "-F$framework_search_path" ]
+  cflags_objc = [ 
+    "-F$framework_search_path",
+  ]
   ldflags = [
     "-F$framework_search_path",
     "-Xlinker",
@@ -424,7 +456,11 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_privacy_manifest",
   ]
 
-  configs += [ "//build/config/ios:ios_application_extension" ]
+  configs += [
+    "//build/config/ios:ios_application_extension",
+    ":utilities_subframework_config" 
+  ]
+
 }
 
 group("universal_flutter_framework") {
