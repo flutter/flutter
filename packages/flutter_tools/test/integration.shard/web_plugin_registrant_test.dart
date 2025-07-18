@@ -275,7 +275,9 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
   final command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create', ...createArgs, dir.path]);
+  // Needs no-pub, otherwise `pub get` fails in the temp folder.
+  // See https://github.com/flutter/flutter/issues/172375
+  await runner.run(<String>['create', ...createArgs, dir.path, '--no-pub']);
 }
 
 typedef PubspecEditor = void Function(List<String> pubSpecContents);
