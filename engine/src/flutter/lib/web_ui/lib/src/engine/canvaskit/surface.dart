@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
+import '../compositing/rasterizer.dart';
 import '../configuration.dart';
 import '../display.dart';
 import '../dom.dart';
@@ -15,7 +16,6 @@ import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'picture.dart';
-import 'rasterizer.dart';
 import 'render_canvas.dart';
 import 'util.dart';
 

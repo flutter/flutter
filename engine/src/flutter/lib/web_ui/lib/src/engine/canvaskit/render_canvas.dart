@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../compositing/rasterizer.dart';
 import '../display.dart';
 import '../dom.dart';
 import '../util.dart';
-import 'rasterizer.dart';
 
 /// A visible (on-screen) canvas that can display bitmaps produced by CanvasKit
 /// in the (off-screen) SkSurface which is backed by an OffscreenCanvas.

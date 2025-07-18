@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../scene_painting.dart';
+import '../scene/scene_painting.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';

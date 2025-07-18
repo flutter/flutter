@@ -24,7 +24,7 @@ void main() {
 }
 
 void testMain() {
-  group('$HtmlViewEmbedder', () {
+  group('$PlatformViewEmbedder', () {
     setUpCanvasKitTest(withImplicitView: true);
 
     setUp(() {
@@ -944,7 +944,7 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView, _platformView]);
 
       expect(() {
-        final HtmlViewEmbedder embedder = (renderer as CanvasKitRenderer)
+        final PlatformViewEmbedder embedder = (renderer as CanvasKitRenderer)
             .debugGetRasterizerForView(implicitView)!
             .viewEmbedder;
         // The following line used to cause a "Concurrent modification during iteration"

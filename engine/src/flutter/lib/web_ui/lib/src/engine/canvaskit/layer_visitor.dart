@@ -35,7 +35,7 @@ class PrerollVisitor extends LayerVisitor {
   final MutatorsStack mutatorsStack = MutatorsStack();
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder? viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   ui.Rect get cullRect {
     ui.Rect cullRect = ui.Rect.largest;
@@ -241,7 +241,7 @@ class MeasureVisitor extends LayerVisitor {
   late final CkCanvas measuringCanvas;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder viewEmbedder;
+  final PlatformViewEmbedder viewEmbedder;
 
   /// Clean up the measuring picture recorder and the picture it recorded.
   void dispose() {
@@ -470,7 +470,7 @@ class MeasureVisitor extends LayerVisitor {
 /// The canvases are the optimized canvases that were created when the view
 /// embedder optimized the canvases after the measure step.
 class PaintVisitor extends LayerVisitor {
-  PaintVisitor(this.nWayCanvas, HtmlViewEmbedder this.viewEmbedder) : toImageCanvas = null;
+  PaintVisitor(this.nWayCanvas, PlatformViewEmbedder this.viewEmbedder) : toImageCanvas = null;
 
   PaintVisitor.forToImage(this.nWayCanvas, this.toImageCanvas) : viewEmbedder = null;
 
@@ -480,7 +480,7 @@ class PaintVisitor extends LayerVisitor {
   CkNWayCanvas nWayCanvas;
 
   /// A compositor for embedded HTML views.
-  final HtmlViewEmbedder? viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   final List<ShaderMaskEngineLayer> shaderMaskStack = <ShaderMaskEngineLayer>[];
 

@@ -7,9 +7,9 @@ import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show PictureLayer, PlatformViewManager;
+import '../compositing/rasterizer.dart';
+import '../platform_views/embedder.dart';
 import '../vector_math.dart';
-import 'embedded_views.dart';
-import 'rasterizer.dart';
 
 /// If `true`, draws the computed bounds for platform views and pictures to
 /// help debug issues with the overlay optimization.

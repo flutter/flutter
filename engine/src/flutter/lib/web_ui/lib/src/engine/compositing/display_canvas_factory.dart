@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:meta/meta.dart';
-
-import '../../engine.dart';
+import 'package:ui/src/engine.dart';
 
 /// Caches canvases used to display Skia-drawn content.
 class DisplayCanvasFactory<T extends DisplayCanvas> {

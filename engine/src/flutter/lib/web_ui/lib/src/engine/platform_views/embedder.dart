@@ -16,8 +16,8 @@ final SVGSVGElement kSvgResourceHeader = createSVGSVGElement()
   ..style.position = 'absolute';
 
 /// This composites HTML views into the [ui.Scene].
-class HtmlViewEmbedder {
-  HtmlViewEmbedder(this.sceneHost, this.rasterizer);
+class PlatformViewEmbedder {
+  PlatformViewEmbedder(this.sceneHost, this.rasterizer);
 
   final DomElement sceneHost;
   final ViewRasterizer rasterizer;
@@ -723,7 +723,7 @@ class ViewClipChain {
   }
 }
 
-/// The parameters passed to the view embedder.
+/// The parameters passed to the platform view embedder.
 class EmbeddedViewParams {
   EmbeddedViewParams(this.offset, this.size, MutatorsStack mutators)
     : mutators = MutatorsStack._copy(mutators);

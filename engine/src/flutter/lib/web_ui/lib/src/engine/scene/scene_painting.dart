@@ -2,23 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// These are additional APIs that are not part of the `dart:ui` interface that
+/// are needed internally to properly implement a `SceneBuilder` on top of the
+/// generic Canvas/Picture api.
+library scene_painting;
+
 import 'package:ui/ui.dart' as ui;
 
-import 'vector_math.dart';
+import '../vector_math.dart';
 
-// These are additional APIs that are not part of the `dart:ui` interface that
-// are needed internally to properly implement a `SceneBuilder` on top of the
-// generic Canvas/Picture api.
+/// A [ui.Canvas] with the additional method [saveLayerWithFilter] which allows
+/// the caller to pass an explicit [ui.ImageFilter] which is applied to the
+/// layer when [restore] is called.
 abstract class SceneCanvas implements ui.Canvas {
   // This is the same as a normal `saveLayer` call, but we can pass a backdrop image filter.
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint paint, ui.ImageFilter backdropFilter);
 }
 
+/// A [ui.Picture] that provides approximate bounds for the drawings contained
+/// within it.
 abstract class ScenePicture implements ui.Picture {
   // This is a conservative bounding box of all the drawing primitives in this picture.
   ui.Rect get cullRect;
 }
 
+/// A [ui.PictureRecorder] which allows callers to know if it has been disposed.
 abstract class ScenePictureRecorder implements ui.PictureRecorder {
   /// Whether this reference to the underlying picture recorder is [dispose]d.
   ///
@@ -27,6 +35,7 @@ abstract class ScenePictureRecorder implements ui.PictureRecorder {
   bool get debugDisposed;
 }
 
+/// A [ui.ImageFilter] with helper methods for picture measurement and layout.
 abstract class SceneImageFilter implements ui.ImageFilter {
   // Since some image filters affect the actual drawing bounds of a given picture, this
   // gives the maximum draw boundary for a picture with the given input bounds after it
@@ -38,6 +47,7 @@ abstract class SceneImageFilter implements ui.ImageFilter {
   Matrix4? get transform;
 }
 
+/// A [ui.Path] with a helper method to convert it to an SVG string.
 abstract class ScenePath implements ui.Path {
   // In order to properly clip platform views with paths, we need to be able to get a
   // string representation of them.

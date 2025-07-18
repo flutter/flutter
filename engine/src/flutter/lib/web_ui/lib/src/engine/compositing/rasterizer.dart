@@ -19,7 +19,7 @@ abstract class Rasterizer {
 
 abstract class ViewRasterizer {
   ViewRasterizer(this.view) {
-    view.dom.sceneHost.append(sceneElement);
+    view.dom.setScene(sceneElement);
   }
 
   /// The view this rasterizer renders into.
@@ -35,7 +35,7 @@ abstract class ViewRasterizer {
   final CompositorContext context = CompositorContext();
 
   /// The platform view embedder.
-  late final HtmlViewEmbedder viewEmbedder = HtmlViewEmbedder(sceneElement, this);
+  late final PlatformViewEmbedder viewEmbedder = PlatformViewEmbedder(sceneElement, this);
 
   /// A factory for creating overlays.
   DisplayCanvasFactory<DisplayCanvas> get displayFactory;
