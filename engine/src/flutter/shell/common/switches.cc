@@ -332,6 +332,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::TraceToFile),
                               &settings.trace_to_file);
 
+  settings.profile_microtasks =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileMicrotasks));
+
   settings.skia_deterministic_rendering_on_cpu =
       command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
 

@@ -554,10 +554,10 @@ class _LineCaretMetrics {
     return offset == Offset.zero
         ? this
         : _LineCaretMetrics(
-          offset: offset + this.offset,
-          writingDirection: writingDirection,
-          height: height,
-        );
+            offset: offset + this.offset,
+            writingDirection: writingDirection,
+            height: height,
+          );
   }
 }
 
@@ -619,10 +619,9 @@ class TextPainter {
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
-       _textScaler =
-           textScaler == const _UnspecifiedTextScaler()
-               ? TextScaler.linear(textScaleFactor)
-               : textScaler,
+       _textScaler = textScaler == const _UnspecifiedTextScaler()
+           ? TextScaler.linear(textScaleFactor)
+           : textScaler,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
@@ -668,8 +667,9 @@ class TextPainter {
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
-      textScaler:
-          textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+      textScaler: textScaler == TextScaler.noScaling
+          ? TextScaler.linear(textScaleFactor)
+          : textScaler,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -721,8 +721,9 @@ class TextPainter {
       text: text,
       textAlign: textAlign,
       textDirection: textDirection,
-      textScaler:
-          textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+      textScaler: textScaler == TextScaler.noScaling
+          ? TextScaler.linear(textScaleFactor)
+          : textScaler,
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -808,10 +809,9 @@ class TextPainter {
       _layoutTemplate = null;
     }
 
-    final RenderComparison comparison =
-        value == null
-            ? RenderComparison.layout
-            : _text?.compareTo(value) ?? RenderComparison.layout;
+    final RenderComparison comparison = value == null
+        ? RenderComparison.layout
+        : _text?.compareTo(value) ?? RenderComparison.layout;
 
     _text = value;
     _cachedPlainText = null;
@@ -1249,8 +1249,9 @@ class TextPainter {
     // when the text is not left-aligned, so we don't have to deal with an
     // infinite paint offset.
     final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
-    final double? adjustedMaxWidth =
-        !adjustMaxWidth ? maxWidth : cachedLayout?.layout.maxIntrinsicLineExtent;
+    final double? adjustedMaxWidth = !adjustMaxWidth
+        ? maxWidth
+        : cachedLayout?.layout.maxIntrinsicLineExtent;
     final double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
 
     // Only rebuild the paragraph when there're layout changes, even when
@@ -1260,9 +1261,8 @@ class TextPainter {
     //    the paragraph rebuilds is unnecessary)
     // 2. the user could be measuring the text layout so `paint` will never be
     //    called.
-    final ui.Paragraph paragraph =
-        (cachedLayout?.paragraph ?? _createParagraph(text))
-          ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
+    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
+      ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
     final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
@@ -1290,6 +1290,22 @@ class TextPainter {
     }
     _layoutCache = newLayoutCache;
   }
+
+  /// Causes the paragraph to paint the layout boxes of the text.
+  ///
+  /// {@template flutter.painting.textPainter.debugPaintTextLayoutBoxes}
+  /// Each painted box illustrates how the encompassed text contributes to the
+  /// overall text layout. For instance, for paragraphs whose [StrutStyle] is
+  /// disabled, the line height of a line is the smallest vertical extent that
+  /// covers all text boxes on that line.
+  ///
+  /// Typically, only characters with a non-zero horizontal advance produce
+  /// these boxes. No boxes will be painted for lines that only consist of a new
+  /// line character.
+  /// {@endtemplate}
+  ///
+  /// The [paint] method reads this flag only in debug mode.
+  bool debugPaintTextLayoutBoxes = false;
 
   /// Paints the text onto the given canvas at the given offset.
   ///
@@ -1335,7 +1351,29 @@ class TextPainter {
       assert(debugSize == size);
     }
     assert(!_rebuildParagraphForPaint);
+
+    assert(
+      !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
+    );
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
+  }
+
+  bool _debugPaintCharacterLayoutBoxes(
+    Canvas canvas,
+    _TextPainterLayoutCacheWithOffset layout,
+    Offset offset,
+  ) {
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = const Color(0xFF00FFFF);
+    final List<TextBox> textBoxes = getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: plainText.length),
+    );
+    for (final TextBox textBox in textBoxes) {
+      canvas.drawRect(textBox.toRect().shift(offset), paint);
+    }
+    return true;
   }
 
   // Returns true if value falls in the valid range of the UTF16 encoding.
@@ -1415,8 +1453,9 @@ class TextPainter {
       // The full width is not (width - caretPrototype.width), because
       // RenderEditable reserves cursor width on the right. Ideally this
       // should be handled by RenderEditable instead.
-      final double dx =
-          paintOffsetAlignment == 0 ? 0 : paintOffsetAlignment * layoutCache.contentWidth;
+      final double dx = paintOffsetAlignment == 0
+          ? 0
+          : paintOffsetAlignment * layoutCache.contentWidth;
       return Offset(dx, 0.0);
     }
 
@@ -1440,26 +1479,30 @@ class TextPainter {
     return Offset(adjustedDx, rawOffset.dy + layoutCache.paintOffset.dy);
   }
 
+  // The condition is derived from
+  // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
+  // which is set here:
+  // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
+  bool get _strutDisabled => switch (strutStyle) {
+    null || StrutStyle.disabled => true,
+    StrutStyle(:final double? fontSize) => fontSize == 0.0,
+  };
+
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}
   /// Returns the strut bounded height of the glyph at the given `position`.
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
   double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
-    // The if condition is derived from
-    // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
-    // which is set here:
-    // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
-    if (strutStyle == null || strutStyle == StrutStyle.disabled || strutStyle?.fontSize == 0.0) {
+    if (_strutDisabled) {
       final double? heightFromCaretMetrics = _computeCaretMetrics(position)?.height;
       if (heightFromCaretMetrics != null) {
         return heightFromCaretMetrics;
       }
     }
-    final TextBox textBox =
-        _getOrCreateLayoutTemplate()
-            .getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut)
-            .single;
+    final TextBox textBox = _getOrCreateLayoutTemplate()
+        .getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut)
+        .single;
     return textBox.toRect().height;
   }
 
@@ -1752,8 +1795,8 @@ class TextPainter {
     return offset == Offset.zero
         ? rawMetrics
         : rawMetrics
-            .map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset))
-            .toList(growable: false);
+              .map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset))
+              .toList(growable: false);
   }
 
   bool _disposed = false;

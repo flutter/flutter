@@ -7,6 +7,8 @@ library;
 
 import 'package:flutter/widgets.dart';
 
+import 'widget_tester.dart';
+
 // Examples can assume:
 // final TransitionDurationObserver transitionDurationObserver = TransitionDurationObserver();
 
@@ -39,6 +41,11 @@ class TransitionDurationObserver extends NavigatorObserver {
   /// {@end-tool}
   ///
   /// Throws if there has never been a page transition.
+  ///
+  /// See also:
+  ///
+  ///  * [pumpPastTransition], which handles pumping past the current page
+  ///  transition.
   Duration get transitionDuration {
     if (_transitionDuration == null) {
       throw FlutterError(
@@ -46,6 +53,48 @@ class TransitionDurationObserver extends NavigatorObserver {
       );
     }
     return _transitionDuration!;
+  }
+
+  /// Pumps the minimum number of frames required for the current page
+  /// transition to run from start to finish.
+  ///
+  /// Typically used immediately after starting a page transition in order to
+  /// wait until the first frame in which the outgoing page is no longer
+  /// visible.
+  ///
+  /// This does not consider whether or not a page transition is currently
+  /// running. If it's called in the middle of a page transition, for example,
+  /// it will still pump for the full duration of the page transition, not just
+  /// for the remaining duration.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   // ...Pump an app with two pages, then:
+  ///   expect(find.text('Page 1'), findsOneWidget);
+  ///   expect(find.text('Page 2'), findsNothing);
+  ///
+  ///   await tester.tap(find.text('Next'));
+  ///
+  ///   await transitionDurationObserver.pumpPastTransition(tester);
+  ///
+  ///   expect(find.text('Page 1'), findsNothing);
+  ///   expect(find.text('Page 2'), findsOneWidget);
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [transitionDuration], which directly returns the [Duration] of the page
+  ///    transition.
+  Future<void> pumpPastTransition(WidgetTester tester) async {
+    // The first pump is required to begin the page transition animation and
+    // make the application no longer idle.
+    await tester.pump();
+    // Pumping for the full transitionDuration would move to the last frame of
+    // the page transition, so pump one more frame after that.
+    await tester.pump(transitionDuration + const Duration(milliseconds: 1));
   }
 
   @override

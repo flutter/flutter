@@ -135,8 +135,7 @@ void main() {
     await tester.tap(find.text('Next'));
     expect(observer.transitionDuration, const Duration(milliseconds: 456));
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsOneWidget);
@@ -146,8 +145,7 @@ void main() {
     await tester.tap(find.text('Next'));
     expect(observer.transitionDuration, const Duration(milliseconds: 678));
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsNothing);
@@ -157,8 +155,7 @@ void main() {
     await tester.tap(find.text('Next'));
     expect(observer.transitionDuration, const ZoomPageTransitionsBuilder().transitionDuration);
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsNothing);
@@ -171,8 +168,7 @@ void main() {
       const ZoomPageTransitionsBuilder().reverseTransitionDuration,
     );
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsNothing);
@@ -182,8 +178,7 @@ void main() {
     await tester.tap(find.text('Back'));
     expect(observer.transitionDuration, const Duration(milliseconds: 789));
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), findsOneWidget);
@@ -193,8 +188,7 @@ void main() {
     await tester.tap(find.text('Back'));
     expect(observer.transitionDuration, const Duration(milliseconds: 567));
 
-    await tester.pump();
-    await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+    await observer.pumpPastTransition(tester);
 
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
