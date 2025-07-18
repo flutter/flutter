@@ -330,14 +330,19 @@ def get_repository_version(repository):
 
 def get_content_hash():
   'Returns the content hash for the engine.'
-  hash_command = os.path.join(SRC_ROOT, '..', '..', 'bin', 'internal', 'content_aware_hash')
-
+  hash_method = os.path.join(SRC_ROOT, '..', '..', 'bin', 'internal', 'content_aware_hash')
   if sys.platform.startswith(('cygwin', 'win')):
-    hash_command = f'{hash_command}.ps1'
+    hash_method = f'{hash_method}.ps1'
+    # hash_command.insert(0, 'cmd.exe /c powershell.exe')
   else:
-    hash_command = f'{hash_command}.sh'
+    hash_method = f'{hash_method}.sh'
 
-  version = subprocess.check_output([hash_command])
+  hash_command = []
+  if sys.platform.startswith(('cygwin', 'win')):
+    hash_command = hash_command + ['cmd.exe', '/c', 'powershell.exe']
+  hash_command = hash_command + [hash_method]
+
+  version = subprocess.check_output(hash_command)
 
   return str(version.strip(), 'utf-8')
 
