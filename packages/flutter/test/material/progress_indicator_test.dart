@@ -1161,22 +1161,23 @@ void main() {
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
+      const Color color = Color(0xFF5D3FD3);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
           home: const Scaffold(
-            body: Material(
-              child: CircularProgressIndicator.adaptive(backgroundColor: Color(0xFF5D3FD3)),
-            ),
+            body: Material(child: CircularProgressIndicator.adaptive(backgroundColor: color)),
           ),
         ),
       );
 
       expect(
         find.byType(CupertinoActivityIndicator),
-        paints..rsuperellipse(
-          rsuperellipse: const RSuperellipse.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
-          color: const Color(0x935D3FD3),
+        paints..rrect(
+          rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+          // The value of 47 comes from the alpha that is applied to the first
+          // tick.
+          color: color.withAlpha(47),
         ),
       );
     },

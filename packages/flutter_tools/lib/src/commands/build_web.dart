@@ -152,13 +152,13 @@ class BuildWebCommand extends BuildSubCommand {
   };
 
   @override
-  final String name = 'web';
+  final name = 'web';
 
   @override
   bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  final String description = 'Build a web application bundle.';
+  final description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -183,10 +183,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
-    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(
-      dartDefines,
-      useWasm: useWasm,
-    );
+    final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
     final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
@@ -273,7 +270,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    final WebBuilder webBuilder = WebBuilder(
+    final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,
