@@ -331,4 +331,9 @@ class SkwasmRenderer implements Renderer {
   void dumpDebugInfo() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
+
+  @override
+  void debugClear() {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
 }
