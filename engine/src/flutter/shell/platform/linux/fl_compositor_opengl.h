@@ -42,10 +42,14 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
 /**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
+ * @width: output width in pixels.
+ * @height: output height in pixels.
  *
  * Renders the current frame.
  */
-void fl_compositor_opengl_render(FlCompositorOpenGL* compositor);
+void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
+                                 size_t width,
+                                 size_t height);
 
 /**
  * fl_compositor_opengl_cleanup:

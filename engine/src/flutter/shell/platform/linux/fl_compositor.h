@@ -19,10 +19,6 @@ struct _FlCompositorClass {
   gboolean (*present_layers)(FlCompositor* compositor,
                              const FlutterLayer** layers,
                              size_t layers_count);
-
-  void (*wait_for_frame)(FlCompositor* compositor,
-                         int target_width,
-                         int target_height);
 };
 
 /**
@@ -45,20 +41,6 @@ struct _FlCompositorClass {
 gboolean fl_compositor_present_layers(FlCompositor* compositor,
                                       const FlutterLayer** layers,
                                       size_t layers_count);
-
-/**
- * fl_compositor_wait_for_frame:
- * @compositor: an #FlCompositor.
- * @target_width: width of frame being waited for
- * @target_height: height of frame being waited for
- *
- * Holds the thread until frame with requested dimensions is presented.
- * While waiting for frame Flutter platform and raster tasks are being
- * processed.
- */
-void fl_compositor_wait_for_frame(FlCompositor* compositor,
-                                  int target_width,
-                                  int target_height);
 
 G_END_DECLS
 

@@ -19,6 +19,6 @@ TEST(FlCompositorSoftwareTest, Render) {
       image_data, CAIRO_FORMAT_ARGB32, 1024, 1024, 1024 * 4);
   cairo_t* cr = cairo_create(surface);
   fl_compositor_present_layers(FL_COMPOSITOR(compositor), nullptr, 0);
-  fl_compositor_software_render(compositor, cr, 1);
+  fl_compositor_software_render(compositor, cr, 1024, 1024, 1);
   cairo_surface_destroy(surface);
 }
