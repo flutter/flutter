@@ -22,7 +22,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
 
-const String kPubspec = '''
+const kPubspec = '''
 name: foo_project
 environment:
   sdk: ^3.7.0-0
@@ -36,7 +36,7 @@ dependencies:
     sdk: flutter
 ''';
 
-const String kFooDart = '''
+const kFooDart = '''
 import 'package:flutter/widgets.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -44,7 +44,7 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Foo');
 ''';
 
-const String kBarDart = '''
+const kBarDart = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/widget_previews.dart';
@@ -74,19 +74,19 @@ WidgetBuilder barPreview3() => (BuildContext context) {
 };
 ''';
 
-const String kBrightnessDart = '''
+const kBrightnessDart = '''
 import 'package:flutter/material.dart';
 
 const Brightness brightnessConstant = Brightness.dark;
 ''';
 
-const String kThemeDart = '''
+const kThemeDart = '''
 import 'package:flutter/widget_previews.dart';
 
 PreviewThemeData myThemeData() => PreviewThemeData();
 ''';
 
-const String kWrapperDart = '''
+const kWrapperDart = '''
 import 'package:flutter/widgets.dart';
 
 Widget wrapper(Widget widget) {
@@ -94,7 +94,7 @@ Widget wrapper(Widget widget) {
 }
 ''';
 
-const String kLocalizationsDart = '''
+const kLocalizationsDart = '''
 import 'dart:ui';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -116,7 +116,7 @@ PreviewLocalizationsData myLocalizations() {
   );
 }''';
 
-const String kErrorContainingLibrary = '''
+const kErrorContainingLibrary = '''
 invalid-symbol;
 
 import 'package:flutter/widgets.dart';
@@ -126,7 +126,7 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Error in library');
 ''';
 
-const String kTransitiveErrorLibrary = '''
+const kTransitiveErrorLibrary = '''
 import 'error.dart';
 
 import 'package:flutter/widgets.dart';
@@ -148,7 +148,7 @@ void main() {
     late PreviewDetector previewDetector;
     // We perform this initialization just so we can build the generated file path for test
     // descriptions.
-    LocalFileSystem fs = LocalFileSystem.test(signals: Signals.test());
+    var fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
       Cache.flutterRoot = getFlutterRoot();
@@ -156,7 +156,7 @@ void main() {
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
       fs = LocalFileSystem.test(signals: Signals.test());
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       FlutterManifest.empty(logger: logger);
       final Directory projectDir = fs.systemTempDirectory.createTempSync('project')
         ..childDirectory('lib/src').createSync(recursive: true)
@@ -186,7 +186,7 @@ void main() {
         onPubspecChangeDetected: (String path) {},
       );
       codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
-      final Pub pub = Pub.test(
+      final pub = Pub.test(
         fileSystem: fs,
         logger: logger,
         processManager: const LocalProcessManager(),
@@ -224,7 +224,7 @@ void main() {
         // - A top-level function 'List<WidgetPreview> previews()'
         // - A returned list containing function calls to 'preview()' from 'foo.dart' and
         //   'barPreview1()', 'barPreview2()', and 'barPreview3()' from 'src/bar.dart'
-        const String expectedGeneratedPreviewFileContents = '''
+        const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 import 'package:foo_project/foo.dart' as _i2;
@@ -283,7 +283,7 @@ List<_i1.WidgetPreview> previews() => [
         // The generated file should only contain:
         // - An import of the widget preview library
         // - A top-level function 'List<WidgetPreview> previews()' that returns an empty list.
-        const String emptyGeneratedPreviewFileContents = '''
+        const emptyGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'widget_preview.dart' as _i1;
 

@@ -32,7 +32,7 @@ class Context {
   final List<String> arguments;
   RandomAccessFile? scriptOutputStream;
 
-  static const String incompatibleErrorMessage =
+  static const incompatibleErrorMessage =
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
@@ -96,7 +96,7 @@ class Context {
   }
 
   bool existsFile(String path) {
-    final File file = File(path);
+    final file = File(path);
     return file.existsSync();
   }
 
@@ -121,7 +121,7 @@ class Context {
     }
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
-      final StringBuffer errorOutput = StringBuffer();
+      final errorOutput = StringBuffer();
       if (result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
@@ -255,7 +255,7 @@ class Context {
   void embedFlutterFrameworks(TargetPlatform platform) {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
-    final String xcodeFrameworksDir =
+    final xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
     runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
@@ -309,12 +309,12 @@ class Context {
   }) {
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
+    var projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
+    final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
     if (!nativeAssetsDir.existsSync()) {
@@ -400,7 +400,7 @@ class Context {
       return;
     }
 
-    final String builtProductsPlist =
+    final builtProductsPlist =
         '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
 
     if (!existsFile(builtProductsPlist)) {
@@ -563,10 +563,10 @@ class Context {
     // Also fail the build if ACTION=install, which indicates the app is being
     // built for distribution.
     final String? action = environment['ACTION'];
-    final bool fatal = action == 'install';
+    final fatal = action == 'install';
 
     if (buildModeCLILastUsed == null) {
-      final String message =
+      final message =
           'Your Flutter build settings are outdated. Please run '
           '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
           'project and try again.\n';
@@ -579,7 +579,7 @@ class Context {
       }
     }
     if (currentBuildMode != buildModeCLILastUsed) {
-      final String message =
+      final message =
           'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
           'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
           'in your Flutter project to update your settings.\n';
@@ -599,7 +599,7 @@ class Context {
     required TargetPlatform platform,
     required bool verbose,
   }) {
-    String targetPath = 'lib/main.dart';
+    var targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
     }
@@ -614,7 +614,7 @@ class Context {
       );
     }
 
-    final List<String> flutterArgs = <String>[];
+    final flutterArgs = <String>[];
 
     if (verbose) {
       flutterArgs.add('--verbose');
@@ -696,9 +696,9 @@ class Context {
       }
     }
     if (platform == TargetPlatform.macos && command == 'build') {
-      final String ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
-      final String buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
-      final String buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
+      final ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
+      final buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
+      final buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
       flutterArgs.addAll(<String>[
         '--build-inputs=$buildInputsPath',
         '--build-outputs=$buildOutputsPath',

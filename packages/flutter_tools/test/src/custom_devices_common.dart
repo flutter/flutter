@@ -23,7 +23,7 @@ void writeCustomDevicesConfigFile(
   );
 }
 
-final CustomDeviceConfig testConfig = CustomDeviceConfig(
+final testConfig = CustomDeviceConfig(
   id: 'testid',
   label: 'testlabel',
   sdkNameAndVersion: 'testsdknameandversion',
@@ -38,7 +38,7 @@ final CustomDeviceConfig testConfig = CustomDeviceConfig(
   forwardPortSuccessRegex: RegExp('testforwardportsuccess'),
 );
 
-const Map<String, dynamic> testConfigJson = <String, dynamic>{
+const testConfigJson = <String, dynamic>{
   'id': 'testid',
   'label': 'testlabel',
   'sdkNameAndVersion': 'testsdknameandversion',

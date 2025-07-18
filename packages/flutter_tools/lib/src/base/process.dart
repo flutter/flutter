@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
+import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -49,9 +50,9 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   _DefaultShutdownHooks();
 
   @override
-  final List<ShutdownHook> registeredHooks = <ShutdownHook>[];
+  final registeredHooks = <ShutdownHook>[];
 
-  bool _shutdownHooksRunning = false;
+  var _shutdownHooksRunning = false;
 
   @override
   void addShutdownHook(ShutdownHook shutdownHook) {
@@ -66,7 +67,7 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     );
     _shutdownHooksRunning = true;
     try {
-      final List<Future<dynamic>> futures = <Future<dynamic>>[
+      final futures = <Future<dynamic>>[
         for (final ShutdownHook shutdownHook in registeredHooks)
           if (shutdownHook() case final Future<dynamic> result) result,
       ];
@@ -103,7 +104,7 @@ class RunResult {
 
   @override
   String toString() {
-    final StringBuffer out = StringBuffer();
+    final out = StringBuffer();
     if (stdout.isNotEmpty) {
       out.writeln(stdout);
     }
@@ -277,7 +278,7 @@ abstract class ProcessUtils {
     required String content,
     required bool isLine,
   }) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
 
     void handleError(Object error, StackTrace stackTrace) {
       completer.completeError(error, stackTrace);
@@ -336,7 +337,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
       );
-      final RunResult runResult = RunResult(results, cmd);
+      final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
       if (throwOnError &&
           runResult.exitCode != 0 &&
@@ -361,8 +362,8 @@ class _DefaultProcessUtils implements ProcessUtils {
         environment: environment,
       );
 
-      final StringBuffer stdoutBuffer = StringBuffer();
-      final StringBuffer stderrBuffer = StringBuffer();
+      final stdoutBuffer = StringBuffer();
+      final stderrBuffer = StringBuffer();
       final Future<void> stdoutFuture = process.stdout
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .listen(stdoutBuffer.write)
@@ -402,13 +403,8 @@ class _DefaultProcessUtils implements ProcessUtils {
       stdoutString = stdoutBuffer.toString();
       stderrString = stderrBuffer.toString();
 
-      final ProcessResult result = ProcessResult(
-        process.pid,
-        exitCode ?? -1,
-        stdoutString,
-        stderrString,
-      );
-      final RunResult runResult = RunResult(result, cmd);
+      final result = ProcessResult(process.pid, exitCode ?? -1, stdoutString, stderrString);
+      final runResult = RunResult(result, cmd);
 
       // If the process did not timeout. We are done.
       if (exitCode != null) {
@@ -458,11 +454,11 @@ class _DefaultProcessUtils implements ProcessUtils {
       stderrEncoding: encoding,
       stdoutEncoding: encoding,
     );
-    final RunResult runResult = RunResult(results, cmd);
+    final runResult = RunResult(results, cmd);
 
     _logger.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
-    bool failedExitCode = runResult.exitCode != 0;
+    var failedExitCode = runResult.exitCode != 0;
     if (allowedFailures != null && failedExitCode) {
       failedExitCode = !allowedFailures(runResult.exitCode);
     }
@@ -484,7 +480,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      String message = 'The command failed with exit code ${runResult.exitCode}';
+      var message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message =
             'The command failed\nStdout:\n${runResult.stdout}\n'
@@ -541,7 +537,7 @@ class _DefaultProcessUtils implements ProcessUtils {
             mappedLine = mapFunction(line);
           }
           if (mappedLine != null) {
-            final String message = '$prefix$mappedLine';
+            final message = '$prefix$mappedLine';
             if (stdoutErrorMatcher?.hasMatch(mappedLine) ?? false) {
               _logger.printError(message, wrap: false);
             } else if (trace) {
@@ -652,7 +648,7 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
   // Run shutdown hooks before flushing logs
   await shutdownHooks.runShutdownHooks(globals.logger);
 
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
 
   await globals.analytics.close();
 

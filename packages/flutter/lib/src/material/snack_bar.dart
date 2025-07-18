@@ -541,6 +541,8 @@ class _SnackBarState extends State<SnackBar> {
   CurvedAnimation? _fadeOutAnimation;
   CurvedAnimation? _heightM3Animation;
 
+  final Key _dismissibleKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -820,7 +822,7 @@ class _SnackBarState extends State<SnackBar> {
         ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
-        key: const Key('dismissible'),
+        key: _dismissibleKey,
         direction: dismissDirection,
         resizeDuration: null,
         behavior:

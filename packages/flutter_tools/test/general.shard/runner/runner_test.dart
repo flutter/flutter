@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -27,7 +28,7 @@ import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
-const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
+const kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
   group('runner (crash reporting)', () {
@@ -43,7 +44,7 @@ void main() {
       // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
-      io.setExitFunctionForTests((int exitCode) {
+      setExitFunctionForTests((int exitCode) {
         firstExitCode ??= exitCode;
 
         // TODO(jamesderlin): Ideally only the first call to exit() would be
@@ -63,14 +64,14 @@ void main() {
     });
 
     tearDown(() {
-      io.restoreExitFunction();
+      restoreExitFunction();
       Cache.enableLocking();
     });
 
     testUsingContext(
       'error handling crash report (synchronous crash)',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -122,7 +123,7 @@ void main() {
     testUsingContext(
       'error handling crash report (bot)',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -181,11 +182,11 @@ void main() {
     // runner.run. Currently the distinction does not matter, but if it ever
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
-    final Completer<void> commandCompleter = Completer<void>();
+    final commandCompleter = Completer<void>();
     testUsingContext(
       'error handling crash report (asynchronous crash)',
       () async {
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -239,7 +240,7 @@ void main() {
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         // runner.run() asynchronously calls the exit function set above, so we
         // catch it in a zone.
         unawaited(
@@ -309,14 +310,14 @@ void main() {
 
     group('in directory without permission', () {
       setUp(() {
-        bool inTestSetup = true;
+        var inTestSetup = true;
         fileSystem = MemoryFileSystem(
           opHandle: (String context, FileSystemOp operation) {
             if (inTestSetup) {
               // Allow all operations during test setup.
               return;
             }
-            const Set<FileSystemOp> disallowedOperations = <FileSystemOp>{
+            const disallowedOperations = <FileSystemOp>{
               FileSystemOp.create,
               FileSystemOp.delete,
               FileSystemOp.copy,
@@ -348,7 +349,7 @@ void main() {
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           // runner.run() asynchronously calls the exit function set above, so we
           // catch it in a zone.
           unawaited(
@@ -422,7 +423,7 @@ void main() {
     late MemoryFileSystem fs;
 
     setUp(() {
-      io.setExitFunctionForTests((int exitCode) {});
+      setExitFunctionForTests((int exitCode) {});
 
       fs = MemoryFileSystem.test();
 
@@ -430,14 +431,14 @@ void main() {
     });
 
     tearDown(() {
-      io.restoreExitFunction();
+      restoreExitFunction();
       Cache.enableLocking();
     });
 
     testUsingContext(
       "catches ProcessException calling git because it's not available",
       () async {
-        final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+        final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
           <String>[command.name],
@@ -467,7 +468,7 @@ void main() {
     testUsingContext(
       'handles ProcessException calling git when ProcessManager.canRun fails',
       () async {
-        final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+        final command = _GitNotFoundFlutterCommand();
 
         await runner.run(
           <String>[command.name],
@@ -535,7 +536,7 @@ void main() {
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 
@@ -559,7 +560,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics enables/disables telemetry',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 
@@ -589,7 +590,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
         await globals.analytics.setTelemetry(true);
 
         await runner.run(
@@ -624,7 +625,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         await globals.analytics.setTelemetry(false);
         await runner.run(
@@ -654,7 +655,7 @@ void main() {
     testUsingContext(
       'throw error when both flags passed',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 
@@ -698,12 +699,12 @@ class CrashingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Exception error = Exception('an exception % --'); // Test URL encoding.
+    final error = Exception('an exception % --'); // Test URL encoding.
     if (!_asyncCrash) {
       throw error;
     }
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     Timer.run(() {
       completer.complete();
       throw error;
@@ -754,7 +755,7 @@ class WaitingCrashReporter implements CrashReporter {
 }
 
 class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManager {
-  final FakeProcessManager delegate = FakeProcessManager.any();
+  final delegate = FakeProcessManager.any();
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {
     if (executable == 'git') {

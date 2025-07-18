@@ -914,6 +914,22 @@ void main() {
 
         expect(getContainerRect(tester).height, 52.0);
       });
+
+      testWidgets('Ambient activeIndicatorBorder is used', (WidgetTester tester) async {
+        const BorderSide activeIndicatorBorder = BorderSide(color: Colors.amber, width: 2.0);
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationThemeData(
+              filled: true,
+              activeIndicatorBorder: activeIndicatorBorder,
+            ),
+            decoration: const InputDecoration(labelText: labelText),
+          ),
+        );
+
+        expect(getBorderColor(tester), activeIndicatorBorder.color);
+        expect(getBorderWeight(tester), activeIndicatorBorder.width);
+      });
     });
 
     group('for outlined text field', () {
@@ -9822,6 +9838,22 @@ void main() {
       );
 
       expect(findBorderPainter(), paints..path(style: PaintingStyle.fill, color: fillColor));
+    });
+
+    testWidgets('activeIndicatorBorder', (WidgetTester tester) async {
+      const BorderSide activeIndicatorBorder = BorderSide(color: Colors.amber, width: 2.0);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(
+            filled: true,
+            activeIndicatorBorder: activeIndicatorBorder,
+          ),
+          decoration: const InputDecoration(labelText: labelText),
+        ),
+      );
+
+      expect(getBorderColor(tester), activeIndicatorBorder.color);
+      expect(getBorderWeight(tester), activeIndicatorBorder.width);
     });
 
     testWidgets('hoverColor', (WidgetTester tester) async {

@@ -3,7 +3,7 @@ description: |
   You found a bug in Flutter causing your application to crash or
   throw an exception, a widget is buggy, or something looks wrong.
 title: "[Google3 Bug]: "
-labels: 'customer: google'
+labels: ['customer: google']
 body:
   - type: markdown
     attributes:
