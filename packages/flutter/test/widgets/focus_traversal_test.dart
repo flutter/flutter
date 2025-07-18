@@ -2778,7 +2778,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ListView(
-              children: [
+              children: <Widget>[
                 Focus(focusNode: topNode, child: Container(height: 100)),
                 ...nodes.map<Widget>((FocusNode node) {
                   return SizedBox(
@@ -2847,7 +2847,7 @@ void main() {
           MaterialApp(
             home: ListView(
               scrollDirection: Axis.horizontal,
-              children: [
+              children: <Widget>[
                 Focus(focusNode: leftNode, child: Container(height: 100)),
                 ...nodes.map<Widget>((FocusNode node) {
                   return SizedBox(
