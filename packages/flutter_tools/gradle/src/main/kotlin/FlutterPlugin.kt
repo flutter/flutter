@@ -14,12 +14,12 @@ import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
-import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
+import org.gradle.api.internal.tasks.DefaultTaskContainer
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
@@ -332,7 +332,7 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        try {
+        if ((rootProject.tasks as? DefaultTaskContainer)?.findByName("generateLockfiles") == null) {
             rootProject.tasks.register("generateLockfiles") {
                 doLast {
                     rootProject.subprojects.forEach { subproject ->
@@ -347,8 +347,6 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
-        } catch (e: InvalidUserDataException) {
-            // ignored
         }
     }
 
