@@ -36,7 +36,6 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   g_autoptr(FlCompositorOpenGL) compositor =
       fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -95,7 +94,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   g_autoptr(FlCompositorOpenGL) compositor =
       fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -149,7 +147,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   g_autoptr(FlCompositorOpenGL) compositor =
       fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -198,7 +195,6 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   g_autoptr(FlCompositorOpenGL) compositor =
       fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -248,7 +244,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   g_autoptr(FlCompositorOpenGL) compositor =
       fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -301,7 +296,6 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
                      1.0, nullptr, nullptr, nullptr);
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
