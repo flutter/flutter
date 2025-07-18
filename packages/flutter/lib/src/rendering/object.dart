@@ -3729,7 +3729,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Wether the semantic bounding box will be clipped by [parent].
   ///
-  /// Defaults to true,
+  /// Defaults to true.
   bool get semanticsBoundsClippedByParent => true;
 
   /// Whether the semantics of this render object is dirty and await the update.
