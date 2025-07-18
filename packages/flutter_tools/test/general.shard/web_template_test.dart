@@ -219,6 +219,70 @@ const htmlSample3 = '''
 </html>
 ''';
 
+const htmlSampleStaticAssetsUrl =
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$kStaticAssetsUrlPlaceholder",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$kStaticAssetsUrlPlaceholder",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
+String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
+    '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <base href="/">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+  <div></div>
+  <script>
+    (flutter.js content)
+    {{flutter_build_config}}
+    _flutter.loader.load({
+      config: {
+        entryPointBaseUrl: "$staticAssetsUrl",
+      },
+      onEntrypointLoaded: async function (engineInitializer) {
+        const appRunner = await engineInitializer.initializeEngine({
+          assetBase: "$staticAssetsUrl",
+        });
+
+        await appRunner.runApp();
+      },
+    });
+  </script>
+</body>
+</html>
+''';
+
 void main() {
   final fs = MemoryFileSystem();
   final File flutterJs = fs.file('flutter.js');
@@ -297,6 +361,21 @@ void main() {
         flutterBootstrapJs: '(flutter bootstrap script)',
       ),
       htmlSampleFullFlutterBootstrapReplacementOutput,
+    );
+  });
+
+  test('applies substitutions to static assets url', () {
+    const indexHtml = WebTemplate(htmlSampleStaticAssetsUrl);
+    const expectedStaticAssetsUrl = 'https://static.example.com/my-app/';
+
+    expect(
+      indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: 'v123xyz',
+        flutterJsFile: flutterJs,
+        staticAssetsUrl: expectedStaticAssetsUrl,
+      ),
+      htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
     );
   });
 
