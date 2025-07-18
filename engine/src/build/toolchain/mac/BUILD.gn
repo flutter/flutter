@@ -62,6 +62,11 @@ if (host_cpu == "arm64") {
       rebase_path("$buildtools_path/mac-x64/clang/bin", root_build_dir)
 }
 
+# TODO: only do it for >= ios 26
+rebased_clang_dir_for_ios_26 = rebase_path("$mac_host_toolchain_path/usr/bin", root_build_dir)
+print(rebased_clang_dir_for_ios_26)
+
+
 if (use_ccache) {
   # ccache only supports compilation, not linking.
   cxx_prefix = "ccache "
@@ -423,13 +428,22 @@ if (is_ios) {
   mac_toolchain("ios_clang_arm") {
     toolchain_cpu = "arm"
     toolchain_os = "mac"
+
+    # TODO: for ios 26 only
+    # TODO: update other toolchains below
     prefix = rebased_clang_dir
-    ar = "${prefix}/llvm-ar"
-    asm = "${prefix}/clang"
-    cc = "${cxx_prefix}${prefix}/clang"
-    cxx = "${cxx_prefix}${prefix}/clang++"
-    objc = "${objc_prefix}${prefix}/clang++"
-    ld = "${link_prefix}${prefix}/clang++"
+    print(prefix)
+    clang_prefix = rebased_clang_dir_for_ios_26
+    print(clang_prefix)
+
+    # there's no llvm-ar under Xcode toolchain.
+    ar = "${clang_prefix}/ar"
+#    ar = "${prefix}/llvm-ar"
+    asm = "${clang_prefix}/clang"
+    cc = "${cxx_prefix}${clang_prefix}/clang"
+    cxx = "${cxx_prefix}${clang_prefix}/clang++"
+    objc = "${objc_prefix}${clang_prefix}/clang++"
+    ld = "${link_prefix}${clang_prefix}/clang++"
     is_clang = true
 
     sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
