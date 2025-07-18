@@ -635,15 +635,29 @@ void main() {
   });
 
   test('BorderDirectional.dimensions', () {
-    expect(
-      const BorderDirectional(
-        top: BorderSide(width: 3.0),
-        start: BorderSide(width: 2.0),
-        end: BorderSide(width: 7.0),
-        bottom: BorderSide(width: 5.0),
-      ).dimensions,
-      const EdgeInsetsDirectional.fromSTEB(2.0, 3.0, 7.0, 5.0),
+    const BorderDirectional inside = BorderDirectional(
+      top: BorderSide(width: 3.0),
+      start: BorderSide(width: 2.0),
+      end: BorderSide(width: 7.0),
+      bottom: BorderSide(width: 5.0),
     );
+    expect(inside.dimensions, EdgeInsets.zero);
+
+    const BorderDirectional center = BorderDirectional(
+      top: BorderSide(width: 3.0, strokeAlign: BorderSide.strokeAlignCenter),
+      start: BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter),
+      end: BorderSide(width: 7.0, strokeAlign: BorderSide.strokeAlignCenter),
+      bottom: BorderSide(width: 5.0, strokeAlign: BorderSide.strokeAlignCenter),
+    );
+    expect(center.dimensions, const EdgeInsetsDirectional.fromSTEB(1.0, 1.5, 3.5, 2.5));
+
+    const BorderDirectional outside = BorderDirectional(
+      top: BorderSide(width: 3.0, strokeAlign: BorderSide.strokeAlignOutside),
+      start: BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside),
+      end: BorderSide(width: 7.0, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 5.0, strokeAlign: BorderSide.strokeAlignOutside),
+    );
+    expect(outside.dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 3.0, 7.0, 5.0));
   });
 
   test('BorderDirectional.isUniform', () {
@@ -1077,7 +1091,7 @@ void main() {
         excludes: <Offset>[const Offset(49.0, 10.0)],
       ),
     );
-    expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
+    expect(decoration2.padding, EdgeInsets.zero);
     expect(decoration2.scale(2.0), decoration4);
     expect(BoxDecoration.lerp(decoration2, decoration6, 0.5), decoration4);
   });
