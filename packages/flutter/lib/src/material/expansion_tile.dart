@@ -420,7 +420,6 @@ class ExpansionTile extends StatefulWidget {
   /// * [InkWell.splashColor], which determines the color of the ripple
   ///   effect in Material widgets.
   /// * [ThemeData.splashColor], which provides a fallback color.
-  
   final Color? splashColor;
 
   /// Defines how compact the expansion tile's layout will be.
