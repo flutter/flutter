@@ -573,7 +573,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   // Returns a number between min and max, proportional to value, which must
   // be between 0.0 and 1.0.
-  double _lerp(double value) => ui.lerpDouble(widget.min, widget.max, value)!;
+  double _lerp(double value) {
+    double lerpValue = ui.lerpDouble(widget.min, widget.max, value)!;
+    if (widget.divisions != null) {
+      lerpValue = (lerpValue * widget.divisions!).round() / widget.divisions!;
+    }
+    return lerpValue;
+  }
 
   // Returns a new range value with the start and end lerped.
   RangeValues _lerpRangeValues(RangeValues values) {

@@ -235,7 +235,10 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value, bool isFastDrag) {
     assert(widget.onChanged != null);
-    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.divisions != null) {
+      lerpValue = (lerpValue * widget.divisions!).round() / widget.divisions!;
+    }
     final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
 
     if (lerpValue != widget.value) {
