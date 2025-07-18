@@ -2777,25 +2777,20 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+            home: ListView(
+              children: [
                 Focus(focusNode: topNode, child: Container(height: 100)),
-                Expanded(
-                  child: ListView(
-                    children: nodes.map<Widget>((FocusNode node) {
-                      return SizedBox(
-                        height: 100,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: <Widget>[
-                            Focus(focusNode: node, child: const SizedBox(height: 100, width: 100)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                ...nodes.map<Widget>((FocusNode node) {
+                  return SizedBox(
+                    height: 100,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: <Widget>[
+                        Focus(focusNode: node, child: const SizedBox(height: 100, width: 100)),
+                      ],
+                    ),
+                  );
+                }),
                 Focus(focusNode: bottomNode, child: Container(height: 100)),
               ],
             ),
@@ -2850,25 +2845,20 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+            home: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
                 Focus(focusNode: leftNode, child: Container(height: 100)),
-                Expanded(
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: nodes.map<Widget>((FocusNode node) {
-                      return SizedBox(
-                        width: 100,
-                        child: ListView(
-                          children: <Widget>[
-                            Focus(focusNode: node, child: const SizedBox(height: 100, width: 100)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                ...nodes.map<Widget>((FocusNode node) {
+                  return SizedBox(
+                    width: 100,
+                    child: ListView(
+                      children: <Widget>[
+                        Focus(focusNode: node, child: const SizedBox(height: 100, width: 100)),
+                      ],
+                    ),
+                  );
+                }),
                 Focus(focusNode: rightNode, child: Container(height: 100)),
               ],
             ),
