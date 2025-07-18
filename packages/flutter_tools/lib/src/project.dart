@@ -901,7 +901,10 @@ See the link below for more information:
       return;
     }
     // The v1 android embedding has been deleted.
-    throwToolExit('Build failed due to use of deleted Android v1 embedding.', exitCode: 1);
+    throwToolExit(
+      'Build failed due to use of deleted Android v1 embedding (${result.reason}).',
+      exitCode: 1,
+    );
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
