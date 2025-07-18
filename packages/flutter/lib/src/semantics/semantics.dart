@@ -3651,7 +3651,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     _SemanticsGeometry? geometry;
-    if (data.identifier.endsWith('child')) {
+    if (_isOverlayPortalChild) {
       semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
       geometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: semanticsParent!.parentPaintClipRect,
@@ -3701,7 +3701,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       transform: kIsWeb
           ? data.transform?.storage ?? _kIdentityTransform
           : geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
-      overlayPortalParent: overlayPortalParent,
+      overlayPortalParent: overlayPortalParent ?? -1,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
@@ -3718,9 +3718,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   // Generate a children list in traversal order. Add tree grafting when needed
-  // so that any overlay portal child nodes  to On web, the childrenInTraversalOrder
-  // is kept the same as the _children list because of the assumption that requires
-  // both childrenInTraversalOrder and childrenInHitTestOrder
+  // so that all overlay portal child nodes have correct overlay portal parent
+  // in traversal order. On web, the childrenInTraversalOrder is kept the same
+  // as the _children(paint-order) list because of the assumption that requires both
+  // childrenInTraversalOrder and childrenInHitTestOrder have the same length.
+  // To ensure the correctness of the childrenInTraversalOrder, ARIA-owns is used
+  // on the web side.
   List<SemanticsNode>? _updateChildrenInTraversalOrder() {
     if (kIsWeb) {
       return _children;
@@ -3741,8 +3744,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       updatedChildren.add(child);
     }
 
-    // If the current node is an overlay portal parent, the according overlay
-    // portal child should be added to this current node children list.
+    // If the current node is an overlay portal parent, get the according overlay
+    // portal child from _overlayPortalChildNodes and add it to the children list
+    // of this current node.
     if (_isOverlayPortalParent) {
       final String parentIdentifier = identifier.split(' ')[0];
       if (owner != null && owner!._overlayPortalChildNodes.containsKey(parentIdentifier)) {
@@ -4052,16 +4056,6 @@ final class _SemanticsGeometry {
     required this.rect,
     required this.hidden,
   });
-
-  factory _SemanticsGeometry.root(Rect rect) {
-    return _SemanticsGeometry(
-      paintClipRect: null,
-      semanticsClipRect: null,
-      transform: Matrix4.identity(),
-      hidden: false,
-      rect: rect,
-    );
-  }
 
   /// Value for [SemanticsNode.transform].
   final Matrix4 transform;
