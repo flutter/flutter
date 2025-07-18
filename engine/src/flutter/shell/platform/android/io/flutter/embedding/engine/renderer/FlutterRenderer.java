@@ -881,7 +881,6 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-
     @Override
     protected void finalize() throws Throwable {
       try {

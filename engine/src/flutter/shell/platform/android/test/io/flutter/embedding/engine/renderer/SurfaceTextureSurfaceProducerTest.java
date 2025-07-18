@@ -10,8 +10,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.annotation.TargetApi;
@@ -22,7 +20,6 @@ import android.os.Looper;
 import android.view.Surface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.view.TextureRegistry;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -22,14 +22,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
-import android.media.ImageReader;
 import android.os.Looper;
 import android.view.Surface;
 import androidx.lifecycle.Lifecycle;
