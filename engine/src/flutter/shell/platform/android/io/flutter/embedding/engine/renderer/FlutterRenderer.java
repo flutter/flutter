@@ -867,25 +867,20 @@ public class FlutterRenderer implements TextureRegistry {
 
     private PerImageReader getActiveReader() {
       synchronized (lock) {
-        if (!createNewReader) {
-          // Verify we don't need a new ImageReader anyway because its Surface has been invalidated.
-          PerImageReader lastPerImageReader = imageReaderQueue.peekLast();
-          Surface lastImageReaderSurface = lastPerImageReader.reader.getSurface();
-          boolean lastImageReaderHasValidSurface = lastImageReaderSurface.isValid();
-          if (lastImageReaderHasValidSurface) {
-            return lastPerImageReader;
+        if (createNewReader) {
+          createNewReader = false;
+          // Create a new ImageReader and add it to the queue.
+          ImageReader reader = createImageReader();
+          if (VERBOSE_LOGS) {
+            Log.i(
+                TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
           }
+          return getOrCreatePerImageReader(reader);
         }
-
-        createNewReader = false;
-        // Create a new ImageReader and add it to the queue.
-        ImageReader reader = createImageReader();
-        if (VERBOSE_LOGS) {
-          Log.i(TAG, reader.hashCode() + " created w=" + requestedWidth + " h=" + requestedHeight);
-        }
-        return getOrCreatePerImageReader(reader);
+        return imageReaderQueue.peekLast();
       }
     }
+
 
     @Override
     protected void finalize() throws Throwable {

@@ -90,51 +90,6 @@ public final class SurfaceTextureSurfaceProducerTest {
   }
 
   @Test
-  public void getSurface_doesNotReturnInvalidSurface() {
-    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
-    final Handler handler = new Handler(Looper.getMainLooper());
-    final SurfaceTexture mockSurfaceTexture = mock(SurfaceTexture.class);
-    final TextureRegistry.SurfaceTextureEntry spyTexture =
-        spy(flutterRenderer.registerSurfaceTexture(mockSurfaceTexture));
-    final SurfaceTextureSurfaceProducer producerSpy =
-        spy(new SurfaceTextureSurfaceProducer(0, handler, fakeJNI, spyTexture));
-    final Surface firstMockSurface = mock(Surface.class);
-    final Surface secondMockSurface = mock(Surface.class);
-
-    when(spyTexture.surfaceTexture()).thenReturn(mockSurfaceTexture);
-    when(firstMockSurface.isValid()).thenReturn(false);
-    when(producerSpy.createSurface(mockSurfaceTexture))
-        .thenReturn(firstMockSurface)
-        .thenReturn(secondMockSurface);
-
-    final Surface firstSurface = producerSpy.getSurface();
-    final Surface secondSurface = producerSpy.getSurface();
-
-    assertNotEquals(firstSurface, secondSurface);
-  }
-
-  @Test
-  public void getSurface_consecutiveCallsReturnSameSurfaceIfStillValid() {
-    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
-    final Handler handler = new Handler(Looper.getMainLooper());
-    final SurfaceTexture mockSurfaceTexture = mock(SurfaceTexture.class);
-    final TextureRegistry.SurfaceTextureEntry spyTexture =
-        spy(flutterRenderer.registerSurfaceTexture(mockSurfaceTexture));
-    final SurfaceTextureSurfaceProducer producerSpy =
-        spy(new SurfaceTextureSurfaceProducer(0, handler, fakeJNI, spyTexture));
-    final Surface mockSurface = mock(Surface.class);
-
-    when(spyTexture.surfaceTexture()).thenReturn(mockSurfaceTexture);
-    when(mockSurface.isValid()).thenReturn(true);
-    when(producerSpy.createSurface(mockSurfaceTexture)).thenReturn(mockSurface);
-
-    final Surface firstSurface = producerSpy.getSurface();
-    final Surface secondSurface = producerSpy.getSurface();
-
-    assertEquals(firstSurface, secondSurface);
-  }
-
-  @Test
   public void getForcedNewSurface_returnsNewSurface() {
     final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
     final Handler handler = new Handler(Looper.getMainLooper());
