@@ -9,6 +9,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor.h"
+#include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
@@ -28,26 +29,27 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 /**
  * fl_compositor_opengl_new:
  * @engine: an #FlEngine.
- * @context: the OpenGL context that is being rendered into.
+ * @shareable: %TRUE if the can use a framebuffer that is shared between
+ * contexts.
  *
  * Creates a new OpenGL compositor.
  *
  * Returns: a new #FlCompositorOpenGL.
  */
 FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
-                                             GdkGLContext* context);
+                                             gboolean shareable);
 
 /**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
- * @width: width of the window in pixels.
- * @height: height of the window in pixels.
+ * @width: output width in pixels.
+ * @height: output height in pixels.
  *
- * Performs OpenGL commands to render current Flutter view.
+ * Renders the current frame.
  */
 void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
-                                 int width,
-                                 int height);
+                                 size_t width,
+                                 size_t height);
 
 /**
  * fl_compositor_opengl_cleanup:
