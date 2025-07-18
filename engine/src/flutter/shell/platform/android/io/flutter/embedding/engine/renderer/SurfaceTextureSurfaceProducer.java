@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 
@@ -96,6 +97,17 @@ final class SurfaceTextureSurfaceProducer
       surface = new Surface(texture.surfaceTexture());
     }
     return surface;
+  }
+
+  @Override
+  public Surface getForcedNewSurface() {
+    surface = null;
+    return getSurface();
+  }
+
+  @VisibleForTesting
+  public Surface createSurface(SurfaceTexture surfaceTexture) {
+    return new Surface(surfaceTexture);
   }
 
   @Override

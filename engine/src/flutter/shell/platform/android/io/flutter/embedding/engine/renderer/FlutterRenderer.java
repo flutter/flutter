@@ -556,10 +556,10 @@ public class FlutterRenderer implements TextureRegistry {
       return (double) deltaNanos / 1000000.0;
     }
 
-    PerImageReader getOrCreatePerImageReader(ImageReader reader) {
+    private PerImageReader getOrCreatePerImageReader(ImageReader reader) {
       PerImageReader r = perImageReaders.get(reader);
       if (r == null) {
-        r = new PerImageReader(reader);
+        r = createPerImageReader(reader);
         perImageReaders.put(reader, r);
         imageReaderQueue.add(r);
         if (VERBOSE_LOGS) {
@@ -567,6 +567,11 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
+    }
+
+    @VisibleForTesting
+    public PerImageReader createPerImageReader(ImageReader reader) {
+      return new PerImageReader(reader);
     }
 
     void pruneImageReaderQueue() {
@@ -831,6 +836,12 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public Surface getForcedNewSurface() {
+      createNewReader = true;
+      return getSurface();
+    }
+
+    @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
         long now = System.nanoTime();
@@ -910,7 +921,8 @@ public class FlutterRenderer implements TextureRegistry {
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     }
 
-    private ImageReader createImageReader() {
+    @VisibleForTesting
+    public ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
       } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {

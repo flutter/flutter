@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.renderer;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.robolectric.Shadows.shadowOf;
@@ -83,5 +84,33 @@ public final class SurfaceTextureSurfaceProducerTest {
     assertTrue(surface.isValid());
     producer.release();
     assertFalse(surface.isValid());
+  }
+
+  @Test
+  public void getForcedNewSurface_returnsNewSurface() {
+    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
+    final Handler handler = new Handler(Looper.getMainLooper());
+    final SurfaceTextureSurfaceProducer producer =
+        new SurfaceTextureSurfaceProducer(
+            0, handler, fakeJNI, flutterRenderer.registerSurfaceTexture(new SurfaceTexture(0)));
+
+    final Surface firstSurface = producer.getSurface();
+    final Surface secondSurface = producer.getForcedNewSurface();
+
+    assertNotEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void getSurface_doesNotReturnNewSurface() {
+    final FlutterRenderer flutterRenderer = new FlutterRenderer(fakeJNI);
+    final Handler handler = new Handler(Looper.getMainLooper());
+    final SurfaceTextureSurfaceProducer producer =
+        new SurfaceTextureSurfaceProducer(
+            0, handler, fakeJNI, flutterRenderer.registerSurfaceTexture(new SurfaceTexture(0)));
+
+    Surface firstSurface = producer.getSurface();
+    Surface secondSurface = producer.getSurface();
+
+    assertEquals(firstSurface, secondSurface);
   }
 }
