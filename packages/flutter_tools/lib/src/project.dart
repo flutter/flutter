@@ -790,7 +790,7 @@ See the link below for more information:
   }
 
   bool get isUsingGradle {
-    return hostAppGradleFile.existsSync();
+    return hostAppGradleFile.existsSync() || getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
   }
 
   String? get applicationId {
