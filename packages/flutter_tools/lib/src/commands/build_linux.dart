@@ -42,8 +42,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     );
     argParser.addFlag(
       'config-only',
-      help:
-          'Update the project configuration without performing a build.'
+      help: 'Update the project configuration without performing a build.',
     );
   }
 

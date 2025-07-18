@@ -27,8 +27,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     argParser.addFlag(
       'config-only',
-      help:
-          'Update the project configuration without performing a build.'
+      help: 'Update the project configuration without performing a build.',
     );
   }
 
