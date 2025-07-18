@@ -234,6 +234,7 @@ class RenderWrap extends RenderBox
     TextDirection? textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     Clip clipBehavior = Clip.none,
+    int? maxLines,
   }) : _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
@@ -242,7 +243,8 @@ class RenderWrap extends RenderBox
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _maxLines = maxLines {
     addAll(children);
   }
 
@@ -448,6 +450,22 @@ class RenderWrap extends RenderBox
       _clipBehavior = value;
       markNeedsPaint();
       markNeedsSemanticsUpdate();
+    }
+  }
+
+  /// The maximum number of lines to display.
+  ///
+  /// If null, there is no limit on the number of lines.
+  /// If not null, the wrap will stop creating new lines after reaching this limit.
+  /// Children that would exceed this limit are not displayed or laid out.
+  ///
+  /// Defaults to null.
+  int? get maxLines => _maxLines;
+  int? _maxLines;
+  set maxLines(int? value) {
+    if (_maxLines != value) {
+      _maxLines = value;
+      markNeedsLayout();
     }
   }
 
@@ -667,18 +685,31 @@ class RenderWrap extends RenderBox
     double runMainAxisExtent = 0.0;
     double runCrossAxisExtent = 0.0;
     int childCount = 0;
+    int currentLineCount = 0;
     RenderBox? child = firstChild;
     while (child != null) {
       final Size childSize = layoutChild(child, childConstraints);
       final double childMainAxisExtent = _getMainAxisExtent(childSize);
       final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
+
+      // Check if we need to start a new run
+      final bool needsNewRun =
+          childCount > 0 && runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit;
+
+      // Check if adding a new run would exceed maxLines
+      if (needsNewRun && maxLines != null && currentLineCount >= maxLines!) {
+        // Stop processing children when maxLines is reached
+        break;
+      }
+
       // There must be at least one child before we move on to the next run.
-      if (childCount > 0 && runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
+      if (needsNewRun) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent + runSpacing;
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         childCount = 0;
+        currentLineCount++;
       }
       runMainAxisExtent += childMainAxisExtent;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
@@ -729,6 +760,28 @@ class RenderWrap extends RenderBox
       _setChildPosition,
       _getChildSize,
     );
+
+    // Layout any remaining children with zero size so they are not painted or hit-tested
+    final Set<RenderBox> laidOutChildren = <RenderBox>{};
+    final _NextChild nextChild = _areAxesFlipped.$1 ? childBefore : childAfter;
+    for (final _RunMetrics run in runMetrics) {
+      RenderBox? child = run.leadingChild;
+      int remaining = run.childCount;
+      while (child != null && remaining > 0) {
+        laidOutChildren.add(child);
+        child = nextChild(child);
+        remaining--;
+      }
+    }
+
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      if (!laidOutChildren.contains(child)) {
+        child.layout(BoxConstraints.tight(Size.zero));
+        final ContainerBoxParentData<RenderBox> parentData =
+            child.parentData! as ContainerBoxParentData<RenderBox>;
+        parentData.offset = Offset.zero;
+      }
+    }
   }
 
   (_AxisSize childrenSize, List<_RunMetrics> runMetrics) _computeRuns(
@@ -747,25 +800,56 @@ class RenderWrap extends RenderBox
 
     _RunMetrics? currentRun;
     _AxisSize childrenAxisSize = _AxisSize.empty;
+
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final _AxisSize childSize = _AxisSize.fromSize(
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
-      final _RunMetrics? newRun = currentRun == null
-          ? _RunMetrics(child, childSize)
-          : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
-      if (newRun != null) {
-        runMetrics.add(newRun);
-        childrenAxisSize += currentRun?.axisSize.flipped ?? _AxisSize.empty;
-        currentRun = newRun;
+
+      final bool needsNewRun =
+          currentRun == null ||
+          currentRun.axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing > mainAxisLimit;
+
+      // If we need a new run and are about to exceed maxLines, stop.
+      if (needsNewRun && currentRun != null) {
+        if (maxLines != null && runMetrics.length + 1 >= maxLines!) {
+          break;
+        }
+        runMetrics.add(currentRun);
+        childrenAxisSize += currentRun.axisSize.flipped;
+        currentRun = null;
+      }
+
+      // If we are on the last allowed run, only add children as long as they fit.
+      if (maxLines != null && runMetrics.length + 1 == maxLines) {
+        if (currentRun == null) {
+          // Start the last run
+          currentRun = _RunMetrics(child, childSize);
+        } else if (currentRun.axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing <=
+            mainAxisLimit) {
+          currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
+        } else {
+          break;
+        }
+        continue;
+      }
+
+      if (currentRun == null) {
+        currentRun = _RunMetrics(child, childSize);
+      } else {
+        currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
       }
     }
+
+    if (currentRun != null) {
+      runMetrics.add(currentRun);
+      childrenAxisSize += currentRun.axisSize.flipped;
+    }
+
     assert(runMetrics.isNotEmpty);
     final double totalRunSpacing = runSpacing * (runMetrics.length - 1);
-    childrenAxisSize +=
-        _AxisSize(mainAxisExtent: totalRunSpacing, crossAxisExtent: 0.0) +
-        currentRun!.axisSize.flipped;
+    childrenAxisSize += _AxisSize(mainAxisExtent: totalRunSpacing, crossAxisExtent: 0.0);
     return (childrenAxisSize.flipped, runMetrics);
   }
 
@@ -887,5 +971,6 @@ class RenderWrap extends RenderBox
         defaultValue: VerticalDirection.down,
       ),
     );
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
