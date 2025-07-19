@@ -495,10 +495,16 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Regex is used in both Groovy and Kotlin Gradle files.
   static final _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
+  /// True if this project has a `build.gradle[.kts]` file in the project root directory.
+  bool get hasGradleSettingsInProjectRoot => getGroovyOrKotlin(parent.directory, 'build.gradle').existsSync();
+
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
+    if (hasGradleSettingsInProjectRoot) {
+      return parent.directory;
+    }
     if (!isModule || _editableHostAppDirectory.existsSync()) {
       return _editableHostAppDirectory;
     }
@@ -632,13 +638,19 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The file must exist and it must be written in either Groovy (build.gradle)
   /// or Kotlin (build.gradle.kts).
   File get appGradleFile {
-    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    final Directory baseDirectory = hasGradleSettingsInProjectRoot
+        ? hostAppGradleRoot.childDirectory('android')
+        : hostAppGradleRoot;
+    final Directory appDir = baseDirectory.childDirectory('app');
     return getGroovyOrKotlin(appDir, 'build.gradle');
   }
 
   File get appManifestFile {
     if (isUsingGradle) {
-      return hostAppGradleRoot
+      final Directory baseDirectory = hasGradleSettingsInProjectRoot
+          ? hostAppGradleRoot.childDirectory('android')
+          : hostAppGradleRoot;
+      return baseDirectory
           .childDirectory('app')
           .childDirectory('src')
           .childDirectory('main')
@@ -664,7 +676,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Directory get gradleAppOutV1Directory {
     return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
+      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'buildYXC', 'outputs', 'apk'),
     );
   }
 
