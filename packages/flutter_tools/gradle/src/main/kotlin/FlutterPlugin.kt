@@ -19,8 +19,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
+import org.gradle.api.internal.tasks.DefaultTaskContainer
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -218,12 +218,12 @@ class FlutterPlugin : Plugin<Project> {
             // settings will take precedence over these defaults.
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
                 buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
                     val abiValue: String =
                         FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
                             ?: throw GradleException("Invalid platform: $platform")
                     buildType.ndk.abiFilters.add(abiValue)
-                })
+                }
             }
         }
         val propDeferredComponentNames = "deferred-component-names"
@@ -377,7 +377,7 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        try {
+        if ((rootProject.tasks as? DefaultTaskContainer)?.findByName("generateLockfiles") == null) {
             rootProject.tasks.register("generateLockfiles") {
                 doLast {
                     rootProject.subprojects.forEach { subproject ->
@@ -392,8 +392,6 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
-        } catch (e: TaskInstantiationException) {
-            // ignored
         }
     }
 
@@ -798,10 +796,12 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     dependsOn(compileTask)
                     with(compileTask.assets)
-                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
-                    //   minimum supported Gradle version is 8.3.
-                    @Suppress("DEPRECATION")
-                    fileMode = 420 // corresponds to unix 0644 in base 8
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
                         dependsOn(packageAssets)

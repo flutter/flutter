@@ -543,7 +543,7 @@ class CanvasKitRenderer implements Renderer {
     _rasterizers.clear();
   }
 
-  /// Clears the state of this renderer. Used in tests.
+  @override
   void debugClear() {
     for (final ViewRasterizer rasterizer in _rasterizers.values) {
       rasterizer.debugClear();

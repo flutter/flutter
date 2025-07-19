@@ -1073,7 +1073,7 @@ class GitTagVersion {
   /// return '1.2.3-4.5.pre-6-gabc123').
   static GitTagVersion parseVersion(String version) {
     final versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:-(\d+)-g([a-f0-9]+))?$',
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:[-\.](\d+)(?:-g([a-f0-9]+))?)?$',
     );
     final Match? match = versionPattern.firstMatch(version.trim());
     if (match == null) {
@@ -1128,14 +1128,14 @@ class GitTagVersion {
     }
     if (hotfix != null) {
       // This is an unexpected state where untagged commits exist past a hotfix
-      return '$x.$y.$z+hotfix.${hotfix! + 1}.pre.$commits';
+      return '$x.$y.$z+hotfix.${hotfix! + 1}.pre-$commits';
     }
     if (devPatch != null && devVersion != null) {
       // The next tag that will contain this commit will be the next candidate
       // branch, which will increment the devVersion.
-      return '$x.$y.0-${devVersion! + 1}.0.pre.$commits';
+      return '$x.$y.0-${devVersion! + 1}.0.pre-$commits';
     }
-    return '$x.$y.${z! + 1}-0.0.pre.$commits';
+    return '$x.$y.${z! + 1}-0.0.pre-$commits';
   }
 }
 
