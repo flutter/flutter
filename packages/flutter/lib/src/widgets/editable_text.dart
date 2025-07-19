@@ -4979,6 +4979,17 @@ class EditableTextState extends State<EditableText>
     return true;
   }
 
+  // The time when the last call to [hideSystemToolbar] was made.
+  DateTime? _hideSystemToolbarLastTimestamp;
+  static const Duration _systemToolbarToggleDebounceThreshold = Duration(milliseconds: 100);
+
+  /// This is called by the [SystemContextMenu] when the platform dismisses the system
+  /// context menu.
+  void hideSystemToolbar() {
+    _hideSystemToolbarLastTimestamp = DateTime.now();
+    hideToolbar(false);
+  }
+
   @override
   void hideToolbar([bool hideHandles = true]) {
     // Stop listening to parent scroll events when toolbar is hidden.
@@ -4998,6 +5009,28 @@ class EditableTextState extends State<EditableText>
     if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
+      if (_hideSystemToolbarLastTimestamp != null &&
+          _hideSystemToolbarLastTimestamp!.difference(DateTime.now()) <
+              _systemToolbarToggleDebounceThreshold) {
+        // Do not show the system toolbar if it was only just hidden. This is
+        // needed to prevent the system toolbar from being shown again when tapping
+        // the selection to toggle the toolbar on iOS.
+        //
+        // More context:
+        //
+        // The framework implements a feature on iOS that toggles the toolbar whenever
+        // the selection is tapped on. The system context menu on iOS dismisses itself
+        // whenever a tap happens outside of it. In this scenario the framework first
+        // handles the dismiss event from the platform, as a result of the tap and hides
+        // the toolbar. Then the framework handles the same tap and attempts to toggle
+        // the toolbar. Since the toolbar is hidden at the time when the framework handles
+        // the tap it attempts to show the toolbar again. The expected behavior would be
+        // for it to keep the toolbar hidden on that same tap, and only with a subsequent
+        // tap should it show the toolbar again. To prevent this, we debounce the toggle.
+        return;
+      } else {
+        _hideSystemToolbarLastTimestamp = null;
+      }
       showToolbar();
     }
   }
