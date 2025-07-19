@@ -17,6 +17,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 
@@ -47,8 +48,7 @@ object FlutterPluginUtils {
         if (parts.isEmpty()) {
             return ""
         }
-        return parts[0] +
-            parts.drop(1).joinToString("") { capitalize(it) }
+        return parts[0] + parts.drop(1).joinToString("") { capitalize(it) }
     }
 
     // Kotlin's capitalize function is deprecated, but the suggested replacement uses syntax that
@@ -160,8 +160,22 @@ object FlutterPluginUtils {
                 """.trimIndent()
             )
         }
+        val parentSettingsGradle = File(projectDirectory.parentFile.parentFile, "settings.gradle")
+        val parentSettingsGradleKts =
+            File(projectDirectory.parentFile.parentFile, "settings.gradle.kts")
+        if (parentSettingsGradle.exists() && parentSettingsGradleKts.exists()) {
+            logger.error(
+                """
+                Both settings.gradle and settings.gradle.kts exist, so
+                settings.gradle.kts is ignored. This is likely a mistake.
+                """.trimIndent()
+            )
+        }
 
-        return if (settingsGradle.exists()) settingsGradle else settingsGradleKts
+        val possibleLocations =
+            listOf(parentSettingsGradle, parentSettingsGradleKts, settingsGradle, settingsGradleKts)
+        return possibleLocations.firstOrNull { it.exists() }
+            ?: throw FileNotFoundException("no settings.gradle[.kts] found at ${possibleLocations.joinToString { it.absolutePath }}")
     }
 
     /**
