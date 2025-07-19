@@ -3098,20 +3098,22 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: SizedBox.shrink(
-            child: BottomNavigationBar(
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'X'),
-                BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Y'),
-              ],
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'X'),
+                  BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'Y'),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
-    final Finder label = find.text('X');
-    expect(tester.getSize(label).isEmpty, isTrue);
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 
