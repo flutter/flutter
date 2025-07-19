@@ -67,7 +67,12 @@ class ConfigCommand extends FlutterCommand {
       if (configSetting == null) {
         continue;
       }
-      argParser.addFlag(configSetting, help: feature.generateHelpMessage());
+      final String channel = globals.flutterVersion.channel;
+      argParser.addFlag(
+        configSetting,
+        help: feature.generateHelpMessage(),
+        defaultsTo: feature.getSettingForChannel(channel).enabledByDefault,
+      );
     }
     argParser.addFlag(
       'clear-features',
