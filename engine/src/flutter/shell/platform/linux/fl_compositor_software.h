@@ -35,24 +35,6 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
  */
 FlCompositorSoftware* fl_compositor_software_new();
 
-/**
- * fl_compositor_software_render:
- * @compositor: an #FlCompositorSoftware.
- * @cr: the cairo context to draw to.
- * @width: output width in pixels.
- * @height: output height in pixels.
- * @scale_factor: pixel scale factor.
- *
- * Render the current frame.
- *
- * Returns: TRUE if rendered.
- */
-gboolean fl_compositor_software_render(FlCompositorSoftware* compositor,
-                                       cairo_t* cr,
-                                       size_t width,
-                                       size_t height,
-                                       gint scale_factor);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_SOFTWARE_H_
