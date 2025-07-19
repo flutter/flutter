@@ -368,6 +368,7 @@ class _DefaultPub implements Pub {
     int exitCode;
 
     final pubCommand = <String>[..._pubCommand, ...arguments];
+    print('*** starting pubCommand: $pubCommand');
     final Map<String, String> pubEnvironment = await _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
@@ -400,10 +401,16 @@ class _DefaultPub implements Pub {
 
           // Direct pub output to [Pub._stdio] for tests.
           final StreamSubscription<List<int>> stdoutSubscription = process.stdout.listen(
-            stdio.stdout.add,
+            (s) {
+              stdio.stdout.add(s);
+              print(utf8.decode(s));
+            }
           );
           final StreamSubscription<List<int>> stderrSubscription = process.stderr.listen(
-            stdio.stderr.add,
+            (s) {
+              stdio.stderr.add(s);
+              print(utf8.decode(s));
+            }
           );
 
           await Future.wait<void>(<Future<void>>[
