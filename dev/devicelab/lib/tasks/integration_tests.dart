@@ -212,6 +212,13 @@ TaskFunction createSpellCheckIntegrationTest() {
   ).call;
 }
 
+TaskFunction createReorderableListAnimationIntegrationTest() {
+  return IntegrationTest(
+    '${flutterDirectory.path}/dev/integration_tests/reorderable_list_test',
+    'integration_test/reorderable_list_test.dart',
+  ).call;
+}
+
 TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
