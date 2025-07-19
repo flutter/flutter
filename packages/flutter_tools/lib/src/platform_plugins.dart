@@ -6,6 +6,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 /// Constant for 'pluginClass' key in plugin maps.
 const kPluginClass = 'pluginClass';
@@ -367,8 +368,18 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
       );
     }
 
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    final String? pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?;
+    final String? pluginClass;
+    if (yaml[kPluginClass] == 'none') {
+      // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/57497.
+      globals.printWarning(
+        'Use of `dartPluginClass: none` ($name) is deprecated, and will be '
+        'removed in the next stable version. See '
+        'https://github.com/flutter/flutter/issues/57497 for details.',
+      );
+      pluginClass = null;
+    } else {
+      pluginClass = yaml[kPluginClass] as String?;
+    }
 
     return MacOSPlugin(
       name: name,
@@ -446,9 +457,14 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
     var pluginClass = yaml[kPluginClass] as String?;
     if (pluginClass == 'none') {
+      // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/57497.
+      globals.printWarning(
+        'Use of `dartPluginClass: none` ($name) is deprecated, and will be '
+        'removed in the next stable version. See '
+        'https://github.com/flutter/flutter/issues/57497 for details.',
+      );
       pluginClass = null;
     }
     final variants = <PluginPlatformVariant>{};
@@ -564,10 +580,22 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
       );
     }
 
+    final String? pluginClass;
+    if (yaml[kPluginClass] == 'none') {
+      // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/57497.
+      globals.printWarning(
+        'Use of `dartPluginClass: none` ($name) is deprecated, and will be '
+        'removed in the next stable version. See '
+        'https://github.com/flutter/flutter/issues/57497 for details.',
+      );
+      pluginClass = null;
+    } else {
+      pluginClass = yaml[kPluginClass] as String?;
+    }
+
     return LinuxPlugin(
       name: name,
-      // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-      pluginClass: yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
+      pluginClass: pluginClass,
       dartPluginClass: dartPluginClass,
       dartFileName: dartFileName,
       ffiPlugin: yaml[kFfiPlugin] as bool? ?? false,
