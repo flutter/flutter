@@ -3421,6 +3421,110 @@ void main() {
 
     await expectLater(find.byType(IconButton), matchesGoldenFile('icon_button.badge.outline.png'));
   });
+
+  Future<void> testStatesController(WidgetTester tester, IconButton iconButton) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final MaterialStatesController controller = iconButton.statesController!;
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(MaterialApp(home: Center(child: iconButton)));
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    final Offset center = tester.getCenter(find.byType(Icon));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 6);
+
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 8); // adds hovered and pressed - two changes
+  }
+
+  testWidgets('IconButton statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton(
+        icon: const Icon(Icons.add),
+        onPressed: () {},
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filled statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filled(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.filledTonal statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.filledTonal(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
+
+  testWidgets('IconButton.outlined statesController', (WidgetTester tester) async {
+    await testStatesController(
+      tester,
+      IconButton.outlined(
+        onPressed: () {},
+        icon: const Icon(Icons.add),
+        statesController: MaterialStatesController(),
+      ),
+    );
+  });
 }
 
 Widget buildAllVariants({
