@@ -2783,6 +2783,15 @@ targets:
       task_name: external_textures_integration_test
       presubmit_max_attempts: "2"
 
+  - name: Linux reorderable_list_animation_test
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: reorderable_list_animation_test
+
   # linux mokey benchmark
   - name: Linux_mokey fading_child_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
