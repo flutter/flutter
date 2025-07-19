@@ -9,6 +9,7 @@
 /// framework.
 library foundation;
 
+export 'package:listen/listen.dart' show Listenable, ValueListenable;
 export 'package:meta/meta.dart'
     show
         factory,
