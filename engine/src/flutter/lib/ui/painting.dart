@@ -4943,20 +4943,25 @@ base class Gradient extends Shader {
     }
   }
 
-  /// Creates a sweep gradient.
+  /// Creates a sweep gradient centered at `center` that starts at `startAngle`
+  /// and ends at `endAngle`.
   ///
-  /// The [center] and [radius] arguments define a circle. The [colors] are
-  /// assigned to stops as described in the [new LinearGradient] documentation.
+  /// `startAngle` and `endAngle` should be provided in radians, with zero
+  /// radians being the horizontal line to the right of the `center` and with
+  /// positive angles going clockwise around the `center`.
   ///
-  /// The [startAngle] and [endAngle] parameters define the angular sector to be
+  /// The `startAngle` and `endAngle` parameters define the angular sector to be
   /// painted. Angles are measured in radians clockwise from the positive x-axis.
   /// Values outside the range [0, 2π] are normalized to this range using modulo
-  /// arithmetic. The gradient is only painted in the sector between [startAngle]
-  /// and [endAngle]. The [tileMode] determines how the gradient behaves outside
+  /// arithmetic. The gradient is only painted in the sector between `startAngle`
+  /// and `endAngle`. The `tileMode` determines how the gradient behaves outside
   /// this sector.
   ///
   /// The [tileMode] argument specifies how the gradient should handle areas
   /// outside the angular sector defined by [startAngle] and [endAngle]:
+  ///
+  /// The behavior before `startAngle` and after `endAngle` is described by the
+  /// `tileMode` argument. For details, see the [TileMode] enum.
   ///
   /// * [TileMode.clamp]: The edge colors are extended to infinity.
   /// * [TileMode.mirror]: The gradient is repeated, alternating direction each time.
