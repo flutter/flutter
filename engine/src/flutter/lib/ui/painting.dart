@@ -4654,13 +4654,33 @@ base class Shader extends NativeFieldWrapperClass1 {
 /// gradient, it's the circle defined by the center and radius. For a sweep
 /// gradient, it's the angular sector between [startAngle] and [endAngle].
 ///
+/// An image filter reads source samples from a source image and performs operations
+/// on those samples to produce a result image. An image defines color samples only
+/// for pixels within the bounds of the image but some filter operations, such as a blur
+/// filter, read samples over a wide area to compute the output for a given pixel. Such
+/// a filter would need to combine samples from inside the image with hypothetical
+/// color values from outside the image.
+///
 /// The behavior when sampling outside this inner area is defined by the
-/// `TileMode` specified when creating the gradient.
+/// `TileMode` specified when creating the gradient or image filter.
 ///
 /// For sweep gradients, the `tileMode` determines how the gradient behaves
 /// outside the angular sector defined by [startAngle] and [endAngle]. The
 /// gradient is only painted in the sector between these angles, and the
 /// `tileMode` controls what's shown outside this sector.
+///
+/// See also:
+///
+///  * [painting.Gradient], the superclass for [LinearGradient] and
+///    [RadialGradient], as used by [BoxDecoration] et al, which works in
+///    relative coordinates and can create a [Shader] representing the gradient
+///    for a particular [Rect] on demand.
+///  * [dart:ui.Gradient], the low-level class used when dealing with the
+///    [Paint.shader] property directly, with its [Gradient.linear] and
+///    [Gradient.radial] constructors.
+///  * [dart:ui.ImageFilter.blur], an ImageFilter that may sometimes need to
+///    read samples from outside an image to combine with the pixels near the
+///    edge of the image.
 // These enum values must be kept in sync with DlTileMode.
 enum TileMode {
   /// Samples beyond the edge are clamped to the nearest color in the defined inner area.
