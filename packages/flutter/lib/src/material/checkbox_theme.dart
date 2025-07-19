@@ -281,8 +281,8 @@ class CheckboxTheme extends InheritedWidget {
   /// CheckboxThemeData theme = CheckboxTheme.of(context);
   /// ```
   static CheckboxThemeData of(BuildContext context) {
-    final CheckboxTheme? checkboxTheme =
-        context.dependOnInheritedWidgetOfExactType<CheckboxTheme>();
+    final CheckboxTheme? checkboxTheme = context
+        .dependOnInheritedWidgetOfExactType<CheckboxTheme>();
     return checkboxTheme?.data ?? Theme.of(context).checkboxTheme;
   }
 

@@ -12,6 +12,7 @@ typedef _PreviewDetailsMatcherMismatchPair = ({Object? expected, Object? actual}
 /// A [Matcher] that verifies each property of a `@Preview` declaration matches an expected value.
 class PreviewDetailsMatcher extends Matcher {
   PreviewDetailsMatcher({
+    required this.packageName,
     required this.functionName,
     required this.isBuilder,
     this.name,
@@ -30,6 +31,7 @@ class PreviewDetailsMatcher extends Matcher {
 
   final String functionName;
   final bool isBuilder;
+  final String packageName;
 
   // Proivde when the expected expression for 'name' is a literal.
   final String? name;
@@ -73,7 +75,7 @@ class PreviewDetailsMatcher extends Matcher {
       return false;
     }
 
-    bool matches = true;
+    var matches = true;
     void checkPropertyMatch({
       required String name,
       required Object? actual,
@@ -88,6 +90,7 @@ class PreviewDetailsMatcher extends Matcher {
       }
     }
 
+    checkPropertyMatch(name: 'packageName', actual: item.packageName, expected: packageName);
     checkPropertyMatch(name: 'functionName', actual: item.functionName, expected: functionName);
     checkPropertyMatch(name: 'isBuilder', actual: item.isBuilder, expected: isBuilder);
     checkPropertyMatch(

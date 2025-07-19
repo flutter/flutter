@@ -147,16 +147,24 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///  * <https://developer.apple.com/design/human-interface-guidelines/sheets>
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
-  required WidgetBuilder pageBuilder,
+  @Deprecated(
+    'Use builder instead. '
+    'This feature was deprecated after v3.33.0-0.2.pre.',
+  )
+  WidgetBuilder? pageBuilder,
+  WidgetBuilder? builder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
 }) {
-  final WidgetBuilder builder;
+  assert(pageBuilder != null || builder != null);
+
+  final WidgetBuilder? effectivePageBuilder = builder ?? pageBuilder;
+  final WidgetBuilder widgetBuilder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
-    builder = pageBuilder;
+    widgetBuilder = effectivePageBuilder!;
   } else {
-    builder = (BuildContext context) {
+    widgetBuilder = (BuildContext context) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
           nestedNavigatorKey.currentState!.maybePop();
@@ -176,7 +184,7 @@ Future<T?> showCupertinoSheet<T>({
                       }
                       Navigator.of(context, rootNavigator: true).pop(result);
                     },
-                    child: pageBuilder(context),
+                    child: effectivePageBuilder!(context),
                   );
                 },
               ),
@@ -190,7 +198,7 @@ Future<T?> showCupertinoSheet<T>({
   return Navigator.of(
     context,
     rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: builder, enableDrag: enableDrag));
+  ).push<T>(CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag));
 }
 
 /// Provides an iOS-style sheet transition.
@@ -270,18 +278,17 @@ class CupertinoSheetTransition extends StatefulWidget {
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
-    final Widget? contrastedChild =
-        child != null && !secondaryAnimation.isDismissed
-            ? Stack(
-              children: <Widget>[
-                child,
-                FadeTransition(
-                  opacity: opacityAnimation,
-                  child: ColoredBox(color: overlayColor, child: const SizedBox.expand()),
-                ),
-              ],
-            )
-            : child;
+    final Widget? contrastedChild = child != null && !secondaryAnimation.isDismissed
+        ? Stack(
+            children: <Widget>[
+              child,
+              FadeTransition(
+                opacity: opacityAnimation,
+                child: ColoredBox(color: overlayColor, child: const SizedBox.expand()),
+              ),
+            ],
+          )
+        : child;
 
     final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
 
@@ -305,10 +312,9 @@ class CupertinoSheetTransition extends StatefulWidget {
               child: child,
               builder: (BuildContext context, Widget? child) {
                 return ClipRSuperellipse(
-                  borderRadius:
-                      !secondaryAnimation.isDismissed
-                          ? radiusAnimation.value
-                          : BorderRadius.circular(0),
+                  borderRadius: !secondaryAnimation.isDismissed
+                      ? radiusAnimation.value
+                      : BorderRadius.circular(0),
                   child: contrastedChild,
                 );
               },
@@ -433,10 +439,9 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
     bool linearTransition,
     Widget? child,
   ) {
-    final Animatable<Offset> offsetTween =
-        CupertinoSheetRoute.hasParentSheet(context)
-            ? _kBottomUpTweenWhenCoveringOtherSheet
-            : _kBottomUpTween;
+    final Animatable<Offset> offsetTween = CupertinoSheetRoute.hasParentSheet(context)
+        ? _kBottomUpTweenWhenCoveringOtherSheet
+        : _kBottomUpTween;
 
     final CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: animation,
