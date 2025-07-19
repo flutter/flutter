@@ -32,7 +32,7 @@ const double _kTopGapRatio = 0.08;
 // The minimum distance (i.e., maximum upward stretch) from the top of the sheet
 // to the top of the screen, as a ratio of total screen height. This value represents
 // how far the sheet can be temporarily pulled upward before snapping back.
-// Determined through visual tuning to feel natural on <device name, i.e iPhone 16 Pro>
+// Determined through visual tuning to feel natural on <iPhone16, iPhone 16 Pro>
 // running iOS 18.0 simulators.
 const double _kStretchedTopGapRatio = 0.072;
 
