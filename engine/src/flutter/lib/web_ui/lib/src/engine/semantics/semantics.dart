@@ -1823,7 +1823,7 @@ class SemanticsObject {
     _updateRole();
 
     // Set up aria-owns relationship for overlay portal children
-    if (overlayPortalParent != null) {
+    if (overlayPortalParent != -1) {
       SemanticsObject? parent = owner._semanticsTree[overlayPortalParent!];
       if (parent != null && parent.semanticRole != null) {
         parent.element.setAttribute('aria-owns', '$kFlutterSemanticNodePrefix${id}');
