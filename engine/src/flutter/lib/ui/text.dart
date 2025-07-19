@@ -3527,7 +3527,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
     if (strutStyle != null && strutStyle._enabled) {
       final String? fontFamily = strutStyle._fontFamily;
       strutFontFamilies = <String>[
-        if (fontFamily != null) fontFamily,
+        ?fontFamily,
         ...?strutStyle._fontFamilyFallback,
       ];
 
