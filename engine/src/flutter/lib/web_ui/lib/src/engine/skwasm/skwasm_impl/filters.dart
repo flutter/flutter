@@ -251,9 +251,6 @@ abstract class SkwasmColorFilter {
         ColorFilterType.matrix => SkwasmMatrixColorFilter(colorFilter.matrix!),
       };
 
-  factory SkwasmColorFilter.composed(SkwasmColorFilter outer, SkwasmColorFilter inner) =>
-      SkwasmComposedColorFilter(outer, inner);
-
   /// Creates a temporary [ColorFilterHandle] and passes it to the [borrow]
   /// function.
   ///

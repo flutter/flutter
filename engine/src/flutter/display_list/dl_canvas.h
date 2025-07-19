@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_text.h"
 #include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
@@ -16,7 +17,9 @@
 
 #include "third_party/skia/include/core/SkTextBlob.h"
 
-#include "impeller/typographer/text_frame.h"
+namespace impeller {
+class TextFrame;
+}
 
 namespace flutter {
 
@@ -185,16 +188,11 @@ class DlCanvas {
   virtual void DrawDisplayList(const sk_sp<DisplayList> display_list,
                                DlScalar opacity = SK_Scalar1) = 0;
 
-  virtual void DrawTextFrame(
-      const std::shared_ptr<impeller::TextFrame>& text_frame,
-      DlScalar x,
-      DlScalar y,
-      const DlPaint& paint) = 0;
+  virtual void DrawText(const std::shared_ptr<DlText>& text,
+                        DlScalar x,
+                        DlScalar y,
+                        const DlPaint& paint);
 
-  virtual void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                            DlScalar x,
-                            DlScalar y,
-                            const DlPaint& paint) = 0;
   virtual void DrawShadow(const DlPath& path,
                           const DlColor color,
                           const DlScalar elevation,

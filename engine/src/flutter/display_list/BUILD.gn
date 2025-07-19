@@ -62,6 +62,9 @@ source_set("display_list") {
     "dl_sampling_options.h",
     "dl_storage.cc",
     "dl_storage.h",
+    "dl_text.h",
+    "dl_text_impeller.h",
+    "dl_text_skia.h",
     "dl_tile_mode.h",
     "dl_types.cc",
     "dl_types.h",
@@ -146,14 +149,38 @@ source_set("display_list") {
   public_deps = [
     ":dl_path",
     "//flutter/fml",
-    "//flutter/impeller/runtime_stage",
-    "//flutter/impeller/typographer",
     "//flutter/skia",
   ]
 
   if (!defined(defines)) {
     defines = []
   }
+}
+
+source_set("display_list_skia") {
+  sources = [
+    "effects/dl_runtime_effect_skia.cc",
+    "effects/dl_runtime_effect_skia.h",
+  ]
+
+  public_configs = [ ":display_list_config" ]
+
+  public_deps = [ ":display_list" ]
+}
+
+source_set("display_list_impeller") {
+  sources = [
+    "effects/dl_runtime_effect_impeller.cc",
+    "effects/dl_runtime_effect_impeller.h",
+  ]
+
+  public_configs = [ ":display_list_config" ]
+
+  public_deps = [
+    ":display_list",
+    "//flutter/impeller/runtime_stage",
+    "//flutter/impeller/typographer",
+  ]
 }
 
 test_fixtures("display_list_fixtures") {
@@ -292,7 +319,6 @@ if (enable_unittests) {
     deps = [
       ":display_list",
       ":display_list_fixtures",
-      "$dart_src/runtime:libdart_jit",  # for tracing
       "//flutter/benchmarking",
       "//flutter/common/graphics",
       "//flutter/display_list/testing:display_list_surface_provider",
@@ -302,6 +328,12 @@ if (enable_unittests) {
       "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
     ]
+
+    if (!is_wasm) {
+      deps += [
+        "$dart_src/runtime:libdart_jit",  # for tracing
+      ]
+    }
   }
 
   executable("display_list_benchmarks") {

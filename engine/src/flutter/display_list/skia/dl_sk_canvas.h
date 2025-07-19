@@ -9,7 +9,10 @@
 
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/skia/dl_sk_types.h"
-#include "impeller/typographer/text_frame.h"
+
+namespace impeller {
+class TextFrame;
+}
 
 namespace flutter {
 
@@ -149,14 +152,10 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                  const DlPaint* paint = nullptr) override;
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        DlScalar opacity = SK_Scalar1) override;
-  void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                    DlScalar x,
-                    DlScalar y,
-                    const DlPaint& paint) override;
-  void DrawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y,
-                     const DlPaint& paint) override;
+  void DrawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y,
+                const DlPaint& paint) override;
   void DrawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
