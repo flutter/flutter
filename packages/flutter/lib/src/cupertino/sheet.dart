@@ -725,12 +725,11 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     super.initState();
     assert(_stretchDragController == null);
     _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
-    _recognizer =
-        VerticalDragGestureRecognizer(debugOwner: this)
-          ..onStart = _handleDragStart
-          ..onUpdate = _handleDragUpdate
-          ..onEnd = _handleDragEnd
-          ..onCancel = _handleDragCancel;
+    _recognizer = VerticalDragGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _handleDragCancel;
   }
 
   @override
