@@ -4979,8 +4979,8 @@ base class Gradient extends Shader {
   /// or if `colors` or `colorStops` contain null values, this constructor will
   /// throw a [NoSuchMethodError].
   ///
-  /// If [matrix4] is provided, the gradient fill will be transformed by the
-  /// specified 4x4 matrix relative to the local coordinate system. [matrix4] must
+  /// If `matrix4` is provided, the gradient fill will be transformed by the
+  /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
   ///
   /// ## Example

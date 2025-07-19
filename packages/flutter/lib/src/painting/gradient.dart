@@ -1005,7 +1005,7 @@ class SweepGradient extends Gradient {
   /// The gradient will be painted in the sector between [startAngle] and [endAngle].
   /// The behavior outside this sector is determined by [tileMode].
   ///
-  /// Defaults to 2π (a full circle).
+  /// Defaults to math.pi * 2 (2π = a full circle).
   final double endAngle;
 
   /// How this gradient should tile the plane in the region before
