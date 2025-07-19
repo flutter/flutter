@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:path/path.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
@@ -73,8 +72,8 @@ Future<void> copyDirectory(Directory source, Directory destination) async {
   await destination.create(recursive: true);
 
   await for (final FileSystemEntity entity in source.list(recursive: true)) {
-    final String relativePath = relative(entity.path, from: source.path);
-    final String destinationPath = join(destination.path, relativePath);
+    final String relativePath = fileSystem.path.relative(entity.path, from: source.path);
+    final String destinationPath = fileSystem.path.join(destination.path, relativePath);
 
     if (entity is Directory) {
       final Directory newDirectory = destination.childDirectory(destinationPath);
