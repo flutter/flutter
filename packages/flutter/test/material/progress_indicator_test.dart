@@ -567,6 +567,80 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('LinearProgressIndicator reflects controller value', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(
+      vsync: tester,
+      duration: const Duration(seconds: 2),
+    );
+
+    Widget buildWidget(AnimationController? controller) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: AnimatedBuilder(
+              animation: controller!,
+              builder: (BuildContext context, Widget? child) {
+                return LinearProgressIndicator(value: controller.value);
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(controller));
+    await tester.pump(const Duration(milliseconds: 100)); // build
+
+    expect(find.byType(LinearProgressIndicator), paints..rect());
+
+    controller.value = 0.5;
+    await tester.pump(); // triggers rebuild via AnimatedBuilder
+
+    expect(find.byType(LinearProgressIndicator), paints..rect());
+    controller.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator paints at 50% when controller value is 0.5', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller = AnimationController(
+      vsync: tester,
+      duration: const Duration(seconds: 2),
+    );
+
+    Widget buildWidget(AnimationController? controller) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              child: AnimatedBuilder(
+                animation: controller!,
+                builder: (BuildContext context, Widget? child) {
+                  return LinearProgressIndicator(value: controller.value);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(controller));
+    await tester.pump();
+
+    controller.value = 0.5;
+    await tester.pump();
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTWH(0.0, 0.0, 200.0, 4.0)) // background
+        ..rect(rect: const Rect.fromLTWH(0.0, 0.0, 100.0, 4.0)), // progress at 50%
+    );
+    controller.dispose();
+  });
+
   testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);

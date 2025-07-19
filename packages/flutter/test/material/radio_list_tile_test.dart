@@ -2285,7 +2285,9 @@ void main() {
     const BorderSide side = BorderSide(color: Colors.red, width: 3.0);
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: RadioListTile<bool>(value: true, radioSide: side))),
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioSide: side)),
+        ),
       ),
     );
 
