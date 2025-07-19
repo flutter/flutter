@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/common/text_editing_delta.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
 #import <Foundation/Foundation.h>
@@ -11,7 +12,6 @@
 #include "unicode/uchar.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
@@ -520,68 +520,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
            ((isAboveBottomOfLine && isCloserHorizontally) || (isBelowBottomOfLine && isFarther))));
 }
 
-#pragma mark - FlutterTextPosition
-
-@implementation FlutterTextPosition
-
-+ (instancetype)positionWithIndex:(NSUInteger)index {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:UITextStorageDirectionForward];
-}
-
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:affinity];
-}
-
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  self = [super init];
-  if (self) {
-    _index = index;
-    _affinity = affinity;
-  }
-  return self;
-}
-
-@end
-
-#pragma mark - FlutterTextRange
-
-@implementation FlutterTextRange
-
-+ (instancetype)rangeWithNSRange:(NSRange)range {
-  return [[FlutterTextRange alloc] initWithNSRange:range];
-}
-
-- (instancetype)initWithNSRange:(NSRange)range {
-  self = [super init];
-  if (self) {
-    _range = range;
-  }
-  return self;
-}
-
-- (UITextPosition*)start {
-  return [FlutterTextPosition positionWithIndex:self.range.location
-                                       affinity:UITextStorageDirectionForward];
-}
-
-- (UITextPosition*)end {
-  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
-                                       affinity:UITextStorageDirectionBackward];
-}
-
-- (BOOL)isEmpty {
-  return self.range.length == 0;
-}
-
-- (id)copyWithZone:(NSZone*)zone {
-  return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
-}
-
-- (BOOL)isEqualTo:(FlutterTextRange*)other {
-  return NSEqualRanges(self.range, other.range);
-}
-@end
-
 #pragma mark - FlutterTokenizer
 
 @interface FlutterTokenizer ()
@@ -633,9 +571,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     // According to the API doc if the text position is at a text-unit boundary, it is considered
     // enclosed only if the next position in the given direction is entirely enclosed. Link:
     // https://developer.apple.com/documentation/uikit/uitextinputtokenizer/1614464-rangeenclosingposition?language=objc
-    FlutterTextPosition* flutterPosition = (FlutterTextPosition*)position;
-    if (flutterPosition.index > _textInputView.text.length ||
-        (flutterPosition.index == _textInputView.text.length &&
+    if (position.index > _textInputView.text.length ||
+        (position.index == _textInputView.text.length &&
          direction == UITextStorageDirectionForward)) {
       return nil;
     }
@@ -839,7 +776,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
-    _selectedTextRange = [[FlutterTextRange alloc] initWithNSRange:NSMakeRange(0, 0)];
+    _selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 0)];
     _markedRect = kInvalidFirstRect;
     _cachedFirstRect = kInvalidFirstRect;
     _scribbleInteractionStatus = FlutterScribbleInteractionStatusNone;
@@ -1372,14 +1309,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 // Change the range of selected text, without notifying the framework.
 - (void)setSelectedTextRangeLocal:(UITextRange*)selectedTextRange {
-  if (_selectedTextRange != selectedTextRange) {
-    if (self.hasText) {
-      FlutterTextRange* flutterTextRange = (FlutterTextRange*)selectedTextRange;
-      _selectedTextRange = [[FlutterTextRange
-          rangeWithNSRange:fml::RangeForCharactersInRange(self.text, flutterTextRange.range)] copy];
-    } else {
-      _selectedTextRange = [selectedTextRange copy];
-    }
+  if (_selectedTextRange == selectedTextRange) {
+    return;
+  }
+  // The `hasText` check isn't really necessary but that's what UITextView does.
+  if (self.hasText) {
+    _selectedTextRange = [selectedTextRange copy];
+    NSAssert(_selectedTextRange.range.location + _selectedTextRange.range.length <= _text.length,
+             @"Selection range out of bounds: %@", NSStringFromRange(_selectedTextRange.range));
+  } else {
+    _selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 0)];
   }
 }
 
@@ -1420,18 +1359,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (!range) {
     return nil;
   }
-  NSAssert([range isKindOfClass:[FlutterTextRange class]],
-           @"Expected a FlutterTextRange for range (got %@).", [range class]);
-  NSRange textRange = ((FlutterTextRange*)range).range;
-  if (textRange.location == NSNotFound) {
-    // Avoids [crashes](https://github.com/flutter/flutter/issues/138464) from an assertion
-    // against NSNotFound.
-    // TODO(hellohuanlin): This is a temp workaround, but we should look into why
-    // framework is providing NSNotFound to the engine.
-    // https://github.com/flutter/flutter/issues/160100
-    return nil;
-  }
+
+  NSRange textRange = range.range;
   // Sanitize the range to prevent going out of bounds.
+  // This is only needed if the caller (typically the IME) makes a mistake and
+  // gives us an outdated UITextRange, or one from a different text field.
   NSUInteger location = MIN(textRange.location, self.text.length);
   NSUInteger length = MIN(self.text.length - location, textRange.length);
   NSRange safeRange = NSMakeRange(location, length);
@@ -1604,36 +1536,20 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (NSUInteger)decrementOffsetPosition:(NSUInteger)position {
-  return fml::RangeForCharacterAtIndex(self.text, MAX(0, position - 1)).location;
+  return position < 2 ? 0
+                      : [self.text rangeOfComposedCharacterSequenceAtIndex:position - 1].location;
 }
 
 - (NSUInteger)incrementOffsetPosition:(NSUInteger)position {
-  NSRange charRange = fml::RangeForCharacterAtIndex(self.text, position);
+  if (position + 1 >= self.text.length) {
+    return self.text.length;
+  }
+  NSRange charRange = [self.text rangeOfComposedCharacterSequenceAtIndex:position];
   return MIN(position + charRange.length, self.text.length);
 }
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position offset:(NSInteger)offset {
-  NSUInteger offsetPosition = ((FlutterTextPosition*)position).index;
-
-  NSInteger newLocation = (NSInteger)offsetPosition + offset;
-  if (newLocation < 0 || newLocation > (NSInteger)self.text.length) {
-    return nil;
-  }
-
-  if (_scribbleInteractionStatus != FlutterScribbleInteractionStatusNone) {
-    return [FlutterTextPosition positionWithIndex:newLocation];
-  }
-
-  if (offset >= 0) {
-    for (NSInteger i = 0; i < offset && offsetPosition < self.text.length; ++i) {
-      offsetPosition = [self incrementOffsetPosition:offsetPosition];
-    }
-  } else {
-    for (NSInteger i = 0; i < ABS(offset) && offsetPosition > 0; ++i) {
-      offsetPosition = [self decrementOffsetPosition:offsetPosition];
-    }
-  }
-  return [FlutterTextPosition positionWithIndex:offsetPosition];
+  return [position offsetBy:offset inDocument:self];
 }
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position
@@ -1660,25 +1576,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
-  NSUInteger positionIndex = ((FlutterTextPosition*)position).index;
-  NSUInteger otherIndex = ((FlutterTextPosition*)other).index;
-  if (positionIndex < otherIndex) {
-    return NSOrderedAscending;
-  }
-  if (positionIndex > otherIndex) {
-    return NSOrderedDescending;
-  }
-  UITextStorageDirection positionAffinity = ((FlutterTextPosition*)position).affinity;
-  UITextStorageDirection otherAffinity = ((FlutterTextPosition*)other).affinity;
-  if (positionAffinity == otherAffinity) {
-    return NSOrderedSame;
-  }
-  if (positionAffinity == UITextStorageDirectionBackward) {
-    // positionAffinity points backwards, otherAffinity points forwards
-    return NSOrderedAscending;
-  }
-  // positionAffinity points forwards, otherAffinity points backwards
-  return NSOrderedDescending;
+  return [position compareTo:other];
 }
 
 - (NSInteger)offsetFromPosition:(UITextPosition*)from toPosition:(UITextPosition*)toPosition {
@@ -1726,14 +1624,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 #pragma mark - UITextInput text direction handling
 
-- (UITextWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
-                                              inDirection:(UITextStorageDirection)direction {
+- (NSWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
+                                          inDirection:(UITextStorageDirection)direction {
   // TODO(cbracken) Add RTL handling.
   return UITextWritingDirectionNatural;
 }
 
-- (void)setBaseWritingDirection:(UITextWritingDirection)writingDirection
-                       forRange:(UITextRange*)range {
+- (void)setBaseWritingDirection:(NSWritingDirection)writingDirection forRange:(UITextRange*)range {
   // TODO(cbracken) Add RTL handling.
 }
 
@@ -1891,8 +1788,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   CGFloat minY = CGFLOAT_MAX;
   CGFloat maxY = CGFLOAT_MIN;
 
-  FlutterTextRange* textRange = [FlutterTextRange
-      rangeWithNSRange:fml::RangeForCharactersInRange(self.text, NSMakeRange(0, self.text.length))];
+  FlutterTextRange* textRange =
+      [FlutterTextRange rangeWithNSRange:NSMakeRange(0, self.text.length)];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     BOOL startsOnOrBeforeStartOfRange = _selectionRects[i].position <= first;
     BOOL isLastSelectionRect = i + 1 == [_selectionRects count];
@@ -1936,18 +1833,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
-  NSInteger index = ((FlutterTextPosition*)position).index;
+  NSInteger index = position.index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
-  NSArray<UITextSelectionRect*>* rects = [self
-      selectionRectsForRange:[FlutterTextRange
-                                 rangeWithNSRange:fml::RangeForCharactersInRange(
-                                                      self.text,
-                                                      NSMakeRange(
-                                                          MAX(0, index - 1),
-                                                          (index >= (NSInteger)self.text.length)
-                                                              ? 1
-                                                              : 2))]];
+  NSInteger start = MAX(0, index - 1);
+  NSInteger end = MIN((NSInteger)self.text.length, start + 2);
+  NSRange characterRange =
+      [self.text rangeOfComposedCharacterSequencesForRange:NSMakeRange(start, end - start)];
+  NSArray<UITextSelectionRect*>* rects =
+      [self selectionRectsForRange:[FlutterTextRange rangeWithNSRange:characterRange]];
   if (rects.count == 0) {
     return CGRectZero;
   }
@@ -2002,14 +1896,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
              @"Expected a FlutterTextPosition for position (got %@).",
              [_selectedTextRange.start class]);
-    NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-    UITextStorageDirection currentAffinity =
-        ((FlutterTextPosition*)_selectedTextRange.start).affinity;
+    NSUInteger currentIndex = _selectedTextRange.start.index;
+    UITextStorageDirection currentAffinity = _selectedTextRange.start.affinity;
     return [FlutterTextPosition positionWithIndex:currentIndex affinity:currentAffinity];
   }
 
-  FlutterTextRange* range = [FlutterTextRange
-      rangeWithNSRange:fml::RangeForCharactersInRange(self.text, NSMakeRange(0, self.text.length))];
+  FlutterTextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, self.text.length)];
   return [self closestPositionToPoint:point withinRange:range];
 }
 
@@ -2024,8 +1916,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
            @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
   NSAssert([range.end isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for range.end (got %@).", [range.end class]);
-  NSUInteger start = ((FlutterTextPosition*)range.start).index;
-  NSUInteger end = ((FlutterTextPosition*)range.end).index;
+  NSUInteger start = range.start.index;
+  NSUInteger end = range.end.index;
   NSMutableArray* rects = [[NSMutableArray alloc] init];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     if (_selectionRects[i].position >= start &&
@@ -2037,15 +1929,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       }
       CGRect rect = CGRectMake(_selectionRects[i].rect.origin.x, _selectionRects[i].rect.origin.y,
                                width, _selectionRects[i].rect.size.height);
-      FlutterTextSelectionRect* selectionRect = [FlutterTextSelectionRect
-          selectionRectWithRectAndInfo:rect
-                              position:_selectionRects[i].position
-                      writingDirection:NSWritingDirectionNatural
-                         containsStart:(i == 0)
-                           containsEnd:(i == fml::RangeForCharactersInRange(
-                                                 self.text, NSMakeRange(0, self.text.length))
-                                                 .length)
-                            isVertical:NO];
+      FlutterTextSelectionRect* selectionRect =
+          [FlutterTextSelectionRect selectionRectWithRectAndInfo:rect
+                                                        position:_selectionRects[i].position
+                                                writingDirection:NSWritingDirectionNatural
+                                                   containsStart:(i == 0)
+                                                     containsEnd:(i == self.text.length)
+                                                      isVertical:NO];
       [rects addObject:selectionRect];
     }
   }
@@ -2109,8 +1999,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
-  NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  return [FlutterTextRange rangeWithNSRange:fml::RangeForCharacterAtIndex(self.text, currentIndex)];
+  NSUInteger currentIndex = _selectedTextRange.start.index;
+  return [FlutterTextRange
+      rangeWithNSRange:[self.text rangeOfComposedCharacterSequenceAtIndex:currentIndex]];
 }
 
 // Overall logic for floating cursor's "move" gesture and "selection" gesture:
@@ -2185,15 +2076,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 #pragma mark - UIKeyInput Overrides
 
 - (void)updateEditingState {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
   NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
-    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
-    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    composingBase = self.markedTextRange.start.index;
+    composingExtent = self.markedTextRange.end.index;
   }
   NSDictionary* state = @{
     @"selectionBase" : @(selectionBase),
@@ -2218,8 +2109,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)updateEditingStateWithDelta:(flutter::TextEditingDelta)delta {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
@@ -2268,7 +2159,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)insertText:(NSString*)text {
   if (self.temporarilyDeletedComposedCharacter.length > 0 && text.length == 1 && !text.UTF8String &&
-      [text characterAtIndex:0] == [self.temporarilyDeletedComposedCharacter characterAtIndex:0]) {
+      [text characterAtIndex:0] ==
+          [self.temporarilyDeletedComposedCharacter
+              characterAtIndex:self.temporarilyDeletedComposedCharacter.length - 1]) {
     // Workaround for https://github.com/flutter/flutter/issues/111494
     // TODO(cyanglaz): revert this workaround if when flutter supports a minimum iOS version which
     // this bug is fixed by Apple.
@@ -2281,7 +2174,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for position (got %@).",
            [_selectedTextRange.start class]);
-  NSUInteger insertPosition = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger insertPosition = _selectedTextRange.start.index;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
@@ -2306,7 +2199,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self resetScribbleInteractionStatusIfEnding];
   self.selectionRects = copiedRects;
   _selectionAffinity = kTextAffinityDownstream;
-  [self replaceRange:_selectedTextRange withText:text];
+
+  FlutterTextRange* replaceRange = (!_markedTextRange || _markedTextRange.isEmpty)
+                                       ? _selectedTextRange
+                                       : (FlutterTextRange*)_markedTextRange;
+  [self replaceRange:replaceRange withText:text];
 }
 
 - (UITextPlaceholder*)insertTextPlaceholderWithSize:(CGSize)size API_AVAILABLE(ios(13.0)) {
@@ -2327,47 +2224,36 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _scribbleFocusStatus = FlutterScribbleFocusStatusUnfocused;
   [self resetScribbleInteractionStatusIfEnding];
 
-  // When deleting Thai vowel, _selectedTextRange has location
-  // but does not have length, so we have to manually set it.
-  // In addition, we needed to delete only a part of grapheme cluster
-  // because it is the expected behavior of Thai input.
-  // https://github.com/flutter/flutter/issues/24203
-  // https://github.com/flutter/flutter/issues/21745
-  // https://github.com/flutter/flutter/issues/39399
-  //
-  // This is needed for correct handling of the deletion of Thai vowel input.
-  // TODO(cbracken): Get a good understanding of expected behavior of Thai
-  // input and ensure that this is the correct solution.
-  // https://github.com/flutter/flutter/issues/28962
-  if (_selectedTextRange.isEmpty && [self hasText]) {
-    UITextRange* oldSelectedRange = _selectedTextRange;
-    NSRange oldRange = ((FlutterTextRange*)oldSelectedRange).range;
-    if (oldRange.location > 0) {
-      NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
-
-      // We should check if the last character is a part of emoji.
-      // If so, we must delete the entire emoji to prevent the text from being malformed.
-      NSRange charRange = fml::RangeForCharacterAtIndex(self.text, oldRange.location - 1);
-      if (IsEmoji(self.text, charRange)) {
-        newRange = NSMakeRange(charRange.location, oldRange.location - charRange.location);
-      }
-
-      _selectedTextRange = [[FlutterTextRange rangeWithNSRange:newRange] copy];
-    }
+  FlutterTextRange* deleteRange = (!_markedTextRange || _markedTextRange.isEmpty)
+                                      ? _selectedTextRange
+                                      : (FlutterTextRange*)_markedTextRange;
+  if (!deleteRange) {
+    return;
   }
 
-  if (!_selectedTextRange.isEmpty) {
+  if (deleteRange.isEmpty) {
+    NSRange backspaceDeleteRange =
+        [_text getBackspaceDeleteRangeForCaretLocation:deleteRange.start.index];
+    _selectedTextRange = [FlutterTextRange rangeWithNSRange:backspaceDeleteRange];
+  } else {
+    // The deletion operation MUST NOT result in a malformed string because
+    // the new string will be immediately turned into JSON (utf8) and sent to
+    // the framework.
+    _selectedTextRange = [deleteRange safeRangeIn:self];
+    // The iOS 16 keyboard has a bug which temporarily leaves a unpaired high
+    // surrogate in the string (but it calls insertText immedately to add the
+    // low surrogate back).
     // Cache the last deleted emoji to use for an iOS bug where the next
     // insertion corrupts the emoji characters.
     // See: https://github.com/flutter/flutter/issues/111494#issuecomment-1248441346
     if (IsEmoji(self.text, _selectedTextRange.range)) {
       NSString* deletedText = [self.text substringWithRange:_selectedTextRange.range];
-      NSRange deleteFirstCharacterRange = fml::RangeForCharacterAtIndex(deletedText, 0);
+      NSRange deleteFirstCharacterRange = [deletedText rangeOfComposedCharacterSequenceAtIndex:0];
       self.temporarilyDeletedComposedCharacter =
           [deletedText substringWithRange:deleteFirstCharacterRange];
     }
-    [self replaceRange:_selectedTextRange withText:@""];
   }
+  [self replaceRange:_selectedTextRange withText:@""];
 }
 
 - (void)postAccessibilityNotification:(UIAccessibilityNotifications)notification target:(id)target {

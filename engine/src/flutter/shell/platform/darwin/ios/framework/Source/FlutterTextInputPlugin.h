@@ -7,8 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
-#import "flutter/shell/platform/common/text_editing_delta.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
@@ -69,27 +69,6 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 - (void)resetViewResponder;
 - (BOOL)showEditMenu:(NSDictionary*)args API_AVAILABLE(ios(16.0));
 - (void)hideEditMenu API_AVAILABLE(ios(16.0));
-
-@end
-
-/** An indexed position in the buffer of a Flutter text editing widget. */
-@interface FlutterTextPosition : UITextPosition
-
-@property(nonatomic, readonly) NSUInteger index;
-@property(nonatomic, readonly) UITextStorageDirection affinity;
-
-+ (instancetype)positionWithIndex:(NSUInteger)index;
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity;
-
-@end
-
-/** A range of text in the buffer of a Flutter text editing widget. */
-@interface FlutterTextRange : UITextRange <NSCopying>
-
-@property(nonatomic, readonly) NSRange range;
-
-+ (instancetype)rangeWithNSRange:(NSRange)range;
 
 @end
 
