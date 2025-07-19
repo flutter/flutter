@@ -4661,6 +4661,9 @@ base class Shader extends NativeFieldWrapperClass1 {
 /// a filter would need to combine samples from inside the image with hypothetical
 /// color values from outside the image.
 ///
+/// This enum is used to define how the gradient or image filter should treat the regions
+/// outside that defined inner area.
+///
 /// The behavior when sampling outside this inner area is defined by the
 /// `TileMode` specified when creating the gradient or image filter.
 ///
@@ -4949,6 +4952,15 @@ base class Gradient extends Shader {
   /// `startAngle` and `endAngle` should be provided in radians, with zero
   /// radians being the horizontal line to the right of the `center` and with
   /// positive angles going clockwise around the `center`.
+  ///
+  /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
+  /// that specifies where `colors[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
+  /// `colors` must therefore only have two entries). Stop values less than 0.0
+  /// will be rounded up to 0.0 and stop values greater than 1.0 will be rounded
+  /// down to 1.0. Each stop value must be greater than or equal to the previous
+  /// stop value. Stop values that do not meet this criteria will be rounded up
+  /// to the previous stop value.
   ///
   /// The `startAngle` and `endAngle` parameters define the angular sector to be
   /// painted. Angles are measured in radians clockwise from the positive x-axis.
