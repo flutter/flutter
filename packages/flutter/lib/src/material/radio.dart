@@ -431,6 +431,7 @@ class Radio<T> extends StatefulWidget {
   /// {@endtemplate}
   final WidgetStateProperty<Color?>? backgroundColor;
 
+  /// {@template flutter.material.Radio.side}
   /// The side for the circular border of the radio button, in all
   /// [WidgetState]s.
   ///
@@ -444,6 +445,7 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   ///
   /// If null, then it defaults to a border using the fill color.
+  /// {@endtemplate}
   final BorderSide? side;
 
   /// The radius of the inner circle of the radio button, in all [WidgetState]s.
@@ -741,9 +743,9 @@ class _RadioPaintState extends State<_RadioPaint> {
       ),
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
-    // TODO(ValentinVignal): Add side to RadioThemeData.
     final BorderSide activeSide =
         _resolveSide(widget.side, activeStates) ??
+        _resolveSide(radioTheme.side, activeStates) ??
         BorderSide(
           color: effectiveActiveColor,
           width: 2.0,
@@ -751,6 +753,7 @@ class _RadioPaintState extends State<_RadioPaint> {
         );
     final BorderSide inactiveSide =
         _resolveSide(widget.side, inactiveStates) ??
+        _resolveSide(radioTheme.side, inactiveStates) ??
         BorderSide(
           color: effectiveInactiveColor,
           width: 2.0,
