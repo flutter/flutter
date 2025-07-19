@@ -137,6 +137,7 @@ class ExpansionTile extends StatefulWidget {
     this.controlAffinity,
     this.controller,
     this.dense,
+    this.splashColor,
     this.visualDensity,
     this.minTileHeight,
     this.enableFeedback = true,
@@ -402,6 +403,25 @@ class ExpansionTile extends StatefulWidget {
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
 
+  /// The splash color of the ink response when the tile is tapped.
+  ///
+  /// This color is passed directly to the underlying [ListTile]'s
+  /// `splashColor` property, which controls the ink ripple (splash)
+  /// animation when the tile is tapped. Internally, [ListTile] uses
+  /// an [InkWell] (which handles the actual splash effect), and so the
+  /// provided color will apply to that ripple.
+  ///
+  /// If null, the splash color will default to the current theme’s
+  /// `ThemeData.splashColor`.
+  ///
+  /// See also:
+  ///
+  /// * [ListTile.splashColor], which sets the ink splash for the tile.
+  /// * [InkWell.splashColor], which determines the color of the ripple
+  ///   effect in Material widgets.
+  /// * [ThemeData.splashColor], which provides a fallback color.
+  final Color? splashColor;
+
   /// Defines how compact the expansion tile's layout will be.
   ///
   /// {@macro flutter.material.themedata.visualDensity}
@@ -593,6 +613,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
           enabled: widget.enabled,
           onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
           dense: widget.dense,
+          splashColor: widget.splashColor,
           visualDensity: widget.visualDensity,
           enableFeedback: widget.enableFeedback,
           contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
