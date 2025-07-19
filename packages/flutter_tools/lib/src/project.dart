@@ -676,7 +676,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Directory get gradleAppOutV1Directory {
     return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'buildYXC', 'outputs', 'apk'),
+      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
     );
   }
 
