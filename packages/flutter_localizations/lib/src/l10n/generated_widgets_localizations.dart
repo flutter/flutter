@@ -496,7 +496,7 @@ class WidgetsLocalizationCkb extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Central Kurdish.
   ///
   /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationCkb() : super(TextDirection.ltr);
+  const WidgetsLocalizationCkb() : super(TextDirection.rtl);
 
   @override
   String get copyButtonLabel => 'کۆپی';

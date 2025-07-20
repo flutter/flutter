@@ -11,6 +11,7 @@ const List<String> _rtlLanguages = <String>[
   'he', // Hebrew
   'ps', // Pashto
   'ur', // Urdu
+  'ckb', // Central Kurdish
 ];
 
 String generateWidgetsHeader(String regenerateInstructions) {

@@ -32,6 +32,7 @@ import 'l10n/generated_widgets_localizations.dart';
 ///   * ps - Pashto
 ///   * sd - Sindhi
 ///   * ur - Urdu
+///   * ckb - Central Kurdish
 ///
 abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
