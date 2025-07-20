@@ -1,0 +1,15 @@
+{
+  "reorderItemToStart": "گواستنەوە بۆ سەرەتای لیستەکە",
+  "reorderItemToEnd": "گواستنەوە بۆ کۆتایی لیستەکە",
+  "reorderItemUp": "گواستنەوە بۆ سەرەوە",
+  "reorderItemDown": "گواستنەوە بۆ خوارەوە",
+  "reorderItemLeft": "گواستنەوە بۆ چەپ",
+  "reorderItemRight": "گواستنەوە بۆ ڕاست",
+  "copyButtonLabel": "کۆپی",
+  "cutButtonLabel": "بڕین",
+  "lookUpButtonLabel": "گەڕانی گشتی",
+  "searchWebButtonLabel": "گەڕان لە ئینتەرنێت",
+  "shareButtonLabel": "هاوبەشکردن",
+  "pasteButtonLabel": "لکاندن",
+  "selectAllButtonLabel": "هەڵبژاردنی هەمووی"
+}
