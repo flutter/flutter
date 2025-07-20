@@ -4999,20 +4999,6 @@ base class Gradient extends Shader {
   /// If `matrix4` is provided, the gradient fill will be transformed by the
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
-  ///
-  /// ## Example
-  ///
-  /// ```dart
-  /// // A 90-degree sweep gradient from red to blue
-  /// final gradient = Gradient.sweep(
-  ///   Offset(50, 50),  // center
-  ///   [Colors.red, Colors.blue],  // colors
-  ///   [0.0, 1.0],  // color stops
-  ///   TileMode.clamp,  // tile mode
-  ///   0.0,  // start angle (0 radians = 3 o'clock)
-  ///   math.pi / 2,  // end angle (π/2 radians = 12 o'clock)
-  /// );
-  /// ```
   Gradient.sweep(
     Offset center,
     List<Color> colors, [
