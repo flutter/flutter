@@ -3612,6 +3612,60 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
+  static Matrix4 _computeChildGeometry({
+    required Matrix4? parentTransform,
+    required Rect? parentPaintClipRect,
+    required Rect? parentSemanticsClipRect,
+    required SemanticsNode parent,
+    required SemanticsNode child,
+  }) {
+    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
+    Matrix4? parentToCommonAncestorTransform;
+    Matrix4? childToCommonAncestorTransform;
+    SemanticsNode childSemanticsNode = child;
+    SemanticsNode parentSemanticsNode = parent;
+
+    final List<SemanticsNode> childToCommonAncestor = <SemanticsNode>[childSemanticsNode];
+
+    // Find the common ancestor.
+    while (!identical(childSemanticsNode, parentSemanticsNode)) {
+      final int fromDepth = childSemanticsNode.depth;
+      final int toDepth = parentSemanticsNode.depth;
+
+      if (fromDepth >= toDepth) {
+        assert(
+          childSemanticsNode.parent != null,
+          '$parent and $child are not in the same render tree.',
+        );
+        childToCommonAncestorTransform ??= Matrix4.identity();
+        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
+        childSemanticsNode = childSemanticsNode.semanticsParent!;
+      }
+      if (fromDepth <= toDepth) {
+        assert(
+          parentSemanticsNode.parent != null,
+          '$parent and $child are not in the same render tree.',
+        );
+
+        parentToCommonAncestorTransform ??= Matrix4.identity();
+        parentToCommonAncestorTransform.multiply(
+          parentSemanticsNode.transform ?? Matrix4.identity(),
+        );
+        parentSemanticsNode = parentSemanticsNode.semanticsParent!;
+      }
+    }
+
+    if (parentToCommonAncestorTransform != null) {
+      if (parentToCommonAncestorTransform.invert() != 0) {
+        transform.multiply(parentToCommonAncestorTransform);
+      } else {
+        transform.setZero();
+      }
+    }
+
+    return transform;
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty || _isOverlayPortalParent);
     final SemanticsData data = getSemanticsData();
@@ -3650,31 +3704,30 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     }
 
-    _SemanticsGeometry? geometry;
     if (_isOverlayPortalChild) {
       semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
-      geometry = _SemanticsGeometry.computeChildGeometry(
+      transform = _computeChildGeometry(
         parentPaintClipRect: semanticsParent!.parentPaintClipRect,
         parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
         parentTransform: null,
         parent: semanticsParent!,
         child: this,
       );
-      transform = geometry.transform;
-      rect = geometry.rect;
-      parentPaintClipRect = geometry.paintClipRect;
-      parentSemanticsClipRect = geometry.semanticsClipRect;
     }
 
     if (data.identifier.endsWith('child')) {
       overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
+    }
+    if (data.identifier.endsWith('parent')) {
+      print('id: ${id}');
+      print('childrenInTraversalOrder: ${childrenInTraversalOrder}');
     }
 
     builder.updateNode(
       id: id,
       flags: data.flagsCollection,
       actions: data.actions,
-      rect: kIsWeb ? data.rect : geometry?.rect ?? data.rect,
+      rect: data.rect,
       identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
@@ -3700,7 +3753,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: kIsWeb
           ? data.transform?.storage ?? _kIdentityTransform
-          : geometry?.transform.storage ?? data.transform?.storage ?? _kIdentityTransform,
+          : transform?.storage ?? data.transform?.storage ?? _kIdentityTransform,
       overlayPortalParent: overlayPortalParent ?? -1,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
@@ -4043,163 +4096,6 @@ class _BoxEdge implements Comparable<_BoxEdge> {
   int compareTo(_BoxEdge other) {
     return offset.compareTo(other.offset);
   }
-}
-
-typedef _SemanticsGeometryClips = (Rect? paintClipRect, Rect? semanticsClipRect);
-
-final class _SemanticsGeometry {
-  /// The `paintClipRect` may be null if no clip is to be applied.
-  const _SemanticsGeometry({
-    required this.paintClipRect,
-    required this.semanticsClipRect,
-    required this.transform,
-    required this.rect,
-    required this.hidden,
-  });
-
-  /// Value for [SemanticsNode.transform].
-  final Matrix4 transform;
-
-  /// Value for [SemanticsNode.parentSemanticsClipRect].
-  final Rect? semanticsClipRect;
-
-  /// Value for [SemanticsNode.parentPaintClipRect].
-  final Rect? paintClipRect;
-
-  /// Value for [SemanticsNode.rect].
-  final Rect rect;
-
-  /// Whether the semantics node is completely clipped from ui, i.e. by
-  /// paintClipRect, but is still present in semantics tree.
-  final bool hidden;
-
-  static _SemanticsGeometry computeChildGeometry({
-    required Matrix4? parentTransform,
-    required Rect? parentPaintClipRect,
-    required Rect? parentSemanticsClipRect,
-    required SemanticsNode parent,
-    required SemanticsNode child,
-  }) {
-    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
-    Matrix4? parentToCommonAncestorTransform;
-    Matrix4? childToCommonAncestorTransform;
-    SemanticsNode childSemanticsNode = child;
-    SemanticsNode parentSemanticsNode = parent;
-
-    final List<SemanticsNode> childToCommonAncestor = <SemanticsNode>[childSemanticsNode];
-
-    // Find the common ancestor.
-    while (!identical(childSemanticsNode, parentSemanticsNode)) {
-      final int fromDepth = childSemanticsNode.depth;
-      final int toDepth = parentSemanticsNode.depth;
-
-      if (fromDepth >= toDepth) {
-        assert(
-          childSemanticsNode.parent != null,
-          '$parent and $child are not in the same render tree.',
-        );
-        childToCommonAncestorTransform ??= Matrix4.identity();
-        childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.semanticsParent!;
-        childToCommonAncestor.add(childSemanticsNode);
-      }
-      if (fromDepth <= toDepth) {
-        assert(
-          parentSemanticsNode.parent != null,
-          '$parent and $child are not in the same render tree.',
-        );
-
-        parentToCommonAncestorTransform ??= Matrix4.identity();
-        parentToCommonAncestorTransform.multiply(
-          parentSemanticsNode.transform ?? Matrix4.identity(),
-        );
-        parentSemanticsNode = parentSemanticsNode.semanticsParent!;
-      }
-    }
-
-    if (parentToCommonAncestorTransform != null) {
-      if (parentToCommonAncestorTransform.invert() != 0) {
-        transform.multiply(parentToCommonAncestorTransform);
-      } else {
-        transform.setZero();
-      }
-    }
-
-    // Calculate clips.
-    Rect? paintClipRect;
-    Rect? semanticsClipRect;
-    // This is most common case, i.e. parent is the common ancestor.
-    paintClipRect = parentPaintClipRect;
-    semanticsClipRect = parentSemanticsClipRect;
-    for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
-      (paintClipRect, semanticsClipRect) = _computeClipRect(
-        childToCommonAncestor[i],
-        childToCommonAncestor[i - 1],
-        semanticsClipRect,
-        paintClipRect,
-      );
-    }
-
-    Rect rect = semanticsClipRect?.intersect(child.rect) ?? child.rect;
-    bool isRectHidden = false;
-    if (paintClipRect != null) {
-      final Rect paintRect = paintClipRect.intersect(rect);
-      isRectHidden = paintRect.isEmpty && !rect.isEmpty;
-      if (!isRectHidden) {
-        rect = paintRect;
-      }
-    }
-
-    return _SemanticsGeometry(
-      transform: transform,
-      paintClipRect: paintClipRect,
-      semanticsClipRect: semanticsClipRect,
-      rect: rect,
-      hidden: isRectHidden,
-    );
-  }
-
-  static _SemanticsGeometryClips _computeClipRect(
-    SemanticsNode parent,
-    SemanticsNode child,
-    Rect? parentSemanticsClipRect,
-    Rect? parentPaintClipRect,
-  ) {
-    assert(identical(child.semanticsParent, parent));
-    if (parentPaintClipRect == null) {
-      return (null, null);
-    }
-    // Computes the paint transform from child to parent. The _transformRect
-    // method will compute the inverse.
-    _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
-    _temporaryTransformHolder.multiply(child.transform ?? Matrix4.identity());
-
-    final Rect paintClipRect = _transformRect(parentPaintClipRect, _temporaryTransformHolder)!;
-    final Rect? semanticsClip = parentSemanticsClipRect;
-    // parent.describeSemanticsClip(child) ??
-    // _intersectRects(parentSemanticsClipRect, additionalPaintClip);
-    return (paintClipRect, _transformRect(semanticsClip, _temporaryTransformHolder));
-  }
-
-  /// From parent to child coordinate system.
-  static Rect? _transformRect(Rect? rect, Matrix4 transform) {
-    if (rect == null) {
-      return null;
-    }
-    if (rect.isEmpty || transform.isZero()) {
-      return Rect.zero;
-    }
-    return MatrixUtils.inverseTransformRect(transform, rect);
-  }
-
-  // A matrix used to store transient transform data.
-  //
-  // Reusing this matrix avoids allocating a new matrix every time a temporary
-  // matrix is needed.
-  //
-  // This instance should never be returned to the caller. Otherwise, the data
-  // stored in it will be overwritten unpredictably by subsequent reuses.
-  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
 }
 
 /// A group of [nodes] that are disjoint vertically or horizontally from other
