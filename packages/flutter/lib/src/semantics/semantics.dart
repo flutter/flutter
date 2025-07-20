@@ -3679,8 +3679,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final Int32List childrenInTraversalOrder;
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
-      childrenInTraversalOrder = _kEmptyChildList;
-      childrenInHitTestOrder = _kEmptyChildList;
+      if (_isOverlayPortalParent) {
+        final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
+        childrenInTraversalOrder = Int32List(sortedChildren.length);
+        for (int i = 0; i < sortedChildren.length; i += 1) {
+          childrenInTraversalOrder[i] = sortedChildren[i].id;
+        }
+        childrenInHitTestOrder = _kEmptyChildList;
+      } else {
+        childrenInTraversalOrder = _kEmptyChildList;
+        childrenInHitTestOrder = _kEmptyChildList;
+      }
     } else {
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
       childrenInTraversalOrder = Int32List(sortedChildren.length);
@@ -3717,10 +3726,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     if (data.identifier.endsWith('child')) {
       overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
-    }
-    if (data.identifier.endsWith('parent')) {
-      print('id: ${id}');
-      print('childrenInTraversalOrder: ${childrenInTraversalOrder}');
     }
 
     builder.updateNode(
