@@ -3629,7 +3629,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInHitTestOrder = _kEmptyChildList;
     } else {
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      childrenInTraversalOrder = Int32List(sortedChildren!.length);
+      childrenInTraversalOrder = Int32List(sortedChildren.length);
       for (int i = 0; i < sortedChildren.length; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
       }
@@ -3656,7 +3656,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       geometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: semanticsParent!.parentPaintClipRect,
         parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
-        parentTransform: null, // semanticsParent!.transform,
+        parentTransform: null,
         parent: semanticsParent!,
         child: this,
       );
@@ -3674,7 +3674,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       id: id,
       flags: data.flagsCollection,
       actions: data.actions,
-      rect: geometry?.rect ?? data.rect,
+      rect: kIsWeb ? data.rect : geometry?.rect ?? data.rect,
       identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
@@ -4101,6 +4101,7 @@ final class _SemanticsGeometry {
         childToCommonAncestorTransform ??= Matrix4.identity();
         childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
         childSemanticsNode = childSemanticsNode.semanticsParent!;
+        childToCommonAncestor.add(childSemanticsNode);
       }
       if (fromDepth <= toDepth) {
         assert(
@@ -4124,14 +4125,12 @@ final class _SemanticsGeometry {
       }
     }
 
-    // assert(childToCommonAncestor.last == parent);
     // Calculate clips.
     Rect? paintClipRect;
     Rect? semanticsClipRect;
     // This is most common case, i.e. parent is the common ancestor.
     paintClipRect = parentPaintClipRect;
     semanticsClipRect = parentSemanticsClipRect;
-    // assert(parentToCommonAncestorTransform == null);
     for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
       (paintClipRect, semanticsClipRect) = _computeClipRect(
         childToCommonAncestor[i],
