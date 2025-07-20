@@ -14,11 +14,16 @@ void main() {
 }
 
 class HeroApp extends StatelessWidget {
-  const HeroApp({super.key});
+  const HeroApp({super.key, this.navigatorObservers});
+
+  final List<NavigatorObserver>? navigatorObservers;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: HeroExample());
+    return MaterialApp(
+      navigatorObservers: navigatorObservers ?? <NavigatorObserver>[],
+      home: const HeroExample(),
+    );
   }
 }
 
