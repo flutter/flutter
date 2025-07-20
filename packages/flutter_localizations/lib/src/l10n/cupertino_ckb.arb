@@ -1,4 +1,5 @@
 {
+  "@@locale": "ckb",
   "timerPickerSecondLabelFew": "چرکە",
   "datePickerHourSemanticsLabelZero": "بە وردی $hour",
   "datePickerHourSemanticsLabelTwo": "بە وردی $hour",

@@ -5479,6 +5479,502 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'Mostra les llicències';
 }
 
+/// The translations for Central Kurdish (`ckb`).
+class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Central Kurdish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationCkb({
+    super.localeName = 'ckb',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'دەربارەی "$applicationName"';
+
+  @override
+  String get alertDialogLabel => 'ئاگاداری';
+
+  @override
+  String get anteMeridiemAbbreviation => 'پ.ن';
+
+  @override
+  String get backButtonTooltip => 'گەڕانەوە';
+
+  @override
+  String get bottomSheetLabel => 'پەڕەی خوارەوە';
+
+  @override
+  String get calendarModeButtonLabel => 'گۆڕین بۆ ڕۆژژمێر';
+
+  @override
+  String get cancelButtonLabel => 'هەڵوەشاندنەوە';
+
+  @override
+  String get clearButtonTooltip => 'سڕینەوەی دەق';
+
+  @override
+  String get closeButtonLabel => 'داخستن';
+
+  @override
+  String get closeButtonTooltip => 'داخستن';
+
+  @override
+  String get collapsedHint => 'فراوانکراوە';
+
+  @override
+  String get collapsedIconTapHint => 'فراوانکردن';
+
+  @override
+  String get continueButtonLabel => 'بەردەوامبوون';
+
+  @override
+  String get copyButtonLabel => 'کۆپیکردن';
+
+  @override
+  String get currentDateLabel => 'بەرواری ئەمڕۆ';
+
+  @override
+  String get cutButtonLabel => 'بڕین';
+
+  @override
+  String get dateHelpText => 'ساڵ/مانگ/ڕۆژ';
+
+  @override
+  String get dateInputLabel => 'تێخستنی بەروار';
+
+  @override
+  String get dateOutOfRangeLabel => 'بەروارەکە لە دەرەوەی مەوداکەیە';
+
+  @override
+  String get datePickerHelpText => 'هەڵبژاردنی بەروار';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'بەرواری کۆتایی $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'بەرواری کۆتایی';
+
+  @override
+  String get dateRangePickerHelpText => 'هەڵبژاردنی مەودا';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'بەرواری دەستپێک $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'بەرواری دەستپێک';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'سڕینەوە';
+
+  @override
+  String get dialModeButtonLabel => 'گۆڕین بۆ دۆخی کاتژمێری خولگەیی';
+
+  @override
+  String get dialogLabel => 'دیالۆگ';
+
+  @override
+  String get drawerLabel => 'مێنووی گەڕان';
+
+  @override
+  String get expandedHint => 'بچووککراوەتەوە';
+
+  @override
+  String get expandedIconTapHint => 'بچووککردنەوە';
+
+  @override
+  String get expansionTileCollapsedHint => 'دوو جار کلیک بکە بۆ فراوانکردن';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'فراوان بکەرەوە بۆ بینینی زیاتر وردەکاری';
+
+  @override
+  String get expansionTileExpandedHint => 'تکایە دوو جار کلیک بکە بۆ بچووککردنەوە';
+
+  @override
+  String get expansionTileExpandedTapHint => 'بچووککردنەوە';
+
+  @override
+  String get firstPageTooltip => 'یەکەم لاپەڕە';
+
+  @override
+  String get hideAccountsLabel => 'شاردنەوەی ئەکاونتەکان';
+
+  @override
+  String get inputDateModeButtonLabel => 'گۆڕین بۆ تێخستن';
+
+  @override
+  String get inputTimeModeButtonLabel => 'گۆڕین بۆ دۆخی تێخستنی دەق';
+
+  @override
+  String get invalidDateFormatLabel => 'فۆرماتەکە هەڵەیە';
+
+  @override
+  String get invalidDateRangeLabel => 'مەوداکە هەڵەیە';
+
+  @override
+  String get invalidTimeLabel => 'تکایە کاتێکی دروست تێبخە';
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps Lock';
+
+  @override
+  String get keyboardKeyChannelDown => 'کەناڵی داهاتوو';
+
+  @override
+  String get keyboardKeyChannelUp => 'کەناڵی پێشوو';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Eject';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'Home';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Command';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Num Lock';
+
+  @override
+  String get keyboardKeyNumpad0 => 'ژمارە 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'ژمارە 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'ژمارە 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'ژمارە 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'ژمارە 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'ژمارە 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'ژمارە 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'ژمارە 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'ژمارە 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'ژمارە 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'نیشانەی کۆکردن +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'کۆما ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'خاڵ .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'نیشانەی دابەشکردن /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'کلیلی Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'نیشانەی یەکسانی =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'نیشانەی لێکدان *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'کروچەی چەپ (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'کروچەی ڕاست )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'نیشانەی لێدەرهێنان -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'دوگمەی پاور';
+
+  @override
+  String get keyboardKeyPowerOff => 'دوگمەی کوژاندنەوە';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print Screen';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll Lock';
+
+  @override
+  String get keyboardKeySelect => 'کلیلی هەڵبژاردن';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'کلیلی بۆشایی';
+
+  @override
+  String get lastPageTooltip => 'دوایین لاپەڕە';
+
+  @override
+  String? get licensesPackageDetailTextFew => r'$licenseCount مۆڵەت';
+
+  @override
+  String? get licensesPackageDetailTextMany => r'$licenseCount مۆڵەت';
+
+  @override
+  String? get licensesPackageDetailTextOne => 'یەک مۆڵەت';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount مۆڵەت';
+
+  @override
+  String? get licensesPackageDetailTextTwo => r'دوو مۆڵەت ($licenseCount)';
+
+  @override
+  String? get licensesPackageDetailTextZero => 'هیچ مۆڵەتێک نییە';
+
+  @override
+  String get licensesPageTitle => 'مۆڵەتەکان';
+
+  @override
+  String get lookUpButtonLabel => 'گەڕانی گشتی';
+
+  @override
+  String get menuBarMenuLabel => 'مێنووی شریتی مێنووەکان';
+
+  @override
+  String get menuDismissLabel => 'داخستنی مێنوو';
+
+  @override
+  String get modalBarrierDismissLabel => 'ڕەتکردنەوە';
+
+  @override
+  String get moreButtonTooltip => 'زیاتر';
+
+  @override
+  String get nextMonthTooltip => 'مانگی داهاتوو';
+
+  @override
+  String get nextPageTooltip => 'لاپەڕەی داهاتوو';
+
+  @override
+  String get okButtonLabel => 'باشە';
+
+  @override
+  String get openAppDrawerTooltip => 'کردنەوەی مێنووی گەڕان';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'لە $firstRow بۆ $lastRow لە کۆی $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'لە $firstRow بۆ $lastRow لە کۆی نزیکەی $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'لکاندن';
+
+  @override
+  String get popupMenuLabel => 'مێنووی پەنجەرەیی';
+
+  @override
+  String get postMeridiemAbbreviation => 'د.ن';
+
+  @override
+  String get previousMonthTooltip => 'مانگی پێشوو';
+
+  @override
+  String get previousPageTooltip => 'لاپەڕەی پێشوو';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'نوێکردنەوە';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => r'$remainingCount پیت ماوە';
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => r'$remainingCount پیت ماوە';
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => 'یەک پیت ماوە';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount پیت ماوە';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => r'دوو پیت ($remainingCount) ماوە';
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => 'هیچ پیتێک نەماوە';
+
+  @override
+  String get reorderItemDown => 'بردن بۆ خوارەوە';
+
+  @override
+  String get reorderItemLeft => 'بردن بۆ چەپ';
+
+  @override
+  String get reorderItemRight => 'بردن بۆ ڕاست';
+
+  @override
+  String get reorderItemToEnd => 'بردن بۆ کۆتایی لیست';
+
+  @override
+  String get reorderItemToStart => 'بردن بۆ سەرەتای لیست';
+
+  @override
+  String get reorderItemUp => 'بردن بۆ سەرەوە';
+
+  @override
+  String get rowsPerPageTitle => 'ژمارەی ڕیزەکان لە هەر لاپەڕەیەک:';
+
+  @override
+  String get saveButtonLabel => 'پاشەکەوتکردن';
+
+  @override
+  String get scanTextButtonLabel => 'سکانی دەق';
+
+  @override
+  String get scrimLabel => 'تەمکردن';
+
+  @override
+  String get scrimOnTapHintRaw => r'داخستنی "$modalRouteContentName"';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => 'گەڕان';
+
+  @override
+  String get searchWebButtonLabel => 'گەڕان لە وێب';
+
+  @override
+  String get selectAllButtonLabel => 'هەڵبژاردنی هەموو';
+
+  @override
+  String get selectYearSemanticsLabel => 'هەڵبژاردنی ساڵ';
+
+  @override
+  String get selectedDateLabel => 'بەرواری هەڵبژێردراو';
+
+  @override
+  String? get selectedRowCountTitleFew => r'$selectedRowCount ڕیز هەڵبژێردراوە';
+
+  @override
+  String? get selectedRowCountTitleMany => r'$selectedRowCount ڕیز هەڵبژێردراوە';
+
+  @override
+  String? get selectedRowCountTitleOne => 'یەک ڕیز هەڵبژێردراوە';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ڕیز هەڵبژێردراوە';
+
+  @override
+  String? get selectedRowCountTitleTwo => r'دوو ڕیز ($selectedRowCount) هەڵبژێردراوە';
+
+  @override
+  String? get selectedRowCountTitleZero => 'هیچ ڕیزێک هەڵنەبژێردراوە';
+
+  @override
+  String get shareButtonLabel => 'هاوبەشکردن';
+
+  @override
+  String get showAccountsLabel => 'پیشاندانی ئەکاونتەکان';
+
+  @override
+  String get showMenuTooltip => 'پیشاندانی مێنوو';
+
+  @override
+  String get signedInLabel => 'چووەتە ژوورەوە';
+
+  @override
+  String get tabLabelRaw => r'تابی $tabIndex لە $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerDialHelpText => 'هەڵبژاردنی کات';
+
+  @override
+  String get timePickerHourLabel => 'کاتژمێر';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'هەڵبژاردنی کاتژمێر';
+
+  @override
+  String get timePickerInputHelpText => 'تێخستنی کات';
+
+  @override
+  String get timePickerMinuteLabel => 'خولەک';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'هەڵبژاردنی خولەک';
+
+  @override
+  String get unspecifiedDate => 'بەروار';
+
+  @override
+  String get unspecifiedDateRange => 'مەودای بەروار';
+
+  @override
+  String get viewLicensesButtonLabel => 'بینینی مۆڵەتەکان';
+}
+
 /// The translations for Czech (`cs`).
 class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Czech.
@@ -46527,6 +47023,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
+  'ckb', // Central Kurdish
   'cs', // Czech
   'cy', // Welsh
   'da', // Danish
@@ -46621,6 +47118,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
+///  * `ckb` - Central Kurdish
 ///  * `cs` - Czech
 ///  * `cy` - Welsh
 ///  * `da` - Danish
@@ -46731,6 +47229,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationBs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
       return MaterialLocalizationCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ckb':
+      return MaterialLocalizationCkb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cs':
       return MaterialLocalizationCs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cy':

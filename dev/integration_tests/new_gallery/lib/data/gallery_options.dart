@@ -18,6 +18,7 @@ const List<String> rtlLanguages = <String>[
   'he', // Hebrew
   'ps', // Pashto
   'ur', // Urdu
+  'ckb', // Central Kurdish
 ];
 
 // Fake locale to represent the system Locale option.

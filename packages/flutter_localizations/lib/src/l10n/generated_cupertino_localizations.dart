@@ -1915,6 +1915,178 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get todayLabel => 'Avui';
 }
 
+/// The translations for Central Kurdish (`ckb`).
+class CupertinoLocalizationCkb extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Central Kurdish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationCkb({
+    super.localeName = 'ckb',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.weekdayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'ئاگاداری';
+
+  @override
+  String get anteMeridiemAbbreviation => 'پ.ن';
+
+  @override
+  String get backButtonLabel => 'گەڕانەوە';
+
+  @override
+  String get cancelButtonLabel => 'هەڵوەشاندنەوە';
+
+  @override
+  String get clearButtonLabel => 'پاککردنەوە';
+
+  @override
+  String get copyButtonLabel => 'کۆپی';
+
+  @override
+  String get cutButtonLabel => 'بڕین';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => r'بە وردی $hour';
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => r'بە وردی $hour';
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'بە وردی $hour';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'بە وردی $hour';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => r'بە وردی $hour';
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => r'بە وردی $hour';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => r'$minute خولەک';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => r'$minute خولەک';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => 'یەک خولەک';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute خولەک';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => r'دوو خولەک ($minute)';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => r'$minute خولەک';
+
+  @override
+  String get lookUpButtonLabel => 'گەڕانی گشتی';
+
+  @override
+  String get menuDismissLabel => 'داخستنی مێنو';
+
+  @override
+  String get modalBarrierDismissLabel => 'ڕەتکردنەوە';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'هیچ جێگرەوەیەک نەدۆزرایەوە';
+
+  @override
+  String get pasteButtonLabel => 'لکاندن';
+
+  @override
+  String get postMeridiemAbbreviation => 'د.ن';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'گەڕان';
+
+  @override
+  String get searchWebButtonLabel => 'گەڕان لە وێب';
+
+  @override
+  String get selectAllButtonLabel => 'هەڵبژاردنی هەموو';
+
+  @override
+  String get shareButtonLabel => 'هاوبەشکردن…';
+
+  @override
+  String get tabSemanticsLabelRaw => r'تابی $tabIndex لە $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => 'کاتژمێر';
+
+  @override
+  String? get timerPickerHourLabelMany => 'کاتژمێر';
+
+  @override
+  String? get timerPickerHourLabelOne => 'کاتژمێر';
+
+  @override
+  String get timerPickerHourLabelOther => 'کاتژمێر';
+
+  @override
+  String? get timerPickerHourLabelTwo => 'دوو کاتژمێر';
+
+  @override
+  String? get timerPickerHourLabelZero => 'کاتژمێر';
+
+  @override
+  String? get timerPickerMinuteLabelFew => 'خولەک';
+
+  @override
+  String? get timerPickerMinuteLabelMany => 'خولەک';
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'یەک خولەک';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'خولەک';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => 'دوو خولەک';
+
+  @override
+  String? get timerPickerMinuteLabelZero => 'خولەک';
+
+  @override
+  String? get timerPickerSecondLabelFew => 'چرکە';
+
+  @override
+  String? get timerPickerSecondLabelMany => 'چرکە';
+
+  @override
+  String? get timerPickerSecondLabelOne => 'یەک چرکە';
+
+  @override
+  String get timerPickerSecondLabelOther => 'چرکە';
+
+  @override
+  String? get timerPickerSecondLabelTwo => 'دوو چرکە';
+
+  @override
+  String? get timerPickerSecondLabelZero => 'چرکە';
+
+  @override
+  String get todayLabel => 'ئەمڕۆ';
+}
+
 /// The translations for Czech (`cs`).
 class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Czech.
@@ -15578,6 +15750,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
+  'ckb', // Central Kurdish
   'cs', // Czech
   'cy', // Welsh
   'da', // Danish
@@ -15671,6 +15844,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
+///  * `ckb` - Central Kurdish
 ///  * `cs` - Czech
 ///  * `cy` - Welsh
 ///  * `da` - Danish
@@ -15780,6 +15954,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationBs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ca':
       return CupertinoLocalizationCa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'ckb':
+      return CupertinoLocalizationCkb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cs':
       return CupertinoLocalizationCs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, weekdayFormat: weekdayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'cy':

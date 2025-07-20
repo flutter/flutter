@@ -491,6 +491,53 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   String get shareButtonLabel => 'Comparteix';
 }
 
+/// The translations for Central Kurdish (`ckb`).
+class WidgetsLocalizationCkb extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Central Kurdish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationCkb() : super(TextDirection.ltr);
+
+  @override
+  String get copyButtonLabel => 'کۆپی';
+
+  @override
+  String get cutButtonLabel => 'بڕین';
+
+  @override
+  String get lookUpButtonLabel => 'گەڕانی گشتی';
+
+  @override
+  String get pasteButtonLabel => 'لکاندن';
+
+  @override
+  String get reorderItemDown => 'گواستنەوە بۆ خوارەوە';
+
+  @override
+  String get reorderItemLeft => 'گواستنەوە بۆ چەپ';
+
+  @override
+  String get reorderItemRight => 'گواستنەوە بۆ ڕاست';
+
+  @override
+  String get reorderItemToEnd => 'گواستنەوە بۆ کۆتایی لیستەکە';
+
+  @override
+  String get reorderItemToStart => 'گواستنەوە بۆ سەرەتای لیستەکە';
+
+  @override
+  String get reorderItemUp => 'گواستنەوە بۆ سەرەوە';
+
+  @override
+  String get searchWebButtonLabel => 'گەڕان لە ئینتەرنێت';
+
+  @override
+  String get selectAllButtonLabel => 'هەڵبژاردنی هەمووی';
+
+  @override
+  String get shareButtonLabel => 'هاوبەشکردن';
+}
+
 /// The translations for Czech (`cs`).
 class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Czech.
@@ -4343,6 +4390,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'bn', // Bengali Bangla
   'bs', // Bosnian
   'ca', // Catalan Valencian
+  'ckb', // Central Kurdish
   'cs', // Czech
   'cy', // Welsh
   'da', // Danish
@@ -4434,6 +4482,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `bn` - Bengali Bangla
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
+///  * `ckb` - Central Kurdish
 ///  * `cs` - Czech
 ///  * `cy` - Welsh
 ///  * `da` - Danish
@@ -4531,6 +4580,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationBs();
     case 'ca':
       return const WidgetsLocalizationCa();
+    case 'ckb':
+      return const WidgetsLocalizationCkb();
     case 'cs':
       return const WidgetsLocalizationCs();
     case 'cy':

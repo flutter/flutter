@@ -1,4 +1,5 @@
 {
+  "@@locale": "ckb",
   "licensesPackageDetailTextTwo": "دوو مۆڵەت ($licenseCount)",
   "licensesPackageDetailTextMany": "$licenseCount مۆڵەت",
   "licensesPackageDetailTextFew": "$licenseCount مۆڵەت",
