@@ -986,7 +986,7 @@ class SweepGradient extends Gradient {
   ///
   /// The angle is measured in radians clockwise from the positive x-axis.
   ///
-  /// Values outside the range [0, 2π] are normalized to the equivalent angle
+  /// Values outside the range `[0, 2π]` are normalized to the equivalent angle
   /// within this range using modulo arithmetic.
   ///
   /// The gradient will be painted in the sector between [startAngle] and [endAngle].
@@ -999,7 +999,7 @@ class SweepGradient extends Gradient {
   ///
   /// The angle is measured in radians clockwise from the positive x-axis.
   ///
-  /// Values outside the range [0, 2π] are normalized to the equivalent angle
+  /// Values outside the range `[0, 2π]` are normalized to the equivalent angle
   /// within this range using modulo arithmetic.
   ///
   /// The gradient will be painted in the sector between [startAngle] and [endAngle].

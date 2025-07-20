@@ -4964,7 +4964,7 @@ base class Gradient extends Shader {
   ///
   /// The `startAngle` and `endAngle` parameters define the angular sector to be
   /// painted. Angles are measured in radians clockwise from the positive x-axis.
-  /// Values outside the range [0, 2π] are normalized to this range using modulo
+  /// Values outside the range `[0, 2π]` are normalized to this range using modulo
   /// arithmetic. The gradient is only painted in the sector between `startAngle`
   /// and `endAngle`. The `tileMode` determines how the gradient behaves outside
   /// this sector.
