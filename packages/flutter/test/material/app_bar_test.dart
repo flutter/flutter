@@ -973,7 +973,9 @@ void main() {
     'AppBar draws menu for end drawer if automaticallyImplyActions is true (default) and actions is null',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(endDrawer: const Drawer(), appBar: AppBar())),
+        MaterialApp(
+          home: Scaffold(endDrawer: const Drawer(), appBar: AppBar()),
+        ),
       );
       expect(find.byIcon(Icons.menu), findsOneWidget);
     },
