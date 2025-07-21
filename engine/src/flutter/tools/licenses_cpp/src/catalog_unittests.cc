@@ -160,9 +160,7 @@ matcher
   if (entry.ok()) {
     EXPECT_EQ(entry->name, "foobar");
     EXPECT_EQ(entry->unique, "unique");
-    EXPECT_EQ(entry->matcher, R"match(Multiline
-matcher
-.*)match");
+    EXPECT_EQ(entry->matcher, R"match(Multiline\s+matcher\s+.*)match");
   }
 }
 
@@ -214,5 +212,7 @@ TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
 
   absl::StatusOr<std::vector<Catalog::Match>> match =
       catalog->FindMatch(no_newline_license);
-  EXPECT_TRUE(match.ok()) << match.status();
+  ASSERT_TRUE(match.ok()) << match.status();
+  ASSERT_EQ(match->size(), 1u);
+  EXPECT_EQ(match->at(0).matched_text, no_newline_license);
 }
