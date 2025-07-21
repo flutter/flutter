@@ -177,3 +177,42 @@ TEST(CatalogTest, SkiaLicense) {
       catalog->FindMatch(kSkiaLicense);
   EXPECT_TRUE(match.ok()) << match.status();
 }
+
+namespace {
+std::string RemoveNewlines(std::string_view input) {
+  if (input.empty()) {
+    return std::string();
+  }
+  std::string no_newline;
+  char last_char = input[0];
+  for (size_t i = 1; i < input.size(); ++i) {
+    char current = input[i];
+    if (last_char == '\n' && current == '\n') {
+      no_newline.push_back('\n');
+      no_newline.push_back('\n');
+    } else if (last_char == '\n') {
+      no_newline.push_back(' ');
+    } else {
+      no_newline.push_back(last_char);
+    }
+    last_char = current;
+  }
+  no_newline.push_back(last_char);
+  return no_newline;
+}
+}  // namespace
+
+TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
+  std::stringstream ss;
+  ss << kEntry;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string no_newline_license = RemoveNewlines(kSkiaLicense);
+
+  absl::StatusOr<std::vector<Catalog::Match>> match =
+      catalog->FindMatch(no_newline_license);
+  EXPECT_TRUE(match.ok()) << match.status();
+}
