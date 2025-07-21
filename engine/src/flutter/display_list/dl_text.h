@@ -17,9 +17,9 @@ class SkTextBlob;
 namespace flutter {
 class DlText {
  public:
-  virtual DlRect getBounds() = 0;
-  virtual std::shared_ptr<impeller::TextFrame> getTextFrame() = 0;
-  virtual sk_sp<SkTextBlob> getTextBlob() = 0;
+  virtual DlRect getBounds() const = 0;
+  virtual std::shared_ptr<impeller::TextFrame> getTextFrame() const = 0;
+  virtual sk_sp<SkTextBlob> getTextBlob() const = 0;
 
  protected:
   DlText() = default;

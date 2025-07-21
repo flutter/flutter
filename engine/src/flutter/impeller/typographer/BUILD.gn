@@ -35,8 +35,10 @@ impeller_component("typographer") {
   ]
 
   if (!is_fuchsia) {
-    public_deps +=
-        [ "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map" ]
+    public_deps += [
+      "//flutter/third_party/abseil-cpp/absl/base",
+      "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
+    ]
   }
 
   deps = [

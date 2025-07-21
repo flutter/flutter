@@ -288,22 +288,19 @@ std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
   }
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkTextBlob* blob) {
-  if (blob == nullptr) {
-    return os << "no text";
+static std::ostream& operator<<(std::ostream& os, const flutter::DlText* text) {
+  auto blob = text->getTextBlob();
+  if (blob != nullptr) {
+    return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
   }
-  return os << "&SkTextBlob(ID: " << blob->uniqueID() << ", " << blob->bounds() << ")";
-}
-
-static std::ostream& operator<<(std::ostream& os,
-                                const impeller::TextFrame* frame) {
-  if (frame == nullptr) {
-    return os << "no text";
+  auto frame = text->getTextFrame();
+  if (frame != nullptr) {
+    auto bounds = frame->GetBounds();
+    return os << "&TextFrame("
+              << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
+              << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
   }
-  auto bounds = frame->GetBounds();
-  return os << "&TextFrame("
-            << bounds.GetLeft() << ", " << bounds.GetTop() << " => "
-            << bounds.GetRight() << ", " << bounds.GetBottom() << ")";
+  return os << "no text";
 }
 
 std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode) {
@@ -977,7 +974,7 @@ void DisplayListStreamDispatcher::drawDisplayList(
            << "opacity: " << opacity
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawText(const std::shared_ptr<DlText> text,
+void DisplayListStreamDispatcher::drawText(const std::shared_ptr<DlText>& text,
                                                DlScalar x,
                                                DlScalar y) {
   startl() << "drawText("
