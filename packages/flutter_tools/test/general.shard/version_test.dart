@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -1223,7 +1224,7 @@ void main() {
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
-        git: git,
+        git: Git(currentPlatform: FakePlatform(), runProcessWith: globals.processUtils),
       );
       flutterVersion.ensureVersionFile();
 
@@ -1248,7 +1249,7 @@ void main() {
         clock: _testClock,
         fs: fs,
         flutterRoot: flutterRoot.path,
-        git: git,
+        git: Git(currentPlatform: FakePlatform(), runProcessWith: globals.processUtils),
       );
       flutterVersion.ensureVersionFile();
 
@@ -1365,16 +1366,11 @@ void main() {
 
   testUsingContext('determine reports correct stable version if HEAD is at a tag', () {
     const stableTag = '1.2.3';
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD'], stdout: stableTag),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      processUtils,
       platform,
       git: git,
       workingDirectory: '.',
@@ -1384,21 +1380,15 @@ void main() {
 
   testUsingContext('determine favors stable tag over beta tag if both identify HEAD', () {
     const stableTag = '1.2.3';
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         // This tests the unlikely edge case where a beta release made it to stable without any cherry picks
         stdout: '1.2.3-6.0.pre\n$stableTag',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
-
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      processUtils,
       platform,
       git: git,
       workingDirectory: '.',
@@ -1410,7 +1400,7 @@ void main() {
     const devTag = '1.2.0-2.0.pre';
     const headRevision = 'abcd1234';
     const commitsAhead = '12';
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         // no output, since there's no tag
@@ -1420,14 +1410,9 @@ void main() {
         stdout: '$devTag-$commitsAhead-g$headRevision',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
 
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      processUtils,
       platform,
       git: git,
       workingDirectory: '.',
@@ -1437,25 +1422,21 @@ void main() {
   });
 
   testUsingContext('determine does not call fetch --tags', () {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
       const FakeCommand(
         command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', 'HEAD'],
         stdout: 'v0.1.2-3-1234abcd',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
 
-    GitTagVersion.determine(processUtils, platform, workingDirectory: '.', git: git);
-    expect(fakeProcessManager, hasNoRemainingExpectations);
+    GitTagVersion.determine(platform, workingDirectory: '.', git: git);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine does not fetch tags on beta', () {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'beta',
@@ -1466,24 +1447,14 @@ void main() {
         stdout: 'v0.1.2-3-1234abcd',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
 
-    GitTagVersion.determine(
-      processUtils,
-      platform,
-      workingDirectory: '.',
-      fetchTags: true,
-      git: git,
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
+    GitTagVersion.determine(platform, workingDirectory: '.', fetchTags: true, git: git);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine calls fetch --tags on master', () {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'master',
@@ -1497,24 +1468,14 @@ void main() {
         stdout: 'v0.1.2-3-1234abcd',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform();
 
-    GitTagVersion.determine(
-      processUtils,
-      platform,
-      workingDirectory: '.',
-      fetchTags: true,
-      git: git,
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
+    GitTagVersion.determine(platform, workingDirectory: '.', fetchTags: true, git: git);
+    expect(processManager, hasNoRemainingExpectations);
   });
 
   testUsingContext('determine uses overridden git url', () {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'master',
@@ -1528,22 +1489,12 @@ void main() {
         stdout: 'v0.1.2-3-1234abcd',
       ),
     ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
     final platform = FakePlatform(
       environment: <String, String>{'FLUTTER_GIT_URL': 'https://githubmirror.com/flutter.git'},
     );
 
-    GitTagVersion.determine(
-      processUtils,
-      platform,
-      workingDirectory: '.',
-      fetchTags: true,
-      git: git,
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
+    GitTagVersion.determine(platform, workingDirectory: '.', fetchTags: true, git: git);
+    expect(processManager, hasNoRemainingExpectations);
   }, overrides: {Git: () => git});
 
   group('$FlutterEngineStampFromFile', () {

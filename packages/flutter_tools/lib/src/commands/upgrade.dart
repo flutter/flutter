@@ -99,7 +99,6 @@ class UpgradeCommand extends FlutterCommand {
       force: boolArg('force'),
       testFlow: stringArg('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(
-        globals.processUtils,
         globals.platform,
         git: globals.git,
         workingDirectory: _commandRunner.workingDirectory,
