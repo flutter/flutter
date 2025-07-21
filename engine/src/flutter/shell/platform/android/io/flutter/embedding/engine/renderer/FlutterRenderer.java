@@ -559,7 +559,7 @@ public class FlutterRenderer implements TextureRegistry {
     private PerImageReader getOrCreatePerImageReader(ImageReader reader) {
       PerImageReader r = perImageReaders.get(reader);
       if (r == null) {
-        r = createPerImageReader(reader);
+        r = new PerImageReader(reader);
         perImageReaders.put(reader, r);
         imageReaderQueue.add(r);
         if (VERBOSE_LOGS) {
@@ -567,11 +567,6 @@ public class FlutterRenderer implements TextureRegistry {
         }
       }
       return r;
-    }
-
-    @VisibleForTesting
-    public PerImageReader createPerImageReader(ImageReader reader) {
-      return new PerImageReader(reader);
     }
 
     void pruneImageReaderQueue() {
@@ -921,8 +916,7 @@ public class FlutterRenderer implements TextureRegistry {
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     }
 
-    @VisibleForTesting
-    public ImageReader createImageReader() {
+    private ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
       } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
