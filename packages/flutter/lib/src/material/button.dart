@@ -363,7 +363,10 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
       widget.constraints,
     );
     final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
-      widget.mouseCursor ?? MaterialStateMouseCursor.statelessClickable,
+      widget.mouseCursor ??
+          (kIsWeb
+              ? MaterialStateMouseCursor.clickable
+              : MaterialStateMouseCursor.statelessClickable),
       materialStates,
     );
     final EdgeInsetsGeometry padding = widget.padding

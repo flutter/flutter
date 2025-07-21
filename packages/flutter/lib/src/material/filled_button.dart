@@ -726,8 +726,9 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
@@ -868,8 +869,9 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

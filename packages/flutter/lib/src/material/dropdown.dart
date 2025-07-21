@@ -812,18 +812,17 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SystemMouseCursor effectiveMouseCursor = mouseCursor ?? SystemMouseCursors.basic;
-
-    return Semantics(
-      button: true,
-      child: MouseRegion(
-        cursor: effectiveMouseCursor,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-          child: Align(alignment: alignment, child: child),
-        ),
-      ),
+    final SystemMouseCursor effectiveNonWebMouseCursor = mouseCursor ?? SystemMouseCursors.basic;
+    SingleChildRenderObjectWidget semanticsChild = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+      child: Align(alignment: alignment, child: child),
     );
+
+    if (!kIsWeb) {
+      semanticsChild = MouseRegion(cursor: effectiveNonWebMouseCursor, child: child);
+    }
+
+    return Semantics(button: true, child: semanticsChild);
   }
 }
 
@@ -1652,7 +1651,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final MouseCursor effectiveMouseCursor =
         widget.mouseCursor ??
         MaterialStateProperty.resolveAs<MouseCursor>(
-          MaterialStateMouseCursor.statelessClickable,
+          kIsWeb ? MaterialStateMouseCursor.clickable : MaterialStateMouseCursor.statelessClickable,
           <MaterialState>{if (!_enabled) MaterialState.disabled},
         );
 

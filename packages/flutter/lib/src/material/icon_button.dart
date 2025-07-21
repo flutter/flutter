@@ -690,12 +690,13 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: disabledMouseCursor == null && enabledMouseCursor == null
-          ? null
-          : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
-              WidgetState.disabled: disabledMouseCursor,
-              WidgetState.any: enabledMouseCursor,
-            }),
+      mouseCursor:
+          disabledMouseCursor == null && enabledMouseCursor == null
+              ? null
+              : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+                WidgetState.disabled: disabledMouseCursor,
+                WidgetState.any: enabledMouseCursor,
+              }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -710,12 +711,10 @@ class IconButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     if (theme.useMaterial3) {
-      final Size? minSize = constraints == null
-          ? null
-          : Size(constraints!.minWidth, constraints!.minHeight);
-      final Size? maxSize = constraints == null
-          ? null
-          : Size(constraints!.maxWidth, constraints!.maxHeight);
+      final Size? minSize =
+          constraints == null ? null : Size(constraints!.minWidth, constraints!.minHeight);
+      final Size? maxSize =
+          constraints == null ? null : Size(constraints!.maxWidth, constraints!.maxHeight);
 
       ButtonStyle adjustedStyle = styleFrom(
         visualDensity: visualDensity,
@@ -802,7 +801,9 @@ class IconButton extends StatelessWidget {
       onTap: onPressed,
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
-      mouseCursor: mouseCursor ?? SystemMouseCursors.basic,
+      mouseCursor:
+          mouseCursor ??
+          ((onPressed != null && kIsWeb) ? SystemMouseCursors.click : SystemMouseCursors.basic),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -1117,8 +1118,9 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1260,8 +1262,9 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1403,8 +1406,9 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1541,8 +1545,9 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-      MaterialStateProperty.all<MouseCursor?>(SystemMouseCursors.basic);
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

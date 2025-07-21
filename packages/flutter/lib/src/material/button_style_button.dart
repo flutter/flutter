@@ -429,11 +429,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       (ButtonStyle? style) => style?.shape,
     );
 
-    final MaterialStateMouseCursor mouseCursor = _MouseCursor((Set<MaterialState> states) {
-      return effectiveValue((ButtonStyle? style) {
-        return style?.mouseCursor?.resolve(states);
-      });
-    });
+    final MaterialStateMouseCursor mouseCursor = _MouseCursor(
+      (Set<MaterialState> states) =>
+          effectiveValue((ButtonStyle? style) => style?.mouseCursor?.resolve(states)),
+    );
 
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
@@ -539,9 +538,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         alignment: resolvedAlignment!,
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: resolvedForegroundBuilder != null
-            ? resolvedForegroundBuilder(context, statesController.value, widget.child)
-            : widget.child,
+        child:
+            resolvedForegroundBuilder != null
+                ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+                : widget.child,
       ),
     );
     if (resolvedBackgroundBuilder != null) {

@@ -1758,7 +1758,9 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   MouseCursor resolve(Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        MaterialStateMouseCursor.statelessClickable.resolve(states);
+        (kIsWeb
+            ? MaterialStateMouseCursor.clickable.resolve(states)
+            : MaterialStateMouseCursor.statelessClickable.resolve(states));
   }
 
   @override
