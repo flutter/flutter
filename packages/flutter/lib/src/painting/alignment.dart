@@ -654,7 +654,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(debugCheckCanResolveTextDirection(direction, '$AlignmentDirectional'));
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedAlignment'));
     return switch (direction!) {
       TextDirection.rtl => Alignment(_x - _start, _y),
       TextDirection.ltr => Alignment(_x + _start, _y),
