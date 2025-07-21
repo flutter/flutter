@@ -556,7 +556,7 @@ public class FlutterRenderer implements TextureRegistry {
       return (double) deltaNanos / 1000000.0;
     }
 
-    private PerImageReader getOrCreatePerImageReader(ImageReader reader) {
+    PerImageReader getOrCreatePerImageReader(ImageReader reader) {
       PerImageReader r = perImageReaders.get(reader);
       if (r == null) {
         r = new PerImageReader(reader);
