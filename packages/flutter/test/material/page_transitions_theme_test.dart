@@ -991,15 +991,14 @@ void main() {
 
   testWidgets('predictive back is the default on Android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => Material(
-            child: TextButton(
-              child: const Text('push'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/b');
-              },
-            ),
-          ),
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
     };
     await tester.pumpWidget(MaterialApp(routes: routes));
 
@@ -1044,15 +1043,14 @@ void main() {
     }
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => Material(
-            child: TextButton(
-              child: const Text('push'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/b');
-              },
-            ),
-          ),
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
