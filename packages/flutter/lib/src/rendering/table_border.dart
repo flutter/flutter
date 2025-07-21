@@ -102,7 +102,7 @@ class TableBorder {
         _allSidesMatch<BorderStyle>((BorderSide side) => side.style);
   }
 
-  /// Whether all the outer sides of the border are identical.
+  /// Whether all the outer sides of the border (excluding the inner sides) are identical.
   bool get outerBorderIsUniform {
     return _outerSidesMatch<Color>((BorderSide side) => side.color) &&
         _outerSidesMatch<double>((BorderSide side) => side.width) &&
@@ -167,15 +167,15 @@ class TableBorder {
   /// Paints a non-uniform border with border radius support.
   ///
   /// This is similar to [BoxBorder.paintNonUniformBorder] but adapted for table borders.
-  void _paintNonUniformBorderWithRadius(
+  static void _paintNonUniformBorderWithRadius(
     Canvas canvas,
     Rect rect, {
     required BorderRadius borderRadius,
-    BorderSide top = BorderSide.none,
-    BorderSide right = BorderSide.none,
-    BorderSide bottom = BorderSide.none,
-    BorderSide left = BorderSide.none,
     required Color color,
+    required BorderSide top,
+    required BorderSide right,
+    required BorderSide bottom,
+    required BorderSide left,
   }) {
     final RRect borderRect = borderRadius.toRRect(rect);
     final Paint paint = Paint()..color = color;
