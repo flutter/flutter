@@ -444,7 +444,7 @@ void main() {
     testUsingContext(
       '[sync] exceptions thrown from a hook do not crash the tool',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         final shutdownHooks = ShutdownHooks();
         shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
@@ -460,7 +460,7 @@ void main() {
     testUsingContext(
       '[async] exceptions thrown from a hook do not crash the tool',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         final shutdownHooks = ShutdownHooks();
         shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
