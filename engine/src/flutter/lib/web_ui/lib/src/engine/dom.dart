@@ -1038,6 +1038,8 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
+
+  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1477,6 +1479,21 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 @JS('TextMetrics')
 extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
+
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters();
+  List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
+
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+
+  external double get fontBoundingBoxAscent;
+
+  external double get fontBoundingBoxDescent;
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -2542,4 +2559,14 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
+}
+
+@JS('TextCluster')
+extension type DomTextCluster._(JSObject _) implements JSObject {
+  // TODO(jlavrova): This has been renamed to `start` in the spec.
+  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  external int get begin;
+  external int get end;
+  external double get x;
+  external double get y;
 }
