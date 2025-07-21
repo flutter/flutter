@@ -198,7 +198,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
               + "attach was called while the PlatformViewsController was already attached.");
     }
     this.context = context;
-    // TODO(gmackall): We should remove this channel once
+    // TODO(gmackall): We should remove this channel once hcpp has been enabled on existing
+    //  platform view widgets.
     platformViewsChannel = new PlatformViewsChannel2(dartExecutor);
     platformViewsChannel.setPlatformViewsHandler(channelHandler);
   }

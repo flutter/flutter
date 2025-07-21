@@ -52,7 +52,7 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
         );
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
-        return PlatformViewsService.initExpensiveAndroidView(
+        return PlatformViewsService.initHybridAndroidView(
             id: params.id,
             viewType: viewType,
             layoutDirection: TextDirection.ltr,

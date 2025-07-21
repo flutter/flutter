@@ -181,7 +181,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         @Override
         public boolean isHcppEnabled() {
           return false;
-          // no op
         }
 
         @Override
