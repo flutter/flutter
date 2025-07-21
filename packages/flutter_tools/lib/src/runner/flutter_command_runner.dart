@@ -24,30 +24,30 @@ import '../web/web_device.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
-  static const String kColorFlag = 'color';
-  static const String kContinuousIntegrationFlag = 'ci';
-  static const String kDeviceIdOption = 'device-id';
-  static const String kDisableAnalyticsFlag = 'disable-analytics';
-  static const String kEnableAnalyticsFlag = 'enable-analytics';
-  static const String kLocalEngineOption = 'local-engine';
-  static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
-  static const String kLocalEngineHostOption = 'local-engine-host';
-  static const String kLocalWebSDKOption = 'local-web-sdk';
-  static const String kMachineFlag = 'machine';
-  static const String kPackagesOption = 'packages';
-  static const String kPrefixedErrorsFlag = 'prefixed-errors';
-  static const String kDtdUrl = 'dtd-url';
-  static const String kPrintDtd = 'print-dtd';
-  static const String kQuietFlag = 'quiet';
-  static const String kShowTestDeviceFlag = 'show-test-device';
-  static const String kShowWebServerDeviceFlag = 'show-web-server-device';
-  static const String kSuppressAnalyticsFlag = 'suppress-analytics';
-  static const String kVerboseFlag = 'verbose';
-  static const String kVersionCheckFlag = 'version-check';
-  static const String kVersionFlag = 'version';
-  static const String kWrapColumnOption = 'wrap-column';
-  static const String kWrapFlag = 'wrap';
-  static const String kDebugLogsDirectoryFlag = 'debug-logs-dir';
+  static const kColorFlag = 'color';
+  static const kContinuousIntegrationFlag = 'ci';
+  static const kDeviceIdOption = 'device-id';
+  static const kDisableAnalyticsFlag = 'disable-analytics';
+  static const kEnableAnalyticsFlag = 'enable-analytics';
+  static const kLocalEngineOption = 'local-engine';
+  static const kLocalEngineSrcPathOption = 'local-engine-src-path';
+  static const kLocalEngineHostOption = 'local-engine-host';
+  static const kLocalWebSDKOption = 'local-web-sdk';
+  static const kMachineFlag = 'machine';
+  static const kPackagesOption = 'packages';
+  static const kPrefixedErrorsFlag = 'prefixed-errors';
+  static const kDtdUrl = 'dtd-url';
+  static const kPrintDtd = 'print-dtd';
+  static const kQuietFlag = 'quiet';
+  static const kShowTestDeviceFlag = 'show-test-device';
+  static const kShowWebServerDeviceFlag = 'show-web-server-device';
+  static const kSuppressAnalyticsFlag = 'suppress-analytics';
+  static const kVerboseFlag = 'verbose';
+  static const kVersionCheckFlag = 'version-check';
+  static const kVersionFlag = 'version';
+  static const kWrapColumnOption = 'wrap-column';
+  static const kWrapFlag = 'wrap';
+  static const kDebugLogsDirectoryFlag = 'debug-logs-dir';
 }
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -239,7 +239,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(
+  final _argParser = ArgParser(
     allowTrailingOptions: false,
     usageLineLength: globals.outputPreferences.wrapText
         ? globals.outputPreferences.wrapColumn
@@ -366,7 +366,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+    final contextOverrides = <Type, Object?>{};
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
@@ -461,8 +461,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        final String? specifiedDeviceId =
-            topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
+        final specifiedDeviceId = topLevelResults[FlutterGlobalOptions.kDeviceIdOption] as String?;
         if (specifiedDeviceId != null) {
           globals.deviceManager?.specifiedDeviceId = specifiedDeviceId;
         }

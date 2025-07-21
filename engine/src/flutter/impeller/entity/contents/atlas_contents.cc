@@ -255,8 +255,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 
-  renderer.GetDrawVerticesUberPipeline(blend_mode,
-                                       OptionsFromPassAndEntity(pass, entity));
+  pass.SetPipeline(renderer.GetDrawVerticesUberPipeline(
+      blend_mode, OptionsFromPassAndEntity(pass, entity)));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
