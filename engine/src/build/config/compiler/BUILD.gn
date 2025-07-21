@@ -724,9 +724,6 @@ if (is_win) {
     default_warning_flags += [
       "-Wno-implicit-int-float-conversion",
       "-Wno-deprecated-copy",
-
-      # Needed by skia, imgui, swiftshader, and angle
-      "-Wno-nontrivial-memcall",
     ]
   }
 
@@ -741,6 +738,9 @@ if (is_win) {
     default_warning_flags += [
       # Unqualified std::move is pretty common.
       "-Wno-unqualified-std-cast-call",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
   if (!is_fuchsia && is_clang) {
