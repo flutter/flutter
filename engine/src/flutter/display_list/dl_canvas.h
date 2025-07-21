@@ -191,7 +191,7 @@ class DlCanvas {
   virtual void DrawText(const std::shared_ptr<DlText>& text,
                         DlScalar x,
                         DlScalar y,
-                        const DlPaint& paint);
+                        const DlPaint& paint) = 0;
 
   virtual void DrawShadow(const DlPath& path,
                           const DlColor color,

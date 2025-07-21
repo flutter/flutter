@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/effects/dl_runtime_effect_impeller.h"
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 
 namespace flutter {

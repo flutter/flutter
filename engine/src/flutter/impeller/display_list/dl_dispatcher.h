@@ -238,14 +238,9 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                        DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
-
-  // |flutter::DlOpReceiver|
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
 
   // |flutter::DlOpReceiver|
   void drawShadow(const DlPath& path,
@@ -354,7 +349,7 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
 
   void transformReset() override;
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
                      DlScalar x,
                      DlScalar y) override;
 

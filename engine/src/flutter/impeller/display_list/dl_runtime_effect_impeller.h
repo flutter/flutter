@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_IMPELLER_H_
-#define FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_IMPELLER_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_RUNTIME_EFFECT_IMPELLER_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_DL_RUNTIME_EFFECT_IMPELLER_H_
 
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 
@@ -37,4 +37,4 @@ class DlRuntimeEffectImpeller final : public DlRuntimeEffect {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_EFFECTS_DL_RUNTIME_EFFECT_IMPELLER_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_DL_RUNTIME_EFFECT_IMPELLER_H_

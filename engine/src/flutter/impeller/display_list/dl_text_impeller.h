@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
-#define FLUTTER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
 
 #include "flutter/display_list/dl_text.h"
 #include "flutter/impeller/typographer/text_frame.h"
@@ -34,4 +34,4 @@ class DlTextImpeller : public DlText {
 };
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_

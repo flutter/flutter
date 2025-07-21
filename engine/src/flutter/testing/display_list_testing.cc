@@ -12,6 +12,7 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter::testing {
 
@@ -976,21 +977,12 @@ void DisplayListStreamDispatcher::drawDisplayList(
            << "opacity: " << opacity
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+void DisplayListStreamDispatcher::drawText(const std::shared_ptr<DlText> text,
                                                DlScalar x,
                                                DlScalar y) {
-  startl() << "drawTextBlob("
-           << blob.get() << ", "
+  startl() << "drawText("
+           << text.get() << ", "
            << x << ", " << y << ");" << std::endl;
-}
-
-void DisplayListStreamDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
-  startl() << "drawTextFrame("
-    << text_frame.get() << ", "
-    << x << ", " << y << ");" << std::endl;
 }
 
 void DisplayListStreamDispatcher::drawShadow(const DlPath& path,

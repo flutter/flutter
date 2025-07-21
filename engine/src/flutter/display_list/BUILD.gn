@@ -63,7 +63,6 @@ source_set("display_list") {
     "dl_storage.cc",
     "dl_storage.h",
     "dl_text.h",
-    "dl_text_impeller.h",
     "dl_text_skia.h",
     "dl_tile_mode.h",
     "dl_types.cc",
@@ -103,6 +102,8 @@ source_set("display_list") {
     "effects/dl_mask_filter.h",
     "effects/dl_runtime_effect.cc",
     "effects/dl_runtime_effect.h",
+    "effects/dl_runtime_effect_skia.cc",
+    "effects/dl_runtime_effect_skia.h",
     "effects/image_filters/dl_blur_image_filter.cc",
     "effects/image_filters/dl_blur_image_filter.h",
     "effects/image_filters/dl_color_filter_image_filter.cc",
@@ -155,32 +156,6 @@ source_set("display_list") {
   if (!defined(defines)) {
     defines = []
   }
-}
-
-source_set("display_list_skia") {
-  sources = [
-    "effects/dl_runtime_effect_skia.cc",
-    "effects/dl_runtime_effect_skia.h",
-  ]
-
-  public_configs = [ ":display_list_config" ]
-
-  public_deps = [ ":display_list" ]
-}
-
-source_set("display_list_impeller") {
-  sources = [
-    "effects/dl_runtime_effect_impeller.cc",
-    "effects/dl_runtime_effect_impeller.h",
-  ]
-
-  public_configs = [ ":display_list_config" ]
-
-  public_deps = [
-    ":display_list",
-    "//flutter/impeller/runtime_stage",
-    "//flutter/impeller/typographer",
-  ]
 }
 
 test_fixtures("display_list_fixtures") {
