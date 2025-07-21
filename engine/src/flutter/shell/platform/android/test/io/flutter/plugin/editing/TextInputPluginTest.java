@@ -1347,7 +1347,6 @@ public class TextInputPluginTest {
 
   @Test
   public void destroy_clearTextInputMethodHandler() {
-
     View testView = new View(ctx);
     TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
     ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
