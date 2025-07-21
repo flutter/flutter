@@ -768,18 +768,22 @@ class IOSDevice extends Device {
       debuggingOptions: debuggingOptions,
     );
 
+    final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
+
+    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
+      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
-      if (vmServiceDiscovery != null && !isWirelesslyConnected) vmServiceDiscovery.uri,
+      if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
     Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
