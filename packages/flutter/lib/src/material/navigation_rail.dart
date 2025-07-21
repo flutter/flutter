@@ -725,7 +725,7 @@ class _RailDestinationState extends State<_RailDestination> {
         );
         final Widget iconPart = Column(
           children: <Widget>[
-            if (spacing != null) spacing,
+            ?spacing,
             SizedBox(
               width: widget.minWidth,
               height: material3 ? null : widget.minWidth,
@@ -740,7 +740,7 @@ class _RailDestinationState extends State<_RailDestination> {
                 ),
               ),
             ),
-            if (spacing != null) spacing,
+            ?spacing,
           ],
         );
         if (widget.extendedTransitionAnimation.value == 0) {

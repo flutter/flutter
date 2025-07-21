@@ -93,6 +93,9 @@ void PrintUsage(const std::string& executable_name) {
 
   std::cerr << "Flutter Engine Version: " << GetFlutterEngineVersion()
             << std::endl;
+
+  std::cerr << "Flutter Content Hash: " << GetFlutterContentHash() << std::endl;
+
   std::cerr << "Skia Version: " << GetSkiaVersion() << std::endl;
 
   std::cerr << "Dart Version: " << GetDartVersion() << std::endl << std::endl;
