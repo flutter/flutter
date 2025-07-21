@@ -328,7 +328,7 @@ bool ProcessNotices(const fs::path& relative_path,
     VLOG(4) << license;
 
     absl::StatusOr<std::vector<Catalog::Match>> matches =
-        data.catalog.FindMatch(license);        
+        data.catalog.FindMatch(license);
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
         for (std::string_view project : projects) {
