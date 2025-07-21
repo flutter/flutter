@@ -20,6 +20,7 @@ import 'theme.dart';
 // late StateSetter setState;
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
+const Size _size = Size(18.0, 18.0);
 const Color _kDisabledCheckColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
   darkColor: Color.fromARGB(64, 255, 255, 255),
@@ -430,7 +431,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
         mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        size: const Size.square(kMinInteractiveDimensionCupertino),
+        size: _size,
         painter: _painter
           ..position = position
           ..reaction = reaction
