@@ -267,7 +267,7 @@ $_simpleLoaderScript
             for (var i = 0; i < scripts.length; i++) {
               var script = scripts[i];
               if (script.id == null) continue;
-              var src = _currentDirectory + script.src.toString();
+              var src = script.src.toString();
               var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
 
               // We might actually load from a different uri, delete the old one
