@@ -724,6 +724,9 @@ if (is_win) {
     default_warning_flags += [
       "-Wno-implicit-int-float-conversion",
       "-Wno-deprecated-copy",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
 
