@@ -99,11 +99,10 @@ abstract class FlutterVersion {
       }
     }
 
-    final String frameworkRevision = _runGit(
-      git,
-      _gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
-      flutterRoot,
-    );
+    final String frameworkRevision = git
+        .runSync(_gitLog(['-n', '1', '--pretty=format:%H']), workingDirectory: flutterRoot)
+        .stdout
+        .trim();
 
     return FlutterVersion.fromRevision(
       clock: clock,
@@ -223,16 +222,18 @@ abstract class FlutterVersion {
   final String flutterRoot;
 
   String _getTimeSinceCommit({String? revision}) {
-    return _runGit(
-      _gitExecutable,
-      FlutterVersion._gitLog(<String>[
-        '-n',
-        '1',
-        '--pretty=format:%ar',
-        if (revision != null) revision,
-      ]).join(' '),
-      flutterRoot,
-    );
+    return _gitExecutable
+        .runSync(
+          FlutterVersion._gitLog([
+            '-n',
+            '1',
+            '--pretty=format:%ar',
+            if (revision != null) revision,
+          ]),
+          workingDirectory: flutterRoot,
+        )
+        .stdout
+        .trim();
   }
 
   // TODO(fujino): calculate this relative to frameworkCommitDate for
@@ -430,7 +431,10 @@ abstract class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'` ([kUserBranch]).
   String getBranchName({bool redactUnknownBranches = false}) {
     _branch ??= () {
-      final String branch = _runGit(_gitExecutable, 'symbolic-ref --short HEAD', flutterRoot);
+      final String branch = _gitExecutable
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: flutterRoot)
+          .stdout
+          .trim();
       return branch == 'HEAD' ? '' : branch;
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
@@ -460,7 +464,7 @@ abstract class FlutterVersion {
   /// so we want to disable it for every git log call. This is a convenience
   /// wrapper that does that.
   static List<String> _gitLog(List<String> args) {
-    return <String>['-c', 'log.showSignature=false', 'log'] + args;
+    return ['-c', 'log.showSignature=false', 'log'] + args;
   }
 }
 
@@ -475,7 +479,7 @@ String _gitCommitDate({
   required Git git,
   required String? workingDirectory,
 }) {
-  final List<String> args = FlutterVersion._gitLog(<String>[
+  final List<String> args = FlutterVersion._gitLog([
     gitRef,
     '-n',
     '1',
@@ -649,15 +653,22 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
-      final String gitChannel = _runGit(
-        _gitExecutable,
-        'rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
-        flutterRoot,
-      );
+      final String gitChannel = _gitExecutable
+          .runSync([
+            'rev-parse',
+            '--abbrev-ref',
+            '--symbolic',
+            kGitTrackingUpstream,
+          ], workingDirectory: flutterRoot)
+          .stdout
+          .trim();
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _runGit(_gitExecutable, 'ls-remote --get-url $remote', flutterRoot);
+        _repositoryUrl = _gitExecutable
+            .runSync(['ls-remote', '--get-url', remote], workingDirectory: flutterRoot)
+            .stdout
+            .trim();
       }
     }
     return _repositoryUrl;
@@ -757,7 +768,7 @@ class VersionUpstreamValidator {
     }
 
     // Strip `.git` suffix before comparing the remotes
-    final List<String> sanitizedStandardRemotes = <String>[
+    final List<String> sanitizedStandardRemotes = [
       // If `FLUTTER_GIT_URL` is set, use that as standard remote.
       if (flutterGit != null)
         flutterGit
@@ -795,7 +806,7 @@ class VersionUpstreamValidator {
   }
 
   // The predefined list of remotes that are considered to be standard.
-  static final _standardRemotes = <String>[
+  static final _standardRemotes = [
     'https://github.com/flutter/flutter.git',
     'git@github.com:flutter/flutter.git',
     'ssh://git@github.com/flutter/flutter.git',
@@ -958,10 +969,6 @@ String _runSync(
   return '';
 }
 
-String _runGit(Git git, String command, String? workingDirectory) {
-  return git.runSync(command.split(' '), workingDirectory: workingDirectory).stdout.trim();
-}
-
 /// Runs [command] in the root of the Flutter installation and returns the
 /// standard output as a string.
 ///
@@ -1045,22 +1052,27 @@ class GitTagVersion {
     String gitRef = 'HEAD',
   }) {
     if (fetchTags) {
-      final String channel = _runGit(git, 'symbolic-ref --short HEAD', workingDirectory);
+      final String channel = git
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: workingDirectory)
+          .stdout
+          .trim();
       if (!kDevelopmentChannels.contains(channel) && kOfficialChannels.contains(channel)) {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
         final String flutterGit =
             platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-        _runGit(git, 'fetch $flutterGit --tags -f', workingDirectory);
+        git.runSync(['fetch', flutterGit, '--tags', '-f'], workingDirectory: workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]. These are returned in alphabetical order, so
     // we reverse the set of tags to examine the most recent tag versions first.
-    final List<String> tags = _runGit(
-      git,
-      'tag --points-at $gitRef',
-      workingDirectory,
-    ).trim().split('\n').reversed.toList();
+    final List<String> tags = git
+        .runSync(['tag', '--points-at', gitRef], workingDirectory: workingDirectory)
+        .stdout
+        .trim()
+        .split('\n')
+        .reversed
+        .toList();
 
     // Check first for a stable tag
     final stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
@@ -1079,7 +1091,19 @@ class GitTagVersion {
 
     // If we're not currently on a tag, use git describe to find the most
     // recent tag and number of commits past.
-    return parse(_runGit(git, 'describe --match *.*.* --long --tags $gitRef', workingDirectory));
+    return parse(
+      git
+          .runSync([
+            'describe',
+            '--match',
+            '*.*.*',
+            '--long',
+            '--tags',
+            gitRef,
+          ], workingDirectory: workingDirectory)
+          .stdout
+          .trim(),
+    );
   }
 
   /// Parse a version string.
