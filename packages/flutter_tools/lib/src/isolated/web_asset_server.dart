@@ -33,6 +33,7 @@ import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web_template.dart';
+import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
