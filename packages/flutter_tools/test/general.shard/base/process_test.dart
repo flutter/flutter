@@ -440,6 +440,38 @@ void main() {
       },
       overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
     );
+
+    testUsingContext(
+      '[sync] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
+
+    testUsingContext(
+      '[async] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
   });
 }
 
