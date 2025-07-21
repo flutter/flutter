@@ -186,7 +186,7 @@ void main() {
   test('TableBorder with non-uniform border radius support', () {
     const TableBorder borderWithRadius = TableBorder(
       top: BorderSide(width: 3.0),
-      right: BorderSide(), // 다른 width
+      right: BorderSide(),
       bottom: BorderSide(width: 2.0),
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
     );
