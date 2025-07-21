@@ -77,22 +77,19 @@ void testMain() {
   }, skip: !browserSupportsCanvaskitChromium);
 
   group('$fragmentUsingV8LineBreaker', () {
-    const int kSoft = 0;
-    const int kHard = 1;
-
     test('fragments text into soft and hard line breaks', () {
       final Uint32List breaks = fragmentUsingV8LineBreaker('Lorem-ipsum 你好🙂\nDolor sit');
       expect(
         breaks,
         orderedEquals(<int>[
-          0, kSoft,
-          6, kSoft, // "Lorem-"
-          12, kSoft, // "ipsum "
-          13, kSoft, // "你"
-          14, kSoft, // "好"
-          17, kHard, // "🙂\n"
-          23, kSoft, // "Dolor "
-          26, kSoft, // "sit"
+          0, kSoftLineBreak,
+          6, kSoftLineBreak, // "Lorem-"
+          12, kSoftLineBreak, // "ipsum "
+          13, kSoftLineBreak, // "你"
+          14, kSoftLineBreak, // "好"
+          17, kHardLineBreak, // "🙂\n"
+          23, kSoftLineBreak, // "Dolor "
+          26, kSoftLineBreak, // "sit"
         ]),
       );
     });
