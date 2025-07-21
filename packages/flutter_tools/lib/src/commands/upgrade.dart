@@ -101,11 +101,16 @@ class UpgradeCommand extends FlutterCommand {
       gitTagVersion: GitTagVersion.determine(
         globals.processUtils,
         globals.platform,
+        git: globals.git,
         workingDirectory: _commandRunner.workingDirectory,
       ),
       flutterVersion: stringArg('working-directory') == null
           ? globals.flutterVersion
-          : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
+          : FlutterVersion(
+              flutterRoot: _commandRunner.workingDirectory!,
+              fs: globals.fs,
+              git: globals.git,
+            ),
       verifyOnly: boolArg('verify-only'),
     );
   }
@@ -300,8 +305,8 @@ class UpgradeCommandRunner {
   @protected
   Future<bool> hasUncommittedChanges() async {
     try {
-      final RunResult result = await globals.processUtils.run(
-        <String>['git', 'status', '-s'],
+      final RunResult result = await globals.git.run(
+        ['status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -325,14 +330,14 @@ class UpgradeCommandRunner {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
-      await globals.processUtils.run(
-        <String>['git', 'fetch', '--tags'],
+      await globals.git.run(
+        <String>['fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
       // Get the latest commit revision of the upstream
-      final RunResult result = await globals.processUtils.run(
-        <String>['git', 'rev-parse', '--verify', kGitTrackingUpstream],
+      final RunResult result = await globals.git.run(
+        <String>['rev-parse', '--verify', kGitTrackingUpstream],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -374,6 +379,7 @@ class UpgradeCommandRunner {
       flutterRoot: workingDirectory!,
       frameworkRevision: revision,
       fs: globals.fs,
+      git: globals.git,
     );
   }
 
@@ -385,8 +391,8 @@ class UpgradeCommandRunner {
   @visibleForTesting
   Future<void> attemptReset(String newRevision) async {
     try {
-      await globals.processUtils.run(
-        <String>['git', 'reset', '--hard', newRevision],
+      await globals.git.run(
+        ['reset', '--hard', newRevision],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );

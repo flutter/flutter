@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
@@ -68,6 +69,7 @@ class DowngradeCommand extends FlutterCommand {
   final Logger _logger;
   Stdio? _stdio;
   FileSystem? _fileSystem;
+  Git? _git;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
@@ -90,10 +92,11 @@ class DowngradeCommand extends FlutterCommand {
     _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger);
     _stdio ??= globals.stdio;
     _fileSystem ??= globals.fs;
+    _git ??= globals.git;
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
-      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory);
+      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory, git: _git!);
     }
 
     final String currentChannel = _flutterVersion!.channel;
@@ -122,9 +125,7 @@ class DowngradeCommand extends FlutterCommand {
     }
 
     // Detect unknown versions.
-    final ProcessUtils processUtils = _processUtils!;
-    final RunResult parseResult = await processUtils.run(<String>[
-      'git',
+    final RunResult parseResult = await _git!.run(<String>[
       'describe',
       '--tags',
       lastFlutterVersion,
@@ -155,8 +156,8 @@ class DowngradeCommand extends FlutterCommand {
     // switch channels. The version recorded must have existed on that branch
     // so this operation is safe.
     try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', lastFlutterVersion],
+      await _git!.run(
+        <String>['reset', '--hard', lastFlutterVersion],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -168,10 +169,10 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
     try {
-      await processUtils.run(
+      await _git!.run(
         // The `--` bit (because it's followed by nothing) means that we don't actually change
         // anything in the working tree, which avoids the need to first go into detached HEAD mode.
-        <String>['git', 'checkout', currentChannel, '--'],
+        <String>['checkout', currentChannel, '--'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -198,8 +199,7 @@ class DowngradeCommand extends FlutterCommand {
       if (sha == null) {
         continue;
       }
-      final RunResult parseResult = await _processUtils!.run(<String>[
-        'git',
+      final RunResult parseResult = await _git!.run(<String>[
         'describe',
         '--tags',
         sha,
