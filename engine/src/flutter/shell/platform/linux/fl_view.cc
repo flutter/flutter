@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include <atk/atk.h>
+#include <gdk/gdkwayland.h>
 #include <gtk/gtk-a11y.h>
 
 #include <cstring>
@@ -193,19 +194,6 @@ static void handle_geometry_changed(FlView* self) {
   fl_engine_send_window_metrics_event(
       self->engine, display_id, self->view_id, allocation.width * scale_factor,
       allocation.height * scale_factor, scale_factor);
-
-  // Make sure the view has been realized and its size has been allocated before
-  // waiting for a frame. `fl_view_realize()` and `fl_view_size_allocate()` may
-  // be called in either order depending on the order in which the window is
-  // shown and the view is added to a container in the app runner.
-  //
-  // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
-  if (allocation.width > 1 && allocation.height > 1 &&
-      gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_compositor_wait_for_frame(self->compositor,
-                                 allocation.width * scale_factor,
-                                 allocation.height * scale_factor);
-  }
 }
 
 static void view_added_cb(GObject* object,
@@ -461,13 +449,16 @@ static GdkGLContext* create_context_cb(FlView* self) {
 
 static void realize_cb(FlView* self) {
   FlutterRendererType renderer_type = fl_engine_get_renderer_type(self->engine);
+  gboolean shareable;
   switch (renderer_type) {
     case kOpenGL:
-      self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
-          self->engine,
-          self->view_id == flutter::kFlutterImplicitViewId
-              ? nullptr
-              : gtk_gl_area_get_context(GTK_GL_AREA(self->render_area))));
+      // If using Wayland, then EGL is in use and we can access the frame
+      // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
+      // then we have to copy the texture via the CPU.
+      shareable =
+          GDK_IS_WAYLAND_DISPLAY(gtk_widget_get_display(GTK_WIDGET(self)));
+      self->compositor =
+          FL_COMPOSITOR(fl_compositor_opengl_new(self->engine, shareable));
       break;
     case kSoftware:
       self->compositor = FL_COMPOSITOR(fl_compositor_software_new());
@@ -529,9 +520,9 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
     return FALSE;
   }
 
-  int width = gtk_widget_get_allocated_width(self->render_area);
-  int height = gtk_widget_get_allocated_height(self->render_area);
-  gint scale_factor = gtk_widget_get_scale_factor(self->render_area);
+  int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->render_area));
+  int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->render_area));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_compositor_opengl_render(FL_COMPOSITOR_OPENGL(self->compositor),
                               width * scale_factor, height * scale_factor);
 
@@ -541,9 +532,12 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
 static gboolean software_draw_cb(FlView* self, cairo_t* cr) {
   paint_background(self, cr);
 
+  int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->render_area));
+  int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->render_area));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_compositor_software_render(
-      FL_COMPOSITOR_SOFTWARE(self->compositor), cr,
-      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
+      FL_COMPOSITOR_SOFTWARE(self->compositor), cr, width * scale_factor,
+      height * scale_factor, gtk_widget_get_scale_factor(GTK_WIDGET(self)));
 }
 
 static void unrealize_cb(FlView* self) {
@@ -551,14 +545,13 @@ static void unrealize_cb(FlView* self) {
     return;
   }
 
-  fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
-
   GError* gl_error = gtk_gl_area_get_error(GTK_GL_AREA(self->render_area));
   if (gl_error != NULL) {
     g_warning("Failed to uninitialize GLArea: %s", gl_error->message);
     return;
   }
 
+  fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
   fl_compositor_opengl_cleanup(FL_COMPOSITOR_OPENGL(self->compositor));
 }
 
