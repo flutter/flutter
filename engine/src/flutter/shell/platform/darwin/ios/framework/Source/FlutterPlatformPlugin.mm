@@ -22,7 +22,10 @@ FLUTTER_ASSERT_ARC
 namespace {
 
 constexpr char kTextPlainFormat[] = "text/plain";
+// Some of the official iOS system sounds. A full list can be found in many places online, such as:
+// https://github.com/p-x9/swift-system-sound/blob/cb4327b223d55d01e9156539c8442db16f4b1f85/SystemSoundTable.md
 const UInt32 kKeyPressClickSoundId = 1306;
+const UInt32 kWheelsOfTimeSoundId = 1157;
 
 NSString* const kSearchURLPrefix = @"x-web-search://?";
 
@@ -243,6 +246,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     // All feedback types are specific to Android and are treated as equal on
     // iOS.
     AudioServicesPlaySystemSound(kKeyPressClickSoundId);
+  } else if ([soundType isEqualToString:@"SystemSoundType.tick"]) {
+    AudioServicesPlaySystemSound(kWheelsOfTimeSoundId);
   }
 }
 

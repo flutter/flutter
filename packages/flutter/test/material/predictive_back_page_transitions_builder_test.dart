@@ -18,15 +18,14 @@ void main() {
       'PredictiveBackPageTransitionsBuilder supports predictive back on Android',
       (WidgetTester tester) async {
         final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => Material(
-                child: TextButton(
-                  child: const Text('push'),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/b');
-                  },
-                ),
-              ),
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
           '/b': (BuildContext context) => const Text('page b'),
         };
 
@@ -129,15 +128,14 @@ void main() {
       'PredictiveBackPageTransitionsBuilder supports canceling a predictive back gesture',
       (WidgetTester tester) async {
         final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => Material(
-                child: TextButton(
-                  child: const Text('push'),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/b');
-                  },
-                ),
-              ),
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
           '/b': (BuildContext context) => const Text('page b'),
         };
 
@@ -241,59 +239,55 @@ void main() {
         bool includingNestedNavigator = false;
         late StateSetter setState;
         final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => Material(
-                child: TextButton(
-                  child: const Text('push'),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/b');
-                  },
-                ),
-              ),
-          '/b':
-              (BuildContext context) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text('page b'),
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter localSetState) {
-                      setState = localSetState;
-                      if (!includingNestedNavigator) {
-                        return const SizedBox.shrink();
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
+          '/b': (BuildContext context) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text('page b'),
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter localSetState) {
+                  setState = localSetState;
+                  if (!includingNestedNavigator) {
+                    return const SizedBox.shrink();
+                  }
+                  return Navigator(
+                    initialRoute: 'b/nested',
+                    onGenerateRoute: (RouteSettings settings) {
+                      WidgetBuilder builder;
+                      switch (settings.name) {
+                        case 'b/nested':
+                          builder = (BuildContext context) => Material(
+                            child: Theme(
+                              data: ThemeData(
+                                pageTransitionsTheme: PageTransitionsTheme(
+                                  builders: <TargetPlatform, PageTransitionsBuilder>{
+                                    for (final TargetPlatform platform in TargetPlatform.values)
+                                      platform: pageTransitionsBuilder,
+                                  },
+                                ),
+                              ),
+                              child: const Column(
+                                children: <Widget>[Text('Nested route inside of page b')],
+                              ),
+                            ),
+                          );
+                        default:
+                          throw Exception('Invalid route: ${settings.name}');
                       }
-                      return Navigator(
-                        initialRoute: 'b/nested',
-                        onGenerateRoute: (RouteSettings settings) {
-                          WidgetBuilder builder;
-                          switch (settings.name) {
-                            case 'b/nested':
-                              builder =
-                                  (BuildContext context) => Material(
-                                    child: Theme(
-                                      data: ThemeData(
-                                        pageTransitionsTheme: PageTransitionsTheme(
-                                          builders: <TargetPlatform, PageTransitionsBuilder>{
-                                            for (final TargetPlatform platform
-                                                in TargetPlatform.values)
-                                              platform: pageTransitionsBuilder,
-                                          },
-                                        ),
-                                      ),
-                                      child: const Column(
-                                        children: <Widget>[Text('Nested route inside of page b')],
-                                      ),
-                                    ),
-                                  );
-                            default:
-                              throw Exception('Invalid route: ${settings.name}');
-                          }
-                          return MaterialPageRoute<void>(builder: builder, settings: settings);
-                        },
-                      );
+                      return MaterialPageRoute<void>(builder: builder, settings: settings);
                     },
-                  ),
-                ],
+                  );
+                },
               ),
+            ],
+          ),
         };
 
         await tester.pumpWidget(
@@ -430,24 +424,22 @@ void main() {
 
     testWidgets('two back gestures back to back dismiss two routes', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push b'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/b');
-                },
-              ),
-            ),
-        '/b':
-            (BuildContext context) => Material(
-              child: TextButton(
-                child: const Text('push c'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/c');
-                },
-              ),
-            ),
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push b'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push c'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/c');
+            },
+          ),
+        ),
         '/c': (BuildContext context) => const Text('page c'),
       };
 

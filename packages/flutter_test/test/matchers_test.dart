@@ -465,13 +465,12 @@ void main() {
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.0)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
       expect(
         linePath,
         coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)),
@@ -480,13 +479,12 @@ void main() {
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.5)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
       expect(
         linePath,
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -762,6 +760,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1062,6 +1061,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1161,6 +1161,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1265,6 +1266,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1297,6 +1299,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1385,6 +1388,7 @@ void main() {
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
         inputType: ui.SemanticsInputType.none,
+        locale: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

@@ -8,6 +8,7 @@ export 'semantics/checkable.dart';
 export 'semantics/disable.dart';
 export 'semantics/expandable.dart';
 export 'semantics/focusable.dart';
+export 'semantics/form.dart';
 export 'semantics/header.dart';
 export 'semantics/heading.dart';
 export 'semantics/image.dart';

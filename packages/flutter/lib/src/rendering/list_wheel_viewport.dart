@@ -777,14 +777,12 @@ class RenderListWheelViewport extends RenderBox
     // we don't know whether there's a limit yet, and set the dimension to the
     // estimated value. Otherwise, we set the dimension limited to our target
     // range.
-    final double minScrollExtent =
-        childManager.childExistsAt(targetFirstIndex - 1)
-            ? _minEstimatedScrollExtent
-            : indexToScrollOffset(targetFirstIndex);
-    final double maxScrollExtent =
-        childManager.childExistsAt(targetLastIndex + 1)
-            ? _maxEstimatedScrollExtent
-            : indexToScrollOffset(targetLastIndex);
+    final double minScrollExtent = childManager.childExistsAt(targetFirstIndex - 1)
+        ? _minEstimatedScrollExtent
+        : indexToScrollOffset(targetFirstIndex);
+    final double maxScrollExtent = childManager.childExistsAt(targetLastIndex + 1)
+        ? _maxEstimatedScrollExtent
+        : indexToScrollOffset(targetLastIndex);
     offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
 

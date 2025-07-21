@@ -1075,8 +1075,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.overlayColor?.resolve(statesController.value) ??
         widget.splashColor ??
         Theme.of(context).splashColor;
-    final RectCallback? rectCallback =
-        widget.containedInkWell ? widget.getRectCallback!(referenceBox) : null;
+    final RectCallback? rectCallback = widget.containedInkWell
+        ? widget.getRectCallback!(referenceBox)
+        : null;
     final BorderRadius? borderRadius = widget.borderRadius;
     final ShapeBorder? customBorder = widget.customBorder;
 
@@ -1381,10 +1382,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               mouseCursor: effectiveMouseCursor,
               child: Semantics(
                 onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
-                onLongPress:
-                    widget.excludeFromSemantics || widget.onLongPress == null
-                        ? null
-                        : simulateLongPress,
+                onLongPress: widget.excludeFromSemantics || widget.onLongPress == null
+                    ? null
+                    : simulateLongPress,
                 child: GestureDetector(
                   onTapDown: _primaryEnabled ? handleTapDown : null,
                   onTapUp: _primaryEnabled ? handleTapUp : null,

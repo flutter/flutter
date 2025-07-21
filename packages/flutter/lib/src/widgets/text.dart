@@ -979,8 +979,9 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     // First pass, if the position is on a placeholder then dispatch the selection
     // event to the [Selectable] at the location and terminate.
     for (int index = 0; index < selectables.length; index += 1) {
-      final bool selectableIsPlaceholder =
-          !paragraph.selectableBelongsToParagraph(selectables[index]);
+      final bool selectableIsPlaceholder = !paragraph.selectableBelongsToParagraph(
+        selectables[index],
+      );
       if (selectableIsPlaceholder && selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(
@@ -1097,8 +1098,9 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     );
     SelectionResult? finalResult;
     // Begin the search for the selection edge at the opposite edge if it exists.
-    final bool hasOppositeEdge =
-        isEnd ? currentSelectionStartIndex != -1 : currentSelectionEndIndex != -1;
+    final bool hasOppositeEdge = isEnd
+        ? currentSelectionStartIndex != -1
+        : currentSelectionEndIndex != -1;
     int newIndex = switch ((isEnd, hasOppositeEdge)) {
       (true, true) => currentSelectionStartIndex,
       (true, false) => 0,
@@ -1177,10 +1179,12 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     //
     // This can happen when there is a scrollable child and the edge being adjusted
     // has been scrolled out of view.
-    final bool isCurrentEdgeWithinViewport =
-        isEnd ? value.endSelectionPoint != null : value.startSelectionPoint != null;
-    final bool isOppositeEdgeWithinViewport =
-        isEnd ? value.startSelectionPoint != null : value.endSelectionPoint != null;
+    final bool isCurrentEdgeWithinViewport = isEnd
+        ? value.endSelectionPoint != null
+        : value.startSelectionPoint != null;
+    final bool isOppositeEdgeWithinViewport = isEnd
+        ? value.startSelectionPoint != null
+        : value.endSelectionPoint != null;
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
       (true, true, true) => currentSelectionEndIndex,
       (true, true, false) => currentSelectionEndIndex,
@@ -1366,8 +1370,10 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
             (selectionStartNormalized -
                     (shouldConsiderContentStart
                         ? paragraph
-                            .getPositionForOffset(selectables[index].boundingBoxes.first.centerLeft)
-                            .offset
+                              .getPositionForOffset(
+                                selectables[index].boundingBoxes.first.centerLeft,
+                              )
+                              .offset
                         : 0))
                 .abs();
         endOffset = startOffset + (selectionEndNormalized - selectionStartNormalized).abs();
@@ -1414,8 +1420,9 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       return;
     }
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      final int skipIndex =
-          currentSelectionStartIndex == -1 ? currentSelectionEndIndex : currentSelectionStartIndex;
+      final int skipIndex = currentSelectionStartIndex == -1
+          ? currentSelectionEndIndex
+          : currentSelectionStartIndex;
       selectables
           .where((Selectable target) => target != selectables[skipIndex])
           .forEach(

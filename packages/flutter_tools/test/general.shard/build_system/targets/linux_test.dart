@@ -20,10 +20,10 @@ void main() {
     'Copies files to correct cache directory, excluding unrelated code on a x64 host',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       setUpCacheDirectory(fileSystem, artifacts);
 
-      final Environment testEnvironment = Environment.test(
+      final testEnvironment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
@@ -71,10 +71,10 @@ void main() {
     'Copies files to correct cache directory, excluding unrelated code on a arm64 host',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       setUpCacheDirectory(fileSystem, artifacts);
 
-      final Environment testEnvironment = Environment.test(
+      final testEnvironment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
@@ -126,7 +126,7 @@ void main() {
   testUsingContext(
     'DebugBundleLinuxAssets copies artifacts to out directory',
     () async {
-      final Environment testEnvironment = Environment.test(
+      final testEnvironment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug', kBuildName: '2.0.0', kBuildNumber: '22'},
         artifacts: Artifacts.test(),
@@ -176,7 +176,7 @@ void main() {
   testUsingContext(
     'ProfileBundleLinuxAssets copies artifacts to out directory',
     () async {
-      final Environment testEnvironment = Environment.test(
+      final testEnvironment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'profile'},
         artifacts: Artifacts.test(),
@@ -222,7 +222,7 @@ void main() {
   testUsingContext(
     'ReleaseBundleLinuxAssets copies artifacts to out directory',
     () async {
-      final Environment testEnvironment = Environment.test(
+      final testEnvironment = Environment.test(
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'release'},
         artifacts: Artifacts.test(),

@@ -10,7 +10,7 @@ struct ContentView: View {
     private let fetchThreshold = 5
 
     var body: some View {
-        NavigationView { // Add a NavigationView for better view management
+        NavigationView {
             List {
                 ForEach(items.indices, id: \.self) { index in
                     Text(items[index])
@@ -23,10 +23,10 @@ struct ContentView: View {
 
                 if isLoadingMore {
                     ProgressView()
-                        .frame(maxWidth: .infinity) // Center the indicator
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .navigationTitle("Infinite Scroll") // Set a title for clarity
+            .navigationTitle("Infinite Scroll")
         }
     }
 

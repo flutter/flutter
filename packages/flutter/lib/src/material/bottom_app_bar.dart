@@ -189,29 +189,28 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
     final BottomAppBarThemeData babTheme = BottomAppBarTheme.of(context);
-    final BottomAppBarThemeData defaults =
-        isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
+    final BottomAppBarThemeData defaults = isMaterial3
+        ? _BottomAppBarDefaultsM3(context)
+        : _BottomAppBarDefaultsM2(context);
 
     final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
     final NotchedShape? notchedShape = widget.shape ?? babTheme.shape ?? defaults.shape;
-    final CustomClipper<Path> clipper =
-        notchedShape != null && hasFab
-            ? _BottomAppBarClipper(
-              geometry: geometryListenable,
-              shape: notchedShape,
-              materialKey: materialKey,
-              notchMargin: widget.notchMargin,
-            )
-            : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final CustomClipper<Path> clipper = notchedShape != null && hasFab
+        ? _BottomAppBarClipper(
+            geometry: geometryListenable,
+            shape: notchedShape,
+            materialKey: materialKey,
+            notchMargin: widget.notchMargin,
+          )
+        : const ShapeBorderClipper(shape: RoundedRectangleBorder());
     final double elevation = widget.elevation ?? babTheme.elevation ?? defaults.elevation!;
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
     final Color surfaceTintColor =
         widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
-    final Color effectiveColor =
-        isMaterial3
-            ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
-            : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color effectiveColor = isMaterial3
+        ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, color, elevation);
     final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     final Widget child = SizedBox(

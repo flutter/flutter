@@ -44,7 +44,7 @@ bool DlSurfaceProvider::Snapshot(std::string& filename) const {
   if (!image) {
     return false;
   }
-  auto raster = image->makeRasterImage();
+  auto raster = image->makeRasterImage(nullptr);
   if (!raster) {
     return false;
   }

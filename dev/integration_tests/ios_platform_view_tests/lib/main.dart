@@ -108,7 +108,9 @@ class MergeThreadTestPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Platform View Thread Merge Tests')),
       body: Column(
         children: <Widget>[
-          const Expanded(child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view'))),
+          const Expanded(
+            child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view')),
+          ),
           ElevatedButton(key: button, child: const Text('button'), onPressed: () {}),
         ],
       ),

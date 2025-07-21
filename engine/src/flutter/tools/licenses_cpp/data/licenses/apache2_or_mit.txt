@@ -1,0 +1,13 @@
+apache2 or mit
+SPDX-License-Identifier: Apache-2\.0 OR MIT
+(?s)Copyright.*
+
+Files in this repository fall under one of these licenses:
+
+- `Apache-2\.0`
+- `MIT`
+.*
+SPDX-License-Identifier: Apache-2.0 OR MIT
+.*
+Full license text of these licenses is available at:
+.*

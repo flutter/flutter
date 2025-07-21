@@ -16,7 +16,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -33,7 +33,7 @@ void main() {
   testWithoutContext('flutter run works on chrome devices with a unary main function', () async {
     await flutter.run(
       device: GoogleChromeDevice.kChromeDeviceId,
-      additionalCommandArgs: <String>['--verbose'],
+      additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
     );
   });
 }

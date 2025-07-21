@@ -363,8 +363,9 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
   ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
 
   void _updateAnimations() {
-    fadeTransition =
-        widget.reverse ? kAlwaysCompleteAnimation : _fadeInTransition.animate(widget.animation);
+    fadeTransition = widget.reverse
+        ? kAlwaysCompleteAnimation
+        : _fadeInTransition.animate(widget.animation);
 
     scaleTransition = (widget.reverse ? _scaleDownTransition : _scaleUpTransition).animate(
       widget.animation,
@@ -467,8 +468,9 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition>
   ).chain(_ZoomPageTransition._scaleCurveSequence);
 
   void _updateAnimations() {
-    fadeTransition =
-        widget.reverse ? _fadeOutTransition.animate(widget.animation) : kAlwaysCompleteAnimation;
+    fadeTransition = widget.reverse
+        ? _fadeOutTransition.animate(widget.animation)
+        : kAlwaysCompleteAnimation;
     scaleTransition = (widget.reverse ? _scaleDownTransition : _scaleUpTransition).animate(
       widget.animation,
     );
@@ -807,10 +809,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     animation: ReverseAnimation(secondaryAnimation),
     forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
       return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                : Colors.transparent,
+        color: animation.isAnimating
+            ? backgroundColor ?? Theme.of(context).colorScheme.surface
+            : Colors.transparent,
         child: FadeTransition(
           opacity: _fadeInTransition.animate(animation),
           child: SlideTransition(
@@ -822,10 +823,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     },
     reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
       return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                : Colors.transparent,
+        color: animation.isAnimating
+            ? backgroundColor ?? Theme.of(context).colorScheme.surface
+            : Colors.transparent,
         child: FadeTransition(
           opacity: _fadeOutTransition.animate(animation),
           child: SlideTransition(
@@ -1237,10 +1237,9 @@ void _drawImageScaledAndCentered(
   if (scale <= 0.0 || opacity <= 0.0) {
     return;
   }
-  final Paint paint =
-      Paint()
-        ..filterQuality = ui.FilterQuality.medium
-        ..color = Color.fromRGBO(0, 0, 0, opacity);
+  final Paint paint = Paint()
+    ..filterQuality = ui.FilterQuality.medium
+    ..color = Color.fromRGBO(0, 0, 0, opacity);
   final double logicalWidth = image.width / pixelRatio;
   final double logicalHeight = image.height / pixelRatio;
   final double scaledLogicalWidth = logicalWidth * scale;
@@ -1579,15 +1578,15 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
       opacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
 
-    final Animation<double> fadeTransition =
-        reverse
-            ? kAlwaysCompleteAnimation
-            : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
+    final Animation<double> fadeTransition = reverse
+        ? kAlwaysCompleteAnimation
+        : _ZoomEnterTransitionState._fadeInTransition.animate(animation);
 
-    final Animation<double> scaleTransition = (reverse
-            ? _ZoomEnterTransitionState._scaleDownTransition
-            : _ZoomEnterTransitionState._scaleUpTransition)
-        .animate(animation);
+    final Animation<double> scaleTransition =
+        (reverse
+                ? _ZoomEnterTransitionState._scaleDownTransition
+                : _ZoomEnterTransitionState._scaleUpTransition)
+            .animate(animation);
 
     return AnimatedBuilder(
       animation: animation,
@@ -1615,14 +1614,14 @@ class _ZoomExitTransitionNoCache extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> fadeTransition =
-        reverse
-            ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
-            : kAlwaysCompleteAnimation;
-    final Animation<double> scaleTransition = (reverse
-            ? _ZoomExitTransitionState._scaleDownTransition
-            : _ZoomExitTransitionState._scaleUpTransition)
-        .animate(animation);
+    final Animation<double> fadeTransition = reverse
+        ? _ZoomExitTransitionState._fadeOutTransition.animate(animation)
+        : kAlwaysCompleteAnimation;
+    final Animation<double> scaleTransition =
+        (reverse
+                ? _ZoomExitTransitionState._scaleDownTransition
+                : _ZoomExitTransitionState._scaleUpTransition)
+            .animate(animation);
 
     return FadeTransition(
       opacity: fadeTransition,

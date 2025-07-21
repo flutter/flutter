@@ -289,8 +289,8 @@ class NavigationBarTheme extends InheritedTheme {
   /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
   static NavigationBarThemeData of(BuildContext context) {
-    final NavigationBarTheme? navigationBarTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
+    final NavigationBarTheme? navigationBarTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 

@@ -772,9 +772,8 @@ void main() {
 
   testWidgets(
     'remove and add listener ',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // leaking by design because imageStream does not have a listener
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because imageStream does not have a listener
     (WidgetTester tester) async {
       final MockCodec mockCodec = MockCodec();
       mockCodec.frameCount = 3;

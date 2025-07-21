@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +16,10 @@ void main() {
       Material(
         child: TestRadioGroup<int>(
           child: Column(
-            children: <Widget>[Radio<int>(key: key0, value: 0), Radio<int>(key: key1, value: 1)],
+            children: <Widget>[
+              Radio<int>(key: key0, value: 0),
+              Radio<int>(key: key1, value: 1),
+            ],
           ),
         ),
       ),
@@ -88,6 +92,27 @@ void main() {
       tester.getSemantics(find.byKey(key1)),
       containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
+  });
+
+  testWidgets('Radio group will not merge up', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: Semantics(
+          container: true,
+          child: Column(
+            children: <Widget>[
+              Checkbox(value: true, onChanged: (bool? value) {}),
+              const TestRadioGroup<int>(
+                child: Column(children: <Widget>[Radio<int>(value: 0), Radio<int>(value: 1)]),
+              ),
+              Checkbox(value: true, onChanged: (bool? value) {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode radioGroup = tester.getSemantics(find.byType(RadioGroup<int>));
+    expect(radioGroup.childrenCount, 2);
   });
 
   testWidgets('Radio group can use arrow key', (WidgetTester tester) async {

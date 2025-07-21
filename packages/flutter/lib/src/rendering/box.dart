@@ -514,10 +514,12 @@ class BoxConstraints extends Constraints {
     return BoxConstraints(
       minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t)! : double.infinity,
       maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t)! : double.infinity,
-      minHeight:
-          a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t)! : double.infinity,
-      maxHeight:
-          a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t)! : double.infinity,
+      minHeight: a.minHeight.isFinite
+          ? ui.lerpDouble(a.minHeight, b.minHeight, t)!
+          : double.infinity,
+      maxHeight: a.maxHeight.isFinite
+          ? ui.lerpDouble(a.maxHeight, b.maxHeight, t)!
+          : double.infinity,
     );
   }
 
@@ -867,8 +869,9 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    final Offset transformedPosition =
-        transform == null ? position : MatrixUtils.transformPoint(transform, position);
+    final Offset transformedPosition = transform == null
+        ? position
+        : MatrixUtils.transformPoint(transform, position);
     if (transform != null) {
       pushTransform(transform);
     }
@@ -1602,10 +1605,9 @@ abstract class RenderBox extends RenderObject {
   ) {
     Map<String, String>? debugTimelineArguments;
     assert(() {
-      final Map<String, String> arguments =
-          debugEnhanceLayoutTimelineArguments
-              ? toDiagnosticsNode().toTimelineArguments()!
-              : <String, String>{};
+      final Map<String, String> arguments = debugEnhanceLayoutTimelineArguments
+          ? toDiagnosticsNode().toTimelineArguments()!
+          : <String, String>{};
       debugTimelineArguments = type.debugFillTimelineArguments(arguments, input);
       return true;
     }());
@@ -2113,11 +2115,10 @@ abstract class RenderBox extends RenderObject {
   /// Typically this method should be only called by the parent [RenderBox]'s
   /// [computeDryBaseline] or [computeDryLayout] implementation.
   double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final double? baselineOffset =
-        _computeIntrinsics(_CachedLayoutCalculation.baseline, (
-          constraints,
-          baseline,
-        ), _computeDryBaseline).offset;
+    final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (
+      constraints,
+      baseline,
+    ), _computeDryBaseline).offset;
     // This assert makes sure computeDryBaseline always gets called in debug mode,
     // in case the computeDryBaseline implementation invokes debugCannotComputeDryLayout.
     // This check should be skipped when debugCheckingIntrinsics is true to avoid
@@ -2271,10 +2272,9 @@ abstract class RenderBox extends RenderObject {
           'trying to access a child\'s size, pass "parentUsesSize: true" to '
           "that child's layout() in ${objectRuntimeType(this, 'RenderBox')}.performLayout.",
         );
-        final RenderBox? renderBoxDoingDryLayout =
-            _computingThisDryLayout
-                ? this
-                : (parent is RenderBox && parent._computingThisDryLayout ? parent : null);
+        final RenderBox? renderBoxDoingDryLayout = _computingThisDryLayout
+            ? this
+            : (parent is RenderBox && parent._computingThisDryLayout ? parent : null);
 
         assert(
           renderBoxDoingDryLayout == null,
@@ -2284,10 +2284,9 @@ abstract class RenderBox extends RenderObject {
           "because it's established in performLayout or performResize using different BoxConstraints.",
         );
 
-        final RenderBox? renderBoxDoingDryBaseline =
-            _computingThisDryBaseline
-                ? this
-                : (parent is RenderBox && parent._computingThisDryBaseline ? parent : null);
+        final RenderBox? renderBoxDoingDryBaseline = _computingThisDryBaseline
+            ? this
+            : (parent is RenderBox && parent._computingThisDryBaseline ? parent : null);
         assert(
           renderBoxDoingDryBaseline == null,
 
@@ -2799,10 +2798,9 @@ abstract class RenderBox extends RenderObject {
           continue;
         }
         if ((dryBaseline == null) != (realBaseline == null)) {
-          final (String methodReturnedNull, String methodReturnedNonNull) =
-              dryBaseline == null
-                  ? ('computeDryBaseline', 'computeDistanceToActualBaseline')
-                  : ('computeDistanceToActualBaseline', 'computeDryBaseline');
+          final (String methodReturnedNull, String methodReturnedNonNull) = dryBaseline == null
+              ? ('computeDryBaseline', 'computeDistanceToActualBaseline')
+              : ('computeDistanceToActualBaseline', 'computeDryBaseline');
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'The $baseline location returned by ${objectRuntimeType(this, 'RenderBox')}.computeDistanceToActualBaseline '
@@ -3213,11 +3211,10 @@ abstract class RenderBox extends RenderObject {
   @visibleForTesting
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      final Paint paint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.0
-            ..color = const Color(0xFF00FFFF);
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = const Color(0xFF00FFFF);
       context.canvas.drawRect((offset & size).deflate(0.5), paint);
       return true;
     }());
@@ -3229,10 +3226,9 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
-      final Paint paint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 0.25;
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.25;
       Path path;
       // ideographic baseline
       final double? baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);

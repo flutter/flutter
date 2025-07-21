@@ -60,36 +60,37 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      builder: (
-        BuildContext context,
-        _PredictiveBackPhase phase,
-        PredictiveBackEvent? startBackEvent,
-        PredictiveBackEvent? currentBackEvent,
-      ) {
-        // Only do a predictive back transition when the user is performing a
-        // pop gesture. Otherwise, for things like button presses or other
-        // programmatic navigation, fall back to
-        // FadeForwardsPageTransitionsBuilder.
-        if (route.popGestureInProgress) {
-          return _PredictiveBackSharedElementPageTransition(
-            isDelegatedTransition: true,
-            animation: animation,
-            phase: phase,
-            secondaryAnimation: secondaryAnimation,
-            startBackEvent: startBackEvent,
-            currentBackEvent: currentBackEvent,
-            child: child,
-          );
-        }
+      builder:
+          (
+            BuildContext context,
+            _PredictiveBackPhase phase,
+            PredictiveBackEvent? startBackEvent,
+            PredictiveBackEvent? currentBackEvent,
+          ) {
+            // Only do a predictive back transition when the user is performing a
+            // pop gesture. Otherwise, for things like button presses or other
+            // programmatic navigation, fall back to
+            // FadeForwardsPageTransitionsBuilder.
+            if (route.popGestureInProgress) {
+              return _PredictiveBackSharedElementPageTransition(
+                isDelegatedTransition: true,
+                animation: animation,
+                phase: phase,
+                secondaryAnimation: secondaryAnimation,
+                startBackEvent: startBackEvent,
+                currentBackEvent: currentBackEvent,
+                child: child,
+              );
+            }
 
-        return const FadeForwardsPageTransitionsBuilder().buildTransitions(
-          route,
-          context,
-          animation,
-          secondaryAnimation,
-          child,
-        );
-      },
+            return const FadeForwardsPageTransitionsBuilder().buildTransitions(
+              route,
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            );
+          },
     );
   }
 }
@@ -136,33 +137,34 @@ class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuil
   ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      builder: (
-        BuildContext context,
-        _PredictiveBackPhase phase,
-        PredictiveBackEvent? startBackEvent,
-        PredictiveBackEvent? currentBackEvent,
-      ) {
-        // Only do a predictive back transition when the user is performing a
-        // pop gesture. Otherwise, for things like button presses or other
-        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
-        if (route.popGestureInProgress) {
-          return _PredictiveBackFullscreenPageTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            getIsCurrent: () => route.isCurrent,
-            phase: phase,
-            child: child,
-          );
-        }
+      builder:
+          (
+            BuildContext context,
+            _PredictiveBackPhase phase,
+            PredictiveBackEvent? startBackEvent,
+            PredictiveBackEvent? currentBackEvent,
+          ) {
+            // Only do a predictive back transition when the user is performing a
+            // pop gesture. Otherwise, for things like button presses or other
+            // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+            if (route.popGestureInProgress) {
+              return _PredictiveBackFullscreenPageTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                getIsCurrent: () => route.isCurrent,
+                phase: phase,
+                child: child,
+              );
+            }
 
-        return const ZoomPageTransitionsBuilder().buildTransitions(
-          route,
-          context,
-          animation,
-          secondaryAnimation,
-          child,
-        );
-      },
+            return const ZoomPageTransitionsBuilder().buildTransitions(
+              route,
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            );
+          },
     );
   }
 }
@@ -295,8 +297,9 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   Widget build(BuildContext context) {
-    final _PredictiveBackPhase effectivePhase =
-        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
+    final _PredictiveBackPhase effectivePhase = widget.route.popGestureInProgress
+        ? phase
+        : _PredictiveBackPhase.idle;
     return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
   }
 }
@@ -510,11 +513,10 @@ class _PredictiveBackSharedElementPageTransitionState
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionAnimation.value,
-              _ =>
-                _lastDrag = Offset(
-                  _positionAnimation.value.dx,
-                  _getYShiftPosition(MediaQuery.heightOf(context)),
-                ),
+              _ => _lastDrag = Offset(
+                _positionAnimation.value.dx,
+                _getYShiftPosition(MediaQuery.heightOf(context)),
+              ),
             },
             child: Opacity(
               opacity: _opacityTween.evaluate(_commitAnimation),
@@ -647,20 +649,17 @@ class _PredictiveBackFullscreenPageTransitionState
     final bool isCurrent = widget.getIsCurrent();
 
     return Transform.translate(
-      offset:
-          isCurrent
-              ? _secondaryCurrentPositionTween.evaluate(widget.secondaryAnimation)
-              : _secondaryPositionTween.evaluate(widget.secondaryAnimation),
+      offset: isCurrent
+          ? _secondaryCurrentPositionTween.evaluate(widget.secondaryAnimation)
+          : _secondaryPositionTween.evaluate(widget.secondaryAnimation),
       child: Transform.scale(
-        scale:
-            isCurrent
-                ? _secondaryScaleTweenCurrent.evaluate(widget.secondaryAnimation)
-                : _secondaryTweenScale.evaluate(widget.secondaryAnimation),
+        scale: isCurrent
+            ? _secondaryScaleTweenCurrent.evaluate(widget.secondaryAnimation)
+            : _secondaryTweenScale.evaluate(widget.secondaryAnimation),
         child: Opacity(
-          opacity:
-              isCurrent
-                  ? _secondaryOpacityTweenCurrent.evaluate(widget.secondaryAnimation)
-                  : _secondaryOpacityTween.evaluate(widget.secondaryAnimation),
+          opacity: isCurrent
+              ? _secondaryOpacityTweenCurrent.evaluate(widget.secondaryAnimation)
+              : _secondaryOpacityTween.evaluate(widget.secondaryAnimation),
           child: child,
         ),
       ),

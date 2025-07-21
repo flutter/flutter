@@ -38,8 +38,9 @@ void main() {
   });
 
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
-    final ui.Image image100x100 =
-        (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+    final ui.Image image100x100 = (await tester.runAsync(
+      () async => createTestImage(width: 100, height: 100),
+    ))!;
 
     final _TestImageProvider imageProvider1 = _TestImageProvider();
     final _TestImageProvider imageProvider2 = _TestImageProvider();
@@ -56,30 +57,23 @@ void main() {
     await tester.pumpWidget(
       ValueListenableBuilder<_TestImageProvider>(
         valueListenable: imageListenable,
-        builder:
-            (BuildContext context, _TestImageProvider image, Widget? child) => Image(
-              image: image,
-              frameBuilder: (
-                BuildContext context,
-                Widget child,
-                int? frame,
-                bool wasSynchronouslyLoaded,
-              ) {
+        builder: (BuildContext context, _TestImageProvider image, Widget? child) => Image(
+          image: image,
+          frameBuilder:
+              (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
                 if (frame == 0) {
                   imageLoaded = true;
                 }
                 return LayoutBuilder(
-                  builder:
-                      (BuildContext context, BoxConstraints constraints) =>
-                          ValueListenableBuilder<int>(
-                            valueListenable: innerListenable,
-                            builder:
-                                (BuildContext context, int value, Widget? valueListenableChild) =>
-                                    KeyedSubtree(key: UniqueKey(), child: child),
-                          ),
+                  builder: (BuildContext context, BoxConstraints constraints) =>
+                      ValueListenableBuilder<int>(
+                        valueListenable: innerListenable,
+                        builder: (BuildContext context, int value, Widget? valueListenableChild) =>
+                            KeyedSubtree(key: UniqueKey(), child: child),
+                      ),
                 );
               },
-            ),
+        ),
       ),
     );
 
@@ -104,7 +98,10 @@ void main() {
     final GlobalKey key = GlobalKey();
     final _TestImageProvider imageProvider1 = _TestImageProvider();
     await tester.pumpWidget(
-      Container(key: key, child: Image(image: imageProvider1, excludeFromSemantics: true)),
+      Container(
+        key: key,
+        child: Image(image: imageProvider1, excludeFromSemantics: true),
+      ),
       phase: EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -119,7 +116,10 @@ void main() {
 
     final _TestImageProvider imageProvider2 = _TestImageProvider();
     await tester.pumpWidget(
-      Container(key: key, child: Image(image: imageProvider2, excludeFromSemantics: true)),
+      Container(
+        key: key,
+        child: Image(image: imageProvider2, excludeFromSemantics: true),
+      ),
       phase: EnginePhase.layout,
     );
 
@@ -428,8 +428,9 @@ void main() {
   );
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
-    final ui.Image image100x100 =
-        (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+    final ui.Image image100x100 = (await tester.runAsync(
+      () async => createTestImage(width: 100, height: 100),
+    ))!;
     // Web does not override the toString, whereas VM does
     final String imageString = image100x100.toString();
 
@@ -810,9 +811,8 @@ void main() {
 
   testWidgets(
     'Precache removes original listener immediately after future completes, does not crash on successive calls #25143',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
       final _TestImageProvider provider = _TestImageProvider(streamCompleter: imageStreamCompleter);
@@ -895,11 +895,15 @@ void main() {
 
       final _TestImageProvider imageProvider1 = _TestImageProvider();
       final _TestImageProvider imageProvider2 = _TestImageProvider();
-      final ui.Image image100x100 =
-          (await tester.runAsync(() async => createTestImage(width: 100, height: 100)))!;
+      final ui.Image image100x100 = (await tester.runAsync(
+        () async => createTestImage(width: 100, height: 100),
+      ))!;
 
       await tester.pumpWidget(
-        Container(key: key, child: Image(excludeFromSemantics: true, image: imageProvider1)),
+        Container(
+          key: key,
+          child: Image(excludeFromSemantics: true, image: imageProvider1),
+        ),
         phase: EnginePhase.layout,
       );
       RenderImage renderImage = key.currentContext!.findRenderObject()! as RenderImage;
@@ -916,7 +920,10 @@ void main() {
       final ui.Image oldImage = renderImage.image!;
 
       await tester.pumpWidget(
-        Container(key: key, child: Image(excludeFromSemantics: true, image: imageProvider2)),
+        Container(
+          key: key,
+          child: Image(excludeFromSemantics: true, image: imageProvider2),
+        ),
         phase: EnginePhase.layout,
       );
 
@@ -944,8 +951,9 @@ void main() {
     final Column columnSwapped = Column(children: <Widget>[image2, image1]);
     await tester.pumpWidget(columnSwapped, phase: EnginePhase.layout);
 
-    final List<RenderImage> renderObjects =
-        tester.renderObjectList<RenderImage>(find.byType(Image)).toList();
+    final List<RenderImage> renderObjects = tester
+        .renderObjectList<RenderImage>(find.byType(Image))
+        .toList();
     expect(renderObjects, hasLength(2));
     expect(renderObjects[0].image, isNotNull);
     expect(renderObjects[0].width, 20.0);
@@ -1006,14 +1014,12 @@ void main() {
 
   testWidgets(
     'Image invokes frameBuilder with correct frameNumber argument',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
-      final ui.Codec codec =
-          (await tester.runAsync(() {
-            return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-          }))!;
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
 
       Future<ui.Image> nextFrame() async {
         final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
@@ -1027,15 +1033,11 @@ void main() {
       await tester.pumpWidget(
         Image(
           image: imageProvider,
-          frameBuilder: (
-            BuildContext context,
-            Widget child,
-            int? frame,
-            bool wasSynchronouslyLoaded,
-          ) {
-            lastFrame = frame;
-            return Center(child: child);
-          },
+          frameBuilder:
+              (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+                lastFrame = frame;
+                return Center(child: child);
+              },
         ),
       );
 
@@ -1066,16 +1068,12 @@ void main() {
     await tester.pumpWidget(
       Image(
         image: imageProvider,
-        frameBuilder: (
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          lastFrame = frame;
-          lastFrameWasSync = wasSynchronouslyLoaded;
-          return child;
-        },
+        frameBuilder:
+            (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+              lastFrame = frame;
+              lastFrameWasSync = wasSynchronouslyLoaded;
+              return child;
+            },
       ),
     );
 
@@ -1094,9 +1092,8 @@ void main() {
 
   testWidgets(
     'Image invokes frameBuilder with correct wasSynchronouslyLoaded=true',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
         ImageInfo(image: image10x10.clone()),
@@ -1108,16 +1105,12 @@ void main() {
       await tester.pumpWidget(
         Image(
           image: imageProvider,
-          frameBuilder: (
-            BuildContext context,
-            Widget child,
-            int? frame,
-            bool wasSynchronouslyLoaded,
-          ) {
-            lastFrame = frame;
-            lastFrameWasSync = wasSynchronouslyLoaded;
-            return child;
-          },
+          frameBuilder:
+              (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+                lastFrame = frame;
+                lastFrameWasSync = wasSynchronouslyLoaded;
+                return child;
+              },
         ),
       );
 
@@ -1138,14 +1131,10 @@ void main() {
     await tester.pumpWidget(
       Image(
         image: imageProvider,
-        frameBuilder: (
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          return Center(child: child);
-        },
+        frameBuilder:
+            (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+              return Center(child: child);
+            },
       ),
     );
 
@@ -1156,14 +1145,10 @@ void main() {
     await tester.pumpWidget(
       Image(
         image: imageProvider,
-        frameBuilder: (
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          return Padding(padding: const EdgeInsets.all(1), child: child);
-        },
+        frameBuilder:
+            (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+              return Padding(padding: const EdgeInsets.all(1), child: child);
+            },
       ),
     );
 
@@ -1175,14 +1160,12 @@ void main() {
 
   testWidgets(
     'Image state handles enabling and disabling of tickers',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
-      final ui.Codec codec =
-          (await tester.runAsync(() {
-            return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-          }))!;
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
 
       Future<ui.Image> nextFrame() async {
         final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
@@ -1206,7 +1189,10 @@ void main() {
       }
 
       await tester.pumpWidget(
-        TickerMode(enabled: true, child: Image(image: imageProvider, frameBuilder: buildFrame)),
+        TickerMode(
+          enabled: true,
+          child: Image(image: imageProvider, frameBuilder: buildFrame),
+        ),
       );
 
       final State<Image> state = tester.state(find.byType(Image));
@@ -1218,7 +1204,10 @@ void main() {
       expect(buildCount, 2);
 
       await tester.pumpWidget(
-        TickerMode(enabled: false, child: Image(image: imageProvider, frameBuilder: buildFrame)),
+        TickerMode(
+          enabled: false,
+          child: Image(image: imageProvider, frameBuilder: buildFrame),
+        ),
       );
 
       expect(tester.state(find.byType(Image)), same(state));
@@ -1231,7 +1220,10 @@ void main() {
       expect(buildCount, 3);
 
       await tester.pumpWidget(
-        TickerMode(enabled: true, child: Image(image: imageProvider, frameBuilder: buildFrame)),
+        TickerMode(
+          enabled: true,
+          child: Image(image: imageProvider, frameBuilder: buildFrame),
+        ),
       );
 
       expect(tester.state(find.byType(Image)), same(state));
@@ -1330,14 +1322,10 @@ void main() {
       Image(
         image: imageProvider,
         excludeFromSemantics: true,
-        frameBuilder: (
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
-        ) {
-          return Padding(padding: const EdgeInsets.all(1), child: child);
-        },
+        frameBuilder:
+            (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+              return Padding(padding: const EdgeInsets.all(1), child: child);
+            },
         loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
           return Center(child: child);
         },
@@ -1438,13 +1426,21 @@ void main() {
     final _TestImageProvider imageProvider1 = _TestImageProvider(
       streamCompleter: imageStreamCompleter,
     );
-    await tester.pumpWidget(Container(key: key, child: Image(image: imageProvider1)));
+    await tester.pumpWidget(
+      Container(
+        key: key,
+        child: Image(image: imageProvider1),
+      ),
+    );
     // listener from resolveStreamForKey is always added.
     expect(imageStreamCompleter.listeners.length, 2);
 
     final _TestImageProvider imageProvider2 = _TestImageProvider();
     await tester.pumpWidget(
-      Container(key: key, child: Image(image: imageProvider2, excludeFromSemantics: true)),
+      Container(
+        key: key,
+        child: Image(image: imageProvider2, excludeFromSemantics: true),
+      ),
       phase: EnginePhase.layout,
     );
 
@@ -1469,7 +1465,10 @@ void main() {
 
     final _TestImageProvider imageProvider2 = _TestImageProvider();
     await tester.pumpWidget(
-      Container(key: key, child: Image(image: imageProvider2, excludeFromSemantics: true)),
+      Container(
+        key: key,
+        child: Image(image: imageProvider2, excludeFromSemantics: true),
+      ),
       phase: EnginePhase.layout,
     );
 
@@ -1601,8 +1600,9 @@ void main() {
     expect(imageCache.liveImageCount, 1);
     expect(imageCache.containsKey(provider), false);
 
-    final ImageCacheStatus providerLocation =
-        (await provider.obtainCacheStatus(configuration: ImageConfiguration.empty))!;
+    final ImageCacheStatus providerLocation = (await provider.obtainCacheStatus(
+      configuration: ImageConfiguration.empty,
+    ))!;
 
     expect(providerLocation, isNotNull);
     expect(providerLocation.live, true);
@@ -1639,9 +1639,8 @@ void main() {
 
   testWidgets(
     'precacheImage allows time to take over weak reference',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       final _TestImageProvider provider = _TestImageProvider();
       late Future<void> precache;
@@ -1777,7 +1776,9 @@ void main() {
 
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Image(image: _FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10)),
+      Image(
+        image: _FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
+      ),
     );
 
     await tester.pump();
@@ -1875,9 +1876,8 @@ void main() {
 
   testWidgets(
     'Reports image size when painted',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       late ImageSizeInfo imageSizeInfo;
       int count = 0;
@@ -1886,15 +1886,18 @@ void main() {
         imageSizeInfo = info;
       };
 
-      final ui.Image image =
-          (await tester.runAsync(() => createTestImage(width: 100, height: 100)))!;
+      final ui.Image image = (await tester.runAsync(
+        () => createTestImage(width: 100, height: 100),
+      ))!;
       final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter(
         ImageInfo(image: image, debugLabel: 'test.png'),
       );
       final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
 
       await tester.pumpWidget(
-        Center(child: SizedBox(height: 50, width: 50, child: Image(image: imageProvider))),
+        Center(
+          child: SizedBox(height: 50, width: 50, child: Image(image: imageProvider)),
+        ),
       );
 
       expect(count, 1);
@@ -1964,9 +1967,8 @@ void main() {
 
   testWidgets(
     'Load a good image after a bad image was loaded should not call errorBuilder',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
       final UniqueKey errorKey = UniqueKey();
       final ui.Image image = (await tester.runAsync(() => createTestImage()))!;
@@ -1984,14 +1986,10 @@ void main() {
               errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
                 return Container(key: errorKey);
               },
-              frameBuilder: (
-                BuildContext context,
-                Widget child,
-                int? frame,
-                bool wasSynchronouslyLoaded,
-              ) {
-                return Padding(padding: const EdgeInsets.all(1), child: child);
-              },
+              frameBuilder:
+                  (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+                    return Padding(padding: const EdgeInsets.all(1), child: child);
+                  },
             ),
           ),
         ),
@@ -2073,14 +2071,12 @@ void main() {
 
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
     (WidgetTester tester) async {
-      final ui.Codec codec =
-          (await tester.runAsync(() {
-            return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
-          }))!;
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
 
       Future<ui.Image> nextFrame() async {
         final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
@@ -2095,15 +2091,11 @@ void main() {
         Center(
           child: Image(
             image: imageProvider,
-            frameBuilder: (
-              BuildContext context,
-              Widget child,
-              int? frame,
-              bool wasSynchronouslyLoaded,
-            ) {
-              lastFrame = frame;
-              return child;
-            },
+            frameBuilder:
+                (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+                  lastFrame = frame;
+                  return child;
+                },
           ),
         ),
       );
@@ -2218,8 +2210,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Image(
             image: provider,
-            errorBuilder:
-                hasErrorBuilder ? (_, _, _) => const SizedBox(width: 10, height: 10) : null,
+            errorBuilder: hasErrorBuilder
+                ? (_, _, _) => const SizedBox(width: 10, height: 10)
+                : null,
           ),
         );
       }

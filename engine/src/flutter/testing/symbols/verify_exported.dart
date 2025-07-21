@@ -39,8 +39,9 @@ void main(List<String> arguments) {
     final String engineCheckoutPath = Platform.environment['ENGINE_CHECKOUT_PATH']!;
     outPath = p.join(engineCheckoutPath, outPath);
   }
-  final String buildToolsPath =
-      arguments.length == 1 ? p.join(p.dirname(outPath), 'flutter', 'buildtools') : arguments[1];
+  final String buildToolsPath = arguments.length == 1
+      ? p.join(p.dirname(outPath), 'flutter', 'buildtools')
+      : arguments[1];
 
   String platform;
   if (Platform.isLinux) {

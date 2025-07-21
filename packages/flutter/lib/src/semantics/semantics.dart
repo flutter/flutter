@@ -13,6 +13,7 @@ import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
+        Locale,
         Offset,
         Rect,
         SemanticsAction,
@@ -143,12 +144,12 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.main => _semanticsMain,
     SemanticsRole.navigation => _semanticsNavigation,
     SemanticsRole.region => _semanticsRegion,
+    SemanticsRole.form => _noCheckRequired,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
     SemanticsRole.progressBar => _unimplemented,
@@ -239,16 +240,14 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
-      if (!data.flagsCollection.hasCheckedState) {
-        node.visitChildren(validateRadioGroupChildren);
+      if (data.role == SemanticsRole.radioGroup) {
+        // Children under sub radio groups don't belong to this radio group.
         return error == null;
       }
 
       if (!data.flagsCollection.isInMutuallyExclusiveGroup) {
-        error = FlutterError(
-          'Radio buttons in a radio group must be in a mutually exclusive group',
-        );
-        return false;
+        node.visitChildren(validateRadioGroupChildren);
+        return error == null;
       }
 
       if (data.flagsCollection.isChecked) {
@@ -806,6 +805,108 @@ class AttributedStringProperty extends DiagnosticsProperty<AttributedString> {
   }
 }
 
+typedef _LabelPart = (String text, TextDirection? textDirection);
+
+/// Builder for creating semantically correct concatenated labels with proper
+/// text direction handling and spacing.
+///
+/// This builder helps address the complexity of concatenating multiple text
+/// parts while handling language-specific nuances like RTL vs LTR text direction
+/// and proper spacing.
+///
+/// Example usage:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder()
+///   ..addPart('Hello')
+///   ..addPart('world');
+/// String label = builder.build(); // "Hello world"
+/// ```
+///
+/// For multilingual text with proper RTL support:
+/// ```dart
+/// SemanticsLabelBuilder builder = SemanticsLabelBuilder(textDirection: TextDirection.ltr)
+///   ..addPart('Welcome', textDirection: TextDirection.ltr)
+///   ..addPart('مرحبا', textDirection: TextDirection.rtl); // Arabic
+/// String label = builder.build(); // "Welcome \u202Bمرحبا\u202C" (with Unicode embedding)
+/// ```
+final class SemanticsLabelBuilder {
+  /// Creates a new [SemanticsLabelBuilder].
+  ///
+  /// The [separator] is used between text parts (defaults to space).
+  /// The [textDirection] specifies the overall text direction for the concatenated label.
+  SemanticsLabelBuilder({this.separator = ' ', this.textDirection});
+
+  /// The separator used between text parts.
+  final String separator;
+
+  /// The overall text direction for the concatenated label.
+  final TextDirection? textDirection;
+
+  final List<_LabelPart> _parts = <_LabelPart>[];
+
+  /// Adds a text part.
+  ///
+  /// If [textDirection] is specified, it will be used for this specific part.
+  /// Empty parts are ignored.
+  void addPart(String label, {TextDirection? textDirection}) {
+    if (label.isNotEmpty) {
+      _parts.add((label, textDirection));
+    }
+  }
+
+  /// Returns true if no parts have been added to this builder.
+  bool get isEmpty => _parts.isEmpty;
+
+  /// Returns the number of parts added to this builder.
+  int get length => _parts.length;
+
+  /// Builds and returns the concatenated label from the added parts.
+  ///
+  /// This method concatenates all parts with proper text direction handling
+  /// and spacing.
+  String build() {
+    if (_parts.isEmpty) {
+      return '';
+    }
+
+    if (_parts.length == 1) {
+      final (String text, TextDirection? _) = _parts.first;
+      return text;
+    }
+
+    // Concatenate multiple parts with proper text direction handling
+    final StringBuffer buffer = StringBuffer();
+    final (String firstText, TextDirection? _) = _parts.first;
+    buffer.write(firstText);
+
+    for (final (String partText, TextDirection? partTextDirection) in _parts.skip(1)) {
+      final TextDirection? partDirection = partTextDirection ?? textDirection;
+
+      if (separator.isNotEmpty) {
+        buffer.write(separator);
+      }
+
+      String processedText = partText;
+      if (textDirection != null && partDirection != null && textDirection != partDirection) {
+        final String directionalEmbedding = switch (partDirection) {
+          TextDirection.rtl => Unicode.RLE,
+          TextDirection.ltr => Unicode.LRE,
+        };
+        processedText = directionalEmbedding + partText + Unicode.PDF;
+      }
+
+      buffer.write(processedText);
+    }
+
+    return buffer.toString();
+  }
+
+  /// Clears all parts from this builder, allowing it to be reused.
+  void clear() {
+    _parts.clear();
+  }
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -846,6 +947,7 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1109,6 +1211,12 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
+  /// The locale for this semantics node.
+  ///
+  /// Assistive technologies uses this property to correctly interpret the
+  /// content of this semantics node.
+  final Locale? locale;
+
   /// Whether [flags] contains the given flag.
   @Deprecated(
     'Use flagsCollection instead. '
@@ -1131,10 +1239,9 @@ class SemanticsData with Diagnosticable {
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
     ];
-    final List<String?> customSemanticsActionSummary =
-        customSemanticsActionIds!
-            .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
-            .toList();
+    final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
+        .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
@@ -2719,6 +2826,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int get depth => _depth;
   int _depth = 0;
 
+  /// The locale of this node.
+  ///
+  /// This property is used by assistive technologies to correctly interpret
+  /// the content of this node.
+  Locale? _locale;
+
   void _redepthChild(SemanticsNode child) {
     assert(child.owner == owner);
     if (child._depth <= _depth) {
@@ -3248,6 +3361,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
     _inputType = config._inputType;
+    _locale = config.locale;
 
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -3299,6 +3413,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
+    final Locale? locale = _locale;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3449,6 +3564,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      locale: locale,
     );
   }
 
@@ -3535,6 +3651,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
       inputType: data.inputType,
+      locale: data.locale,
     );
     _dirty = false;
   }
@@ -3647,6 +3764,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         ifTrue: 'merge boundary ⛔️',
       ),
     );
+    if (_locale != null) {
+      properties.add(StringProperty('locale', _locale.toString()));
+    }
     final Offset? offset = transform != null ? MatrixUtils.getAsTranslation(transform!) : null;
     if (offset != null) {
       properties.add(DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -3683,10 +3803,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
             )
             .toList()
           ..sort();
-    final List<String?> customSemanticsActions =
-        _customSemanticsActions.keys
-            .map<String?>((CustomSemanticsAction action) => action.label)
-            .toList();
+    final List<String?> customSemanticsActions = _customSemanticsActions.keys
+        .map<String?>((CustomSemanticsAction action) => action.label)
+        .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
@@ -3951,16 +4070,16 @@ class _SemanticsSortGroup implements Comparable<_SemanticsSortGroup> {
 
     final List<int> sortedIds = <int>[];
     final Set<int> visitedIds = <int>{};
-    final List<SemanticsNode> startNodes =
-        nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
-          final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
-          final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
-          final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
-          if (verticalDiff != 0) {
-            return -verticalDiff;
-          }
-          return -aTopLeft.dx.compareTo(bTopLeft.dx);
-        });
+    final List<SemanticsNode> startNodes = nodes.toList()
+      ..sort((SemanticsNode a, SemanticsNode b) {
+        final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
+        final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
+        final int verticalDiff = aTopLeft.dy.compareTo(bTopLeft.dy);
+        if (verticalDiff != 0) {
+          return -verticalDiff;
+        }
+        return -aTopLeft.dx.compareTo(bTopLeft.dx);
+      });
 
     void search(int id) {
       if (visitedIds.contains(id)) {
@@ -4188,8 +4307,9 @@ class SemanticsOwner extends ChangeNotifier {
     final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      final List<SemanticsNode> localDirtyNodes =
-          _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes
+          .where((SemanticsNode node) => !_detachedNodes.contains(node))
+          .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
@@ -4373,6 +4493,27 @@ class SemanticsConfiguration {
     assert(!isMergingSemanticsOfDescendants || value);
     _isSemanticBoundary = value;
   }
+
+  /// The locale for widgets in the subtree.
+  Locale? get localeForSubtree => _localeForSubtree;
+  Locale? _localeForSubtree;
+  set localeForSubtree(Locale? value) {
+    assert(
+      value == null || _isSemanticBoundary,
+      'to set locale for subtree, this configuration must also be a semantics '
+      'boundary.',
+    );
+    _localeForSubtree = value;
+  }
+
+  /// The locale of the resulting semantics node if this configuration formed
+  /// one.
+  ///
+  /// This is used internally to track the inherited locale from parent
+  /// rendering object and should not be used directly.
+  ///
+  /// To set a locale for a rendering object, use [localeForSubtree] instead.
+  Locale? locale;
 
   /// Whether to block pointer related user actions for the rendering subtree.
   ///

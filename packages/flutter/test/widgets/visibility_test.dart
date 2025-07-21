@@ -41,7 +41,10 @@ void main() {
       child: Builder(
         builder: (BuildContext context) {
           final bool animating = TickerMode.of(context);
-          return TestState(log: log, child: Text('a $animating', textDirection: TextDirection.rtl));
+          return TestState(
+            log: log,
+            child: Text('a $animating', textDirection: TextDirection.rtl),
+          );
         },
       ),
     );
@@ -111,7 +114,9 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      Center(child: Visibility(replacement: const Placeholder(), visible: false, child: testChild)),
+      Center(
+        child: Visibility(replacement: const Placeholder(), visible: false, child: testChild),
+      ),
     );
     expect(find.byType(Text, skipOffstage: false), findsNothing);
     expect(find.byType(Placeholder), findsOneWidget);
@@ -124,7 +129,9 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      Center(child: Visibility(replacement: const Placeholder(), child: testChild)),
+      Center(
+        child: Visibility(replacement: const Placeholder(), child: testChild),
+      ),
     );
     expect(find.byType(Text, skipOffstage: false), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);

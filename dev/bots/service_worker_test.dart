@@ -30,6 +30,15 @@ final String _targetWithBlockedServiceWorkers = path.join(
 );
 final String _targetPath = path.join(_testAppDirectory, _target);
 
+// Some paths are not guaranteed to actually be requested by the time we finish the test, so we just
+// ignore them and not make them part of the tracked requests or expectations.
+final Set<String> _ignoreRequestPaths = <String>{
+  'canvaskit/canvaskit.js',
+  'canvaskit/canvaskit.wasm',
+  'canvaskit/chromium/canvaskit.js',
+  'canvaskit/chromium/canvaskit.wasm',
+};
+
 enum ServiceWorkerTestType {
   // Mocks how FF disables service workers.
   blockedServiceWorkers,
@@ -176,7 +185,7 @@ Future<void> _rebuildApp({
   ], workingDirectory: _testAppWebDirectory);
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
+    <String>['build', 'web', '--no-web-resources-cdn', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
@@ -297,6 +306,9 @@ Future<void> runWebServiceWorkerTest({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -509,6 +521,9 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'assets/fonts/MaterialIcons-Regular.otf') {
@@ -653,6 +668,9 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -726,6 +744,9 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {

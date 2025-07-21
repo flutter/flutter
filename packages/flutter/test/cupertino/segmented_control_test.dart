@@ -48,7 +48,10 @@ StatefulBuilder setupSimpleSegmentedControl() {
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 int getChildCount(WidgetTester tester) {
@@ -1370,7 +1373,7 @@ void main() {
                   sharedValue = newValue;
                 });
                 if (sharedValue == 1) {
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   children[3] = const Text('D');
                 }
               },
@@ -1419,7 +1422,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(2);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                 }
               },
               groupValue: sharedValue,
@@ -1464,7 +1467,7 @@ void main() {
                 });
                 if (sharedValue == 1) {
                   children.remove(1);
-                  children = Map<int, Widget>.from(children);
+                  children = Map<int, Widget>.of(children);
                   sharedValue = null;
                 }
               },

@@ -73,6 +73,37 @@ external DomObjectConstructor get objectConstructor;
 
 extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
+
+  external void defineProperty(
+    JSObject object,
+    String property,
+    DomPropertyDataDescriptor descriptor,
+  );
+}
+
+extension type DomPropertyDataDescriptor._primary(JSObject _) implements JSObject {
+  factory DomPropertyDataDescriptor({
+    Object? value,
+    bool configurable = false,
+    bool enumerable = false,
+    bool writable = false,
+  }) => DomPropertyDataDescriptor._(
+    value: value?.toJSAnyDeep,
+    configurable: configurable,
+    enumerable: enumerable,
+    writable: writable,
+  );
+  external factory DomPropertyDataDescriptor._({
+    required JSAny? value,
+    required bool configurable,
+    required bool enumerable,
+    required bool writable,
+  });
+
+  external JSAny? get value;
+  external bool get configurable;
+  external bool get enumerable;
+  external bool get writable;
 }
 
 @JS('Window')
@@ -235,7 +266,6 @@ extension type DomDocument._(JSObject _) implements DomNode {
     }
   }
 
-  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
   external DomText createTextNode(String data);
@@ -826,6 +856,7 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   return canvas;
 }
 
+@JS('WebGLRenderingContext')
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
@@ -834,6 +865,20 @@ extension type WebGLContext._(JSObject _) implements JSObject {
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  external JSAny? getExtension(String name);
+
+  WebGLLoseContextExtension get loseContextExtension {
+    return getExtension('WEBGL_lose_context')! as WebGLLoseContextExtension;
+  }
+
+  external bool isContextLost();
+}
+
+extension type WebGLLoseContextExtension._(JSObject _) implements JSObject {
+  external void loseContext();
+
+  external void restoreContext();
 }
 
 extension type DomCanvasImageSource._(JSObject _) implements JSObject {}
@@ -993,11 +1038,8 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
-}
 
-@JS('WebGLRenderingContext')
-extension type DomWebGLRenderingContext._(JSObject _) implements JSObject {
-  external bool isContextLost();
+  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1437,6 +1479,21 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 @JS('TextMetrics')
 extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
+
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters();
+  List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
+
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+
+  external double get fontBoundingBoxAscent;
+
+  external double get fontBoundingBoxDescent;
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -2271,19 +2328,18 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
   'flutter-engine',
   DomTrustedTypePolicyOptions(
     // Validates the given [url].
-    createScriptURL:
-        (String url) {
-          final Uri uri = Uri.parse(url);
-          if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
-            return uri.toString().toJS;
-          }
-          domWindow.console.error(
-            'URL rejected by TrustedTypes policy flutter-engine: $url'
-            '(download prevented)',
-          );
+    createScriptURL: (String url) {
+      final Uri uri = Uri.parse(url);
+      if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
+        return uri.toString().toJS;
+      }
+      domWindow.console.error(
+        'URL rejected by TrustedTypes policy flutter-engine: $url'
+        '(download prevented)',
+      );
 
-          return null;
-        }.toJS,
+      return null;
+    }.toJS,
   ),
 );
 
@@ -2503,4 +2559,14 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
+}
+
+@JS('TextCluster')
+extension type DomTextCluster._(JSObject _) implements JSObject {
+  // TODO(jlavrova): This has been renamed to `start` in the spec.
+  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  external int get begin;
+  external int get end;
+  external double get x;
+  external double get y;
 }

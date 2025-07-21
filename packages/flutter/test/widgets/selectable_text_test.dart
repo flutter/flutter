@@ -53,10 +53,9 @@ Widget overlay({Widget? child}) {
     },
   );
   addTearDown(
-    () =>
-        entry
-          ..remove()
-          ..dispose(),
+    () => entry
+      ..remove()
+      ..dispose(),
   );
   return overlayWithEntry(entry);
 }
@@ -212,8 +211,8 @@ void main() {
 
   testWidgets(
     'throw if no Overlay widget exists above',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
@@ -1503,7 +1502,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SelectableText('some text')))),
+      const MaterialApp(
+        home: Material(child: Center(child: SelectableText('some text'))),
+      ),
     );
 
     expect(
@@ -2835,7 +2836,9 @@ void main() {
 
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
-      return MaterialApp(home: Material(child: SelectableText('something', style: style)));
+      return MaterialApp(
+        home: Material(child: SelectableText('something', style: style)),
+      );
     }
 
     await tester.pumpWidget(
@@ -3432,8 +3435,9 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      final TextEditingValue currentValue =
-          tester.state<EditableTextState>(find.byType(EditableText)).textEditingValue;
+      final TextEditingValue currentValue = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .textEditingValue;
       expect(
         currentValue.selection,
         TextSelection(baseOffset: testValue.indexOf('g'), extentOffset: testValue.indexOf('p') + 3),
@@ -3900,18 +3904,17 @@ void main() {
 
       // Find the selection handle fade transition after the start handle has been
       // hidden because it is out of view.
-      final List<FadeTransition> transitionsAfter =
-          find
-              .descendant(
-                of: find.byWidgetPredicate(
-                  (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                ),
-                matching: find.byType(FadeTransition),
-              )
-              .evaluate()
-              .map((Element e) => e.widget)
-              .cast<FadeTransition>()
-              .toList();
+      final List<FadeTransition> transitionsAfter = find
+          .descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(FadeTransition),
+          )
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<FadeTransition>()
+          .toList();
 
       expect(transitionsAfter.length, 2);
 
@@ -4286,11 +4289,10 @@ void main() {
 
     const SelectableText('something').debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>['data: something']);
   });
@@ -4319,11 +4321,10 @@ void main() {
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'data: something',
@@ -4596,18 +4597,15 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<FadeTransition> transitions =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-              ),
-              matching: find.byType(FadeTransition),
-            )
-            .evaluate()
-            .map((Element e) => e.widget)
-            .cast<FadeTransition>()
-            .toList();
+    final List<FadeTransition> transitions = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+          matching: find.byType(FadeTransition),
+        )
+        .evaluate()
+        .map((Element e) => e.widget)
+        .cast<FadeTransition>()
+        .toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -4623,15 +4621,19 @@ void main() {
 
       await tester.pumpWidget(const MaterialApp(home: Material(child: SelectableText(testText))));
 
-      final RenderEditable renderEditable =
-          tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+      final RenderEditable renderEditable = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
 
       await tester.tapAt(const Offset(20, 10));
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       await tester.pumpAndSettle();
 
-      final List<Widget> transitions =
-          find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<Widget> transitions = find
+          .byType(FadeTransition)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .toList();
       expect(transitions.length, 2);
       final FadeTransition left = transitions[0] as FadeTransition;
       final FadeTransition right = transitions[1] as FadeTransition;
@@ -4748,11 +4750,10 @@ void main() {
     WidgetTester tester,
   ) async {
     int spyTaps = 0;
-    final TapGestureRecognizer spyRecognizer =
-        TapGestureRecognizer()
-          ..onTap = () {
-            spyTaps += 1;
-          };
+    final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        spyTaps += 1;
+      };
     addTearDown(spyRecognizer.dispose);
 
     await tester.pumpWidget(
@@ -4801,11 +4802,10 @@ void main() {
     WidgetTester tester,
   ) async {
     int spyLongPress = 0;
-    final LongPressGestureRecognizer spyRecognizer =
-        LongPressGestureRecognizer()
-          ..onLongPress = () {
-            spyLongPress += 1;
-          };
+    final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
+      ..onLongPress = () {
+        spyLongPress += 1;
+      };
     addTearDown(spyRecognizer.dispose);
 
     await tester.pumpWidget(
@@ -4856,7 +4856,9 @@ void main() {
 
   testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SelectableText('test')))),
+      const MaterialApp(
+        home: Material(child: Center(child: SelectableText('test'))),
+      ),
     );
 
     final TestGesture gesture = await tester.createGesture(
@@ -5340,7 +5342,10 @@ void main() {
                     child: Center(
                       child: TabBar(
                         labelColor: Colors.black,
-                        tabs: <Tab>[Tab(text: 'Sliver Tab 1'), Tab(text: 'Sliver Tab 2')],
+                        tabs: <Tab>[
+                          Tab(text: 'Sliver Tab 1'),
+                          Tab(text: 'Sliver Tab 2'),
+                        ],
                       ),
                     ),
                   ),
@@ -5411,14 +5416,11 @@ void main() {
       final SelectableText selectableText = SelectableText(
         testValue,
         magnifierConfiguration: TextMagnifierConfiguration(
-          magnifierBuilder: (
-            _,
-            MagnifierController controller,
-            ValueNotifier<MagnifierInfo> localMagnifierInfo,
-          ) {
-            magnifierInfo = localMagnifierInfo;
-            return fakeMagnifier;
-          },
+          magnifierBuilder:
+              (_, MagnifierController controller, ValueNotifier<MagnifierInfo> localMagnifierInfo) {
+                magnifierInfo = localMagnifierInfo;
+                return fakeMagnifier;
+              },
         ),
       );
 

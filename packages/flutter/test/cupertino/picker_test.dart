@@ -313,10 +313,13 @@ void main() {
 
         // Let the scroll settle and end up in the middle of the item.
         await tester.pumpAndSettle();
+        expect(systemCalls, hasLength(2));
+        // Check that the haptic feedback and ticking sound were triggered.
         expect(
-          systemCalls.single,
+          systemCalls[0],
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
+        expect(systemCalls[1], isMethodCall('SystemSound.play', arguments: 'SystemSoundType.tick'));
 
         // Overscroll a little to pass the middle of the item.
         await tester.drag(
@@ -325,17 +328,77 @@ void main() {
           warnIfMissed: false,
         ); // has an IgnorePointer
         expect(selectedItems, <int>[1, 0]);
-        expect(systemCalls, hasLength(2));
+        expect(systemCalls, hasLength(4));
         expect(
-          systemCalls.last,
+          systemCalls[2],
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
+        expect(systemCalls[3], isMethodCall('SystemSound.play', arguments: 'SystemSoundType.tick'));
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
 
+    testWidgets('scrolling with new behavior calls onSelectedItemChanged only when scroll ends', (
+      WidgetTester tester,
+    ) async {
+      final List<int> selectedItems = <int>[];
+      final List<MethodCall> systemCalls = <MethodCall>[];
+
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        systemCalls.add(methodCall);
+        return null;
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoPicker(
+            itemExtent: 100.0,
+            changeReportingBehavior: ChangeReportingBehavior.onScrollEnd,
+            onSelectedItemChanged: (int index) {
+              selectedItems.add(index);
+            },
+            children: List<Widget>.generate(100, (int index) {
+              return Center(
+                child: SizedBox(width: 400.0, height: 100.0, child: Text(index.toString())),
+              );
+            }),
+          ),
+        ),
+      );
+
+      final Offset initialOffset = tester.getTopLeft(find.text('0'));
+      // Drag to almost the middle of the next item.
+      final TestGesture scrollGesture = await tester.startGesture(initialOffset);
+      // Item 0 is still closest to the center. No updates.
+      await scrollGesture.moveBy(const Offset(0.0, -49.0));
+      expect(selectedItems.isEmpty, true);
+
+      // Now item 1 is closest to the center.
+      await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      expect(selectedItems, <int>[]);
+
+      // Now item 1 is still closest to the center for another full itemExtent (100px).
+      await scrollGesture.moveBy(const Offset(0.0, -99.0));
+      expect(selectedItems, <int>[]);
+
+      await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      await scrollGesture.up();
+      await tester.pumpAndSettle();
+      expect(selectedItems, <int>[2]);
+
+      await scrollGesture.down(initialOffset);
+      await scrollGesture.moveBy(const Offset(0.0, 100.0));
+      expect(selectedItems, <int>[2]);
+
+      await scrollGesture.up();
+      expect(selectedItems, <int>[2, 1]);
+    });
+
     testWidgets(
-      'does not trigger haptics when scrolling by tapping on the item',
+      'does not trigger haptics or sounds when scrolling by tapping on the item',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
@@ -381,7 +444,7 @@ void main() {
     );
 
     testWidgets(
-      'do not trigger haptic effects on non-iOS devices',
+      'do not trigger haptic or sounds on non-iOS devices',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
@@ -680,28 +743,27 @@ void main() {
                 itemExtent: 55,
                 diameterRatio: 0.9,
                 onSelectedItemChanged: (int index) {},
-                children:
-                    children
-                        .map<Widget>(
-                          (int index) => GestureDetector(
-                            key: ValueKey<int>(index),
-                            onTap: () {
-                              tappedChildren.add(index);
-                            },
-                            child: SizedBox(
-                              width: 55,
-                              height: 55,
-                              child: CustomPaint(
-                                painter: TestCallbackPainter(
-                                  onPaint: () {
-                                    paintedChildren.add(index);
-                                  },
-                                ),
-                              ),
+                children: children
+                    .map<Widget>(
+                      (int index) => GestureDetector(
+                        key: ValueKey<int>(index),
+                        onTap: () {
+                          tappedChildren.add(index);
+                        },
+                        child: SizedBox(
+                          width: 55,
+                          height: 55,
+                          child: CustomPaint(
+                            painter: TestCallbackPainter(
+                              onPaint: () {
+                                paintedChildren.add(index);
+                              },
                             ),
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),

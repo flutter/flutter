@@ -14,9 +14,9 @@ void main() {
     /// behavior when exceptions occur after a delay in the passed closures to
     /// [TaskQueue.add].
     test('no deadlock when delayed exceptions fire in closures', () async {
-      final TaskQueue<void> sharedTracker = TaskQueue<void>(maxJobs: 2);
+      final sharedTracker = TaskQueue<void>(maxJobs: 2);
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
+        final t = Future<void>.delayed(
           const Duration(milliseconds: 10),
           () => throw TestException(),
         );
@@ -24,7 +24,7 @@ void main() {
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
+        final t = Future<void>.delayed(
           const Duration(milliseconds: 10),
           () => throw TestException(),
         );
@@ -32,7 +32,7 @@ void main() {
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
+        final t = Future<void>.delayed(
           const Duration(milliseconds: 10),
           () => throw TestException(),
         );
@@ -40,7 +40,7 @@ void main() {
         return t;
       }, throwsA(const TypeMatcher<TestException>()));
       expect(() async {
-        final Future<void> t = Future<void>.delayed(
+        final t = Future<void>.delayed(
           const Duration(milliseconds: 10),
           () => throw TestException(),
         );
@@ -53,8 +53,8 @@ void main() {
     });
 
     test('basic sequential processing works with no deadlock', () async {
-      final Set<int> completed = <int>{};
-      final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 1);
+      final completed = <int>{};
+      final tracker = TaskQueue<void>(maxJobs: 1);
       await tracker.add(() async => completed.add(1));
       await tracker.add(() async => completed.add(2));
       await tracker.add(() async => completed.add(3));
@@ -63,8 +63,8 @@ void main() {
     });
 
     test('basic sequential processing works on exceptions', () async {
-      final Set<int> completed = <int>{};
-      final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 1);
+      final completed = <int>{};
+      final tracker = TaskQueue<void>(maxJobs: 1);
       await tracker.add(() async => completed.add(0));
       await tracker.add(() async => throw TestException()).then((_) {}, onError: (Object _) {});
       await tracker.add(() async => throw TestException()).then((_) {}, onError: (Object _) {});
@@ -76,9 +76,9 @@ void main() {
     /// Verify that if there are more exceptions than the maximum number
     /// of in-flight [Future]s that there is no deadlock.
     test('basic parallel processing works with no deadlock', () async {
-      final Set<int> completed = <int>{};
-      final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 10);
-      for (int i = 0; i < 100; i++) {
+      final completed = <int>{};
+      final tracker = TaskQueue<void>(maxJobs: 10);
+      for (var i = 0; i < 100; i++) {
         await tracker.add(() async => completed.add(i));
       }
       await tracker.tasksComplete;
@@ -86,19 +86,19 @@ void main() {
     });
 
     test('basic parallel processing works on exceptions', () async {
-      final Set<int> completed = <int>{};
-      final TaskQueue<void> tracker = TaskQueue<void>(maxJobs: 10);
-      for (int i = 0; i < 50; i++) {
+      final completed = <int>{};
+      final tracker = TaskQueue<void>(maxJobs: 10);
+      for (var i = 0; i < 50; i++) {
         await tracker.add(() async => completed.add(i));
       }
-      for (int i = 50; i < 65; i++) {
+      for (var i = 50; i < 65; i++) {
         try {
           await tracker.add(() async => throw TestException());
         } on TestException {
           // Ignore
         }
       }
-      for (int i = 65; i < 100; i++) {
+      for (var i = 65; i < 100; i++) {
         await tracker.add(() async => completed.add(i));
       }
       await tracker.tasksComplete;

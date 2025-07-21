@@ -268,10 +268,9 @@ class Icon extends StatelessWidget {
 
     final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
 
-    final double iconSize =
-        applyTextScaling
-            ? MediaQuery.textScalerOf(context).scale(tentativeIconSize)
-            : tentativeIconSize;
+    final double iconSize = applyTextScaling
+        ? MediaQuery.textScalerOf(context).scale(tentativeIconSize)
+        : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -285,7 +284,10 @@ class Icon extends StatelessWidget {
 
     final IconData? icon = this.icon;
     if (icon == null) {
-      return Semantics(label: semanticLabel, child: SizedBox(width: iconSize, height: iconSize));
+      return Semantics(
+        label: semanticLabel,
+        child: SizedBox(width: iconSize, height: iconSize),
+      );
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
@@ -295,10 +297,9 @@ class Icon extends StatelessWidget {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
     if (blendMode != null) {
-      foreground =
-          Paint()
-            ..blendMode = blendMode!
-            ..color = iconColor;
+      foreground = Paint()
+        ..blendMode = blendMode!
+        ..color = iconColor;
       // Cannot provide both a color and a foreground.
       iconColor = null;
     }
@@ -347,7 +348,11 @@ class Icon extends StatelessWidget {
     return Semantics(
       label: semanticLabel,
       child: ExcludeSemantics(
-        child: SizedBox(width: iconSize, height: iconSize, child: Center(child: iconWidget)),
+        child: SizedBox(
+          width: iconSize,
+          height: iconSize,
+          child: Center(child: iconWidget),
+        ),
       ),
     );
   }

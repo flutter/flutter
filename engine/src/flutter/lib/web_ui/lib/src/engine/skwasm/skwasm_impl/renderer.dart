@@ -21,17 +21,19 @@ class SkwasmRenderer implements Renderer {
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
+  SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
+
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
-    return SkwasmPath.combine(op, path1 as SkwasmPath, path2 as SkwasmPath);
+    return LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
   }
 
   @override
   ui.Path copyPath(ui.Path src) {
-    return SkwasmPath.from(src as SkwasmPath);
+    return LazyPath.fromLazyPath(src as LazyPath);
   }
 
   @override
@@ -153,7 +155,7 @@ class SkwasmRenderer implements Renderer {
   );
 
   @override
-  ui.Path createPath() => SkwasmPath();
+  ui.Path createPath() => LazyPath(pathConstructors);
 
   @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
@@ -397,8 +399,9 @@ class SkwasmRenderer implements Renderer {
 
   @override
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view) {
-    final FrameTimingRecorder? recorder =
-        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
     recorder?.recordBuildFinish();
 
     final EngineSceneView sceneView = _getSceneViewForView(view);
@@ -477,13 +480,12 @@ class SkwasmRenderer implements Renderer {
     required bool transferOwnership,
   }) async {
     if (!transferOwnership) {
-      textureSource =
-          (await createImageBitmap(textureSource, (
-            x: 0,
-            y: 0,
-            width: width,
-            height: height,
-          ))).toJSAnyShallow;
+      textureSource = (await createImageBitmap(textureSource, (
+        x: 0,
+        y: 0,
+        width: width,
+        height: height,
+      ))).toJSAnyShallow;
     }
     return SkwasmImage(
       imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
@@ -559,6 +561,12 @@ class SkwasmRenderer implements Renderer {
         }
       }
     }
+  }
+
+  @override
+  void debugClear() {
+    // TODO(harryterkelsen): See what needs to be cleaned up for tests and clear
+    // it here.
   }
 }
 

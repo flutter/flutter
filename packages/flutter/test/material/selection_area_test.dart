@@ -78,7 +78,10 @@ void main() {
             body: SelectionArea(
               child: SizedBox(
                 height: 100,
-                child: FittedBox(fit: BoxFit.fill, child: Text('test', key: textKey)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text('test', key: textKey),
+                ),
               ),
             ),
           ),
@@ -134,7 +137,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -171,12 +176,10 @@ void main() {
         MaterialApp(
           home: SelectionArea(
             focusNode: focusNode,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              return Placeholder(key: key);
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return Placeholder(key: key);
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -226,7 +229,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 

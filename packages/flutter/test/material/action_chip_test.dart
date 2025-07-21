@@ -72,7 +72,9 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Material(
-          child: Center(child: ActionChip(onPressed: () {}, label: const Text(label))),
+          child: Center(
+            child: ActionChip(onPressed: () {}, label: const Text(label)),
+          ),
         ),
       ),
     );
@@ -96,7 +98,10 @@ void main() {
 
     // Test disabled ActionChip defaults.
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Material(child: ActionChip(label: Text(label)))),
+      MaterialApp(
+        theme: theme,
+        home: const Material(child: ActionChip(label: Text(label))),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -118,7 +123,9 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Material(
-          child: Center(child: ActionChip(onPressed: () {}, label: const Text(label))),
+          child: Center(
+            child: ActionChip(onPressed: () {}, label: const Text(label)),
+          ),
         ),
       ),
     );
@@ -149,7 +156,10 @@ void main() {
 
     // Test disabled ActionChip defaults.
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Material(child: ActionChip(label: Text(label)))),
+      MaterialApp(
+        theme: theme,
+        home: const Material(child: ActionChip(label: Text(label))),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -178,7 +188,9 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Material(
-          child: Center(child: ActionChip.elevated(onPressed: () {}, label: const Text(label))),
+          child: Center(
+            child: ActionChip.elevated(onPressed: () {}, label: const Text(label)),
+          ),
         ),
       ),
     );
@@ -337,7 +349,9 @@ void main() {
   testWidgets('ActionChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: ActionChip(onPressed: () {}, label: const Text('action chip'))),
+        home: Material(
+          child: ActionChip(onPressed: () {}, label: const Text('action chip')),
+        ),
       ),
     );
 
@@ -349,11 +363,17 @@ void main() {
     WidgetTester tester,
   ) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () {})));
+    await tester.pumpWidget(
+      wrapForChip(
+        child: ActionChip(label: label, onPressed: () {}),
+      ),
+    );
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(
-      wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () {})),
+      wrapForChip(
+        child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () {}),
+      ),
     );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
@@ -488,7 +508,9 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        child: const Center(child: ActionChip(mouseCursor: customCursor, label: Text('Chip'))),
+        child: const Center(
+          child: ActionChip(mouseCursor: customCursor, label: Text('Chip')),
+        ),
       ),
     );
 

@@ -78,7 +78,7 @@ class XCResult {
     required Map<String, Object?> resultJson,
     List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[],
   }) {
-    final List<XCResultIssue> issues = <XCResultIssue>[];
+    final issues = <XCResultIssue>[];
 
     final Object? issuesMap = resultJson['issues'];
     if (issuesMap == null || issuesMap is! Map<String, Object?>) {
@@ -186,7 +186,7 @@ class XCResultIssue {
       }
     }
 
-    final List<String> warnings = <String>[];
+    final warnings = <String>[];
     // Parse url and convert it to a location String.
     String? location;
     final Object? documentLocationInCreatingWorkspaceMap =
@@ -322,7 +322,7 @@ String? _convertUrlToLocationString(String url) {
     return null;
   }
   // Parse the fragment as a query of key-values:
-  final Uri fileLocation = Uri(path: fragmentLocation.path, query: fragmentLocation.fragment);
+  final fileLocation = Uri(path: fragmentLocation.path, query: fragmentLocation.fragment);
   String startingLineNumber = fileLocation.queryParameters['StartingLineNumber'] ?? '';
   if (startingLineNumber.isNotEmpty) {
     startingLineNumber = ':$startingLineNumber';
@@ -366,16 +366,16 @@ List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
   required Map<String, Object?> issueSummariesJson,
   required List<XCResultIssueDiscarder> issueDiscarder,
 }) {
-  final List<XCResultIssue> issues = <XCResultIssue>[];
+  final issues = <XCResultIssue>[];
   final Object? errorsList = issueSummariesJson['_values'];
   if (errorsList is List<Object?>) {
     for (final Object? issueJson in errorsList) {
       if (issueJson == null || issueJson is! Map<String, Object?>) {
         continue;
       }
-      final XCResultIssue resultIssue = XCResultIssue(type: type, issueJson: issueJson);
-      bool discard = false;
-      for (final XCResultIssueDiscarder discarder in issueDiscarder) {
+      final resultIssue = XCResultIssue(type: type, issueJson: issueJson);
+      var discard = false;
+      for (final discarder in issueDiscarder) {
         if (_shouldDiscardIssue(issue: resultIssue, discarder: discarder)) {
           discard = true;
           break;
@@ -440,7 +440,7 @@ List<XCResultIssue> _parseActionIssues(
   //     ]
   //   }
   // }
-  final List<XCResultIssue> issues = <XCResultIssue>[];
+  final issues = <XCResultIssue>[];
   final Object? actionsValues = actionsMap['_values'];
   if (actionsValues is! List<Object?>) {
     return issues;

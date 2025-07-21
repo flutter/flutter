@@ -18,7 +18,9 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Center(child: example.FallbackDemo()))),
+      const MaterialApp(
+        home: Scaffold(body: Center(child: example.FallbackDemo())),
+      ),
     );
 
     // Focus on the first text field.

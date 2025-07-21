@@ -95,7 +95,7 @@ sk_sp<SkImage> TestVulkanSurface::GetSurfaceSnapshot() const {
     return nullptr;
   }
 
-  auto host_snapshot = device_snapshot->makeRasterImage();
+  auto host_snapshot = device_snapshot->makeRasterImage(nullptr);
 
   if (!host_snapshot) {
     FML_LOG(ERROR) << "Could not create the host snapshot while attempting to "

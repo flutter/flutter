@@ -601,10 +601,9 @@ class _UnderlinesState extends State<Underlines> {
         ),
         child: Text(
           _text,
-          style:
-              style != null
-                  ? _style.copyWith(decoration: TextDecoration.underline, decorationStyle: style)
-                  : _style,
+          style: style != null
+              ? _style.copyWith(decoration: TextDecoration.underline, decorationStyle: style)
+              : _style,
         ),
       ),
     );
@@ -665,14 +664,13 @@ class _UnderlinesState extends State<Underlines> {
                       foregroundColor: Colors.white,
                       backgroundColor: Colors.red,
                     ),
-                    onPressed:
-                        _text == ''
-                            ? null
-                            : () {
-                              setState(() {
-                                _text = _text.substring(0, _text.length - 1);
-                              });
-                            },
+                    onPressed: _text == ''
+                        ? null
+                        : () {
+                            setState(() {
+                              _text = _text.substring(0, _text.length - 1);
+                            });
+                          },
                     child: const Text('REMOVE'),
                   ),
                 ],
@@ -1251,20 +1249,19 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                         child: const Text('ITERATE'),
                       ),
                       TextButton(
-                        onPressed:
-                            _ticker.isActive
-                                ? null
-                                : () {
-                                  print('The currently visible text is: $_text');
-                                  print(
-                                    _text?.runes
-                                        .map<String>(
-                                          (int value) =>
-                                              'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}',
-                                        )
-                                        .join(' '),
-                                  );
-                                },
+                        onPressed: _ticker.isActive
+                            ? null
+                            : () {
+                                print('The currently visible text is: $_text');
+                                print(
+                                  _text?.runes
+                                      .map<String>(
+                                        (int value) =>
+                                            'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}',
+                                      )
+                                      .join(' '),
+                                );
+                              },
                         child: const Text('DUMP TEXT TO LOGS'),
                       ),
                     ],

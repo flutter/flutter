@@ -297,26 +297,21 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Videos')),
-      body:
-          isSupported
-              ? Scrollbar(
-                child: ListView(
-                  primary: true,
-                  children: <Widget>[
-                    VideoCard(
-                      title: 'Butterfly',
-                      subtitle: '… flutters by',
-                      controller: butterflyController,
-                    ),
-                    VideoCard(
-                      title: 'Bee',
-                      subtitle: '… gently buzzing',
-                      controller: beeController,
-                    ),
-                  ],
-                ),
-              )
-              : const Placeholder(),
+      body: isSupported
+          ? Scrollbar(
+              child: ListView(
+                primary: true,
+                children: <Widget>[
+                  VideoCard(
+                    title: 'Butterfly',
+                    subtitle: '… flutters by',
+                    controller: butterflyController,
+                  ),
+                  VideoCard(title: 'Bee', subtitle: '… gently buzzing', controller: beeController),
+                ],
+              ),
+            )
+          : const Placeholder(),
     );
   }
 }

@@ -58,12 +58,11 @@ class MainWidgetState extends State<MainWidget> {
           ),
         ],
       ),
-      body:
-          <Widget>[
-            Container(alignment: Alignment.center, child: const Text('Page 1')),
-            Container(alignment: Alignment.center, child: const Text('Page 2')),
-            Container(alignment: Alignment.center, child: const Text('Page 3')),
-          ][currentPageIndex],
+      body: <Widget>[
+        Container(alignment: Alignment.center, child: const Text('Page 1')),
+        Container(alignment: Alignment.center, child: const Text('Page 2')),
+        Container(alignment: Alignment.center, child: const Text('Page 3')),
+      ][currentPageIndex],
     );
   }
 }

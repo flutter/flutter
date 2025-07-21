@@ -23,20 +23,19 @@ class PictureCachePage extends StatelessWidget {
         ),
         body: TabBarView(
           key: const Key('tabbar_view'), // this key is used by the driver test
-          children:
-              kTabNames.map((String name) {
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Builder(
-                    builder: (BuildContext context) {
-                      return ListView.builder(
-                        itemBuilder: (BuildContext context, int index) => ListItem(index: index),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
+          children: kTabNames.map((String name) {
+            return SafeArea(
+              top: false,
+              bottom: false,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ListView.builder(
+                    itemBuilder: (BuildContext context, int index) => ListItem(index: index),
+                  );
+                },
+              ),
+            );
+          }).toList(),
         ),
       ),
     );

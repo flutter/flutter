@@ -10,6 +10,7 @@
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/third_party/re2/re2/set.h"
 
+#include <iosfwd>
 #include <optional>
 
 /// A storage of licenses that can be matched against.
@@ -19,20 +20,32 @@
 /// that. This approach was chosen to minimize the size of the RE2::Set.
 class Catalog {
  public:
+  /// VisibleForTesting
+  struct Entry {
+    std::string name;
+    std::string unique;
+    std::string matcher;
+  };
+
+  struct Match {
+    std::string_view matcher;
+    std::string_view matched_text;
+  };
+
   static absl::StatusOr<Catalog> Open(std::string_view data_dir);
 
   /// Make a Catalog for testing.
-  /// The format is [[<name>, <unique regex>, <full regex>]*] where the unique
-  /// regex should only match one license.
-  static absl::StatusOr<Catalog> Make(
-      const std::vector<std::vector<std::string_view>>& entries);
+  static absl::StatusOr<Catalog> Make(const std::vector<Entry>& entries);
 
   /// @brief Tries to identify a match for the `query` across the `Catalog`.
-  /// @param query The text that will be matched against. @return
-  /// absl::StatusCode::kNotFound when a match can't be found.
+  /// @param query The text that will be matched against.
+  /// @return absl::StatusCode::kNotFound when a match can't be found.
   /// absl::StatusCode::kInvalidArgument if more than one match comes up from
   /// the selector.
-  absl::StatusOr<std::string> FindMatch(std::string_view query);
+  absl::StatusOr<std::vector<Match>> FindMatch(std::string_view query) const;
+
+  /// VisibleForTesting
+  static absl::StatusOr<Entry> ParseEntry(std::istream& is);
 
  private:
   explicit Catalog(RE2::Set selector,

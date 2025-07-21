@@ -58,10 +58,9 @@ void main() {
     );
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject =
-        tester.allRenderObjects
-            .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
-            .first;
+    final dynamic renderObject = tester.allRenderObjects
+        .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
@@ -112,10 +111,9 @@ void main() {
     await tester.pumpWidget(SingleChildScrollView(child: Container(height: 2000.0)));
 
     // 1st, check that the render object has received the default clip behavior.
-    final dynamic renderObject =
-        tester.allRenderObjects
-            .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
-            .first;
+    final dynamic renderObject = tester.allRenderObjects
+        .where((RenderObject o) => o.runtimeType.toString() == '_RenderSingleChildViewport')
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge)); // ignore: avoid_dynamic_calls
 
     // 2nd, check that the painting context has received the default clip behavior.
@@ -521,10 +519,9 @@ void main() {
             child: SingleChildScrollView(
               controller: controller,
               child: Column(
-                children:
-                    children = List<Widget>.generate(20, (int i) {
-                      return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
-                    }),
+                children: children = List<Widget>.generate(20, (int i) {
+                  return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
+                }),
               ),
             ),
           ),
@@ -532,8 +529,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
@@ -553,10 +551,9 @@ void main() {
             child: SingleChildScrollView(
               controller: controller,
               child: Column(
-                children:
-                    children = List<Widget>.generate(20, (int i) {
-                      return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
-                    }),
+                children: children = List<Widget>.generate(20, (int i) {
+                  return SizedBox(height: 100.0, width: 300.0, child: Text('Tile $i'));
+                }),
               ),
             ),
           ),
@@ -564,8 +561,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -616,8 +614,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -661,10 +660,9 @@ void main() {
               scrollDirection: Axis.horizontal,
               controller: controller,
               child: Row(
-                children:
-                    children = List<Widget>.generate(20, (int i) {
-                      return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
-                    }),
+                children: children = List<Widget>.generate(20, (int i) {
+                  return SizedBox(height: 300.0, width: 100.0, child: Text('Tile $i'));
+                }),
               ),
             ),
           ),
@@ -672,8 +670,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -726,8 +725,9 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport =
-        tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -797,10 +797,9 @@ void main() {
                 controller: controllerX = ScrollController(initialScrollOffset: 400.0),
                 scrollDirection: Axis.horizontal,
                 child: Column(
-                  children:
-                      children.map((List<Widget> widgets) {
-                        return Row(children: widgets);
-                      }).toList(),
+                  children: children.map((List<Widget> widgets) {
+                    return Row(children: widgets);
+                  }).toList(),
                 ),
               ),
             ),
@@ -944,10 +943,9 @@ void main() {
                       child: SingleChildScrollView(
                         controller: inner,
                         child: Column(
-                          children:
-                              children = List<Widget>.generate(10, (int i) {
-                                return SizedBox(height: 100.0, width: 300.0, child: Text('$i'));
-                              }),
+                          children: children = List<Widget>.generate(10, (int i) {
+                            return SizedBox(height: 100.0, width: 300.0, child: Text('$i'));
+                          }),
                         ),
                       ),
                     ),
@@ -1055,10 +1053,9 @@ void main() {
               padding: EdgeInsets.zero,
               keyboardDismissBehavior: behavior,
               child: Column(
-                children:
-                    focusNodes.map((FocusNode focusNode) {
-                      return SizedBox(height: 50, child: TextField(focusNode: focusNode));
-                    }).toList(),
+                children: focusNodes.map((FocusNode focusNode) {
+                  return SizedBox(height: 50, child: TextField(focusNode: focusNode));
+                }).toList(),
               ),
             ),
           ),

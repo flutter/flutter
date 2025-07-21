@@ -421,10 +421,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     );
     return hasContentDimensions || haveDimensions
         ? _cachedPage ??
-            getPageFromPixels(
-              clampDouble(pixels, minScrollExtent, maxScrollExtent),
-              viewportDimension,
-            )
+              getPageFromPixels(
+                clampDouble(pixels, minScrollExtent, maxScrollExtent),
+                viewportDimension,
+              )
         : null;
   }
 
@@ -935,15 +935,14 @@ class _PageViewState extends State<PageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
-    final ScrollPhysics physics = _ForceImplicitScrollPhysics(
-      allowImplicitScrolling: widget.allowImplicitScrolling,
-    ).applyTo(
-      widget.pageSnapping
-          ? _kPagePhysics.applyTo(
-            widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
-          )
-          : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
-    );
+    final ScrollPhysics physics =
+        _ForceImplicitScrollPhysics(allowImplicitScrolling: widget.allowImplicitScrolling).applyTo(
+          widget.pageSnapping
+              ? _kPagePhysics.applyTo(
+                  widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+                )
+              : widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context),
+        );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {

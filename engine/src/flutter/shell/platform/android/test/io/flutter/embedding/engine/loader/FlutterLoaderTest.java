@@ -5,7 +5,6 @@
 package io.flutter.embedding.engine.loader;
 
 import static android.os.Looper.getMainLooper;
-import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
@@ -16,13 +15,10 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
-import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
@@ -38,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterLoaderTest {
@@ -403,19 +398,5 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(shaderModeArg));
-  }
-
-  @Test
-  @TargetApi(API_LEVELS.API_23)
-  @Config(sdk = API_LEVELS.API_23)
-  public void itReportsFpsToVsyncWaiterAndroidM() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-
-    Context appContextSpy = spy(ctx);
-
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(appContextSpy);
-    verify(appContextSpy, never()).getSystemService(anyString());
   }
 }

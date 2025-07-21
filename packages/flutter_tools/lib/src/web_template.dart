@@ -10,7 +10,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 
 /// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -36,8 +36,9 @@ class WebTemplate {
 
   static String baseHref(String html) {
     final Element? baseElement = parse(html).querySelector('base');
-    final String? baseHref =
-        baseElement?.attributes == null ? null : baseElement!.attributes['href'];
+    final String? baseHref = baseElement?.attributes == null
+        ? null
+        : baseElement!.attributes['href'];
 
     if (baseHref == null || baseHref == kBaseHrefPlaceholder) {
       return '';
@@ -86,8 +87,9 @@ class WebTemplate {
   }
 
   WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
-    final int lineCount =
-        RegExp(r'(\r\n|\r|\n)').allMatches(_content.substring(0, match.start)).length;
+    final int lineCount = RegExp(
+      r'(\r\n|\r|\n)',
+    ).allMatches(_content.substring(0, match.start)).length;
     return WebTemplateWarning(warningText, lineCount + 1);
   }
 
@@ -155,7 +157,7 @@ String stripTrailingSlash(String path) {
   return path;
 }
 
-const String _kBasePathExample = '''
+const _kBasePathExample = '''
 For example, to serve from the root use:
 
     <base href="/">

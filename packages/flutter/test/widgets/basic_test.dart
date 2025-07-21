@@ -26,7 +26,10 @@ void main() {
       addTearDown(image1.dispose);
 
       await tester.pumpWidget(
-        Directionality(textDirection: TextDirection.ltr, child: RawImage(image: image1)),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RawImage(image: image1),
+        ),
       );
       final RenderImage renderObject = tester.firstRenderObject<RenderImage>(find.byType(RawImage));
 
@@ -48,8 +51,9 @@ void main() {
       expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
-      final ui.Image image2 =
-          (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      final ui.Image image2 = (await tester.runAsync<ui.Image>(
+        () => createTestImage(width: 2, height: 2),
+      ))!;
       addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
@@ -751,6 +755,20 @@ void main() {
       expect(listItemNode.role, SemanticsRole.listItem);
     });
 
+    testWidgets('Semantics can use form', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key1, role: SemanticsRole.form, container: true),
+          ),
+        ),
+      );
+      final SemanticsNode formNode = tester.getSemantics(find.byKey(key1));
+
+      expect(formNode.role, SemanticsRole.form);
+    });
+
     testWidgets('Semantics can merge attributed strings with non attributed string', (
       WidgetTester tester,
     ) async {
@@ -840,7 +858,9 @@ void main() {
       'Semantics with decreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(decreasedValue: 'test value', child: const Placeholder())),
+          MaterialApp(
+            home: Semantics(decreasedValue: 'test value', child: const Placeholder()),
+          ),
         );
         expect(tester.takeException(), isNull);
       },
@@ -850,7 +870,9 @@ void main() {
       'Semantics with increasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Semantics(increasedValue: 'test value', child: const Placeholder())),
+          MaterialApp(
+            home: Semantics(increasedValue: 'test value', child: const Placeholder()),
+          ),
         );
         expect(tester.takeException(), isNull);
       },
@@ -1022,8 +1044,9 @@ void main() {
 
   testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
-    final RenderConstraintsTransformBox renderObject =
-        tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+    final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
+        .whereType<RenderConstraintsTransformBox>()
+        .first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(const UnconstrainedBox(clipBehavior: Clip.antiAlias));
@@ -1042,19 +1065,19 @@ void main() {
         Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200, maxWidth: 200),
-            child:
-                clip == null
-                    ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
-                    : UnconstrainedBox(
-                      clipBehavior: clip,
-                      child: const SizedBox(width: 400, height: 400),
-                    ),
+            child: clip == null
+                ? const UnconstrainedBox(child: SizedBox(width: 400, height: 400))
+                : UnconstrainedBox(
+                    clipBehavior: clip,
+                    child: const SizedBox(width: 400, height: 400),
+                  ),
           ),
         ),
       );
 
-      final RenderConstraintsTransformBox renderObject =
-          tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
+      final RenderConstraintsTransformBox renderObject = tester.allRenderObjects
+          .whereType<RenderConstraintsTransformBox>()
+          .first;
 
       // Defaults to Clip.none
       expect(renderObject.clipBehavior, equals(clip ?? Clip.none), reason: 'for clip = $clip');
@@ -1142,7 +1165,11 @@ void main() {
         const Flex(
           direction: Axis.horizontal,
           textDirection: TextDirection.ltr,
-          children: <Widget>[SizedBox.shrink(child: ColoredBox(color: colorToPaint, child: child))],
+          children: <Widget>[
+            SizedBox.shrink(
+              child: ColoredBox(color: colorToPaint, child: child),
+            ),
+          ],
         ),
       );
       expect(find.byType(ColoredBox), findsOneWidget);
@@ -1549,11 +1576,10 @@ void main() {
       children: <Widget>[Text('Hamilton'), Text('Lafayette'), Text('Mulligan')],
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,

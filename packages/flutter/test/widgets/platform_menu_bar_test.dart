@@ -101,8 +101,8 @@ void main() {
     });
     testWidgets(
       'asserts when more than one has locked the delegate',
-      experimentalLeakTesting:
-          LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
@@ -150,11 +150,10 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       item.debugFillProperties(builder);
 
-      final List<String> description =
-          builder.properties
-              .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-              .map((DiagnosticsNode node) => node.toString())
-              .toList();
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description, <String>['label: "label"']);
     });

@@ -316,5 +316,5 @@ int _toABGR(int rgba) =>
 
 // Converts a 32 bit abgr pixel to a 32 bit rgba pixel
 int _toRGBA(int abgr) =>
-// This is just a mirror of the other conversion.
-_toABGR(abgr);
+    // This is just a mirror of the other conversion.
+    _toABGR(abgr);

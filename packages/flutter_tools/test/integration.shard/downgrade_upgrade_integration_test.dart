@@ -11,15 +11,15 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String _kInitialVersion = '3.0.0';
-const String _kBranch = 'beta';
+const _kInitialVersion = '3.0.0';
+const _kBranch = 'beta';
 
-final Stdio stdio = Stdio();
-final BufferLogger logger = BufferLogger.test(
+final stdio = Stdio();
+final logger = BufferLogger.test(
   terminal: AnsiTerminal(platform: platform, stdio: stdio),
   outputPreferences: OutputPreferences.test(wrapText: true),
 );
-final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: logger);
+final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
@@ -45,7 +45,8 @@ void main() {
       expect(
         exitCode,
         0,
-        reason: '''
+        reason:
+            '''
 trace:
 ${logger.traceText}
 

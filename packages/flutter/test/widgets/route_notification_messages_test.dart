@@ -32,20 +32,18 @@ class OnTapPage extends StatelessWidget {
 void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
     };
 
     final List<MethodCall> log = <MethodCall>[];
@@ -121,7 +119,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          pages: const <Page<void>>[TestPage(name: '/'), TestPage(name: '/abc')],
+          pages: const <Page<void>>[
+            TestPage(name: '/'),
+            TestPage(name: '/abc'),
+          ],
           onPopPage: (Route<void> route, void result) => false,
         ),
       ),
@@ -133,20 +134,18 @@ void main() {
 
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/B');
-            },
-          ),
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/B');
+        },
+      ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 

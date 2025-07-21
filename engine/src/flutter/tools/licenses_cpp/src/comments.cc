@@ -349,9 +349,9 @@ struct yy_trans_info {
   flex_int32_t yy_verify;
   flex_int32_t yy_nxt;
 };
-static const flex_int16_t yy_accept[27] = {0, 0, 0, 0, 0, 0, 0, 9, 7,
-                                           7, 1, 7, 4, 4, 6, 6, 0, 1,
-                                           0, 1, 2, 3, 0, 5, 0, 5, 0};
+static const flex_int16_t yy_accept[37] = {
+    0, 0, 0, 0, 0, 0, 0, 9, 7, 7, 1, 7, 8, 4, 8, 6, 6, 0, 1,
+    0, 1, 2, 0, 4, 0, 0, 0, 5, 0, 2, 2, 0, 3, 0, 5, 0, 0};
 
 static const YY_CHAR yy_ec[256] = {
     0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -371,23 +371,27 @@ static const YY_CHAR yy_ec[256] = {
 
 static const YY_CHAR yy_meta[7] = {0, 1, 1, 2, 1, 1, 3};
 
-static const flex_int16_t yy_base[34] = {
-    0, 0, 0, 24, 12, 12, 7, 8, 34, 5,  0,  7,  34, 0,  34, 12, 0,
-    0, 0, 0, 34, 34, 0,  0, 0, 0,  34, 18, 21, 24, 27, 2,  30, 0};
+static const flex_int16_t yy_base[45] = {
+    0,  0,  0,  4, 7, 18, 13, 14, 62, 11, 0,  13, 17, 62, 20,
+    62, 25, 0,  0, 0, 0,  29, 5,  62, 0,  32, 0,  0,  0,  62,
+    0,  35, 62, 2, 0, 0,  62, 40, 43, 46, 49, 52, 55, 58, 0};
 
-static const flex_int16_t yy_def[34] = {
-    0,  27, 27, 28, 28, 29, 29, 26, 26, 26, 30, 26, 26, 31, 26, 26, 9,
-    30, 11, 30, 26, 26, 15, 32, 33, 32, 0,  26, 26, 26, 26, 26, 26, 26};
+static const flex_int16_t yy_def[45] = {
+    0,  37, 37, 38, 38, 39, 39, 36, 36, 36, 40, 36, 41, 36, 41,
+    36, 36, 9,  40, 11, 40, 36, 14, 36, 14, 42, 16, 43, 44, 36,
+    21, 42, 36, 31, 43, 31, 0,  36, 36, 36, 36, 36, 36, 36, 36};
 
-static const flex_int16_t yy_nxt[41] = {
-    0,  26, 9,  23, 10, 21, 11, 16, 26, 17, 15, 18, 20, 17,
-    22, 15, 23, 13, 24, 8,  8,  8,  12, 12, 12, 14, 14, 14,
-    19, 13, 19, 25, 26, 25, 7,  26, 26, 26, 26, 26, 26};
+static const flex_int16_t yy_nxt[69] = {
+    0,  36, 9,  27, 10, 36, 11, 13, 35, 14, 13, 22, 14, 17, 36, 18, 16, 19,
+    21, 18, 23, 16, 24, 23, 36, 24, 25, 26, 36, 27, 36, 28, 29, 36, 30, 32,
+    36, 33, 32, 36, 33, 8,  8,  8,  12, 12, 12, 15, 15, 15, 20, 36, 20, 22,
+    22, 22, 31, 31, 31, 34, 36, 34, 7,  36, 36, 36, 36, 36, 36};
 
-static const flex_int16_t yy_chk[41] = {
-    0,  0, 2,  33, 2,  31, 2,  9,  7,  9,  6,  9,  11, 11,
-    15, 5, 15, 4,  15, 27, 27, 27, 28, 28, 28, 29, 29, 29,
-    30, 3, 30, 32, 0,  32, 26, 26, 26, 26, 26, 26, 26};
+static const flex_int16_t yy_chk[69] = {
+    0,  0,  2,  44, 2,  0,  2,  3,  33, 3,  4,  22, 4,  9,  7,  9, 6,  9,
+    11, 11, 12, 5,  12, 14, 0,  14, 14, 16, 0,  16, 0,  16, 21, 0, 21, 25,
+    0,  25, 31, 0,  31, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 0, 40, 41,
+    41, 41, 42, 42, 42, 43, 0,  43, 36, 36, 36, 36, 36, 36, 36};
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -409,6 +413,7 @@ static const flex_int16_t yy_chk[41] = {
 
 #line 20 "comments.l"
 #include "flutter/tools/licenses_cpp/src/comments.h"
+#include "flutter/tools/licenses_cpp/src/comments_util.h"
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -420,9 +425,9 @@ struct LexerContext {
   std::function<void(std::string_view)> callback;
   std::string buffer;
 };
-#line 461 "comments.cc"
+#line 471 "comments.cc"
 
-#line 463 "comments.cc"
+#line 473 "comments.cc"
 
 #define INITIAL 0
 #define C_COMMENT 1
@@ -678,9 +683,9 @@ YY_DECL {
   }
 
   {
-#line 39 "comments.l"
+#line 40 "comments.l"
 
-#line 728 "comments.cc"
+#line 738 "comments.cc"
 
     while (/*CONSTCOND*/ 1) /* loops until end-of-file is reached */
     {
@@ -705,12 +710,12 @@ YY_DECL {
         }
         while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
           yy_current_state = (int)yy_def[yy_current_state];
-          if (yy_current_state >= 27)
+          if (yy_current_state >= 37)
             yy_c = yy_meta[yy_c];
         }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
         ++yy_cp;
-      } while (yy_base[yy_current_state] != 34);
+      } while (yy_base[yy_current_state] != 62);
 
     yy_find_action:
       yy_act = yy_accept[yy_current_state];
@@ -734,27 +739,28 @@ YY_DECL {
 
         case 1:
           YY_RULE_SETUP
-#line 40 "comments.l"
+#line 41 "comments.l"
           {
             BEGIN(BLOCK);
-            yyextra->buffer.append(yytext, yyleng);
+            CommentsUtil::AddTrimLine(&yyextra->buffer, yytext, yyleng);
           }
           YY_BREAK
         case 2:
+          /* rule 2 can match eol */
           YY_RULE_SETUP
-#line 44 "comments.l"
+#line 45 "comments.l"
           {
             BEGIN(C_COMMENT);
-            yyextra->buffer.append(yytext, yyleng);
           }
           YY_BREAK
 
         case 3:
+          /* rule 3 can match eol */
           YY_RULE_SETUP
 #line 50 "comments.l"
           {
             BEGIN(INITIAL);
-            yyextra->buffer.append(yytext, yyleng);
+            CommentsUtil::AddCEndTrimLine(&yyextra->buffer, yytext, yyleng - 2);
             yyextra->callback(yyextra->buffer);
             yyextra->buffer.clear();
           }
@@ -764,7 +770,7 @@ YY_DECL {
           YY_RULE_SETUP
 #line 56 "comments.l"
           {
-            yyextra->buffer.append(yytext, yyleng);
+            CommentsUtil::AddCTrimLine(&yyextra->buffer, yytext, yyleng);
           }
           YY_BREAK
 
@@ -773,13 +779,14 @@ YY_DECL {
           YY_RULE_SETUP
 #line 62 "comments.l"
           {
-            yyextra->buffer.append(yytext, yyleng);
+            yyextra->buffer.append("\n", 1);
+            CommentsUtil::AddTrimLine(&yyextra->buffer, yytext + 1, yyleng - 1);
           }
           YY_BREAK
         case 6:
           /* rule 6 can match eol */
           YY_RULE_SETUP
-#line 65 "comments.l"
+#line 66 "comments.l"
           {
             BEGIN(INITIAL);
             yyextra->callback(yyextra->buffer);
@@ -790,16 +797,16 @@ YY_DECL {
         case 7:
           /* rule 7 can match eol */
           YY_RULE_SETUP
-#line 72 "comments.l"
+#line 73 "comments.l"
           {
           }
           YY_BREAK
         case 8:
           YY_RULE_SETUP
-#line 73 "comments.l"
+#line 74 "comments.l"
           ECHO;
           YY_BREAK
-#line 853 "comments.cc"
+#line 865 "comments.cc"
         case YY_STATE_EOF(INITIAL):
         case YY_STATE_EOF(C_COMMENT):
         case YY_STATE_EOF(BLOCK):
@@ -1079,7 +1086,7 @@ static yy_state_type yy_get_previous_state(yyscan_t yyscanner) {
     }
     while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
       yy_current_state = (int)yy_def[yy_current_state];
-      if (yy_current_state >= 27)
+      if (yy_current_state >= 37)
         yy_c = yy_meta[yy_c];
     }
     yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1107,11 +1114,11 @@ static yy_state_type yy_try_NUL_trans(yy_state_type yy_current_state,
   }
   while (yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state) {
     yy_current_state = (int)yy_def[yy_current_state];
-    if (yy_current_state >= 27)
+    if (yy_current_state >= 37)
       yy_c = yy_meta[yy_c];
   }
   yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-  yy_is_jam = (yy_current_state == 26);
+  yy_is_jam = (yy_current_state == 36);
 
   (void)yyg;
   return yy_is_jam ? 0 : yy_current_state;
@@ -1908,7 +1915,7 @@ void yyfree(void* ptr, yyscan_t yyscanner) {
 
 #define YYTABLES_NAME "yytables"
 
-#line 73 "comments.l"
+#line 74 "comments.l"
 
 void IterateComments(const char* buffer,
                      size_t size,

@@ -9,7 +9,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/fl_renderable.h"
 
 G_BEGIN_DECLS
 
@@ -28,19 +28,19 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
 
 /**
  * fl_compositor_software_new:
- * @engine: an #FlEngine.
  *
  * Creates a new software rendering compositor.
  *
  * Returns: a new #FlCompositorSoftware.
  */
-FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine);
+FlCompositorSoftware* fl_compositor_software_new();
 
 /**
  * fl_compositor_software_render:
  * @compositor: an #FlCompositorSoftware.
- * @view_id: the view to render.
  * @cr: the cairo context to draw to.
+ * @width: output width in pixels.
+ * @height: output height in pixels.
  * @scale_factor: pixel scale factor.
  *
  * Render the current frame.
@@ -48,8 +48,9 @@ FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine);
  * Returns: TRUE if rendered.
  */
 gboolean fl_compositor_software_render(FlCompositorSoftware* compositor,
-                                       FlutterViewId view_id,
                                        cairo_t* cr,
+                                       size_t width,
+                                       size_t height,
                                        gint scale_factor);
 
 G_END_DECLS

@@ -119,60 +119,57 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo>
           PopupMenuButton<TabsDemoStyle>(
             tooltip: 'Popup Menu',
             onSelected: changeDemoStyle,
-            itemBuilder:
-                (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
-                  const PopupMenuItem<TabsDemoStyle>(
-                    value: TabsDemoStyle.iconsAndText,
-                    child: Text('Icons and text'),
-                  ),
-                  const PopupMenuItem<TabsDemoStyle>(
-                    value: TabsDemoStyle.iconsOnly,
-                    child: Text('Icons only'),
-                  ),
-                  const PopupMenuItem<TabsDemoStyle>(
-                    value: TabsDemoStyle.textOnly,
-                    child: Text('Text only'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
+              const PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.iconsAndText,
+                child: Text('Icons and text'),
+              ),
+              const PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.iconsOnly,
+                child: Text('Icons only'),
+              ),
+              const PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.textOnly,
+                child: Text('Text only'),
+              ),
+            ],
           ),
         ],
         bottom: TabBar(
           controller: _controller,
           isScrollable: true,
           indicator: getIndicator(),
-          tabs:
-              _allPages.map<Tab>((_Page page) {
-                return switch (_demoStyle) {
-                  TabsDemoStyle.iconsAndText => Tab(text: page.text, icon: Icon(page.icon)),
-                  TabsDemoStyle.iconsOnly => Tab(icon: Icon(page.icon)),
-                  TabsDemoStyle.textOnly => Tab(text: page.text),
-                };
-              }).toList(),
+          tabs: _allPages.map<Tab>((_Page page) {
+            return switch (_demoStyle) {
+              TabsDemoStyle.iconsAndText => Tab(text: page.text, icon: Icon(page.icon)),
+              TabsDemoStyle.iconsOnly => Tab(icon: Icon(page.icon)),
+              TabsDemoStyle.textOnly => Tab(text: page.text),
+            };
+          }).toList(),
         ),
       ),
       body: TabBarView(
         controller: _controller,
-        children:
-            _allPages.map<Widget>((_Page page) {
-              return SafeArea(
-                top: false,
-                bottom: false,
-                child: Container(
-                  key: ObjectKey(page.icon),
-                  padding: const EdgeInsets.all(12.0),
-                  child: Card(
-                    child: Center(
-                      child: Icon(
-                        page.icon,
-                        color: iconColor,
-                        size: 128.0,
-                        semanticLabel: 'Placeholder for ${page.text} tab',
-                      ),
-                    ),
+        children: _allPages.map<Widget>((_Page page) {
+          return SafeArea(
+            top: false,
+            bottom: false,
+            child: Container(
+              key: ObjectKey(page.icon),
+              padding: const EdgeInsets.all(12.0),
+              child: Card(
+                child: Center(
+                  child: Icon(
+                    page.icon,
+                    color: iconColor,
+                    size: 128.0,
+                    semanticLabel: 'Placeholder for ${page.text} tab',
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

@@ -140,7 +140,7 @@ struct RoundRect {
   RoundingRadii radii_;
 
   // Helps with RoundRectPathSource and DiffRoundRectPathSource
-  void Dispatch(PathReceiver& receiver, bool include_end = true) const;
+  void Dispatch(PathReceiver& receiver) const;
 
   friend class RoundRectPathSource;
   friend class DiffRoundRectPathSource;

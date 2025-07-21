@@ -387,7 +387,10 @@ void main() {
     (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        Theme(data: theme, child: const Center(child: CircularProgressIndicator())),
+        Theme(
+          data: theme,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       );
 
       expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -583,7 +586,12 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: red));
 
@@ -652,7 +660,12 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: blue));
 
     // With just color provided
-    await tester.pumpWidget(Theme(data: theme, child: const RefreshProgressIndicator(color: red)));
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const RefreshProgressIndicator(color: red),
+      ),
+    );
     expect(find.byType(RefreshProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(RefreshProgressIndicator), paints..arc(color: red));
 
@@ -1134,10 +1147,9 @@ void main() {
       );
 
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-      final double actualProgress =
-          tester
-              .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
-              .progress;
+      final double actualProgress = tester
+          .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
+          .progress;
       expect(actualProgress, 0.5);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -1149,22 +1161,23 @@ void main() {
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
+      const Color color = Color(0xFF5D3FD3);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
           home: const Scaffold(
-            body: Material(
-              child: CircularProgressIndicator.adaptive(backgroundColor: Color(0xFF5D3FD3)),
-            ),
+            body: Material(child: CircularProgressIndicator.adaptive(backgroundColor: color)),
           ),
         ),
       );
 
       expect(
         find.byType(CupertinoActivityIndicator),
-        paints..rsuperellipse(
-          rsuperellipse: const RSuperellipse.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
-          color: const Color(0x935D3FD3),
+        paints..rrect(
+          rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+          // The value of 47 comes from the alpha that is applied to the first
+          // tick.
+          color: color.withAlpha(47),
         ),
       );
     },
@@ -1214,7 +1227,11 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(home: Theme(data: theme, child: progressTheme)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(data: theme, child: progressTheme),
+      ),
+    );
     final Widget wrappedTheme = progressTheme.wrap(builderContext, Container());
 
     // Make sure the returned widget is a new ProgressIndicatorTheme instance
@@ -1226,7 +1243,9 @@ void main() {
 
   testWidgets('Material3 - Default size of CircularProgressIndicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: Material(child: CircularProgressIndicator()))),
+      const MaterialApp(
+        home: Scaffold(body: Material(child: CircularProgressIndicator())),
+      ),
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));

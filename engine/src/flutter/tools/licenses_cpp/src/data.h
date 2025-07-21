@@ -5,7 +5,10 @@
 #ifndef FLUTTER_TOOLS_LICENSES_CPP_SRC_DATA_H_
 #define FLUTTER_TOOLS_LICENSES_CPP_SRC_DATA_H_
 
+#include <filesystem>
+
 #include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
+#include "flutter/tools/licenses_cpp/src/catalog.h"
 #include "flutter/tools/licenses_cpp/src/filter.h"
 
 /// In memory representation of the contents of the data directory
@@ -15,6 +18,8 @@ struct Data {
   static absl::StatusOr<Data> Open(std::string_view data_dir);
   Filter include_filter;
   Filter exclude_filter;
+  Catalog catalog;
+  std::filesystem::path secondary_dir;
 };
 
 #endif  // FLUTTER_TOOLS_LICENSES_CPP_SRC_DATA_H_

@@ -59,6 +59,9 @@ Future<void> pumpViews({required WidgetTester tester, required List<FlutterView>
 
   return tester.pumpWidget(
     wrapWithView: false,
-    Directionality(textDirection: TextDirection.ltr, child: ViewCollection(views: viewWidgets)),
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: ViewCollection(views: viewWidgets),
+    ),
   );
 }

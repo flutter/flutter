@@ -214,7 +214,9 @@ void main() {
 
   testWidgets('InputChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: InputChip(label: Text('input chip')))),
+      const MaterialApp(
+        home: Material(child: InputChip(label: Text('input chip'))),
+      ),
     );
 
     await tester.tap(find.byType(InputChip));
@@ -375,7 +377,9 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(
-      wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)),
+      wrapForChip(
+        child: const InputChip(label: label, clipBehavior: Clip.antiAlias),
+      ),
     );
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
@@ -429,7 +433,9 @@ void main() {
 
   testWidgets('Delete button is visible on disabled InputChip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      wrapForChip(child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {})),
+      wrapForChip(
+        child: InputChip(isEnabled: false, label: const Text('Label'), onDeleted: () {}),
+      ),
     );
 
     // Delete button should be visible.
@@ -605,7 +611,9 @@ void main() {
 
     await tester.pumpWidget(
       wrapForChip(
-        child: const Center(child: InputChip(mouseCursor: customCursor, label: Text('Chip'))),
+        child: const Center(
+          child: InputChip(mouseCursor: customCursor, label: Text('Chip')),
+        ),
       ),
     );
 

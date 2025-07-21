@@ -730,10 +730,9 @@ void setThemeColor(ui.Color? color) {
 
   if (color != null) {
     if (theme == null) {
-      theme =
-          createDomHTMLMetaElement()
-            ..id = 'flutterweb-theme'
-            ..name = 'theme-color';
+      theme = createDomHTMLMetaElement()
+        ..id = 'flutterweb-theme'
+        ..name = 'theme-color';
       domDocument.head!.append(theme);
     }
     theme.content = color.toCssString();
@@ -747,10 +746,9 @@ void ensureMetaTag(String name, String content) {
   final DomElement? existingTag = domDocument.querySelector('meta[name=$name][content=$content]');
 
   if (existingTag == null) {
-    final DomHTMLMetaElement meta =
-        createDomHTMLMetaElement()
-          ..name = name
-          ..content = content;
+    final DomHTMLMetaElement meta = createDomHTMLMetaElement()
+      ..name = name
+      ..content = content;
     domDocument.head!.append(meta);
   }
 }

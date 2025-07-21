@@ -621,22 +621,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
-        final LongPressGestureRecognizer recognizer =
-            _longPressRecognizer ??= LongPressGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final LongPressGestureRecognizer recognizer = _longPressRecognizer ??=
+            LongPressGestureRecognizer(debugOwner: this, supportedDevices: triggerModeDeviceKinds);
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
           ..onLongPress = _handleLongPress
           ..onLongPressUp = _handlePressUp
           ..addPointer(event);
       case TooltipTriggerMode.tap:
-        final TapGestureRecognizer recognizer =
-            _tapRecognizer ??= TapGestureRecognizer(
-              debugOwner: this,
-              supportedDevices: triggerModeDeviceKinds,
-            );
+        final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
+          debugOwner: this,
+          supportedDevices: triggerModeDeviceKinds,
+        );
         recognizer
           ..onTapCancel = _handleTapToDismiss
           ..onTap = _handleTap
@@ -740,10 +736,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // before dispatching any `onEnter` events, so `event.device` must have
     // already been removed from _activeHoveringPointerDevices of the tooltips
     // that are no longer being hovered over.
-    final List<TooltipState> tooltipsToDismiss =
-        Tooltip._openedTooltips
-            .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
-            .toList();
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+        .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty)
+        .toList();
     for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
       tooltip._scheduleDismissTooltip(withDelay: Duration.zero);

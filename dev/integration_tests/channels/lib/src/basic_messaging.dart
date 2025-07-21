@@ -85,8 +85,9 @@ Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
     );
     final Object response = await channel.send(message) as Object;
 
-    final TestStatus testStatus =
-        TestStepResult.deepEquals(message, response) ? TestStatus.ok : TestStatus.failed;
+    final TestStatus testStatus = TestStepResult.deepEquals(message, response)
+        ? TestStatus.ok
+        : TestStatus.failed;
     sendPort.send(TestStepResult(name, description, testStatus));
   } catch (ex) {
     sendPort.send(TestStepResult(name, description, TestStatus.failed, error: ex.toString()));

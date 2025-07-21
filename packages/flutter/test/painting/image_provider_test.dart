@@ -110,10 +110,9 @@ void main() {
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file =
-        fs.file('/blue.png')
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(kBlueSquarePng);
+    final File file = fs.file('/blue.png')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
     final MultiFrameImageStreamCompleter completer =
@@ -185,7 +184,10 @@ void main() {
   }, skip: kIsWeb); // [intended] The web cannot load files.
 
   test('ImageProvider toStrings', () async {
-    expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
+    expect(
+      const NetworkImage('test', scale: 1.21).toString(),
+      'NetworkImage("test", scale: 1.2, webHtmlElementStrategy: never, headers: null)',
+    );
     expect(
       const ExactAssetImage('test', scale: 1.21).toString(),
       'ExactAssetImage(name: "test", scale: 1.2, bundle: null)',

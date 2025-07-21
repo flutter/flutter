@@ -783,7 +783,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setParent(rootAccessibilityView);
     }
 
-    if (semanticsNode.previousNodeId != -1 && Build.VERSION.SDK_INT >= API_LEVELS.API_22) {
+    if (semanticsNode.previousNodeId != -1) {
+      // Requires at least android api 22.
       result.setTraversalAfter(rootAccessibilityView, semanticsNode.previousNodeId);
     }
 
@@ -931,6 +932,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       if (semanticsNode.tooltip != null) {
         result.setTooltipText(semanticsNode.tooltip);
+        // Tooltips are not announced when a node is focused resulting in no
+        // message. This is only announced after a long press and the tooltip
+        // is shown.
+        // To be consistent with platforms other than Android and prevent
+        // TalkBack from announcing the node as unlabeled, a content
+        // description is set.
+        if (semanticsNode.getValueLabelHint() == null) {
+          result.setContentDescription(semanticsNode.tooltip);
+        }
       }
     }
 

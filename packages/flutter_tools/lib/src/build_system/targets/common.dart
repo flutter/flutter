@@ -11,6 +11,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
@@ -59,7 +60,7 @@ class CopyFlutterBundle extends Target {
     }
     final String? flavor = environment.defines[kFlavor];
 
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -149,7 +150,7 @@ class KernelSnapshot extends Target {
     // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
-  static const String depfile = 'kernel_snapshot_program.d';
+  static const depfile = 'kernel_snapshot_program.d';
 
   @override
   List<String> get depfiles => const <String>[depfile];
@@ -160,11 +161,11 @@ class KernelSnapshot extends Target {
     DartPluginRegistrantTarget(),
   ];
 
-  static const String dillName = 'app.dill';
+  static const dillName = 'app.dill';
 
   @override
   Future<void> build(Environment environment) async {
-    final KernelCompiler compiler = KernelCompiler(
+    final compiler = KernelCompiler(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       processManager: environment.processManager,
@@ -179,13 +180,13 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile =
         environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = findPackageConfigFileOrDefault(environment.projectDir);
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
-    final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
+    final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
 
     // This configuration is all optional.
@@ -223,6 +224,8 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final String? targetOS = switch (targetPlatform) {
@@ -236,6 +239,7 @@ class KernelSnapshot extends Target {
       TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
+      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -290,10 +294,13 @@ class KernelSnapshot extends Target {
     // not get from the FLAVOR environment variable. This is because when built
     // from Xcode, the scheme/flavor can be changed through the UI and is not
     // reflected in the environment variable.
-    if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+    final FlutterDarwinPlatform? darwinPlatform = FlutterDarwinPlatform.fromTargetPlatform(
+      targetPlatform,
+    );
+
+    if (darwinPlatform != null) {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-      final XcodeBasedProject xcodeProject =
-          targetPlatform == TargetPlatform.ios ? flutterProject.ios : flutterProject.macos;
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
       flavor = await xcodeProject.parseFlavorFromConfiguration(environment);
     } else {
       flavor = environment.defines[kFlavor];
@@ -325,7 +332,7 @@ abstract class AotElfBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -345,10 +352,10 @@ abstract class AotElfBase extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
 
     if (codeSizeDirectory != null) {
@@ -482,7 +489,7 @@ abstract final class Lipo {
       }
     }
 
-    final List<String> lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
+    final lipoArgs = <String>['lipo', ...inputPaths, '-create', '-output', resultPath];
 
     final ProcessResult result = await environment.processManager.run(lipoArgs);
     if (result.exitCode != 0) {

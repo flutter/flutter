@@ -24,14 +24,14 @@ import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
 
-const String _kFontManifest = 'FontManifest.json';
+const _kFontManifest = 'FontManifest.json';
 
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
-  bool cacheSymlinks = false;
+  var cacheSymlinks = false;
 
   /// Should DevFS assume that there are no symlinks to directories?
-  bool noDirectorySymlinks = false;
+  var noDirectorySymlinks = false;
 }
 
 DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
@@ -152,8 +152,8 @@ class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this._bytes);
 
   final List<int> _bytes;
-  final DateTime _creationTime = DateTime.now();
-  bool _isModified = true;
+  final _creationTime = DateTime.now();
+  var _isModified = true;
 
   List<int> get bytes => _bytes;
 
@@ -209,9 +209,9 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
 
   final String _string;
   final ZLibEncoder _compressor;
-  final DateTime _creationTime = DateTime.now();
+  final _creationTime = DateTime.now();
 
-  bool _isModified = true;
+  var _isModified = true;
 
   late final List<int> bytes = _compressor.convert(utf8.encode(_string));
 
@@ -287,9 +287,9 @@ class _DevFSHttpWriter implements DevFSWriter {
   // `await request.close()` since there is a known bug in Dart where it doesn't
   // always return a status code in response to a PUT request:
   // https://github.com/dart-lang/sdk/issues/43525.
-  static const int kMaxInFlight = 3;
+  static const kMaxInFlight = 3;
 
-  int _inFlight = 0;
+  var _inFlight = 0;
   late Map<Uri, DevFSContent> _outstanding;
   late Completer<void> _completer;
 
@@ -485,16 +485,16 @@ class DevFS {
 
   final String fsName;
   final Directory rootDirectory;
-  final Set<String> assetPathsToEvict = <String>{};
-  final Set<String> shaderPathsToEvict = <String>{};
+  final assetPathsToEvict = <String>{};
+  final shaderPathsToEvict = <String>{};
 
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
-  bool hasSetAssetDirectory = false;
+  var hasSetAssetDirectory = false;
 
   /// Whether the font manifest was uploaded during [update].
-  bool didUpdateFontManifest = false;
+  var didUpdateFontManifest = false;
 
-  List<Uri> sources = <Uri>[];
+  var sources = <Uri>[];
   DateTime? lastCompiled;
   DateTime? _previousCompiled;
   PackageConfig? lastPackageConfig;
@@ -503,8 +503,8 @@ class DevFS {
   Uri? get baseUri => _baseUri;
 
   Uri deviceUriToHostUri(Uri deviceUri) {
-    final String deviceUriString = deviceUri.toString();
-    final String baseUriString = baseUri.toString();
+    final deviceUriString = deviceUri.toString();
+    final baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
       final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
       return rootDirectory.uri.resolve(deviceUriSuffix);
@@ -583,15 +583,15 @@ class DevFS {
     bool resetCompiler = false,
     File? dartPluginRegistrant,
   }) async {
-    final DateTime candidateCompileTime = DateTime.now();
+    final candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
 
     // Update modified files
-    final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
-    bool assetBuildFailed = false;
-    int syncedBytes = 0;
+    final dirtyEntries = <Uri, DevFSContent>{};
+    final pendingAssetBuilds = <Future<void>>[];
+    var assetBuildFailed = false;
+    var syncedBytes = 0;
     if (resetCompiler) {
       generator.reset();
     }
@@ -667,18 +667,17 @@ class DevFS {
           case AssetKind.regular:
           case AssetKind.font:
           case null:
-            final Future<DevFSContent?> pending =
-                (() async {
-                  if (entry.transformers.isEmpty || kind != AssetKind.regular) {
-                    return entry.content;
-                  }
-                  return _assetTransformer.retransformAsset(
-                    inputAssetKey: archivePath,
-                    inputAssetContent: entry.content,
-                    transformerEntries: entry.transformers,
-                    workingDirectory: rootDirectory.path,
-                  );
-                })();
+            final Future<DevFSContent?> pending = (() async {
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                return entry.content;
+              }
+              return _assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: entry.content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectory.path,
+              );
+            })();
 
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
@@ -715,7 +714,7 @@ class DevFS {
       final String compiledBinary = compilerOutput.outputFilename;
       if (compiledBinary.isNotEmpty) {
         final Uri entryUri = _fileSystem.path.toUri(pathToReload);
-        final DevFSFileContent content = DevFSFileContent(_fileSystem.file(compiledBinary));
+        final content = DevFSFileContent(_fileSystem.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
@@ -771,7 +770,7 @@ class LocalDevFSWriter implements DevFSWriter {
           destination.parent.createSync(recursive: true);
         }
         if (devFSContent is DevFSFileContent) {
-          final File content = devFSContent.file as File;
+          final content = devFSContent.file as File;
           content.copySync(destination.path);
           continue;
         }

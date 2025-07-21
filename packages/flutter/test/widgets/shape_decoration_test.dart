@@ -180,7 +180,10 @@ Future<void> main() async {
             color: Colors.redAccent,
             shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
           ),
-          child: Directionality(textDirection: TextDirection.ltr, child: Stack(children: circles)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(children: circles),
+          ),
         ),
       );
     }

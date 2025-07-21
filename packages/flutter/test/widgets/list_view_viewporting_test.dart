@@ -495,12 +495,11 @@ void main() {
               slivers: <Widget>[
                 const SliverAppBar(expandedHeight: 250.0),
                 SliverList(
-                  delegate:
-                      ListView.builder(
-                        itemExtent: 100.0,
-                        itemCount: 100,
-                        itemBuilder: (_, _) => const SizedBox(height: 40.0, child: Text('hey')),
-                      ).childrenDelegate,
+                  delegate: ListView.builder(
+                    itemExtent: 100.0,
+                    itemCount: 100,
+                    itemBuilder: (_, _) => const SizedBox(height: 40.0, child: Text('hey')),
+                  ).childrenDelegate,
                 ),
               ],
             ),
@@ -524,12 +523,8 @@ void main() {
             scrollDirection: Axis.horizontal,
             itemExtent: 200.0,
             itemCount: 10,
-            itemBuilder:
-                (_, int i) => Container(
-                  height: 200.0,
-                  width: 200.0,
-                  color: i.isEven ? Colors.black : Colors.red,
-                ),
+            itemBuilder: (_, int i) =>
+                Container(height: 200.0, width: 200.0, color: i.isEven ? Colors.black : Colors.red),
           ),
         ),
       ),

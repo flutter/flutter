@@ -38,23 +38,24 @@ class TextMagnifier extends StatefulWidget {
   /// shows the editing handles only on iOS.
   static TextMagnifierConfiguration adaptiveMagnifierConfiguration = TextMagnifierConfiguration(
     shouldDisplayHandlesInMagnifier: defaultTargetPlatform == TargetPlatform.iOS,
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
-        case TargetPlatform.android:
-          return TextMagnifier(magnifierInfo: magnifierInfo);
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    },
+    magnifierBuilder:
+        (
+          BuildContext context,
+          MagnifierController controller,
+          ValueNotifier<MagnifierInfo> magnifierInfo,
+        ) {
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.iOS:
+              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
+            case TargetPlatform.android:
+              return TextMagnifier(magnifierInfo: magnifierInfo);
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              return null;
+          }
+        },
   );
 
   /// The duration that the position is animated if [TextMagnifier] just switched
@@ -230,10 +231,9 @@ class _TextMagnifierState extends State<TextMagnifier> {
       left: _magnifierPosition!.dx,
       // Material magnifier typically does not animate, unless we jump between lines,
       // in which case we animate between lines.
-      duration:
-          _positionShouldBeAnimated
-              ? TextMagnifier.jumpBetweenLinesAnimationDuration
-              : Duration.zero,
+      duration: _positionShouldBeAnimated
+          ? TextMagnifier.jumpBetweenLinesAnimationDuration
+          : Duration.zero,
       child: Magnifier(additionalFocalPointOffset: _extraFocalPointOffset),
     );
   }

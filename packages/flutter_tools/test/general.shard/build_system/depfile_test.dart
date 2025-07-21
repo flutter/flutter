@@ -19,7 +19,8 @@ void main() {
   });
 
   testWithoutContext('Can parse depfile from file', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync('''
 a.txt: b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -29,7 +30,8 @@ a.txt: b.txt
   });
 
   testWithoutContext('Can parse depfile with multiple inputs', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync('''
 a.txt: b.txt c.txt d.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -39,7 +41,8 @@ a.txt: b.txt c.txt d.txt
   });
 
   testWithoutContext('Can parse depfile with multiple outputs', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync('''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync('''
 a.txt c.txt d.txt: b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -50,11 +53,9 @@ a.txt c.txt d.txt: b.txt
 
   testWithoutContext('Can parse depfile with windows file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    final DepfileService depfileService = DepfileService(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-    );
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
 C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -73,16 +74,12 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     'Can escape depfile with windows file paths and spaces in directory names',
     () {
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final DepfileService depfileService = DepfileService(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-      );
-      final File inputFile =
-          fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
-            ..createSync(recursive: true);
-      final File outputFile =
-          fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute..createSync();
-      final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+      final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
+        ..createSync(recursive: true);
+      final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
+        ..createSync();
+      final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
       final File outputDepfile = fileSystem.file('depfile');
       depfileService.writeToFile(depfile, outputDepfile);
 
@@ -93,12 +90,11 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
   );
 
   testWithoutContext('Can escape depfile with spaces in directory names', () {
-    final File inputFile =
-        fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
-          ..createSync(recursive: true);
-    final File outputFile =
-        fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute..createSync();
-    final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
+      ..createSync(recursive: true);
+    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
+      ..createSync();
+    final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
     final File outputDepfile = fileSystem.file('depfile');
     depfileService.writeToFile(depfile, outputDepfile);
 
@@ -108,44 +104,41 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
   });
 
   testWithoutContext('Can produce normalized paths', () {
-    final List<(FileSystemStyle style, String input, String output, List<String> expects)> pairs =
-        <(FileSystemStyle style, String input, String output, List<String> expects)>[
-          (
-            FileSystemStyle.posix,
-            r'Hello Flutter\a.txt',
-            r'Hello Flutter\b.txt',
-            <String>[r'/Hello\ Flutter/a.txt', r'/Hello\ Flutter/b.txt'],
-          ),
-          (
-            FileSystemStyle.windows,
-            r'Hello Flutter/a.txt',
-            r'Hello Flutter/b.txt',
-            <String>[r'\\Hello\ Flutter\\a.txt', r'\\Hello\ Flutter\\b.txt'],
-          ),
-        ];
+    final pairs = <(FileSystemStyle style, String input, String output, List<String> expects)>[
+      (
+        FileSystemStyle.posix,
+        r'Hello Flutter\a.txt',
+        r'Hello Flutter\b.txt',
+        <String>[r'/Hello\ Flutter/a.txt', r'/Hello\ Flutter/b.txt'],
+      ),
+      (
+        FileSystemStyle.windows,
+        r'Hello Flutter/a.txt',
+        r'Hello Flutter/b.txt',
+        <String>[r'\\Hello\ Flutter\\a.txt', r'\\Hello\ Flutter\\b.txt'],
+      ),
+    ];
 
     for (final (FileSystemStyle style, String input, String output, List<String> expects)
         in pairs) {
       final FileSystem fileSystem = MemoryFileSystem.test(style: style);
-      final DepfileService depfileService = DepfileService(
-        logger: BufferLogger.test(),
-        fileSystem: fileSystem,
-      );
+      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
       final File inputFile = fileSystem.file(input).absolute..createSync(recursive: true);
       final File outputFile = fileSystem.file(output).absolute..createSync();
-      final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+      final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
       final File outputDepfile = fileSystem.file('depfile');
       depfileService.writeToFile(depfile, outputDepfile);
 
       final String outputString = outputDepfile.readAsStringSync();
-      for (final String path in expects) {
+      for (final path in expects) {
         expect(outputString, contains(path));
       }
     }
   });
 
   testWithoutContext('Resilient to weird whitespace', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
 a.txt
   : b.txt    c.txt
 
@@ -158,7 +151,8 @@ a.txt
   });
 
   testWithoutContext('Resilient to duplicate files', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
 a.txt: b.txt b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -168,7 +162,8 @@ a.txt: b.txt b.txt
   });
 
   testWithoutContext('Resilient to malformed file, missing :', () {
-    final File depfileSource = fileSystem.file('example.d')..writeAsStringSync(r'''
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
 a.text b.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
@@ -178,7 +173,8 @@ a.text b.txt
   });
 
   testWithoutContext('Can parse dart2js output format', () {
-    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')..writeAsStringSync(r'''
+    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')
+      ..writeAsStringSync(r'''
 file:///Users/foo/collection.dart
 file:///Users/foo/algorithms.dart
 file:///Users/foo/canonicalized_map.dart
@@ -198,7 +194,8 @@ file:///Users/foo/canonicalized_map.dart
   });
 
   testWithoutContext('Can parse handle invalid uri', () {
-    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')..writeAsStringSync('''
+    final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')
+      ..writeAsStringSync('''
 file:///Users/foo/collection.dart
 abcdevf
 file:///Users/foo/canonicalized_map.dart

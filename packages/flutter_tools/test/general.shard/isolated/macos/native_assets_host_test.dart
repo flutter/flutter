@@ -22,7 +22,7 @@ void main() {
   });
 
   test('framework name conflicts', () {
-    final Set<String> alreadyTakenNames = <String>{};
+    final alreadyTakenNames = <String>{};
     expect(frameworkUri('libfoo.dylib', alreadyTakenNames), equals(Uri.file('foo.framework/foo')));
     expect(
       frameworkUri('libfoo.dylib', alreadyTakenNames),

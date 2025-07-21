@@ -19,9 +19,9 @@ void main() {
   testWithoutContext(
     'UnpackWindows copies files to the correct windows/ cache directory',
     () async {
-      final Artifacts artifacts = Artifacts.test();
+      final artifacts = Artifacts.test();
       final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
         processManager: FakeProcessManager.any(),
@@ -45,7 +45,7 @@ void main() {
         Artifact.icuData,
         platform: TargetPlatform.windows_x64,
       );
-      final List<String> requiredFiles = <String>[
+      final requiredFiles = <String>[
         '$windowsDesktopPath\\flutter_export.h',
         '$windowsDesktopPath\\flutter_messenger.h',
         '$windowsDesktopPath\\flutter_windows.dll',
@@ -60,7 +60,7 @@ void main() {
         r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart',
       ];
 
-      for (final String path in requiredFiles) {
+      for (final path in requiredFiles) {
         fileSystem.file(path).createSync(recursive: true);
       }
       fileSystem.directory('windows').createSync();
@@ -90,18 +90,16 @@ void main() {
       // Depfile is created correctly.
       expect(outputDepfile, exists);
 
-      final List<String> inputPaths =
-          environment.depFileService
-              .parse(outputDepfile)
-              .inputs
-              .map((File file) => file.path)
-              .toList();
-      final List<String> outputPaths =
-          environment.depFileService
-              .parse(outputDepfile)
-              .outputs
-              .map((File file) => file.path)
-              .toList();
+      final List<String> inputPaths = environment.depFileService
+          .parse(outputDepfile)
+          .inputs
+          .map((File file) => file.path)
+          .toList();
+      final List<String> outputPaths = environment.depFileService
+          .parse(outputDepfile)
+          .outputs
+          .map((File file) => file.path)
+          .toList();
 
       // Depfile has expected sources.
       expect(
@@ -149,7 +147,7 @@ void main() {
   testUsingContext(
     'DebugBundleWindowsAssets creates correct bundle structure',
     () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
@@ -178,7 +176,7 @@ void main() {
   testUsingContext(
     'ProfileBundleWindowsAssets creates correct bundle structure',
     () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
@@ -208,7 +206,7 @@ void main() {
   testUsingContext(
     'ReleaseBundleWindowsAssets creates correct bundle structure',
     () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),

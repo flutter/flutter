@@ -1425,8 +1425,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // [widget.initialRoute].
   String get _initialRouteName =>
       WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
-          ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
-          : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+      ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+      : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   AppLifecycleState? _appLifecycleState;
 
@@ -1546,8 +1546,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final String? name = settings.name;
     final WidgetBuilder? pageContentBuilder =
         name == Navigator.defaultRouteName && widget.home != null
-            ? (BuildContext context) => widget.home!
-            : widget.routes![name];
+        ? (BuildContext context) => widget.home!
+        : widget.routes![name];
 
     if (pageContentBuilder != null) {
       assert(
@@ -1684,16 +1684,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           key: _navigator,
           initialRoute: _initialRouteName,
           onGenerateRoute: _onGenerateRoute,
-          onGenerateInitialRoutes:
-              widget.onGenerateInitialRoutes == null
-                  ? Navigator.defaultGenerateInitialRoutes
-                  : (NavigatorState navigator, String initialRouteName) {
-                    return widget.onGenerateInitialRoutes!(initialRouteName);
-                  },
+          onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+              ? Navigator.defaultGenerateInitialRoutes
+              : (NavigatorState navigator, String initialRouteName) {
+                  return widget.onGenerateInitialRoutes!(initialRouteName);
+                },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior:
-              kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
+          routeTraversalEdgeBehavior: kIsWeb
+              ? TraversalEdgeBehavior.leaveFlutterView
+              : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );
@@ -1806,6 +1806,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
                         listenable: _localizationsResolver,
                         builder: (BuildContext context, _) {
                           return Localizations(
+                            isApplicationLevel: true,
                             locale: _localizationsResolver.locale,
                             delegates: _localizationsResolver.localizationsDelegates.toList(),
                             child: title ?? result,

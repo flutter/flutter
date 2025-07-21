@@ -84,14 +84,12 @@ void main() {
   //
   // Offset.dx: a right or left margin (_kToolbarChevronSize / 4 => 2.5) to center the icon horizontally
   // Offset.dy: always in the exact vertical center (_kToolbarChevronSize / 2 => 5)
-  PaintPattern overflowNextPaintPattern() =>
-      paints
-        ..line(p1: const Offset(2.5, 0), p2: const Offset(7.5, 5))
-        ..line(p1: const Offset(7.5, 5), p2: const Offset(2.5, 10));
-  PaintPattern overflowBackPaintPattern() =>
-      paints
-        ..line(p1: const Offset(7.5, 0), p2: const Offset(2.5, 5))
-        ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
+  PaintPattern overflowNextPaintPattern() => paints
+    ..line(p1: const Offset(2.5, 0), p2: const Offset(7.5, 5))
+    ..line(p1: const Offset(7.5, 5), p2: const Offset(2.5, 10));
+  PaintPattern overflowBackPaintPattern() => paints
+    ..line(p1: const Offset(7.5, 0), p2: const Offset(2.5, 5))
+    ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
 
   Finder findOverflowNextButton() {
     return find.byWidgetPredicate(
@@ -605,7 +603,10 @@ void main() {
       return CupertinoApp(
         theme: CupertinoThemeData(brightness: brightness),
         home: Center(
-          child: SizedBox(height: 200, child: RepaintBoundary(key: key, child: toolbar)),
+          child: SizedBox(
+            height: 200,
+            child: RepaintBoundary(key: key, child: toolbar),
+          ),
         ),
       );
     }

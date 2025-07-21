@@ -16,14 +16,14 @@ void main() {
   testWithoutContext('FileStore initializes file cache', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
     fileCache.initialize();
     fileCache.persist();
 
     expect(cacheFile, exists);
 
     final Uint8List buffer = cacheFile.readAsBytesSync();
-    final FileStorage fileStorage = FileStorage.fromBuffer(buffer);
+    final fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files, isEmpty);
     expect(fileStorage.version, 2);
@@ -32,7 +32,7 @@ void main() {
   testWithoutContext('FileStore can use timestamp strategy', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(
+    final fileCache = FileStore(
       cacheFile: cacheFile,
       logger: BufferLogger.test(),
       strategy: FileStoreStrategy.timestamp,
@@ -62,23 +62,22 @@ void main() {
   testWithoutContext('FileStore saves and restores to file cache', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
 
     fileCache.initialize();
     fileCache.diffFileList(<File>[file]);
     fileCache.persist();
     final String? currentHash = fileCache.currentAssetKeys[file.path];
     final Uint8List buffer = cacheFile.readAsBytesSync();
-    FileStorage fileStorage = FileStorage.fromBuffer(buffer);
+    var fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.path);
 
-    final FileStore newfileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final newfileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
     newfileCache.initialize();
     expect(newfileCache.currentAssetKeys, isEmpty);
     expect(newfileCache.previousAssetKeys['foo.dart'], currentHash);
@@ -93,10 +92,11 @@ void main() {
 
   testWithoutContext('FileStore handles changed format', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final File cacheFile = fileSystem.file(FileStore.kFileCache)..writeAsStringSync(
-      '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}',
-    );
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final File cacheFile = fileSystem.file(FileStore.kFileCache)
+      ..writeAsStringSync(
+        '{"version":1,"files":[{"path_old":"foo.dart","hash_old":"f95b70fdc3088560732a5ac135644506"}]}',
+      );
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
 
     fileCache.initialize();
     expect(cacheFile, isNot(exists));
@@ -106,11 +106,10 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.directory('example').childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
     fileCache.initialize();
 
     cacheFile.parent.deleteSync(recursive: true);
@@ -123,7 +122,7 @@ void main() {
   testWithoutContext('FileStore handles hashing missing files', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.file(FileStore.kFileCache);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
     fileCache.initialize();
 
     final List<File> results = fileCache.diffFileList(<File>[fileSystem.file('hello.dart')]);
@@ -134,14 +133,14 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to persist file cache', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
 
     final File cacheFile = fileSystem.file('foo')..createSync();
     handler.addError(cacheFile, FileSystemOp.write, const FileSystemException('Out of space!'));
 
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: logger);
+    final fileCache = FileStore(cacheFile: cacheFile, logger: logger);
 
     fileCache.initialize();
     fileCache.persist();
@@ -150,14 +149,14 @@ void main() {
   });
 
   testWithoutContext('FileStore handles failure to restore file cache', () async {
-    final FileExceptionHandler handler = FileExceptionHandler();
+    final handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
 
     final File cacheFile = fileSystem.file('foo')..createSync();
     handler.addError(cacheFile, FileSystemOp.read, const FileSystemException('Out of space!'));
 
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: logger);
+    final fileCache = FileStore(cacheFile: cacheFile, logger: logger);
 
     fileCache.initialize();
 
@@ -168,11 +167,10 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File cacheFile = fileSystem.directory('example').childFile(FileStore.kFileCache)
       ..createSync(recursive: true);
-    final FileStore fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
-    final File file =
-        fileSystem.file('foo.dart')
-          ..createSync()
-          ..writeAsStringSync('hello');
+    final fileCache = FileStore(cacheFile: cacheFile, logger: BufferLogger.test());
+    final File file = fileSystem.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
     fileCache.initialize();
 
     cacheFile.parent.deleteSync(recursive: true);

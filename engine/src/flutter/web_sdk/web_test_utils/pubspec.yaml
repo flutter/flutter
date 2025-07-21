@@ -2,7 +2,7 @@ name: web_test_utils
 
 # Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.8.0-0
 
 dependencies:
   image: 4.5.3

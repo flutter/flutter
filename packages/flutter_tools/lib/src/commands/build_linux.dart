@@ -23,10 +23,9 @@ class BuildLinuxCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    final String defaultTargetPlatform =
-        (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
-            ? 'linux-arm64'
-            : 'linux-x64';
+    final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.linux_arm64)
+        ? 'linux-arm64'
+        : 'linux-x64';
     argParser.addOption(
       'target-platform',
       defaultsTo: defaultTargetPlatform,
@@ -46,7 +45,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  final String name = 'linux';
+  final name = 'linux';
 
   @override
   bool get hidden => !featureFlags.isLinuxEnabled || !globals.platform.isLinux;
@@ -63,7 +62,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform')!);
-    final bool needCrossBuild =
+    final needCrossBuild =
         _operatingSystemUtils.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!featureFlags.isLinuxEnabled) {
