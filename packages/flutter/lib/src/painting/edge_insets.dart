@@ -894,7 +894,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(debugCheckCanResolveTextDirection(direction, '$runtimeType'));
+    assert(debugCheckCanResolveTextDirection(direction, '$EdgeInsetsDirectional'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(end, top, start, bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(start, top, end, bottom),
@@ -1006,7 +1006,7 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(debugCheckCanResolveTextDirection(direction, '$runtimeType'));
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedEdgeInsets'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom),
