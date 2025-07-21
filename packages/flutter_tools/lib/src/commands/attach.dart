@@ -331,9 +331,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
       vmServiceUri = vmServiceDiscovery.uris;
 
+      var discoveryStatusStopped = false;
       // Stop the timer once we receive the first uri.
       vmServiceUri = vmServiceUri.map((Uri uri) {
-        discoveryStatus.stop();
+        if (!discoveryStatusStopped) {
+          discoveryStatus.stop();
+          discoveryStatusStopped = true;
+        }
         return uri;
       });
     } else {
