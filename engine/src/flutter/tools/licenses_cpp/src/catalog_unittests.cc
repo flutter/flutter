@@ -216,3 +216,22 @@ TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
   ASSERT_EQ(match->size(), 1u);
   EXPECT_EQ(match->at(0).matched_text, no_newline_license);
 }
+
+TEST(CatalogTest, SkiaLicenseIgnoreTrailing) {
+  std::stringstream ss;
+  ss << kEntry;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string no_end(kSkiaLicense);
+  ASSERT_EQ(no_end.back(), '\n');
+  no_end.pop_back();
+
+  std::cout << no_end << std::endl;
+
+  absl::StatusOr<std::vector<Catalog::Match>> match =
+      catalog->FindMatch(no_end);
+  EXPECT_TRUE(match.ok()) << match.status();
+}

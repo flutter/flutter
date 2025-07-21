@@ -18,6 +18,13 @@ bool Overlaps(std::string_view a, std::string_view b) {
   return start1 < end2 && start2 < end1;
 }
 
+bool EndsWith(std::string_view str, std::string_view suffix) {
+  if (suffix.length() > str.length()) {
+    return false;
+  }
+  return str.substr(str.length() - suffix.length()) == suffix;
+}
+
 std::string IgnoreWhitespace(std::string_view input) {
   bool in_whitespace = false;
   std::string result = "";
@@ -32,6 +39,9 @@ std::string IgnoreWhitespace(std::string_view input) {
       result.push_back(current);
       in_whitespace = false;
     }
+  }
+  if (EndsWith(result, "\\s+")) {
+    result.back() = '*';
   }
   return result;
 }
