@@ -63,7 +63,7 @@
 ^third_party/swiftshader/third_party/.*
 ^third_party/swiftshader/third_party/llvm-10.0/.*
 ^third_party/swiftshader/third_party/llvm-16.0/.*
-^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
+(?i)^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
 ^third_party/vulkan-deps/spirv-headers/.*
 ^third_party/vulkan-deps/vulkan-loader/.*
 ^tools/fuchsia/.*
