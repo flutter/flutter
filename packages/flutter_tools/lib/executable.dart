@@ -65,10 +65,14 @@ Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
-  // Support the -? Powershell help idiom.
+  // Support universal help idioms.
   final int powershellHelpIndex = args.indexOf('-?');
   if (powershellHelpIndex != -1) {
     args[powershellHelpIndex] = '-h';
+  }
+  final int slashQuestionHelpIndex = args.indexOf('/?');
+  if (slashQuestionHelpIndex != -1) {
+    args[slashQuestionHelpIndex] = '-h';
   }
 
   final bool doctor =
