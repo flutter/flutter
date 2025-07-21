@@ -427,8 +427,23 @@ abstract class WidgetStateMouseCursor extends MouseCursor
     debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
 
-  // TODO(camsim99): not sure that I can modify this directly since this is referenced by cupertino. maybe the material level above?
   static MouseCursor _clickable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.click;
+  }
+
+  /// A mouse cursor for clickable widgets, which always resolves to [SystemMouseCursors.basic]
+  /// regardless of whether or ont the widget is disabled.
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const WidgetStateMouseCursor statelessClickable = WidgetStateMouseCursor.resolveWith(
+    _statelessClickable,
+    debugDescription: 'WidgetStateMouseCursor(statelessClickable)',
+  );
+
+  static MouseCursor _statelessClickable(Set<WidgetState> states) {
     return SystemMouseCursors.basic;
   }
 

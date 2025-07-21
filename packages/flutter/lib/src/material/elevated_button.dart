@@ -543,10 +543,9 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
-      children:
-          effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, Flexible(child: label)]
-              : <Widget>[Flexible(child: label), icon],
+      children: effectiveIconAlignment == IconAlignment.start
+          ? <Widget>[icon, Flexible(child: label)]
+          : <Widget>[Flexible(child: label), icon],
     );
   }
 }
