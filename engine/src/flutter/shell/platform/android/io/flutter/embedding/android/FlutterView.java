@@ -1123,7 +1123,7 @@ public class FlutterView extends FrameLayout
             this.flutterEngine.getScribeChannel(),
             this.flutterEngine
                 .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
-                                               // delegator.
+            // delegator.
             this.flutterEngine.getPlatformViewsController2());
 
     try {
