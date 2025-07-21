@@ -2543,16 +2543,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  int? get overlayPortalParent => _overlayPortalParent;
-  int? _overlayPortalParent;
-  set overlayPortalParent(int? value) {
-    if (_overlayPortalParent == value) {
-      return;
-    }
-    _overlayPortalParent = value;
-    _markDirty();
-  }
-
   /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
@@ -2840,6 +2830,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
+  /// The parent of this node in the semantics tree.
+  ///
+  /// If this node indicates an overlay portal child, this is its overlay portal
+  /// parent node in traversal order. Otherwise, it is the same as [parent].
   SemanticsNode? get semanticsParent => _semanticsParent ?? parent;
   SemanticsNode? _semanticsParent;
   set semanticsParent(SemanticsNode? value) {
@@ -3722,6 +3716,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       );
     }
 
+    int? overlayPortalParent;
     if (data.identifier.endsWith('child')) {
       overlayPortalParent = owner!._overlayPortalParentNodes[data.identifier.split(' ')[0]]?.id;
     }
