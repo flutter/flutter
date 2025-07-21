@@ -67,12 +67,12 @@ The general process for submitting code to a Flutter repository is as follows:
    This doesn’t prohibit the use of coding assistance tools, but what’s submitted does
    need to be a contributor’s original creation.
 
-8. Get your code reviewed (see below). You should probably reach out to the relevant
+7. Get your code reviewed (see below). You should probably reach out to the relevant
    expert(s) for the areas you touched and ask them to review your PR directly.
    GitHub sometimes recommends specific reviewers; if you're not sure who to ask,
    that's probably a good place to start.
 
-9. Make sure your PR passes all the pre-commit tests. Consider running some of the
+8. Make sure your PR passes all the pre-commit tests. Consider running some of the
    post-commit tests locally (see the
    [devicelab](https://github.com/flutter/flutter/blob/main/dev/devicelab/README.md)
    directory). If any tests break, especially the `customer_testing` tests, please
@@ -85,10 +85,10 @@ The general process for submitting code to a Flutter repository is as follows:
    **If the trees or dashboards are showing any regressions, only fixes
    that improve the situation are allowed to go in.**
 
-10. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
+9. Once everything is green and you have an LGTM from the owners of the code you are affecting (or someone to whom they
    have delegated), and an LGTM from any other contributor who left comments, add the "autosubmit" label if you're in the flutter-hackers github group. A bot will land the patch when it feels like it. If you're not in the flutter-hackers group a reviewer will add the label for you.
 
-11. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
+10. Watch the post-commit tests on the [dashboard](https://dashboard.flutter.dev/#/build) to make sure everything passes. If anything
    goes wrong, revert your patch and study the problem. You should aim to be the one to revert your patch. You will be racing everyone
    else on the team who will also be trying to revert your patch. (See below for guidance on reverting PRs.)
 
