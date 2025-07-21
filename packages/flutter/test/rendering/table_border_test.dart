@@ -177,7 +177,7 @@ void main() {
       left: BorderSide(color: Color(0xFF00FF00)),
     );
 
-    final Set<Color> colors = border.getDistinctVisibleOuterColors();
+    final Set<Color> colors = border.distinctVisibleOuterColors();
     expect(colors.length, 2);
     expect(colors.contains(const Color(0xFF000000)), isTrue);
     expect(colors.contains(const Color(0xFF00FF00)), isTrue);
@@ -191,7 +191,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
     );
 
-    expect(borderWithRadius.getDistinctVisibleOuterColors().length, 1);
+    expect(borderWithRadius.distinctVisibleOuterColors().length, 1);
     expect(borderWithRadius.outerBorderIsUniform, isFalse);
     expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
