@@ -3625,8 +3625,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsNode childSemanticsNode = child;
     SemanticsNode parentSemanticsNode = parent;
 
-    final List<SemanticsNode> childToCommonAncestor = <SemanticsNode>[childSemanticsNode];
-
     // Find the common ancestor.
     while (!identical(childSemanticsNode, parentSemanticsNode)) {
       final int fromDepth = childSemanticsNode.depth;
