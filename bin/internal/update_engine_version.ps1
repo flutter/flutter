@@ -57,7 +57,15 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
 } else {
-  $engineVersion = & "$flutterRoot/bin/internal/content_aware_hash.ps1"
+  $ErrorActionPreference = "Continue"
+  git -C "$flutterRoot" remote get-url upstream *> $null
+  $exitCode = $?
+  $ErrorActionPreference = "Stop"
+  if ($exitCode) {
+    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD upstream/master)
+  } else {
+    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD origin/master)
+  }
 }
 
 # Write the engine version out so downstream tools know what to look for.
