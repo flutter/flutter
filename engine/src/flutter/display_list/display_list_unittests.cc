@@ -798,9 +798,9 @@ TEST_F(DisplayListTest, SingleOpDisplayListsCompareToEachOther) {
     }
 
     for (size_t i = 0; i < lists_a.size(); i++) {
-      sk_sp<DisplayList> listA = lists_a[i];
+      const sk_sp<DisplayList>& listA = lists_a[i];
       for (size_t j = 0; j < lists_b.size(); j++) {
-        sk_sp<DisplayList> listB = lists_b[j];
+        const sk_sp<DisplayList>& listB = lists_b[j];
         auto desc = group.op_name + "(variant " + std::to_string(i + 1) +
                     " ==? variant " + std::to_string(j + 1) + ")";
         if (i == j ||
@@ -4651,7 +4651,10 @@ class ClipExpector : public virtual DlOpReceiver,
   std::vector<ClipExpectation> clip_expectations_;
 
   template <typename T>
-  void check(T shape, DlClipOp clip_op, bool is_aa, bool is_oval = false) {
+  void check(const T& shape,
+             DlClipOp clip_op,
+             bool is_aa,
+             bool is_oval = false) {
     ASSERT_LT(index_, clip_expectations_.size())
         << label() << std::endl
         << "extra clip shape = " << shape << (is_oval ? " (oval)" : "");
