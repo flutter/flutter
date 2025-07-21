@@ -41,7 +41,7 @@ std::string IgnoreWhitespace(std::string_view input) {
     }
   }
   if (EndsWith(result, "\\s+")) {
-    result.back() = '*';
+    result.erase(result.end() - 3, result.end());
   }
   return result;
 }

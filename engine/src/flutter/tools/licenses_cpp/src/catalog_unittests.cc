@@ -195,7 +195,9 @@ std::string RemoveNewlines(std::string_view input) {
     }
     last_char = current;
   }
-  no_newline.push_back(last_char);
+  if (last_char != '\n') {
+    no_newline.push_back(last_char);
+  }
   return no_newline;
 }
 }  // namespace
