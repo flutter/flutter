@@ -6,13 +6,6 @@ import 'package:yaml/yaml.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
 
-String _normalizePath(String path) {
-  if (!path.startsWith('/')) {
-    path = '/$path';
-  }
-  return path;
-}
-
 abstract class ProxyRule {
   ProxyRule({required this.target});
 
