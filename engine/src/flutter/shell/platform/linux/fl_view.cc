@@ -429,24 +429,6 @@ static void gesture_zoom_end_cb(FlView* self) {
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
 
-static GdkGLContext* create_context_cb(FlView* self) {
-  if (self->view_id != flutter::kFlutterImplicitViewId) {
-    return nullptr;
-  }
-
-  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
-  g_autoptr(GError) error = nullptr;
-  if (!fl_opengl_manager_create_contexts(
-          opengl_manager, gtk_widget_get_parent_window(GTK_WIDGET(self)),
-          &error)) {
-    gtk_gl_area_set_error(GTK_GL_AREA(self->render_area), error);
-    return nullptr;
-  }
-
-  return GDK_GL_CONTEXT(
-      g_object_ref(fl_opengl_manager_get_context(opengl_manager)));
-}
-
 static void realize_cb(FlView* self) {
   FlutterRendererType renderer_type = fl_engine_get_renderer_type(self->engine);
   gboolean shareable;
@@ -712,8 +694,6 @@ static void setup_engine(FlView* self) {
                                G_CALLBACK(opengl_draw_cb), self);
       g_signal_connect_swapped(self->render_area, "render",
                                G_CALLBACK(render_cb), self);
-      g_signal_connect_swapped(self->render_area, "create-context",
-                               G_CALLBACK(create_context_cb), self);
       g_signal_connect_swapped(self->render_area, "unrealize",
                                G_CALLBACK(unrealize_cb), self);
       break;
