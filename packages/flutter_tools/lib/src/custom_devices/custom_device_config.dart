@@ -220,26 +220,26 @@ class CustomDeviceConfig {
     );
   }
 
-  static const String _kId = 'id';
-  static const String _kLabel = 'label';
-  static const String _kSdkNameAndVersion = 'sdkNameAndVersion';
-  static const String _kPlatform = 'platform';
-  static const String _kEnabled = 'enabled';
-  static const String _kPingCommand = 'ping';
-  static const String _kPingSuccessRegex = 'pingSuccessRegex';
-  static const String _kPostBuildCommand = 'postBuild';
-  static const String _kInstallCommand = 'install';
-  static const String _kUninstallCommand = 'uninstall';
-  static const String _kRunDebugCommand = 'runDebug';
-  static const String _kForwardPortCommand = 'forwardPort';
-  static const String _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
-  static const String _kScreenshotCommand = 'screenshot';
-  static const String _kReadLogsCommand = 'readLogs';
+  static const _kId = 'id';
+  static const _kLabel = 'label';
+  static const _kSdkNameAndVersion = 'sdkNameAndVersion';
+  static const _kPlatform = 'platform';
+  static const _kEnabled = 'enabled';
+  static const _kPingCommand = 'ping';
+  static const _kPingSuccessRegex = 'pingSuccessRegex';
+  static const _kPostBuildCommand = 'postBuild';
+  static const _kInstallCommand = 'install';
+  static const _kUninstallCommand = 'uninstall';
+  static const _kRunDebugCommand = 'runDebug';
+  static const _kForwardPortCommand = 'forwardPort';
+  static const _kForwardPortSuccessRegex = 'forwardPortSuccessRegex';
+  static const _kScreenshotCommand = 'screenshot';
+  static const _kReadLogsCommand = 'readLogs';
 
   /// An example device config used for creating the default config file.
   /// Uses windows-specific ping and pingSuccessRegex. For the linux and macOs
   /// example config, see [exampleUnix].
-  static final CustomDeviceConfig exampleWindows = CustomDeviceConfig(
+  static final exampleWindows = CustomDeviceConfig(
     id: 'pi',
     label: 'Raspberry Pi',
     sdkNameAndVersion: 'Raspberry Pi 4 Model B+',

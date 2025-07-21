@@ -14,7 +14,7 @@ import '../src/common.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
-const String base64PlistXml =
+const base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
     '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
@@ -22,16 +22,16 @@ const String base64PlistXml =
     'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
     'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KPC9kaWN0Pgo8L3BsaXN0Pgo=';
 
-const String base64PlistBinary =
+const base64PlistBinary =
     'YnBsaXN0MDDSAQIDBF8QEkNGQnVuZGxlRXhlY3V0YWJsZV8QEkNGQnVuZGxlSWRlbnRpZmllc'
     'lNBcHBfEBZpby5mbHV0dGVyLmZsdXR0ZXIuYXBwCA0iNzsAAAAAAAABAQAAAAAAAAAFAAAAAA'
     'AAAAAAAAAAAAAAVA==';
 
-const String base64PlistJson =
+const base64PlistJson =
     'eyJDRkJ1bmRsZUV4ZWN1dGFibGUiOiJBcHAiLCJDRkJ1bmRsZUlkZW50aWZpZXIiOiJpby5mb'
     'HV0dGVyLmZsdXR0ZXIuYXBwIn0=';
 
-const String base64PlistXmlWithComplexDatatypes =
+const base64PlistXmlWithComplexDatatypes =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
     '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
@@ -291,12 +291,9 @@ void main() {
       'project.pbxproj',
     );
 
-    final BufferLogger logger = BufferLogger(
-      terminal: Terminal.test(),
-      outputPreferences: OutputPreferences(),
-    );
+    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
 
-    final PlistParser parser = PlistParser(
+    final parser = PlistParser(
       fileSystem: fileSystem,
       processManager: processManager,
       logger: logger,
@@ -321,12 +318,12 @@ void main() {
         'project.pbxproj',
       );
 
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: Terminal.test(),
         outputPreferences: OutputPreferences(),
       );
 
-      final PlistParser parser = PlistParser(
+      final parser = PlistParser(
         fileSystem: fileSystem,
         processManager: processManager,
         logger: logger,
@@ -344,12 +341,9 @@ void main() {
   );
 
   testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
-    final BufferLogger logger = BufferLogger(
-      terminal: Terminal.test(),
-      outputPreferences: OutputPreferences(),
-    );
+    final logger = BufferLogger(terminal: Terminal.test(), outputPreferences: OutputPreferences());
 
-    final PlistParser parser = PlistParser(
+    final parser = PlistParser(
       fileSystem: fileSystem,
       processManager: processManager,
       logger: logger,
