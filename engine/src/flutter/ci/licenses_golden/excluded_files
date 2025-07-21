@@ -1488,6 +1488,7 @@
 ../../../flutter/third_party/dart/runtime/observatory/tests
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
 ../../../flutter/third_party/dart/runtime/tests
+../../../flutter/third_party/dart/runtime/tools/.dart_tool
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/android_finder.py
 ../../../flutter/third_party/dart/runtime/tools/benchmark.py
@@ -1523,6 +1524,7 @@
 ../../../flutter/third_party/dart/runtime/tools/profiling/README.md
 ../../../flutter/third_party/dart/runtime/tools/profiling/analysis_options.yaml
 ../../../flutter/third_party/dart/runtime/tools/profiling/pubspec.yaml
+../../../flutter/third_party/dart/runtime/tools/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/utils.py
 ../../../flutter/third_party/dart/runtime/tools/valgrind.py
 ../../../flutter/third_party/dart/runtime/tools/wiki/README.md
