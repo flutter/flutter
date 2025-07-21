@@ -2285,11 +2285,27 @@ void main() {
     const BorderSide side = BorderSide(color: Colors.red, width: 3.0);
     await tester.pumpWidget(
       const MaterialApp(
-        home: Material(child: Center(child: RadioListTile<bool>(value: true, radioSide: side))),
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioSide: side)),
+        ),
       ),
     );
 
     final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
     expect(radio.side, side);
+  });
+
+  testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
+    final WidgetStateProperty<double?> innerRadius = MaterialStateProperty.all(6);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioInnerRadius: innerRadius)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.innerRadius, innerRadius);
   });
 }

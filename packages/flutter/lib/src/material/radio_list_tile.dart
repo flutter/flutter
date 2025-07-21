@@ -202,6 +202,7 @@ class RadioListTile<T> extends StatefulWidget {
     this.internalAddSemanticForOnTap = false,
     this.radioBackgroundColor,
     this.radioSide,
+    this.radioInnerRadius,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
        assert(isThreeLine != true || subtitle != null);
@@ -256,6 +257,7 @@ class RadioListTile<T> extends StatefulWidget {
     this.internalAddSemanticForOnTap = false,
     this.radioBackgroundColor,
     this.radioSide,
+    this.radioInnerRadius,
   }) : _radioType = _RadioType.adaptive,
        assert(isThreeLine != true || subtitle != null);
 
@@ -543,6 +545,15 @@ class RadioListTile<T> extends StatefulWidget {
   /// If null, then it defaults to a border using the fill color.
   final BorderSide? radioSide;
 
+  /// The radius of the inner circle of the radio button, in all [WidgetState]s.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then it defaults to `4.5` in all states.
+  final WidgetStateProperty<double?>? radioInnerRadius;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
@@ -639,6 +650,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             groupRegistry: _radioRegistry,
             backgroundColor: widget.radioBackgroundColor,
             side: widget.radioSide,
+            innerRadius: widget.radioInnerRadius,
           ),
         );
       case _RadioType.adaptive:
@@ -660,6 +672,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
             groupRegistry: _radioRegistry,
             backgroundColor: widget.radioBackgroundColor,
             side: widget.radioSide,
+            innerRadius: widget.radioInnerRadius,
           ),
         );
     }
