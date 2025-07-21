@@ -79,7 +79,6 @@ template("skwasm_variant") {
 
     deps = [
       "//flutter/display_list",
-      "//flutter/display_list:display_list_skia",
       "//flutter/skia",
       "//flutter/skia/modules/skparagraph",
       "//flutter/skia/modules/skunicode",
