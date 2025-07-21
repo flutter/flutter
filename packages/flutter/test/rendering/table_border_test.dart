@@ -148,4 +148,51 @@ void main() {
     );
     expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
+
+  test('TableBorder outerBorderIsUniform property', () {
+    const TableBorder uniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+      horizontalInside: BorderSide(color: Color(0xFF0000FF)),
+      verticalInside: BorderSide(color: Color(0xFF0000FF)),
+    );
+    expect(uniformOuter.isUniform, isFalse);
+    expect(uniformOuter.outerBorderIsUniform, isTrue);
+
+    const TableBorder nonUniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(color: Color(0xFF00FF00), width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+    );
+    expect(nonUniformOuter.outerBorderIsUniform, isFalse);
+  });
+
+  test('TableBorder distinct visible outer colors', () {
+    const TableBorder border = TableBorder(
+      top: BorderSide(),
+      right: BorderSide(),
+      left: BorderSide(color: Color(0xFF00FF00)),
+    );
+
+    final Set<Color> colors = border.getDistinctVisibleOuterColors();
+    expect(colors.length, 2);
+    expect(colors.contains(const Color(0xFF000000)), isTrue);
+    expect(colors.contains(const Color(0xFF00FF00)), isTrue);
+  });
+
+  test('TableBorder with non-uniform border radius support', () {
+    const TableBorder borderWithRadius = TableBorder(
+      top: BorderSide(width: 3.0),
+      right: BorderSide(),
+      bottom: BorderSide(width: 2.0),
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    );
+
+    expect(borderWithRadius.getDistinctVisibleOuterColors().length, 1);
+    expect(borderWithRadius.outerBorderIsUniform, isFalse);
+    expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
+  });
 }
