@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'async_guard.dart';
+import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
 
