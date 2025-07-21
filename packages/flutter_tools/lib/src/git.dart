@@ -12,7 +12,7 @@ interface class Git {
   /// Creates a wrapper that executes `git` using [runProcessWith].
   Git({
     required Platform currentPlatform,
-    required ProcessUtils runProcessWith, //
+    required ProcessUtils runProcessWith,
     String executable = 'git',
   }) : _platform = currentPlatform,
        _processUtils = runProcessWith,

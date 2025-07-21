@@ -120,7 +120,7 @@ abstract class FlutterVersion {
     required this.flutterRoot,
     required this.fs,
   }) : _clock = clock,
-       _gitExecutable = git;
+       _git = git;
 
   factory FlutterVersion.fromRevision({
     SystemClock clock = const SystemClock(),
@@ -172,12 +172,12 @@ abstract class FlutterVersion {
       flutterRoot: flutterRoot,
       fs: fs,
       fetchTags: true,
-      git: _gitExecutable,
+      git: _git,
     );
   }
 
   final FileSystem fs;
-  final Git _gitExecutable;
+  final Git _git;
   final SystemClock _clock;
 
   String? get repositoryUrl;
@@ -222,7 +222,7 @@ abstract class FlutterVersion {
   final String flutterRoot;
 
   String _getTimeSinceCommit({String? revision}) {
-    return _gitExecutable
+    return _git
         .runSync(
           FlutterVersion._gitLog([
             '-n',
@@ -324,7 +324,7 @@ abstract class FlutterVersion {
     try {
       // Don't perform the update check if fetching the latest local commit failed.
       localFrameworkCommitDate = DateTime.parse(
-        _gitCommitDate(git: _gitExecutable, workingDirectory: flutterRoot),
+        _gitCommitDate(git: _git, workingDirectory: flutterRoot),
       );
     } on VersionCheckError {
       return;
@@ -400,9 +400,9 @@ abstract class FlutterVersion {
   Future<String> _fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
-      await _run(_gitExecutable, ['fetch', '--tags']);
+      await _run(_git, ['fetch', '--tags']);
       return _gitCommitDate(
-        git: _gitExecutable,
+        git: _git,
         gitRef: kGitTrackingUpstream,
         workingDirectory: Cache.flutterRoot,
       );
@@ -431,7 +431,7 @@ abstract class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'` ([kUserBranch]).
   String getBranchName({bool redactUnknownBranches = false}) {
     _branch ??= () {
-      final String branch = _gitExecutable
+      final String branch = _git
           .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: flutterRoot)
           .stdout
           .trim();
@@ -634,7 +634,7 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   String get frameworkCommitDate =>
-      _gitCommitDate(git: _gitExecutable, lenient: true, workingDirectory: flutterRoot);
+      _gitCommitDate(git: _git, lenient: true, workingDirectory: flutterRoot);
 
   // This uses 'late final' instead of 'String get' because unlike frameworkCommitDate, it is
   // operating based on a 'gitRef: ...', which we can assume to be immutable in the context of
@@ -643,7 +643,7 @@ class _FlutterVersionGit extends FlutterVersion {
   late final String engineCommitDate =
       _engineStamp?.gitRevisionDate.toString() ??
       _gitCommitDate(
-        git: _gitExecutable,
+        git: _git,
         gitRef: engineRevision,
         lenient: true,
         workingDirectory: flutterRoot,
@@ -653,7 +653,7 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
-      final String gitChannel = _gitExecutable
+      final String gitChannel = _git
           .runSync([
             'rev-parse',
             '--abbrev-ref',
@@ -665,7 +665,7 @@ class _FlutterVersionGit extends FlutterVersion {
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _gitExecutable
+        _repositoryUrl = _git
             .runSync(['ls-remote', '--get-url', remote], workingDirectory: flutterRoot)
             .stdout
             .trim();

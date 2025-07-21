@@ -255,7 +255,7 @@ class UpgradeCommandRunner {
   @visibleForTesting
   Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await globals.processUtils.stream(
-      <String>[
+      [
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
         '--continue',
@@ -330,13 +330,13 @@ class UpgradeCommandRunner {
     try {
       // Fetch upstream branch's commits and tags
       await globals.git.run(
-        <String>['fetch', '--tags'],
+        ['fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
       // Get the latest commit revision of the upstream
       final RunResult result = await globals.git.run(
-        <String>['rev-parse', '--verify', kGitTrackingUpstream],
+        ['rev-parse', '--verify', kGitTrackingUpstream],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -422,7 +422,7 @@ class UpgradeCommandRunner {
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
     await globals.processUtils.stream(
-      <String>[globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor'],
+      [globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor'],
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
@@ -438,12 +438,7 @@ Future<void> precacheArtifacts([String? workingDirectory]) async {
   globals.printStatus('');
   globals.printStatus('Upgrading engine...');
   final int code = await globals.processUtils.stream(
-    <String>[
-      globals.fs.path.join('bin', 'flutter'),
-      '--no-color',
-      '--no-version-check',
-      'precache',
-    ],
+    [globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
     allowReentrantFlutter: true,
     environment: Map<String, String>.of(globals.platform.environment),
     workingDirectory: workingDirectory,
