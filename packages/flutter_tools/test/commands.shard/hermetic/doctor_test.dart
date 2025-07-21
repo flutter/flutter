@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_studio_validator.dart';
-import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -20,10 +18,7 @@ import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/vscode/vscode.dart';
-import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -54,80 +49,6 @@ void main() {
   });
 
   group('doctor', () {
-    testUsingContext('vs code validator when both installed', () async {
-      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension
-          .validate();
-      expect(result.type, ValidationType.success);
-      expect(result.statusInfo, 'version 1.2.3');
-      expect(result.messages, hasLength(2));
-
-      ValidationMessage message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('VS Code '),
-      );
-      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
-
-      message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('Flutter '),
-      );
-      expect(message.message, 'Flutter extension version 4.5.6');
-      expect(message.isError, isFalse);
-    });
-
-    testUsingContext('No IDE Validator includes expected installation messages', () async {
-      final ValidationResult result = await NoIdeValidator().validate();
-      expect(result.type, ValidationType.notAvailable);
-
-      expect(
-        result.messages.map((ValidationMessage vm) => vm.message),
-        UserMessages().noIdeInstallationInfo,
-      );
-    });
-
-    testUsingContext('vs code validator when 64bit installed', () async {
-      expect(
-        VsCodeValidatorTestTargets.installedWithExtension64bit.title,
-        'VS Code, 64-bit edition',
-      );
-      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit
-          .validate();
-      expect(result.type, ValidationType.success);
-      expect(result.statusInfo, 'version 1.2.3');
-      expect(result.messages, hasLength(2));
-
-      ValidationMessage message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('VS Code '),
-      );
-      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
-
-      message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('Flutter '),
-      );
-      expect(message.message, 'Flutter extension version 4.5.6');
-    });
-
-    testUsingContext('vs code validator when extension missing', () async {
-      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension
-          .validate();
-      expect(result.type, ValidationType.success);
-      expect(result.statusInfo, 'version 1.2.3');
-      expect(result.messages, hasLength(2));
-
-      ValidationMessage message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('VS Code '),
-      );
-      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
-
-      message = result.messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('Flutter '),
-      );
-      expect(message.message, startsWith('Flutter extension can be installed from'));
-      expect(
-        message.contextUrl,
-        'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter',
-      );
-      expect(message.isError, false);
-    });
-
     group('device validator', () {
       testWithoutContext('no devices', () async {
         final deviceManager = FakeDeviceManager();
@@ -790,20 +711,6 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'If android workflow is disabled, AndroidStudio validator is not included',
-    () {
-      final provider = DoctorValidatorsProvider.test(
-        featureFlags: TestFeatureFlags(isAndroidEnabled: false),
-      );
-      expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
-      expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
-    },
-    overrides: <Type, Generator>{
-      AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
-    },
-  );
-
   group('Doctor events with unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     final fakeFlutterVersion = FakeFlutterVersion();
@@ -1008,16 +915,6 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
   });
-}
-
-class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
-  FakeAndroidWorkflow({this.canListDevices = true, this.appliesToHostPlatform = true});
-
-  @override
-  final bool canListDevices;
-
-  @override
-  final bool appliesToHostPlatform;
 }
 
 class PassingValidator extends DoctorValidator {
@@ -1394,40 +1291,6 @@ class FakeSmallGroupDoctor extends Doctor {
 
   @override
   final List<DoctorValidator> validators;
-}
-
-class VsCodeValidatorTestTargets extends VsCodeValidator {
-  VsCodeValidatorTestTargets._(
-    String installDirectory,
-    String extensionDirectory, {
-    String? edition,
-  }) : super(
-         VsCode.fromDirectory(
-           installDirectory,
-           extensionDirectory,
-           edition: edition,
-           fileSystem: globals.fs,
-           platform: globals.platform,
-         ),
-       );
-
-  static VsCodeValidatorTestTargets get installedWithExtension =>
-      VsCodeValidatorTestTargets._(validInstall, validExtensions);
-
-  static VsCodeValidatorTestTargets get installedWithExtension64bit =>
-      VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
-
-  static VsCodeValidatorTestTargets get installedWithoutExtension =>
-      VsCodeValidatorTestTargets._(validInstall, missingExtensions);
-
-  static final String root = globals.fs.path.join(
-    'test',
-    'data',
-    globals.platform.isLinux ? 'vscode_linux' : 'vscode',
-  );
-  static final String validInstall = globals.fs.path.join(root, 'application');
-  static final String validExtensions = globals.fs.path.join(root, 'extensions');
-  static final String missingExtensions = globals.fs.path.join(root, 'notExtensions');
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
