@@ -105,11 +105,6 @@ void main() {
       testRoot.binInternalUpdateEngineVersion.path,
     );
 
-    // Copy the content_aware_hash script and create a rough directory structure.
-    flutterRoot.binInternalContentAwareHash.copySyncRecursive(
-      testRoot.binInternalContentAwareHash.path,
-    );
-
     // Regression test for https://github.com/flutter/flutter/pull/164396;
     // on a fresh checkout bin/cache does not exist, so avoid trying to create
     // this folder.
@@ -136,11 +131,6 @@ void main() {
         'bin',
         'internal',
         localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path),
-      ),
-      localFs.path.join(
-        'bin',
-        'internal',
-        localFs.path.basename(testRoot.binInternalContentAwareHash.path),
       ),
       localFs.path.join('bin', 'internal', 'engine.version'),
       localFs.path.join('engine', 'src', '.gn'),
@@ -240,22 +230,13 @@ void main() {
     run('git', <String>['fetch', remote], workingPath: rootPath);
   }
 
-  /// Returns the SHA computed by `content_aware_hash`.
-  String gitContentHash({required _FlutterRootUnderTest fileSystem}) {
-    final String executable;
-    final List<String> args;
-    final String script = fileSystem.binInternalContentAwareHash.path;
-    if (const LocalPlatform().isWindows) {
-      executable = 'powershell';
-      args = <String>[script];
-    } else if (usePowershellOnPosix) {
-      executable = 'pwsh';
-      args = <String>[script];
-    } else {
-      executable = script;
-      args = <String>[];
-    }
-    final io.ProcessResult mergeBaseHeadOrigin = run(executable, args);
+  /// Returns the SHA computed by `merge-base HEAD {{ref}}/master`.
+  String gitMergeBase({required String ref}) {
+    final io.ProcessResult mergeBaseHeadOrigin = run('git', <String>[
+      'merge-base',
+      'HEAD',
+      '$ref/master',
+    ]);
     return mergeBaseHeadOrigin.stdout as String;
   }
 
@@ -331,10 +312,7 @@ void main() {
       pinEngineVersionForReleaseBranch(engineHash: 'abc123', gitTrack: false);
       runUpdateEngineVersion();
 
-      expect(
-        testRoot.binCacheEngineStamp,
-        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
-      );
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
     });
   });
 
@@ -347,20 +325,14 @@ void main() {
       setupRemote(remote: 'upstream');
       runUpdateEngineVersion();
 
-      expect(
-        testRoot.binCacheEngineStamp,
-        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
-      );
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
     });
 
     test('fallsback to origin/master', () async {
       setupRemote(remote: 'origin');
       runUpdateEngineVersion();
 
-      expect(
-        testRoot.binCacheEngineStamp,
-        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
-      );
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'origin')));
     });
   });
 
@@ -420,13 +392,6 @@ final class _FlutterRootUnderTest {
           'update_engine_version.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
         ),
       ),
-      binInternalContentAwareHash: root.childFile(
-        fileSystem.path.join(
-          'bin',
-          'internal',
-          'content_aware_hash.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
-        ),
-      ),
     );
   }
 
@@ -452,7 +417,6 @@ final class _FlutterRootUnderTest {
     required this.binInternalEngineVersion,
     required this.binCacheEngineRealm,
     required this.binInternalUpdateEngineVersion,
-    required this.binInternalContentAwareHash,
   });
 
   final Directory root;
@@ -483,11 +447,6 @@ final class _FlutterRootUnderTest {
   /// - [binInternalEngineVersion]
   /// - [binInternalEngineRealm]
   final File binInternalUpdateEngineVersion;
-
-  /// `bin/internal/content_aware_hash.{sh|ps1}`.
-  ///
-  /// This file contains a shell script that computes the content hash
-  final File binInternalContentAwareHash;
 }
 
 extension on File {
