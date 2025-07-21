@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'convert.dart';
 
 /// Wrapper around the command-line `git` executable on the host.
 interface class Git {
