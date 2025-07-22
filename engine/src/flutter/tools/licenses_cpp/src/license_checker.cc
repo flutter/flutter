@@ -325,6 +325,8 @@ bool ProcessNotices(const fs::path& relative_path,
   while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
     std::vector<std::string_view> projects = SplitLines(projects_text);
 
+    VLOG(4) << license;
+
     absl::StatusOr<std::vector<Catalog::Match>> matches =
         data.catalog.FindMatch(license);
     if (matches.ok()) {

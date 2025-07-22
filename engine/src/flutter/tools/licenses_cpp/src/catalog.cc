@@ -17,6 +17,35 @@ bool Overlaps(std::string_view a, std::string_view b) {
 
   return start1 < end2 && start2 < end1;
 }
+
+bool EndsWith(std::string_view str, std::string_view suffix) {
+  if (suffix.length() > str.length()) {
+    return false;
+  }
+  return str.substr(str.length() - suffix.length()) == suffix;
+}
+
+std::string IgnoreWhitespace(std::string_view input) {
+  bool in_whitespace = false;
+  std::string result = "";
+  for (size_t i = 0; i < input.size(); ++i) {
+    char current = input[i];
+    if (std::isspace(current)) {
+      if (!in_whitespace) {
+        result.append("\\s+");
+      }
+      in_whitespace = true;
+    } else {
+      result.push_back(current);
+      in_whitespace = false;
+    }
+  }
+  if (EndsWith(result, "\\s+")) {
+    result.erase(result.end() - 3, result.end());
+  }
+  return result;
+}
+
 }  // namespace
 
 absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
@@ -180,7 +209,9 @@ absl::StatusOr<Catalog::Entry> Catalog::ParseEntry(std::istream& is) {
   std::string matcher_text((std::istreambuf_iterator<char>(is)),
                            std::istreambuf_iterator<char>());
 
+  std::string ignore_whitespace_matcher = IgnoreWhitespace(matcher_text);
+
   return Catalog::Entry{.name = std::move(name),
                         .unique = std::move(unique),
-                        .matcher = std::move(matcher_text)};
+                        .matcher = std::move(ignore_whitespace_matcher)};
 }

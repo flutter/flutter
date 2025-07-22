@@ -160,9 +160,7 @@ matcher
   if (entry.ok()) {
     EXPECT_EQ(entry->name, "foobar");
     EXPECT_EQ(entry->unique, "unique");
-    EXPECT_EQ(entry->matcher, R"match(Multiline
-matcher
-.*)match");
+    EXPECT_EQ(entry->matcher, R"match(Multiline\s+matcher\s+.*)match");
   }
 }
 
@@ -175,5 +173,67 @@ TEST(CatalogTest, SkiaLicense) {
   ASSERT_TRUE(catalog.ok());
   absl::StatusOr<std::vector<Catalog::Match>> match =
       catalog->FindMatch(kSkiaLicense);
+  EXPECT_TRUE(match.ok()) << match.status();
+}
+
+namespace {
+std::string RemoveNewlines(std::string_view input) {
+  if (input.empty()) {
+    return std::string();
+  }
+  std::string no_newline;
+  char last_char = input[0];
+  for (size_t i = 1; i < input.size(); ++i) {
+    char current = input[i];
+    if (last_char == '\n' && current == '\n') {
+      no_newline.push_back('\n');
+      no_newline.push_back('\n');
+    } else if (last_char == '\n') {
+      no_newline.push_back(' ');
+    } else {
+      no_newline.push_back(last_char);
+    }
+    last_char = current;
+  }
+  if (last_char != '\n') {
+    no_newline.push_back(last_char);
+  }
+  return no_newline;
+}
+}  // namespace
+
+TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
+  std::stringstream ss;
+  ss << kEntry;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string no_newline_license = RemoveNewlines(kSkiaLicense);
+
+  absl::StatusOr<std::vector<Catalog::Match>> match =
+      catalog->FindMatch(no_newline_license);
+  ASSERT_TRUE(match.ok()) << match.status();
+  ASSERT_EQ(match->size(), 1u);
+  EXPECT_EQ(match->at(0).matched_text, no_newline_license);
+}
+
+TEST(CatalogTest, SkiaLicenseIgnoreTrailing) {
+  std::stringstream ss;
+  ss << kEntry;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string no_end(kSkiaLicense);
+  ASSERT_EQ(no_end.back(), '\n');
+  no_end.pop_back();
+
+  std::cout << no_end << std::endl;
+
+  absl::StatusOr<std::vector<Catalog::Match>> match =
+      catalog->FindMatch(no_end);
   EXPECT_TRUE(match.ok()) << match.status();
 }
