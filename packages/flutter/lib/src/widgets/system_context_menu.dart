@@ -465,6 +465,12 @@ final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
 ///
 /// The [title] and [onPressed] callback must be provided.
 ///
+/// {@tool dartpad}
+/// This example shows how to add custom menu items to the iOS system context menu.
+///
+/// ** See code in examples/api/lib/widgets/system_context_menu/system_context_menu.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
@@ -487,11 +493,10 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
-    final String callbackId = '${DateTime.now().millisecondsSinceEpoch}_${title.hashCode}';
-    SystemContextMenuController.registerCustomAction(callbackId, onPressed);
     return IOSSystemContextMenuItemDataCustom(
       title: title,
-      callbackId: callbackId,
+      callbackId: hashCode.toString(),
+      onPressed: onPressed,
     );
   }
 
@@ -515,6 +520,3 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
     properties.add(ObjectFlagProperty<VoidCallback>.has('onPressed', onPressed));
   }
 }
-
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163
