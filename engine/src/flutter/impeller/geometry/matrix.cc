@@ -362,7 +362,7 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
 
 std::optional<std::pair<Scalar, Scalar>> Matrix::GetScales2D() const {
   if (HasPerspective2D()) {
-    return {};
+    return std::nullopt;
   }
 
   // We only operate on the uppermost 2x2 matrix since those are the only
@@ -407,26 +407,27 @@ std::optional<std::pair<Scalar, Scalar>> Matrix::GetScales2D() const {
   //
   // (We use -B for calculations because the square is the same as B and we
   //  need -B for the final quadratic equation computations anyway.)
-  double negB = a2 + d2;
+  double minus_B = a2 + d2;
   double C = a2 * d2 - b2 * c2;
-  double B2minus4AC = negB * negB - 4 * 1.0f * C;
+  double B_squared_minus_4AC = minus_B * minus_B - 4 * 1.0f * C;
 
-  double Sqrt;
-  if (B2minus4AC <= 0.0f) {
+  double quadratic_sqrt;
+  if (B_squared_minus_4AC <= 0.0f) {
     // This test should never fail, but we might be slightly negative
-    FML_DCHECK(B2minus4AC + kEhCloseEnough >= 0.0f);
+    FML_DCHECK(B_squared_minus_4AC + kEhCloseEnough >= 0.0f);
     // Uniform scales (possibly rotated) would tend to end up here
     // in which case both eigenvalues are identical
-    Sqrt = 0.0f;
+    quadratic_sqrt = 0.0f;
   } else {
-    Sqrt = std::sqrt(B2minus4AC);
+    quadratic_sqrt = std::sqrt(B_squared_minus_4AC);
   }
 
   // Since this is returning the sqrt of the values, we can guarantee that
   // the returned scales are non-negative.
-  FML_DCHECK(negB - Sqrt >= 0.0f);
-  FML_DCHECK(negB + Sqrt >= 0.0f);
-  return {{std::sqrt((negB - Sqrt) / 2.0f), std::sqrt((negB + Sqrt) / 2.0f)}};
+  FML_DCHECK(minus_B - quadratic_sqrt >= 0.0f);
+  FML_DCHECK(minus_B + quadratic_sqrt >= 0.0f);
+  return {{std::sqrt((minus_B - quadratic_sqrt) / 2.0f),
+           std::sqrt((minus_B + quadratic_sqrt) / 2.0f)}};
 }
 
 uint64_t MatrixDecomposition::GetComponentsMask() const {

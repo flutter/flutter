@@ -29,14 +29,14 @@ inline DlScalar AmbientBlurRadius(DlScalar height) {
 
 struct DrawShadowRec {
   DlVector3 light_position;
-  DlScalar light_radius;
-  DlScalar occluder_z;
+  DlScalar light_radius = 0.0f;
+  DlScalar occluder_z = 0.0f;
 };
 
-static inline float DivideAndPin(float numer,
-                                 float denom,
-                                 float min,
-                                 float max) {
+static inline float DivideAndClamp(float numer,
+                                   float denom,
+                                   float min,
+                                   float max) {
   float result = std::clamp(numer / denom, min, max);
   // ensure that clamp handled non-finites correctly
   FML_DCHECK(result >= min && result <= max);
@@ -51,8 +51,8 @@ inline void GetDirectionalParams(DrawShadowRec params,
   *scale = 1.0f;
   // Max z-ratio is ("max expected elevation" / "min allowable z").
   constexpr DlScalar kMaxZRatio = 64.0f / flutter::kEhCloseEnough;
-  DlScalar zRatio = DivideAndPin(params.occluder_z, params.light_position.z,
-                                 0.0f, kMaxZRatio);
+  DlScalar zRatio = DivideAndClamp(params.occluder_z, params.light_position.z,
+                                   0.0f, kMaxZRatio);
   *translate = DlVector2(-zRatio * params.light_position.x,
                          -zRatio * params.light_position.y);
 }
@@ -61,7 +61,7 @@ DlRect GetLocalBounds(DlRect ambient_bounds,
                       const DlMatrix& matrix,
                       const DrawShadowRec& params) {
   if (!matrix.IsInvertible() || ambient_bounds.IsEmpty()) {
-    return {};
+    return DlRect();
   }
 
   DlScalar ambient_blur;
