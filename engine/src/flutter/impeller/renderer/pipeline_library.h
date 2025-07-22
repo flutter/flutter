@@ -43,7 +43,8 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
 
   virtual PipelineFuture<PipelineDescriptor> GetPipeline(
       PipelineDescriptor descriptor,
-      bool async = true) = 0;
+      bool async = true,
+      bool threadsafe = false) = 0;
 
   virtual PipelineFuture<ComputePipelineDescriptor> GetPipeline(
       ComputePipelineDescriptor descriptor,

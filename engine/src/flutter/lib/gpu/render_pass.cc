@@ -167,7 +167,7 @@ RenderPass::GetOrCreatePipeline() {
         fml::MakeCopyable([promise = std::move(pipeline_promise),
                            context = GetContext(), pipeline_desc]() mutable {
           promise.set_value(
-              context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get());
+              context->GetPipelineLibrary()->GetPipeline(pipeline_desc, true, true).Get());
         }));
     pipeline = pipeline_future.get();
   } else {
