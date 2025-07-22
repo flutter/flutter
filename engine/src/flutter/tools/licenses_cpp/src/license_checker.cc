@@ -26,8 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 5> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
+const std::array<std::string_view, 7> kLicenseFileNames = {
+    "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
+    "LICENSE.MIT", "COPYING",     "License.txt"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
