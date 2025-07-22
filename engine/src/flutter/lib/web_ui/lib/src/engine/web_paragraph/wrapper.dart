@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:ui/ui.dart' as ui;
-
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -24,52 +22,50 @@ class TextWrapper {
   double _top = 0.0;
 
   // Whitespaces always separates text from clusters even if it's empty
-  ClusterRange _whitespaces = ClusterRange.empty;
+  late ClusterRange _whitespaces;
 
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
   double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
   double _maxIntrinsicWidth = 0.0;
+
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = double.infinity;
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
-      CodeUnitFlags.kPartOfWhiteSpaceBreak,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kWhitespaceFlag);
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
-      CodeUnitFlags.kSoftLineBreakBefore,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kSoftLineBreakFlag);
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _layout.hasFlag(
-      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
-      CodeUnitFlags.kHardLineBreakBefore,
-    );
+    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kHardLineBreakFlag);
   }
 
+  bool _hasCodeUnitFlag(ExtendedTextCluster cluster, int flag) {
+    return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
+  }
+
+  // TODO(jlavrova): Consider combining this with `_layout.addLine`.
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
-    _whitespaces = ClusterRange(start: start, end: start);
+    _whitespaces = ClusterRange.collapsed(start);
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
     _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
     _widthLetters = clusterWidth;
+    _top = 0.0;
   }
 
   void breakLines(double width) {
     // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
-    _top = 0.0;
     startNewLine(0, 0.0);
+
     bool hardLineBreak = false;
     for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
@@ -89,7 +85,7 @@ class TextWrapper {
         _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
-          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+          _whitespaces.clone(),
           hardLineBreak,
           _top,
         );
@@ -125,7 +121,7 @@ class TextWrapper {
           _widthText += _widthWhitespaces + _widthLetters;
           _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
           _widthLetters = 0.0;
-          _whitespaces = ClusterRange(start: index, end: index);
+          _whitespaces = ClusterRange.collapsed(index);
           _widthWhitespaces = 0.0;
         }
         // Add the cluster to the current whitespace sequence (empty or not)
@@ -150,8 +146,7 @@ class TextWrapper {
             _widthWhitespaces = 0.0;
             _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
             _widthLetters = 0.0;
-            _whitespaces.start = index;
-            _whitespaces.end = index;
+            _whitespaces.start = _whitespaces.end = index;
           } else {
             // We only have whitespaces on the line
             _widthText = 0.0;
@@ -165,8 +160,7 @@ class TextWrapper {
                 _widthLetters == 0.0,
           );
           _widthText = widthCluster;
-          _whitespaces.start = index + 1;
-          _whitespaces.end = index + 1;
+          _whitespaces.start = _whitespaces.end = index + 1;
           widthCluster = 0.0; // Since we already processed this cluster
         }
 
@@ -190,10 +184,7 @@ class TextWrapper {
     if (_whitespaces.end != _layout.textClusters.length - 1) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
-      _whitespaces = ClusterRange(
-        start: _layout.textClusters.length - 1,
-        end: _layout.textClusters.length - 1,
-      );
+      _whitespaces = ClusterRange.collapsed(_layout.textClusters.length - 1);
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
     }
@@ -201,7 +192,7 @@ class TextWrapper {
     _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
-      ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+      _whitespaces.clone(),
       hardLineBreak,
       _top,
     );

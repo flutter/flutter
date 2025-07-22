@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 class WebParagraphDebug {
-  static bool logging = false;
+  static const bool logging = false;
 
   static void log(String arg) {
     if (logging) {

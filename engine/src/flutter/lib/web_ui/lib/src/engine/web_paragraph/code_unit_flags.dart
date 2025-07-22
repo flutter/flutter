@@ -2,61 +2,81 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../canvaskit/canvaskit_api.dart';
+import '../canvaskit/text_fragmenter.dart';
+import 'paragraph.dart';
+
 class CodeUnitFlags {
   CodeUnitFlags(this._value);
 
-  bool get isWhitespace => (_value & kPartOfWhiteSpaceBreak) != 0;
+  static List<CodeUnitFlags> extractForParagraph(WebParagraph paragraph) {
+    final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text);
+    assert(ckFlags.length == (paragraph.text.length + 1));
 
-  bool get isGraphemeStart => (_value & kGraphemeStart) != 0;
+    final codeUnitFlags = ckFlags.map((info) => CodeUnitFlags(info.flags)).toList();
 
-  bool get isSoftLineBreak => (_value & kSoftLineBreakBefore) != 0;
+    // Get text segmentation resuls using browser APIs.
+    final SegmentationResult result = segmentText(paragraph.text);
 
-  bool get isHardLineBreak => (_value & kHardLineBreakBefore) != 0;
+    // Fill out grapheme flags
+    for (final grapheme in result.graphemes) {
+      codeUnitFlags[grapheme].graphemeStart = true;
+    }
+    // Fill out word flags
+    for (final word in result.words) {
+      codeUnitFlags[word].wordBreak = true;
+    }
+    // Fill out line break flags
+    for (int index = 0; index < result.breaks.length; index += 2) {
+      final int lineBreak = result.breaks[index];
+      if (result.breaks[index + 1] == kSoftLineBreak) {
+        codeUnitFlags[lineBreak].softLineBreak = true;
+      } else {
+        codeUnitFlags[lineBreak].hardLineBreak = true;
+      }
+    }
+    return codeUnitFlags;
+  }
 
-  bool get isWordBreak => (_value & kWordBreak) != 0;
+  bool get isWhitespace => hasFlag(kWhitespaceFlag);
+  set whitespace(bool enable) => _setFlag(kWhitespaceFlag, enable);
 
-  set whitespace(bool flag) =>
-      _value = flag ? (_value | kPartOfWhiteSpaceBreak) : (_value & ~kPartOfWhiteSpaceBreak);
+  bool get isGraphemeStart => hasFlag(kGraphemeFlag);
+  set graphemeStart(bool enable) => _setFlag(kGraphemeFlag, enable);
 
-  set graphemeStart(bool flag) =>
-      _value = flag ? (_value | kGraphemeStart) : (_value & ~kGraphemeStart);
+  bool get isSoftLineBreak => hasFlag(kSoftLineBreakFlag);
+  set softLineBreak(bool enable) => _setFlag(kSoftLineBreakFlag, enable);
 
-  set softLineBreak(bool flag) =>
-      _value = flag ? (_value | kSoftLineBreakBefore) : (_value & ~kSoftLineBreakBefore);
+  bool get isHardLineBreak => hasFlag(kHardLineBreakFlag);
+  set hardLineBreak(bool enable) => _setFlag(kHardLineBreakFlag, enable);
 
-  set hardLineBreak(bool flag) =>
-      _value = flag ? (_value | kHardLineBreakBefore) : (_value & ~kHardLineBreakBefore);
-
-  set wordBreak(bool flag) => _value = flag ? (_value | kWordBreak) : (_value & ~kWordBreak);
+  bool get isWordBreak => hasFlag(kWordBreakFlag);
+  set wordBreak(bool enable) => _setFlag(kWordBreakFlag, enable);
 
   bool hasFlag(int flag) {
     return (_value & flag) != 0;
   }
 
-  int get value => _value;
+  void _setFlag(int flag, bool enable) {
+    _value = enable ? (_value | flag) : (_value & ~flag);
+  }
+
   int _value;
 
   @override
   String toString() {
-    final String whitespaces = isWhitespace ? 'whitespace ' : '';
-    final String grapheme = isGraphemeStart ? 'grapheme ' : '';
-    final String softBreak = isSoftLineBreak ? 'softBreak ' : '';
-    final String hardBreak = isHardLineBreak ? 'hardBreak ' : '';
-    final String word = isWordBreak ? 'word ' : '';
-    return '$whitespaces$grapheme$softBreak$hardBreak$word';
+    return [
+      if (isWhitespace) 'whitespace',
+      if (isGraphemeStart) 'grapheme',
+      if (isSoftLineBreak) 'softBreak',
+      if (isHardLineBreak) 'hardBreak',
+      if (isWordBreak) 'word',
+    ].join(' ');
   }
 
-  static const int kNoCodeUnitFlag = 0 << 0;
-  static const int kPartOfWhiteSpaceBreak = 1 << 0;
-  static const int kGraphemeStart = 1 << 1;
-  static const int kSoftLineBreakBefore = 1 << 2;
-  static const int kHardLineBreakBefore = 1 << 3;
-  static const int kPartOfIntraWordBreak = 1 << 4;
-  static const int kControl = 1 << 5;
-  static const int kTabulation = 1 << 6;
-  static const int kGlyphClusterStart = 1 << 7;
-  static const int kIdeographic = 1 << 8;
-  static const int kEmoji = 1 << 9;
-  static const int kWordBreak = 1 << 10;
-  static const int kSentenceBreak = 1 << 11;
+  static const int kWhitespaceFlag = 1 << 0;
+  static const int kGraphemeFlag = 1 << 1;
+  static const int kSoftLineBreakFlag = 1 << 2;
+  static const int kHardLineBreakFlag = 1 << 3;
+  static const int kWordBreakFlag = 1 << 4;
 }

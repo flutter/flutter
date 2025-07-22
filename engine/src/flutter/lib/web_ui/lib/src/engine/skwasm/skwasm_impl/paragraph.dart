@@ -11,10 +11,8 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-const int _kSoftLineBreak = 0;
-const int _kHardLineBreak = 100;
-
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
+
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   if (!ui_web.debugEmulateFlutterTesterEnvironment) {
     return fontFamilies;
@@ -83,6 +81,7 @@ class SkwasmLineMetrics extends SkwasmObjectWrapper<RawLineMetrics> implements u
   int get lineNumber => lineMetricsGetLineNumber(handle);
 
   int get startIndex => lineMetricsGetStartIndex(handle);
+
   int get endIndex => lineMetricsGetEndIndex(handle);
 }
 
@@ -203,10 +202,10 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
       final Pointer<Bool> outBooleanFlags = scope.allocBoolArray(1);
       return paragraphGetGlyphInfoAt(handle, codeUnitOffset, outRect, outRange, outBooleanFlags)
           ? ui.GlyphInfo(
-            scope.convertRectFromNative(outRect),
-            ui.TextRange(start: outRange[0], end: outRange[1]),
-            outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
-          )
+              scope.convertRectFromNative(outRect),
+              ui.TextRange(start: outRange[0], end: outRange[1]),
+              outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+            )
           : null;
     });
   }
@@ -226,10 +225,10 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
             outBooleanFlags,
           )
           ? ui.GlyphInfo(
-            scope.convertRectFromNative(outRect),
-            ui.TextRange(start: outRange[0], end: outRange[1]),
-            outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
-          )
+              scope.convertRectFromNative(outRect),
+              ui.TextRange(start: outRange[0], end: outRange[1]),
+              outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+            )
           : null;
     });
   }
@@ -285,8 +284,9 @@ void withScopedFontList(
   void Function(Pointer<SkStringHandle>, int) callback,
 ) {
   withStackScope((StackScope scope) {
-    final Pointer<SkStringHandle> familiesPtr =
-        scope.allocPointerArray(fontFamilies.length).cast<SkStringHandle>();
+    final Pointer<SkStringHandle> familiesPtr = scope
+        .allocPointerArray(fontFamilies.length)
+        .cast<SkStringHandle>();
     int nativeIndex = 0;
     for (int i = 0; i < fontFamilies.length; i++) {
       familiesPtr[nativeIndex] = skStringFromDartString(fontFamilies[i]);
@@ -766,8 +766,9 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle>
       strutStyle as SkwasmStrutStyle;
       paragraphStyleSetStrutStyle(handle, strutStyle.handle);
     }
-    final SkwasmNativeTextStyle textStyle =
-        (renderer.fontCollection as SkwasmFontCollection).defaultTextStyle.copy();
+    final SkwasmNativeTextStyle textStyle = (renderer.fontCollection as SkwasmFontCollection)
+        .defaultTextStyle
+        .copy();
     final TextStyleHandle textStyleHandle = textStyle.handle;
 
     final List<String> effectiveFontFamilies = _computeEffectiveFontFamilies(<String>[
@@ -1071,8 +1072,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     for (int i = 0; i < lineBreaks.length; i++) {
       final LineBreakFragment fragment = lineBreaks[i];
       lineBreakPointer[i + 1].position = fragment.end;
-      lineBreakPointer[i + 1].lineBreakType =
-          fragment.type == LineBreakType.mandatory ? _kHardLineBreak : _kSoftLineBreak;
+      lineBreakPointer[i + 1].lineBreakType = fragment.type == LineBreakType.mandatory
+          ? kHardLineBreak
+          : kSoftLineBreak;
     }
     paragraphBuilderSetLineBreaksUtf16(handle, lineBreakBuffer);
     lineBreakBufferFree(lineBreakBuffer);
@@ -1099,8 +1101,9 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
   @override
   void pushStyle(ui.TextStyle textStyle) {
     textStyle as SkwasmTextStyle;
-    final SkwasmNativeTextStyle baseStyle =
-        textStyleStack.isNotEmpty ? textStyleStack.last : style.textStyle;
+    final SkwasmNativeTextStyle baseStyle = textStyleStack.isNotEmpty
+        ? textStyleStack.last
+        : style.textStyle;
     final SkwasmNativeTextStyle nativeStyle = baseStyle.copy();
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);

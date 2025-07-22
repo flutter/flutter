@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:ui/ui.dart' as ui;
 
-import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/canvaskit_canvas.dart';
-import '../canvaskit/image.dart';
 import '../dom.dart';
-import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'painter.dart';
@@ -28,7 +23,9 @@ typedef PaintCluster =
       ui.Rect targetRect,
     );
 
-/// Performs layout on a [WebParagraph].
+/// Paints on a [WebParagraph].
+///
+/// It uses a [DomCanvasElement] to get text information
 class TextPaint {
   TextPaint(this.paragraph, this.painter);
 
@@ -90,17 +87,19 @@ class TextPaint {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
-      if (block.clusterRange.width == 1 &&
+      if (block.clusterRange.size == 1 &&
           layout.textClusters[block.clusterRange.start].placeholder) {
         continue;
       }
       WebParagraphDebug.log(
         'paintByClusters: ${line.fontBoundingBoxAscent} - ${block.rawFontBoundingBoxAscent}',
       );
-      final int start =
-          block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
-      final int end =
-          block.bidiLevel.isEven ? block.clusterRange.end : block.clusterRange.start - 1;
+      final int start = block.bidiLevel.isEven
+          ? block.clusterRange.start
+          : block.clusterRange.end - 1;
+      final int end = block.bidiLevel.isEven
+          ? block.clusterRange.end
+          : block.clusterRange.start - 1;
       final int step = block.bidiLevel.isEven ? 1 : -1;
       for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
@@ -180,8 +179,9 @@ class TextPaint {
       block.textRange.translate(-block.textMetricsZero),
     );
 
-    final int start =
-        block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
+    final int start = block.bidiLevel.isEven
+        ? block.clusterRange.start
+        : block.clusterRange.end - 1;
     final ExtendedTextCluster startCluster = layout.textClusters[start];
 
     // Define the text clusters rect (using advances, not selected rects)

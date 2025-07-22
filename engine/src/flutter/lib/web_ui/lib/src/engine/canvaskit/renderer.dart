@@ -52,6 +52,7 @@ class CanvasKitRenderer implements Renderer {
 
   /// The scene host, where the root canvas and overlay canvases are added to.
   DomElement? _sceneHost;
+
   DomElement? get sceneHost => _sceneHost;
 
   Rasterizer _rasterizer = _createRasterizer();
@@ -86,6 +87,7 @@ class CanvasKitRenderer implements Renderer {
 
   // Listens for view creation events from the view manager.
   StreamSubscription<int>? _onViewCreatedListener;
+
   // Listens for view disposal events from the view manager.
   StreamSubscription<int>? _onViewDisposedListener;
 
@@ -361,29 +363,37 @@ class CanvasKitRenderer implements Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => CkTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background as CkPaint?,
-    foreground: foreground as CkPaint?,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
+  }) =>
+      isExperimentalWebParagraph
+          ? WebTextStyle(
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            foreground: foreground,
+            background: background,
+          )
+          : CkTextStyle(
+            color: color,
+            decoration: decoration,
+            decorationColor: decorationColor,
+            decorationStyle: decorationStyle,
+            decorationThickness: decorationThickness,
+            fontWeight: fontWeight,
+            fontStyle: fontStyle,
+            textBaseline: textBaseline,
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
+            fontSize: fontSize,
+            letterSpacing: letterSpacing,
+            wordSpacing: wordSpacing,
+            height: height,
+            leadingDistribution: leadingDistribution,
+            locale: locale,
+            background: background as CkPaint?,
+            foreground: foreground as CkPaint?,
+            shadows: shadows,
+            fontFeatures: fontFeatures,
+            fontVariations: fontVariations,
+          );
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -401,7 +411,12 @@ class CanvasKitRenderer implements Renderer {
     ui.Locale? locale,
   }) =>
       isExperimentalWebParagraph
-          ? WebParagraphStyle()
+          ? WebParagraphStyle(
+            textDirection: textDirection,
+            textAlign: textAlign,
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+          )
           : CkParagraphStyle(
             textAlign: textAlign,
             textDirection: textDirection,

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_canvas.dart';
@@ -340,7 +339,7 @@ class WebTextStyle implements ui.TextStyle {
     final String cssFontWeight =
         fontWeight == null ? 'normal' : fontWeightIndexToCss(fontWeightIndex: fontWeight!.index);
     final int cssFontSize = fontSize == null ? 14 : fontSize!.floor();
-    final String cssFontFamily = engine.canonicalizeFontFamily(originalFontFamily)!;
+    final String cssFontFamily = canonicalizeFontFamily(originalFontFamily)!;
 
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
   }
@@ -405,100 +404,115 @@ class WebTextStyle implements ui.TextStyle {
   }
 }
 
-class TextRange extends ui.TextRange {
-  TextRange({required this.start, required this.end})
-    : assert(start >= -1),
-      assert(end >= -1),
-      super(start: 0, end: 0);
+abstract class _RangeStartEnd {
+  _RangeStartEnd(int start, int end) {
+    this.start = start;
+    this.end = end;
+  }
+  _RangeStartEnd.collapsed(int offset) : this(offset, offset);
+  _RangeStartEnd.zero() : this.collapsed(0);
+
+  int _start = -1;
+  int get start => _start;
+  set start(int value) {
+    assert(value >= -1, 'Start index cannot be negative: $value');
+    _start = value;
+  }
+
+  int _end = -1;
+  int get end => _end;
+  set end(int value) {
+    assert(value >= -1, 'End index cannot be negative: $value');
+    _end = value;
+  }
+
+  int get size => _end - _start;
+
+  bool get isEmpty => _start == _end;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is TextRange && other.start == start && other.end == end;
+    return other is _RangeStartEnd && other._start == _start && other._end == _end;
   }
 
   @override
   int get hashCode {
-    return Object.hash(start, end);
+    return Object.hash(_start, _end);
   }
 
   @override
   String toString() {
     return '[$start:$end)';
   }
+}
 
-  int get width => end - start;
+class ClusterRange extends _RangeStartEnd {
+  ClusterRange({required int start, required int end}) : super(start, end);
+  ClusterRange.collapsed(super.offset) : super.collapsed();
+  ClusterRange.zero() : super.zero();
 
-  bool get isEmpty => start == end;
+  ClusterRange clone() {
+    return ClusterRange(start: start, end: end);
+  }
+
+  @override
+  // No need to override hashCode, since _RangeStartEnd already does it.
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is ClusterRange && super == other;
+  }
+}
+
+class TextRange extends _RangeStartEnd {
+  TextRange({required int start, required int end}) : super(start, end);
+  TextRange.collapsed(super.offset) : super.collapsed();
+  TextRange.zero() : super.zero();
+
+  TextRange clone() {
+    return TextRange(start: start, end: end);
+  }
+
+  @override
+  // No need to override hashCode, since _RangeStartEnd already does it.
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is TextRange && super == other;
+  }
 
   TextRange translate(int offset) {
     return TextRange(start: start + offset, end: end + offset);
   }
-
-  static TextRange empty = TextRange(start: 0, end: 0);
-
-  @override
-  int start;
-  @override
-  int end;
 }
 
-class ClusterRange {
-  ClusterRange({required this.start, required this.end}) : assert(start >= -1), assert(end >= -1);
+class StyledTextRange extends _RangeStartEnd {
+  StyledTextRange(super.start, super.end, this.style);
+  StyledTextRange.collapsed(super.offset, this.style) : super.collapsed();
+  StyledTextRange.zero(this.style) : super.zero();
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is ClusterRange && other.start == start && other.end == end;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(start, end);
-  }
+  final WebTextStyle style;
+  WebParagraphPlaceholder? placeholder;
 
   @override
   String toString() {
-    return '[$start:$end)';
+    return 'StyledTextRange[$this) ${placeholder != null ? 'placeholder' : 'text'}';
   }
 
-  ClusterRange normalize(bool isDefaultLtr) {
-    return isDefaultLtr ? this : ClusterRange(start: end + 1, end: start + 1);
-  }
-
-  int get width => end - start;
-
-  bool get isEmpty => start == end;
-
-  static ClusterRange empty = ClusterRange(start: 0, end: 0);
-
-  int start;
-  int end;
-}
-
-class StyledTextRange {
-  StyledTextRange(int start, int end, this.textStyle) {
-    textRange = TextRange(start: start, end: end);
-  }
-
-  @override
-  String toString() {
-    return 'StyledTextRange[${textRange.start}:${textRange.end}) ${placeholder != null ? 'placeholder' : 'text'}';
-  }
+  String textFrom(WebParagraph paragraph) => paragraph.text.substring(_start, _end);
 
   void markAsPlaceholder(WebParagraphPlaceholder placeholder) {
     this.placeholder = placeholder;
   }
 
   bool get isPlaceholder => placeholder != null;
-
-  TextRange textRange = TextRange(start: 0, end: 0);
-  WebTextStyle textStyle;
-  WebParagraphPlaceholder? placeholder;
 }
 
 class WebStrutStyle implements ui.StrutStyle {
@@ -528,8 +542,8 @@ class WebParagraph implements ui.Paragraph {
   List<StyledTextRange> get styledTextRanges => _styledTextRanges;
   final List<StyledTextRange> _styledTextRanges;
 
-  String? get text => _text;
-  final String? _text;
+  String get text => _text;
+  final String _text;
 
   @override
   double get alphabeticBaseline => _alphabeticBaseline;
@@ -609,8 +623,8 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition < 0) {
       return const ui.TextRange(start: 0, end: 0);
     }
-    if (codepointPosition >= text!.length) {
-      return ui.TextRange(start: text!.length, end: text!.length);
+    if (codepointPosition >= text.length) {
+      return ui.TextRange(start: text.length, end: text.length);
     }
     return _layout.getWordBoundary(codepointPosition);
   }
@@ -630,12 +644,14 @@ class WebParagraph implements ui.Paragraph {
   }
 
   /// Paints this paragraph instance on a [canvas] at the given [offset].
+  // TODO(jlavrova): Delete.
   void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 
+  // TODO(jlavrova): Delete.
   void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
@@ -651,7 +667,7 @@ class WebParagraph implements ui.Paragraph {
     for (final line in _layout.lines) {
       if (line.allLineTextRange.start <= codepointPosition &&
           line.allLineTextRange.end > codepointPosition) {
-        return line.allLineTextRange;
+        return ui.TextRange(start: line.allLineTextRange.start, end: line.allLineTextRange.end);
       }
     }
     return ui.TextRange.empty;
@@ -718,60 +734,45 @@ class WebParagraph implements ui.Paragraph {
   }
 
   String getText(TextRange textRange) {
-    if (text!.isEmpty) {
-      return text!;
+    if (text.isEmpty) {
+      return text;
     }
     assert(textRange.start >= 0);
-    assert(textRange.end <= text!.length);
-    return text!.substring(textRange.start, textRange.end);
+    assert(textRange.end <= text.length);
+    return text.substring(textRange.start, textRange.end);
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(
-    this,
-    Canvas2DPainter(),
-  ); // TODO(jlavrova): get the painter from somewhere else
+  late final TextPaint _paint = TextPaint(this, Canvas2DPainter());
 }
 
 class WebLineMetrics implements ui.LineMetrics {
-  const WebLineMetrics({
-    required this.hardBreak,
-    required this.ascent,
-    required this.descent,
-    required this.unscaledAscent,
-    required this.height,
-    required this.width,
-    required this.left,
-    required this.baseline,
-    required this.lineNumber,
-  });
+  @override
+  double get ascent => 0.0;
 
   @override
-  final bool hardBreak;
+  double get descent => 0.0;
 
   @override
-  final double ascent;
+  double get unscaledAscent => 0.0;
 
   @override
-  final double descent;
+  bool get hardBreak => false;
 
   @override
-  final double unscaledAscent;
+  double get baseline => 0.0;
 
   @override
-  final double height;
+  double get height => 0.0;
 
   @override
-  final double width;
+  double get left => 0.0;
 
   @override
-  final double left;
+  double get width => 0.0;
 
   @override
-  final double baseline;
-
-  @override
-  final int lineNumber;
+  int get lineNumber => 0;
 
   @override
   int get hashCode => Object.hash(
@@ -846,15 +847,17 @@ class WebParagraphPlaceholder {
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)
-    : paragraphStyle = paragraphStyle as WebParagraphStyle {
-    textStylesList.add(StyledTextRange(0, 0, paragraphStyle.getTextStyle()));
-    textStylesStack.add(paragraphStyle.getTextStyle());
-  }
+    : paragraphStyle = paragraphStyle as WebParagraphStyle,
+      textStylesList = <StyledTextRange>[StyledTextRange.zero(paragraphStyle.getTextStyle())],
+      textStylesStack = <WebTextStyle>[paragraphStyle.getTextStyle()];
 
   final WebParagraphStyle paragraphStyle;
-  List<StyledTextRange> textStylesList = <StyledTextRange>[];
-  List<WebTextStyle> textStylesStack = <WebTextStyle>[];
-  String text = '';
+
+  // TODO(jlavrova): Combine these two. We can do this with only a List<StyledTextRange>.
+  final List<StyledTextRange> textStylesList;
+  final List<WebTextStyle> textStylesStack;
+
+  final StringBuffer textBuffer = StringBuffer();
 
   @override
   void addPlaceholder(
@@ -891,26 +894,26 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    this.text += text;
+    textBuffer.write(text);
     finishStyledTextRange();
   }
 
   @override
   WebParagraph build() {
+    final String text = textBuffer.toString();
+
     // We only keep the default style if there is nothing else
     if (textStylesList.length > 1) {
       textStylesList.removeAt(0);
     } else {
-      textStylesList.first.textRange.end = text.length;
+      textStylesList.first.end = text.length;
     }
     finishStyledTextRange();
 
     final WebParagraph builtParagraph = WebParagraph(paragraphStyle, textStylesList, text);
     WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${textStylesList.length}');
     for (var i = 0; i < textStylesList.length; ++i) {
-      WebParagraphDebug.log(
-        '$i: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
-      );
+      WebParagraphDebug.log('$i: ${textStylesList[i]}');
     }
     return builtParagraph;
   }
@@ -938,7 +941,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   void pushStyle(ui.TextStyle textStyle) {
     textStylesStack.add(textStyle as WebTextStyle);
     final last = textStylesList.last;
-    if (last.textRange.end == text.length && last.textStyle == textStyle) {
+    if (last.end == textBuffer.length && last.style == textStyle) {
       // Just continue with the same style
       return;
     }
@@ -947,15 +950,18 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void startStyledTextRange() {
     finishStyledTextRange();
-    textStylesList.add(StyledTextRange(text.length, text.length, textStylesStack.last));
+    textStylesList.add(StyledTextRange.collapsed(textBuffer.length, textStylesStack.last));
   }
 
   void finishStyledTextRange() {
+    // TODO(jlavrova): Instead of removing empty styles, can we try reusing the last one if it's empty?
+    //                 We would need to make `StyledTextRange.style` non-final.
+
     // Remove all text styles without text
-    while (textStylesList.length > 1 && textStylesList.last.textRange.start == text.length) {
+    while (textStylesList.length > 1 && textStylesList.last.start == textBuffer.length) {
       textStylesList.removeLast();
     }
     // Update the first one found with text
-    textStylesList.last.textRange.end = text.length;
+    textStylesList.last.end = textBuffer.length;
   }
 }

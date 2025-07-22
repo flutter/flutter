@@ -10,7 +10,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import '../../ui.dart';
 import 'browser_detection.dart';
 
 /// This file contains static interop classes for interacting with the DOM and
@@ -81,16 +80,12 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomConsole get console;
   external double get devicePixelRatio;
   external DomDocument get document;
-
   external DomHistory get history;
   external double? get innerHeight;
   external double? get innerWidth;
   external DomLocation get location;
-
   external DomNavigator get navigator;
-
   external DomVisualViewport? get visualViewport;
-
   external DomPerformance get performance;
 
   @visibleForTesting
@@ -155,7 +150,6 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
 
   @JS('createImageBitmap')
   external JSPromise<JSAny?> _createImageBitmap(DomImageData source);
-
   Future<DomImageBitmap> createImageBitmap(DomImageData source) {
     return _createImageBitmap(source).toDart.then((JSAny? value) => value! as DomImageBitmap);
   }
@@ -212,7 +206,6 @@ extension type DomNavigator._(JSObject _) implements JSObject {
 
   @JS('languages')
   external JSArray<JSAny?>? get _languages;
-
   List<String>? get languages =>
       _languages?.toDart.map<String>((JSAny? any) => (any! as JSString).toDart).toList();
 }
@@ -249,9 +242,7 @@ extension type DomDocument._(JSObject _) implements DomNode {
 @JS('HTMLDocument')
 extension type DomHTMLDocument._(JSObject _) implements DomDocument {
   external DomFontFaceSet? get fonts;
-
   external DomHTMLHeadElement? get head;
-
   external DomHTMLBodyElement? get body;
   external String? title;
 
@@ -304,7 +295,6 @@ typedef DomEventListener = JSFunction;
 @JS('Event')
 extension type DomEvent._(JSObject _) implements JSObject {
   external DomEventTarget? get target;
-
   external DomEventTarget? get currentTarget;
   external double? get timeStamp;
   external String get type;
@@ -314,7 +304,6 @@ extension type DomEvent._(JSObject _) implements JSObject {
   bool get cancelable => _cancelable ?? true;
 
   external void preventDefault();
-
   external void stopPropagation();
 
   @JS('initEvent')
@@ -351,21 +340,17 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
   external DomNode? get firstChild;
   external String innerText;
   external DomNode? get lastChild;
-
   external DomNode appendChild(DomNode node);
 
   external DomElement? get parentElement;
-
   DomElement? get parent => parentElement;
 
   @JS('textContent')
   external String? text;
+
   external DomNode? get parentNode;
-
   external DomNode? get nextSibling;
-
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
-
   void remove() {
     if (parentNode != null) {
       final DomNode parent = parentNode!;
@@ -384,7 +369,6 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
   Iterable<DomNode> get childNodes => _createDomListWrapper<DomElement>(_childNodes);
 
   external DomDocument? get ownerDocument;
-
   void clearChildren() {
     while (firstChild != null) {
       removeChild(firstChild!);
@@ -399,7 +383,6 @@ extension type DomElement._(JSObject _) implements DomNode {
   Iterable<DomElement> get children => _createDomListWrapper<DomElement>(_children);
 
   external DomElement? get firstElementChild;
-
   external DomElement? get lastElementChild;
   external DomElement? get nextElementSibling;
   external double get clientHeight;
@@ -414,7 +397,6 @@ extension type DomElement._(JSObject _) implements DomNode {
   external DomCSSStyleDeclaration get style;
   external String? getAttribute(String attributeName);
   external DomRect getBoundingClientRect();
-
   external void prepend(DomNode node);
   external DomElement? querySelector(String selectors);
   external DomElement? closest(String selectors);
@@ -481,7 +463,6 @@ extension type DomElement._(JSObject _) implements DomNode {
 
   @JS('attachShadow')
   external DomShadowRoot _attachShadow(JSAny initDict);
-
   DomShadowRoot attachShadow(Map<Object?, Object?> initDict) => _attachShadow(initDict.toJSAnyDeep);
 
   external DomShadowRoot? get shadowRoot;
@@ -501,251 +482,128 @@ external DomCSS get domCSS;
 @JS('CSSStyleDeclaration')
 extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set width(String value) => setProperty('width', value);
-
   set height(String value) => setProperty('height', value);
-
   set position(String value) => setProperty('position', value);
-
   set clip(String value) => setProperty('clip', value);
-
   set clipPath(String value) => setProperty('clip-path', value);
-
   set transform(String value) => setProperty('transform', value);
-
   set transformOrigin(String value) => setProperty('transform-origin', value);
-
   set opacity(String value) => setProperty('opacity', value);
-
   set color(String value) => setProperty('color', value);
-
   set top(String value) => setProperty('top', value);
-
   set left(String value) => setProperty('left', value);
-
   set right(String value) => setProperty('right', value);
-
   set bottom(String value) => setProperty('bottom', value);
-
   set backgroundColor(String value) => setProperty('background-color', value);
-
   set caretColor(String value) => setProperty('caret-color', value);
-
   set pointerEvents(String value) => setProperty('pointer-events', value);
-
   set filter(String value) => setProperty('filter', value);
-
   set zIndex(String value) => setProperty('z-index', value);
-
   set whiteSpace(String value) => setProperty('white-space', value);
-
   set lineHeight(String value) => setProperty('line-height', value);
-
   set textStroke(String value) => setProperty('-webkit-text-stroke', value);
-
   set fontSize(String value) => setProperty('font-size', value);
-
   set fontWeight(String value) => setProperty('font-weight', value);
-
   set fontStyle(String value) => setProperty('font-style', value);
-
   set fontFamily(String value) => setProperty('font-family', value);
-
   set letterSpacing(String value) => setProperty('letter-spacing', value);
-
   set wordSpacing(String value) => setProperty('word-spacing', value);
-
   set textShadow(String value) => setProperty('text-shadow', value);
-
   set textDecoration(String value) => setProperty('text-decoration', value);
-
   set textDecorationColor(String value) => setProperty('text-decoration-color', value);
-
   set fontFeatureSettings(String value) => setProperty('font-feature-settings', value);
-
   set fontVariationSettings(String value) => setProperty('font-variation-settings', value);
-
   set visibility(String value) => setProperty('visibility', value);
-
   set overflow(String value) => setProperty('overflow', value);
-
   set boxShadow(String value) => setProperty('box-shadow', value);
-
   set borderTopLeftRadius(String value) => setProperty('border-top-left-radius', value);
-
   set borderTopRightRadius(String value) => setProperty('border-top-right-radius', value);
-
   set borderBottomLeftRadius(String value) => setProperty('border-bottom-left-radius', value);
-
   set borderBottomRightRadius(String value) => setProperty('border-bottom-right-radius', value);
-
   set borderRadius(String value) => setProperty('border-radius', value);
-
   set perspective(String value) => setProperty('perspective', value);
-
   set padding(String value) => setProperty('padding', value);
-
   set backgroundImage(String value) => setProperty('background-image', value);
-
   set border(String value) => setProperty('border', value);
-
   set mixBlendMode(String value) => setProperty('mix-blend-mode', value);
-
   set backgroundSize(String value) => setProperty('background-size', value);
-
   set backgroundBlendMode(String value) => setProperty('background-blend-mode', value);
-
   set transformStyle(String value) => setProperty('transform-style', value);
-
   set display(String value) => setProperty('display', value);
-
   set flexDirection(String value) => setProperty('flex-direction', value);
-
   set alignItems(String value) => setProperty('align-items', value);
-
   set margin(String value) => setProperty('margin', value);
-
   set background(String value) => setProperty('background', value);
-
   set touchAction(String value) => setProperty('touch-action', value);
-
   set overflowY(String value) => setProperty('overflow-y', value);
-
   set overflowX(String value) => setProperty('overflow-x', value);
-
   set outline(String value) => setProperty('outline', value);
-
   set resize(String value) => setProperty('resize', value);
-
   set alignContent(String value) => setProperty('align-content', value);
-
   set textAlign(String value) => setProperty('text-align', value);
-
   set font(String value) => setProperty('font', value);
-
   set cursor(String value) => setProperty('cursor', value);
-
   set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
-
   String get width => getPropertyValue('width');
-
   String get height => getPropertyValue('height');
-
   String get position => getPropertyValue('position');
-
   String get clip => getPropertyValue('clip');
-
   String get clipPath => getPropertyValue('clip-path');
-
   String get transform => getPropertyValue('transform');
-
   String get transformOrigin => getPropertyValue('transform-origin');
-
   String get opacity => getPropertyValue('opacity');
-
   String get color => getPropertyValue('color');
-
   String get top => getPropertyValue('top');
-
   String get left => getPropertyValue('left');
-
   String get right => getPropertyValue('right');
-
   String get bottom => getPropertyValue('bottom');
-
   String get backgroundColor => getPropertyValue('background-color');
-
   String get caretColor => getPropertyValue('caret-color');
-
   String get pointerEvents => getPropertyValue('pointer-events');
-
   String get filter => getPropertyValue('filter');
-
   String get zIndex => getPropertyValue('z-index');
-
   String get whiteSpace => getPropertyValue('white-space');
-
   String get lineHeight => getPropertyValue('line-height');
-
   String get textStroke => getPropertyValue('-webkit-text-stroke');
-
   String get fontSize => getPropertyValue('font-size');
-
   String get fontWeight => getPropertyValue('font-weight');
-
   String get fontStyle => getPropertyValue('font-style');
-
   String get fontFamily => getPropertyValue('font-family');
-
   String get letterSpacing => getPropertyValue('letter-spacing');
-
   String get wordSpacing => getPropertyValue('word-spacing');
-
   String get textShadow => getPropertyValue('text-shadow');
-
   String get textDecorationColor => getPropertyValue('text-decoration-color');
-
   String get fontFeatureSettings => getPropertyValue('font-feature-settings');
-
   String get fontVariationSettings => getPropertyValue('font-variation-settings');
-
   String get visibility => getPropertyValue('visibility');
-
   String get overflow => getPropertyValue('overflow');
-
   String get boxShadow => getPropertyValue('box-shadow');
-
   String get borderTopLeftRadius => getPropertyValue('border-top-left-radius');
-
   String get borderTopRightRadius => getPropertyValue('border-top-right-radius');
-
   String get borderBottomLeftRadius => getPropertyValue('border-bottom-left-radius');
-
   String get borderBottomRightRadius => getPropertyValue('border-bottom-right-radius');
-
   String get borderRadius => getPropertyValue('border-radius');
-
   String get perspective => getPropertyValue('perspective');
-
   String get padding => getPropertyValue('padding');
-
   String get backgroundImage => getPropertyValue('background-image');
-
   String get border => getPropertyValue('border');
-
   String get mixBlendMode => getPropertyValue('mix-blend-mode');
-
   String get backgroundSize => getPropertyValue('background-size');
-
   String get backgroundBlendMode => getPropertyValue('background-blend-mode');
-
   String get transformStyle => getPropertyValue('transform-style');
-
   String get display => getPropertyValue('display');
-
   String get flexDirection => getPropertyValue('flex-direction');
-
   String get alignItems => getPropertyValue('align-items');
-
   String get margin => getPropertyValue('margin');
-
   String get background => getPropertyValue('background');
-
   String get touchAction => getPropertyValue('touch-action');
-
   String get overflowY => getPropertyValue('overflow-y');
-
   String get overflowX => getPropertyValue('overflow-x');
-
   String get outline => getPropertyValue('outline');
-
   String get resize => getPropertyValue('resize');
-
   String get alignContent => getPropertyValue('align-content');
-
   String get textAlign => getPropertyValue('text-align');
-
   String get font => getPropertyValue('font');
-
   String get cursor => getPropertyValue('cursor');
   String get scrollbarWidth => getPropertyValue('scrollbar-width');
 
@@ -806,7 +664,6 @@ DomHTMLImageElement createDomHTMLImageElement() =>
 extension type DomHTMLScriptElement._(JSObject _) implements DomHTMLElement {
   @JS('src')
   external set _src(JSAny value);
-
   set src(Object /* String|TrustedScriptURL */ value) => _src = value.toJSAnyShallow;
 
   external set nonce(String? value);
@@ -879,7 +736,6 @@ extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement {
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
-
   String toDataURL([String type = 'image/png']) => _toDataURL(type.toJS).toDart;
 
   @JS('getContext')
@@ -944,12 +800,10 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
 
   @JS('fillStyle')
   external JSAny? get _fillStyle;
-
   Object? get fillStyle => _fillStyle?.toObjectShallow;
 
   @JS('fillStyle')
   external set _fillStyle(JSAny? style);
-
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
@@ -968,18 +822,14 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
 
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
-
   set strokeStyle(Object? value) => _strokeStyle = value?.toJSAnyShallow;
 
   @JS('strokeStyle')
   external JSAny? get _strokeStyle;
-
   Object? get strokeStyle => _strokeStyle?.toObjectShallow;
 
   external void beginPath();
-
   external void closePath();
-
   external DomCanvasGradient createLinearGradient(num x0, num y0, num x1, num y1);
 
   @JS('createPattern')
@@ -1001,7 +851,6 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
     num dWidth,
     num dHeight,
   ]);
-
   void drawImage(
     DomCanvasImageSource source,
     num srcxOrDstX,
@@ -1036,7 +885,6 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
 
   @JS('fill')
   external void _fill([JSAny pathOrWinding]);
-
   void fill([Object? pathOrWinding]) {
     if (pathOrWinding == null) {
       _fill();
@@ -1062,20 +910,16 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external DomTextMetrics measureText(String text);
   external void moveTo(num x, num y);
   external void save();
-
   external void stroke();
   external void rect(num x, num y, num width, num height);
   external void resetTransform();
-
   external void restore();
   external void reset();
-
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);
 
   @JS('clip')
   external void _clip([JSAny pathOrWinding]);
-
   void clip([Object? pathOrWinding]) {
     if (pathOrWinding == null) {
       _clip();
@@ -1116,6 +960,17 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
+
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
+
+  void fillTextCluster(DomTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
 
 @JS('WebGLRenderingContext')
@@ -1560,6 +1415,21 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 @JS('TextMetrics')
 extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
+
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters();
+  List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
+
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+
+  external double get fontBoundingBoxAscent;
+
+  external double get fontBoundingBoxDescent;
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1618,12 +1488,10 @@ DomFontFace createDomFontFace(String family, Object source, [Map<Object?, Object
 @JS('FontFaceSet')
 extension type DomFontFaceSet._(JSObject _) implements DomEventTarget {
   external DomFontFaceSet? add(DomFontFace font);
-
   external void clear();
 
   @JS('forEach')
   external void _forEach(JSFunction callback);
-
   void forEach(DomFontFaceSetForEachCallback callback) => _forEach(callback.toJS);
 }
 
@@ -1712,7 +1580,6 @@ DomKeyboardEvent createDomKeyboardEvent(String type, [Map<dynamic, dynamic>? ini
 extension type DomHistory._(JSObject _) implements JSObject {
   @JS('state')
   external JSAny? get _state;
-
   dynamic get state => _state?.toObjectDeep;
 
   @JS('go')
@@ -1751,7 +1618,6 @@ extension type DomPopStateEvent._(JSObject _) implements DomEvent {
 
   @JS('state')
   external JSAny? get _state;
-
   dynamic get state => _state?.toObjectDeep;
 }
 
@@ -1806,7 +1672,6 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
 
   @JS('observe')
   external void _observe(DomNode target, JSAny options);
-
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
     final Map<String, dynamic> options = <String, dynamic>{
       if (childList != null) 'childList': childList,
@@ -1824,7 +1689,6 @@ DomMutationObserver createDomMutationObserver(DomMutationCallback callback) =>
 extension type DomMutationRecord._(JSObject _) implements JSObject {
   @JS('addedNodes')
   external _DomList? get _addedNodes;
-
   Iterable<DomNode>? get addedNodes {
     final _DomList? list = _addedNodes;
     if (list == null) {
@@ -1835,7 +1699,6 @@ extension type DomMutationRecord._(JSObject _) implements JSObject {
 
   @JS('removedNodes')
   external _DomList? get _removedNodes;
-
   Iterable<DomNode>? get removedNodes {
     final _DomList? list = _removedNodes;
     if (list == null) {
@@ -1895,7 +1758,6 @@ extension type DomMouseEvent._(JSObject _) implements DomUIEvent {
   external double get pageY;
 
   DomPoint get client => DomPoint(clientX, clientY);
-
   DomPoint get offset => DomPoint(offsetX, offsetY);
 
   external double get button;
@@ -1932,7 +1794,6 @@ extension type DomPointerEvent._(JSObject _) implements DomMouseEvent {
 
   @JS('getCoalescedEvents')
   external JSArray<JSAny?> _getCoalescedEvents();
-
   List<DomPointerEvent> getCoalescedEvents() =>
       _getCoalescedEvents().toDart.cast<DomPointerEvent>();
 }
@@ -2103,7 +1964,6 @@ extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget {
 
   @JS('convertToBlob')
   external JSPromise<JSAny?> _convertToBlob([JSAny options]);
-
   Future<DomBlob> convertToBlob([Map<Object?, Object?>? options]) {
     final JSPromise<JSAny?> blob;
     if (options == null) {
@@ -2132,11 +1992,9 @@ DomFileReader createDomFileReader() => DomFileReader();
 @JS('DocumentFragment')
 extension type DomDocumentFragment._(JSObject _) implements DomNode {
   external DomElement? get firstElementChild;
-
   external DomElement? get lastElementChild;
 
   external void prepend(DomNode node);
-
   external DomElement? querySelector(String selectors);
 
   @JS('querySelectorAll')
@@ -2148,7 +2006,6 @@ extension type DomDocumentFragment._(JSObject _) implements DomNode {
 @JS('ShadowRoot')
 extension type DomShadowRoot._(JSObject _) implements DomDocumentFragment {
   external DomElement? get activeElement;
-
   external DomElement? get host;
   external String? get mode;
   external bool? get delegatesFocus;
@@ -2185,7 +2042,6 @@ extension type DomScreen._(JSObject _) implements JSObject {
   external DomScreenOrientation? get orientation;
 
   external double get width;
-
   external double get height;
 }
 
@@ -2226,7 +2082,6 @@ extension type DomWebSocket._(JSObject _) implements DomEventTarget {
 
   @JS('send')
   external void _send(JSAny? data);
-
   void send(Object? data) => _send(data?.toJSAnyShallow);
 }
 
@@ -2236,7 +2091,6 @@ DomWebSocket createDomWebSocket(String url) => DomWebSocket(url);
 extension type DomMessageEvent._(JSObject _) implements DomEvent {
   @JS('data')
   external JSAny? get _data;
-
   dynamic get data => _data?.toObjectDeep;
 
   external String get origin;
@@ -2275,7 +2129,6 @@ DomHTMLIFrameElement createDomHTMLIFrameElement() =>
 extension type DomMessagePort._(JSObject _) implements DomEventTarget {
   @JS('postMessage')
   external void _postMessage(JSAny? message);
-
   void postMessage(Object? message) => _postMessage(message?.toJSAnyDeep);
 
   external void start();
@@ -2286,7 +2139,6 @@ extension type DomMessageChannel._(JSObject _) implements JSObject {
   external DomMessageChannel();
 
   external DomMessagePort get port1;
-
   external DomMessagePort get port2;
 }
 
@@ -2335,7 +2187,6 @@ extension type DomResizeObserverEntry._(JSObject _) implements JSObject {
   /// still included in the spec for web compat reasons, and may be deprecated
   /// in future versions.
   external DomRectReadOnly get contentRect;
-
   external DomElement get target;
   // Some more future getters:
   //
@@ -2525,7 +2376,7 @@ extension type DomSegmenter._(JSObject _) implements JSObject {
 @JS('Segments')
 extension type DomSegments._(JSObject _) implements JSObject {
   DomIteratorWrapper<DomSegment> iterator() {
-    final DomIterator segmentIterator = callMethod(domSymbol.iterator)! as DomIterator;
+    final DomIterator segmentIterator = callMethod<DomIterator>(domSymbol.iterator);
     return DomIteratorWrapper<DomSegment>(segmentIterator);
   }
 }
@@ -2643,73 +2494,16 @@ bool get browserSupportsCreateImageBitmap =>
 
 extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
-
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
 }
 
-@JS()
-@staticInterop
-class TextCluster {}
-
-@JS()
-@staticInterop
-class WebTextCluster extends TextCluster {}
-
-extension WebTextClusterExtension on WebTextCluster {
-  @JS('begin')
-  external int get _begin;
-
-  int get begin => _begin;
-
-  @JS('end')
-  external int get _end;
-
-  int get end => _end;
-
-  @JS('x')
-  external double get _x;
-
-  double get x => _x;
-
-  @JS('y')
-  external double get _y;
-
-  double get y => _y;
-}
-
-extension WebTextMetricsExtension on DomTextMetrics {
-  @JS('getTextClusters')
-  external JSArray<JSAny?> _getTextClusters();
-  List<WebTextCluster> getTextClusters() => _getTextClusters().toDart.cast<WebTextCluster>();
-
-  @JS('getActualBoundingBox')
-  external DomRectReadOnly _getActualBoundingBox(int begin, int end);
-  DomRectReadOnly getActualBoundingBox(int begin, int end) => _getActualBoundingBox(begin, end);
-
-  @JS('fontBoundingBoxAscent')
-  external double get _fontBoundingBoxAscent;
-  double get fontBoundingBoxAscent => _fontBoundingBoxAscent;
-
-  @JS('fontBoundingBoxDescent')
-  external double get _fontBoundingBoxDescent;
-  double get fontBoundingBoxDescent => _fontBoundingBoxDescent;
-
-  @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
-}
-
-extension WebDomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
-  @JS('fillTextCluster')
-  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
-
-  void fillTextCluster(WebTextCluster textCluster, double x, double y, [Object? options]) {
-    if (options == null) {
-      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
-    } else {
-      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
-    }
-  }
+@JS('TextCluster')
+extension type DomTextCluster._(JSObject _) implements JSObject {
+  // TODO(jlavrova): This has been renamed to `start` in the spec.
+  // See: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  external int get begin;
+  external int get end;
+  external double get x;
+  external double get y;
 }

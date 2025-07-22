@@ -1,0 +1,78 @@
+// Copyright 2025 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:math' as math;
+
+import 'package:test/bootstrap/browser.dart';
+import 'package:test/test.dart';
+import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/ui.dart' as ui;
+
+import '../common/test_initialization.dart';
+
+void main() {
+  internalBootstrapBrowserTest(() => testMain);
+}
+
+Future<void> testMain() async {
+  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+
+  test('Paragraph getPositionForOffset 1 Infinity line', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(
+      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final ui.TextPosition positiontt = paragraph.getPositionForOffset(ui.Offset(-1, -1));
+    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset(0, 0));
+    final ui.TextPosition positionee = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width, paragraph.height),
+    );
+    final ui.TextPosition positionmm = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width / 2, paragraph.height / 2),
+    );
+    final ui.TextPosition positionbb = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width + 1, paragraph.height + 1),
+    );
+    expect(positiontt, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream));
+    expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
+    expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
+    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.downstream));
+    expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
+  });
+
+  test('Paragraph getPositionForOffset multiple lines', () {
+    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+
+    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(
+      'World domination is such an ugly phrase - I prefer to call it world optimisation. ',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final ui.TextPosition positiontt = paragraph.getPositionForOffset(ui.Offset(-1, -1));
+    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset(0, 0));
+    final ui.TextPosition positionee = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width, paragraph.height),
+    );
+    final ui.TextPosition positionmm = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width / 2, paragraph.height / 2),
+    );
+    final ui.TextPosition positionbb = paragraph.getPositionForOffset(
+      ui.Offset(paragraph.width + 1, paragraph.height + 1),
+    );
+
+    expect(positiontt, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream));
+    expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
+    expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
+    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.downstream));
+    expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
+  });
+}
+// SkParagraph_PositionInsideEmoji
