@@ -92,7 +92,8 @@ var _kDefaultTargets = <Target>[
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
-    : _buildSystem = buildSystem {
+    : _verboseHelp = verboseHelp,
+      _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -148,6 +149,11 @@ class AssembleCommand extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
+
+  final bool _verboseHelp;
+
+  @override
+  bool get hidden => !_verboseHelp;
 
   final BuildSystem _buildSystem;
 

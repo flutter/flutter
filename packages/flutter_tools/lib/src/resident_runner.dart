@@ -1463,9 +1463,9 @@ abstract class ResidentRunner extends ResidentHandlers {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
-      commandHelp.w.print();
-      commandHelp.t.print();
       if (isRunningDebug) {
+        commandHelp.w.print();
+        commandHelp.t.print();
         commandHelp.L.print();
         commandHelp.f.print();
         commandHelp.S.print();
