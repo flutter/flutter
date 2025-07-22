@@ -1662,15 +1662,6 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   if (platformInfo == null) {
     return false;
   }
-  if (platformInfo.dartClass == 'none') {
-    // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/57497.
-    globals.printWarning(
-      'Use of `dartPluginClass: none` (${plugin.name}) is deprecated, and will '
-      'be removed in the next stable version. See '
-      'https://github.com/flutter/flutter/issues/57497 for details.',
-    );
-    return false;
-  }
   return true;
 }
 
