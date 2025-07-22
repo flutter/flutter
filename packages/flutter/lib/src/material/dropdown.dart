@@ -1366,6 +1366,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     super.dispose();
   }
 
+  // Whether the current pointer is a mouse or trackpad.
   bool _isTraditionalPointer = false;
 
   void _handlePointerEvent(PointerEvent event) {
@@ -1754,8 +1755,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     } else {
       // Hide focus color when using a mouse.
-      final Color focusColor = (widget.focusColor ?? Theme.of(context).focusColor).withAlpha(
-        _isTraditionalPointer ? 0 : 255,
+      final Color focusColor = widget.focusColor ?? Theme.of(context).focusColor;
+      final int focusAlpha = (focusColor.a * 255.0).round() & 0xff;
+      final Color effectiveFocusColor = focusColor.withAlpha(
+        _isTraditionalPointer ? 0 : focusAlpha,
       );
       result = InkWell(
         mouseCursor: effectiveMouseCursor,
@@ -1764,7 +1767,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         borderRadius: widget.borderRadius,
         focusNode: focusNode,
         autofocus: widget.autofocus,
-        focusColor: focusColor,
+        focusColor: effectiveFocusColor,
         enableFeedback: false,
         child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
       );
