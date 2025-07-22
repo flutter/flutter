@@ -64,6 +64,9 @@ enum ScrollbarOrientation {
 /// proportional to the percentage of content completely visible on screen,
 /// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
+/// If [padding] is an [EdgeInsetsDirectional], a non-null [textDirection] must
+/// be provided to properly resolve the padding values.
+///
 /// Unlike [CustomPainter]s that subclasses [CustomPainter] and only repaint
 /// when [shouldRepaint] returns true (which requires this [CustomPainter] to
 /// be rebuilt), this painter has the added optimization of repainting and not
@@ -110,6 +113,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength <= minLength),
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding.isNonNegative),
+       assert(
+         padding is! EdgeInsetsDirectional || textDirection != null,
+         'A non-null textDirection must be provided when using EdgeInsetsDirectional for padding.',
+       ),
        _color = color,
        _textDirection = textDirection,
        _thickness = thickness,
