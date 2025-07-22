@@ -390,7 +390,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If true and [AppBar.actions] is null or empty, automatically try to deduce what the actions
   /// widget should be. If false and [AppBar.actions] is null or empty, the actions widget list is kept empty.
-  /// If leading widget is not null, this parameter has no effect.
+  /// If [AppBar.actions] is not null, this parameter has no effect.
   /// {@endtemplate}
   final bool automaticallyImplyActions;
 
