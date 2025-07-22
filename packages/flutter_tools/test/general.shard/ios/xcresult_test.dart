@@ -16,32 +16,50 @@ import 'xcresult_test_data.dart';
 void main() {
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXCResultGetCommand({
-    required String stdout,
-    required String tempResultPath,
-    required Xcode xcode,
-    int exitCode = 0,
-    String stderr = '',
-    bool useLegacyFlag = true,
-  }) {
-    return FakeCommand(
-      command: <String>[
-        ...xcode.xcrunCommand(),
-        'xcresulttool',
-        'get',
-        if (useLegacyFlag) '--legacy',
-        '--path',
-        tempResultPath,
-        '--format',
-        'json',
-      ],
-      stdout: stdout,
-      stderr: stderr,
-      exitCode: exitCode,
-      onRun: (_) {},
-    );
+  FakeCommand setUpFakeXCResultCommand({
+  required String stdout,
+  required String tempResultPath,
+  required Xcode xcode,
+  required Version? xcodeVersion,
+  int exitCode = 0,
+  String stderr = '',
+}) {
+  final bool useNewCommand = xcodeVersion != null && xcodeVersion >= Version(16, 0, 0);
+
+  final List<String> command;
+  if (useNewCommand) {
+    // Command for Xcode 16+
+    command = <String>[
+      ...xcode.xcrunCommand(),
+      'xcresulttool',
+      'get',
+      'build-results',
+      '--path',
+      tempResultPath,
+      '--format',
+      'json',
+    ];
+  } else {
+    // Command for Xcode < 16 (no --legacy flag needed)
+    command = <String>[
+      ...xcode.xcrunCommand(),
+      'xcresulttool',
+      'get',
+      '--path',
+      tempResultPath,
+      '--format',
+      'json',
+    ];
   }
 
+  return FakeCommand(
+    command: command,
+    stdout: stdout,
+    stderr: stderr,
+    exitCode: exitCode,
+    onRun: (_) {},
+  );
+}
   const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
   const kx64CheckCommand = FakeCommand(
@@ -50,39 +68,77 @@ void main() {
   );
 
   XCResultGenerator setupGenerator({
-    required String resultJson,
-    int exitCode = 0,
-    String stderr = '',
-    Version? xcodeVersion = const Version.withText(16, 0, 0, '16.0'),
-    bool useLegacyFlag = true,
-  }) {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-    ]);
-    final xcode = Xcode.test(
+  required String resultJson,
+  int exitCode = 0,
+  String stderr = '',
+  // Default to an OLD version of Xcode.
+  // This ensures existing tests that don't specify a version still test the old code path.
+  Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
+}) {
+  final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+    kWhichSysctlCommand,
+    kx64CheckCommand,
+  ]);
+  final xcode = Xcode.test(
+    processManager: fakeProcessManager,
+    xcodeProjectInterpreter: XcodeProjectInterpreter.test(
       processManager: fakeProcessManager,
-      xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
-        version: xcodeVersion,
-      ),
-    );
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXCResultGetCommand(
-        stdout: resultJson,
-        tempResultPath: _tempResultPath,
-        xcode: xcode,
-        exitCode: exitCode,
-        stderr: stderr,
-        useLegacyFlag: useLegacyFlag,
-      ),
-    ]);
-    final processUtils = ProcessUtils(
-      processManager: fakeProcessManager,
-      logger: BufferLogger.test(),
-    );
-    return XCResultGenerator(resultPath: _tempResultPath, xcode: xcode, processUtils: processUtils);
-  }
+      version: xcodeVersion,
+    ),
+  );
+  fakeProcessManager.addCommands(<FakeCommand>[
+    // Use the new, refactored command setup.
+    setUpFakeXCResultCommand(
+      stdout: resultJson,
+      tempResultPath: _tempResultPath,
+      xcode: xcode,
+      exitCode: exitCode,
+      stderr: stderr,
+      xcodeVersion: xcodeVersion,
+    ),
+  ]);
+  final processUtils = ProcessUtils(
+    processManager: fakeProcessManager,
+    logger: BufferLogger.test(),
+  );
+  return XCResultGenerator(resultPath: _tempResultPath, xcode: xcode, processUtils: processUtils);
+}
+
+testWithoutContext('correctly parses new format (Xcode 16+) JSON with issues', () async {
+  // Setup generator to use the new command and data
+  final XCResultGenerator generator = setupGenerator(
+    resultJson: kNewFormatResultJsonWithIssues,
+    xcodeVersion: Version(16, 0, 0),
+  );
+  final XCResult result = await generator.generate();
+
+  expect(result.issues.length, 2);
+  expect(result.parseSuccess, isTrue);
+  expect(result.parsingErrorMessage, isNull);
+
+  final XCResultIssue error = result.issues.firstWhere((issue) => issue.type == XCResultIssueType.error);
+  expect(error.subType, 'Swift Compiler Error');
+  expect(error.message, "consecutive statements on a line must be separated by ';'");
+  expect(error.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.swift:11:82');
+
+  final XCResultIssue warning = result.issues.firstWhere((issue) => issue.type == XCResultIssueType.warning);
+  expect(warning.subType, 'Deprecation');
+  expect(warning.message, "'openURL' was deprecated in iOS 10.0");
+  expect(warning.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.swift:15:20');
+});
+
+testWithoutContext('correctly handles new format (Xcode 16+) with invalid sourceURL', () async {
+  final XCResultGenerator generator = setupGenerator(
+    resultJson: kNewFormatResultJsonWithInvalidUrl,
+    xcodeVersion: Version(16, 0, 0),
+  );
+  final XCResult result = await generator.generate();
+
+  expect(result.issues.length, 1);
+  final XCResultIssue error = result.issues.first;
+  expect(error.location, isNull);
+  expect(error.warnings.first, contains('failed to be parsed'));
+});
 
   testWithoutContext('correctly parse sample result json when there are issues.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
@@ -254,7 +310,7 @@ void main() {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonNoIssues,
       xcodeVersion: Version(15, 0, 0),
-      useLegacyFlag: false,
+
     );
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);

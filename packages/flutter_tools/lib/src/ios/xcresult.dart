@@ -40,30 +40,53 @@ class XCResultGenerator {
     List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[],
   }) async {
     final Version? xcodeVersion = xcode.currentVersion;
-    final RunResult result = await processUtils.run(<String>[
+    final bool useNewCommand = xcodeVersion != null && xcodeVersion >= Version(16, 0, 0);
+
+    // Base command for xcrun
+    final command = <String>[
       ...xcode.xcrunCommand(),
       'xcresulttool',
-      'get',
-      // See https://github.com/flutter/flutter/issues/151502
-      if (xcodeVersion != null && xcodeVersion >= Version(16, 0, 0)) '--legacy',
-      '--path',
-      resultPath,
-      '--format',
-      'json',
-    ]);
+    ];
+
+    // Determine the correct subcommand and arguments based on the Xcode version.
+    if (useNewCommand) {
+      // For Xcode 16+, the 'get' command requires a specific subcommand.
+      // 'build-results' is the correct choice for parsing compilation/build errors.
+      command.addAll(<String>[
+        'get',
+        'build-results',
+        '--path',
+        resultPath,
+        '--format',
+        'json',
+      ]);
+    } else {
+      // For older versions of Xcode, the original 'get' command works directly.
+      command.addAll(<String>[
+        'get',
+        '--path',
+        resultPath,
+        '--format',
+        'json',
+      ]);
+    }
+
+    // Run the constructed command.
+    final RunResult result = await processUtils.run(command);
+
+    // Handle command failure or empty output.
     if (result.exitCode != 0) {
       return XCResult.failed(errorMessage: result.stderr);
     }
     if (result.stdout.isEmpty) {
       return XCResult.failed(errorMessage: 'xcresult parser: Unrecognized top level json format.');
     }
+    // Parse the JSON output.
     final Object? resultJson = json.decode(result.stdout);
     if (resultJson == null || resultJson is! Map<String, Object?>) {
-      // If json parsing failed, indicate such error.
-      // This also includes the top level json object is an array, which indicates
-      // the structure of the json is changed and this parser class possibly needs to update for this change.
       return XCResult.failed(errorMessage: 'xcresult parser: Unrecognized top level json format.');
     }
+    // Create and return the final XCResult object.
     return XCResult(resultJson: resultJson, issueDiscarders: issueDiscarders);
   }
 }
@@ -80,40 +103,61 @@ class XCResult {
   }) {
     final issues = <XCResultIssue>[];
 
-    final Object? issuesMap = resultJson['issues'];
-    if (issuesMap == null || issuesMap is! Map<String, Object?>) {
-      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
-    }
-
-    final Object? errorSummaries = issuesMap['errorSummaries'];
-    if (errorSummaries is Map<String, Object?>) {
-      issues.addAll(
-        _parseIssuesFromIssueSummariesJson(
-          type: XCResultIssueType.error,
-          issueSummariesJson: errorSummaries,
-          issueDiscarder: issueDiscarders,
-        ),
-      );
-    }
-
-    final Object? warningSummaries = issuesMap['warningSummaries'];
-    if (warningSummaries is Map<String, Object?>) {
-      issues.addAll(
-        _parseIssuesFromIssueSummariesJson(
-          type: XCResultIssueType.warning,
-          issueSummariesJson: warningSummaries,
-          issueDiscarder: issueDiscarders,
-        ),
-      );
-    }
-
-    final Object? actionsMap = resultJson['actions'];
-    if (actionsMap is Map<String, Object?>) {
-      final List<XCResultIssue> actionIssues = _parseActionIssues(
-        actionsMap,
+    // Detect the format. The new format has top-level 'errors' or 'warnings' keys.
+    if (resultJson.containsKey('errors') || resultJson.containsKey('warnings')) {
+      // ---- NEW (Xcode 16+) PARSING LOGIC ----
+      issues.addAll(_parseIssuesFromNewFormat(
+        type: XCResultIssueType.error,
+        jsonList: resultJson['errors'],
         issueDiscarders: issueDiscarders,
-      );
-      issues.addAll(actionIssues);
+      ));
+      issues.addAll(_parseIssuesFromNewFormat(
+        type: XCResultIssueType.warning,
+        jsonList: resultJson['warnings'],
+        issueDiscarders: issueDiscarders,
+      ));
+
+    } else {
+      // ---- OLD (pre-Xcode 16) PARSING LOGIC ----
+      final Object? issuesMap = resultJson['issues'];
+
+      if (issuesMap is! Map<String, Object?>) {
+          // The key exists but is not a map, which is an error for the old format.
+          return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
+        }
+
+      final Object? errorSummaries = issuesMap['errorSummaries'];
+      if (errorSummaries is Map<String, Object?>) {
+        issues.addAll(
+          _parseIssuesFromOldFormat(
+            type: XCResultIssueType.error,
+            issueSummariesJson: errorSummaries,
+            issueDiscarder: issueDiscarders,
+          ),
+        );
+      }
+      final Object? warningSummaries = issuesMap['warningSummaries'];
+      if (warningSummaries is Map<String, Object?>) {
+        issues.addAll(
+          _parseIssuesFromOldFormat(
+            type: XCResultIssueType.warning,
+            issueSummariesJson: warningSummaries,
+            issueDiscarder: issueDiscarders,
+          ),
+        );
+      }
+          final Object? actionsMap = resultJson['actions'];
+      if (actionsMap is Map<String, Object?>) {
+        final List<XCResultIssue> actionIssues = _parseActionIssues(
+          actionsMap,
+          issueDiscarders: issueDiscarders,
+        );
+        issues.addAll(actionIssues);
+      }
+    }
+
+    if (issues.isEmpty && resultJson['issues'] == null && resultJson['actions'] == null && resultJson['errors'] == null && resultJson['warnings'] == null) {
+      return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
 
     return XCResult._(issues: issues);
@@ -162,7 +206,7 @@ class XCResultIssue {
   /// Construct an `XCResultIssue` object from `issueJson`.
   ///
   /// `issueJson` is the object at xcresultJson[['actions']['_values'][0]['buildResult']['issues']['errorSummaries'/'warningSummaries']['_values'].
-  factory XCResultIssue({
+  factory XCResultIssue.fromOldFormat({
     required XCResultIssueType type,
     required Map<String, Object?> issueJson,
   }) {
@@ -170,20 +214,13 @@ class XCResultIssue {
     final Object? issueSubTypeMap = issueJson['issueType'];
     String? subType;
     if (issueSubTypeMap is Map<String, Object?>) {
-      final Object? subTypeValue = issueSubTypeMap['_value'];
-      if (subTypeValue is String) {
-        subType = subTypeValue;
-      }
+      subType = issueSubTypeMap['_value'] as String?;
     }
 
-    // Parse message.
     String? message;
     final Object? messageMap = issueJson['message'];
     if (messageMap is Map<String, Object?>) {
-      final Object? messageValue = messageMap['_value'];
-      if (messageValue is String) {
-        message = messageValue;
-      }
+      message = messageMap['_value'] as String?;
     }
 
     final warnings = <String>[];
@@ -215,7 +252,38 @@ class XCResultIssue {
     );
   }
 
-  /// Create a [XCResultIssue] without JSON parsing for testing.
+  /// Construct an `XCResultIssue` object from the NEW (Xcode 16+) format `issueJson`.
+  /// This implementation is now aligned with the official schema.
+  factory XCResultIssue.fromNewFormat({
+    required XCResultIssueType type,
+    required Map<String, Object?> issueJson,
+  }) {
+    final message = issueJson['message'] as String?;
+
+    // CORRECTED: Use 'issueType' as per the schema.
+    final subType = issueJson['issueType'] as String?;
+
+    String? location;
+    final warnings = <String>[];
+
+    // CORRECTED: Use 'sourceURL' and the existing URL parser.
+    final sourceUrl = issueJson['sourceURL'] as String?;
+    if (sourceUrl != null) {
+      location = _convertUrlToLocationString(sourceUrl);
+      if (location == null) {
+        warnings.add('(XCResult) The `sourceURL` exists but it failed to be parsed. url: $sourceUrl');
+      }
+    }
+
+    return XCResultIssue._(
+      type: type,
+      subType: subType,
+      message: message,
+      location: location,
+      warnings: warnings,
+    );
+  }
+
   @visibleForTesting
   factory XCResultIssue.test({
     XCResultIssueType type = XCResultIssueType.error,
@@ -235,10 +303,10 @@ class XCResultIssue {
 
   XCResultIssue._({
     required this.type,
-    required this.subType,
-    required this.message,
-    required this.location,
-    required this.warnings,
+    this.subType,
+    this.message,
+    this.location,
+    this.warnings = const <String>[],
   });
 
   /// The type of the issue.
@@ -314,11 +382,10 @@ class XCResultIssueDiscarder {
 }
 
 // A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
-//
-// This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
+// This function is now used by BOTH the old and new parsers.
 String? _convertUrlToLocationString(String url) {
   final Uri? fragmentLocation = Uri.tryParse(url);
-  if (fragmentLocation == null) {
+  if (fragmentLocation == null || !fragmentLocation.hasFragment) {
     return null;
   }
   // Parse the fragment as a query of key-values:
@@ -361,7 +428,38 @@ bool _shouldDiscardIssue({
   return false;
 }
 
-List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
+/// [NEW] Helper to parse issues from the new (Xcode 16+) flat list format.
+List<XCResultIssue> _parseIssuesFromNewFormat({
+  required XCResultIssueType type,
+  required Object? jsonList,
+  required List<XCResultIssueDiscarder> issueDiscarders,
+}) {
+  final issues = <XCResultIssue>[];
+  if (jsonList is! List<Object?>) {
+    return issues;
+  }
+
+  for (final Object? issueJson in jsonList) {
+    if (issueJson is! Map<String, Object?>) {
+      continue;
+    }
+    final resultIssue = XCResultIssue.fromNewFormat(type: type, issueJson: issueJson);
+    var discard = false;
+    for (final discarder in issueDiscarders) {
+      if (_shouldDiscardIssue(issue: resultIssue, discarder: discarder)) {
+        discard = true;
+        break;
+      }
+    }
+    if (!discard) {
+      issues.add(resultIssue);
+    }
+  }
+  return issues;
+}
+
+/// [OLD] Renamed helper to parse issues from the old (pre-Xcode 16) format.
+List<XCResultIssue> _parseIssuesFromOldFormat({
   required XCResultIssueType type,
   required Map<String, Object?> issueSummariesJson,
   required List<XCResultIssueDiscarder> issueDiscarder,
@@ -370,10 +468,10 @@ List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
   final Object? errorsList = issueSummariesJson['_values'];
   if (errorsList is List<Object?>) {
     for (final Object? issueJson in errorsList) {
-      if (issueJson == null || issueJson is! Map<String, Object?>) {
+      if (issueJson is! Map<String, Object?>) {
         continue;
       }
-      final resultIssue = XCResultIssue(type: type, issueJson: issueJson);
+      final resultIssue = XCResultIssue.fromOldFormat(type: type, issueJson: issueJson);
       var discard = false;
       for (final discarder in issueDiscarder) {
         if (_shouldDiscardIssue(issue: resultIssue, discarder: discarder)) {
@@ -381,15 +479,15 @@ List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
           break;
         }
       }
-      if (discard) {
-        continue;
+      if (!discard) {
+        issues.add(resultIssue);
       }
-      issues.add(resultIssue);
     }
   }
   return issues;
 }
 
+/// [OLD] Helper to parse issues from the `actions` block in the old format.
 List<XCResultIssue> _parseActionIssues(
   Map<String, Object?> actionsMap, {
   required List<XCResultIssueDiscarder> issueDiscarders,
@@ -447,21 +545,15 @@ List<XCResultIssue> _parseActionIssues(
   }
 
   for (final Object? actionValue in actionsValues) {
-    if (actionValue is! Map<String, Object?>) {
-      continue;
-    }
+    if (actionValue is! Map<String, Object?>) { continue; }
     final Object? actionResult = actionValue['actionResult'];
-    if (actionResult is! Map<String, Object?>) {
-      continue;
-    }
+    if (actionResult is! Map<String, Object?>) { continue; }
     final Object? actionResultIssues = actionResult['issues'];
-    if (actionResultIssues is! Map<String, Object?>) {
-      continue;
-    }
+    if (actionResultIssues is! Map<String, Object?>) { continue; }
     final Object? testFailureSummaries = actionResultIssues['testFailureSummaries'];
     if (testFailureSummaries is Map<String, Object?>) {
       issues.addAll(
-        _parseIssuesFromIssueSummariesJson(
+        _parseIssuesFromOldFormat(
           type: XCResultIssueType.error,
           issueSummariesJson: testFailureSummaries,
           issueDiscarder: issueDiscarders,
@@ -469,6 +561,5 @@ List<XCResultIssue> _parseActionIssues(
       );
     }
   }
-
   return issues;
 }
