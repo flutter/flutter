@@ -81,8 +81,8 @@ class TestImpellerAllocator : public impeller::Allocator {
     return std::make_shared<TestImpellerDeviceBuffer>(desc);
   }
 
-  std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc) override {
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override {
     return std::make_shared<TestImpellerTexture>(desc);
   }
 };

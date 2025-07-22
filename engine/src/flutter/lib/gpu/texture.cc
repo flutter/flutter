@@ -109,7 +109,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
       return false;
   }
   auto texture =
-      gpu_context->GetContext()->GetResourceAllocator()->CreateTexture(desc);
+      gpu_context->GetContext()->GetResourceAllocator()->CreateTexture(desc, true);
   if (!texture) {
     FML_LOG(ERROR) << "Failed to create texture.";
     return false;

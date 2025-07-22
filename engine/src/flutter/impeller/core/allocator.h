@@ -30,7 +30,8 @@ class Allocator {
   std::shared_ptr<DeviceBuffer> CreateBuffer(
       const DeviceBufferDescriptor& desc);
 
-  std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc);
+  std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc,
+                                         bool threadsafe = false);
 
   //------------------------------------------------------------------------------
   /// @brief      Minimum value for `row_bytes` on a Texture. The row
@@ -62,7 +63,8 @@ class Allocator {
       const DeviceBufferDescriptor& desc) = 0;
 
   virtual std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc) = 0;
+      const TextureDescriptor& desc,
+      bool threadsafe = false) = 0;
 
  private:
   Allocator(const Allocator&) = delete;

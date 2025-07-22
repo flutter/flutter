@@ -149,7 +149,7 @@ std::shared_ptr<TextureGLES> TextureGLES::WrapFBO(
     TextureDescriptor desc,
     GLuint fbo) {
   auto texture = std::shared_ptr<TextureGLES>(
-      new TextureGLES(std::move(reactor), desc, fbo, std::nullopt));
+      new TextureGLES(std::move(reactor), desc, false, fbo, std::nullopt));
   if (!texture->IsValid()) {
     return nullptr;
   }
@@ -168,8 +168,8 @@ std::shared_ptr<TextureGLES> TextureGLES::WrapTexture(
     VALIDATION_LOG << "Cannot wrap a non-texture handle.";
     return nullptr;
   }
-  auto texture = std::shared_ptr<TextureGLES>(
-      new TextureGLES(std::move(reactor), desc, std::nullopt, external_handle));
+  auto texture = std::shared_ptr<TextureGLES>(new TextureGLES(
+      std::move(reactor), desc, false, std::nullopt, external_handle));
   if (!texture->IsValid()) {
     return nullptr;
   }
@@ -183,15 +183,18 @@ std::shared_ptr<TextureGLES> TextureGLES::CreatePlaceholder(
 }
 
 TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
-                         TextureDescriptor desc)
+                         TextureDescriptor desc,
+                         bool threadsafe)
     : TextureGLES(std::move(reactor),  //
                   desc,                //
+                  threadsafe,          //
                   std::nullopt,        //
                   std::nullopt         //
       ) {}
 
 TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                          TextureDescriptor desc,
+                         bool threadsafe,
                          std::optional<GLuint> fbo,
                          std::optional<HandleGLES> external_handle)
     : Texture(desc),
@@ -201,7 +204,9 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
           reactor_->GetProcTable().GetCapabilities())),
       handle_(external_handle.has_value()
                   ? external_handle.value()
-                  : reactor_->CreateUntrackedHandle(ToHandleType(type_))),
+                  : (threadsafe ? reactor_->CreateHandle(ToHandleType(type_))
+                                : reactor_->CreateUntrackedHandle(
+                                      ToHandleType(type_)))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
