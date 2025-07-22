@@ -34,7 +34,7 @@ struct _FlView {
   // Event box the render area goes inside.
   GtkWidget* event_box;
 
-  // The widget rendering the Flutter view, either GtkGLArea or GtkDrawingArea.
+  // The widget rendering the Flutter view.
   GtkDrawingArea* render_area;
 
   // Rendering context when using OpenGL.
