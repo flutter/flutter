@@ -1369,7 +1369,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   bool _isTraditionalPointer = false;
 
   void _handlePointerEvent(PointerEvent event) {
-    final bool hasFocus = focusNode != null && (focusNode!.hasPrimaryFocus || focusNode!.hasFocus);
+    final bool hasFocus = focusNode.hasPrimaryFocus || focusNode.hasFocus;
     if (!hasFocus && _dropdownRoute == null) {
       return;
     }
