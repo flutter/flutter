@@ -64,7 +64,7 @@ abstract class FeatureFlags {
   /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
   bool get isOmitLegacyVersionFileEnabled;
 
-    /// Whether desktop windowing is enabled.
+  /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
   /// Whether a particular feature is enabled for the current channel.

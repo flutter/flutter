@@ -413,7 +413,7 @@ abstract class RegularWindowController extends WindowController {
   /// setting [WindowSizing.preferredSize] does not affect the [WindowSizing.constraints]
   /// set previously.
   ///
-  /// System compositor is free to ignore the request.
+  /// The platform is free to ignore the request.
   ///
   /// {@template flutter.widgets.windowing.experimental}
   /// Do not use this API in production applications or packages published to
