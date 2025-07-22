@@ -35,6 +35,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart';
 import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
@@ -1457,7 +1458,24 @@ mixin WidgetsBinding
   /// See: https://github.com/flutter/flutter/issues/30701.
   /// {@endtemplate}
   @internal
-  WindowingOwner get windowingOwner => _windowingOwner;
+  WindowingOwner get windowingOwner {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    return _windowingOwner;
+  }
+
   late WindowingOwner _windowingOwner;
 
   /// Creates the [WindowingOwner] instance available via [windowingOwner].

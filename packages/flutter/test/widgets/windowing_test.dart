@@ -97,8 +97,10 @@ void main() {
 
     test('Creating WindowSizing throws UnsupportedError when windowing is disabled', () {
       expect(
-        () =>
-            WindowSizing(preferredSize: const Size(100, 100), constraints: const BoxConstraints()),
+        () => WindowSizing(
+          preferredSize: const Size(100, 100),
+          preferredConstraints: const BoxConstraints(),
+        ),
         throwsUnsupportedError,
       );
     });

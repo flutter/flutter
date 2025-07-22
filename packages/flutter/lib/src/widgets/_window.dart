@@ -27,6 +27,7 @@ import 'view.dart';
 
 const String _windowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
+
 Windowing APIs are currently experimental. Do not use windowing APIs in
 production applications or plugins published to pub.dev.
 
@@ -51,84 +52,53 @@ See: https://github.com/flutter/flutter/issues/30701.
 /// {@endtemplate}
 @internal
 enum WindowArchetype {
-  /// Defines a traditional window
+  /// Defines a traditional window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   regular,
 }
 
 /// Defines sizing request for a window.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 class WindowSizing {
   /// Creates a new [WindowSizing] object.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowSizing({this.preferredSize, this.constraints}) {
+  WindowSizing({this.preferredSize, this.preferredConstraints}) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_windowingDisabledErrorMessage);
     }
   }
 
-  /// Preferred size of the window. This may not be honored by the platform.
+  /// Preferred size of the window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// This might not behonored by the platform.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
+  /// This is the size that the platform will try to  apply to the window
+  /// when it is created. In contrast, the [preferredConstraints] field enforces
+  /// the minimum and maximum size of the window. If the preferred size
+  /// does not satisfy the constraints or the preferred size is null, then
+  /// the platform will use an initial size that does satisfy the constraints
+  /// instead.
   ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final Size? preferredSize;
 
-  /// Constraints for the window. This may not be honored by the platform.
+  /// Constraints for the window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// This might not behonored by the platform.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
+  /// This field enforces a miniumum and maximum size on the window.
+  /// If null, the window will be unconstrained.
   ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  final BoxConstraints? constraints;
+  final BoxConstraints? preferredConstraints;
 }
 
 /// Base class for window controllers.
@@ -138,7 +108,7 @@ class WindowSizing {
 /// associated with the window, the archetype of the window, the size
 /// of the window, and the state of the window.
 ///
-/// The caller may also provide a callback to be called when the window
+/// The caller might also provide a callback to be called when the window
 /// is destroyed, and a callback to be called when an error is encountered
 /// during the creation of the window.
 ///
@@ -146,87 +116,50 @@ class WindowSizing {
 ///
 /// When the window is destroyed for any reason (either by the caller or by the
 /// platform), the content of the controller will thereafter be invalid. Callers
-/// may check if this content is invalid via the [isReady] property.
+/// might check if this content is invalid via the [isReady] property.
 ///
 /// This class implements the [Listenable] interface, so callers can listen
 /// for changes to the window's properties.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 abstract class WindowController with ChangeNotifier {
-  @protected
   /// Sets the view associated with this window.
   // ignore: use_setters_to_change_properties
-  void setView(FlutterView view) {
+  @protected
+  set rootView(FlutterView view) {
     _view = view;
   }
 
   /// The archetype of the window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   WindowArchetype get type;
 
-  /// The current size of the window. This may differ from the requested size.
+  /// The current size of the window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// This might differ from the requested size.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
   ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// This might also differ from the actual size of the window if the window has
+  /// decorations such as title bar, borders, etc.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   Size get contentSize;
 
-  /// Destroys this window. It is permissible to call this method multiple times.
+  /// Destroys this window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// It is permissible to call this method multiple times.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void destroy();
 
   /// The root view associated to this window, which is unique to each window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   FlutterView get rootView => _view;
   late final FlutterView _view;
@@ -234,32 +167,14 @@ abstract class WindowController with ChangeNotifier {
 
 /// Delegate class for regular window controller.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 mixin class RegularWindowControllerDelegate {
   /// Invoked when user attempts to close the window. Default implementation
   /// destroys the window. Subclass can override the behavior to delay
   /// or prevent the window from closing.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void onWindowCloseRequested(RegularWindowController controller) {
     if (!isWindowingEnabled) {
@@ -269,19 +184,12 @@ mixin class RegularWindowControllerDelegate {
     controller.destroy();
   }
 
-  /// Invoked when the window is closed. Default implementation exits the
-  /// application if this was the last top-level window.
+  /// Invoked when the window is closed.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// Default implementation exits the application if this was
+  /// the last top-level window.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
@@ -310,53 +218,39 @@ mixin class RegularWindowControllerDelegate {
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
 ///   contentSize: const WindowSizing(
-///     size: Size(800, 600),
-///     constraints: BoxConstraints(minWidth: 640, minHeight: 480),
+///     preferredSize: Size(800, 600),
+///     preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
 ///   ),
 ///   title: "Example Window",
 /// );
-/// runWidget(RegularWindow(
-///   controller: controller,
-///   child: MaterialApp(home: Container())));
+/// runWidget(
+///   RegularWindow(
+///     controller: controller,
+///     child: MaterialApp(home: Container()),
+///   ),
+/// );
 /// ```
 ///
 /// When provided to a [RegularWindow] widget, widgets inside of the [child]
 /// parameter will have access to the [RegularWindowController] via the
 /// [WindowControllerContext] widget.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 abstract class RegularWindowController extends WindowController {
   /// Creates a [RegularWindowController] with the provided properties.
+  ///
   /// Upon construction, the window is created for the platform.
   ///
-  /// [contentSize] sizing requests for the window. This may not be honored by the platform
+  /// [contentSize] sizing requests for the window. This might not behonored by the platform
   /// [title] the title of the window
   /// [state] the initial state of the window
   /// [delegate] optional delegate for the controller controller.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   factory RegularWindowController({
-    required WindowSizing contentSize,
+    required WindowSizing preferredContentSize,
     String? title,
     RegularWindowControllerDelegate? delegate,
   }) {
@@ -367,7 +261,7 @@ abstract class RegularWindowController extends WindowController {
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final RegularWindowController controller = owner.createRegularWindowController(
-      contentSize: contentSize,
+      preferredContentSize: preferredContentSize,
       delegate: delegate ?? RegularWindowControllerDelegate(),
     );
     if (title != null) {
@@ -378,30 +272,14 @@ abstract class RegularWindowController extends WindowController {
 
   /// Creates an empty [RegularWindowController].
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// TODO(mattkae): Replace @internal with @visibleForTesting when this API is non-experimental
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @protected
   RegularWindowController.empty();
 
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
   WindowArchetype get type => WindowArchetype.regular;
@@ -410,150 +288,73 @@ abstract class RegularWindowController extends WindowController {
   ///
   /// [contentSize] describes the new requested window size. The properties
   /// of this object are applied independently of each other. For example,
-  /// setting [WindowSizing.preferredSize] does not affect the [WindowSizing.constraints]
+  /// setting [WindowSizing.preferredSize] does not affect the [WindowSizing.preferredConstraints]
   /// set previously.
   ///
   /// The platform is free to ignore the request.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void updateContentSize(WindowSizing sizing);
 
   /// Request change for the window title.
   /// [title] new title of the window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setTitle(String title);
 
   /// Requests that the window be displayed in its current size and position.
-  /// If the window is minimized or maximized, the window returns to the size
-  /// and position that it had before that state was applied.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// If the window is minimized, the window returns to the size  and position
+  /// that it had before that state was applied. The window will also be
+  /// brought to the top of the window stack.
   ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void activate();
 
-  /// Requests the window to be maximized. This has no effect
-  /// if the window is currently full screen or minimized, but may
-  /// affect the window size upon restoring it from minimized or
+  /// Requests the window to be maximized.
+  ///
+  /// This has no effect if the window is currently full screen or minimized,
+  /// but might affect the window size upon restoring it from minimized or
   /// full screen state.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMaximized(bool maximized);
 
   /// Returns whether window is currently maximized.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool isMaximized();
 
   /// Requests window to be minimized.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setMinimized(bool minimized);
 
   /// Returns whether window is currently minimized.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool isMinimized();
 
   /// Request change for the window to enter or exit fullscreen state.
+  ///
   /// [fullscreen] whether to enter or exit fullscreen state.
-  /// [displayId] optional [Display] identifier to use for fullscreen mode.
-  /// Specifying the [displayId] might not be supported on all platforms.
+  /// [display] optional [Display] to use for fullscreen mode.
+  /// The [display] might not be honored by the platform
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void setFullscreen(bool fullscreen, {int? displayId});
+  void setFullscreen(bool fullscreen, {Display? display});
 
   /// Returns whether window is currently in fullscreen mode.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool isFullscreen();
 }
@@ -563,64 +364,28 @@ abstract class RegularWindowController extends WindowController {
 /// Custom subclass can be provided by subclassing [WidgetsBinding] and
 /// overriding the [createWindowingOwner] method.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 abstract class WindowingOwner {
   /// Creates a [RegularWindowController] with the provided properties.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   RegularWindowController createRegularWindowController({
-    required WindowSizing contentSize,
+    required WindowSizing preferredContentSize,
     required RegularWindowControllerDelegate delegate,
   });
 
   /// Returns whether application has any top level windows created by this
   /// windowing owner.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool hasTopLevelWindows();
 
   /// Creates default windowing owner for standard desktop embedders.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowingOwner createDefaultOwner() {
     if (!isWindowingEnabled) {
@@ -640,7 +405,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 
   @override
   RegularWindowController createRegularWindowController({
-    required WindowSizing contentSize,
+    required WindowSizing preferredContentSize,
     required RegularWindowControllerDelegate delegate,
   }) {
     throw UnsupportedError(errorMessaage);
@@ -653,7 +418,9 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 }
 
 /// The [RegularWindow] widget provides a way to render a regular window in the
-/// widget tree. The provided [controller] creates the native window that backs
+/// widget tree.
+///
+/// The provided [controller] creates the native window that backs
 /// the widget. The [child] widget is rendered into this newly created window.
 ///
 /// While the window is being created, the [RegularWindow] widget will render
@@ -680,32 +447,14 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// Widgets in the same tree as the [child] widget will have access to the
 /// [RegularWindowController] via the [WindowControllerContext] widget.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 class RegularWindow extends StatefulWidget {
   /// Creates a regular window widget.
   /// [controller] the controller for this window
   /// [child] the content to render into this window
   /// [key] the key for this widget
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   RegularWindow({super.key, required this.controller, required this.child}) {
     if (!isWindowingEnabled) {
@@ -715,44 +464,17 @@ class RegularWindow extends StatefulWidget {
 
   /// Controller for this widget.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final RegularWindowController controller;
 
   /// The content rendered into this window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final Widget child;
 
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
   State<RegularWindow> createState() => _RegularWindowState();
@@ -761,8 +483,8 @@ class RegularWindow extends StatefulWidget {
 class _RegularWindowState extends State<RegularWindow> {
   @override
   void dispose() {
-    super.dispose();
     widget.controller.destroy();
+    super.dispose();
   }
 
   @override
@@ -777,32 +499,15 @@ class _RegularWindowState extends State<RegularWindow> {
 /// Provides descendants with access to the [WindowController] associated with
 /// the window that is being rendered.
 ///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
+/// {@macro flutter.widgets.windowing.experimental}
 @internal
 class WindowControllerContext extends InheritedWidget {
   /// Creates a new [WindowControllerContext]
+  ///
   /// [controller] the controller associated with this window
   /// [child] the child widget
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   WindowControllerContext({super.key, required this.controller, required super.child}) {
     if (!isWindowingEnabled) {
@@ -812,31 +517,13 @@ class WindowControllerContext extends InheritedWidget {
 
   /// The controller associated with this window.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   final WindowController controller;
 
   /// Returns the [WindowContext] if any
   ///
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowController? of(BuildContext context) {
     if (!isWindowingEnabled) {
@@ -846,16 +533,7 @@ class WindowControllerContext extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
   }
 
-  /// {@template flutter.widgets.windowing.experimental}
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
-  ///
-  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
-  /// feature is enabled by [isWindowingEnabled].
-  ///
-  /// See: https://github.com/flutter/flutter/issues/30701.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
   bool updateShouldNotify(WindowControllerContext oldWidget) {
