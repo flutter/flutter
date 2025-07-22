@@ -74,4 +74,20 @@ void main() {
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Kotlin version'));
   });
+
+  testUsingContext('No logs are printed when suppression flag is passed', () async {
+    final VersionTuple versionTuple = VersionTuple(
+      agpVersion: '7.3.0',
+      gradleVersion: '7.5',
+      kotlinVersion: '1.7.10',
+      compileSdkVersion: '34',
+    );
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+      versions: versionTuple,
+      tempDir: tempDir,
+      skipChecking: true
+    );
+    expect(result, const ProcessResultMatcher());
+    expect(result.stderr, isNot(contains('Please upgrade your Android Gradle Plugin version')));
+  });
 }
