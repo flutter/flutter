@@ -6,14 +6,14 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../xcode_project.dart';
 
-const String _appDelegateFileBefore = r'''
+const _appDelegateFileBefore = r'''
 class AppDelegate: FlutterAppDelegate {
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
 }''';
 
-const String _appDelegateFileAfter = r'''
+const _appDelegateFileAfter = r'''
 class AppDelegate: FlutterAppDelegate {
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true

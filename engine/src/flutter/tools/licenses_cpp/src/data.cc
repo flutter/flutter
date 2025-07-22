@@ -12,7 +12,8 @@ const char* kExcludeFilename = "exclude.txt";
 namespace fs = std::filesystem;
 
 absl::StatusOr<Data> Data::Open(std::string_view data_dir) {
-  fs::path include_path = fs::path(data_dir) / kIncludeFilename;
+  fs::path data_path = fs::path(data_dir);
+  fs::path include_path = data_path / kIncludeFilename;
   absl::StatusOr<Filter> include_filter = Filter::Open(include_path.string());
   if (!include_filter.ok()) {
     return absl::InvalidArgumentError("Can't open include.txt at " +
@@ -33,7 +34,11 @@ absl::StatusOr<Data> Data::Open(std::string_view data_dir) {
                                       catalog.status().ToString());
   }
 
-  return Data{.include_filter = std::move(*include_filter),
-              .exclude_filter = std::move(*exclude_filter),
-              .catalog = std::move(*catalog)};
+  fs::path secondary_dir = data_path / "secondary";
+
+  return Data{
+      .include_filter = std::move(*include_filter),
+      .exclude_filter = std::move(*exclude_filter),
+      .catalog = std::move(*catalog),
+      .secondary_dir = fs::exists(secondary_dir) ? secondary_dir : fs::path()};
 }

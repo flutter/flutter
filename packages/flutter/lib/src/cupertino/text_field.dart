@@ -815,7 +815,7 @@ class CupertinoTextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -1877,5 +1877,21 @@ class _RenderBaselineAlignedStack extends RenderBox
     final Size size = Size(width, height);
     assert(size.isFinite);
     return constraints.constrain(size);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox editableText = _editableTextChild;
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+
+    return result.addWithPaintOffset(
+      offset: editableTextParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - editableTextParentData.offset);
+        return editableText.hitTest(result, position: transformed);
+      },
+    );
   }
 }
