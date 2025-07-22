@@ -123,6 +123,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        _radius = radius,
        _shape = shape,
        _padding = padding,
+       _resolvedPadding = padding.resolve(textDirection),
        _mainAxisMargin = mainAxisMargin,
        _crossAxisMargin = crossAxisMargin,
        _minLength = minLength,
@@ -197,6 +198,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     _textDirection = value;
+    _resolvedPadding = _padding.resolve(_textDirection);
     notifyListeners();
   }
 
@@ -310,6 +312,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     _padding = value;
+    _resolvedPadding = _padding.resolve(_textDirection);
     notifyListeners();
   }
 
@@ -400,7 +403,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // - Scrollbar Details
 
   Rect? _trackRect;
-  late EdgeInsets _resolvedPadding;
+  EdgeInsets? _resolvedPadding;
   // The full painted length of the track
   double get _trackExtent => _lastMetrics!.viewportDimension - _totalTrackMainAxisOffsets;
   // The full length of the track that the thumb can travel
@@ -408,11 +411,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Track Offsets
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets =>
-      _isVertical ? _resolvedPadding.vertical : _resolvedPadding.horizontal;
+      _isVertical ? _resolvedPadding!.vertical : _resolvedPadding!.horizontal;
 
   double get _leadingTrackMainAxisOffset => switch (_resolvedOrientation) {
-    ScrollbarOrientation.left || ScrollbarOrientation.right => _resolvedPadding.top,
-    ScrollbarOrientation.top || ScrollbarOrientation.bottom => _resolvedPadding.left,
+    ScrollbarOrientation.left || ScrollbarOrientation.right => _resolvedPadding!.top,
+    ScrollbarOrientation.top || ScrollbarOrientation.bottom => _resolvedPadding!.left,
   };
 
   Rect? _thumbRect;
@@ -567,6 +570,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintScrollbar(Canvas canvas, Size size) {
+    assert(
+      textDirection != null,
+      'A TextDirection must be provided before a Scrollbar can be painted.',
+    );
     final double x, y;
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
@@ -575,7 +582,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = crossAxisMargin + _resolvedPadding.left;
+        x = crossAxisMargin + _resolvedPadding!.left;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
@@ -583,7 +590,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
-        x = size.width - thickness - crossAxisMargin - _resolvedPadding.right;
+        x = size.width - thickness - crossAxisMargin - _resolvedPadding!.right;
         y = _thumbOffset;
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset;
@@ -592,7 +599,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = crossAxisMargin + _resolvedPadding.top;
+        y = crossAxisMargin + _resolvedPadding!.top;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
@@ -600,7 +607,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
         x = _thumbOffset;
-        y = size.height - thickness - crossAxisMargin - _resolvedPadding.bottom;
+        y = size.height - thickness - crossAxisMargin - _resolvedPadding!.bottom;
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
@@ -643,11 +650,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_lastAxisDirection == null || !_needPaint(_lastMetrics)) {
       return;
     }
-    assert(
-      textDirection != null,
-      'A TextDirection must be provided before a Scrollbar can be painted.',
-    );
-    _resolvedPadding = padding.resolve(textDirection);
 
     // Skip painting if there's not enough space.
     if (_traversableTrackExtent <= 0) {
