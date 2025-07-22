@@ -1968,23 +1968,6 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
-  void _handleCustomAction(String actionId) {
-    // Support dynamic callbacks (new API)
-    final VoidCallback? callback = SystemContextMenuController._customActionCallbacks[actionId];
-    if (callback != null) {
-      callback();
-      return;
-    }
-
-    // Support hardcoded test case
-    if (actionId == 'vibrate') {
-      debugPrint('[HARDCODED] Vibrate action triggered');
-      return;
-    }
-
-    debugPrint('Custom action callback not found for id: $actionId');
-  }
-
   Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
@@ -2135,9 +2118,6 @@ class TextInput {
           firstArg['action'] as String,
           firstArg['data'] == null ? <String, dynamic>{} : firstArg['data'] as Map<String, dynamic>,
         );
-      case 'TextInputClient.performCustomAction':
-        final String customAction = args[1] as String;
-        _handleCustomAction(customAction);
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(
           _toTextPoint(_toTextCursorAction(args[1] as String), args[2] as Map<String, dynamic>),
@@ -2644,8 +2624,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
   static SystemContextMenuController? _lastShown;
 
-  /// Map to store custom action callbacks, keyed by their unique identifiers.
-  static final Map<String, VoidCallback> _customActionCallbacks = <String, VoidCallback>{};
+  final Map<String, VoidCallback> _customActionCallbacks = <String, VoidCallback>{};
 
   /// The target [Rect] that was last given to [show].
   ///
@@ -2669,18 +2648,6 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
-  /// Registers a custom action callback with the given identifier.
-  /// @nodoc
-  @visibleForTesting
-  static void registerCustomAction(String callbackId, VoidCallback callback) {
-    _customActionCallbacks[callbackId] = callback;
-  }
-
-  /// Clears all registered custom action callbacks.
-  static void _clearCustomActions() {
-    _customActionCallbacks.clear();
-  }
-
   // Begin SystemContextMenuClient.
 
   @override
@@ -2694,10 +2661,20 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
       _lastShown = null;
     }
     _hiddenBySystem = true;
+    _customActionCallbacks.clear();
     onSystemHide?.call();
   }
 
-  // End SystemContextMenuClient.
+  @override
+  void handleCustomContextMenuAction(String actionId) {
+    final VoidCallback? callback = _customActionCallbacks[actionId];
+    assert(
+      callback != null,
+      'Custom action callback not found for id: $actionId. '
+      'This may indicate that the menu item was not properly registered.',
+    );
+    callback?.call();
+  }
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
@@ -2805,17 +2782,17 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
 
     ServicesBinding.systemContextMenuClient = this;
 
+    _customActionCallbacks.clear();
+    
+    for (final IOSSystemContextMenuItemData item in items) {
+      if (item is IOSSystemContextMenuItemDataCustom) {
+        _customActionCallbacks[item.callbackId] = item.onPressed;
+      }
+    }
+
     final List<Map<String, dynamic>> itemsJson = items
         .map<Map<String, dynamic>>((IOSSystemContextMenuItemData item) => item._json)
         .toList();
-
-    // TODO(jingshao): Remove this hardcoded test item before final PR submission
-    itemsJson.add(<String, dynamic>{
-      'callbackId': 'vibrate'.hashCode,
-      'title': 'Vibrate',
-      'type': 'custom',
-      'id': 'vibrate',
-    });
 
     _lastTargetRect = targetRect;
     _lastItems = items;
@@ -2853,7 +2830,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     }
     _lastShown = null;
     ServicesBinding.systemContextMenuClient = null;
-    _clearCustomActions();
+    _customActionCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>('ContextMenu.hideSystemContextMenu');
@@ -3140,6 +3117,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
   const IOSSystemContextMenuItemDataCustom({
     required this.title,
     required this.callbackId,
+    required this.onPressed,
   });
 
   @override
@@ -3147,6 +3125,9 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
 
   /// The unique identifier for this custom action.
   final String callbackId;
+  
+  /// The callback to be executed when the item is selected.
+  final VoidCallback onPressed;
 
   @override
   String get _jsonType => 'custom';
@@ -3181,6 +3162,3 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
         other.callbackId == callbackId;
   }
 }
-
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163

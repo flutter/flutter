@@ -546,4 +546,153 @@ void main() {
     systemContextMenuController.showWithItems(anchor, defaultItemDatas);
     expect(systemContextMenuController.isVisible, isTrue);
   });
+
+  test('custom action callbacks are properly managed', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool action1Called = false;
+    bool action2Called = false;
+    
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+    
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 1',
+        callbackId: '1',
+        onPressed: () {
+          action1Called = true;
+        },
+      ),
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Action 2',
+        callbackId: '2',
+        onPressed: () {
+          action2Called = true;
+        },
+      ),
+    ];
+    
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    
+    expect(controller.isVisible, isTrue);
+    
+    controller.handleCustomContextMenuAction('1');
+    expect(action1Called, isTrue);
+    expect(action2Called, isFalse);
+    
+    controller.handleCustomContextMenuAction('2');
+    expect(action1Called, isTrue);
+    expect(action2Called, isTrue);
+    
+    controller.hide();
+    expect(controller.isVisible, isFalse);
+    
+    expect(
+      () => controller.handleCustomContextMenuAction('1'),
+      throwsAssertionError,
+    );
+  });
+
+  test('multiple controllers handle callbacks independently', () {
+    final FakeTextInputClient client1 = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection1 = TextInput.attach(client1, client1.configuration);
+    addTearDown(() {
+      connection1.close();
+    });
+
+    bool controller1ActionCalled = false;
+    bool controller2ActionCalled = false;
+    
+    final SystemContextMenuController controller1 = SystemContextMenuController();
+    final SystemContextMenuController controller2 = SystemContextMenuController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+    
+    final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 1 Action',
+        callbackId: 'c1',
+        onPressed: () {
+          controller1ActionCalled = true;
+        },
+      ),
+    ];
+    
+    final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Controller 2 Action',
+        callbackId: 'c2',
+        onPressed: () {
+          controller2ActionCalled = true;
+        },
+      ),
+    ];
+    
+    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    const Rect rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
+    
+    controller1.showWithItems(rect1, items1);
+    expect(controller1.isVisible, isTrue);
+    
+    controller2.showWithItems(rect2, items2);
+    expect(controller2.isVisible, isTrue);
+    expect(controller1.isVisible, isFalse);
+    
+    controller2.handleCustomContextMenuAction('c2');
+    expect(controller2ActionCalled, isTrue);
+    expect(controller1ActionCalled, isFalse);
+    
+    expect(
+      () => controller1.handleCustomContextMenuAction('c1'),
+      throwsAssertionError,
+    );
+  });
+
+  test('platform dismissal clears callbacks', () {
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    bool actionCalled = false;
+    
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+    
+    final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
+      IOSSystemContextMenuItemDataCustom(
+        title: 'Test Action',
+        callbackId: 'test',
+        onPressed: () {
+          actionCalled = true;
+        },
+      ),
+    ];
+    
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.showWithItems(rect, items);
+    expect(controller.isVisible, isTrue);
+    
+    controller.handleSystemHide();
+    expect(controller.isVisible, isFalse);
+    
+    expect(
+      () => controller.handleCustomContextMenuAction('test'),
+      throwsAssertionError,
+    );
+    expect(actionCalled, isFalse);
+  });
 }

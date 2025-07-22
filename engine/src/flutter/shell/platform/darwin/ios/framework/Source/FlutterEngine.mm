@@ -1063,8 +1063,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performPlatformChannelContextMenuCustomAction:(NSString*)customActionID
                                        withClient:(int)client {
-  [self.textInputChannel invokeMethod:@"TextInputClient.performCustomAction"
-                             arguments:@[ @(client), customActionID ]];
+  [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                           arguments:@[ @(client), customActionID ]];
 }
 
 #pragma mark - FlutterViewEngineDelegate

@@ -895,4 +895,121 @@ void main() {
     },
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
+
+  testWidgets(
+    'can use custom menu items',
+    (WidgetTester tester) async {
+      bool customAction1Called = false;
+      bool customAction2Called = false;
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
+      
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case 'ContextMenu.showSystemContextMenu':
+              final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+              final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
+              itemsReceived.add(lastItems);
+          }
+          return;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
+        const IOSSystemContextMenuItemCopy(),
+        IOSSystemContextMenuItemCustom(
+          title: 'Custom Action 1',
+          onPressed: () {
+            customAction1Called = true;
+          },
+        ),
+        IOSSystemContextMenuItemCustom(
+          title: 'Custom Action 2',
+          onPressed: () {
+            customAction2Called = true;
+          },
+        ),
+      ];
+
+      final TextEditingController controller = TextEditingController(text: 'test text');
+      addTearDown(controller.dispose);
+      
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(find.byType(SystemContextMenu), findsOneWidget);
+      expect(itemsReceived, hasLength(1));
+      expect(itemsReceived.last, hasLength(3));
+      
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
+      expect(itemsReceived.last[1], isA<IOSSystemContextMenuItemDataCustom>());
+      expect((itemsReceived.last[1] as IOSSystemContextMenuItemDataCustom).title, 'Custom Action 1');
+      expect(itemsReceived.last[2], isA<IOSSystemContextMenuItemDataCustom>());
+      expect((itemsReceived.last[2] as IOSSystemContextMenuItemDataCustom).title, 'Custom Action 2');
+      
+      final SystemContextMenu contextMenu = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
+      final SystemContextMenuController controller2 = contextMenu.controller;
+      
+      final IOSSystemContextMenuItemCustom customItem1 = items[1] as IOSSystemContextMenuItemCustom;
+      final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
+      
+      controller2.handleCustomContextMenuAction(customItem1.hashCode.toString());
+      expect(customAction1Called, isTrue);
+      expect(customAction2Called, isFalse);
+      
+      controller2.handleCustomContextMenuAction(customItem2.hashCode.toString());
+      expect(customAction2Called, isTrue);
+      
+      state.hideToolbar();
+      await tester.pump();
+      expect(find.byType(SystemContextMenu), findsNothing);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
