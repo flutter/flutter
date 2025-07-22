@@ -184,7 +184,10 @@ void main() {
   }, skip: kIsWeb); // [intended] The web cannot load files.
 
   test('ImageProvider toStrings', () async {
-    expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
+    expect(
+      const NetworkImage('test', scale: 1.21).toString(),
+      'NetworkImage("test", scale: 1.2, webHtmlElementStrategy: never, headers: null)',
+    );
     expect(
       const ExactAssetImage('test', scale: 1.21).toString(),
       'ExactAssetImage(name: "test", scale: 1.2, bundle: null)',

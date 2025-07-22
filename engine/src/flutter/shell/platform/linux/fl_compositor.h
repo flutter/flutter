@@ -16,15 +16,9 @@ G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 struct _FlCompositorClass {
   GObjectClass parent_class;
 
-  FlutterRendererType (*get_renderer_type)(FlCompositor* compositor);
-
   gboolean (*present_layers)(FlCompositor* compositor,
                              const FlutterLayer** layers,
                              size_t layers_count);
-
-  void (*wait_for_frame)(FlCompositor* compositor,
-                         int target_width,
-                         int target_height);
 };
 
 /**
@@ -32,16 +26,6 @@ struct _FlCompositorClass {
  *
  * #FlCompositor is an abstract class that implements Flutter compositing.
  */
-
-/**
- * fl_compositor_get_renderer_type:
- * @compositor: an #FlCompositor.
- *
- * Gets the rendering method this compositor uses.
- *
- * Returns: a FlutterRendererType.
- */
-FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
 
 /**
  * fl_compositor_present_layers:
@@ -57,20 +41,6 @@ FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
 gboolean fl_compositor_present_layers(FlCompositor* compositor,
                                       const FlutterLayer** layers,
                                       size_t layers_count);
-
-/**
- * fl_compositor_wait_for_frame:
- * @compositor: an #FlCompositor.
- * @target_width: width of frame being waited for
- * @target_height: height of frame being waited for
- *
- * Holds the thread until frame with requested dimensions is presented.
- * While waiting for frame Flutter platform and raster tasks are being
- * processed.
- */
-void fl_compositor_wait_for_frame(FlCompositor* compositor,
-                                  int target_width,
-                                  int target_height);
 
 G_END_DECLS
 
