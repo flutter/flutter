@@ -597,6 +597,7 @@ class WebAssetServer implements AssetReader {
   String get _buildConfigString {
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'contentHash': globals.flutterVersion.engineContentHash ?? '',
       'builds': <Object>[
         <String, Object>{
           'compileTarget': 'dartdevc',
