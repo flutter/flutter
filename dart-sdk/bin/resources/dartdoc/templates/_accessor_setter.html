@@ -1,0 +1,15 @@
+{{ #setter }}
+  <section id="setter">
+
+    <section class="multi-line-signature">
+      {{ >annotations }}
+      set
+      <span class="name {{#isDeprecated}}deprecated{{/isDeprecated}}">{{ definingCombo.name }}</span>
+      <span class="signature">(<wbr>{{{ linkedParamsNoMetadata }}})</span>
+      {{ >attributes }}
+    </section>
+
+    {{ >documentation }}
+    {{ >source_code }}
+  </section>
+{{ /setter }}

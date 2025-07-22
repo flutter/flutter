@@ -1,0 +1,10 @@
+<dt id="{{htmlId}}" class="{{ #isInherited }} inherited{{ /isInherited}}">
+  <span class="name{{#isDeprecated}} deprecated{{/isDeprecated}}">{{{linkedName}}}</span>{{{linkedGenericParameters}}}
+    = {{{ modelType.linkedName }}}
+  </span>
+  {{>categorization}}
+</dt>
+<dd{{ #isInherited }} class="inherited"{{ /isInherited}}>
+  {{{ oneLineDoc }}}
+  {{ >attributes }}
+</dd>

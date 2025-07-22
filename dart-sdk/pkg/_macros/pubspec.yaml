@@ -1,0 +1,18 @@
+name: _macros
+version: 0.3.3
+description: >-
+  This is a private SDK vendored package, which is re-exported by the public
+  `macros` package, which is a pub package. Every change to this package is
+  treated as a release, see CONTRIBUTING.md for full instructions.
+publish_to: none
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/_macros
+
+environment:
+  sdk: ^3.5.0
+
+resolution: workspace
+
+# Note that as an SDK vendored package, pub package dependencies are only
+# allowed in the dev_dependencies section.
+dev_dependencies:
+  test: any

@@ -1,0 +1,11 @@
+{{ #hasPublicVariableStaticFields }}
+  <section class="summary offset-anchor" id="static-properties">
+    <h2>Static Properties</h2>
+
+    <dl class="properties">
+      {{ #publicVariableStaticFieldsSorted }}
+        {{ >property }}
+      {{ /publicVariableStaticFieldsSorted }}
+    </dl>
+  </section>
+{{ /hasPublicVariableStaticFields }}

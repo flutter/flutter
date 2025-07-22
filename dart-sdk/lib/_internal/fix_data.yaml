@@ -1,0 +1,2128 @@
+# Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes.  Add corresponding golden tests to
+# `tests/lib/fix_data_tests` for each new fix.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+version: 1
+transforms:
+  - title: "Rename to 'read'"
+    date: 2021-01-25
+    element:
+      uris: [ 'dart:io' ]
+      field: 'READ'
+      inClass: 'FileMode'
+    changes:
+      - kind: 'rename'
+        newName: 'read'
+
+  - title: "Rename to 'write'"
+    date: 2021-01-25
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WRITE'
+      inClass: 'FileMode'
+    changes:
+      - kind: 'rename'
+        newName: 'write'
+
+  - title: "Rename to 'append'"
+    date: 2021-01-25
+    element:
+      uris: [ 'dart:io' ]
+      field: 'APPEND'
+      inClass: 'FileMode'
+    changes:
+      - kind: 'rename'
+        newName: 'append'
+
+  - title: "Rename to 'writeOnly'"
+    date: 2021-01-25
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WRITE_ONLY'
+      inClass: 'FileMode'
+    changes:
+      - kind: 'rename'
+        newName: 'writeOnly'
+
+  - title: "Rename to 'writeOnlyAppend'"
+    date: 2021-01-25
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WRITE_ONLY_APPEND'
+      inClass: 'FileMode'
+    changes:
+      - kind: 'rename'
+        newName: 'writeOnlyAppend'
+
+  - title: "Rename to 'continue_'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'CONTINUE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'continue_'
+
+  - title: "Rename to 'switchingProtocols'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'SWITCHING_PROTOCOLS'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'switchingProtocols'
+
+  - title: "Rename to 'ok'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'OK'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'ok'
+
+  - title: "Rename to 'created'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'CREATED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'created'
+
+  - title: "Rename to 'accepted'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'ACCEPTED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'accepted'
+
+  - title: "Rename to 'nonAuthoritativeInformation'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NON_AUTHORITATIVE_INFORMATION'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'nonAuthoritativeInformation'
+
+  - title: "Rename to 'noContent'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NO_CONTENT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'noContent'
+
+  - title: "Rename to 'resetContent'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'RESET_CONTENT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'resetContent'
+
+  - title: "Rename to 'partialContent'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'PARTIAL_CONTENT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'partialContent'
+
+  - title: "Rename to 'multipleChoices'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'MULTIPLE_CHOICES'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'multipleChoices'
+
+  - title: "Rename to 'movedPermanently'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'MOVED_PERMANENTLY'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'movedPermanently'
+
+  - title: "Rename to 'found'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'FOUND'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'found'
+
+  - title: "Rename to 'movedTemporarily'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'MOVED_TEMPORARILY'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'movedTemporarily'
+
+  - title: "Rename to 'seeOther'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'SEE_OTHER'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'seeOther'
+
+  - title: "Rename to 'notModified'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NOT_MODIFIED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'notModified'
+
+  - title: "Rename to 'useProxy'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'USE_PROXY'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'useProxy'
+
+  - title: "Rename to 'temporaryRedirect'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'TEMPORARY_REDIRECT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'temporaryRedirect'
+
+  - title: "Rename to 'badRequest'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'BAD_REQUEST'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'badRequest'
+
+  - title: "Rename to 'unauthorized'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'UNAUTHORIZED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'unauthorized'
+
+  - title: "Rename to 'paymentRequired'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'PAYMENT_REQUIRED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'paymentRequired'
+
+  - title: "Rename to 'forbidden'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'FORBIDDEN'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'forbidden'
+
+  - title: "Rename to 'notFound'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NOT_FOUND'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'notFound'
+
+  - title: "Rename to 'methodNotAllowed'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'METHOD_NOT_ALLOWED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'methodNotAllowed'
+
+  - title: "Rename to 'notAcceptable'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NOT_ACCEPTABLE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'notAcceptable'
+
+  - title: "Rename to 'proxyAuthenticationRequired'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'PROXY_AUTHENTICATION_REQUIRED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'proxyAuthenticationRequired'
+
+  - title: "Rename to 'requestTimeout'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'REQUEST_TIMEOUT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'requestTimeout'
+
+  - title: "Rename to 'conflict'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'CONFLICT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'conflict'
+
+  - title: "Rename to 'gone'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'GONE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'gone'
+
+  - title: "Rename to 'lengthRequired'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'LENGTH_REQUIRED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'lengthRequired'
+
+  - title: "Rename to 'preconditionFailed'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'PRECONDITION_FAILED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'preconditionFailed'
+
+  - title: "Rename to 'requestEntityTooLarge'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'REQUEST_ENTITY_TOO_LARGE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'requestEntityTooLarge'
+
+  - title: "Rename to 'requestUriTooLong'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'REQUEST_URI_TOO_LONG'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'requestUriTooLong'
+
+  - title: "Rename to 'unsupportedMediaType'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'UNSUPPORTED_MEDIA_TYPE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'unsupportedMediaType'
+
+  - title: "Rename to 'requestedRangeNotSatisfiable'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'REQUESTED_RANGE_NOT_SATISFIABLE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'requestedRangeNotSatisfiable'
+  - title: "Rename to 'expectationFailed'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'EXPECTATION_FAILED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'expectationFailed'
+
+  - title: "Rename to 'upgradeRequired'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'UPGRADE_REQUIRED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'upgradeRequired'
+
+  - title: "Rename to 'internalServerError'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'INTERNAL_SERVER_ERROR'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'internalServerError'
+
+  - title: "Rename to 'notImplemented'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NOT_IMPLEMENTED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'notImplemented'
+
+  - title: "Rename to 'badGateway'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'BAD_GATEWAY'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'badGateway'
+
+  - title: "Rename to 'serviceUnavailable'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'SERVICE_UNAVAILABLE'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'serviceUnavailable'
+
+  - title: "Rename to 'gatewayTimeout'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'GATEWAY_TIMEOUT'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'gatewayTimeout'
+
+  - title: "Rename to 'httpVersionNotSupported'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'HTTP_VERSION_NOT_SUPPORTED'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'httpVersionNotSupported'
+
+  - title: "Rename to 'networkConnectTimeoutError'"
+    date: 2021-06-15
+    element:
+      uris: [ 'dart:io', 'dart:html' ]
+      field: 'NETWORK_CONNECT_TIMEOUT_ERROR'
+      inClass: 'HttpStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'networkConnectTimeoutError'
+
+  - title: "Rename to 'invalidParams'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:developer' ]
+      field: 'kInvalidParams'
+      inClass: 'ServiceExtensionResponse'
+    changes:
+      - kind: 'rename'
+        newName: 'invalidParams'
+
+  - title: "Rename to 'extensionError'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:developer' ]
+      field: 'kExtensionError'
+      inClass: 'ServiceExtensionResponse'
+    changes:
+      - kind: 'rename'
+        newName: 'extensionError'
+
+  - title: "Rename to 'extensionErrorMax'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:developer' ]
+      field: 'kExtensionErrorMax'
+      inClass: 'ServiceExtensionResponse'
+    changes:
+      - kind: 'rename'
+        newName: 'extensionErrorMax'
+
+  - title: "Rename to 'extensionErrorMin'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:developer' ]
+      field: 'kExtensionErrorMin'
+      inClass: 'ServiceExtensionResponse'
+    changes:
+      - kind: 'rename'
+        newName: 'extensionErrorMin'
+
+  - title: "Rename to 'systemEncoding'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      variable: 'SYSTEM_ENCODING'
+    changes:
+      - kind: 'rename'
+        newName: 'systemEncoding'
+
+  - title: "Rename to 'terminal'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TERMINAL'
+      inClass: 'StdioType'
+    changes:
+      - kind: 'rename'
+        newName: 'terminal'
+
+  - title: "Rename to 'pipe'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'PIPE'
+      inClass: 'StdioType'
+    changes:
+      - kind: 'rename'
+        newName: 'pipe'
+
+  - title: "Rename to 'file'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'FILE'
+      inClass: 'StdioType'
+    changes:
+      - kind: 'rename'
+        newName: 'file'
+
+  - title: "Rename to 'other'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'OTHER'
+      inClass: 'StdioType'
+    changes:
+      - kind: 'rename'
+        newName: 'other'
+
+  - title: "Rename to 'normal'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'NORMAL'
+      inClass: 'ProcessStartMode'
+    changes:
+      - kind: 'rename'
+        newName: 'normal'
+
+  - title: "Rename to 'inheritStdio'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'INHERIT_STDIO'
+      inClass: 'ProcessStartMode'
+    changes:
+      - kind: 'rename'
+        newName: 'inheritStdio'
+
+  - title: "Rename to 'detached'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DETACHED'
+      inClass: 'ProcessStartMode'
+    changes:
+      - kind: 'rename'
+        newName: 'detached'
+
+  - title: "Rename to 'detachedWithStdio'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DETACHED_WITH_STDIO'
+      inClass: 'ProcessStartMode'
+    changes:
+      - kind: 'rename'
+        newName: 'detachedWithStdio'
+
+  - title: "Rename to 'sighup'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGHUP'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sighup'
+
+  - title: "Rename to 'sigint'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGINT'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigint'
+
+  - title: "Rename to 'sigquit'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGQUIT'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigquit'
+
+  - title: "Rename to 'sigill'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGILL'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigill'
+
+  - title: "Rename to 'sigtrap'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGTRAP'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigtrap'
+
+  - title: "Rename to 'sigabrt'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGABRT'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigabrt'
+
+  - title: "Rename to 'sigbus'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGBUS'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigbus'
+
+  - title: "Rename to 'sigfpe'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGFPE'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigfpe'
+
+  - title: "Rename to 'sigkill'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGKILL'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigkill'
+
+  - title: "Rename to 'sigusr1'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGUSR1'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigusr1'
+
+  - title: "Rename to 'sigsegv'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGSEGV'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigsegv'
+
+  - title: "Rename to 'sigusr2'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGUSR2'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigusr2'
+
+  - title: "Rename to 'sigpipe'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGPIPE'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigpipe'
+
+  - title: "Rename to 'sigalrm'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGALRM'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigalrm'
+
+  - title: "Rename to 'sigterm'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGTERM'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigterm'
+
+  - title: "Rename to 'sigchld'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGCHLD'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigchld'
+
+  - title: "Rename to 'sigcont'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGCONT'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigcont'
+
+  - title: "Rename to 'sigstop'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGSTOP'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigstop'
+
+  - title: "Rename to 'sigtstp'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGTSTP'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigtstp'
+
+  - title: "Rename to 'sigttin'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGTTIN'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigttin'
+
+  - title: "Rename to 'sigttou'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGTTOU'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigttou'
+
+  - title: "Rename to 'sigurg'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGURG'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigurg'
+
+  - title: "Rename to 'sigxcpu'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGXCPU'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigxcpu'
+
+  - title: "Rename to 'sigxfsz'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGXFSZ'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigxfsz'
+
+  - title: "Rename to 'sigvtalrm'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGVTALRM'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigvtalrm'
+
+  - title: "Rename to 'sigprof'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGPROF'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigprof'
+
+  - title: "Rename to 'sigwinch'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGWINCH'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigwinch'
+
+  - title: "Rename to 'sigpoll'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGPOLL'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigpoll'
+
+  - title: "Rename to 'sigsys'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SIGSYS'
+      inClass: 'ProcessSignal'
+    changes:
+      - kind: 'rename'
+        newName: 'sigsys'
+
+  - title: "Rename to 'IPv4'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IP_V4'
+      inClass: 'InternetAddressType'
+    changes:
+      - kind: 'rename'
+        newName: 'IPv4'
+
+  - title: "Rename to 'IPv6'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IP_V6'
+      inClass: 'InternetAddressType'
+    changes:
+      - kind: 'rename'
+        newName: 'IPv6'
+
+  - title: "Rename to 'any'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ANY'
+      inClass: 'InternetAddressType'
+    changes:
+      - kind: 'rename'
+        newName: 'any'
+
+  - title: "Rename to 'loopbackIPv4'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'LOOPBACK_IP_V4'
+      inClass: 'InternetAddress'
+    changes:
+      - kind: 'rename'
+        newName: 'loopbackIPv4'
+
+  - title: "Rename to 'loopbackIPv6'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'LOOPBACK_IP_V6'
+      inClass: 'InternetAddress'
+    changes:
+      - kind: 'rename'
+        newName: 'loopbackIPv6'
+
+  - title: "Rename to 'anyIPv4'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ANY_IP_V4'
+      inClass: 'InternetAddress'
+    changes:
+      - kind: 'rename'
+        newName: 'anyIPv4'
+
+  - title: "Rename to 'anyIPv6'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ANY_IP_V6'
+      inClass: 'InternetAddress'
+    changes:
+      - kind: 'rename'
+        newName: 'anyIPv6'
+
+  - title: "Rename to 'receive'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RECEIVE'
+      inClass: 'SocketDirection'
+    changes:
+      - kind: 'rename'
+        newName: 'receive'
+
+  - title: "Rename to 'send'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SEND'
+      inClass: 'SocketDirection'
+    changes:
+      - kind: 'rename'
+        newName: 'send'
+
+  - title: "Rename to 'both'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'BOTH'
+      inClass: 'SocketDirection'
+    changes:
+      - kind: 'rename'
+        newName: 'both'
+
+  - title: "Rename to 'tcpNoDelay'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TCP_NODELAY'
+      inClass: 'SocketOption'
+    changes:
+      - kind: 'rename'
+        newName: 'tcpNoDelay'
+
+  - title: "Rename to 'read'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'READ'
+      inClass: 'RawSocketEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'read'
+
+  - title: "Rename to 'write'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WRITE'
+      inClass: 'RawSocketEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'write'
+
+  - title: "Rename to 'readClosed'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'READ_CLOSED'
+      inClass: 'RawSocketEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'readClosed'
+
+  - title: "Rename to 'closed'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CLOSED'
+      inClass: 'RawSocketEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'closed'
+
+  - title: "Rename to 'file'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'FILE'
+      inClass: 'FileSystemEntityType'
+    changes:
+      - kind: 'rename'
+        newName: 'file'
+
+  - title: "Rename to 'directory'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DIRECTORY'
+      inClass: 'FileSystemEntityType'
+    changes:
+      - kind: 'rename'
+        newName: 'directory'
+
+  - title: "Rename to 'link'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'LINK'
+      inClass: 'FileSystemEntityType'
+    changes:
+      - kind: 'rename'
+        newName: 'link'
+
+  - title: "Rename to 'notFound'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'NOT_FOUND'
+      inClass: 'FileSystemEntityType'
+    changes:
+      - kind: 'rename'
+        newName: 'notFound'
+
+  - title: "Rename to 'create'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CREATE'
+      inClass: 'FileSystemEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'create'
+
+  - title: "Rename to 'modify'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MODIFY'
+      inClass: 'FileSystemEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'modify'
+
+  - title: "Rename to 'delete'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DELETE'
+      inClass: 'FileSystemEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'delete'
+
+  - title: "Rename to 'move'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MOVE'
+      inClass: 'FileSystemEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'move'
+
+  - title: "Rename to 'all'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ALL'
+      inClass: 'FileSystemEvent'
+    changes:
+      - kind: 'rename'
+        newName: 'all'
+
+  - title: "Rename to 'minWindowBits'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MIN_WINDOW_BITS'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'minWindowBits'
+
+  - title: "Rename to 'maxWindowBits'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MAX_WINDOW_BITS'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'maxWindowBits'
+
+  - title: "Rename to 'defaultWindowBits'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT_WINDOW_BITS'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'defaultWindowBits'
+
+  - title: "Rename to 'minLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MIN_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'minLevel'
+
+  - title: "Rename to 'maxLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MAX_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'maxLevel'
+
+  - title: "Rename to 'defaultLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'defaultLevel'
+
+  - title: "Rename to 'minMemLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MIN_MEM_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'minMemLevel'
+
+  - title: "Rename to 'maxMemLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MAX_MEM_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'maxMemLevel'
+
+  - title: "Rename to 'defaultMemLevel'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT_MEM_LEVEL'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'defaultMemLevel'
+
+  - title: "Rename to 'strategyFiltered'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'STRATEGY_FILTERED'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'strategyFiltered'
+
+  - title: "Rename to 'strategyHuffmanOnly'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'STRATEGY_HUFFMAN_ONLY'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'strategyHuffmanOnly'
+
+  - title: "Rename to 'strategyRle'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'STRATEGY_RLE'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'strategyRle'
+
+  - title: "Rename to 'strategyFixed'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'STRATEGY_FIXED'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'strategyFixed'
+
+  - title: "Rename to 'strategyDefault'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'STRATEGY_DEFAULT'
+      inClass: 'ZLibOption'
+    changes:
+      - kind: 'rename'
+        newName: 'strategyDefault'
+
+  - title: "Rename to 'zlib'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      variable: 'ZLIB'
+    changes:
+      - kind: 'rename'
+        newName: 'zlib'
+
+  - title: "Rename to 'gzip'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      variable: 'GZIP'
+    changes:
+      - kind: 'rename'
+        newName: 'gzip'
+
+  - title: "Rename to 'shared'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SHARED'
+      inClass: 'FileLock'
+    changes:
+      - kind: 'rename'
+        newName: 'shared'
+
+  - title: "Rename to 'exclusive'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'EXCLUSIVE'
+      inClass: 'FileLock'
+    changes:
+      - kind: 'rename'
+        newName: 'exclusive'
+
+  - title: "Rename to 'blockingShared'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'BLOCKING_SHARED'
+      inClass: 'FileLock'
+    changes:
+      - kind: 'rename'
+        newName: 'blockingShared'
+
+  - title: "Rename to 'blockingExclusive'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'BLOCKING_EXCLUSIVE'
+      inClass: 'FileLock'
+    changes:
+      - kind: 'rename'
+        newName: 'blockingExclusive'
+
+  - title: "Rename to 'normalClosure'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'NORMAL_CLOSURE'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'normalClosure'
+
+  - title: "Rename to 'goingAway'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'GOING_AWAY'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'goingAway'
+
+  - title: "Rename to 'protocolError'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'PROTOCOL_ERROR'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'protocolError'
+
+  - title: "Rename to 'unsupportedData'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'UNSUPPORTED_DATA'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'unsupportedData'
+
+  - title: "Rename to 'reserved1004'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RESERVED_1004'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'reserved1004'
+
+  - title: "Rename to 'noStatusReceived'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'NO_STATUS_RECEIVED'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'noStatusReceived'
+
+  - title: "Rename to 'abnormalClosure'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ABNORMAL_CLOSURE'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'abnormalClosure'
+
+  - title: "Rename to 'invalidFramePayloadData'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'INVALID_FRAME_PAYLOAD_DATA'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'invalidFramePayloadData'
+
+  - title: "Rename to 'policyViolation'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'POLICY_VIOLATION'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'policyViolation'
+
+  - title: "Rename to 'messageTooBig'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MESSAGE_TOO_BIG'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'messageTooBig'
+
+  - title: "Rename to 'missingMandatoryExtension'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MISSING_MANDATORY_EXTENSION'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'missingMandatoryExtension'
+
+  - title: "Rename to 'internalServerError'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'INTERNAL_SERVER_ERROR'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'internalServerError'
+
+  - title: "Rename to 'reserved1015'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RESERVED_1015'
+      inClass: 'WebSocketStatus'
+    changes:
+      - kind: 'rename'
+        newName: 'reserved1015'
+
+  - title: "Rename to 'compressionDefault'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT'
+      inClass: 'CompressionOptions'
+    changes:
+      - kind: 'rename'
+        newName: 'compressionDefault'
+
+  - title: "Rename to 'compressionOff'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'OFF'
+      inClass: 'CompressionOptions'
+    changes:
+      - kind: 'rename'
+        newName: 'compressionOff'
+
+  - title: "Rename to 'connecting'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONNECTING'
+      inClass: 'WebSocket'
+    changes:
+      - kind: 'rename'
+        newName: 'connecting'
+
+  - title: "Rename to 'open'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'OPEN'
+      inClass: 'WebSocket'
+    changes:
+      - kind: 'rename'
+        newName: 'open'
+
+  - title: "Rename to 'closing'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CLOSING'
+      inClass: 'WebSocket'
+    changes:
+      - kind: 'rename'
+        newName: 'closing'
+
+  - title: "Rename to 'closed'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CLOSED'
+      inClass: 'WebSocket'
+    changes:
+      - kind: 'rename'
+        newName: 'closed'
+
+  - title: "Rename to 'acceptHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ACCEPT'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'acceptHeader'
+
+  - title: "Rename to 'acceptCharsetHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ACCEPT_CHARSET'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'acceptCharsetHeader'
+
+  - title: "Rename to 'acceptEncodingHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ACCEPT_ENCODING'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'acceptEncodingHeader'
+
+  - title: "Rename to 'acceptLanguageHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ACCEPT_LANGUAGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'acceptLanguageHeader'
+
+  - title: "Rename to 'acceptRangesHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ACCEPT_RANGES'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'acceptRangesHeader'
+
+  - title: "Rename to 'ageHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'AGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ageHeader'
+
+  - title: "Rename to 'allowHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ALLOW'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'allowHeader'
+
+  - title: "Rename to 'authorizationHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'AUTHORIZATION'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'authorizationHeader'
+
+  - title: "Rename to 'cacheControlHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CACHE_CONTROL'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'cacheControlHeader'
+
+  - title: "Rename to 'connectionHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONNECTION'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'connectionHeader'
+
+  - title: "Rename to 'contentEncodingHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_ENCODING'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentEncodingHeader'
+
+  - title: "Rename to 'contentLanguageHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_LANGUAGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentLanguageHeader'
+
+  - title: "Rename to 'contentLengthHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_LENGTH'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentLengthHeader'
+
+  - title: "Rename to 'contentLocationHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_LOCATION'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentLocationHeader'
+
+  - title: "Rename to 'contentMD5Header'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_MD5'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentMD5Header'
+
+  - title: "Rename to 'contentRangeHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_RANGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentRangeHeader'
+
+  - title: "Rename to 'contentTypeHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'CONTENT_TYPE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'contentTypeHeader'
+
+  - title: "Rename to 'dateHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DATE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'dateHeader'
+
+  - title: "Rename to 'etagHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ETAG'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'etagHeader'
+
+  - title: "Rename to 'expectHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'EXPECT'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'expectHeader'
+
+  - title: "Rename to 'expiresHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'EXPIRES'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'expiresHeader'
+
+  - title: "Rename to 'fromHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'FROM'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'fromHeader'
+
+  - title: "Rename to 'hostHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'HOST'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'hostHeader'
+
+  - title: "Rename to 'ifMatchHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IF_MATCH'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ifMatchHeader'
+
+  - title: "Rename to 'ifModifiedSinceHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IF_MODIFIED_SINCE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ifModifiedSinceHeader'
+
+  - title: "Rename to 'ifNoneMatchHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IF_NONE_MATCH'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ifNoneMatchHeader'
+
+  - title: "Rename to 'ifRangeHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IF_RANGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ifRangeHeader'
+
+  - title: "Rename to 'ifUnmodifiedSinceHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'IF_UNMODIFIED_SINCE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'ifUnmodifiedSinceHeader'
+
+  - title: "Rename to 'lastModifiedHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'LAST_MODIFIED'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'lastModifiedHeader'
+
+  - title: "Rename to 'locationHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'LOCATION'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'locationHeader'
+
+  - title: "Rename to 'maxForwardsHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'MAX_FORWARDS'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'maxForwardsHeader'
+
+  - title: "Rename to 'pragmaHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'PRAGMA'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'pragmaHeader'
+
+  - title: "Rename to 'proxyAuthenticateHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'PROXY_AUTHENTICATE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'proxyAuthenticateHeader'
+
+  - title: "Rename to 'proxyAuthorizationHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'PROXY_AUTHORIZATION'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'proxyAuthorizationHeader'
+
+  - title: "Rename to 'rangeHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RANGE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'rangeHeader'
+
+  - title: "Rename to 'refererHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'REFERER'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'refererHeader'
+
+  - title: "Rename to 'retryAfterHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RETRY_AFTER'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'retryAfterHeader'
+
+  - title: "Rename to 'serverHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SERVER'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'serverHeader'
+
+  - title: "Rename to 'teHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'teHeader'
+
+  - title: "Rename to 'trailerHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TRAILER'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'trailerHeader'
+
+  - title: "Rename to 'transferEncodingHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TRANSFER_ENCODING'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'transferEncodingHeader'
+
+  - title: "Rename to 'upgradeHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'UPGRADE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'upgradeHeader'
+
+  - title: "Rename to 'userAgentHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'USER_AGENT'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'userAgentHeader'
+
+  - title: "Rename to 'varyHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'VARY'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'varyHeader'
+
+  - title: "Rename to 'viaHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'VIA'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'viaHeader'
+
+  - title: "Rename to 'warningHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WARNING'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'warningHeader'
+
+  - title: "Rename to 'wwwAuthenticateHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'WWW_AUTHENTICATE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'wwwAuthenticateHeader'
+
+  - title: "Rename to 'cookieHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'COOKIE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'cookieHeader'
+
+  - title: "Rename to 'setCookieHeader'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'SET_COOKIE'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'setCookieHeader'
+
+  - title: "Rename to 'generalHeaders'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'GENERAL_HEADERS'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'generalHeaders'
+
+  - title: "Rename to 'entityHeaders'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'ENTITY_HEADERS'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'entityHeaders'
+
+  - title: "Rename to 'responseHeaders'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'RESPONSE_HEADERS'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'responseHeaders'
+
+  - title: "Rename to 'requestHeaders'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'REQUEST_HEADERS'
+      inClass: 'HttpHeaders'
+    changes:
+      - kind: 'rename'
+        newName: 'requestHeaders'
+
+  - title: "Rename to 'text'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'TEXT'
+      inClass: 'ContentType'
+    changes:
+      - kind: 'rename'
+        newName: 'text'
+
+  - title: "Rename to 'html'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'HTML'
+      inClass: 'ContentType'
+    changes:
+      - kind: 'rename'
+        newName: 'html'
+
+  - title: "Rename to 'json'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'JSON'
+      inClass: 'ContentType'
+    changes:
+      - kind: 'rename'
+        newName: 'json'
+
+  - title: "Rename to 'binary'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'BINARY'
+      inClass: 'ContentType'
+    changes:
+      - kind: 'rename'
+        newName: 'binary'
+
+  - title: "Rename to 'defaultHttpPort'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT_HTTP_PORT'
+      inClass: 'HttpClient'
+    changes:
+      - kind: 'rename'
+        newName: 'defaultHttpPort'
+
+  - title: "Rename to 'defaultHttpsPort'"
+    date: 2021-09-20
+    element:
+      uris: [ 'dart:io' ]
+      field: 'DEFAULT_HTTPS_PORT'
+      inClass: 'HttpClient'
+    changes:
+      - kind: 'rename'
+        newName: 'defaultHttpsPort'

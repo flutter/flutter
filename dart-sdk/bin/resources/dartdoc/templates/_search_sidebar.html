@@ -1,0 +1,22 @@
+<!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  {{ #navLinks }}
+    <li><a href="{{{ href }}}">{{ name }}</a></li>
+  {{ /navLinks }}
+  {{ #navLinksWithGenerics }}
+    <li><a href="{{{ href }}}">{{ name }}{{ #hasGenericParameters }}<span class="signature">{{{ genericParameters }}}</span>{{ /hasGenericParameters }}</a></li>
+  {{ /navLinksWithGenerics }}
+  {{ ^hasHomepage }}
+    <li class="self-crumb">{{{ layoutTitle }}}</li>
+  {{ /hasHomepage }}
+  {{ #hasHomepage }}
+    <li><a href="{{{ homepage}}}">{{{ layoutTitle }}}</a></li>
+  {{ /hasHomepage }}
+</ol>
+

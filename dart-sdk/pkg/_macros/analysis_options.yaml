@@ -1,0 +1,11 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+  errors:
+    # Remove on next publish or protocol refactoring:
+    unintended_html_in_doc_comment: ignore
+    # Remove on next publish or protocol refactoring;
+    # https://github.com/dart-lang/language/issues/3706.
+    unnecessary_library_name: ignore

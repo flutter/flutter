@@ -1,0 +1,18 @@
+{{#isCallable}}
+  {{#asCallable}}
+    {{#hasAnnotations}}
+    <div>
+      <ol class="annotation-list">
+      {{#annotations}}
+      <li>{{{linkedNameWithParameters}}}</li>
+      {{/annotations}}
+    </ol>
+    </div>
+    {{/hasAnnotations}}
+     {{#isConst}}const {{/isConst}}<span class="name {{#isDeprecated}}deprecated{{/isDeprecated}}">{{name}}</span>{{{linkedGenericParameters}}} =
+     <span class="returntype">{{{ modelType.linkedName }}}</span>
+  {{/asCallable}}
+{{/isCallable}}
+{{^isCallable}}
+  {{>type_multiline}}
+{{/isCallable}}

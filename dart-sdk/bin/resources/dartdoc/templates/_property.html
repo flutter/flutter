@@ -1,0 +1,17 @@
+<dt id="{{ htmlId }}" class="property{{ #isInherited }} inherited{{ /isInherited}}">
+  <span class="name">{{{ linkedName }}}</span>
+  <span class="signature">{{{ arrow }}} {{{ modelType.linkedName }}}</span>
+  {{ >categorization }}
+</dt>
+<dd{{ #isInherited }} class="inherited"{{ /isInherited }}>
+  {{ #isProvidedByExtension }}
+    {{ #enclosingExtension }}
+      <p class="from-extension">
+        <span>Available on {{{ extendedElement.linkedName }}},
+        provided by the {{{ linkedName }}} extension</span>
+      </p>
+    {{ /enclosingExtension }}
+  {{ /isProvidedByExtension }}
+  {{{ oneLineDoc }}}
+  {{ >attributes }}
+</dd>

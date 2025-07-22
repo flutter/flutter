@@ -1,0 +1,142 @@
+{{>head}}
+
+<div id="dartdoc-main-content" class="main-content">
+  {{#self}}
+  <h1><span class="kind-category">{{name}}</span> {{kind}}</h1>
+  {{>documentation}}
+
+  {{#hasPublicLibraries}}
+  <section class="summary offset-anchor" id="libraries">
+    <h2>Libraries</h2>
+
+    <dl>
+      {{#publicLibrariesSorted}}
+      {{>library}}
+      {{/publicLibrariesSorted}}
+    </dl>
+  </section>
+  {{/hasPublicLibraries}}
+
+  {{#hasPublicClasses}}
+  <section class="summary offset-anchor" id="classes">
+    <h2>Classes</h2>
+
+    <dl>
+      {{#publicClassesSorted}}
+      {{>container}}
+      {{/publicClassesSorted}}
+    </dl>
+  </section>
+  {{/hasPublicClasses}}
+
+  {{#hasPublicMixins}}
+  <section class="summary offset-anchor" id="mixins">
+    <h2>Mixins</h2>
+
+    <dl>
+      {{#publicMixinsSorted}}
+      {{>container}}
+      {{/publicMixinsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicMixins}}
+
+  {{#hasPublicExtensions}}
+  <section class="summary offset-anchor" id="extensions">
+    <h2>Extensions</h2>
+
+    <dl>
+      {{#publicExtensionsSorted}}
+      {{>extension}}
+      {{/publicExtensionsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicExtensions}}
+
+  {{#hasPublicConstants}}
+  <section class="summary offset-anchor" id="constants">
+    <h2>Constants</h2>
+
+    <dl class="properties">
+      {{#publicConstantsSorted}}
+      {{>constant}}
+      {{/publicConstantsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicConstants}}
+
+  {{#hasPublicProperties}}
+  <section class="summary offset-anchor" id="properties">
+    <h2>Properties</h2>
+
+    <dl class="properties">
+      {{#publicPropertiesSorted}}
+      {{>property}}
+      {{/publicPropertiesSorted}}
+    </dl>
+  </section>
+  {{/hasPublicProperties}}
+
+  {{#hasPublicFunctions}}
+  <section class="summary offset-anchor" id="functions">
+    <h2>Functions</h2>
+
+    <dl class="callables">
+      {{#publicFunctionsSorted}}
+      {{>callable}}
+      {{/publicFunctionsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicFunctions}}
+
+  {{#hasPublicEnums}}
+  <section class="summary offset-anchor" id="enums">
+    <h2>Enums</h2>
+
+    <dl>
+      {{#publicEnumsSorted}}
+      {{>container}}
+      {{/publicEnumsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicEnums}}
+
+  {{#hasPublicTypedefs}}
+  <section class="summary offset-anchor" id="typedefs">
+    <h2>Typedefs</h2>
+
+    <dl class="callables">
+      {{#publicTypedefsSorted}}
+      {{>typedef}}
+      {{/publicTypedefsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicTypedefs}}
+
+  {{#hasPublicExceptions}}
+  <section class="summary offset-anchor" id="exceptions">
+    <h2>Exceptions / Errors</h2>
+
+    <dl>
+      {{#publicExceptionsSorted}}
+      {{>container}}
+      {{/publicExceptionsSorted}}
+    </dl>
+  </section>
+  {{/hasPublicExceptions}}
+  {{/self}}
+
+</div> <!-- /.main-content -->
+
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  {{>search_sidebar}}
+  <h5><span class="package-name">{{parent.name}}</span> <span class="package-kind">{{parent.kind}}</span></h5>
+  {{>packages}}
+</div>
+
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  <h5>{{self.name}} {{self.kind}}</h5>
+  {{>sidebar_for_category}}
+</div>
+<!--/sidebar-offcanvas-right-->
+{{>footer}}
