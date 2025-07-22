@@ -61,8 +61,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder =
-      EngineSemantics.instance.semanticsHelper.prepareAccessibilityPlaceholder();
+  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
+      .prepareAccessibilityPlaceholder();
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -1251,11 +1251,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener =
-        (DomEvent event) {
-          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-        }.toJS;
+    _brightnessMediaQueryListener = (DomEvent event) {
+      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+    }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 
