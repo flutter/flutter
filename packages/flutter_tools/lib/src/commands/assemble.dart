@@ -99,7 +99,7 @@ class AssembleCommand extends FlutterCommand {
       abbr: 'd',
       valueHelp: 'target=key=value',
       help:
-          'DEPRECATED. Use `--dart-define` or `-D` instead for consistency.\n'
+          'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
           '\n'
           'Allows passing configuration to a target, as in "--define=target=key=value".',
     );
