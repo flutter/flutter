@@ -10462,6 +10462,19 @@ void main() {
     await performBaselineAlignmentCheck(20.0, 40.0);
   });
 
+  testWidgets('Editable text in text field with placeholder is hit-testable', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(placeholder: 'placeholder')),
+      ),
+    );
+
+    expect(find.byType(CupertinoTextField), findsOneWidget);
+    expect(find.byType(EditableText).hitTestable(), findsOne);
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
