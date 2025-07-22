@@ -1558,6 +1558,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Subclasses can override to configure the [scrollbarPainter].
   @protected
   void updateScrollbarPainter() {
+    final TextDirection textDirection = Directionality.of(context);
     scrollbarPainter
       ..color = widget.thumbColor ?? const Color(0x66BCBCBC)
       ..trackRadius = widget.trackRadius
@@ -1567,10 +1568,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       ..trackBorderColor = _showTrack
           ? widget.trackBorderColor ?? const Color(0x1a000000)
           : const Color(0x00000000)
-      ..textDirection = Directionality.of(context)
+      ..textDirection = textDirection
       ..thickness = widget.thickness ?? _kScrollbarThickness
       ..radius = widget.radius
-      ..padding = widget.padding ?? MediaQuery.paddingOf(context)
+      ..padding = (widget.padding ?? MediaQuery.paddingOf(context)).resolve(textDirection)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..mainAxisMargin = widget.mainAxisMargin
       ..shape = widget.shape
