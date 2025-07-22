@@ -772,14 +772,18 @@ void main() {
       expect(overlappingLeftResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingBottomResult = await androidTapTargetGuideline.evaluate(tester);
       expect(overlappingBottomResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingRightResult = await androidTapTargetGuideline.evaluate(tester);

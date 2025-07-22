@@ -31,15 +31,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => RepaintBoundary(
-                child: RepaintBoundary(
-                  child: FlipWidget(
-                    left: CustomPaint(painter: TestCustomPainter(log: log, name: 'left')),
-                    right: CustomPaint(painter: TestCustomPainter(log: log, name: 'right')),
-                  ),
+          '/': (BuildContext context) => RepaintBoundary(
+            child: RepaintBoundary(
+              child: FlipWidget(
+                left: CustomPaint(
+                  painter: TestCustomPainter(log: log, name: 'left'),
+                ),
+                right: CustomPaint(
+                  painter: TestCustomPainter(log: log, name: 'right'),
                 ),
               ),
+            ),
+          ),
           '/second': (BuildContext context) => Container(),
         },
       ),

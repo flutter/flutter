@@ -13,6 +13,14 @@ set -e
 # crucial for making all other paths relative and predictable.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
+# Default verbosity level
+VERBOSITY=1
+
+# Check for QUIET environment variable
+if [[ -n "${QUIET}" ]]; then
+  VERBOSITY=0
+fi
+
 # --- Determine Host Profile Directory ---
 
 HOST_PROFILE_DIR=""
@@ -56,7 +64,7 @@ DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
 # in the directory where you *run* the script from (your current working directory).
 LICENSES_OUTPUT_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP.new"
 
-LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP"
+LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE"
 
 # --- Validation ---
 
@@ -72,7 +80,21 @@ fi
 "$EXECUTABLE" \
   --working_dir "$WORKING_DIR" \
   --data_dir "$DATA_DIR" \
-  --licenses_path "$LICENSES_OUTPUT_PATH"
+  --licenses_path "$LICENSES_OUTPUT_PATH" \
+  --v $VERBOSITY
 
-diff -u "$LICENSES_OUTPUT_PATH" "$LICENSES_PATH"
+if ! git diff \
+  --no-index \
+  --exit-code \
+  --ignore-cr-at-eol \
+  --ignore-matching-lines="^You may obtain a copy of this library's Source Code Form from:.*" \
+  "$LICENSES_PATH" \
+  "$LICENSES_OUTPUT_PATH"; then
+  echo "The licenses have changed."
+  echo "Please review added licenses and update //engine/src/flutter/sky/packages/sky_engine/LICENSE"
+  echo "The license check can be repeated locally with //engine/src/flutter/ci/licenses_cpp.sh"
+  echo "When executed locally the following command can update the licenses after a run:"
+  echo "cp $LICENSES_OUTPUT_PATH $LICENSES_PATH"
+  exit 1
+fi
 rm "$LICENSES_OUTPUT_PATH"

@@ -75,8 +75,8 @@ class HomePageState extends State<HomePage> {
         builder: (BuildContext context) {
           return TextButton(
             key: Key(useCase.name),
-            onPressed:
-                () => Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
             child: Text(useCase.name),
           );
         },
