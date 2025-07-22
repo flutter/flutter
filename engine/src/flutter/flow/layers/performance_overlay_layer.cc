@@ -19,7 +19,7 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
-#include "impeller/display_list/dl_text_impeller.h"
+#include "impeller/display_list/dl_text_impeller.h"              // nogncheck
 #include "impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
