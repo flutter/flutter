@@ -80,8 +80,8 @@ bool InternalFlutterGpu_CommandBuffer_Initialize(
     Dart_Handle wrapper,
     flutter::gpu::Context* contextWrapper) {
   auto res = fml::MakeRefCounted<flutter::gpu::CommandBuffer>(
-      contextWrapper->GetContext(),
-      contextWrapper->GetContext()->CreateCommandBuffer());
+      contextWrapper->GetContextShared(),
+      contextWrapper->GetContext().CreateCommandBuffer());
   res->AssociateWithDartWrapper(wrapper);
 
   return true;
