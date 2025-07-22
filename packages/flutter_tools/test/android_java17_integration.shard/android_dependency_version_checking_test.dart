@@ -45,7 +45,7 @@ void main() {
     // Create a new flutter project.
     final VersionTuple versionTuple = VersionTuple(
       agpVersion: '8.3.0',
-      gradleVersion: '8.4.0',
+      gradleVersion: '8.4',
       kotlinVersion: '2.1.0',
     );
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
