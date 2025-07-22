@@ -297,6 +297,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
   /// greater than or equal to zero.
+  ///
+  /// For RTL (right-to-left) support, you can provide [EdgeInsetsDirectional],
+  /// but you must also provide a non-null [textDirection] to properly resolve
+  /// the padding values. The scrollbar will automatically adjust the padding
+  /// based on the text direction.
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
