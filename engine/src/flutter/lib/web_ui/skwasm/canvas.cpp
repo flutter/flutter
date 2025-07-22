@@ -263,11 +263,10 @@ SKWASM_EXPORT void canvas_drawImageNine(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawVertices(DisplayListBuilder* canvas,
-                                       DlVertices* vertices,
+                                       sp_wrapper<DlVertices>* vertices,
                                        DlBlendMode mode,
                                        DlPaint* paint) {
-  canvas->DrawVertices(vertices->shared_from_this(), mode,
-                       paint ? *paint : DlPaint());
+  canvas->DrawVertices(vertices->shared(), mode, paint ? *paint : DlPaint());
 }
 
 SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
