@@ -563,7 +563,30 @@ targets:
       # TODO(flutter/flutter#164140): Reduce timeout once customer
       # tests are sharded.
       test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
-
+# debug only
+  - name: Linux docs_debug
+    recipe: flutter/docs
+    bringup: true
+    enabled_branches:
+      - master
+    timeout: 60
+    dimensions:
+      os: "Linux"
+    properties:
+      docs:
+        release_candidate: false
+      cores: "32"
+      dependencies: >-
+        [
+          {"dependency": "dashing", "version": "0.4.0"},
+          {"dependency": "firebase", "version": "v11.0.1"}
+        ]
+      tags: >
+        ["framework", "hostonly", "linux"]
+      validation: docs
+      validation_name: Docs
+    drone_dimensions:
+      - os=Linux
   # Despite the name, this really means "generate api_docs.zip", and "upload zip
   # to GCS", and conditionally on the "master" channel will also deploy the docs
   # to Firebase (https://main-api.flutter.dev/).
