@@ -23,7 +23,7 @@ import '../../../src/fake_process_manager.dart';
 
 const kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
 const kElfAot = '--snapshot_kind=app-aot-elf';
-const kAssemblyAot = '--snapshot_kind=app-aot-assembly';
+const kMachoDylibAot = '--snapshot_kind=app-aot-macho-dylib';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -805,24 +805,10 @@ void main() {
             '--deterministic',
             '--write-v8-snapshot-profile-to=code_size_1/snapshot.arm64.json',
             '--trace-precompiler-to=code_size_1/trace.arm64.json',
-            kAssemblyAot,
-            '--assembly=$build/arm64/snapshot_assembly.S',
+            kMachoDylibAot,
+            '--macho-min-os-version=13.0',
+            '--macho=$build/arm64/app.so',
             '$build/app.dill',
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/iPhoneOS.sdk',
-            '-c',
-            '$build/arm64/snapshot_assembly.S',
-            '-o',
-            '$build/arm64/snapshot_assembly.o',
           ],
         ),
         FakeCommand(
@@ -848,7 +834,7 @@ void main() {
             '@rpath/App.framework/App',
             '-o',
             '$build/arm64/App.framework/App',
-            '$build/arm64/snapshot_assembly.o',
+            '$build/arm64/app.so',
           ],
         ),
         FakeCommand(
