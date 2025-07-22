@@ -20,7 +20,6 @@ import 'theme.dart';
 // late StateSetter setState;
 
 // Eyeballed from a checkbox on a physical Macbook Pro running macOS version 14.5.
-const Size _size = Size(18.0, 18.0);
 const Color _kDisabledCheckColor = CupertinoDynamicColor.withBrightness(
   color: Color.fromARGB(64, 0, 0, 0),
   darkColor: Color.fromARGB(64, 255, 255, 255),
@@ -114,6 +113,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.tapTargetSize,
     this.semanticLabel,
   }) : assert(tristate || value != null);
 
@@ -291,6 +291,9 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
+  ///
+  final Size? tapTargetSize;
+
   /// The semantic label for the checkbox that will be announced by screen readers.
   ///
   /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
@@ -431,7 +434,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
         mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        size: _size,
+        size: widget.tapTargetSize ?? const Size.square(kMinInteractiveDimensionCupertino),
         painter: _painter
           ..position = position
           ..reaction = reaction
