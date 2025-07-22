@@ -322,7 +322,7 @@ class LoggerFactory {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return AppRunLogger(parent: logger);
+      return MachineFlagLogger(parent: logger);
     }
     return logger;
   }
