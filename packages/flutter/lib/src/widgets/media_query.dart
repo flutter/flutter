@@ -19,7 +19,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+
+import 'basic.dart';
+import 'binding.dart';
+import 'debug.dart';
+import 'framework.dart';
+import 'inherited_model.dart';
 
 // Examples can assume:
 // late BuildContext context;
