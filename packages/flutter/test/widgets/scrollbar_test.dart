@@ -3568,7 +3568,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     variant: TargetPlatformVariant.desktop(),
   );
 
-  testWidgets('with EdgeInsetsDirectional', (WidgetTester tester) async {
+  test('with EdgeInsetsDirectional', () {
     const Size size = Size(60, 80);
     final ScrollMetrics metrics = defaultMetrics.copyWith(
       minScrollExtent: -100,
