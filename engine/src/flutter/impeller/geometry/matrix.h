@@ -332,6 +332,24 @@ struct Matrix {
                               e[1][0] * e[1][0] + e[1][1] * e[1][1]));
   }
 
+  Scalar GetMinScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return -1.0f;
+    }
+    return std::min(std::abs(scales.value().first),
+                    std::abs(scales.value().second));
+  }
+
+  Scalar GetMaxScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return -1.0f;
+    }
+    return std::max(std::abs(scales.value().first),
+                    std::abs(scales.value().second));
+  }
+
   constexpr Vector3 GetBasisX() const { return Vector3(m[0], m[1], m[2]); }
 
   constexpr Vector3 GetBasisY() const { return Vector3(m[4], m[5], m[6]); }
@@ -449,6 +467,8 @@ struct Matrix {
   }
 
   std::optional<MatrixDecomposition> Decompose() const;
+
+  std::optional<std::pair<Scalar, Scalar>> GetScales2D() const;
 
   bool Equals(const Matrix& matrix, Scalar epsilon = 1e-5f) const {
     const Scalar* a = m;
