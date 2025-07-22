@@ -950,7 +950,6 @@ class SemanticsData with Diagnosticable {
     required this.locale,
     this.tags,
     this.transform,
-    this.hitTestTransform,
     this.customSemanticsActionIds,
   }) : assert(
          tooltip == '' || textDirection != null,
@@ -1188,13 +1187,6 @@ class SemanticsData with Diagnosticable {
   /// parent).
   final Matrix4? transform;
 
-  /// The transform used for hit testing from this node's coordinate system to its parent's coordinate system.
-  ///
-  /// By default, the hitTestTransform is null, which represents the identity
-  /// transformation (i.e., that this node has the same coordinate system as its
-  /// parent for hit testing).
-  final Matrix4? hitTestTransform;
-
   /// The identifiers for the custom semantics actions and standard action
   /// overrides for this node.
   ///
@@ -1243,9 +1235,6 @@ class SemanticsData with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('rect', rect, showName: false));
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
-    properties.add(
-      TransformProperty('hitTestTransform', hitTestTransform, showName: false, defaultValue: null),
-    );
     final List<String> actionSummary = <String>[
       for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0) action.name,
@@ -1325,7 +1314,6 @@ class SemanticsData with Diagnosticable {
         other.maxValueLength == maxValueLength &&
         other.currentValueLength == currentValueLength &&
         other.transform == transform &&
-        other.hitTestTransform == hitTestTransform &&
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
         other.role == role &&
@@ -1360,7 +1348,6 @@ class SemanticsData with Diagnosticable {
       maxValueLength,
       currentValueLength,
       transform,
-      hitTestTransform,
       headingLevel,
       linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
