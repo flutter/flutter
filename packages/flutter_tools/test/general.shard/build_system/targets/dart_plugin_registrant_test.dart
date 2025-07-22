@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -55,33 +54,12 @@ environment:
   flutter: ">=1.20.0"
 ''';
 
-/// Returns a `pubspec.yaml` where `$platform` uses `dartPluginClass: 'none'`.
-String samplePluginPubspecWithDartPluginClassNone({required String platform}) =>
-    '''
-name: path_provider_$platform
-description: $platform implementation of the path_provider plugin
-// version: 2.0.1
-// homepage: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_$platform
-flutter:
-  plugin:
-    implements: path_provider
-    platforms:
-      $platform:
-        dartPluginClass: none
-        pluginClass: none
-environment:
-  sdk: ^3.7.0-0
-  flutter: ">=1.20.0"
-''';
-
 void main() {
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
-    late BufferLogger logger;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      logger = BufferLogger.test();
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
