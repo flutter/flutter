@@ -2675,6 +2675,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
     callback?.call();
   }
+  // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
