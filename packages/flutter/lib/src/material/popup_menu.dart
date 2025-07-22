@@ -1599,6 +1599,46 @@ class PopupMenuButton<T> extends StatefulWidget {
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   bool _isMenuExpanded = false;
   RelativeRect? _lastPosition;
+  late PopupMenuThemeData _popupMenuTheme;
+  RenderBox? _cachedButtonRenderBox;
+  RenderBox? _cachedOverlayRenderBox;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateCachedObjects();
+  }
+
+  /// Caches some objects relying on context used in _positionBuilder()
+  /// to avoid crashing when the popup menu is inactive.
+  /// See https://github.com/flutter/flutter/issues/171422 for more details.
+  void _updateCachedObjects() {
+    if (mounted) {
+      _popupMenuTheme = PopupMenuTheme.of(context);
+
+      final RenderObject? buttonRenderObject = context.findRenderObject();
+      if (buttonRenderObject is RenderBox) {
+        _cachedButtonRenderBox = buttonRenderObject;
+      }
+      try {
+        final NavigatorState navigator = Navigator.of(
+          context,
+          rootNavigator: widget.useRootNavigator,
+        );
+        final RenderObject? overlayRenderObject = navigator.overlay?.context.findRenderObject();
+        if (overlayRenderObject is RenderBox) {
+          _cachedOverlayRenderBox = overlayRenderObject;
+        }
+      } catch (e) {
+        _cachedButtonRenderBox = null;
+        _cachedOverlayRenderBox = null;
+      }
+    }
+  }
+
+  RelativeRect _getDefaultPosition(BoxConstraints constraints) {
+    return _lastPosition ?? RelativeRect.fromSize(Rect.zero, constraints.biggest);
+  }
 
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     if (!mounted) {
@@ -1606,17 +1646,20 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       // Even after the button has been unmounted and the context becomes invalid,
       // the route might keep displaying, and `_positionBuilder` must continue to
       // work in that case.
-      return _lastPosition ?? RelativeRect.fromSize(Rect.zero, constraints.biggest);
+      return _getDefaultPosition(constraints);
     }
 
-    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay =
-        Navigator.of(
-              context,
-              rootNavigator: widget.useRootNavigator,
-            ).overlay!.context.findRenderObject()!
-            as RenderBox;
+    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme;
+
+    // Use cached render objects if available.
+    final RenderBox? button = _cachedButtonRenderBox;
+    final RenderBox? overlay = _cachedOverlayRenderBox;
+
+    // Check if cached render objects are available and still attached.
+    if (button == null || overlay == null || !button.attached || !overlay.attached) {
+      // Render objects are not available or detached, return cached position or default.
+      return _getDefaultPosition(constraints);
+    }
     final PopupMenuPosition popupMenuPosition =
         widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
     late Offset offset;
@@ -1650,7 +1693,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
   /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
-    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
+    // Ensure cached render objects are initialized
+    _updateCachedObjects();
+    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme;
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
