@@ -67,7 +67,9 @@ FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const
   ..stdoutSupportsAnsi = false
   ..operatingSystem = 'macos';
 
-final noColorTerminalOverride = {Platform: _kNoColorTerminalPlatform};
+final Map<Type, FakePlatform Function()> noColorTerminalOverride = {
+  Platform: _kNoColorTerminalPlatform,
+};
 
 const samplesIndexJson = '''
 [
