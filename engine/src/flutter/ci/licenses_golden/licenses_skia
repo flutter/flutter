@@ -1,4 +1,4 @@
-Signature: d1096e15ec001154e1fd674754e18962
+Signature: 3df1aa325c4dbb7e69684c8fce6d629d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -468,7 +468,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../flutter/third_party/skia/third_party/go.mod
-FILE: ../../../flutter/third_party/skia/toolchain/linux_trampolines/IWYU_mapping.imp
 FILE: ../../../flutter/third_party/skia/toolchain/ndk.BUILD
 FILE: ../../../flutter/third_party/skia/whitespace.txt
 ----------------------------------------------------------------------------------------------------
