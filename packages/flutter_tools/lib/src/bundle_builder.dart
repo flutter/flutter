@@ -57,6 +57,9 @@ class BundleBuilder {
       engineVersion: globals.artifacts!.usesLocalArtifacts
           ? null
           : globals.flutterVersion.engineRevision,
+      contentHash: globals.artifacts!.usesLocalArtifacts
+          ? null
+          : globals.flutterVersion.engineContentHash,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: getNameForTargetPlatform(platform),

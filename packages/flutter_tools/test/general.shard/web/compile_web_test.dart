@@ -33,7 +33,11 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     testUsage = TestUsage();
     logger = BufferLogger.test();
-    flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
+    flutterVersion = FakeFlutterVersion(
+      frameworkVersion: '1.0.0',
+      engineRevision: '9.8.7',
+      engineContentHash: '123456',
+    );
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
@@ -69,6 +73,7 @@ environement:
         });
 
         expect(environment.engineVersion, '9.8.7');
+        expect(environment.contentHash, '123456');
         expect(environment.generateDartPluginRegistry, isFalse);
       });
 

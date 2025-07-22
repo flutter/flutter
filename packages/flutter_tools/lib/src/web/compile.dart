@@ -118,6 +118,9 @@ class WebBuilder {
           engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : _flutterVersion.engineRevision,
+          contentHash: globals.artifacts!.usesLocalArtifacts
+              ? null
+              : _flutterVersion.engineContentHash,
           flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406

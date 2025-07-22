@@ -20,6 +20,7 @@ const String testVersionInfo = r'''
   "frameworkRevision": "9b2f6f7f9ab96bb3302f81b814a094f33023e79a",
   "frameworkCommitDate": "2021-07-28 13:03:40 -0700",
   "engineRevision": "0ed62a16f36348e97b2baadd8ccfec3825f80c5d",
+  "engineContentHash": "70fb28dde094789120421d4e807a9c37a0131296",
   "dartSdkVersion": "2.14.0 (build 2.14.0-360.0.dev)",
   "flutterRoot": "/home/user/flutter"
 }

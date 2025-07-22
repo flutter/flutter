@@ -40,6 +40,11 @@ abstract final class FlutterVersion {
       ? String.fromEnvironment('FLUTTER_ENGINE_REVISION')
       : null;
 
+  /// The content hash that uniquely identifies the Flutter engine artifacts.
+  static const String? contentHash = bool.hasEnvironment('FLUTTER_CONTENT_HASH')
+      ? String.fromEnvironment('FLUTTER_CONTENT_HASH')
+      : null;
+
   // This is included since [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
   // is not included on web platforms.
   /// The Dart version used to compile the app.

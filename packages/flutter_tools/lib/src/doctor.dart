@@ -289,8 +289,8 @@ class Doctor {
     return buffer.toString();
   }
 
-  Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
+  Future<bool> checkRemoteArtifacts(String hash) async {
+    return globals.cache.areRemoteArtifactsAvailable(engineVersion: hash);
   }
 
   /// Maximum allowed duration for an entire validator to take.
@@ -547,6 +547,9 @@ class FlutterValidator extends DoctorValidator {
         ),
       );
       messages.add(ValidationMessage(_userMessages.engineRevision(version.engineRevisionShort)));
+      if (version.engineContentHash != null) {
+        messages.add(ValidationMessage(_userMessages.contentHash(version.engineContentHash!)));
+      }
       messages.add(ValidationMessage(_userMessages.dartRevision(version.dartSdkVersion)));
       messages.add(ValidationMessage(_userMessages.devToolsVersion(_devToolsVersion())));
       final String? pubUrl = _platform.environment[kPubDevOverride];

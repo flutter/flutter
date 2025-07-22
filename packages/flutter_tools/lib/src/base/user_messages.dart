@@ -40,6 +40,7 @@ class UserMessages {
       'Set environment variable "FLUTTER_GIT_URL" to $url to dismiss this error.';
   String flutterGitUrl(String url) => 'FLUTTER_GIT_URL = $url';
   String engineRevision(String revision) => 'Engine revision $revision';
+  String contentHash(String hash) => 'Content hash $hash';
   String dartRevision(String revision) => 'Dart version $revision';
   String devToolsVersion(String version) => 'DevTools version $version';
   String pubMirrorURL(String url) => 'Pub download mirror $url';

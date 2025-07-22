@@ -337,6 +337,7 @@ class Environment {
     required Platform platform,
     required Analytics analytics,
     String? engineVersion,
+    String? contentHash,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
     Map<String, String> defines = const <String, String>{},
@@ -351,6 +352,9 @@ class Environment {
     // The engine revision is `null` for local or custom engines.
     if (engineVersion != null) {
       buffer.write(engineVersion);
+    }
+    if (contentHash != null) {
+      buffer.write(contentHash);
     }
     for (final key in keys) {
       buffer.write(key);
@@ -379,6 +383,7 @@ class Environment {
       platform: platform,
       analytics: analytics,
       engineVersion: engineVersion,
+      contentHash: contentHash,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -399,6 +404,7 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
     String? engineVersion,
+    String? contentHash,
     Platform? platform,
     Analytics? analytics,
     bool generateDartPluginRegistry = false,
@@ -423,6 +429,7 @@ class Environment {
       platform: platform ?? FakePlatform(),
       analytics: analytics ?? const NoOpAnalytics(),
       engineVersion: engineVersion,
+      contentHash: contentHash,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
   }
@@ -443,6 +450,7 @@ class Environment {
     required this.artifacts,
     required this.analytics,
     this.engineVersion,
+    this.contentHash,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
@@ -537,6 +545,9 @@ class Environment {
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;
+
+  /// The unique content hash current engine, or `null` if built with a local engine.
+  final String? contentHash;
 
   /// Whether to generate the Dart plugin registry.
   /// When `true`, the main entrypoint is wrapped and the wrapper becomes
