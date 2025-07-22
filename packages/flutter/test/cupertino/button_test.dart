@@ -146,7 +146,9 @@ void main() {
 
   testWidgets('Button child alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: CupertinoButton(onPressed: () {}, child: const Text('button'))),
+      CupertinoApp(
+        home: CupertinoButton(onPressed: () {}, child: const Text('button')),
+      ),
     );
 
     Align align = tester.firstWidget<Align>(
@@ -256,7 +258,9 @@ void main() {
 
   testWidgets('Enabled button animates', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     await tester.tap(find.byType(CupertinoButton));
@@ -291,7 +295,9 @@ void main() {
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     // Keep a "down" gesture on the button
@@ -342,7 +348,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
-        child: Center(child: CupertinoButton(onPressed: () {}, child: const Text('ABC'))),
+        child: Center(
+          child: CupertinoButton(onPressed: () {}, child: const Text('ABC')),
+        ),
       ),
     );
 
@@ -639,7 +647,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me'))),
+        home: Center(
+          child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me')),
+        ),
       ),
     );
 
@@ -668,11 +678,10 @@ void main() {
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final BorderSide defaultFocusBorder = BorderSide(
-      color:
-          HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-              .withLightness(kCupertinoFocusColorBrightness)
-              .withSaturation(kCupertinoFocusColorSaturation)
-              .toColor(),
+      color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
+          .toColor(),
       width: 3.5,
       strokeAlign: BorderSide.strokeAlignOutside,
     );
@@ -868,7 +877,9 @@ void main() {
 
   testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+      boilerplate(
+        child: CupertinoButton(onPressed: () {}, child: const Text('Tap me')),
+      ),
     );
     final TestGesture gesture = await tester.startGesture(
       tester.getTopLeft(find.byType(CupertinoButton)),
@@ -1009,10 +1020,117 @@ void main() {
     await gesture.up();
     await gesture.removePointer();
   });
+
+  testWidgets('CupertinoButton foregroundColor applies to its text', (WidgetTester tester) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
+
+  testWidgets('CupertinoButton foregroundColor applies to its icon', (WidgetTester tester) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Icon(IconData(0xE000)),
+        ),
+      ),
+    );
+
+    // Check that the icon has the custom foreground color
+    final IconTheme iconTheme = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(IconTheme)),
+    );
+    expect(iconTheme.data.color, customForegroundColor);
+  });
+
+  testWidgets(
+    "CupertinoButton uses the theme's primaryColor when foregroundColor is not specified",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoButton(onPressed: () {}, child: const Text('Button')),
+          ),
+        ),
+      );
+
+      // The default color should be the primary color from the theme
+      final BuildContext context = tester.element(find.text('Button'));
+      final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+
+      final RichText text = tester.widget(find.byType(RichText));
+      expect(text.text.style?.color, primaryColor);
+    },
+  );
+
+  testWidgets('CupertinoButton.filled foregroundColor applies to its text', (
+    WidgetTester tester,
+  ) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton.filled(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
+
+  testWidgets('CupertinoButton foregroundColor applies to its text when disabled', (
+    WidgetTester tester,
+  ) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const CupertinoButton(
+          onPressed: null, // disabled button
+          foregroundColor: customForegroundColor,
+          child: Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color even when disabled
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 class _ButtonMouseCursor extends WidgetStateMouseCursor {
