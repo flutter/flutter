@@ -682,6 +682,9 @@ if (is_win) {
 
       # Needed for nlohmann/json.
       "-Wno-deprecated-literal-operator",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
 } else {
