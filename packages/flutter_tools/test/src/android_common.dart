@@ -191,7 +191,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
     'build',
     'apk',
     '--debug',
-    if (skipChecking) '--android-skip-build-dependency-validation'
+    if (skipChecking) '--android-skip-build-dependency-validation',
   ], workingDirectory: app.path);
   return result;
 }

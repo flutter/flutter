@@ -81,7 +81,7 @@ void main() {
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
       versions: versionTuple,
       tempDir: tempDir,
-      skipChecking: true
+      skipChecking: true,
     );
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, isNot(contains('Please upgrade your Android Gradle Plugin version')));
