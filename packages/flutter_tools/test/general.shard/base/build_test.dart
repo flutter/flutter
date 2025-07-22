@@ -34,7 +34,7 @@ const kDefaultClang = <String>[
   '@rpath/App.framework/App',
   '-o',
   'build/foo/App.framework/App',
-  'build/foo/snapshot_assembly.o',
+  'build/foo/app.so',
 ];
 
 void main() {
@@ -191,7 +191,7 @@ void main() {
 
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
+      final String snapshotPath = fileSystem.path.join(outputPath, 'app.so');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
@@ -203,8 +203,9 @@ void main() {
           command: <String>[
             genSnapshotPath,
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=$assembly',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=$snapshotPath',
+            '--macho-min-os-version=13.0',
             '--dwarf-stack-traces',
             '--resolve-dwarf-paths',
             '--save-debugging-info=$debugPath',
@@ -213,21 +214,6 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/sdk',
-            '-c',
-            'build/foo/snapshot_assembly.S',
-            '-o',
-            'build/foo/snapshot_assembly.o',
-          ],
-        ),
         const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
@@ -267,7 +253,7 @@ void main() {
 
     testWithoutContext('builds iOS snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      final String assembly = fileSystem.path.join(outputPath, 'snapshot_assembly.S');
+      final String snapshotPath = fileSystem.path.join(outputPath, 'app.so');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
         platform: TargetPlatform.ios,
@@ -278,29 +264,15 @@ void main() {
           command: <String>[
             genSnapshotPath,
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=$assembly',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=$snapshotPath',
+            '--macho-min-os-version=13.0',
             '--obfuscate',
             'main.dill',
           ],
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/sdk',
-            '-c',
-            'build/foo/snapshot_assembly.S',
-            '-o',
-            'build/foo/snapshot_assembly.o',
-          ],
-        ),
         const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
@@ -349,28 +321,14 @@ void main() {
           command: <String>[
             genSnapshotPath,
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${fileSystem.path.join(outputPath, 'snapshot_assembly.S')}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${fileSystem.path.join(outputPath, 'app.so')}',
+            '--macho-min-os-version=13.0',
             'main.dill',
           ],
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-miphoneos-version-min=13.0',
-            '-isysroot',
-            'path/to/sdk',
-            '-c',
-            'build/foo/snapshot_assembly.S',
-            '-o',
-            'build/foo/snapshot_assembly.o',
-          ],
-        ),
         const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
