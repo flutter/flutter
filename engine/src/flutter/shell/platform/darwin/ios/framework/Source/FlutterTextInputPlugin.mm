@@ -2827,11 +2827,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self removeEnableFlutterTextInputViewAccessibilityTimer];
   _activeView.accessibilityEnabled = NO;
   [_activeView resignFirstResponder];
-  // Removes the focus from the `_activeView` (UIView<UITextInput>)
-  // when the user stops typing (keyboard is hidden).
-  // For more details, refer to the discussion at:
-  // https://github.com/flutter/engine/pull/57209#discussion_r1905942577
-  [self cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
+  [_activeView removeFromSuperview];
+  [_inputHider removeFromSuperview];
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {
