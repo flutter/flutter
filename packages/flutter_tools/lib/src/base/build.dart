@@ -165,7 +165,7 @@ class AOTSnapshotter {
       // When the minimum version is updated, remember to update
       // template MinimumOSVersion.
       // https://github.com/flutter/flutter/pull/62902
-      final String minOSVersion =
+      final minOSVersion =
           platform == TargetPlatform.ios
               ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
               : FlutterDarwinPlatform.macos.deploymentTarget().toString();
