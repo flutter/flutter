@@ -22,6 +22,22 @@ interface class Git {
   final Platform _platform;
   final ProcessUtils _processUtils;
 
+  /// Returns the result of `git log <arguments>`.
+  ///
+  /// Automatically injects the arguments `-c log.showSignature=false` in order
+  /// to ignore user settings that will break the expected output for this call;
+  /// otherwise this call is identical to using [Git.runSync] directly.
+  RunResult logSync(List<String> arguments, {String? workingDirectory}) {
+    assert(arguments.isEmpty || arguments.first != 'log');
+    return runSync([
+      ..._ignoreLogShowSignature,
+      'log',
+      ...arguments,
+    ], workingDirectory: workingDirectory);
+  }
+
+  static const _ignoreLogShowSignature = ['-c', 'log.showSignature=false'];
+
   /// Spawns a child process to run `git`.
   ///
   /// The arguments are the same as [ProcessUtils.run], except:

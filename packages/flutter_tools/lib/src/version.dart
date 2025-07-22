@@ -100,7 +100,7 @@ abstract class FlutterVersion {
     }
 
     final String frameworkRevision = git
-        .runSync(_gitLog(['-n', '1', '--pretty=format:%H']), workingDirectory: flutterRoot)
+        .logSync(['-n', '1', '--pretty=format:%H'], workingDirectory: flutterRoot)
         .stdout
         .trim();
 
@@ -223,15 +223,12 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _git
-        .runSync(
-          FlutterVersion._gitLog([
-            '-n',
-            '1',
-            '--pretty=format:%ar',
-            if (revision != null) revision,
-          ]),
-          workingDirectory: flutterRoot,
-        )
+        .logSync([
+          '-n',
+          '1',
+          '--pretty=format:%ar',
+          if (revision != null) revision,
+        ], workingDirectory: flutterRoot)
         .stdout
         .trim();
   }
@@ -459,13 +456,6 @@ abstract class FlutterVersion {
       // Ignore, since we don't mind if the file didn't exist in the first place.
     }
   }
-
-  /// log.showSignature=false is a user setting and it will break things,
-  /// so we want to disable it for every git log call. This is a convenience
-  /// wrapper that does that.
-  static List<String> _gitLog(List<String> args) {
-    return ['-c', 'log.showSignature=false', 'log'] + args;
-  }
 }
 
 // The date of the given commit hash as [gitRef]. If no hash is specified,
@@ -479,30 +469,31 @@ String _gitCommitDate({
   required Git git,
   required String? workingDirectory,
 }) {
-  final List<String> args = FlutterVersion._gitLog([
+  final RunResult result = git.logSync([
     gitRef,
     '-n',
     '1',
     '--pretty=format:%ad',
     '--date=iso',
-  ]);
-  try {
-    // Don't plumb 'lenient' through directly so that we can print an error
-    // if something goes wrong.
-    return _runSync(git, args, lenient: false, workingDirectory: workingDirectory);
-  } on VersionCheckError catch (e) {
-    if (lenient) {
-      final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
-      globals.printError(
-        'Failed to find the latest git commit date: $e\n'
-        'Returning $dummyDate instead.',
-      );
-      // Return something that DateTime.parse() can parse.
-      return dummyDate.toString();
-    } else {
-      rethrow;
-    }
+  ], workingDirectory: workingDirectory);
+  if (result.exitCode == 0) {
+    return result.stdout.trim();
   }
+  final error = VersionCheckError(
+    'Command exited with code ${result.exitCode}: ${result.command.join(' ')}\n'
+    'Standard out: ${result.stdout}\n'
+    'Standard error: ${result.stderr}',
+  );
+  if (lenient) {
+    final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+    globals.printError(
+      'Failed to find the latest git commit date: $error\n'
+      'Returning $dummyDate instead.',
+    );
+    // Return something that DateTime.parse() can parse.
+    return dummyDate.toString();
+  }
+  throw error;
 }
 
 class _FlutterVersionFromFile extends FlutterVersion {
@@ -942,38 +933,12 @@ class VersionCheckError implements Exception {
   String toString() => '$VersionCheckError: $message';
 }
 
-/// Runs `git` + [arguments] and returns the standard output as a string.
-///
-/// If [lenient] is true and the command fails, returns an empty string.
-/// Otherwise, throws a [ToolExit] exception.
-String _runSync(
-  Git git,
-  List<String> arguments, {
-  bool lenient = true,
-  required String? workingDirectory,
-}) {
-  final RunResult results = git.runSync(arguments, workingDirectory: workingDirectory);
-
-  if (results.exitCode == 0) {
-    return results.stdout.trim();
-  }
-
-  if (!lenient) {
-    throw VersionCheckError(
-      'Command exited with code ${results.exitCode}: ${results.command.join(' ')}\n'
-      'Standard out: ${results.stdout}\n'
-      'Standard error: ${results.stderr}',
-    );
-  }
-
-  return '';
-}
-
 /// Runs [command] in the root of the Flutter installation and returns the
 /// standard output as a string.
 ///
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(Git git, List<String> command) async {
+  // TODO(matanlurey): Inline this in the single place it's called in this file.
   final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
