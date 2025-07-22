@@ -26,8 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 5> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
+const std::array<std::string_view, 7> kLicenseFileNames = {
+    "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
+    "LICENSE.MIT", "COPYING",     "License.txt"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -323,6 +324,8 @@ bool ProcessNotices(const fs::path& relative_path,
   std::string_view license;
   while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
     std::vector<std::string_view> projects = SplitLines(projects_text);
+
+    VLOG(4) << license;
 
     absl::StatusOr<std::vector<Catalog::Match>> matches =
         data.catalog.FindMatch(license);
