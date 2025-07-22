@@ -55,7 +55,9 @@ class IconButtonThemeData with Diagnosticable {
     if (identical(a, b)) {
       return a;
     }
-    return IconButtonThemeData(style: ButtonStyle.lerp(a?.style, b?.style, t));
+    return IconButtonThemeData(
+      style: ButtonStyle.lerp(a?.style, b?.style, t),
+    );
   }
 
   @override
