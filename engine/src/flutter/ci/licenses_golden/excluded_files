@@ -445,7 +445,6 @@
 ../../../flutter/shell/vmservice/pubspec.yaml
 ../../../flutter/sky/packages/sky_engine/.gitignore
 ../../../flutter/sky/packages/sky_engine/LICENSE
-../../../flutter/sky/packages/sky_engine/LICENSE_CPP
 ../../../flutter/sky/packages/sky_engine/README.md
 ../../../flutter/sky/packages/sky_engine/lib/_embedder.yaml
 ../../../flutter/sky/packages/sky_engine/pubspec.yaml
