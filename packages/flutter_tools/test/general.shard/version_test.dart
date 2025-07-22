@@ -1242,7 +1242,16 @@ void main() {
 
     // Master channel
     gitTagVersion = GitTagVersion.parse('1.2.0-4.5.pre-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.0-5.0.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.0-5.0.pre-13');
+    expect(gitTagVersion.gitTag, '1.2.0-4.5.pre');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
+    // Master channel
+    // Format from old version files used '.' instead of '-' for the commit count.
+    // See https://github.com/flutter/flutter/issues/172091#issuecomment-3071202443
+    gitTagVersion = GitTagVersion.parse('1.2.0-4.5.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.0-5.0.pre-13');
     expect(gitTagVersion.gitTag, '1.2.0-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
@@ -1264,7 +1273,7 @@ void main() {
     expect(gitTagVersion.devPatch, 5);
 
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre-13');
     expect(gitTagVersion.gitTag, '1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
@@ -1278,14 +1287,29 @@ void main() {
 
     // new tag release format, stable channel
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-0.0.pre-13');
     expect(gitTagVersion.gitTag, '1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
+    // new tag release format, beta channel, old version file format
+    // Format from old version files used '.' instead of '-' for the commit count.
+    // See https://github.com/flutter/flutter/issues/172091#issuecomment-3071202443
+    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre.0');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
+    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
     expect(
       GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash),
-      '98.76.55-0.0.pre.32',
+      '98.76.55-0.0.pre-32',
+    );
+    // Format from old version files used '.' instead of '-' for the commit count.
+    // See https://github.com/flutter/flutter/issues/172091#issuecomment-3071202443
+    expect(
+      GitTagVersion.parse('98.76.54.32-g$hash').frameworkVersionFor(hash),
+      '98.76.55-0.0.pre-32',
     );
     expect(GitTagVersion.parse('10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
     expect(testLogger.traceText, '');
@@ -1379,7 +1403,7 @@ void main() {
       workingDirectory: '.',
     );
     // reported version should increment the m
-    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre.12');
+    expect(gitTagVersion.frameworkVersionFor(headRevision), '1.2.0-3.0.pre-12');
   });
 
   testUsingContext('determine does not call fetch --tags', () {

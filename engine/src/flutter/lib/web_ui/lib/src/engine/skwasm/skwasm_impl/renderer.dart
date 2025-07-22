@@ -562,6 +562,12 @@ class SkwasmRenderer implements Renderer {
       }
     }
   }
+
+  @override
+  void debugClear() {
+    // TODO(harryterkelsen): See what needs to be cleaned up for tests and clear
+    // it here.
+  }
 }
 
 class SkwasmPictureRenderer implements PictureRenderer {

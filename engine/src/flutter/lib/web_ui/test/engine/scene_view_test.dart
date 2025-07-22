@@ -43,10 +43,13 @@ class StubPictureRenderer implements PictureRenderer {
   @override
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
     clipRequests[picture] = clip;
-    return picture;
+    final clippedRect = clip.intersect(picture.cullRect);
+    final clippedPicture = StubPicture(clippedRect);
+    return clippedPicture;
   }
 
   List<ScenePicture> renderedPictures = <ScenePicture>[];
+  List<StubPicture> clippedPictures = <StubPicture>[];
   Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
@@ -277,6 +280,13 @@ void testMain() {
   setUp(() {
     stubPictureRenderer = StubPictureRenderer();
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView());
+  });
+
+  tearDown(() {
+    expect(
+      stubPictureRenderer.clippedPictures.every((StubPicture picture) => picture.debugDisposed),
+      true,
+    );
   });
 
   test('SceneView places canvas according to device-pixel ratio', () async {
