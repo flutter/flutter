@@ -815,8 +815,9 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('arm64/app.so').path}',
+            '--macho-min-os-version=10.15',
             environment.buildDir.childFile('app.dill').path,
           ],
         ),
@@ -824,33 +825,10 @@ void main() {
           command: <String>[
             'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
-            '--snapshot_kind=app-aot-assembly',
-            '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('x86_64/app.so').path}',
+            '--macho-min-os-version=10.15',
             environment.buildDir.childFile('app.dill').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'arm64',
-            '-c',
-            environment.buildDir.childFile('arm64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'xcrun',
-            'cc',
-            '-arch',
-            'x86_64',
-            '-c',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.S').path,
-            '-o',
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
           ],
         ),
         FakeCommand(
@@ -873,7 +851,7 @@ void main() {
             '@rpath/App.framework/App',
             '-o',
             environment.buildDir.childFile('arm64/App.framework/App').path,
-            environment.buildDir.childFile('arm64/snapshot_assembly.o').path,
+            environment.buildDir.childFile('arm64/app.so').path,
           ],
         ),
         FakeCommand(
@@ -896,7 +874,7 @@ void main() {
             '@rpath/App.framework/App',
             '-o',
             environment.buildDir.childFile('x86_64/App.framework/App').path,
-            environment.buildDir.childFile('x86_64/snapshot_assembly.o').path,
+            environment.buildDir.childFile('x86_64/app.so').path,
           ],
         ),
         FakeCommand(
