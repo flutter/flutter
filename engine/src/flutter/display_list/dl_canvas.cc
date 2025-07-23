@@ -79,7 +79,10 @@ DlRect GetLocalBounds(DlRect ambient_bounds,
     // get spot params (in device space)
     GetDirectionalParams(params, &spot_blur, &spot_scale, &spot_offset);
   } else {
-    DlScalar device_to_local_scale = 1.0f / matrix.GetMinScale2D();
+    auto min_scale = matrix.GetMinScale2D();
+    // We've already checked the matrix for perspective elements.
+    FML_DCHECK(min_scale.has_value());
+    DlScalar device_to_local_scale = 1.0f / min_scale.value_or(1.0f);
 
     // get ambient blur (in local space)
     DlScalar device_space_ambient_blur = AmbientBlurRadius(params.occluder_z);

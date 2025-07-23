@@ -349,16 +349,20 @@ TEST(MatrixTest, MinMaxScales2D) {
       {
         // Simple scale
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
-        EXPECT_EQ(matrix.GetMinScale2D(), minScale);
-        EXPECT_EQ(matrix.GetMaxScale2D(), maxScale);
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
         check_pair(matrix, xScale, yScale);
       }
 
       {
         // Simple scale with Z scale
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 5.0f});
-        EXPECT_EQ(matrix.GetMinScale2D(), minScale);
-        EXPECT_EQ(matrix.GetMaxScale2D(), maxScale);
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
         check_pair(matrix, xScale, yScale);
       }
 
@@ -366,8 +370,10 @@ TEST(MatrixTest, MinMaxScales2D) {
         // Simple scale + translate
         Matrix matrix = Matrix::MakeTranslateScale({xScale, yScale, 1.0f},
                                                    {10.0f, 15.0f, 2.0f});
-        EXPECT_EQ(matrix.GetMinScale2D(), minScale);
-        EXPECT_EQ(matrix.GetMaxScale2D(), maxScale);
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
         check_pair(matrix, xScale, yScale);
       }
 
@@ -376,8 +382,10 @@ TEST(MatrixTest, MinMaxScales2D) {
           // Rotation * Scale
           Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f}) *
                           Matrix::MakeRotationZ(Degrees(d));
-          EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), minScale);
-          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), maxScale);
+          EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+          EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+          EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
           check_pair(matrix, xScale, yScale);
         }
 
@@ -385,8 +393,10 @@ TEST(MatrixTest, MinMaxScales2D) {
           // Scale * Rotation
           Matrix matrix = Matrix::MakeRotationZ(Degrees(d)) *
                           Matrix::MakeScale({xScale, yScale, 1.0f});
-          EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), minScale);
-          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), maxScale);
+          EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+          EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+          EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
           check_pair(matrix, xScale, yScale);
         }
       }
@@ -395,8 +405,8 @@ TEST(MatrixTest, MinMaxScales2D) {
         // Scale + PerspectiveX (returns invalid values)
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
         matrix.m[3] = 0.1;
-        EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), -1.0f);
-        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), -1.0f);
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
         EXPECT_FALSE(matrix.GetScales2D().has_value());
       }
 
@@ -404,8 +414,8 @@ TEST(MatrixTest, MinMaxScales2D) {
         // Scale + PerspectiveY (returns invalid values)
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
         matrix.m[7] = 0.1;
-        EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), -1.0f);
-        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), -1.0f);
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
         EXPECT_FALSE(matrix.GetScales2D().has_value());
       }
 
@@ -413,8 +423,10 @@ TEST(MatrixTest, MinMaxScales2D) {
         // Scale + PerspectiveZ (Z ignored; returns actual scales)
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
         matrix.m[11] = 0.1;
-        EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), minScale);
-        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), maxScale);
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
         check_pair(matrix, xScale, yScale);
       }
 
@@ -422,8 +434,8 @@ TEST(MatrixTest, MinMaxScales2D) {
         // Scale + PerspectiveW (returns invalid values)
         Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
         matrix.m[15] = 0.1;
-        EXPECT_FLOAT_EQ(matrix.GetMinScale2D(), -1.0f);
-        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D(), -1.0f);
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
         EXPECT_FALSE(matrix.GetScales2D().has_value());
       }
     }
