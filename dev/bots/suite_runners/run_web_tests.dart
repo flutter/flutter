@@ -93,8 +93,9 @@ class WebTestsSuite {
 
   /// Coarse-grained integration tests running on the Web.
   Future<void> webLongRunningTestsRunner() async {
-    final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
     final String engineRealmFile = path.join(flutterRoot, 'bin', 'cache', 'engine.realm');
+    // NOTE(codefu): this reading of engine.stamp is fine because it's signalling to
+    // the Web framework which content-hash to download.
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
     final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
     final List<ShardRunner> tests = <ShardRunner>[
