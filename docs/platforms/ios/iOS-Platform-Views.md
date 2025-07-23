@@ -65,28 +65,70 @@ In a frame without a PlatformView, the Flutter framework composites all the widg
 
 Below compares a layer tree and its corresponding `UIView` tree. On the left, each node represents a layer, such as transform layer, cliprect layer and picture layer. On the right, each node represents a `UIView`. All the layers are rendered onto the same `UIView`.
 
-| Layer Tree | UIView Tree |
-| :--------- | :---------- |
-| <img width="362" height="277" alt="layer_tree" src="https://github.com/user-attachments/assets/d755d09e-89e0-41d0-9e4f-ac52da02cbd6" /> | <img width="142" height="127" alt="uiview_tree" src="https://github.com/user-attachments/assets/2d47c32c-ab7c-4276-998b-21fb3e87f7c2" /> |
+```mermaid
+---
+displayMode: compact
+---
+graph TD;
+    subgraph "UIView Tree"
+      id4((F1,F2,F3))
+    end
+
+    subgraph "Layer Tree"
+      id1((F1)) --> id2((F2))
+      id1((F1)) --> id3((F3))
+    end
+```
 
 When there is a PlatformView, the **PlatformView is added as a subview of the FlutterView**. The `UIView` tree expands to different parts, as shown in the right graph below.
 
 In the layer tree (left), F1 and F2 are regular layers, while P1 and P2 are PlatformView layers. Just like in the above scenario, F2 is rendered onto the `FlutterView`. Each PlatformView layer creates a `UIView` called **ChildClippingView**, which contains the view that is desired to be embedded (e.g., WKWebView). `ChildClippingView` is added as a subview of the `FlutterView`. (The clipping mechanism is explained in the Mutator and Mutator Stack section.)
 
-| Layer Tree | UIView Tree |
-| :--------- | :---------- |
-| (Diagram illustrating layers F1, F2, P1, P2) | (Diagram illustrating FlutterView with P1 and P2 as subviews) |
+```mermaid
+flowchart TD
+ subgraph subGraph0["UIView Tree"]
+        F(("P1"))
+        E(("F1,F2"))
+        G(("P2"))
+  end
+ subgraph subGraph1["Layer Tree"]
+        B(("F2"))
+        C(("P1"))
+        A(("F1"))
+        D(("P2"))
+  end
+    E --- F:::PlatformView & G:::PlatformView
+    A --- B & C:::PlatformView & D:::PlatformView
+     
+    classDef PlatformView fill:#00C853
+```
 
 ### Obstruct and Unobstruct PlatformViews.
 
 Sometimes, an application wants to render a Flutter widget that covers the PlatformView. For example:
 
+<img width="131" height="288" alt="widget_f1" src="https://github.com/user-attachments/assets/07aff255-2971-4396-8133-bbd1453c758c" />
+
+
 In this case Widget F1 is rendered on the `FlutterView` (in the same way as explained in the Overview section), Widget F2 is rendered on a `UIView` that is called Overlay. The below layer tree and `UIView` tree comparison demonstrates the `UIView` tree structure with overlays. On the `UIView` tree (right), 2 subviews are added to the `FlutterView` (F0F1): P1 and F2. P1 is the PlatformView, F2 is an overlay, which renders Widget F2.
-
-| Layer Tree | UIView Tree |
-| :--------- | :---------- |
-| (Diagram illustrating layers F1, F2, P1) | (Diagram illustrating FlutterView with P1 and F2 as subviews) |
-
+```mermaid
+flowchart TD
+ subgraph subGraph0["UIView Tree"]
+        F(("P1"))
+        E(("F0,F1"))
+        G(("F2"))
+  end
+ subgraph subGraph1["Layer Tree"]
+        B(("F1"))
+        C(("P1"))
+        A(("F0"))
+        D(("F2"))
+  end
+    E --- F:::PlatformView & G
+    A --- B & C:::PlatformView & D
+     
+    classDef PlatformView fill:#00C853
+```
 The decision of whether to create an overlay and render F2 on the overlay depends on whether any part of F2 covers the PlatformView. If F2 does not cover the PlatformView, it is rendered on `FlutterView`. If **any part of F2 covers the PlatformView, an overlay is created** with the rect as the intersection between F2 and the PlatformView, and the part of F2 that covers the PlatformView is rendered on the overlay.
 
 The RTree determines how many overlays need to be created. During each frame, the RTree scans through all the non-PlatformView widgets’ rect and reports all the rects that cover the PlatformView. Based on the suggestion, N numbers of the overlays are created to render each of the rects. See below example that is taken from the the [Google internal design document about Unobstructed PlatformViews Compositing Unobstructed Platform Views](go/flutter-unobstructed-platform-views). The “Background Canvas” is FlutterView and “Flutter Canvases” are Overlays,
@@ -95,13 +137,39 @@ The RTree determines how many overlays need to be created. During each frame, th
 
 For performance reasons, the **maximum number of overlays can be created are limited to 2**. This means if there are more than 2 rects covering a single PlatformView, an aggregated rect is created. For example, in the below scenario, the widget F1, F2 and F3 are all covering the PlatformView. The red rectangles represent the overlays. The first overlay renders the left half of Widget F1 and the second overlay renders parts of both F2 and F3. Note that there are no separate overlays for F2 and F3, due to the max limit of 2 overlays being reached.
 
-<img width="1152" height="864" src="https://github.com/user-attachments/assets/77237f71-c46b-4b76-9a18-4feae81b194d" />
+<img width="191" height="226" alt="widget_overlay" src="https://github.com/user-attachments/assets/5f7530b9-6102-46c0-a181-e5e5be466ab8" />
 
 ### Mutator and Mutator Stack
 
 The PlatformView is rendered with a **completely different render engine** with non-PlatformView Flutter widgets. Flutter Widgets are typically rendered with impeller, while PlatformViews are rendered with Apple’s rendering engine. As a result, the composition modifiers such as clipping, matrix transform and blurring of the PlatformViews are **not handled by impeller**. Applying the modifiers on PlatformViews requires 1) a data structure to store the modifier information, 2) using Apple’s rendering APIs such as UIKit to apply the modifiers.
 
 **Mutator Stack is the data structure** to store the modifiers. Each modifier is abstracted with a Mutator object. While prerolling the layer tree (the complete traversal of the layer tree before the paint traversal), the Mutator Stack is being filled. A copy of the Mutator Stack is made to represent each PlatformView. Here is an arbitrary example of a layer tree and Mutator Stacks of the Platform Views. (Note that M layers are modifier layers. D layers are display list layers and P layers are PlatformView layers)
+
+```mermaid
+flowchart TD
+ subgraph subGraph0["Mutator Stack"]
+        A(("M1"))
+        B(("M2"))
+        C(("D2"))
+        D(("M3"))
+        E(("P1"))
+        F(("P2"))
+  end
+    A --- B & C & D
+    B --- E
+    D --- F
+
+    A:::Mutator
+    B:::Mutator
+    D:::Mutator
+    E:::PlatformView
+    F:::PlatformView
+
+    classDef PlatformView fill:#00C853
+    classDef Mutator fill:#FF6D00
+```
+<img width="423" height="454" alt="mutator_stack" src="https://github.com/user-attachments/assets/168730cf-b493-4af7-8e23-8fcb6077b442" />
+
 
 *Most of the Mutators are populated to the stack in the same way as mentioned above, except BackdropFilter.*
 
@@ -114,6 +182,19 @@ Each transform Mutator contains a `SkMatrix`. The matrices are concatenated and 
 #### Clippings
 
 Clippings, including `ClipRect`, `ClipRRect`, `ClipPath` are translated to paths. The paths are transformed with the local matrix that’s being tracked (See Transform section about the local matrix).
+```mermaid
+flowchart TD
+    A("Transform1")
+    B("Transform2")
+    C("ClipRect")
+    D(("P1"))
+    A:::Mutator --- B
+    B:::Mutator --- C
+    C:::Mutator --- D:::PlatformView
+
+    classDef PlatformView fill:#00C853
+    classDef Mutator fill:#FF6D00
+```
 
 For example, The above graph shows a branch of the layer tree, with 2 transform layers and 1 clipRect layer above the PlatformView. Before applying the `ClipRect` to the PlatformView, the rect object inside `ClipRect` is transformed into paths. The Paths are transformed with the concatenation of Transform1 and Transform2.
 
@@ -127,9 +208,29 @@ The opacity is applied directly to the **FlutterTouchInterceptingView**. If ther
 
 BackdropFilter is a special filter where the filter object is applied to all the layers underneath the current layer. For example, when a BackdropFilter layer is an ancestor of the PlatformView, the filter does not apply to the PlatformView, but to all the views underneath the PlatformView. Therefore, there is nothing that needs to be handled if the BackdropFilter is the ancestor of the PlatformView. However, if the PlatformView is underneath a BackdropFilter layer, the PlatformView needs to be filtered:
 
-| No special handling on PlatformView | PlatformView needs to be filtered |
-| :---------------------------------- | :-------------------------------- |
-| (Diagram: BackdropFilter not affecting ancestor PlatformView) | (Diagram: BackdropFilter affecting underlying PlatformView) |
+```mermaid
+flowchart TD
+ subgraph subGraph1["PlatformView needs to be filtered"]
+    E(("F0"))
+    F(("P1"))
+    G(["Backdrop"])
+    H(("F1"))
+  end
+ subgraph subGraph0["No special handling on PlatformView"]
+    A(("F0"))
+    B(("F1"))
+    C(["Backdrop"])
+    D(("P1"))
+  end
+    A --- B & C
+    C --- D
+    E --- F & G
+    G --- H
+
+    F:::PlatformView
+    D:::PlatformView
+    classDef PlatformView fill:#00C853
+```
 
 *Further details about backdrop filter Mutator implementation and current limitations.*
 
