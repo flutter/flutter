@@ -304,10 +304,10 @@ flutter:
         expect(assetBundle.inputFiles.map((File f) => f.path), <String>[]);
       });
 
-      final List<String> testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+      final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
 
       testWithoutContext('bundles material shaders on non-web platforms', () async {
-        for (final String shader in testShaders) {
+        for (final shader in testShaders) {
           final String shaderPath = fileSystem.path.join(
             flutterRoot,
             'packages',
@@ -336,13 +336,13 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final String shader in testShaders) {
+        for (final shader in testShaders) {
           expect(assetBundle.entries.keys, contains('shaders/$shader'));
         }
       });
 
       testWithoutContext('bundles material shaders on web platforms', () async {
-        for (final String shader in testShaders) {
+        for (final shader in testShaders) {
           final String shaderPath = fileSystem.path.join(
             flutterRoot,
             'packages',
@@ -371,7 +371,7 @@ flutter:
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         );
 
-        for (final String shader in testShaders) {
+        for (final shader in testShaders) {
           expect(assetBundle.entries.keys, contains('shaders/$shader'));
         }
       });

@@ -132,10 +132,9 @@ class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
 class _StretchEffectPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint =
-        Paint()
-          ..color = const Color.fromARGB(1, 0, 0, 0)
-          ..style = PaintingStyle.fill;
+    final Paint paint = Paint()
+      ..color = const Color.fromARGB(1, 0, 0, 0)
+      ..style = PaintingStyle.fill;
 
     canvas.drawPoints(ui.PointMode.points, <Offset>[
       Offset.zero,
