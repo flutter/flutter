@@ -1992,7 +1992,7 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<void> validateCommand() async {
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
-      // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
+      // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
