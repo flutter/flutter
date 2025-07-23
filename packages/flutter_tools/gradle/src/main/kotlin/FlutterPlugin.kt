@@ -18,7 +18,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
@@ -98,12 +100,7 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
-                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-            }
+            maybeAddAndroidStudioNativeConfiguration(plugins, dependencies)
         }
 
         project.apply {
@@ -827,4 +824,19 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
+
+    private fun shouldAddAndroidStudioNativeConfiguration(plugins: PluginContainer): Boolean =
+        plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()
+
+    private fun maybeAddAndroidStudioNativeConfiguration(
+        plugins: PluginContainer,
+        dependencies: DependencyHandler
+    ) {
+        if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
+            dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+        }
+    }
 }
