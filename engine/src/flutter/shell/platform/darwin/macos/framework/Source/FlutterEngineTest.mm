@@ -212,6 +212,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
 
   // Replace stdout stream buffer with our own.
   FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  writer.expectedOutput = @"Hello logging";
   FlutterLogger.outputWriter = writer;
 
   // Launch the test entrypoint.
@@ -224,7 +225,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   }
 
   // Verify hello world was written to stdout.
-  EXPECT_TRUE([writer.lastLine containsString:@"Hello logging"]);
+  EXPECT_TRUE(writer.gotExpectedOutput);
 }
 
 TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {

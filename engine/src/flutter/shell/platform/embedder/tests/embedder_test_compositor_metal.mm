@@ -111,7 +111,7 @@ bool EmbedderTestCompositorMetal::UpdateOffscrenComposition(const FlutterLayer**
   }
 
   if (next_scene_callback_) {
-    auto last_composition_snapshot = last_composition_->makeRasterImage();
+    auto last_composition_snapshot = last_composition_->makeRasterImage(nullptr);
     FML_CHECK(last_composition_snapshot);
     auto callback = next_scene_callback_;
     next_scene_callback_ = nullptr;

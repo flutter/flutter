@@ -1450,6 +1450,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('$kAppFlavor=$flavor');
     }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
+    _addFeatureFlagsToDartDefines(dartDefines);
 
     return BuildInfo(
       buildMode,
@@ -1509,6 +1510,27 @@ abstract class FlutterCommand extends Command<void> {
       '$flutterEngineRevisionDefine=${version.engineRevisionShort}',
       '$flutterDartVersionDefine=${version.dartSdkVersion}',
     ]);
+  }
+
+  void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
+    if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
+      throwToolExit(
+        '$kEnabledFeatureFlags is used by the framework and cannot be '
+        'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}.\n'
+        '\n'
+        'Use the "flutter config" command to enable feature flags.',
+      );
+    }
+
+    final String enabledFeatureFlags = featureFlags.allFeatures
+        .where((Feature feature) => featureFlags.isEnabled(feature))
+        .where((Feature feature) => feature.runtimeId != null)
+        .map((Feature feature) => feature.runtimeId!)
+        .join(',');
+
+    if (enabledFeatureFlags.isNotEmpty) {
+      dartDefines.add('$kEnabledFeatureFlags=$enabledFeatureFlags');
+    }
   }
 
   void setupApplicationPackages() {
@@ -1970,7 +1992,7 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<void> validateCommand() async {
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
-      // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
+      // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.
