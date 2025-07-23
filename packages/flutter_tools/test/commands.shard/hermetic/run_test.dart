@@ -961,18 +961,13 @@ void main() {
         'can accept simple, valid values',
         () async {
           final command = RunCommand();
-          await createTestCommandRunner(command).run(<String>[
-            'run',
-            '--no-pub',
-            '--no-hot',
-            '--no-resident',
-            '--web-header',
-            'foo=bar',
-          ]);
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.devConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.devConfig!.headers, <String, String>{
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
             'foo': 'bar',
           });
         },
@@ -1091,14 +1086,13 @@ void main() {
             'run',
             '--no-pub',
             '--no-hot',
-            '--no-resident',
             '--web-header',
             'hurray=flutter,flutter=hurray',
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.devConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.devConfig!.headers, <String, String>{
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
             'hurray': 'flutter,flutter=hurray',
           });
         },

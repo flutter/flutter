@@ -7,54 +7,49 @@ import '../base/logger.dart';
 import '../globals.dart' as globals;
 
 abstract class ProxyRule {
-  ProxyRule({required this.target});
+  ProxyRule({required this.target, this.replacement});
 
   final String target;
+  final String? replacement;
   String replace(String path);
   bool matches(String path);
 
   static ProxyRule? fromYaml(YamlMap yaml, {Logger? logger}) {
     final target = yaml['target'] as String?;
-    final source = yaml['source'] as String?;
+    final prefix = yaml['prefix'] as String?;
     final regex = yaml['regex'] as String?;
-    final replace = yaml['replace'] as String?;
+    final replacement = yaml['replace'] as String?;
     final Logger effectiveLogger = logger ?? globals.logger;
 
-    RegExp? proxyPattern;
-    if (source != null && source.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError(
-          "Invalid 'target' for 'source': $source. 'target' cannot be null",
-        );
-        return null;
-      }
-      return SourceProxyRule(source: source, target: target, replacement: replace?.trim());
+    if (target == null) {
+      final String? path = prefix ?? regex;
+      effectiveLogger.printError("Invalid 'target' for path: $path. 'target' cannot be null");
+      return null;
+    }
+    if (prefix != null && prefix.isNotEmpty) {
+      return PrefixProxyRule(prefix: prefix, target: target, replacement: replace?.trim());
     } else if (regex != null && regex.isNotEmpty) {
-      if (target == null) {
-        effectiveLogger.printError("Invalid 'target' for 'regex': $regex. 'target' cannot be null");
-        return null;
-      }
+      RegExp? regexPattern;
       try {
-        proxyPattern = RegExp(regex.trim());
+        regexPattern = RegExp(regex.trim());
       } on FormatException catch (e) {
-        proxyPattern = RegExp(RegExp.escape(regex));
+        regexPattern = RegExp(RegExp.escape(regex));
         effectiveLogger.printWarning(
           "Invalid regex pattern in replace 'regex': '$regex'. Treating $regex as string. Error: $e",
         );
       }
-      return RegexProxyRule(pattern: proxyPattern, target: target, replacement: replace?.trim());
+      return RegexProxyRule(pattern: regexPattern, target: target, replacement: replace?.trim());
     } else {
-      effectiveLogger.printError("'source' or 'regex' field must be provided");
+      effectiveLogger.printError("'prefix' or 'regex' field must be provided");
       return null;
     }
   }
 }
 
 class RegexProxyRule extends ProxyRule {
-  RegexProxyRule({required this.pattern, required super.target, this.replacement});
+  RegexProxyRule({required this.pattern, required super.target, super.replacement});
 
   final RegExp pattern;
-  final String? replacement;
 
   @override
   bool matches(String path) {
@@ -63,9 +58,6 @@ class RegexProxyRule extends ProxyRule {
 
   @override
   String replace(String path) {
-    if (replacement == null) {
-      return path;
-    }
     return path.replaceAllMapped(pattern, (Match match) {
       String result = replacement!;
 
@@ -78,30 +70,26 @@ class RegexProxyRule extends ProxyRule {
 
   @override
   String toString() {
-    return '{pattern: ${pattern.pattern}, target: $target, replacement: ${replacement ?? 'null'}}';
+    return '{pattern: ${pattern.pattern}, target: $target, replace: ${replacement ?? 'null'}}';
   }
 }
 
-class SourceProxyRule extends ProxyRule {
-  SourceProxyRule({required this.source, required super.target, this.replacement});
-  final String source;
-  final String? replacement;
+class PrefixProxyRule extends ProxyRule {
+  PrefixProxyRule({required this.prefix, required super.target, super.replacement});
+  final String prefix;
 
   @override
   bool matches(String path) {
-    return path.startsWith(source);
+    return path.startsWith(prefix);
   }
 
   @override
   String replace(String path) {
-    if (replacement == null) {
-      return path;
-    }
-    return path.replaceFirst(source, replacement!);
+    return path.replaceFirst(prefix, replacement!);
   }
 
   @override
   String toString() {
-    return '{source: $source, target: $target, replacement: ${replacement ?? 'null'}}';
+    return '{prefix: $prefix, target: $target, replacement: ${replacement ?? 'null'}}';
   }
 }

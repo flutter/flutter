@@ -976,7 +976,7 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.devConfig = const WebDevServerConfig(),
+    this.webDevServerConfig,
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
@@ -1003,7 +1003,7 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-    this.devConfig = const WebDevServerConfig(),
+    this.webDevServerConfig = const WebDevServerConfig(),
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1090,7 +1090,7 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     // ignore: unused_element_parameter
-    this.devConfig,
+    this.webDevServerConfig,
   });
 
   final bool debuggingEnabled;
@@ -1135,7 +1135,7 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
-  final WebDevServerConfig? devConfig;
+  final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1257,6 +1257,10 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
+    'port': webDevServerConfig?.port,
+    'hostname': webDevServerConfig?.host,
+    'tlsCertPath': webDevServerConfig?.https?.certPath,
+    'tlsCertKeyPath': webDevServerConfig?.https?.certKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1266,6 +1270,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webHeaders': webDevServerConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1349,6 +1354,18 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        webDevServerConfig: WebDevServerConfig(
+          port: json['port'] is int ? json['port']! as int : 8080,
+          host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
+
+          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
+              ? HttpsConfig(
+                  certPath: json['tlsCertPath'] as String?,
+                  certKeyPath: json['tlsCertKeyPath'] as String?,
+                )
+              : null,
+          headers: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
+        ),
       );
 }
 

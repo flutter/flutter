@@ -278,14 +278,21 @@ void main() {
       final WebDriverService service = setUpDriverService();
       final device = FakeDevice();
       final webHeaders = <String, String>{'test-header': 'test-value'};
-      final devConfig = WebDevServerConfig(headers: webHeaders);
+      final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
       await service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, devConfig: devConfig, ipv6: true),
+        DebuggingOptions.enabled(
+          BuildInfo.profile,
+          webDevServerConfig: webDevServerConfig,
+          ipv6: true,
+        ),
       );
       await service.stop();
-      expect(FakeResidentRunner.instance.debuggingOptions.devConfig?.headers, equals(webHeaders));
+      expect(
+        FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
+        equals(webHeaders),
+      );
     },
     overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
   );

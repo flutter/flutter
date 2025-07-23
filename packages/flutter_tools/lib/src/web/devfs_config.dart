@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
 import 'package:meta/meta.dart';
-// import 'package:source_span/source_span.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
@@ -13,14 +11,14 @@ import '../base/file_system.dart' as fs;
 import '../globals.dart' as globals;
 import 'devfs_proxy.dart';
 
-const devConfigFilePath = 'web_dev_config.yaml';
+const webDevServerConfigFilePath = 'web_dev_config.yaml';
 
 @immutable
 class WebDevServerConfig {
   const WebDevServerConfig({
     this.headers = const <String, String>{},
-    this.host = 'any',
-    this.port,
+    this.host = 'localhost',
+    this.port = 8080,
     this.https,
     this.proxy = const <ProxyRule>[],
   });
@@ -29,44 +27,46 @@ class WebDevServerConfig {
     final headers = <String, String>{};
     if (yaml['headers'] != null) {
       if (yaml['headers'] is! YamlList) {
-        throwToolExit('Headers must be a List of maps. Found ${yaml['headers'].runtimeType}');
+        throwToolExit(
+          '[WebDevServer] Headers must be a List of maps. Found ${yaml['headers'].runtimeType}',
+        );
       }
       final headersList = yaml['headers'] as YamlList;
-      for (final dynamic item in headersList) {
+      for (final Object? item in headersList) {
         if (item is! YamlMap) {
           throwToolExit(
-            'Each header entry must be a map with "name" and "value" keys. Found ${item.runtimeType}',
+            '[WebDevServer] Each header entry must be a map with "name" and "value" keys. Found ${item.runtimeType}',
           );
         }
         final YamlMap headerMap = item;
         if (!headerMap.containsKey('name') || !headerMap.containsKey('value')) {
-          throwToolExit('Each header entry must contain "name" and "value" keys.');
+          throwToolExit('[WebDevServer] Each header entry must contain "name" and "value" keys.');
         }
-        final dynamic name = headerMap['name'];
-        final dynamic value = headerMap['value'];
+        final Object? name = headerMap['name'];
+        final Object? value = headerMap['value'];
 
         if (name is! String || value is! String) {
           throwToolExit(
-            'Header "name" and "value" must be strings. Found name: ${name.runtimeType}, value: ${value.runtimeType}',
+            '[WebDevServer] Header "name" and "value" must be strings. Found name: ${name.runtimeType}, value: ${value.runtimeType}',
           );
         }
         headers[name] = value;
       }
     }
     if (yaml['host'] is! String && yaml['host'] != null) {
-      throwToolExit('Host must be a String. Found ${yaml['host'].runtimeType}');
+      throwToolExit('[WebDevServer] host must be a String. Found ${yaml['host'].runtimeType}');
     }
     if (yaml['port'] is! int && yaml['port'] != null) {
-      throwToolExit('Port must be an int. Found ${yaml['port'].runtimeType}');
+      throwToolExit('[WebDevServer] port must be an int. Found ${yaml['port'].runtimeType}');
     }
     if (yaml['https'] is! YamlMap && yaml['https'] != null) {
-      throwToolExit('Https must be a Map. Found ${yaml['https'].runtimeType}');
+      throwToolExit('[WebDevServer] Https must be a Map. Found ${yaml['https'].runtimeType}');
     }
 
     final proxyRules = <ProxyRule>[];
     if (yaml['proxy'] != null) {
       if (yaml['proxy'] is! YamlList) {
-        throwToolExit('Proxy must be a list. Found ${yaml['proxy'].runtimeType}');
+        throwToolExit('[WebDevServer]Proxy must be a list. Found ${yaml['proxy'].runtimeType}');
       }
       final proxyList = yaml['proxy'] as YamlList;
       for (final dynamic item in proxyList) {
@@ -81,23 +81,94 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: yaml['host'] as String?,
-      port: yaml['port'] as int?,
+      host: yaml['host'] as String,
+      port: yaml['port'] as int,
       https: yaml['https'] == null ? null : HttpsConfig.fromYaml(yaml['https'] as YamlMap),
       proxy: proxyRules,
     );
   }
 
+  static Future<WebDevServerConfig> loadFromFile({
+    String? overrideHostname,
+    String? overridePort,
+    String? overrideTlsCertPath,
+    String? overrideTlsCertKeyPath,
+    Map<String, String>? extraHeaders,
+    List<String>? browserFlags,
+  }) async {
+    var fileConfig = const WebDevServerConfig();
+    final fs.File webDevServerConfigFile = globals.fs.file(webDevServerConfigFilePath);
+
+    if (webDevServerConfigFile.existsSync()) {
+      try {
+        final String fileContent = await webDevServerConfigFile.readAsString();
+        final YamlDocument yamlDoc = loadYamlDocument(fileContent);
+        final YamlNode contents = yamlDoc.contents;
+        if (contents is! YamlMap ||
+            !contents.containsKey('server') ||
+            contents['server'] is! YamlMap) {
+          throwToolExit(
+            '"[WebDevServer] $webDevServerConfigFilePath" file is missing or malformed.',
+          );
+        }
+
+        final serverYaml = contents['server'] as YamlMap;
+        fileConfig = WebDevServerConfig.fromYaml(serverYaml);
+        globals.printStatus(
+          '\n [WebDevServer] Loaded configuration from $webDevServerConfigFilePath',
+        );
+        globals.printTrace(fileConfig.toString());
+      } on Exception catch (e) {
+        throwToolExit('[WebDevServer] Error: Failed to parse $webDevServerConfigFilePath: $e');
+      }
+    }
+
+    HttpsConfig? httpsOverride;
+    if (overrideTlsCertPath != null || overrideTlsCertKeyPath != null) {
+      httpsOverride = HttpsConfig(
+        certPath: overrideTlsCertPath,
+        certKeyPath: overrideTlsCertKeyPath,
+      );
+    }
+
+    final combinedHeaders = <String, String>{...fileConfig.headers, ...?extraHeaders};
+
+    return fileConfig.copyWith(
+      host: overrideHostname,
+      port: overridePort != null ? int.tryParse(overridePort) : null,
+      https: httpsOverride,
+      headers: combinedHeaders,
+    );
+  }
+
+  /// Creates a new [WebDevServerConfig] by overriding existing properties
+  /// with the provided non-null values.
+  WebDevServerConfig copyWith({
+    String? host,
+    int? port,
+    HttpsConfig? https,
+    Map<String, String>? headers,
+    List<ProxyRule>? proxy,
+  }) {
+    return WebDevServerConfig(
+      host: host ?? this.host,
+      port: port ?? this.port,
+      https: https ?? this.https,
+      headers: headers ?? this.headers,
+      proxy: proxy ?? this.proxy,
+    );
+  }
+
   final Map<String, String> headers;
-  final String? host;
-  final int? port;
+  final String host;
+  final int port;
   final HttpsConfig? https;
   final List<ProxyRule> proxy;
 
   @override
   String toString() {
     return '''
-  DevConfig:
+  WebDevServerConfig:
   headers: $headers
   host: $host
   port: $port
@@ -112,11 +183,13 @@ class HttpsConfig {
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
     if (yaml['cert-path'] is! String && yaml['cert-path'] != null) {
-      throwToolExit('Https cert-path must be a String. Found ${yaml['cert-path'].runtimeType}');
+      throwToolExit(
+        '[WebDevServer] Https cert-path must be a String. Found ${yaml['cert-path'].runtimeType}',
+      );
     }
     if (yaml['cert-key-path'] is! String && yaml['cert-key-path'] != null) {
       throwToolExit(
-        'Https cert-key-path must be a String. Found ${yaml['cert-key-path'].runtimeType}',
+        '[WebDevServer] Https cert-key-path must be a String. Found ${yaml['cert-key-path'].runtimeType}',
       );
     }
     return HttpsConfig(
@@ -135,116 +208,6 @@ class HttpsConfig {
         certPath: $certPath
         certKeyPath: $certKeyPath''';
   }
-}
-
-T? _getOverriddenValue<T>(String filedName, T? fileValue, T? cliValue) {
-  if (cliValue != null) {
-    if (fileValue != null && cliValue != fileValue) {
-      globals.printStatus(
-        'Overriding $filedName from $devConfigFilePath ($fileValue) with command-line argument ($cliValue)',
-      );
-    }
-    return cliValue;
-  }
-  return fileValue;
-}
-
-Future<WebDevServerConfig> loadDevConfig({
-  String? hostname,
-  String? port,
-  String? tlsCertPath,
-  String? tlsCertKeyPath,
-  Map<String, String>? headers,
-  int? debugPort,
-  List<String>? browserFlags,
-}) async {
-  final fs.File devConfigFile = globals.fs.file(devConfigFilePath);
-  var fileConfig = const WebDevServerConfig();
-
-  if (!devConfigFile.existsSync()) {
-    globals.printStatus('No $devConfigFilePath found');
-  } else {
-    try {
-      final String devConfigContent = await devConfigFile.readAsString();
-      final YamlDocument yamlDoc = loadYamlDocument(devConfigContent);
-      final YamlNode contents = yamlDoc.contents;
-      if (contents is! YamlMap) {
-        throw YamlException(
-          '$devConfigFilePath file found, but it must be a YAML map (e.g., "server:"). Found a ${contents.runtimeType} instead.',
-          contents.span,
-        );
-      }
-
-      if (!contents.containsKey('server') || contents['server'] is! YamlMap) {
-        // final SourceSpan span = (contents.containsKey('server') && contents['server'] is YamlNode)
-        //     ? (contents['server'] as YamlNode).span
-        //     : contents.span;
-        throw YamlException(
-          '"$devConfigFilePath" file found, but the "server" key is missing or malformed. It must be a YAML map.',
-          null,
-        );
-      }
-
-      final serverYaml = contents['server'] as YamlMap;
-      fileConfig = WebDevServerConfig.fromYaml(serverYaml);
-      globals.printStatus('\nLoaded configuration from $devConfigFilePath');
-      globals.printTrace(fileConfig.toString());
-    } on YamlException catch (e) {
-      globals.printError('Error: Failed to parse $devConfigFilePath: ${e.message} ${e.span}');
-      rethrow;
-    } on Exception catch (e) {
-      globals.printError('An unexpected error occurred while reading $devConfigFilePath: $e');
-      globals.printStatus(
-        'Reverting to default flutter_tools web server configuration due to unexpected error.',
-      );
-    }
-  }
-
-  final String finalHost =
-      _getOverriddenValue<String>('host', fileConfig.host, hostname) ?? 'localhost';
-  final int? finalPort = _getOverriddenValue<int>(
-    'port',
-    fileConfig.port,
-    port != null ? int.tryParse(port) : null,
-  );
-  final String? finalCertPath = _getOverriddenValue<String>(
-    'TLS cert path',
-    fileConfig.https?.certPath,
-    tlsCertPath,
-  );
-  final String? finalCertKeyPath = _getOverriddenValue<String>(
-    'TLS cert key path',
-    fileConfig.https?.certKeyPath,
-    tlsCertKeyPath,
-  );
-  HttpsConfig? finalHttpsConfig;
-  if (finalCertPath != null || finalCertKeyPath != null || fileConfig.https != null) {
-    finalHttpsConfig = HttpsConfig(certPath: finalCertPath, certKeyPath: finalCertKeyPath);
-  } else {
-    finalHttpsConfig = null;
-  }
-  final finalHeaders = <String, String>{};
-  finalHeaders.addAll(fileConfig.headers);
-  if (headers != null && headers.isNotEmpty) {
-    for (final MapEntry<String, String> entry in headers.entries) {
-      if (fileConfig.headers.containsKey(entry.key)) {
-        globals.printStatus(
-          'Overriding headers "${entry.key}" from $devConfigFilePath ("${fileConfig.headers[entry.key]}") with command-line argument("${entry.value}").',
-        );
-      } else {
-        globals.printStatus('Adding header "${entry.key}" from command-line arguments.');
-      }
-    }
-    finalHeaders.addAll(headers);
-  }
-
-  return WebDevServerConfig(
-    host: finalHost,
-    port: finalPort,
-    https: finalHttpsConfig,
-    headers: finalHeaders,
-    proxy: fileConfig.proxy,
-  );
 }
 
 Future<int> resolvePort(int? port) async {

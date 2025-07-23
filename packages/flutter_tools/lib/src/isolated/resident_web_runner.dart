@@ -275,18 +275,12 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        final WebDevServerConfig originalDevConfig =
-            debuggingOptions.devConfig ?? const WebDevServerConfig();
+        final WebDevServerConfig originalConfig =
+            debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
 
-        final int resolvedPort = await resolvePort(originalDevConfig.port);
+        final int resolvedPort = await resolvePort(originalConfig.port);
 
-        final updatedDevConfig = WebDevServerConfig(
-          host: originalDevConfig.host,
-          port: resolvedPort,
-          headers: originalDevConfig.headers,
-          https: originalDevConfig.https,
-          proxy: originalDevConfig.proxy,
-        );
+        final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
             ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
@@ -311,7 +305,7 @@ class ResidentWebRunner extends ResidentRunner {
                 nonWebServerConnectedDeviceIds.contains(device!.device!.id));
 
         device!.devFS = WebDevFS(
-          devConfig: updatedDevConfig,
+          webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -336,8 +330,7 @@ class ResidentWebRunner extends ResidentRunner {
           platform: _platform,
         );
         Uri url = await device!.devFS!.create();
-        if (debuggingOptions.devConfig?.https?.certKeyPath != null &&
-            debuggingOptions.devConfig?.https?.certPath != null) {
+        if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {

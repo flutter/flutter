@@ -178,7 +178,7 @@ class WebAssetServer implements AssetReader {
   Uri get baseUri => _baseUri;
   late Uri _baseUri;
 
-  /// Start the web asset server on a hostname and port.
+  /// Start the web asset server with configuration provided by [webDevServerConfig].
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
@@ -196,7 +196,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
-    required WebDevServerConfig devConfig,
+    required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -211,12 +211,12 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
   }) async {
-    final String effectiveHost = devConfig.host ?? 'localhost';
-    final int effectivePort = devConfig.port ?? 0;
-    final String? effectiveCertPath = devConfig.https?.certPath;
-    final String? effectiveCertKeyPath = devConfig.https?.certKeyPath;
-    final Map<String, String> effectiveHeaders = devConfig.headers;
-    final List<ProxyRule> effectiveProxy = devConfig.proxy;
+    final String hostname = webDevServerConfig.host;
+    final int port = webDevServerConfig.port;
+    final String? tlsCertPath = webDevServerConfig.https?.certPath;
+    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final Map<String, String> extraHeaders = webDevServerConfig.headers;
+    final List<ProxyRule> proxy = webDevServerConfig.proxy;
 
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -388,7 +388,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
-    pipeline = pipeline.addMiddleware(proxyMiddleware(effectiveProxy));
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
