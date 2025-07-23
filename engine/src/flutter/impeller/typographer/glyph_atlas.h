@@ -10,14 +10,7 @@
 #include <optional>
 
 #include "flutter/fml/build_config.h"
-
-#if defined(OS_FUCHSIA)
-// TODO(gaaclarke): Migrate to use absl. I couldn't get it working since absl
-// has special logic in its GN files for Fuchsia that I couldn't sort out.
-#define IMPELLER_TYPOGRAPHER_USE_STD_HASH
-#else
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
-#endif
 
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
