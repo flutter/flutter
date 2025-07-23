@@ -48,6 +48,48 @@ std::string IgnoreWhitespace(std::string_view input) {
   return result;
 }
 
+std::optional<Catalog::Match> FindMatchForSelectedMatcher(
+    std::string_view query,
+    RE2* matcher,
+    std::string_view matcher_name) {
+  int num_groups = matcher->NumberOfCapturingGroups();
+
+  if (num_groups == 0) {
+    std::string_view match_text;
+    if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
+                       &match_text,
+                       /*nsubmatch=*/1)) {
+      return Catalog::Match::MakeWithView(matcher_name, match_text);
+    }
+  } else {
+    // This will extract all non-grouped text from a match.
+    std::vector<re2::StringPiece> submatches(num_groups + 1);
+    if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
+                       submatches.data(), num_groups + 1)) {
+      std::string_view full_match = submatches[0];
+      const char* full_match_end = full_match.data() + full_match.size();
+
+      std::string non_group_text;
+      non_group_text.reserve(full_match.size());
+      const char* position = full_match.data();
+      for (int i = 1; i <= num_groups; ++i) {
+        std::string_view submatch = submatches[i];
+        if (submatch.data() > position) {
+          non_group_text.append(position, submatch.data() - position);
+        }
+        position = submatch.data() + submatch.size();
+      }
+      if (position < full_match_end) {
+        non_group_text.append(position, full_match_end - position);
+      }
+
+      return Catalog::Match::MakeWithString(matcher_name,
+                                            std::move(non_group_text));
+    }
+  }
+
+  return std::nullopt;
+}
 }  // namespace
 
 absl::StatusOr<Catalog> Catalog::Open(std::string_view data_dir) {
@@ -133,6 +175,8 @@ Catalog::Catalog(RE2::Set selector,
       matchers_(std::move(matchers)),
       names_(std::move(names)) {}
 
+namespace {}  // namespace
+
 absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
     std::string_view query) const {
   std::vector<int> selector_results;
@@ -147,46 +191,13 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
   hit_results.reserve(selector_results.size());
   for (int selector_result : selector_results) {
     RE2* matcher = matchers_[selector_result].get();
-    int num_groups = matcher->NumberOfCapturingGroups();
-
-    if (num_groups == 0) {
-      std::string_view match_text;
-      if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
-                         &match_text,
-                         /*nsubmatch=*/1)) {
-        results.emplace_back(
-            Catalog::Match::MakeWithView(names_[selector_result], match_text));
-        hit_results.push_back(selector_result);
-      } else {
-        missed_results.push_back(selector_result);
-      }
+    std::optional<Match> match =
+        FindMatchForSelectedMatcher(query, matcher, names_[selector_result]);
+    if (match.has_value()) {
+      results.emplace_back(std::move(match.value()));
+      hit_results.push_back(selector_result);
     } else {
-      std::vector<re2::StringPiece> submatches(num_groups + 1);
-      if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
-                         submatches.data(), num_groups + 1)) {
-        std::string_view full_match = submatches[0];
-        const char* full_match_end = full_match.data() + full_match.size();
-
-        std::string non_group_text;
-        non_group_text.reserve(full_match.size());
-        const char* position = full_match.data();
-        for (int i = 1; i <= num_groups; ++i) {
-          std::string_view submatch = submatches[i];
-          if (submatch.data() > position) {
-            non_group_text.append(position, submatch.data() - position);
-            position = submatch.data() + submatch.size();
-          }
-        }
-        if (position < full_match_end) {
-          non_group_text.append(position, full_match_end - position);
-        }
-
-        results.emplace_back(Catalog::Match::MakeWithString(
-            names_[selector_result], std::move(non_group_text)));
-        hit_results.push_back(selector_result);
-      } else {
-        missed_results.push_back(selector_result);
-      }
+      missed_results.push_back(selector_result);
     }
   }
   if (selector_results.size() != results.size()) {
