@@ -35,6 +35,7 @@ import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'git.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
@@ -106,6 +107,8 @@ FileSystem get fs => ErrorHandlingFileSystem(
 
 FileSystemUtils get fsUtils =>
     context.get<FileSystemUtils>() ?? FileSystemUtils(fileSystem: fs, platform: platform);
+
+Git get git => context.get<Git>()!;
 
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 

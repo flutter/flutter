@@ -121,6 +121,9 @@ class RunResult {
   String get stdout => processResult.stdout as String;
   String get stderr => processResult.stderr as String;
 
+  /// Returns the command executed.
+  List<String> get command => [..._command];
+
   @override
   String toString() {
     final out = StringBuffer();
