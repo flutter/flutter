@@ -1265,7 +1265,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
-    'webHeaders': devConfig?.headers,
+    'webHeaders': devConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1357,8 +1357,7 @@ class DebuggingOptions {
                 )
               : null,
           headers:
-              (json['webHeaders'] as Map<dynamic, dynamic>?)?.cast<String, String>() ??
-              const <String, String>{},
+              (json['webHeaders'] as Map<dynamic, dynamic>?)!.cast<String, String>(),
         ),
       );
 }
