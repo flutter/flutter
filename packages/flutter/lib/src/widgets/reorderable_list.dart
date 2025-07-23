@@ -971,10 +971,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
         }
       } else {
         if (item.index == _dragIndex!) {
-          // If the proxy's center is within its original item's bounds, we're at the
-          // original position.
-          final double proxyCenter = proxyItemStart + (proxyItemEnd - proxyItemStart) / 2;
-          if (itemStart <= proxyCenter && proxyCenter <= itemEnd) {
+          // If end of the proxy is not in ending half of item,
+          // we don't process, because it's original dragged item.
+          if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
             newIndex = _dragIndex!;
           }
         } else if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
