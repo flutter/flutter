@@ -17,7 +17,7 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('recorder and picture dispose underlying objects properly', () {
-    final ScenePictureRecorder recorder = ui.PictureRecorder() as ScenePictureRecorder;
+    final LayerPictureRecorder recorder = ui.PictureRecorder() as LayerPictureRecorder;
     final ui.Canvas canvas = ui.Canvas(recorder);
     const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     canvas.clipRect(rect);

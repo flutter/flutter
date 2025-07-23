@@ -7,6 +7,16 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'image.dart';
+import 'painting.dart';
+import 'path.dart';
+import 'picture.dart';
+import 'picture_recorder.dart';
+import 'text.dart';
+import 'vertices.dart';
+
 /// An implementation of [ui.Canvas] that is backed by a CanvasKit canvas.
 class CanvasKitCanvas implements ui.Canvas {
   factory CanvasKitCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {

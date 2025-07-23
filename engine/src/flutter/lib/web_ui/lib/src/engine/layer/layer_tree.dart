@@ -7,11 +7,10 @@ import 'package:ui/ui.dart' as ui;
 import '../../engine.dart' show BitmapSize, kProfileApplyFrame, kProfilePrerollFrame;
 import '../platform_views/embedder.dart';
 import '../profiler.dart';
-import 'canvas.dart';
 import 'layer.dart';
+import 'layer_painting.dart';
 import 'layer_visitor.dart';
 import 'n_way_canvas.dart';
-import 'picture_recorder.dart';
 
 /// A tree of [Layer]s that, together with a [Size] compose a frame.
 class LayerTree {
@@ -50,8 +49,8 @@ class LayerTree {
   /// If [ignoreRasterCache] is `true`, then the raster cache will
   /// not be used.
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
-    final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
-    final Iterable<CkCanvas> overlayCanvases = frame.viewEmbedder!.getOptimizedCanvases();
+    final NWayCanvas internalNodesCanvas = NWayCanvas();
+    final Iterable<LayerCanvas> overlayCanvases = frame.viewEmbedder!.getOptimizedCanvases();
     overlayCanvases.forEach(internalNodesCanvas.addCanvas);
     final PaintVisitor paintVisitor = PaintVisitor(internalNodesCanvas, frame.viewEmbedder!);
     if (rootLayer.needsPainting) {
@@ -63,13 +62,13 @@ class LayerTree {
   ///
   /// This picture does not contain any platform views.
   ui.Picture flatten(ui.Size size) {
-    final CkPictureRecorder recorder = CkPictureRecorder();
-    final CkCanvas canvas = recorder.beginRecording(ui.Offset.zero & size);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, ui.Offset.zero & size);
     final PrerollVisitor prerollVisitor = PrerollVisitor(null);
     rootLayer.accept(prerollVisitor);
 
-    final CkNWayCanvas internalNodesCanvas = CkNWayCanvas();
-    internalNodesCanvas.addCanvas(canvas);
+    final NWayCanvas internalNodesCanvas = NWayCanvas();
+    internalNodesCanvas.addCanvas(canvas as LayerCanvas);
     final PaintVisitor paintVisitor = PaintVisitor.forToImage(internalNodesCanvas, canvas);
     if (rootLayer.needsPainting) {
       rootLayer.accept(paintVisitor);

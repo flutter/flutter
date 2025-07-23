@@ -6,6 +6,8 @@ import 'dart:async';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+/// A [Rasterizer] creates [ViewRasterizer]s which are able to draw Flutter
+/// content into [FlutterView]s.
 abstract class Rasterizer {
   /// Creates a [ViewRasterizer] for a given [view].
   ViewRasterizer createViewRasterizer(EngineFlutterView view);
@@ -17,6 +19,8 @@ abstract class Rasterizer {
   void dispose();
 }
 
+/// Composites Flutter content into a [FlutterView]. Manages the creation of
+/// [DisplayCanvas] objects to render the content into.
 abstract class ViewRasterizer {
   ViewRasterizer(this.view) {
     view.dom.setScene(sceneElement);
@@ -77,7 +81,7 @@ abstract class ViewRasterizer {
   void prepareToDraw();
 
   /// Rasterize the [pictures] to the given [canvas].
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures);
+  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<ui.Picture> pictures);
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {

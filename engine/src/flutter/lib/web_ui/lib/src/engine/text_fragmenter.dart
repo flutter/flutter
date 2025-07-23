@@ -5,10 +5,9 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import '../dom.dart';
-import '../text/line_breaker.dart';
-import '../util.dart';
-import 'canvaskit_api.dart';
+import 'dom.dart';
+import 'text/line_breaker.dart';
+import 'util.dart';
 
 typedef SegmentationResult = ({Uint32List words, Uint32List graphemes, Uint32List breaks});
 
@@ -72,22 +71,6 @@ extension SegmentationCacheExtensions on SegmentationCache {
     medium.clear();
     large.clear();
   }
-}
-
-/// Injects required ICU data into the [builder].
-///
-/// This should only be used with the CanvasKit Chromium variant that's compiled
-/// without ICU data.
-void injectClientICU(SkParagraphBuilder builder) {
-  assert(
-    canvasKit.ParagraphBuilder.RequiresClientICU(),
-    'This method should only be used with the CanvasKit Chromium variant.',
-  );
-
-  final SegmentationResult result = segmentText(builder.getText());
-  builder.setWordsUtf16(result.words);
-  builder.setGraphemeBreaksUtf16(result.graphemes);
-  builder.setLineBreaksUtf16(result.breaks);
 }
 
 /// Segments the [text] into words, graphemes and line breaks.

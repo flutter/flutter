@@ -14,20 +14,22 @@ import '../vector_math.dart';
 /// A [ui.Canvas] with the additional method [saveLayerWithFilter] which allows
 /// the caller to pass an explicit [ui.ImageFilter] which is applied to the
 /// layer when [restore] is called.
-abstract class SceneCanvas implements ui.Canvas {
-  // This is the same as a normal `saveLayer` call, but we can pass a backdrop image filter.
+abstract class LayerCanvas implements ui.Canvas {
+  /// This is the same as a normal `saveLayer` call, but we can pass a backdrop image filter.
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint paint, ui.ImageFilter backdropFilter);
+
+  void clear(ui.Color color);
 }
 
 /// A [ui.Picture] that provides approximate bounds for the drawings contained
 /// within it.
-abstract class ScenePicture implements ui.Picture {
+abstract class LayerPicture implements ui.Picture {
   // This is a conservative bounding box of all the drawing primitives in this picture.
   ui.Rect get cullRect;
 }
 
 /// A [ui.PictureRecorder] which allows callers to know if it has been disposed.
-abstract class ScenePictureRecorder implements ui.PictureRecorder {
+abstract class LayerPictureRecorder implements ui.PictureRecorder {
   /// Whether this reference to the underlying picture recorder is [dispose]d.
   ///
   /// This only returns a valid value if asserts are enabled, and must not be
@@ -36,7 +38,7 @@ abstract class ScenePictureRecorder implements ui.PictureRecorder {
 }
 
 /// A [ui.ImageFilter] with helper methods for picture measurement and layout.
-abstract class SceneImageFilter implements ui.ImageFilter {
+abstract class LayerImageFilter implements ui.ImageFilter {
   // Since some image filters affect the actual drawing bounds of a given picture, this
   // gives the maximum draw boundary for a picture with the given input bounds after it
   // has been processed by the filter.
@@ -48,7 +50,7 @@ abstract class SceneImageFilter implements ui.ImageFilter {
 }
 
 /// A [ui.Path] with a helper method to convert it to an SVG string.
-abstract class ScenePath implements ui.Path {
+abstract class LayerPath implements ui.Path {
   // In order to properly clip platform views with paths, we need to be able to get a
   // string representation of them.
   String toSvgString();

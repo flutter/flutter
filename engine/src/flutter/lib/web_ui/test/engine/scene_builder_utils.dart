@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class StubPicture implements ScenePicture {
+class StubPicture implements LayerPicture {
   StubPicture(this.cullRect);
 
   bool _isDisposed = false;
@@ -68,7 +68,7 @@ class StubPictureRecorder implements ui.PictureRecorder {
   bool get isRecording => throw UnimplementedError();
 }
 
-class StubSceneCanvas implements SceneCanvas {
+class StubSceneCanvas implements LayerCanvas {
   List<StubPicture> pictures = <StubPicture>[];
 
   // We actually use offsets in some of the tests, so we need to track the

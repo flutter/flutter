@@ -23,10 +23,10 @@ class StubPictureRenderer implements PictureRenderer {
   final DomHTMLCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
 
   @override
-  Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
+  Future<RenderResult> renderPictures(List<LayerPicture> pictures) async {
     renderedPictures.addAll(pictures);
     final List<DomImageBitmap> bitmaps = await Future.wait(
-      pictures.map((ScenePicture picture) {
+      pictures.map((LayerPicture picture) {
         final ui.Rect cullRect = picture.cullRect;
         final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement, (
           x: 0,
@@ -41,16 +41,16 @@ class StubPictureRenderer implements PictureRenderer {
   }
 
   @override
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
+  LayerPicture clipPicture(LayerPicture picture, ui.Rect clip) {
     clipRequests[picture] = clip;
     final clippedRect = clip.intersect(picture.cullRect);
     final clippedPicture = StubPicture(clippedRect);
     return clippedPicture;
   }
 
-  List<ScenePicture> renderedPictures = <ScenePicture>[];
+  List<LayerPicture> renderedPictures = <LayerPicture>[];
   List<StubPicture> clippedPictures = <StubPicture>[];
-  Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
+  Map<LayerPicture, ui.Rect> clipRequests = <LayerPicture, ui.Rect>{};
 }
 
 class StubFlutterView implements EngineFlutterView {
@@ -148,7 +148,7 @@ class StubFlutterView implements EngineFlutterView {
   EngineSemanticsOwner get semantics => throw UnimplementedError();
 }
 
-class StubPath implements ScenePath {
+class StubPath implements LayerPath {
   StubPath(this.pathString, this.transformedPathString);
 
   final String pathString;

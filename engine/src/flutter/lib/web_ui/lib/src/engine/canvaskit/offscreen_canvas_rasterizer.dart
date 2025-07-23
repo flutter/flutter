@@ -4,6 +4,10 @@
 
 import 'package:ui/src/engine.dart';
 
+import 'picture.dart';
+import 'render_canvas.dart';
+import 'surface.dart';
+
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
 /// one or many on-screen <canvas> elements to actually display the scene.

@@ -576,16 +576,16 @@ class SkwasmPictureRenderer implements PictureRenderer {
   SkwasmSurface surface;
 
   @override
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> pictures) =>
+  FutureOr<RenderResult> renderPictures(List<LayerPicture> pictures) =>
       surface.renderPictures(pictures.cast<SkwasmPicture>());
 
   @override
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
+  LayerPicture clipPicture(LayerPicture picture, ui.Rect clip) {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder, clip);
     canvas.clipRect(clip);
     canvas.drawPicture(picture);
 
-    return recorder.endRecording() as ScenePicture;
+    return recorder.endRecording() as LayerPicture;
   }
 }

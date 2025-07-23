@@ -187,7 +187,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
   }) {
     final int sliceIndex = _placePicture(
       offset,
-      picture as ScenePicture,
+      picture as LayerPicture,
       currentBuilder.globalPlatformViewStyling,
     );
     currentBuilder.addPicture(offset, picture, sliceIndex: sliceIndex);
@@ -200,7 +200,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
   // in the slice or it intersects with a platform view in the preceding slice. If the
   // picture intersects with a platform view in the last slice, a new slice is added at
   // the end and the picture goes in there.
-  int _placePicture(ui.Offset offset, ScenePicture picture, PlatformViewStyling styling) {
+  int _placePicture(ui.Offset offset, LayerPicture picture, PlatformViewStyling styling) {
     if (_isSimple) {
       // This is the fast path where there are no platform views. The picture should
       // just be placed on the bottom (and only) slice.
@@ -301,7 +301,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
       switch (command) {
         case PictureDrawCommand(
           offset: final ui.Offset offset,
-          picture: final ScenePicture picture,
+          picture: final LayerPicture picture,
         ):
           final int sliceIndex = _placePicture(offset, picture, combinedStyling);
           if (command.sliceIndex != sliceIndex) {
@@ -338,7 +338,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
       switch (command) {
         case PictureDrawCommand(
           offset: final ui.Offset offset,
-          picture: final ScenePicture picture,
+          picture: final LayerPicture picture,
         ):
           currentBuilder.addPicture(offset, picture, sliceIndex: command.sliceIndex);
         case PlatformViewDrawCommand(viewId: final int viewId, bounds: final ui.Rect bounds):
@@ -379,7 +379,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     ui.Path path, {
     ui.Clip clipBehavior = ui.Clip.antiAlias,
     ui.ClipPathEngineLayer? oldLayer,
-  }) => pushLayer<ClipPathLayer>(ClipPathLayer(ClipPathOperation(path as ScenePath, clipBehavior)));
+  }) => pushLayer<ClipPathLayer>(ClipPathLayer(ClipPathOperation(path as LayerPath, clipBehavior)));
 
   @override
   ui.ClipRRectEngineLayer pushClipRRect(
@@ -420,7 +420,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     ui.Offset offset = ui.Offset.zero,
     ui.ImageFilterEngineLayer? oldLayer,
   }) => pushLayer<ImageFilterLayer>(
-    ImageFilterLayer(ImageFilterOperation(filter as SceneImageFilter, offset)),
+    ImageFilterLayer(ImageFilterOperation(filter as LayerImageFilter, offset)),
   );
 
   @override

@@ -284,19 +284,12 @@ class SkwasmRenderer implements Renderer {
   String get rendererTag => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  void clearFragmentProgramCache() => _programs.clear();
-
-  static final Map<String, Future<ui.FragmentProgram>> _programs =
-      <String, Future<ui.FragmentProgram>>{};
+  void clearFragmentProgramCache() =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
-    if (_programs.containsKey(assetKey)) {
-      return _programs[assetKey]!;
-    }
-    return _programs[assetKey] = ui_web.assetManager.load(assetKey).then((ByteData data) {
-      return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
-    });
+    throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override

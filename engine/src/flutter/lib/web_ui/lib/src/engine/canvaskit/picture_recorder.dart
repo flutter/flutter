@@ -7,7 +7,11 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class CkPictureRecorder implements ScenePictureRecorder {
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'picture.dart';
+
+class CkPictureRecorder implements LayerPictureRecorder {
   SkPictureRecorder? _skRecorder;
   CkCanvas? _recordingCanvas;
 

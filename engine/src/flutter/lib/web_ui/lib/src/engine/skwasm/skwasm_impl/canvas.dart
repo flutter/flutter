@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmCanvas implements SceneCanvas {
+class SkwasmCanvas implements LayerCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
       (StackScope s) =>

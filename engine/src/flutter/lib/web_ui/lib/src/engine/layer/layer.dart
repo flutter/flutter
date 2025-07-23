@@ -5,6 +5,8 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import 'layer_visitor.dart';
+
 /// A layer to be composed into a scene.
 ///
 /// A layer is the lowest-level rendering primitive. It represents an atomic
@@ -173,7 +175,7 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
   ImageFilterEngineLayer(this.filter, this.offset);
 
   final ui.Offset offset;
-  final ui.ImageFilter filter;
+  final LayerImageFilter filter;
 
   @override
   void accept(LayerVisitor visitor) {
@@ -203,7 +205,7 @@ class PictureLayer extends Layer {
   PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   /// The picture to paint into the canvas.
-  final CkPicture picture;
+  final LayerPicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;

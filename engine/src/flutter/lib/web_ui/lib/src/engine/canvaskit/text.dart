@@ -9,6 +9,13 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../text_fragmenter.dart';
+import 'canvaskit_api.dart';
+import 'native_memory.dart';
+import 'painting.dart';
+import 'renderer.dart';
+import 'util.dart';
+
 final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
@@ -1138,6 +1145,22 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   CkParagraph build() {
     final SkParagraph builtParagraph = _buildSkParagraph();
     return CkParagraph(builtParagraph, _style);
+  }
+
+  /// Injects required ICU data into the [builder].
+  ///
+  /// This should only be used with the CanvasKit Chromium variant that's compiled
+  /// without ICU data.
+  void injectClientICU(SkParagraphBuilder builder) {
+    assert(
+      canvasKit.ParagraphBuilder.RequiresClientICU(),
+      'This method should only be used with the CanvasKit Chromium variant.',
+    );
+
+    final SegmentationResult result = segmentText(builder.getText());
+    builder.setWordsUtf16(result.words);
+    builder.setGraphemeBreaksUtf16(result.graphemes);
+    builder.setLineBreaksUtf16(result.breaks);
   }
 
   /// Builds the CkParagraph with the builder and deletes the builder.

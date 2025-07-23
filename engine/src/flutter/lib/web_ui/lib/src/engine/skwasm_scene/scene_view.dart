@@ -19,8 +19,8 @@ typedef RenderResult = ({
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
 // composite pictures into the canvases in the DOM tree it builds.
 abstract class PictureRenderer {
-  FutureOr<RenderResult> renderPictures(List<ScenePicture> picture);
-  ScenePicture clipPicture(ScenePicture picture, ui.Rect clip);
+  FutureOr<RenderResult> renderPictures(List<LayerPicture> picture);
+  LayerPicture clipPicture(LayerPicture picture, ui.Rect clip);
 }
 
 class _SceneRender {
@@ -95,9 +95,9 @@ class EngineSceneView {
       flutterView.physicalSize.height,
     );
     final List<LayerSlice?> slices = scene.rootLayer.slices;
-    final List<ScenePicture> picturesToRender = <ScenePicture>[];
-    final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
-    final List<ScenePicture> picturesToFree = <ScenePicture>[];
+    final List<LayerPicture> picturesToRender = <LayerPicture>[];
+    final List<LayerPicture> originalPicturesToRender = <LayerPicture>[];
+    final List<LayerPicture> picturesToFree = <LayerPicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
@@ -117,17 +117,17 @@ class EngineSceneView {
         picturesToFree.add(clippedPicture);
       }
     }
-    final Map<ScenePicture, DomImageBitmap> renderMap;
+    final Map<LayerPicture, DomImageBitmap> renderMap;
     if (picturesToRender.isNotEmpty) {
       final RenderResult renderResult = await pictureRenderer.renderPictures(picturesToRender);
-      renderMap = <ScenePicture, DomImageBitmap>{
+      renderMap = <LayerPicture, DomImageBitmap>{
         for (int i = 0; i < picturesToRender.length; i++)
           originalPicturesToRender[i]: renderResult.imageBitmaps[i],
       };
       recorder?.recordRasterStart(renderResult.rasterStartMicros);
       recorder?.recordRasterFinish(renderResult.rasterEndMicros);
     } else {
-      renderMap = <ScenePicture, DomImageBitmap>{};
+      renderMap = <LayerPicture, DomImageBitmap>{};
       recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
     }
@@ -324,7 +324,7 @@ final class PlatformViewContainer extends SliceContainer {
     }
   }
 
-  set clipPath(ScenePath? path) {
+  set clipPath(LayerPath? path) {
     if (_clipPath == path) {
       return;
     }
@@ -361,10 +361,10 @@ final class PlatformViewContainer extends SliceContainer {
         final double blRadiusY = clip.rrect.blRadiusY / devicePixelRatio;
         return 'rect(${top}px ${right}px ${bottom}px ${left}px round ${tlRadiusX}px ${trRadiusX}px ${brRadiusX}px ${blRadiusX}px / ${tlRadiusY}px ${trRadiusY}px ${brRadiusY}px ${blRadiusY}px)';
       case PlatformViewPathClip():
-        ScenePath path = clip.path;
+        LayerPath path = clip.path;
         if (devicePixelRatio != 1.0) {
           final dprTransform = Matrix4.identity()..scale(1 / devicePixelRatio);
-          path = path.transform(dprTransform.toFloat64()) as ScenePath;
+          path = path.transform(dprTransform.toFloat64()) as LayerPath;
         }
         clipPath = path;
         return "path('$_clipPathString')";

@@ -7,14 +7,109 @@ import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show PlatformViewManager;
-import '../compositing/composition.dart';
+import '../compositing/rasterizer.dart';
+import '../layer/layer.dart';
 import '../platform_views/embedder.dart';
 import '../vector_math.dart';
-import '../layer/layer.dart';
 
 /// If `true`, draws the computed bounds for platform views and pictures to
 /// help debug issues with the overlay optimization.
 bool debugOverlayOptimizationBounds = false;
+
+/// A [Composition] is a concrete description of how a Flutter scene will be
+/// rendered in a web browser.
+///
+/// A [Composition] is a sequence containing two types of entities:
+///   * Canvases: which contain rasterized Pictures, and
+///   * Platform views: being HTML content that is to be composited along with
+///     the Flutter content.
+class Composition {
+  final List<CompositionEntity> entities = <CompositionEntity>[];
+
+  void add(CompositionEntity entity) {
+    entities.add(entity);
+  }
+
+  /// Returns [true] if this is equivalent to [other] for use in a composition.
+  bool equalsForCompositing(Composition other) {
+    if (other.entities.length != entities.length) {
+      return false;
+    }
+    for (int i = 0; i < entities.length; i++) {
+      if (!entities[i].equalsForCompositing(other.entities[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// A list of just the canvases in the composition.
+  List<CompositionCanvas> get canvases => entities.whereType<CompositionCanvas>().toList();
+
+  @override
+  String toString() => entities.toString();
+}
+
+/// An element of a [Composition]. Either a canvas or a platform view.
+sealed class CompositionEntity {
+  /// Returns [true] if this entity is equal to [other] for use in a
+  /// composition.
+  ///
+  /// For example, all [CompositionCanvas] objects are equal to each other
+  /// for purposes of rendering since any canvas in that place in the
+  /// composition will be equivalent. Platform views are only equal if they are
+  /// for the same view id.
+  bool equalsForCompositing(CompositionEntity other);
+}
+
+class CompositionCanvas extends CompositionEntity {
+  CompositionCanvas();
+
+  /// The [pictures] which should be rendered in this canvas.
+  final List<PictureLayer> pictures = <PictureLayer>[];
+
+  /// The [DisplayCanvas] that will be used to display [pictures].
+  ///
+  /// This is set by the view embedder.
+  DisplayCanvas? displayCanvas;
+
+  /// Adds the [picture] to the pictures that should be rendered in this canvas.
+  void add(PictureLayer picture) {
+    pictures.add(picture);
+  }
+
+  @override
+  bool equalsForCompositing(CompositionEntity other) {
+    return other is CompositionCanvas;
+  }
+
+  @override
+  String toString() {
+    return '$CompositionCanvas(${pictures.length} pictures)';
+  }
+}
+
+/// A platform view to be composited.
+class CompositionPlatformView extends CompositionEntity {
+  CompositionPlatformView(this.viewId);
+
+  /// The [viewId] of the platform view to render.
+  final int viewId;
+
+  @override
+  bool equalsForCompositing(CompositionEntity other) {
+    return other is CompositionPlatformView && other.viewId == viewId;
+  }
+
+  @override
+  String toString() {
+    return '$CompositionPlatformView($viewId)';
+  }
+
+  /// The bounds that were computed for this platform view when creating the
+  /// optimized composition. This is only set in debug mode.
+  ui.Rect? debugComputedBounds;
+}
 
 // Computes the bounds of the platform view from its associated parameters.
 @visibleForTesting

@@ -27,12 +27,12 @@ class NoopOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
   }
 
@@ -68,12 +68,12 @@ class BackdropFilterOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.saveLayerWithFilter(ui.Rect.largest, ui.Paint()..blendMode = mode, filter);
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
   }
 
@@ -109,14 +109,14 @@ class ClipPathLayer with PictureEngineLayer implements ui.ClipPathEngineLayer {
 class ClipPathOperation implements LayerOperation {
   ClipPathOperation(this.path, this.clip);
 
-  final ScenePath path;
+  final LayerPath path;
   final ui.Clip clip;
 
   @override
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(path.getBounds());
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.clipPath(path, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -125,7 +125,7 @@ class ClipPathOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -179,7 +179,7 @@ class ClipRectOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rect);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.clipRect(rect, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -188,7 +188,7 @@ class ClipRectOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -236,7 +236,7 @@ class ClipRRectOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rrect.outerRect);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.clipRRect(rrect, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -245,7 +245,7 @@ class ClipRRectOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -306,7 +306,7 @@ class ClipRSuperellipseOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rsuperellipse.outerRect);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.clipRSuperellipse(rsuperellipse, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -315,7 +315,7 @@ class ClipRSuperellipseOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -377,12 +377,12 @@ class ColorFilterOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.saveLayer(ui.Rect.largest, ui.Paint()..colorFilter = filter);
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
   }
 
@@ -414,14 +414,14 @@ class ImageFilterLayer with PictureEngineLayer implements ui.ImageFilterEngineLa
 class ImageFilterOperation implements LayerOperation {
   ImageFilterOperation(this.filter, this.offset);
 
-  final SceneImageFilter filter;
+  final LayerImageFilter filter;
   final ui.Offset offset;
 
   @override
   ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     if (offset != ui.Offset.zero) {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
@@ -430,7 +430,7 @@ class ImageFilterOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     if (offset != ui.Offset.zero) {
       canvas.restore();
     }
@@ -489,13 +489,13 @@ class OffsetOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.shift(ui.Offset(dx, dy));
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.translate(dx, dy);
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
   }
 
@@ -538,7 +538,7 @@ class OpacityOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect.shift(offset);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     if (offset != ui.Offset.zero) {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
@@ -547,7 +547,7 @@ class OpacityOperation implements LayerOperation {
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
     if (offset != ui.Offset.zero) {
       canvas.restore();
@@ -601,13 +601,13 @@ class TransformOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => matrix.transformRect(contentRect);
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.save();
     canvas.transform(transform);
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.restore();
   }
 
@@ -648,12 +648,12 @@ class ShaderMaskOperation implements LayerOperation {
   ui.Rect mapRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(SceneCanvas canvas) {
+  void pre(LayerCanvas canvas) {
     canvas.saveLayer(ui.Rect.largest, ui.Paint());
   }
 
   @override
-  void post(SceneCanvas canvas) {
+  void post(LayerCanvas canvas) {
     canvas.save();
     canvas.translate(maskRect.left, maskRect.top);
     canvas.drawRect(
@@ -711,7 +711,7 @@ class LayerSlice {
   LayerSlice(this.picture, this.platformViews);
 
   // The picture of native flutter content to be rendered
-  ScenePicture picture;
+  LayerPicture picture;
 
   // Platform views to be placed on top of the flutter content.
   final List<PlatformView> platformViews;
@@ -772,8 +772,8 @@ abstract class LayerOperation {
   // layer operation.
   ui.Rect mapRect(ui.Rect contentRect);
 
-  void pre(SceneCanvas canvas);
-  void post(SceneCanvas canvas);
+  void pre(LayerCanvas canvas);
+  void post(LayerCanvas canvas);
 
   PlatformViewStyling createPlatformViewStyling();
 
@@ -794,7 +794,7 @@ class PictureDrawCommand extends LayerDrawCommand {
 
   final int sliceIndex;
   final ui.Offset offset;
-  final ScenePicture picture;
+  final LayerPicture picture;
 
   @override
   Map<String, Object> get debugJsonDescription {
@@ -1006,7 +1006,7 @@ sealed class PlatformViewClip {
   /// region is clipped.
   ui.Rect get outerRect;
 
-  ScenePath get toPath;
+  LayerPath get toPath;
 
   static bool rectCovers(ui.Rect covering, ui.Rect covered) {
     return covering.left <= covered.left &&
@@ -1032,7 +1032,7 @@ sealed class PlatformViewClip {
     }
 
     return PlatformViewPathClip(
-      ui.Path.combine(ui.PathOperation.intersect, outer.toPath, inner.toPath) as ScenePath,
+      ui.Path.combine(ui.PathOperation.intersect, outer.toPath, inner.toPath) as LayerPath,
     );
   }
 }
@@ -1046,7 +1046,7 @@ class PlatformViewNoClip implements PlatformViewClip {
   }
 
   @override
-  ScenePath get toPath => ui.Path() as ScenePath;
+  LayerPath get toPath => ui.Path() as LayerPath;
 
   @override
   bool operator ==(Object other) {
@@ -1082,12 +1082,12 @@ class PlatformViewRectClip implements PlatformViewClip {
     if (offset != null) {
       return PlatformViewRectClip(rect.shift(offset));
     } else {
-      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as ScenePath);
+      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as LayerPath);
     }
   }
 
   @override
-  ScenePath get toPath => (ui.Path() as ScenePath)..addRect(rect);
+  LayerPath get toPath => (ui.Path() as LayerPath)..addRect(rect);
 
   @override
   bool operator ==(Object other) {
@@ -1126,12 +1126,12 @@ class PlatformViewRRectClip implements PlatformViewClip {
     if (offset != null) {
       return PlatformViewRRectClip(rrect.shift(offset));
     } else {
-      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as ScenePath);
+      return PlatformViewPathClip(toPath.transform(position.transform!.toFloat64()) as LayerPath);
     }
   }
 
   @override
-  ScenePath get toPath => (ui.Path() as ScenePath)..addRRect(rrect);
+  LayerPath get toPath => (ui.Path() as LayerPath)..addRRect(rrect);
 
   @override
   bool operator ==(Object other) {
@@ -1159,7 +1159,7 @@ class PlatformViewRRectClip implements PlatformViewClip {
 class PlatformViewPathClip implements PlatformViewClip {
   PlatformViewPathClip(this.path);
 
-  final ScenePath path;
+  final LayerPath path;
 
   @override
   PlatformViewClip positioned(PlatformViewPosition position) {
@@ -1169,14 +1169,14 @@ class PlatformViewPathClip implements PlatformViewClip {
 
     final ui.Offset? offset = position.offset;
     if (offset != null) {
-      return PlatformViewPathClip(path.shift(offset) as ScenePath);
+      return PlatformViewPathClip(path.shift(offset) as LayerPath);
     } else {
-      return PlatformViewPathClip(path.transform(position.transform!.toFloat64()) as ScenePath);
+      return PlatformViewPathClip(path.transform(position.transform!.toFloat64()) as LayerPath);
     }
   }
 
   @override
-  ScenePath get toPath => path;
+  LayerPath get toPath => path;
 
   @override
   bool operator ==(Object other) {
@@ -1203,21 +1203,21 @@ class PlatformViewPathClip implements PlatformViewClip {
 
 class LayerSliceBuilder {
   @visibleForTesting
-  static (ui.PictureRecorder, SceneCanvas) Function(ui.Rect)? debugRecorderFactory;
+  static (ui.PictureRecorder, LayerCanvas) Function(ui.Rect)? debugRecorderFactory;
 
-  static (ui.PictureRecorder, SceneCanvas) defaultRecorderFactory(ui.Rect rect) {
+  static (ui.PictureRecorder, LayerCanvas) defaultRecorderFactory(ui.Rect rect) {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final SceneCanvas canvas = ui.Canvas(recorder, rect) as SceneCanvas;
+    final LayerCanvas canvas = ui.Canvas(recorder, rect) as LayerCanvas;
     return (recorder, canvas);
   }
 
-  void addPicture(ui.Offset offset, ScenePicture picture) {
+  void addPicture(ui.Offset offset, LayerPicture picture) {
     pictures.add((picture, offset));
     final ui.Rect pictureRect = picture.cullRect.shift(offset);
     cullRect = cullRect?.expandToInclude(pictureRect) ?? pictureRect;
   }
 
-  (ui.PictureRecorder, SceneCanvas) createRecorder(ui.Rect rect) =>
+  (ui.PictureRecorder, LayerCanvas) createRecorder(ui.Rect rect) =>
       debugRecorderFactory != null ? debugRecorderFactory!(rect) : defaultRecorderFactory(rect);
 
   LayerSlice buildWithOperation(LayerOperation operation, ui.Rect? backdropRect) {
@@ -1241,10 +1241,10 @@ class LayerSliceBuilder {
     }
     operation.post(canvas);
     final ui.Picture picture = recorder.endRecording();
-    return LayerSlice(picture as ScenePicture, platformViews);
+    return LayerSlice(picture as LayerPicture, platformViews);
   }
 
-  final List<(ScenePicture, ui.Offset)> pictures = [];
+  final List<(LayerPicture, ui.Offset)> pictures = [];
   ui.Rect? cullRect;
   final List<PlatformView> platformViews = <PlatformView>[];
 }
@@ -1325,7 +1325,7 @@ class LayerBuilder {
 
   void addPicture(ui.Offset offset, ui.Picture picture, {required int sliceIndex}) {
     final LayerSliceBuilder sliceBuilder = getOrCreateSliceBuilderAtIndex(sliceIndex);
-    sliceBuilder.addPicture(offset, picture as ScenePicture);
+    sliceBuilder.addPicture(offset, picture as LayerPicture);
     drawCommands.add(PictureDrawCommand(offset, picture, sliceIndex));
   }
 

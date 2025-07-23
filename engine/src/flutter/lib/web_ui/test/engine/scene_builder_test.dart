@@ -348,7 +348,7 @@ class LayerSliceMatcher extends Matcher {
     if (item is! LayerSlice) {
       return false;
     }
-    final ScenePicture picture = item.picture;
+    final LayerPicture picture = item.picture;
     if (picture is! StubPicture) {
       return false;
     }
