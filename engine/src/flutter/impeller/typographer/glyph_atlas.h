@@ -9,9 +9,7 @@
 #include <memory>
 #include <optional>
 
-#include "flutter/fml/build_config.h"
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
-
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -20,30 +18,6 @@
 namespace impeller {
 
 class FontGlyphAtlas;
-
-/// Helper for AbslHashAdapter. Tallies a hash value with fml::HashCombine.
-template <typename T>
-struct AbslHashAdapterCombiner {
-  std::size_t value = 0;
-
-  template <typename... Args>
-  static AbslHashAdapterCombiner combine(AbslHashAdapterCombiner combiner,
-                                         const Args&... args) {
-    combiner.value = fml::HashCombine(combiner.value, args...);
-    return combiner;
-  }
-};
-
-/// Adapts AbslHashValue functions to be used with std::unordered_map and the
-/// fml hash functions.
-template <typename T>
-struct AbslHashAdapter {
-  constexpr std::size_t operator()(const T& element) const {
-    AbslHashAdapterCombiner<T> combiner;
-    combiner = AbslHashValue(std::move(combiner), element);
-    return combiner.value;
-  }
-};
 
 struct FrameBounds {
   /// The bounds of the glyph within the glyph atlas.
