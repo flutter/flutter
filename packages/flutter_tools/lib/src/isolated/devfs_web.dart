@@ -202,7 +202,7 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri? get baseUri => webAssetServer.baseUri;
+  Uri get baseUri => webAssetServer.baseUri;
 
   @override
   Future<Uri> create() async {
@@ -234,7 +234,7 @@ class WebDevFS implements DevFS {
       platform: platform,
       shouldEnableMiddleware: shouldEnableMiddleware,
     );
-    return baseUri!;
+    return baseUri;
   }
 
   @override

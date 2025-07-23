@@ -1,4 +1,4 @@
-Signature: 96766702cb9fad68fcd614c5f6c55c67
+Signature: 12b5dde804f56a46d8726a049f29ecd5
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -13894,13 +13894,13 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/conver
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/arm-neon.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/generic-simd.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/scalar.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/x86-avx2.h + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/x86-ssse3.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/utf-utils.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/arm-neon.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/generic-simd.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/x86-avx2.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/x86-ssse3.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/utf-utils.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/board.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -14252,13 +14252,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_component_cpp_testing/internal/convert.
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/use.shard.cml
-FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/arm-neon.h
-FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/generic-simd.h
-FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/scalar.h
-FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/x86-avx2.h
-FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/internal/x86-ssse3.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/utf-utils.h
+FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/arm-neon.h
+FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/generic-simd.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.h
+FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/x86-avx2.h
+FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/x86-ssse3.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/utf-utils.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/board.h
@@ -14829,12 +14829,15 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.f
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/channel.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_logging_cpp/include/lib/driver/logging/cpp/internal/panic.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/suspend.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/suspend.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -14861,12 +14864,15 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fid
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/channel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_logging_cpp/include/lib/driver/logging/cpp/internal/panic.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/include/lib/driver/power/cpp/suspend.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_power_cpp/suspend.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/processargs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h
