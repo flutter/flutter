@@ -852,7 +852,11 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex == item.index) {
+      if (_insertIndex! - item.index == 1) {
+        // Drop at the original position when item returns from below
+        _finalDropPosition = _itemOffsetAt(_insertIndex! - 1);
+      } else if (_insertIndex == item.index) {
+        // Drop at the current position
         _finalDropPosition = _itemOffsetAt(_insertIndex!);
       } else if (_reverse) {
         if (_insertIndex! >= _items.length) {
