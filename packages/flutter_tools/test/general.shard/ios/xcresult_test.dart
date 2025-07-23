@@ -28,7 +28,6 @@ void main() {
 
     final List<String> command;
     if (useNewCommand) {
-      // Command for Xcode 16+
       command = <String>[
         ...xcode.xcrunCommand(),
         'xcresulttool',
@@ -40,7 +39,6 @@ void main() {
         'json',
       ];
     } else {
-      // Command for Xcode < 16 (no --legacy flag needed)
       command = <String>[
         ...xcode.xcrunCommand(),
         'xcresulttool',
@@ -72,7 +70,7 @@ void main() {
     required String resultJson,
     int exitCode = 0,
     String stderr = '',
-    // Default to an OLD version of Xcode.
+    // Default to an pre-Xcode 16 version of Xcode.
     // This ensures that tests which don't explicitly set an Xcode version still cover
     // the logic for pre-Xcode 16 platforms.
     Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
@@ -106,7 +104,6 @@ void main() {
   }
 
   testWithoutContext('correctly parses new format (Xcode 16+) JSON with issues', () async {
-    // Setup generator to use the new command and data
     final XCResultGenerator generator = setupGenerator(
       resultJson: kNewFormatResultJsonWithIssues,
       xcodeVersion: Version(16, 0, 0),
