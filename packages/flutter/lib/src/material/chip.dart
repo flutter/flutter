@@ -13,7 +13,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show clampDouble, kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1502,7 +1502,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     return Semantics(
       button: widget.tapEnabled,
       container: true,
-      selected: widget.selected,
+      // On web, aria-selected only works for certain roles: gridcell, option, row and tab.
+      // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-selected
+      // If the role doesn't support aria-selected, aria-current will be set instead in flutter engine.
+      // But in this case, aria-checked makes more sense than aria-current for a selected chip.
+      // So use checked on web instead.
+      selected: kIsWeb ? null : widget.selected,
+      checked: kIsWeb ? widget.selected : null,
       enabled: widget.tapEnabled ? canTap : null,
       child: result,
     );
