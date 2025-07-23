@@ -22,4 +22,5 @@ $ET build --no-rbe -c host_profile //flutter/tools/licenses_cpp
 $LICENSE_CPP \
   --working_dir=$WORKING_DIR \
   --licenses_path=$LICENSES_PATH \
-  --data_dir=$DATA_PATH
+  --data_dir=$DATA_PATH \
+  --v=1
