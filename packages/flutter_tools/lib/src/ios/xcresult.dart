@@ -421,7 +421,7 @@ bool _shouldDiscardIssue({
   return false;
 }
 
-/// [NEW] Helper to parse issues from the new (Xcode 16+) flat list format.
+/// Helper to parse issues from the new (Xcode 16+) flat list format.
 List<XCResultIssue> _parseIssuesFromNewFormat({
   required XCResultIssueType type,
   required Object? jsonList,
@@ -451,7 +451,7 @@ List<XCResultIssue> _parseIssuesFromNewFormat({
   return issues;
 }
 
-/// [OLD] Renamed helper to parse issues from the old (pre-Xcode 16) format.
+/// Renamed helper to parse issues from the old (pre-Xcode 16) format.
 List<XCResultIssue> _parseIssuesFromXcode15Format({
   required XCResultIssueType type,
   required Map<String, Object?> issueSummariesJson,
@@ -480,7 +480,7 @@ List<XCResultIssue> _parseIssuesFromXcode15Format({
   return issues;
 }
 
-/// [OLD] Helper to parse issues from the `actions` block in the old format.
+/// Helper to parse issues from the `actions` block in the old format.
 List<XCResultIssue> _parseActionIssues(
   Map<String, Object?> actionsMap, {
   required List<XCResultIssueDiscarder> issueDiscarders,
