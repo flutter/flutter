@@ -735,6 +735,7 @@ class Text extends StatelessWidget {
           text: TextSpan(
             style: effectiveTextStyle,
             text: data,
+            locale: locale,
             children: textSpan != null ? <InlineSpan>[textSpan!] : null,
           ),
         ),
@@ -762,6 +763,7 @@ class Text extends StatelessWidget {
         text: TextSpan(
           style: effectiveTextStyle,
           text: data,
+          locale: locale,
           children: textSpan != null ? <InlineSpan>[textSpan!] : null,
         ),
       );
