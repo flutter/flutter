@@ -167,6 +167,7 @@ if (enable_unittests) {
     sources = [
       "benchmarking/dl_complexity_unittests.cc",
       "display_list_unittests.cc",
+      "dl_canvas_unittests.cc",
       "dl_color_unittests.cc",
       "dl_paint_unittests.cc",
       "dl_storage_unittests.cc",
@@ -180,6 +181,7 @@ if (enable_unittests) {
       "geometry/dl_path_unittests.cc",
       "geometry/dl_region_unittests.cc",
       "geometry/dl_rtree_unittests.cc",
+      "skia/dl_sk_canvas_unittests.cc",
       "skia/dl_sk_conversions_unittests.cc",
       "skia/dl_sk_paint_dispatcher_unittests.cc",
       "utils/dl_accumulation_rect_unittests.cc",
