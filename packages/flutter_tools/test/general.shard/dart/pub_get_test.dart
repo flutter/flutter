@@ -1086,7 +1086,7 @@ exit code: 66
     );
 
     fileSystem.file('version').createSync();
-    // the good scenario: .packages is old, pub updates the file.
+    // the good scenario: package_config.json is old, pub updates the file.
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..setLastModifiedSync(DateTime(2000));
@@ -1096,7 +1096,7 @@ exit code: 66
     await pub.get(
       project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       context: PubContext.flutterTests,
-    ); // pub sets date of .packages to 2002
+    ); // pub sets date of package_config.json to 2002
 
     expect(logger.errorText, isEmpty);
     expect(
