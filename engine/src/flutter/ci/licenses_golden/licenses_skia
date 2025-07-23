@@ -1,4 +1,4 @@
-Signature: 3df1aa325c4dbb7e69684c8fce6d629d
+Signature: 7d836339a15c3f8f56626015b96ef849
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9948,6 +9948,8 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bi
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9982,6 +9984,8 @@ FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
 FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.cpp
 FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureCanvas.h
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.cpp
+FILE: ../../../flutter/third_party/skia/src/capture/SkCaptureManager.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContext.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkCPUContextImpl.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCPURecorder.cpp
