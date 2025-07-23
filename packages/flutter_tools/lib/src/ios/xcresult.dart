@@ -42,21 +42,26 @@ class XCResultGenerator {
     final Version? xcodeVersion = xcode.currentVersion;
     final bool useNewCommand = xcodeVersion != null && xcodeVersion >= Version(16, 0, 0);
 
-    // Base command for xcrun
-    final command = <String>[...xcode.xcrunCommand(), 'xcresulttool'];
+    final baseCommand = <String>[...xcode.xcrunCommand(), 'xcresulttool'];
 
     // Determine the correct subcommand and arguments based on the Xcode version.
     if (useNewCommand) {
       // For Xcode 16+, the 'get' command requires a specific subcommand.
       // 'build-results' is the correct choice for parsing compilation/build errors.
-      command.addAll(<String>['get', 'build-results', '--path', resultPath, '--format', 'json']);
+      baseCommand.addAll(<String>[
+        'get',
+        'build-results',
+        '--path',
+        resultPath,
+        '--format',
+        'json',
+      ]);
     } else {
       // For older versions of Xcode, the original 'get' command works directly.
-      command.addAll(<String>['get', '--path', resultPath, '--format', 'json']);
+      baseCommand.addAll(<String>['get', '--path', resultPath, '--format', 'json']);
     }
 
-    // Run the constructed command.
-    final RunResult result = await processUtils.run(command);
+    final RunResult result = await processUtils.run(baseCommand);
 
     // Handle command failure or empty output.
     if (result.exitCode != 0) {
@@ -427,28 +432,20 @@ List<XCResultIssue> _parseIssuesFromNewFormat({
   required Object? jsonList,
   required List<XCResultIssueDiscarder> issueDiscarders,
 }) {
-  final issues = <XCResultIssue>[];
   if (jsonList is! List<Object?>) {
-    return issues;
+    return const <XCResultIssue>[];
   }
 
-  for (final Object? issueJson in jsonList) {
-    if (issueJson is! Map<String, Object?>) {
-      continue;
-    }
-    final resultIssue = XCResultIssue.fromNewFormat(type: type, issueJson: issueJson);
-    var discard = false;
-    for (final discarder in issueDiscarders) {
-      if (_shouldDiscardIssue(issue: resultIssue, discarder: discarder)) {
-        discard = true;
-        break;
-      }
-    }
-    if (!discard) {
-      issues.add(resultIssue);
-    }
-  }
-  return issues;
+  return jsonList
+      .whereType<Map<String, Object?>>()
+      .map((issueJson) => XCResultIssue.fromNewFormat(type: type, issueJson: issueJson))
+      .where((issue) {
+        final bool shouldDiscard = issueDiscarders.any(
+          (discarder) => _shouldDiscardIssue(issue: issue, discarder: discarder),
+        );
+        return !shouldDiscard;
+      })
+      .toList();
 }
 
 /// Renamed helper to parse issues from the old (pre-Xcode 16) format.

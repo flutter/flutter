@@ -89,7 +89,6 @@ void main() {
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
-      // Use the new, refactored command setup.
       setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,
