@@ -250,8 +250,7 @@ start(.*)stop(.*)last
 
   std::string text = "start hello stop world last";
 
-  absl::StatusOr<std::vector<Catalog::Match>> match =
-      catalog->FindMatch(text);
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch(text);
   EXPECT_TRUE(match.ok()) << match.status();
   ASSERT_EQ(match->size(), 1u);
   EXPECT_EQ(match->at(0).GetMatchedText(), "startstoplast");
