@@ -11,9 +11,6 @@ import '../src/android_common.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-// This test requires Java 11 due to the intentionally low version of Gradle.
-// It also overrides the template compile sdk version to 34, because using 35
-// requires AGP 8.0+.
 void main() {
   late Directory tempDir;
 
