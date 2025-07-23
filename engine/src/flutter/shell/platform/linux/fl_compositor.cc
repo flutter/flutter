@@ -19,3 +19,10 @@ gboolean fl_compositor_present_layers(FlCompositor* self,
   return FL_COMPOSITOR_GET_CLASS(self)->present_layers(self, layers,
                                                        layers_count);
 }
+
+gboolean fl_compositor_render(FlCompositor* self,
+                              cairo_t* cr,
+                              GdkWindow* window) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR(self), FALSE);
+  return FL_COMPOSITOR_GET_CLASS(self)->render(self, cr, window);
+}

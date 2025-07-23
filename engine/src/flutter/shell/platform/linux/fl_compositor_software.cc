@@ -69,6 +69,32 @@ static gboolean fl_compositor_software_present_layers(
   return TRUE;
 }
 
+static gboolean fl_compositor_software_render(FlCompositor* compositor,
+                                              cairo_t* cr,
+                                              GdkWindow* window) {
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (self->surface == nullptr) {
+    return FALSE;
+  }
+
+  // If frame not ready, then wait for it.
+  gint scale_factor = gdk_window_get_scale_factor(window);
+  size_t width = gdk_window_get_width(window) * scale_factor;
+  size_t height = gdk_window_get_height(window) * scale_factor;
+  while (self->width != width || self->height != height) {
+    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+  }
+
+  cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
+  cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
+  cairo_paint(cr);
+
+  return TRUE;
+}
+
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
@@ -86,6 +112,7 @@ static void fl_compositor_software_class_init(
     FlCompositorSoftwareClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->present_layers =
       fl_compositor_software_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_software_render;
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
 }
@@ -99,29 +126,4 @@ FlCompositorSoftware* fl_compositor_software_new() {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
       g_object_new(fl_compositor_software_get_type(), nullptr));
   return self;
-}
-
-gboolean fl_compositor_software_render(FlCompositorSoftware* self,
-                                       cairo_t* cr,
-                                       size_t width,
-                                       size_t height,
-                                       gint scale_factor) {
-  g_return_val_if_fail(FL_IS_COMPOSITOR_SOFTWARE(self), FALSE);
-
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
-  if (self->surface == nullptr) {
-    return FALSE;
-  }
-
-  // If frame not ready, then wait for it.
-  while (self->width != width || self->height != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
-  }
-
-  cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
-  cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
-  cairo_paint(cr);
-
-  return TRUE;
 }
