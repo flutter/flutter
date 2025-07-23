@@ -1168,14 +1168,14 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   int toARGB32() => _effectiveColor.toARGB32();
 
   @Deprecated(
-    'Use (*.a * 255.0).round() & 0xff. '
+    'Use (*.a * 255.0).round().clamp(0, 255). '
     'This feature was deprecated after v3.33.0-1.0.pre.',
   )
   @override
   int get alpha => _effectiveColor.alpha;
 
   @Deprecated(
-    'Use (*.b * 255.0).round() & 0xff. '
+    'Use (*.b * 255.0).round().clamp(0, 255). '
     'This feature was deprecated after v3.33.0-1.0.pre.',
   )
   @override
@@ -1185,7 +1185,7 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   double computeLuminance() => _effectiveColor.computeLuminance();
 
   @Deprecated(
-    'Use (*.g * 255.0).round() & 0xff. '
+    'Use (*.g * 255.0).round().clamp(0, 255). '
     'This feature was deprecated after v3.33.0-1.0.pre.',
   )
   @override
@@ -1199,7 +1199,7 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
   double get opacity => _effectiveColor.opacity;
 
   @Deprecated(
-    'Use (*.r * 255.0).round() & 0xff. '
+    'Use (*.r * 255.0).round().clamp(0, 255). '
     'This feature was deprecated after v3.33.0-1.0.pre.',
   )
   @override
