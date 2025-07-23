@@ -75,7 +75,7 @@ TEST(CatalogTest, Simple) {
   ASSERT_TRUE(catalog.ok());
   absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch("foo");
   ASSERT_TRUE(match.ok());
-  ASSERT_EQ(match->front().matcher, "foobar");
+  ASSERT_EQ(match->front().GetMatcher(), "foobar");
 }
 
 TEST(CatalogTest, MultipleMatchOverlapping) {
@@ -216,7 +216,7 @@ TEST(CatalogTest, SkiaLicenseIgnoreWhitespace) {
       catalog->FindMatch(no_newline_license);
   ASSERT_TRUE(match.ok()) << match.status();
   ASSERT_EQ(match->size(), 1u);
-  EXPECT_EQ(match->at(0).matched_text, no_newline_license);
+  EXPECT_EQ(match->at(0).GetMatchedText(), no_newline_license);
 }
 
 TEST(CatalogTest, SkiaLicenseIgnoreTrailing) {

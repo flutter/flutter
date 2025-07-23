@@ -149,8 +149,8 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
     if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
                        &match_text,
                        /*nsubmatch=*/1)) {
-      results.emplace_back(Match{.matcher = names_[selector_result],
-                                 .matched_text = match_text});
+      results.emplace_back(
+          Catalog::Match::MakeWithView(names_[selector_result], match_text));
       hit_results.push_back(selector_result);
     } else {
       missed_results.push_back(selector_result);
@@ -179,10 +179,10 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
   } else {
     for (size_t i = 0; i < results.size(); ++i) {
       for (size_t j = i + 1; j < results.size(); ++j) {
-        if (Overlaps(results[i].matched_text, results[j].matched_text)) {
+        if (Overlaps(results[i].GetMatchedText(), results[j].GetMatchedText())) {
           return absl::InvalidArgumentError(
-              absl::StrCat("Selected matchers overlap (", results[i].matcher,
-                           ", ", results[j].matcher, ")."));
+              absl::StrCat("Selected matchers overlap (", results[i].GetMatcher(),
+                           ", ", results[j].GetMatcher(), ")."));
         }
       }
     }
