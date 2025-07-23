@@ -174,7 +174,7 @@ class Color {
   const Color.fromARGB(int a, int r, int g, int b) : this._fromARGBC(a, r, g, b, ColorSpace.sRGB);
 
   const Color._fromARGBC(int alpha, int red, int green, int blue, ColorSpace colorSpace)
-    : this._fromRGBOC(red, green, blue, (alpha.clamp(0, 255)) / 255, colorSpace);
+    : this._fromRGBOC(red, green, blue, (alpha & 0xff) / 255, colorSpace);
 
   /// Create an sRGB color from red, green, blue, and opacity, similar to
   /// `rgba()` in CSS.
@@ -195,9 +195,9 @@ class Color {
 
   const Color._fromRGBOC(int r, int g, int b, double opacity, this.colorSpace)
     : a = opacity,
-      r = (r.clamp(0, 255)) / 255,
-      g = (g.clamp(0, 255)) / 255,
-      b = (b.clamp(0, 255)) / 255;
+      r = (r & 0xff) / 255,
+      g = (g & 0xff) / 255,
+      b = (b & 0xff) / 255;
 
   /// The alpha channel of this color.
   final double a;
