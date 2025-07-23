@@ -12,7 +12,7 @@ const kSampleResultJsonInvalidIssuesMap = r'''
 }
 ''';
 
-  /// Simulates the output of `xcrun xcresulttool get build-results` on Xcode 16+.
+/// Simulates the output of `xcrun xcresulttool get build-results` on Xcode 16+.
 const kNewFormatResultJsonWithIssues = r'''
 {
   "actionTitle": "Build Runner",

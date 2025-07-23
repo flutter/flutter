@@ -43,32 +43,16 @@ class XCResultGenerator {
     final bool useNewCommand = xcodeVersion != null && xcodeVersion >= Version(16, 0, 0);
 
     // Base command for xcrun
-    final command = <String>[
-      ...xcode.xcrunCommand(),
-      'xcresulttool',
-    ];
+    final command = <String>[...xcode.xcrunCommand(), 'xcresulttool'];
 
     // Determine the correct subcommand and arguments based on the Xcode version.
     if (useNewCommand) {
       // For Xcode 16+, the 'get' command requires a specific subcommand.
       // 'build-results' is the correct choice for parsing compilation/build errors.
-      command.addAll(<String>[
-        'get',
-        'build-results',
-        '--path',
-        resultPath,
-        '--format',
-        'json',
-      ]);
+      command.addAll(<String>['get', 'build-results', '--path', resultPath, '--format', 'json']);
     } else {
       // For older versions of Xcode, the original 'get' command works directly.
-      command.addAll(<String>[
-        'get',
-        '--path',
-        resultPath,
-        '--format',
-        'json',
-      ]);
+      command.addAll(<String>['get', '--path', resultPath, '--format', 'json']);
     }
 
     // Run the constructed command.
@@ -106,25 +90,28 @@ class XCResult {
     // Detect the format. The new format has top-level 'errors' or 'warnings' keys.
     if (resultJson.containsKey('errors') || resultJson.containsKey('warnings')) {
       // ---- NEW (Xcode 16+) PARSING LOGIC ----
-      issues.addAll(_parseIssuesFromNewFormat(
-        type: XCResultIssueType.error,
-        jsonList: resultJson['errors'],
-        issueDiscarders: issueDiscarders,
-      ));
-      issues.addAll(_parseIssuesFromNewFormat(
-        type: XCResultIssueType.warning,
-        jsonList: resultJson['warnings'],
-        issueDiscarders: issueDiscarders,
-      ));
-
+      issues.addAll(
+        _parseIssuesFromNewFormat(
+          type: XCResultIssueType.error,
+          jsonList: resultJson['errors'],
+          issueDiscarders: issueDiscarders,
+        ),
+      );
+      issues.addAll(
+        _parseIssuesFromNewFormat(
+          type: XCResultIssueType.warning,
+          jsonList: resultJson['warnings'],
+          issueDiscarders: issueDiscarders,
+        ),
+      );
     } else {
       // ---- OLD (pre-Xcode 16) PARSING LOGIC ----
       final Object? issuesMap = resultJson['issues'];
 
       if (issuesMap is! Map<String, Object?>) {
-          // The key exists but is not a map, which is an error for the old format.
-          return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
-        }
+        // The key exists but is not a map, which is an error for the old format.
+        return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
+      }
 
       final Object? errorSummaries = issuesMap['errorSummaries'];
       if (errorSummaries is Map<String, Object?>) {
@@ -146,7 +133,7 @@ class XCResult {
           ),
         );
       }
-          final Object? actionsMap = resultJson['actions'];
+      final Object? actionsMap = resultJson['actions'];
       if (actionsMap is Map<String, Object?>) {
         final List<XCResultIssue> actionIssues = _parseActionIssues(
           actionsMap,
@@ -156,7 +143,11 @@ class XCResult {
       }
     }
 
-    if (issues.isEmpty && resultJson['issues'] == null && resultJson['actions'] == null && resultJson['errors'] == null && resultJson['warnings'] == null) {
+    if (issues.isEmpty &&
+        resultJson['issues'] == null &&
+        resultJson['actions'] == null &&
+        resultJson['errors'] == null &&
+        resultJson['warnings'] == null) {
       return XCResult.failed(errorMessage: 'xcresult parser: Failed to parse the issues map.');
     }
 
@@ -271,7 +262,9 @@ class XCResultIssue {
     if (sourceUrl != null) {
       location = _convertUrlToLocationString(sourceUrl);
       if (location == null) {
-        warnings.add('(XCResult) The `sourceURL` exists but it failed to be parsed. url: $sourceUrl');
+        warnings.add(
+          '(XCResult) The `sourceURL` exists but it failed to be parsed. url: $sourceUrl',
+        );
       }
     }
 
@@ -545,11 +538,17 @@ List<XCResultIssue> _parseActionIssues(
   }
 
   for (final Object? actionValue in actionsValues) {
-    if (actionValue is! Map<String, Object?>) { continue; }
+    if (actionValue is! Map<String, Object?>) {
+      continue;
+    }
     final Object? actionResult = actionValue['actionResult'];
-    if (actionResult is! Map<String, Object?>) { continue; }
+    if (actionResult is! Map<String, Object?>) {
+      continue;
+    }
     final Object? actionResultIssues = actionResult['issues'];
-    if (actionResultIssues is! Map<String, Object?>) { continue; }
+    if (actionResultIssues is! Map<String, Object?>) {
+      continue;
+    }
     final Object? testFailureSummaries = actionResultIssues['testFailureSummaries'];
     if (testFailureSummaries is Map<String, Object?>) {
       issues.addAll(
