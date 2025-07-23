@@ -3054,11 +3054,11 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
-                              if (kIsWeb) ...[
+                              if (kIsWeb) ...<SemanticsFlag>[
                                 SemanticsFlag.hasCheckedState,
                                 SemanticsFlag.isChecked,
                               ],
-                              if (!kIsWeb) ...[
+                              if (!kIsWeb) ...<SemanticsFlag>[
                                 SemanticsFlag.hasSelectedState,
                                 SemanticsFlag.isSelected,
                               ],
