@@ -975,7 +975,7 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.devConfig = const WebDevServerConfig(),
+    this.devConfig,
   }) : debuggingEnabled = true,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
@@ -1252,6 +1252,10 @@ class DebuggingOptions {
     'disablePortPublication': disablePortPublication,
     'ddsPort': ddsPort,
     'devToolsServerAddress': devToolsServerAddress.toString(),
+    'port': devConfig?.port,
+    'hostname': devConfig?.host,
+    'tlsCertPath': devConfig?.https?.certPath,
+    'tlsCertKeyPath': devConfig?.https?.certKeyPath,
     'webEnableExposeUrl': webEnableExposeUrl,
     'webUseSseForDebugProxy': webUseSseForDebugProxy,
     'webUseSseForDebugBackend': webUseSseForDebugBackend,
@@ -1261,6 +1265,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webHeaders': devConfig?.headers,
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
@@ -1342,6 +1347,17 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        devConfig: WebDevServerConfig(
+          port: json['port'] as int?,
+          host: json['hostname'] as String?,
+          https: (json['tlsCertPath'] != null || json['tlsCertKeyPath'] != null)
+              ? HttpsConfig(
+                  certPath: json['tlsCertPath'] as String?,
+                  certKeyPath: json['tlsCertKeyPath'] as String?,
+                )
+              : null,
+          headers: (json['webHeaders'] as Map<dynamic, dynamic>?)!.cast<String, String>(),
+        ),
       );
 }
 
