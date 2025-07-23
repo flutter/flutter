@@ -2819,7 +2819,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2868,7 +2870,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2931,7 +2935,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -2991,7 +2997,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3050,8 +3058,10 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
-                              SemanticsFlag.hasSelectedState,
-                              SemanticsFlag.isSelected,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
+                              kIsWeb ? SemanticsFlag.isChecked : SemanticsFlag.isSelected,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           ),
@@ -3100,7 +3110,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -3149,7 +3161,11 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             // Must not be a button when tapping is disabled.
-                            flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState],
+                            flags: <SemanticsFlag>[
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
+                            ],
                             actions: <SemanticsAction>[],
                           ),
                         ],
@@ -3198,7 +3214,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3249,7 +3267,9 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
-                              SemanticsFlag.hasSelectedState,
+                              kIsWeb
+                                  ? SemanticsFlag.hasCheckedState
+                                  : SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
