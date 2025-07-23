@@ -195,6 +195,23 @@ class DlCanvas {
                             DlScalar x,
                             DlScalar y,
                             const DlPaint& paint) = 0;
+  /// @brief  Draws the shadow of the given |path| rendered in the provided
+  ///         |color| (which is only consulted for its opacity) as would be
+  ///         produced by a directional light source uniformly shining in
+  ///         the device space direction {0, -1, 1} against a backdrop
+  ///         which is |elevation * dpr| device coordinates below the |path|
+  ///         in the Z direction.
+  ///
+  /// Normally the renderer might consider omitting the rendering of any
+  /// of the shadow pixels that fall under the |path| itself, as an
+  /// optimization, unless the |transparent_occluder| flag is specified
+  /// which would indicate that the optimization isn't appropriate.
+  ///
+  /// Note that the |elevation| and |dpr| are unique in the API for being
+  /// considered in pure device coordinates while the |path| is interpreted
+  /// relative to the current local-to-device transform.
+  ///
+  /// @see |ComputeShadowBounds|
   virtual void DrawShadow(const DlPath& path,
                           const DlColor color,
                           const DlScalar elevation,
@@ -206,6 +223,16 @@ class DlCanvas {
   static constexpr DlScalar kShadowLightHeight = 600;
   static constexpr DlScalar kShadowLightRadius = 800;
 
+  /// @brief  Compute the local coverage for a |DrawShadow| operation using
+  ///         the given parameters (excluding the color and the transparent
+  ///         occluder parameters which do not affect the bounds).
+  ///
+  /// Since the elevation is expressed in device coordinates relative to the
+  /// provided |dpr| value, the |ctm| of the final rendering coordinate
+  /// system that will be applied to the path must be provided so the two
+  /// sets of coordinates (path and light source) can be correlated.
+  ///
+  /// @see |DrawShadow|
   static DlRect ComputeShadowBounds(const DlPath& path,
                                     float elevation,
                                     DlScalar dpr,
