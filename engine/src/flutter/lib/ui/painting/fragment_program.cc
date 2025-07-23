@@ -6,16 +6,19 @@
 #include <sstream>
 
 #include "display_list/effects/dl_runtime_effect.h"
+#include "display_list/effects/dl_runtime_effect_skia.h"
 #include "flutter/lib/ui/painting/fragment_program.h"
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 
 #include "impeller/core/runtime_types.h"
 #include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -99,7 +102,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
           }
           snapshot_controller->CacheRuntimeStage(runtime_stage);
         });
-    runtime_effect_ = DlRuntimeEffect::MakeImpeller(std::move(runtime_stage));
+    runtime_effect_ = DlRuntimeEffectImpeller::Make(std::move(runtime_stage));
   } else {
     const auto& code_mapping = runtime_stage->GetCodeMapping();
     auto code_size = code_mapping->GetSize();
@@ -112,7 +115,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
       return std::string("Invalid SkSL:\n") + sksl +
              std::string("\nSkSL Error:\n") + result.errorText.c_str();
     }
-    runtime_effect_ = DlRuntimeEffect::MakeSkia(result.effect);
+    runtime_effect_ = DlRuntimeEffectSkia::Make(result.effect);
   }
 
   Dart_Handle ths = Dart_HandleFromWeakPersistent(dart_wrapper());

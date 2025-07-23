@@ -180,6 +180,7 @@ source_set("ui") {
     "//flutter/common/graphics",
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/impeller/display_list",
     "//flutter/impeller/runtime_stage",
     "//flutter/runtime:dart_plugin_registrant",
     "//flutter/runtime:test_font",
