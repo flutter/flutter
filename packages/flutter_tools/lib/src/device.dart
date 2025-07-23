@@ -1356,7 +1356,9 @@ class DebuggingOptions {
                   certKeyPath: json['tlsCertKeyPath'] as String?,
                 )
               : null,
-          headers: (json['webHeaders'] as Map<dynamic, dynamic>?)?.cast<String, String>() ?? const <String, String>{},
+          headers:
+              (json['webHeaders'] as Map<dynamic, dynamic>?)?.cast<String, String>() ??
+              const <String, String>{},
         ),
       );
 }
