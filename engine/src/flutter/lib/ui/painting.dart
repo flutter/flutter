@@ -4651,8 +4651,8 @@ base class Shader extends NativeFieldWrapperClass1 {
 ///
 /// A gradient is defined along a finite inner area. In the case of a linear
 /// gradient, this is the line between the start and end points. For a radial
-/// gradient, it's the circle defined by the center and radius. For a sweep
-/// gradient, it's the angular sector between [startAngle] and [endAngle].
+/// gradient, this is the circle defined by the center and radius. For a sweep
+/// gradient, this is the angular sector between [startAngle] and [endAngle].
 ///
 /// An image filter reads source samples from a source image and performs operations
 /// on those samples to produce a result image. An image defines color samples only
