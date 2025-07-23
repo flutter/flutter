@@ -113,7 +113,9 @@ void main() {
               textDirection: TextDirection.ltr,
               child: MediaQuery(
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
-                child: Center(child: Material(child: TextField(controller: controller))),
+                child: Center(
+                  child: Material(child: TextField(controller: controller)),
+                ),
               ),
             ),
           ),
@@ -178,7 +180,9 @@ void main() {
               textDirection: TextDirection.ltr,
               child: MediaQuery(
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
-                child: Center(child: Material(child: TextField(controller: controller))),
+                child: Center(
+                  child: Material(child: TextField(controller: controller)),
+                ),
               ),
             ),
           ),
@@ -251,7 +255,9 @@ void main() {
               textDirection: TextDirection.ltr,
               child: MediaQuery(
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
-                child: Center(child: Material(child: TextField(controller: controller))),
+                child: Center(
+                  child: Material(child: TextField(controller: controller)),
+                ),
               ),
             ),
           ),
@@ -726,7 +732,9 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Material(child: Column(children: <Widget>[TextField(controller: controller)])),
+          home: Material(
+            child: Column(children: <Widget>[TextField(controller: controller)]),
+          ),
         ),
       );
 

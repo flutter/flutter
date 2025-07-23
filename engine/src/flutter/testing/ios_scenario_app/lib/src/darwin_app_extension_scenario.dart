@@ -20,11 +20,10 @@ class DarwinAppExtensionScenario extends Scenario {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
-    final ParagraphBuilder paragraphBuilder =
-        ParagraphBuilder(ParagraphStyle())
-          ..pushStyle(TextStyle(fontSize: 80))
-          ..addText('flutter Scenarios app extension.')
-          ..pop();
+    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(ParagraphStyle())
+      ..pushStyle(TextStyle(fontSize: 80))
+      ..addText('flutter Scenarios app extension.')
+      ..pop();
     final Paragraph paragraph = paragraphBuilder.build();
 
     paragraph.layout(ParagraphConstraints(width: _screenWidth));

@@ -102,7 +102,7 @@ class XcodeDebug {
         if (project.verboseLogging) '--verbose',
       ]);
 
-      final StringBuffer stdoutBuffer = StringBuffer();
+      final stdoutBuffer = StringBuffer();
       stdoutSubscription = startDebugActionProcess!.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
@@ -111,8 +111,8 @@ class XcodeDebug {
             stdoutBuffer.write(line);
           });
 
-      final StringBuffer stderrBuffer = StringBuffer();
-      bool permissionWarningPrinted = false;
+      final stderrBuffer = StringBuffer();
+      var permissionWarningPrinted = false;
       // console.log from the script are found in the stderr
       stderrSubscription = startDebugActionProcess!.stderr
           .transform<String>(utf8.decoder)
@@ -281,11 +281,9 @@ class XcodeDebug {
     }
 
     try {
-      final Object decodeResult = json.decode(trimmedResults) as Object;
+      final decodeResult = json.decode(trimmedResults) as Object;
       if (decodeResult is Map<String, Object?>) {
-        final XcodeAutomationScriptResponse response = XcodeAutomationScriptResponse.fromJson(
-          decodeResult,
-        );
+        final response = XcodeAutomationScriptResponse.fromJson(decodeResult);
         // Status should always be found
         if (response.status != null) {
           return response;
@@ -408,25 +406,19 @@ class XcodeDebug {
 
     final String schemeXml = schemeFile.readAsStringSync();
     try {
-      final XmlDocument document = XmlDocument.parse(schemeXml);
+      final document = XmlDocument.parse(schemeXml);
       final Iterable<XmlNode> nodes = document.xpath('/Scheme/LaunchAction');
       if (nodes.isEmpty) {
         _logger.printError('Failed to find LaunchAction for the Scheme in ${schemeFile.path}.');
         return;
       }
       final XmlNode launchAction = nodes.first;
-      final XmlAttribute? debuggerIdentifier =
-          launchAction.attributes
-              .where(
-                (XmlAttribute attribute) => attribute.localName == 'selectedDebuggerIdentifier',
-              )
-              .firstOrNull;
-      final XmlAttribute? launcherIdentifier =
-          launchAction.attributes
-              .where(
-                (XmlAttribute attribute) => attribute.localName == 'selectedLauncherIdentifier',
-              )
-              .firstOrNull;
+      final XmlAttribute? debuggerIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) => attribute.localName == 'selectedDebuggerIdentifier')
+          .firstOrNull;
+      final XmlAttribute? launcherIdentifier = launchAction.attributes
+          .where((XmlAttribute attribute) => attribute.localName == 'selectedLauncherIdentifier')
+          .firstOrNull;
       if (debuggerIdentifier == null ||
           launcherIdentifier == null ||
           !debuggerIdentifier.value.contains('LLDB') ||

@@ -111,6 +111,36 @@ ScopedObject<ColorSource> ColorSource::MakeImage(
   return Create<ColorSource>(std::move(dl_filter));
 }
 
+ScopedObject<ColorSource> ColorSource::MakeFragmentProgram(
+    const Context& context,
+    const FragmentProgram& program,
+    std::vector<std::shared_ptr<flutter::DlColorSource>> samplers,
+    std::shared_ptr<std::vector<uint8_t>> uniform_data) {
+  auto runtime_stage =
+      program.FindRuntimeStage(context.GetContext()->GetRuntimeStageBackend());
+  if (!runtime_stage) {
+    VALIDATION_LOG << "Could not find runtime stage for backend.";
+    return nullptr;
+  }
+  auto runtime_effect =
+      flutter::DlRuntimeEffect::MakeImpeller(std::move(runtime_stage));
+  if (!runtime_effect) {
+    VALIDATION_LOG << "Could not make runtime effect.";
+    return nullptr;
+  }
+
+  auto dl_filter =
+      flutter::DlColorSource::MakeRuntimeEffect(std::move(runtime_effect),  //
+                                                std::move(samplers),        //
+                                                std::move(uniform_data)     //
+      );
+  if (!dl_filter) {
+    VALIDATION_LOG << "Could not create runtime effect color source.";
+    return nullptr;
+  }
+  return Create<ColorSource>(std::move(dl_filter));
+}
+
 ColorSource::ColorSource(std::shared_ptr<flutter::DlColorSource> source)
     : color_source_(std::move(source)) {}
 

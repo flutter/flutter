@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,7 +18,7 @@ import '../../../src/context.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
 
-const String _kEmptyPubspecFile = '''
+const _kEmptyPubspecFile = '''
 name: path_provider_example
 
 dependencies:
@@ -25,7 +26,7 @@ dependencies:
     sdk: flutter
 ''';
 
-const String _kSamplePubspecFile = '''
+const _kSamplePubspecFile = '''
 name: path_provider_example
 description: Demonstrates how to use the path_provider plugin.
 
@@ -35,7 +36,7 @@ dependencies:
   path_provider_linux: 1.0.0
 ''';
 
-const String _kSamplePluginPubspec = '''
+const _kSamplePluginPubspec = '''
 name: path_provider_linux
 description: linux implementation of the path_provider plugin
 // version: 2.0.1
@@ -54,16 +55,37 @@ environment:
   flutter: ">=1.20.0"
 ''';
 
+/// Returns a `pubspec.yaml` where `$platform` uses `dartPluginClass: 'none'`.
+String samplePluginPubspecWithDartPluginClassNone({required String platform}) =>
+    '''
+name: path_provider_$platform
+description: $platform implementation of the path_provider plugin
+// version: 2.0.1
+// homepage: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_$platform
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      $platform:
+        dartPluginClass: none
+        pluginClass: none
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''';
+
 void main() {
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
+    late BufferLogger logger;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -73,7 +95,7 @@ void main() {
 
       expect(await const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
-      final Environment environment2 = Environment.test(
+      final environment2 = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -86,7 +108,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on platform', () async {
-      const Map<String, bool> canSkip = <String, bool>{
+      const canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
@@ -120,7 +142,7 @@ void main() {
       "doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins",
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -158,11 +180,64 @@ name: path_provider_example
       },
     );
 
+    for (final platform in ['linux', 'macos', 'windows']) {
+      testUsingContext(
+        '$platform treats dartPluginClass: "none" as omitted',
+        () async {
+          final Directory projectDir = fileSystem.directory('project')..createSync();
+          final environment = Environment.test(
+            fileSystem.currentDirectory,
+            projectDir: projectDir,
+            artifacts: Artifacts.test(),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+            defines: <String, String>{
+              kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
+            },
+            generateDartPluginRegistry: true,
+          );
+
+          writePackageConfigFiles(
+            directory: projectDir,
+            mainLibName: 'path_provider_example',
+            packages: <String, String>{'path_provider_$platform': '/path_provider_$platform'},
+            languageVersions: <String, String>{'path_provider_example': '2.12'},
+          );
+
+          projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
+
+          projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+
+          environment.fileSystem.currentDirectory
+              .childDirectory('path_provider_$platform')
+              .childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(samplePluginPubspecWithDartPluginClassNone(platform: platform));
+
+          final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
+          await DartPluginRegistrantTarget.test(testProject).build(environment);
+
+          final File generatedMain = projectDir
+              .childDirectory('.dart_tool')
+              .childDirectory('flutter_build')
+              .childFile('dart_plugin_registrant.dart');
+          expect(generatedMain, isNot(exists));
+          expect(logger.warningText, contains('Use of `dartPluginClass: none`'));
+        },
+        overrides: {
+          Logger: () => logger,
+          ProcessManager: () => FakeProcessManager.any(),
+          Pub: ThrowingPub.new,
+        },
+      );
+    }
+
     testUsingContext(
       'regenerates dart_plugin_registrant.dart',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -211,7 +286,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -222,7 +297,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"
@@ -248,7 +323,7 @@ name: path_provider_example
       'removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -301,7 +376,7 @@ name: path_provider_example
       'target file is outside the current project package',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -350,7 +425,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -361,7 +436,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"

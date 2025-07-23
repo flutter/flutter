@@ -1,4 +1,4 @@
-Signature: 2f8c959b84dddc4afae88ab8705a6778
+Signature: 3df1aa325c4dbb7e69684c8fce6d629d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -434,12 +434,9 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/analytic-clip.md
-FILE: ../../../flutter/third_party/skia/relnotes/dng_sdk.md
-FILE: ../../../flutter/third_party/skia/relnotes/fontconfig.md
-FILE: ../../../flutter/third_party/skia/relnotes/ganesh-vulkan11.md
-FILE: ../../../flutter/third_party/skia/relnotes/ios12.md
-FILE: ../../../flutter/third_party/skia/relnotes/macos1015.md
+FILE: ../../../flutter/third_party/skia/relnotes/graphite_insert_status.md
+FILE: ../../../flutter/third_party/skia/relnotes/image.md
+FILE: ../../../flutter/third_party/skia/relnotes/typeface_virtuals.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -471,7 +468,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../flutter/third_party/skia/third_party/go.mod
-FILE: ../../../flutter/third_party/skia/toolchain/linux_trampolines/IWYU_mapping.imp
 FILE: ../../../flutter/third_party/skia/toolchain/ndk.BUILD
 FILE: ../../../flutter/third_party/skia/whitespace.txt
 ----------------------------------------------------------------------------------------------------
@@ -9901,12 +9897,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp + ../../../flutter/third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2025 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPUContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/gpu/vk/VulkanPreferredFeatures.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9932,7 +9966,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/Precompile
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLNativeShader.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/hdr_pip_blur.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkCPUContext.h
@@ -9940,6 +9974,7 @@ FILE: ../../../flutter/third_party/skia/include/core/SkCPURecorder.h
 FILE: ../../../flutter/third_party/skia/include/core/SkRecorder.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/VulkanPrecompileShader.h
+FILE: ../../../flutter/third_party/skia/include/gpu/vk/VulkanPreferredFeatures.h
 FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp
@@ -9965,7 +10000,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/PrecompileIm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/VulkanPrecompileShader.cpp
-FILE: ../../../flutter/third_party/skia/src/ports/SkFontMgr_fontconfig_freetype.cpp
+FILE: ../../../flutter/third_party/skia/src/sksl/codegen/SkSLNativeShader.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC
 
@@ -10001,9 +10036,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.h
 FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.
@@ -10037,4 +10076,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
-Total license count: 73
+Total license count: 74
