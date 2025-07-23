@@ -38,7 +38,7 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
-/// Defines the possible archetypes for a window.
+/// Defines the possible types for a window.
 ///
 /// {@template flutter.widgets.windowing.experimental}
 /// Do not use this API in production applications or packages published to
@@ -51,7 +51,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 /// See: https://github.com/flutter/flutter/issues/30701.
 /// {@endtemplate}
 @internal
-enum WindowArchetype {
+enum WindowType {
   /// Defines a traditional window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -105,14 +105,14 @@ class WindowSizing {
 ///
 /// A window controller must provide a [future] that resolves to a
 /// a [WindowCreationResult] object. This object contains the view
-/// associated with the window, the archetype of the window, the size
+/// associated with the window, the type of the window, the size
 /// of the window, and the state of the window.
 ///
 /// The caller might also provide a callback to be called when the window
 /// is destroyed, and a callback to be called when an error is encountered
 /// during the creation of the window.
 ///
-/// Each [WindowController] is associated with exactly one root [FlutterView].
+/// Each [BaseWindowController] is associated with exactly one root [FlutterView].
 ///
 /// When the window is destroyed for any reason (either by the caller or by the
 /// platform), the content of the controller will thereafter be invalid. Callers
@@ -123,7 +123,7 @@ class WindowSizing {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract class WindowController with ChangeNotifier {
+abstract class BaseWindowController with ChangeNotifier {
   /// Sets the view associated with this window.
   // ignore: use_setters_to_change_properties
   @protected
@@ -131,11 +131,11 @@ abstract class WindowController with ChangeNotifier {
     _view = view;
   }
 
-  /// The archetype of the window.
+  /// The type of the window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowArchetype get type;
+  WindowType get type;
 
   /// The current size of the window.
   ///
@@ -198,8 +198,8 @@ mixin class RegularWindowControllerDelegate {
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     if (!owner.hasTopLevelWindows()) {
-      // No more top-level windows, exit the application.
-      ServicesBinding.instance.exitApplication(AppExitType.cancelable);
+      // TODO(mattkae): close the application if this is the last window
+      // via ServicesBinding.instance.exitApplication(AppExitType.cancelable);
     }
   }
 }
@@ -237,7 +237,7 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract class RegularWindowController extends WindowController {
+abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] with the provided properties.
   ///
   /// Upon construction, the window is created for the platform.
@@ -282,7 +282,7 @@ abstract class RegularWindowController extends WindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  WindowArchetype get type => WindowArchetype.regular;
+  WindowType get type => WindowType.regular;
 
   /// Request change for the window content size.
   ///
@@ -496,7 +496,7 @@ class _RegularWindowState extends State<RegularWindow> {
   }
 }
 
-/// Provides descendants with access to the [WindowController] associated with
+/// Provides descendants with access to the [BaseWindowController] associated with
 /// the window that is being rendered.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -519,13 +519,13 @@ class WindowControllerContext extends InheritedWidget {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  final WindowController controller;
+  final BaseWindowController controller;
 
   /// Returns the [WindowContext] if any
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  static WindowController? of(BuildContext context) {
+  static BaseWindowController? of(BuildContext context) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_windowingDisabledErrorMessage);
     }
