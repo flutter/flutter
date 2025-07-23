@@ -52,8 +52,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v1"},
-          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
+          {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -74,6 +74,27 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      os: Ubuntu
+      cores: "8"
+      device_type: none
+      kvm: "1"
+
+  # linux_android_emu_vulkan_stable temporarily depends on an API 35 AVD while all
+  # other linux_android_emu test targets depend on an API 36 AVD due to a potential issue with
+  # virtual display on API 36: https://github.com/flutter/flutter/issues/170024.
+  linux_android_emu_vulkan_stable:
+    properties:
+      contexts: >-
+        [
+          "android_virtual_device"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v1"},
+          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -136,7 +157,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       device_type: none
       $flutter/osx_sdk : >-
         {
@@ -153,7 +174,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
@@ -173,7 +194,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -191,7 +212,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -210,7 +231,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
@@ -226,7 +247,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       cpu: x86
       device_type: "mokey"
 
@@ -237,7 +258,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v1"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-14|Mac-15.5
+      os: Mac-14|Mac-15
       cpu: arm64
       device_type: "mokey"
 
@@ -252,7 +273,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.1|Mac-15.5
+      os: Mac-14|Mac-15
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
@@ -270,7 +291,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2025"}
         ]
-      os: Mac-14|Mac-15.1|Mac-15.5
+      os: Mac-14|Mac-15
       cpu: x86
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -289,7 +310,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-14|Mac-15.1|Mac-15.5
+      os: Mac-14|Mac-15
       cpu: arm64
       device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
@@ -698,17 +719,15 @@ targets:
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
           "--device", "model=Nexus5.gce_x86,version=21",
           "--device", "model=Nexus5.gce_x86,version=22",
           "--device", "model=Nexus5.gce_x86,version=23",
           "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=MediumPhone.arm,version=26",
+          "--device", "model=MediumPhone.arm,version=27",
+          "--device", "model=SmallPhone.arm,version=29"
         ]
 
   - name: Linux flutter_packaging_test
@@ -1183,7 +1202,6 @@ targets:
 
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -1654,9 +1672,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux_android_emu android_engine_vulkan_tests
+  - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
+    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -1683,7 +1701,6 @@ targets:
 
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       shard: android_engine_opengles_tests
@@ -3031,7 +3048,6 @@ targets:
       task_name: image_list_reported_duration
 
   - name: Linux_pixel_7pro integration_ui_driver
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/167638
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3110,7 +3126,6 @@ targets:
 
   - name: Linux_android_emu native_assets_android
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -5523,7 +5538,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-17|iOS-18","os=Mac-14|Mac-15.5", "cpu=x86"]
+        ["device_os=iOS-17|iOS-18","os=Mac-14|Mac-15", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone

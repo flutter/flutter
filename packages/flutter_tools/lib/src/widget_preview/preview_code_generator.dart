@@ -28,13 +28,13 @@ class PreviewCodeGenerator {
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
-  static const String _kBuilderType = 'Builder';
-  static const String _kBuilderLibraryUri = 'package:flutter/widgets.dart';
-  static const String _kBuilderProperty = 'builder';
-  static const String _kListType = 'List';
-  static const String _kPreviewsFunctionName = 'previews';
-  static const String _kWidgetPreviewClass = 'WidgetPreview';
-  static const String _kWidgetPreviewLibraryUri = 'widget_preview.dart';
+  static const _kBuilderType = 'Builder';
+  static const _kBuilderLibraryUri = 'package:flutter/widgets.dart';
+  static const _kBuilderProperty = 'builder';
+  static const _kListType = 'List';
+  static const _kPreviewsFunctionName = 'previews';
+  static const _kWidgetPreviewClass = 'WidgetPreview';
+  static const _kWidgetPreviewLibraryUri = 'widget_preview.dart';
 
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
       fs.path.join('lib', 'src', 'generated_preview.dart');
@@ -86,8 +86,8 @@ class PreviewCodeGenerator {
   /// ];
   /// ```
   void populatePreviewsInGeneratedPreviewScaffold(PreviewDependencyGraph previews) {
-    final cb.DartEmitter emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
-    final cb.Library lib = cb.Library(
+    final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
+    final lib = cb.Library(
       (cb.LibraryBuilder b) => b.body.addAll(<cb.Spec>[
         cb.Method(
           (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(
@@ -114,14 +114,14 @@ class PreviewCodeGenerator {
     required cb.Allocator allocator,
     required cb.MethodBuilder builder,
   }) {
-    final List<cb.Expression> previewExpressions = <cb.Expression>[];
+    final previewExpressions = <cb.Expression>[];
     // Sort the entries by URI so that the code generator assigns import prefixes in a
     // deterministic manner, mainly for testing purposes. This also results in previews being
     // displayed in the same order across platforms with differing path styles.
-    final List<_PreviewMappingEntry> sortedPreviews =
-        previews.entries.toList()..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
-          return a.key.uri.toString().compareTo(b.key.uri.toString());
-        });
+    final List<_PreviewMappingEntry> sortedPreviews = previews.entries.toList()
+      ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
+        return a.key.uri.toString().compareTo(b.key.uri.toString());
+      });
     for (final _PreviewMappingEntry(
           key: (path: String _, :Uri uri),
           value: LibraryPreviewNode libraryDetails,
@@ -183,10 +183,9 @@ class PreviewCodeGenerator {
       }
     }
 
-    previewWidget =
-        cb.Method((cb.MethodBuilder previewBuilder) {
-          previewBuilder.body = previewWidget.code;
-        }).closure;
+    previewWidget = cb.Method((cb.MethodBuilder previewBuilder) {
+      previewBuilder.body = previewWidget.code;
+    }).closure;
 
     return cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri).newInstance(
       <cb.Expression>[],
@@ -194,6 +193,8 @@ class PreviewCodeGenerator {
         // TODO(bkonyi): try to display the preview name, even if the preview can't be displayed.
         if (!libraryDetails.dependencyHasErrors &&
             !libraryDetails.hasErrors) ...<String, cb.Expression>{
+          if (preview.packageName != null)
+            PreviewDetails.kPackageName: cb.literalString(preview.packageName!),
           ...?_generateCodeFromAnalyzerExpression(
             allocator: allocator,
             key: PreviewDetails.kName,
@@ -241,8 +242,9 @@ class PreviewCodeGenerator {
     if (expression == null) {
       return null;
     }
-    cb.Expression generatedExpression =
-        expression.accept(AnalyzerAstToCodeBuilderVisitor(allocator: allocator))!;
+    cb.Expression generatedExpression = expression.accept(
+      AnalyzerAstToCodeBuilderVisitor(allocator: allocator),
+    )!;
 
     if (isCallback) {
       generatedExpression = generatedExpression.call(<cb.Expression>[]);
@@ -280,7 +282,7 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   @override
   cb.Expression visitStringInterpolation(analyzer.StringInterpolation node) {
     // TODO(bkonyi): handle multiline
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (final analyzer.InterpolationElement element in node.elements) {
       if (element is analyzer.InterpolationString) {
         buffer.write(element.value);
@@ -322,8 +324,8 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   cb.Expression visitRecordLiteral(analyzer.RecordLiteral node) {
     // TODO(bkonyi): fully implement. Low priority as records aren't currently arguments
     // to @Preview(...).
-    final List<Object?> positionalFieldValues = <Object?>[];
-    final Map<String, Object?> namedFieldValues = <String, Object?>{};
+    final positionalFieldValues = <Object?>[];
+    final namedFieldValues = <String, Object?>{};
     return node.isConst
         ? cb.literalRecord(positionalFieldValues, namedFieldValues)
         : cb.literalConstRecord(positionalFieldValues, namedFieldValues);
@@ -336,7 +338,7 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
 
   @override
   cb.Expression visitListLiteral(analyzer.ListLiteral node) {
-    final List<Object?> literals = <Object?>[
+    final literals = <Object?>[
       for (final analyzer.CollectionElement literal in node.elements) literal.accept(this),
     ];
     return node.isConst ? cb.literalConstList(literals) : cb.literalList(literals);
@@ -345,13 +347,13 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   @override
   cb.Expression visitSetOrMapLiteral(analyzer.SetOrMapLiteral node) {
     if (node.isMap) {
-      final Map<Object?, Object?> values = <Object?, Object?>{
+      final values = <Object?, Object?>{
         for (final analyzer.MapLiteralEntry entry in node.elements.cast<analyzer.MapLiteralEntry>())
           entry.key.accept(this): entry.value.accept(this),
       };
       return node.isConst ? cb.literalConstMap(values) : cb.literalMap(values);
     } else {
-      final Set<Object?> values = <Object?>{
+      final values = <Object?>{
         for (final analyzer.CollectionElement entry in node.elements) entry.accept(this),
       };
       return node.isConst ? cb.literalConstSet(values) : cb.literalSet(values);
@@ -391,27 +393,26 @@ class AnalyzerAstToCodeBuilderVisitor extends analyzer.RecursiveAstVisitor<cb.Ex
   cb.Expression visitInstanceCreationExpression(analyzer.InstanceCreationExpression node) {
     final cb.Expression type = node.constructorName.type.accept(this)!;
     final String? name = node.constructorName.name?.name;
-    final List<cb.Expression> positionalArguments =
-        node.argumentList.arguments
-            .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
-            .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
-            .toList();
-    final Map<String, cb.Expression> namedArguments = <String, cb.Expression>{
+    final List<cb.Expression> positionalArguments = node.argumentList.arguments
+        .where((analyzer.Expression e) => e is! analyzer.NamedExpression)
+        .map<cb.Expression>((analyzer.Expression e) => e.accept(this)!)
+        .toList();
+    final namedArguments = <String, cb.Expression>{
       for (final analyzer.NamedExpression e
           in node.argumentList.arguments.whereType<analyzer.NamedExpression>())
         e.name.label.name: e.expression.accept(this)!,
     };
-    final List<cb.Reference> typeArguments = <cb.Reference>[
+    final typeArguments = <cb.Reference>[
       // TODO(bkonyi): consider handling type arguments
     ];
     return node.isConst
         ? cb.InvokeExpression.constOf(
-          type,
-          positionalArguments,
-          namedArguments,
-          typeArguments,
-          name,
-        )
+            type,
+            positionalArguments,
+            namedArguments,
+            typeArguments,
+            name,
+          )
         : cb.InvokeExpression.newOf(type, positionalArguments, namedArguments, typeArguments, name);
   }
 

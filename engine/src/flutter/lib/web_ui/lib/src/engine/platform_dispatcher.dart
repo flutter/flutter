@@ -59,8 +59,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
 
   @visibleForTesting
-  final DomElement accessibilityPlaceholder =
-      EngineSemantics.instance.semanticsHelper.prepareAccessibilityPlaceholder();
+  final DomElement accessibilityPlaceholder = EngineSemantics.instance.semanticsHelper
+      .prepareAccessibilityPlaceholder();
 
   PlatformConfiguration configuration = PlatformConfiguration(
     locales: parseBrowserLanguages(),
@@ -549,10 +549,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final String? text = arguments['text'] as String?;
+            ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            ClipboardMessageHandler().getDataMethodCall(callback);
+            final String? format = decoded.arguments as String?;
+            ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
             ClipboardMessageHandler().hasStringsMethodCall(callback);
@@ -1089,11 +1092,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener =
-        (DomEvent event) {
-          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-        }.toJS;
+    _brightnessMediaQueryListener = (DomEvent event) {
+      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+    }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 
@@ -1293,8 +1295,26 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     });
   }
 
+  /// The [ui.FrameData] object for the current frame.
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => FrameService.instance.frameData;
+
+  /// A callback that is invoked when the window updates the [ui.FrameData].
+  @override
+  ui.VoidCallback? get onFrameDataChanged => _onFrameDataChanged;
+  ui.VoidCallback? _onFrameDataChanged;
+  Zone _onFrameDataChangedZone = Zone.root;
+  @override
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    _onFrameDataChanged = callback;
+    _onFrameDataChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnFrameDataChanged() {
+    invoke(onFrameDataChanged, _onFrameDataChangedZone);
+  }
 
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;

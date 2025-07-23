@@ -113,6 +113,13 @@ class BuildWebCommand extends BuildSubCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag(
+      'wasm-dry-run',
+      defaultsTo: true,
+      help:
+          'Compiles wasm in dry run mode during JS only compilations. '
+          'Disable to suppress warnings.',
+    );
+    argParser.addFlag(
       'no-frequency-based-minification',
       negatable: false,
       help:
@@ -145,13 +152,13 @@ class BuildWebCommand extends BuildSubCommand {
   };
 
   @override
-  final String name = 'web';
+  final name = 'web';
 
   @override
   bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  final String description = 'Build a web application bundle.';
+  final description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -162,24 +169,21 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final String? optimizationLevelArg = stringArg('optimization-level');
-    final int? optimizationLevel =
-        optimizationLevelArg != null ? int.parse(optimizationLevelArg) : null;
+    final int? optimizationLevel = optimizationLevelArg != null
+        ? int.parse(optimizationLevelArg)
+        : null;
 
     final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
-    final int? jsOptimizationLevel =
-        dart2jsOptimizationLevelValue != null
-            ? int.parse(dart2jsOptimizationLevelValue.substring(1))
-            : optimizationLevel;
+    final int? jsOptimizationLevel = dart2jsOptimizationLevelValue != null
+        ? int.parse(dart2jsOptimizationLevelValue.substring(1))
+        : optimizationLevel;
 
     final List<String> dartDefines = extractDartDefines(
       defineConfigJsonMap: extractDartDefineConfigJsonMap(),
     );
     final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
     // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
-    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(
-      dartDefines,
-      useWasm: useWasm,
-    );
+    final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
     final bool? minifyJs = argResults!.wasParsed('minify-js') ? boolArg('minify-js') : null;
@@ -226,6 +230,13 @@ class BuildWebCommand extends BuildSubCommand {
           sourceMaps: sourceMaps,
           renderer: webRenderer,
         ),
+        WasmCompilerConfig(
+          optimizationLevel: optimizationLevel,
+          stripWasm: boolArg('strip-wasm'),
+          sourceMaps: sourceMaps,
+          minify: minifyWasm,
+          dryRun: boolArg('wasm-dry-run'),
+        ),
       ];
     }
 
@@ -259,7 +270,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    final WebBuilder webBuilder = WebBuilder(
+    final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,

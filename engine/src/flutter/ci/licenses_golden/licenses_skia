@@ -1,4 +1,4 @@
-Signature: ee955b3b74b20407fdf628a42546767f
+Signature: 3df1aa325c4dbb7e69684c8fce6d629d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -435,6 +435,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/graphite_insert_status.md
+FILE: ../../../flutter/third_party/skia/relnotes/image.md
 FILE: ../../../flutter/third_party/skia/relnotes/typeface_virtuals.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
@@ -467,7 +468,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/sksl_rt_shader.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_shared.sksl
 FILE: ../../../flutter/third_party/skia/src/sksl/sksl_vert.sksl
 FILE: ../../../flutter/third_party/skia/third_party/go.mod
-FILE: ../../../flutter/third_party/skia/toolchain/linux_trampolines/IWYU_mapping.imp
 FILE: ../../../flutter/third_party/skia/toolchain/ndk.BUILD
 FILE: ../../../flutter/third_party/skia/whitespace.txt
 ----------------------------------------------------------------------------------------------------

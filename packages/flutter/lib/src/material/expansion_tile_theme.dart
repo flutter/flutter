@@ -272,8 +272,8 @@ class ExpansionTileTheme extends InheritedTheme {
   /// ExpansionTileThemeData theme = ExpansionTileTheme.of(context);
   /// ```
   static ExpansionTileThemeData of(BuildContext context) {
-    final ExpansionTileTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<ExpansionTileTheme>();
+    final ExpansionTileTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<ExpansionTileTheme>();
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 

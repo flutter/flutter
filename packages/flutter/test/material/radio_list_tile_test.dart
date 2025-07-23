@@ -15,7 +15,10 @@ import '../widgets/semantics_tester.dart';
 Widget wrap({Widget? child}) {
   return MediaQuery(
     data: const MediaQueryData(),
-    child: Directionality(textDirection: TextDirection.ltr, child: Material(child: child)),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
   );
 }
 
@@ -30,13 +33,12 @@ void main() {
     final Type radioListTileType = const RadioListTile<int>(value: 0, groupValue: 0).runtimeType;
 
     List<RadioListTile<int>> generatedRadioListTiles;
-    List<RadioListTile<int>> findTiles() =>
-        find
-            .byType(radioListTileType)
-            .evaluate()
-            .map<Widget>((Element element) => element.widget)
-            .cast<RadioListTile<int>>()
-            .toList();
+    List<RadioListTile<int>> findTiles() => find
+        .byType(radioListTileType)
+        .evaluate()
+        .map<Widget>((Element element) => element.widget)
+        .cast<RadioListTile<int>>()
+        .toList();
 
     Widget buildFrame() {
       return wrap(
@@ -45,17 +47,16 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -166,18 +167,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -231,18 +231,17 @@ void main() {
             return Scaffold(
               body: ListView.builder(
                 itemCount: values.length,
-                itemBuilder:
-                    (BuildContext context, int index) => RadioListTile<int>(
-                      onChanged: (int? value) {
-                        log.add(value);
-                        setState(() {
-                          selectedValue = value;
-                        });
-                      },
-                      value: values[index],
-                      groupValue: selectedValue,
-                      title: Text(values[index].toString()),
-                    ),
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int? value) {
+                    log.add(value);
+                    setState(() {
+                      selectedValue = value;
+                    });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
             );
           },
@@ -360,7 +359,9 @@ void main() {
 
     await tester.pumpWidget(
       Material(
-        child: Center(child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true)),
+        child: Center(
+          child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
+        ),
       ),
     );
 
@@ -912,14 +913,13 @@ void main() {
             return RadioListTile<int>(
               value: 0,
               fillColor: fillColor,
-              onChanged:
-                  enabled
-                      ? (int? newValue) {
-                        setState(() {
-                          groupValue = newValue;
-                        });
-                      }
-                      : null,
+              onChanged: enabled
+                  ? (int? newValue) {
+                      setState(() {
+                        groupValue = newValue;
+                      });
+                    }
+                  : null,
               groupValue: groupValue,
             );
           },
@@ -1043,14 +1043,13 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return RadioListTile<int>(
                 value: 0,
-                onChanged:
-                    enabled
-                        ? (int? newValue) {
-                          setState(() {
-                            groupValue = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (int? newValue) {
+                        setState(() {
+                          groupValue = newValue;
+                        });
+                      }
+                    : null,
                 hoverColor: hoverColor,
                 groupValue: groupValue,
               );
@@ -1431,8 +1430,9 @@ void main() {
                 groupValue: true,
                 onChanged: (_) {},
                 fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-                overlayColor:
-                    useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+                overlayColor: useOverlay
+                    ? MaterialStateProperty.resolveWith(getOverlayColor)
+                    : null,
                 hoverColor: hoverColor,
               ),
             ),
@@ -1505,14 +1505,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return RadioListTile<int>(
                   value: 0,
-                  onChanged:
-                      enabled
-                          ? (int? newValue) {
-                            setState(() {
-                              groupValue = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (int? newValue) {
+                          setState(() {
+                            groupValue = newValue;
+                          });
+                        }
+                      : null,
                   hoverColor: hoverColor,
                   groupValue: groupValue,
                 );
@@ -1640,14 +1639,14 @@ void main() {
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
         key: UniqueKey(),
-        theme:
-            themeDataIsThreeLine != null
-                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-                : null,
+        theme: themeDataIsThreeLine != null
+            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+            : null,
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 RadioListTile<int>(
@@ -1756,15 +1755,15 @@ void main() {
         key: UniqueKey(),
         theme: ThemeData(
           platform: TargetPlatform.iOS,
-          listTileTheme:
-              themeDataIsThreeLine != null
-                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-                  : null,
+          listTileTheme: themeDataIsThreeLine != null
+              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+              : null,
         ),
         home: Material(
           child: ListTileTheme(
-            data:
-                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+            data: themeIsThreeLine != null
+                ? ListTileThemeData(isThreeLine: themeIsThreeLine)
+                : null,
             child: ListView(
               children: <Widget>[
                 RadioListTile<int>.adaptive(
@@ -2280,5 +2279,33 @@ void main() {
         ..circle()
         ..circle(color: hoveredBackgroundColor),
     );
+  });
+
+  testWidgets('radioSide is passed to the Radio', (WidgetTester tester) async {
+    const BorderSide side = BorderSide(color: Colors.red, width: 3.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioSide: side)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.side, side);
+  });
+
+  testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
+    final WidgetStateProperty<double?> innerRadius = MaterialStateProperty.all(6);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioInnerRadius: innerRadius)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.innerRadius, innerRadius);
   });
 }

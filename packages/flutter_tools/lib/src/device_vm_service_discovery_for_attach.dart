@@ -36,22 +36,21 @@ class LogScanningVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach
     required bool ipv6,
     required Logger logger,
   }) {
-    _protocolDiscovery =
-        (() async => ProtocolDiscovery.vmService(
-          await logReader,
-          portForwarder: portForwarder,
-          ipv6: ipv6,
-          devicePort: devicePort,
-          hostPort: hostPort,
-          logger: logger,
-        ))();
+    _protocolDiscovery = (() async => ProtocolDiscovery.vmService(
+      await logReader,
+      portForwarder: portForwarder,
+      ipv6: ipv6,
+      devicePort: devicePort,
+      hostPort: hostPort,
+      logger: logger,
+    ))();
   }
 
   late final Future<ProtocolDiscovery> _protocolDiscovery;
 
   @override
   Stream<Uri> get uris {
-    final StreamController<Uri> controller = StreamController<Uri>();
+    final controller = StreamController<Uri>();
     _protocolDiscovery.then((ProtocolDiscovery protocolDiscovery) async {
       await controller.addStream(protocolDiscovery.uris);
       await controller.close();
