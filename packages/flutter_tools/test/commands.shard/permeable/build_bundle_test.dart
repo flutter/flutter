@@ -302,7 +302,7 @@ void main() {
           kTargetPlatform: 'android-arm',
           kTargetFile: globals.fs.path.join('lib', 'main.dart'),
           kDartDefines:
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9DT05URU5UX0hBU0g9MTIzNDU=,RkxVVFRFUl9DT05URU5UX0hBU0g9MTIzNDU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9DT05URU5UX0hBU0g9MTIzNDU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
           kTrackWidgetCreation: 'true',
           kFileSystemScheme: 'org-dartlang-root',
           kIconTreeShakerFlag: 'false',
