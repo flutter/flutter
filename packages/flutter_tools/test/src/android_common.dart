@@ -144,6 +144,7 @@ class VersionTuple {
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required VersionTuple versions,
   required Directory tempDir,
+  bool skipChecking = false,
 }) async {
   // Create a new flutter project.
   final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -190,6 +191,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
     'build',
     'apk',
     '--debug',
+    if (skipChecking) '--android-skip-build-dependency-validation',
   ], workingDirectory: app.path);
   return result;
 }

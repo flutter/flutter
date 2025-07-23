@@ -213,8 +213,7 @@ class FlutterPlugin : Plugin<Project> {
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
                 (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
                 )
         if (!shouldSkipDependencyChecks) {
             try {
