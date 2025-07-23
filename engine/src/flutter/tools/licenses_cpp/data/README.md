@@ -34,7 +34,8 @@ show up in source code or in its own LICENSE file.  The format is the following:
 2) Second line - Unique regex which cannot overlap with other matcher's unique
    regexes.
 3) Remaining lines - Matcher regex that will be used to extract the full text
-   of the accepted license.
+   of the accepted license.  All whitespace is considered `\s+` to help match
+   text that is formatted differently.  Trailing whitespace is ignored too.
 
 ## secondary/
 
