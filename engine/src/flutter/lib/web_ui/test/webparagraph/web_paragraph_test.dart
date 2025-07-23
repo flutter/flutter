@@ -18,6 +18,7 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
@@ -27,7 +28,6 @@ Future<void> testMain() async {
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
-
     canvas.drawRect(const Rect.fromLTWH(0, 0, 200, 200), bluePaint);
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
@@ -51,17 +51,17 @@ Future<void> testMain() async {
       'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
     );
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
   });
 
   test('Draw WebParagraph RTL text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());D
+    expect(canvas, isA<engine.CanvasKitCanvas>());
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
@@ -75,7 +75,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_rtl_1.png', region: region);
+    await matchGoldenFile('web_paragraph_1_rtl.png', region: region);
   });
 
   // Small line breaking difference with Chrome
@@ -91,7 +91,7 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line in ltr', () async {
@@ -107,7 +107,7 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
 
     builder.addText('لABC لم def لل لم ghi');
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line', () async {
@@ -673,21 +673,18 @@ Future<void> testMain() async {
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
 
-    final Paint redPaint =
-        Paint()
-          ..color = const Color(0xFFFF0000)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
-    final Paint bluePaint =
-        Paint()
-          ..color = const Color(0xFF0000FF)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
-    final Paint greenPaint =
-        Paint()
-          ..color = const Color(0xFF00FF00)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
+    final Paint redPaint = Paint()
+      ..color = const Color(0xFFFF0000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final Paint bluePaint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final Paint greenPaint = Paint()
+      ..color = const Color(0xFF00FF00)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
     final WebParagraphStyle robotoStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
     final WebTextStyle heightStyle = WebTextStyle(fontFamily: 'Roboto', fontSize: 40, height: 2.0);
     final WebParagraphBuilder builder = WebParagraphBuilder(robotoStyle);
@@ -702,7 +699,7 @@ Future<void> testMain() async {
     {
       final rects = paragraph.getBoxesForRange(
         0,
-        paragraph.text!.length,
+        paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingTop,
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
@@ -713,7 +710,7 @@ Future<void> testMain() async {
     {
       final rects = paragraph.getBoxesForRange(
         0,
-        paragraph.text!.length,
+        paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingBottom,
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
@@ -724,7 +721,7 @@ Future<void> testMain() async {
     {
       final rects = paragraph.getBoxesForRange(
         0,
-        paragraph.text!.length,
+        paragraph.text.length,
         boxHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
         //boxWidthStyle: ui.BoxWidthStyle.tight,
       );
@@ -836,12 +833,11 @@ Future<void> testMain() async {
 
     final rects1 = paragraph.getBoxesForPlaceholders();
     final rects2 = paragraph.getBoxesForPlaceholders();
-    paragraph.getBoxesForRange(0, paragraph.text!.length);
-    final Paint bluePaint =
-        Paint()
-          ..color = const Color(0xFF0000FF)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1;
+    paragraph.getBoxesForRange(0, paragraph.text.length);
+    final Paint bluePaint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
     for (final rect in rects1) {
       canvas.drawRect(rect.toRect(), bluePaint);
     }

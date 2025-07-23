@@ -229,81 +229,6 @@ class WebTextStyle implements ui.TextStyle {
         other.fontVariations == fontVariations;
   }
 
-  @override
-  int get hashCode {
-    return Object.hash(
-      originalFontFamily,
-      fontSize,
-      fontStyle,
-      fontWeight,
-      foreground,
-      background,
-      shadows,
-      decoration,
-      decorationColor,
-      decorationStyle,
-      decorationThickness,
-      letterSpacing,
-      wordSpacing,
-      height,
-      fontFeatures,
-      fontVariations,
-    );
-  }
-
-  @override
-  String toString() {
-    String result = super.toString();
-    assert(() {
-      final double? fontSize = this.fontSize;
-      result =
-          'WebTextStyle('
-          'fontFamily: ${originalFontFamily ?? ""} '
-          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
-          'fontStyle: ${fontStyle != null ? fontStyle.toString() : ""} '
-          'fontWeight: ${fontWeight != null ? fontWeight.toString() : ""} '
-          'foreground: ${foreground != null ? foreground.toString() : ""} '
-          'background: ${background != null ? background.toString() : ""} '
-          ')';
-      if (shadows != null && shadows!.isNotEmpty) {
-        result += 'shadows(${shadows!.length}) ';
-        for (final ui.Shadow shadow in shadows!) {
-          result += '[${shadow.color} ${shadow.blurRadius} ${shadow.blurSigma}]';
-        }
-      }
-      if (decoration != null && decoration! != ui.TextDecoration.none) {
-        result +=
-            'decoration: $decoration'
-            'decorationColor: ${decorationColor != null ? decorationColor.toString() : ""} '
-            'decorationStyle: ${decorationStyle != null ? decorationStyle.toString() : ""} '
-            'decorationThickness: ${decorationThickness != null ? decorationThickness.toString() : ""} ';
-      }
-      if (letterSpacing != null) {
-        result += 'letterSpacing: $letterSpacing ';
-      }
-      if (wordSpacing != null) {
-        result += 'wordSpacing: $wordSpacing ';
-      }
-      if (height != null) {
-        result += 'height: $height ';
-      }
-      if (fontFeatures != null && fontFeatures!.isNotEmpty) {
-        result += 'fontFeatures(${fontFeatures!.length}) ';
-        for (final ui.FontFeature feature in fontFeatures!) {
-          result += '[${feature.feature} ${feature.value}]';
-        }
-      }
-      if (fontVariations != null && fontVariations!.isNotEmpty) {
-        result += 'fontVariations(${fontVariations!.length}) ';
-        for (final ui.FontVariation variation in fontVariations!) {
-          result += '[${variation.axis} ${variation.value}]';
-        }
-      }
-      return true;
-    }());
-    return result;
-  }
-
   String fontWeightIndexToCss({int fontWeightIndex = 3}) {
     switch (fontWeightIndex) {
       case 0:
@@ -500,13 +425,18 @@ class TextRange extends _RangeStartEnd {
     return other is TextRange && super == other;
   }
 
+  @override
+  String toString() {
+    return '[${this.start}:${this.end})';
+  }
+
   TextRange translate(int offset) {
     return TextRange(start: start + offset, end: end + offset);
   }
 }
 
-class StyledTextRange extends _RangeStartEnd {
-  StyledTextRange(super.start, super.end, this.style);
+class StyledTextRange extends TextRange {
+  StyledTextRange(int start, int end, this.style) : super(start: start, end: end);
 
   StyledTextRange.collapsed(super.offset, this.style) : super.collapsed();
 
@@ -517,7 +447,14 @@ class StyledTextRange extends _RangeStartEnd {
 
   @override
   String toString() {
-    return 'StyledTextRange[$this) ${placeholder != null ? 'placeholder' : 'text'}';
+    return 'StyledTextRange[${this.start}:${this.end}) ${placeholder != null ? 'placeholder' : 'text'}';
+  }
+
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is TextRange && super == other;
   }
 
   String textFrom(WebParagraph paragraph) => paragraph.text.substring(_start, _end);
@@ -863,37 +800,6 @@ class WebParagraphPlaceholder {
   final ui.TextBaseline baseline;
   final double offset;
 }
-
-class WebLineMetrics implements ui.LineMetrics {
-  @override
-  double get ascent => 0.0;
-
-  @override
-  double get descent => 0.0;
-
-  @override
-  double get unscaledAscent => 0.0;
-
-  @override
-  bool get hardBreak => false;
-
-  @override
-  double get baseline => 0.0;
-
-  @override
-  double get height => 0.0;
-
-  @override
-  double get left => 0.0;
-
-  @override
-  double get width => 0.0;
-
-  @override
-  int get lineNumber => 0;
-}
-
-class WebParagraphPlaceholder {}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)

@@ -172,13 +172,13 @@ Future<void> testMain() async {
 
     final List<TextBox> placeholders = paragraph.getBoxesForPlaceholders();
 
-    expect(placeholders.length, 3);
+    expect(placeholders.length, 6);
     expect((placeholders[0].toRect().width - 20.0).abs() < EPSILON, true);
     expect((placeholders[0].toRect().height - 20.0).abs() < EPSILON, true);
-    expect(placeholders[0].direction, TextDirection.rtl);
-    expect((placeholders[1].toRect().width - 40.0).abs() < EPSILON, true);
-    expect((placeholders[1].toRect().height - 40.0).abs() < EPSILON, true);
-    expect((placeholders[2].toRect().width - 60.0).abs() < EPSILON, true);
-    expect((placeholders[2].toRect().height - 60.0).abs() < EPSILON, true);
+    expect(placeholders[0].direction, TextDirection.ltr);
+    expect((placeholders[1].toRect().width - 20.0).abs() < EPSILON, true);
+    expect((placeholders[1].toRect().height - 20.0).abs() < EPSILON, true);
+    expect((placeholders[2].toRect().width - 20.0).abs() < EPSILON, true);
+    expect((placeholders[2].toRect().height - 20.0).abs() < EPSILON, true);
   });
 }

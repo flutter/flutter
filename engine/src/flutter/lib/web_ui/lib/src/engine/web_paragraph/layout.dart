@@ -201,9 +201,6 @@ class TextLayout {
             styledBlock.isPlaceholder,
           ),
         );
-        WebParagraphDebug.log(
-          'text#${textClusters.length}: [${textClusters.last.textRange.start}:${textClusters.last.textRange.end}) [${textClusters.last.advance.left}:${textClusters.last.advance.right})',
-        );
       }
       final ui.Rect blockAdvance = getAdvance(
         blockTextMetrics,
@@ -895,8 +892,8 @@ class ExtendedTextCluster {
     this.advance,
     this.shift,
     this.placeholder,
-  ) : start = cluster!.begin,
-      end = cluster.end;
+  ) : start = cluster == null ? 0 : cluster!.begin,
+      end = cluster == null ? 0 : cluster.end;
 
   ExtendedTextCluster.fromLast(ExtendedTextCluster lastCluster)
     : cluster = null,

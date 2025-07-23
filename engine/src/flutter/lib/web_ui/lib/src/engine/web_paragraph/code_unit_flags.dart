@@ -4,6 +4,7 @@
 
 import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/text_fragmenter.dart';
+import 'debug.dart';
 import 'paragraph.dart';
 
 class CodeUnitFlags {
@@ -34,6 +35,12 @@ class CodeUnitFlags {
       } else {
         codeUnitFlags[lineBreak].hardLineBreak = true;
       }
+    }
+
+    int i = 0;
+    for (final flags in codeUnitFlags) {
+      WebParagraphDebug.log('$i: $flags');
+      i += 1;
     }
     return codeUnitFlags;
   }

@@ -35,19 +35,15 @@ class TextWrapper {
   double _minIntrinsicWidth = double.infinity;
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kWhitespaceFlag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isWhitespace;
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kSoftLineBreakFlag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isSoftLineBreak;
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kHardLineBreakFlag);
-  }
-
-  bool _hasCodeUnitFlag(ExtendedTextCluster cluster, int flag) {
-    return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isHardLineBreak;
   }
 
   // TODO(jlavrova): Consider combining this with `_layout.addLine`.
@@ -58,7 +54,6 @@ class TextWrapper {
     _widthWhitespaces = 0.0;
     _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
     _widthLetters = clusterWidth;
-    _top = 0.0;
   }
 
   void breakLines(double width) {
@@ -66,6 +61,7 @@ class TextWrapper {
     // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
     startNewLine(0, 0.0);
+    _top = 0.0;
 
     bool hardLineBreak = false;
     for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {

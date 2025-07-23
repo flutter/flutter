@@ -11,10 +11,6 @@ import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
 
-extension on StyledTextRange {
-  TextRange get textRange => TextRange(start: start, end: end);
-}
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }

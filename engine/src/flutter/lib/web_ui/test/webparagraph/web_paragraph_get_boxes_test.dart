@@ -30,7 +30,7 @@ Future<void> testMain() async {
 
     final rects1 = paragraph.getBoxesForRange(
       0,
-      paragraph.text!.length,
+      paragraph.text.length,
       boxHeightStyle: ui.BoxHeightStyle.max,
       boxWidthStyle: ui.BoxWidthStyle.max,
     );
@@ -40,7 +40,7 @@ Future<void> testMain() async {
 
     final rects2 = paragraph.getBoxesForRange(
       0,
-      paragraph.text!.length,
+      paragraph.text.length,
       // boxHeightStyle: ui.BoxHeightStyle.tight,
       // boxWidthStyle: ui.BoxWidthStyle.tight,
     );
@@ -63,7 +63,7 @@ Future<void> testMain() async {
     {
       final rects = paragraph.getBoxesForRange(
         0,
-        paragraph.text!.length,
+        paragraph.text.length,
         boxHeightStyle: ui.BoxHeightStyle.max,
         boxWidthStyle: ui.BoxWidthStyle.max,
       );
@@ -95,7 +95,7 @@ Future<void> testMain() async {
     {
       final rects = paragraph.getBoxesForRange(
         0,
-        paragraph.text!.length,
+        paragraph.text.length,
         // boxHeightStyle: ui.BoxHeightStyle.tight,
         // boxWidthStyle: ui.BoxWidthStyle.tight,
       );
@@ -136,21 +136,21 @@ Future<void> testMain() async {
 
     final rectsTop = paragraph.getBoxesForRange(
       0,
-      paragraph.text!.length,
+      paragraph.text.length,
       boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
       //boxWidthStyle: ui.BoxWidthStyle.tight,
     );
 
     final rectsBottom = paragraph.getBoxesForRange(
       0,
-      paragraph.text!.length,
+      paragraph.text.length,
       boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
       //boxWidthStyle: ui.BoxWidthStyle.tight,
     );
 
     final rectsMiddle = paragraph.getBoxesForRange(
       0,
-      paragraph.text!.length,
+      paragraph.text.length,
       boxHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
       //boxWidthStyle: ui.BoxWidthStyle.tight,
     );

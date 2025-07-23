@@ -1,9 +1,6 @@
 // Copyright 2025 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:math' as math;
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -28,7 +25,7 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    final SegmentationResult result = segmentText(paragraph.text!);
+    final SegmentationResult result = segmentText(paragraph.text);
     int start = 0;
     for (final end in result.words.skip(1)) {
       for (int i = start; i < end; i++) {
@@ -71,15 +68,15 @@ Future<void> testMain() async {
     );
     expect(
       paragraph.getWordBoundary(
-        ui.TextPosition(offset: paragraph.text!.length + 1, affinity: ui.TextAffinity.upstream),
+        ui.TextPosition(offset: paragraph.text.length + 1, affinity: ui.TextAffinity.upstream),
       ),
-      ui.TextRange(start: paragraph.text!.length, end: paragraph.text!.length),
+      ui.TextRange(start: paragraph.text.length, end: paragraph.text.length),
     );
     expect(
       paragraph.getWordBoundary(
-        ui.TextPosition(offset: paragraph.text!.length /* affinity: ui.TextAffinity.downstream */),
+        ui.TextPosition(offset: paragraph.text.length /* affinity: ui.TextAffinity.downstream */),
       ),
-      ui.TextRange(start: paragraph.text!.length, end: paragraph.text!.length),
+      ui.TextRange(start: paragraph.text.length, end: paragraph.text.length),
     );
   });
 
@@ -114,13 +111,13 @@ Future<void> testMain() async {
       paragraph.getWordBoundary(
         const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
       ),
-      ui.TextRange(start: 0, end: paragraph.text!.length),
+      const ui.TextRange(start: 0, end: 1),
     );
     expect(
       paragraph.getWordBoundary(
-        ui.TextPosition(offset: paragraph.text!.length, affinity: ui.TextAffinity.upstream),
+        ui.TextPosition(offset: paragraph.text.length, affinity: ui.TextAffinity.upstream),
       ),
-      ui.TextRange(start: 0, end: paragraph.text!.length),
+      ui.TextRange(start: paragraph.text.length - 1, end: paragraph.text.length),
     );
   });
 
@@ -159,7 +156,7 @@ Future<void> testMain() async {
 
     expect(
       paragraph.getLineBoundary(
-        ui.TextPosition(offset: paragraph.text!.length + 1, affinity: ui.TextAffinity.upstream),
+        ui.TextPosition(offset: paragraph.text.length + 1, affinity: ui.TextAffinity.upstream),
       ),
       ui.TextRange.empty,
     );
