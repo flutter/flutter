@@ -186,17 +186,10 @@ class GlyphAtlas {
   std::shared_ptr<Texture> texture_;
   size_t generation_ = 0;
 
-#if defined(IMPELLER_TYPOGRAPHER_USE_STD_HASH)
-  using FontAtlasMap = std::unordered_map<ScaledFont,
-                                          FontGlyphAtlas,
-                                          AbslHashAdapter<ScaledFont>,
-                                          ScaledFont::Equal>;
-#else
   using FontAtlasMap = absl::flat_hash_map<ScaledFont,
                                            FontGlyphAtlas,
                                            absl::Hash<ScaledFont>,
                                            ScaledFont::Equal>;
-#endif
 
   FontAtlasMap font_atlas_map_;
 
@@ -284,17 +277,10 @@ class FontGlyphAtlas {
  private:
   friend class GlyphAtlas;
 
-#if defined(IMPELLER_TYPOGRAPHER_USE_STD_HASH)
-  using PositionsMap = std::unordered_map<SubpixelGlyph,
-                                          FrameBounds,
-                                          AbslHashAdapter<SubpixelGlyph>,
-                                          SubpixelGlyph::Equal>;
-#else
   using PositionsMap = absl::flat_hash_map<SubpixelGlyph,
                                            FrameBounds,
                                            absl::Hash<SubpixelGlyph>,
                                            SubpixelGlyph::Equal>;
-#endif
 
   PositionsMap positions_;
   FontGlyphAtlas(const FontGlyphAtlas&) = delete;
