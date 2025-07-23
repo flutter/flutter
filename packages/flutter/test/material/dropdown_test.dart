@@ -2549,6 +2549,52 @@ void main() {
     );
   }
 
+  testWidgets('DropdownButton can be focused, and hides the focusColor when using a mouse', (
+    WidgetTester tester,
+  ) async {
+    // Set strategy to alwaysTraditional so InkResponse tries to show the focusColor.
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final UniqueKey buttonKey = UniqueKey();
+    final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
+    const Color focusColor = Color(0xff00ff00);
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      buildFrame(
+        buttonKey: buttonKey,
+        onChanged: onChanged,
+        focusNode: focusNode,
+        focusColor: focusColor,
+        useMaterial3: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Click on button to open options.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(buttonKey)),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Click on option to 'three', button should have focus after.
+    await gesture.down(tester.getCenter(find.text('three')));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(Material),
+      paints..rect(
+        rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0),
+        color: focusColor.withAlpha(0), // Focus color should be transparent to hide it.
+      ),
+    );
+  });
+
   testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
