@@ -116,7 +116,7 @@ class XCResult {
       final Object? errorSummaries = issuesMap['errorSummaries'];
       if (errorSummaries is Map<String, Object?>) {
         issues.addAll(
-          _parseIssuesFromOldFormat(
+          _parseIssuesFromXcode15Format(
             type: XCResultIssueType.error,
             issueSummariesJson: errorSummaries,
             issueDiscarder: issueDiscarders,
@@ -126,7 +126,7 @@ class XCResult {
       final Object? warningSummaries = issuesMap['warningSummaries'];
       if (warningSummaries is Map<String, Object?>) {
         issues.addAll(
-          _parseIssuesFromOldFormat(
+          _parseIssuesFromXcode15Format(
             type: XCResultIssueType.warning,
             issueSummariesJson: warningSummaries,
             issueDiscarder: issueDiscarders,
@@ -452,7 +452,7 @@ List<XCResultIssue> _parseIssuesFromNewFormat({
 }
 
 /// [OLD] Renamed helper to parse issues from the old (pre-Xcode 16) format.
-List<XCResultIssue> _parseIssuesFromOldFormat({
+List<XCResultIssue> _parseIssuesFromXcode15Format({
   required XCResultIssueType type,
   required Map<String, Object?> issueSummariesJson,
   required List<XCResultIssueDiscarder> issueDiscarder,
@@ -552,7 +552,7 @@ List<XCResultIssue> _parseActionIssues(
     final Object? testFailureSummaries = actionResultIssues['testFailureSummaries'];
     if (testFailureSummaries is Map<String, Object?>) {
       issues.addAll(
-        _parseIssuesFromOldFormat(
+        _parseIssuesFromXcode15Format(
           type: XCResultIssueType.error,
           issueSummariesJson: testFailureSummaries,
           issueDiscarder: issueDiscarders,

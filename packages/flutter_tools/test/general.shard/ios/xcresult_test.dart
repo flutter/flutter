@@ -73,7 +73,8 @@ void main() {
     int exitCode = 0,
     String stderr = '',
     // Default to an OLD version of Xcode.
-    // This ensures existing tests that don't specify a version still test the old code path.
+    // This ensures that tests which don't explicitly set an Xcode version still cover
+    // the logic for pre-Xcode 16 platforms.
     Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
   }) {
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
