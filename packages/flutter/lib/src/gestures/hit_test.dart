@@ -103,7 +103,7 @@ class _OffsetTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return rhs.clone()..leftTranslate(offset.dx, offset.dy);
+    return rhs.clone()..leftTranslateByDouble(offset.dx, offset.dy, 0, 1);
   }
 }
 

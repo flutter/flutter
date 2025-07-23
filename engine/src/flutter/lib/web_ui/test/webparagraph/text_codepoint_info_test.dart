@@ -22,8 +22,92 @@ Future<void> testMain() async {
       'World domination is such an ugly phrase - \nI prefer to call it world optimisation.',
     );
     final WebParagraph paragraph = builder.build();
-    final TextLayout layout = TextLayout(paragraph);
-    layout.extractUnicodeInfo();
+
+    /*
+0: grapheme softBreak word
+1: grapheme
+2: grapheme
+3: grapheme
+4: grapheme
+5: whitespace grapheme word
+6: grapheme softBreak word
+7: grapheme
+8: grapheme
+9: grapheme
+10: grapheme
+11: grapheme
+12: grapheme
+13: grapheme
+14: grapheme
+15: grapheme
+16: whitespace grapheme word
+17: grapheme softBreak word
+18: grapheme
+19: whitespace grapheme word
+20: grapheme softBreak word
+21: grapheme
+22: grapheme
+23: grapheme
+24: whitespace grapheme word
+25: grapheme softBreak word
+26: grapheme
+27: whitespace grapheme word
+28: grapheme softBreak word
+29: grapheme
+30: grapheme
+31: grapheme
+32: whitespace grapheme word
+33: grapheme softBreak word
+34: grapheme
+35: grapheme
+36: grapheme
+37: grapheme
+38: grapheme
+39: whitespace grapheme word
+40: grapheme softBreak word
+41: whitespace grapheme word
+42: whitespace grapheme word
+43: grapheme hardBreak word
+44: whitespace grapheme word
+45: grapheme softBreak word
+46: grapheme
+47: grapheme
+48: grapheme
+49: grapheme
+50: grapheme
+51: whitespace grapheme word
+52: grapheme softBreak word
+53: grapheme
+54: whitespace grapheme word
+55: grapheme softBreak word
+56: grapheme
+57: grapheme
+58: grapheme
+59: whitespace grapheme word
+60: grapheme softBreak word
+61: grapheme
+62: whitespace grapheme word
+63: grapheme softBreak word
+64: grapheme
+65: grapheme
+66: grapheme
+67: grapheme
+68: whitespace grapheme word
+69: grapheme softBreak word
+70: grapheme
+71: grapheme
+72: grapheme
+73: grapheme
+74: grapheme
+75: grapheme
+76: grapheme
+77: grapheme
+78: grapheme
+79: grapheme
+80: grapheme
+81: grapheme word
+82: grapheme softBreak word
+*/
 
     int i = 0;
     for (final CodeUnitFlags flags in CodeUnitFlags.extractForParagraph(paragraph)) {
@@ -111,89 +195,3 @@ Future<void> testMain() async {
     }
   });
 }
-
-/*
-0: grapheme softBreak word
-1: grapheme
-2: grapheme
-3: grapheme
-4: grapheme
-5: whitespace grapheme word
-6: grapheme softBreak word
-7: grapheme
-8: grapheme
-9: grapheme
-10: grapheme
-11: grapheme
-12: grapheme
-13: grapheme
-14: grapheme
-15: grapheme
-16: whitespace grapheme word
-17: grapheme softBreak word
-18: grapheme
-19: whitespace grapheme word
-20: grapheme softBreak word
-21: grapheme
-22: grapheme
-23: grapheme
-24: whitespace grapheme word
-25: grapheme softBreak word
-26: grapheme
-27: whitespace grapheme word
-28: grapheme softBreak word
-29: grapheme
-30: grapheme
-31: grapheme
-32: whitespace grapheme word
-33: grapheme softBreak word
-34: grapheme
-35: grapheme
-36: grapheme
-37: grapheme
-38: grapheme
-39: whitespace grapheme word
-40: grapheme softBreak word
-41: whitespace grapheme word
-42: whitespace grapheme word
-43: grapheme hardBreak word
-44: whitespace grapheme word
-45: grapheme softBreak word
-46: grapheme
-47: grapheme
-48: grapheme
-49: grapheme
-50: grapheme
-51: whitespace grapheme word
-52: grapheme softBreak word
-53: grapheme
-54: whitespace grapheme word
-55: grapheme softBreak word
-56: grapheme
-57: grapheme
-58: grapheme
-59: whitespace grapheme word
-60: grapheme softBreak word
-61: grapheme
-62: whitespace grapheme word
-63: grapheme softBreak word
-64: grapheme
-65: grapheme
-66: grapheme
-67: grapheme
-68: whitespace grapheme word
-69: grapheme softBreak word
-70: grapheme
-71: grapheme
-72: grapheme
-73: grapheme
-74: grapheme
-75: grapheme
-76: grapheme
-77: grapheme
-78: grapheme
-79: grapheme
-80: grapheme
-81: grapheme word
-82: grapheme softBreak word
- */

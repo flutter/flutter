@@ -18,7 +18,6 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
-  const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
@@ -26,7 +25,6 @@ Future<void> testMain() async {
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
-
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
 
@@ -63,7 +61,7 @@ Future<void> testMain() async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
     expect(recorder, isA<engine.CkPictureRecorder>());
-    expect(canvas, isA<engine.CanvasKitCanvas>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());D
     canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
@@ -109,10 +107,16 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
 
     builder.addText('لABC لم def لل لم ghi');
-    final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
-    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+  });
+
+  test('Draw WebParagraph LTR/RTL 1 Line', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText('ABC لم def');
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
   });
 

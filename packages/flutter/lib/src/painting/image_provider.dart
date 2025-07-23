@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-    if (dart.library.js_util) '_network_image_web.dart'
+    if (dart.library.js_interop) '_network_image_web.dart'
     as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
@@ -386,12 +386,11 @@ abstract class ImageProvider<T extends Object> {
         await null; // wait an event turn in case a listener has been added to the image stream.
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<ImageProvider>('Image provider', this),
-                DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-                DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+            DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+          ];
           return true;
         }());
         if (stream.completer == null) {
@@ -444,12 +443,11 @@ abstract class ImageProvider<T extends Object> {
         } else {
           InformationCollector? collector;
           assert(() {
-            collector =
-                () => <DiagnosticsNode>[
-                  DiagnosticsProperty<ImageProvider>('Image provider', this),
-                  DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-                  DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-                ];
+            collector = () => <DiagnosticsNode>[
+              DiagnosticsProperty<ImageProvider>('Image provider', this),
+              DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
+              DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+            ];
             return true;
           }());
           FlutterError.reportError(
@@ -735,11 +733,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -756,11 +753,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+      ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -1244,7 +1240,7 @@ enum ResizeImagePolicy {
 ///    Image(
 ///      image: ResizeImage(
 ///        FileImage(File('path/to/image')),
-///        width: MediaQuery.sizeOf(context).width ~/ 2, // Half of the screen's width.
+///        width: MediaQuery.widthOf(context) ~/ 2, // Half of the screen's width.
 ///      ),
 ///    );
 /// ```

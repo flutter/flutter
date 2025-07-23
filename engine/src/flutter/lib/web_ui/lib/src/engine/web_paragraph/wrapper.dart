@@ -27,6 +27,7 @@ class TextWrapper {
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
   double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
+
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
   double _maxIntrinsicWidth = 0.0;
 
@@ -176,6 +177,7 @@ class TextWrapper {
         // Start a new line but keep the clusters sequence
         startNewLine(_whitespaces.end, _widthLetters);
       }
+
       // This is just a regular cluster, keep track of it
       _widthLetters += widthCluster;
     }

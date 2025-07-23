@@ -497,10 +497,9 @@ class TextLayout {
             styledTextBlock.textMetrics!,
             styleTextRange.translate(-styledTextBlock.start),
           );
-          final ExtendedTextCluster firstVisualClusterInBlock =
-              bidiRun.bidiLevel.isEven
-                  ? textClusters[styleClusterRange.start]
-                  : textClusters[styleClusterRange.end - 1];
+          final ExtendedTextCluster firstVisualClusterInBlock = bidiRun.bidiLevel.isEven
+              ? textClusters[styleClusterRange.start]
+              : textClusters[styleClusterRange.end - 1];
           shiftFromTextBlock = firstVisualClusterInBlock.advance.left;
           line.visualBlocks.add(
             LineClusterBlock(
@@ -816,10 +815,12 @@ class TextLayout {
           continue;
         }
         // Found the block; let's go through all the clusters IN VISUAL ORDER to find the position
-        final int start =
-            block.bidiLevel.isEven ? block.clusterRange.start : block.clusterRange.end - 1;
-        final int end =
-            block.bidiLevel.isEven ? block.clusterRange.end : block.clusterRange.start - 1;
+        final int start = block.bidiLevel.isEven
+            ? block.clusterRange.start
+            : block.clusterRange.end - 1;
+        final int end = block.bidiLevel.isEven
+            ? block.clusterRange.end
+            : block.clusterRange.start - 1;
         final int step = block.bidiLevel.isEven ? 1 : -1;
         WebParagraphDebug.log('Found block: ${block.clusterRange}');
         for (int i = start; i != end; i += step) {

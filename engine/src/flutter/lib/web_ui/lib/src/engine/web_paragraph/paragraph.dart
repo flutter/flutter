@@ -334,10 +334,12 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   String buildCssFontString() {
-    final String cssFontStyle =
-        (fontStyle == null || fontStyle == ui.FontStyle.normal) ? 'normal' : 'italic';
-    final String cssFontWeight =
-        fontWeight == null ? 'normal' : fontWeightIndexToCss(fontWeightIndex: fontWeight!.index);
+    final String cssFontStyle = (fontStyle == null || fontStyle == ui.FontStyle.normal)
+        ? 'normal'
+        : 'italic';
+    final String cssFontWeight = fontWeight == null
+        ? 'normal'
+        : fontWeightIndexToCss(fontWeightIndex: fontWeight!.index);
     final int cssFontSize = fontSize == null ? 14 : fontSize!.floor();
     final String cssFontFamily = canonicalizeFontFamily(originalFontFamily)!;
 
@@ -409,18 +411,24 @@ abstract class _RangeStartEnd {
     this.start = start;
     this.end = end;
   }
+
   _RangeStartEnd.collapsed(int offset) : this(offset, offset);
+
   _RangeStartEnd.zero() : this.collapsed(0);
 
   int _start = -1;
+
   int get start => _start;
+
   set start(int value) {
     assert(value >= -1, 'Start index cannot be negative: $value');
     _start = value;
   }
 
   int _end = -1;
+
   int get end => _end;
+
   set end(int value) {
     assert(value >= -1, 'End index cannot be negative: $value');
     _end = value;
@@ -451,7 +459,9 @@ abstract class _RangeStartEnd {
 
 class ClusterRange extends _RangeStartEnd {
   ClusterRange({required int start, required int end}) : super(start, end);
+
   ClusterRange.collapsed(super.offset) : super.collapsed();
+
   ClusterRange.zero() : super.zero();
 
   ClusterRange clone() {
@@ -471,7 +481,9 @@ class ClusterRange extends _RangeStartEnd {
 
 class TextRange extends _RangeStartEnd {
   TextRange({required int start, required int end}) : super(start, end);
+
   TextRange.collapsed(super.offset) : super.collapsed();
+
   TextRange.zero() : super.zero();
 
   TextRange clone() {
@@ -495,7 +507,9 @@ class TextRange extends _RangeStartEnd {
 
 class StyledTextRange extends _RangeStartEnd {
   StyledTextRange(super.start, super.end, this.style);
+
   StyledTextRange.collapsed(super.offset, this.style) : super.collapsed();
+
   StyledTextRange.zero(this.style) : super.zero();
 
   final WebTextStyle style;
@@ -555,6 +569,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   double get height => _height;
+
   set height(double value) => _height = value;
   double _height = 0;
 
@@ -564,21 +579,25 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   double get longestLine => _longestLine;
+
   set longestLine(double value) => _longestLine = value;
   double _longestLine = 0;
 
   @override
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
+
   set maxIntrinsicWidth(double value) => _maxIntrinsicWidth = value;
   double _maxIntrinsicWidth = 0;
 
   @override
   double get minIntrinsicWidth => _minIntrinsicWidth;
+
   set minIntrinsicWidth(double value) => _minIntrinsicWidth = value;
   double _minIntrinsicWidth = 0;
 
   @override
   double get width => _width;
+
   set width(double value) => _width = value;
   double _width = 0;
 
@@ -844,6 +863,37 @@ class WebParagraphPlaceholder {
   final ui.TextBaseline baseline;
   final double offset;
 }
+
+class WebLineMetrics implements ui.LineMetrics {
+  @override
+  double get ascent => 0.0;
+
+  @override
+  double get descent => 0.0;
+
+  @override
+  double get unscaledAscent => 0.0;
+
+  @override
+  bool get hardBreak => false;
+
+  @override
+  double get baseline => 0.0;
+
+  @override
+  double get height => 0.0;
+
+  @override
+  double get left => 0.0;
+
+  @override
+  double get width => 0.0;
+
+  @override
+  int get lineNumber => 0;
+}
+
+class WebParagraphPlaceholder {}
 
 class WebParagraphBuilder implements ui.ParagraphBuilder {
   WebParagraphBuilder(ui.ParagraphStyle paragraphStyle)

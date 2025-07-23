@@ -4242,6 +4242,10 @@ abstract class ImageFilter {
   /// also be at least one sampler2D uniform, the first of which will be set by
   /// the engine to contain the filter input.
   ///
+  /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
+  /// reversed. Custom fragment shaders must invert the y-axis on
+  /// GLES or they will render upside-down.
+  ///
   /// For example, the following is a valid fragment shader that can be used
   /// with this API. Note that the uniform names are not required to have any
   /// particular value.
@@ -4257,7 +4261,12 @@ abstract class ImageFilter {
   /// out vec4 frag_color;
   ///
   /// void main() {
-  ///   frag_color = texture(u_texture_input, FlutterFragCoord().xy / u_size) * u_time;
+  ///   vec2 uv = FlutterFragCoord().xy / u_size;
+  /// // Reverse y axis for OpenGL backend.
+  /// #ifdef IMPELLER_TARGET_OPENGLES
+  ///   uv.y = 1.0 - uv.y
+  /// #endif
+  ///   frag_color = texture(u_texture_input, uv) * u_time;
   ///
   /// }
   ///
@@ -4492,7 +4501,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
         _equals(nativeFilter, other.nativeFilter);
   }
 
-  @Native<Bool Function(Handle, Handle)>(symbol: 'ImageFilter::equal')
+  @Native<Bool Function(Handle, Handle)>(symbol: 'ImageFilter::equals')
   external static bool _equals(_ImageFilter a, _ImageFilter b);
 
   @override
@@ -4824,8 +4833,9 @@ base class Gradient extends Shader {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
   }
@@ -4877,8 +4887,9 @@ base class Gradient extends Shader {
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
 
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
@@ -4959,8 +4970,9 @@ base class Gradient extends Shader {
        super._() {
     _validateColorStops(colors, colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initSweep(
       center.dx,
@@ -5458,8 +5470,9 @@ base class Vertices extends NativeFieldWrapperClass1 {
       return true;
     }());
     final Float32List encodedPositions = _encodePointList(positions);
-    final Float32List? encodedTextureCoordinates =
-        (textureCoordinates != null) ? _encodePointList(textureCoordinates) : null;
+    final Float32List? encodedTextureCoordinates = (textureCoordinates != null)
+        ? _encodePointList(textureCoordinates)
+        : null;
     final Int32List? encodedColors = colors != null ? _encodeColorList(colors) : null;
     final Uint16List? encodedIndices = indices != null ? Uint16List.fromList(indices) : null;
 
@@ -7112,8 +7125,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Int32List? colorBuffer =
-        (colors == null || colors.isEmpty) ? null : _encodeColorList(colors);
+    final Int32List? colorBuffer = (colors == null || colors.isEmpty)
+        ? null
+        : _encodeColorList(colors);
     final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 

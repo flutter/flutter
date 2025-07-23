@@ -20,7 +20,7 @@ function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics >&2) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -30,6 +30,11 @@ function pub_upgrade_with_retry {
     >&2 echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
     return 1
   fi
+
+  # Touch the pubspec.lock to ensure, even if this was a NOP, it is newer than pubspec.yaml.
+  # See https://github.com/flutter/flutter/issues/171024.
+  touch "$FLUTTER_TOOLS_DIR/pubspec.lock" >&2
+
   return 0
 }
 

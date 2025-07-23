@@ -23,7 +23,7 @@ open class FlutterExtension {
     val compileSdkVersion: Int = 36
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    val minSdkVersion: Int = 21
+    val minSdkVersion: Int = 24
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -31,7 +31,7 @@ open class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    val targetSdkVersion: Int = 35
+    val targetSdkVersion: Int = 36
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.

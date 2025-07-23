@@ -535,12 +535,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required GlobalKey key,
   }) {
     return _CupertinoInspectorButton.filled(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
+      semanticsLabel: semanticsLabel,
       icon: CupertinoIcons.xmark,
       buttonKey: key,
     );
@@ -549,28 +549,28 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
-    bool isLeftAligned = true,
+    required String semanticsLabel,
+    bool usesDefaultAlignment = true,
   }) {
     return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
-      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+      semanticsLabel: semanticsLabel,
+      icon: usesDefaultAlignment ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
     );
   }
 
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required String semanticLabel,
+    required String semanticsLabel,
     required bool selectionOnTapEnabled,
   }) {
     return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
-      semanticLabel: semanticLabel,
-      // This icon is also used for the Material-styled button and for DevTools.
-      // It should be updated in all 3 places if changed.
-      icon: CupertinoIcons.cursor_rays,
+      semanticsLabel: semanticsLabel,
+      // This unicode icon is also used for the Material-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
       toggledOn: selectionOnTapEnabled,
     );
   }
@@ -685,21 +685,21 @@ class _CupertinoAppState extends State<CupertinoApp> {
 class _CupertinoInspectorButton extends InspectorButton {
   const _CupertinoInspectorButton.filled({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     super.buttonKey,
   }) : super.filled();
 
   const _CupertinoInspectorButton.toggle({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
     super.toggledOn,
   }) : super.toggle();
 
   const _CupertinoInspectorButton.iconOnly({
     required super.onPressed,
-    required super.semanticLabel,
+    required super.semanticsLabel,
     required super.icon,
   }) : super.iconOnly();
 
@@ -707,7 +707,7 @@ class _CupertinoInspectorButton extends InspectorButton {
   Widget build(BuildContext context) {
     final Icon buttonIcon = Icon(
       icon,
-      semanticLabel: semanticLabel,
+      semanticLabel: semanticsLabel,
       size: iconSizeForVariant,
       color: foregroundColor(context),
     );
@@ -717,21 +717,20 @@ class _CupertinoInspectorButton extends InspectorButton {
       padding: const EdgeInsets.all(
         (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
       ),
-      child:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? CupertinoButton.tinted(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                child: buttonIcon,
-              )
-              : CupertinoButton(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                color: backgroundColor(context),
-                child: buttonIcon,
-              ),
+      child: variant == InspectorButtonVariant.toggle && !toggledOn!
+          ? CupertinoButton.tinted(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              child: buttonIcon,
+            )
+          : CupertinoButton(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              color: backgroundColor(context),
+              child: buttonIcon,
+            ),
     );
   }
 

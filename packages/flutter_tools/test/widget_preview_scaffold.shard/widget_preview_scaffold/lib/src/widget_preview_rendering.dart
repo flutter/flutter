@@ -5,18 +5,19 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
-import 'dtd_services.dart';
+import 'dtd/dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
@@ -47,6 +48,7 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
     final TextStyle boldStyle = fixBlurryText(
       TextStyle(fontWeight: FontWeight.bold),
     );
+    final TextStyle monospaceStyle = GoogleFonts.robotoMono();
 
     return SizedBox(
       height: size.height,
@@ -61,15 +63,16 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
                     text: 'Failed to initialize widget tree: ',
                     style: boldStyle,
                   ),
-                  // TODO(bkonyi): use monospace font
-                  TextSpan(text: error.toString()),
+                  TextSpan(text: error.toString(), style: monospaceStyle),
                 ],
               ),
             ),
             Text('Stacktrace:', style: boldStyle),
-            // TODO(bkonyi): use monospace font
             SelectableText.rich(
-              TextSpan(children: _formatFrames(trace.frames)),
+              TextSpan(
+                children: _formatFrames(trace.frames),
+                style: monospaceStyle,
+              ),
             ),
           ],
         ),
@@ -145,6 +148,33 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class Preview extends StatelessWidget {
+  const Preview({super.key, required this.preview, required this.child});
+
+  final WidgetPreview preview;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  String toStringShort() {
+    final StringBuffer buffer = StringBuffer('@Preview');
+    if (preview.name != null) {
+      buffer.write('(name: "${preview.name}")');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    preview.debugFillProperties(properties);
   }
 }
 
@@ -226,7 +256,12 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             key: key,
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
-              child: widget.preview.builder(),
+              child: EnableWidgetInspectorScope(
+                child: Preview(
+                  preview: widget.preview,
+                  child: widget.preview.builder(),
+                ),
+              ),
             ),
           );
           if (performRestart) {
@@ -287,6 +322,26 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     preview = WidgetPreviewMediaQueryOverride(
       preview: widget.preview,
       brightnessListenable: brightnessListenable,
+      child: preview,
+    );
+
+    preview = WidgetPreviewLocalizations(
+      localizationsData: widget.preview.localizations,
+      child: preview,
+    );
+
+    // Override the asset resolution behavior to automatically insert
+    // 'packages/$packageName/` in front of non-package paths as some previews
+    // may reference assets that are within the current project and wouldn't
+    // normally require a package specifier.
+    // TODO(bkonyi): this doesn't modify the behavior of asset loading logic in
+    // the engine implementation. This means that any asset loading done by
+    // APIs provided in dart:ui won't work correctly for non-package asset
+    // paths (e.g., shaders loaded by `FragmentProgram.fromAsset()`).
+    //
+    // See https://github.com/flutter/flutter/issues/171284
+    preview = DefaultAssetBundle(
+      bundle: PreviewAssetBundle(packageName: widget.preview.packageName),
       child: preview,
     );
 
@@ -440,6 +495,72 @@ class WidgetPreviewMediaQueryOverride extends StatelessWidget {
   }
 }
 
+/// Wraps [child] with a [Localizations] with localization data from
+/// [localizationsData].
+class WidgetPreviewLocalizations extends StatefulWidget {
+  const WidgetPreviewLocalizations({
+    super.key,
+    required this.localizationsData,
+    required this.child,
+  });
+
+  final PreviewLocalizationsData? localizationsData;
+  final Widget child;
+
+  @override
+  State<WidgetPreviewLocalizations> createState() =>
+      _WidgetPreviewLocalizationsState();
+}
+
+class _WidgetPreviewLocalizationsState
+    extends State<WidgetPreviewLocalizations> {
+  PreviewLocalizationsData get _localizationsData => widget.localizationsData!;
+  late final LocalizationsResolver _localizationsResolver =
+      LocalizationsResolver(
+        supportedLocales: _localizationsData.supportedLocales,
+        locale: _localizationsData.locale,
+        localeListResolutionCallback:
+            _localizationsData.localeListResolutionCallback,
+        localeResolutionCallback: _localizationsData.localeResolutionCallback,
+        localizationsDelegates: _localizationsData.localizationsDelegates,
+      );
+
+  @override
+  void didUpdateWidget(WidgetPreviewLocalizations oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final PreviewLocalizationsData? localizationsData =
+        widget.localizationsData;
+    if (localizationsData == null) {
+      return;
+    }
+    _localizationsResolver.update(
+      supportedLocales: localizationsData.supportedLocales,
+      locale: localizationsData.locale,
+      localeListResolutionCallback:
+          localizationsData.localeListResolutionCallback,
+      localeResolutionCallback: localizationsData.localeResolutionCallback,
+      localizationsDelegates: localizationsData.localizationsDelegates,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.localizationsData == null) {
+      return widget.child;
+    }
+    return ListenableBuilder(
+      listenable: _localizationsResolver,
+      builder: (context, _) {
+        return Localizations(
+          locale: _localizationsResolver.locale,
+          delegates: _localizationsResolver.localizationsDelegates.toList(),
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
+
 /// An [InheritedWidget] that propagates the current size of the
 /// WidgetPreviewScaffold.
 ///
@@ -577,12 +698,28 @@ class _WidgetPreviewWrapperBox extends RenderShiftedBox {
 }
 
 /// Custom [AssetBundle] used to map original asset paths from the parent
-/// project to those in the preview project.
+/// projects to those in the preview project.
 class PreviewAssetBundle extends PlatformAssetBundle {
+  PreviewAssetBundle({required this.packageName});
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  ///
+  /// This should only be null if the preview is defined in a file that's not
+  /// part of a Flutter library (e.g., is defined in a test).
+  // TODO(bkonyi): verify what the behavior should be in this scenario.
+  final String? packageName;
+
   // Assets shipped via package dependencies have paths that start with
   // 'packages'.
   static const String _kPackagesPrefix = 'packages';
 
+  // TODO(bkonyi): when loading an invalid asset path that doesn't start with
+  // 'packages', this throws a FlutterError referencing the modified key
+  // instead of the original. We should catch the error and rethrow one with
+  // the original key in the error message.
   @override
   Future<ByteData> load(String key) {
     // These assets are always present or are shipped via a package and aren't
@@ -591,12 +728,13 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     if (key == 'AssetManifest.bin' ||
         key == 'AssetManifest.json' ||
         key == 'FontManifest.json' ||
-        key.startsWith(_kPackagesPrefix)) {
+        key.startsWith(_kPackagesPrefix) ||
+        packageName == null) {
       return super.load(key);
     }
-    // Other assets are from the parent project. Map their keys to those found
-    // in the pubspec.yaml of the preview envirnment.
-    return super.load('../../$key');
+    // Other assets are from the parent project. Map their keys to package
+    // paths corresponding to the package containing the preview.
+    return super.load(_toPackagePath(key));
   }
 
   @override
@@ -606,9 +744,11 @@ class PreviewAssetBundle extends PlatformAssetBundle {
       return ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
     return await ImmutableBuffer.fromAsset(
-      key.startsWith(_kPackagesPrefix) ? key : '../../$key',
+      key.startsWith(_kPackagesPrefix) ? key : _toPackagePath(key),
     );
   }
+
+  String _toPackagePath(String key) => '$_kPackagesPrefix/$packageName/$key';
 }
 
 /// Main entrypoint for the widget previewer.
@@ -623,18 +763,30 @@ Future<void> mainImpl() async {
   // individual preview so the widget inspector won't allow for users to select
   // widgets that make up the widget preview scaffolding.
   binding.debugExcludeRootWidgetInspector = true;
-  // TODO(bkonyi): store somewhere.
-  await WidgetPreviewScaffoldDtdServices().connect();
-  runApp(WidgetPreviewScaffold(previews: previews));
+  final WidgetPreviewScaffoldDtdServices dtdServices =
+      WidgetPreviewScaffoldDtdServices();
+  await dtdServices.connect();
+  runWidget(
+    DisableWidgetInspectorScope(
+      child: binding.wrapWithDefaultView(
+        WidgetPreviewScaffold(previews: previews, dtdServices: dtdServices),
+      ),
+    ),
+  );
 }
 
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
 class WidgetPreviewScaffold extends StatelessWidget {
-  WidgetPreviewScaffold({super.key, required this.previews});
+  WidgetPreviewScaffold({
+    super.key,
+    required this.previews,
+    required this.dtdServices,
+  });
 
   final List<WidgetPreview> Function() previews;
+  final WidgetPreviewScaffoldDtdServices dtdServices;
 
   // Positioning values for positioning the previewer
   final double _previewLeftPadding = 60.0;
@@ -692,34 +844,41 @@ class WidgetPreviewScaffold extends StatelessWidget {
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Column(
-          children: [
-            ValueListenableBuilder<LayoutType>(
-              valueListenable: _selectedLayout,
-              builder: (context, selectedLayout, _) {
-                return Column(
-                  children: [
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.gridView),
-                      icon: Icon(Icons.grid_on),
-                      color: selectedLayout == LayoutType.gridView
-                          ? Colors.blue
-                          : Colors.black,
-                    ),
-                    IconButton(
-                      onPressed: () => _toggleLayout(LayoutType.listView),
-                      icon: Icon(Icons.view_list),
-                      color: selectedLayout == LayoutType.listView
-                          ? Colors.blue
-                          : Colors.black,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+        child: ValueListenableBuilder<LayoutType>(
+          valueListenable: _selectedLayout,
+          builder: (context, selectedLayout, _) {
+            return Column(
+              children: [
+                IconButton(
+                  onPressed: () => _toggleLayout(LayoutType.gridView),
+                  icon: Icon(Icons.grid_on),
+                  color: selectedLayout == LayoutType.gridView
+                      ? Colors.blue
+                      : Colors.black,
+                ),
+                IconButton(
+                  onPressed: () => _toggleLayout(LayoutType.listView),
+                  icon: Icon(Icons.view_list),
+                  color: selectedLayout == LayoutType.listView
+                      ? Colors.blue
+                      : Colors.black,
+                ),
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _hotRestartPreviewerButton() {
+    return Container(
+      alignment: Alignment.topRight,
+      padding: EdgeInsets.only(
+        top: _toggleButtonsTopPadding,
+        right: _toggleButtonsLeftPadding,
+      ),
+      child: WidgetPreviewerRestartButton(dtdServices: dtdServices),
     );
   }
 
@@ -763,16 +922,15 @@ class WidgetPreviewScaffold extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Material(
         color: Colors.transparent,
-        child: DefaultAssetBundle(
-          bundle: PreviewAssetBundle(),
-          child: Stack(
-            children: [
-              // Display the previewer
-              _displayPreviewer(previewView),
-              // Display the layout toggle buttons
-              _displayToggleLayoutButtons(),
-            ],
-          ),
+        child: Stack(
+          children: [
+            // Display the previewer
+            _displayPreviewer(previewView),
+            // Display the layout toggle buttons
+            _displayToggleLayoutButtons(),
+            // Display the global hot restart button
+            _hotRestartPreviewerButton(),
+          ],
         ),
       ),
     );

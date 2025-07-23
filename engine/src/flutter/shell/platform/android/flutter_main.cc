@@ -45,6 +45,23 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
+// Workaround for crashes in Vivante GL driver on Android.
+//
+// See:
+//   * https://github.com/flutter/flutter/issues/167850
+//   * http://crbug.com/141785
+#ifdef FML_OS_ANDROID
+bool IsVivante() {
+  char product_model[PROP_VALUE_MAX];
+  __system_property_get("ro.hardware.egl", product_model);
+  return strcmp(product_model, "VIVANTE") == 0;
+}
+#else
+bool IsVivante() {
+  return false;
+}
+#endif  // FML_OS_ANDROID
+
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings,
@@ -274,7 +291,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
 #endif
 
   if (settings.enable_impeller &&
-      api_level >= kMinimumAndroidApiLevelForImpeller) {
+      api_level >= kMinimumAndroidApiLevelForImpeller && !IsVivante()) {
     return AndroidRenderingAPI::kImpellerAutoselect;
   }
 

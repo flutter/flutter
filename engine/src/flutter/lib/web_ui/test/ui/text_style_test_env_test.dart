@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
 
@@ -13,7 +14,10 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(setUpTestViewDimensions: false);
+  setUpUnitTests(
+    setUpTestViewDimensions: false,
+    testEnvironment: const ui_web.TestEnvironment.flutterTester(),
+  );
 
   // Previously the logic that set the effective font family would forget the
   // original value and would print incorrect value in toString.

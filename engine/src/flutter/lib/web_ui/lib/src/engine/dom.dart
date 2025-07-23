@@ -73,6 +73,37 @@ external DomObjectConstructor get objectConstructor;
 
 extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
+
+  external void defineProperty(
+    JSObject object,
+    String property,
+    DomPropertyDataDescriptor descriptor,
+  );
+}
+
+extension type DomPropertyDataDescriptor._primary(JSObject _) implements JSObject {
+  factory DomPropertyDataDescriptor({
+    Object? value,
+    bool configurable = false,
+    bool enumerable = false,
+    bool writable = false,
+  }) => DomPropertyDataDescriptor._(
+    value: value?.toJSAnyDeep,
+    configurable: configurable,
+    enumerable: enumerable,
+    writable: writable,
+  );
+  external factory DomPropertyDataDescriptor._({
+    required JSAny? value,
+    required bool configurable,
+    required bool enumerable,
+    required bool writable,
+  });
+
+  external JSAny? get value;
+  external bool get configurable;
+  external bool get enumerable;
+  external bool get writable;
 }
 
 @JS('Window')
@@ -171,6 +202,9 @@ extension type DomConsole._(JSObject _) implements JSObject {
   void debug(Object? arg) => _debug(arg.toString());
 }
 
+@JS('parseFloat')
+external double parseFloatImpl(String value);
+
 @JS('window')
 external DomWindow get domWindow;
 
@@ -204,6 +238,8 @@ extension type DomNavigator._(JSObject _) implements JSObject {
   external String? get platform;
   external String get userAgent;
 
+  external bool vibrate(JSAny? pattern);
+
   @JS('languages')
   external JSArray<JSAny?>? get _languages;
   List<String>? get languages =>
@@ -230,7 +266,6 @@ extension type DomDocument._(JSObject _) implements DomNode {
     }
   }
 
-  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
   external DomText createTextNode(String data);
@@ -468,6 +503,45 @@ extension type DomElement._(JSObject _) implements DomNode {
   external DomShadowRoot? get shadowRoot;
 
   external void setPointerCapture(num? pointerId);
+
+  /// The **`computedStyleMap()`** method of
+  /// the [Element] interface returns a [StylePropertyMapReadOnly]
+  /// interface which provides a read-only representation of a CSS declaration
+  /// block that is
+  /// an alternative to [CSSStyleDeclaration].
+  external StylePropertyMapReadOnly computedStyleMap();
+}
+
+/// The **`StylePropertyMapReadOnly`** interface of the
+/// [CSS Typed Object Model API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model#css_typed_object_model)
+/// provides a read-only representation of a CSS declaration block that is an
+/// alternative to [CSSStyleDeclaration]. Retrieve an instance of this interface
+/// using [Element.computedStyleMap].
+///
+/// ---
+///
+/// API documentation sourced from
+/// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/StylePropertyMapReadOnly).
+extension type StylePropertyMapReadOnly._(JSObject _) implements JSObject {
+  /// The **`get()`** method of the
+  /// [StylePropertyMapReadOnly] interface returns a [CSSStyleValue]
+  /// object for the first value of the specified property.
+  external JSObject? get(String property);
+
+  /// The **`getAll()`** method of the
+  /// `StylePropertyMapReadOnly` interface returns an array of
+  /// [CSSStyleValue] objects containing the values for the provided property.
+  external JSArray<JSObject> getAll(String property);
+
+  /// The **`has()`** method of the
+  /// [StylePropertyMapReadOnly] interface indicates whether the specified
+  /// property is in the `StylePropertyMapReadOnly` object.
+  external bool has(String property);
+
+  /// The **`size`** read-only property of the
+  /// [StylePropertyMapReadOnly] interface returns an unsigned long integer
+  /// containing the size of the `StylePropertyMapReadOnly` object.
+  external int get size;
 }
 
 DomElement createDomElement(String tag) => domDocument.createElement(tag);
@@ -782,6 +856,7 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   return canvas;
 }
 
+@JS('WebGLRenderingContext')
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
@@ -790,6 +865,20 @@ extension type WebGLContext._(JSObject _) implements JSObject {
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  external JSAny? getExtension(String name);
+
+  WebGLLoseContextExtension get loseContextExtension {
+    return getExtension('WEBGL_lose_context')! as WebGLLoseContextExtension;
+  }
+
+  external bool isContextLost();
+}
+
+extension type WebGLLoseContextExtension._(JSObject _) implements JSObject {
+  external void loseContext();
+
+  external void restoreContext();
 }
 
 extension type DomCanvasImageSource._(JSObject _) implements JSObject {}
@@ -971,11 +1060,6 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
       return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
     }
   }
-}
-
-@JS('WebGLRenderingContext')
-extension type DomWebGLRenderingContext._(JSObject _) implements JSObject {
-  external bool isContextLost();
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -2264,19 +2348,18 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
   'flutter-engine',
   DomTrustedTypePolicyOptions(
     // Validates the given [url].
-    createScriptURL:
-        (String url) {
-          final Uri uri = Uri.parse(url);
-          if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
-            return uri.toString().toJS;
-          }
-          domWindow.console.error(
-            'URL rejected by TrustedTypes policy flutter-engine: $url'
-            '(download prevented)',
-          );
+    createScriptURL: (String url) {
+      final Uri uri = Uri.parse(url);
+      if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
+        return uri.toString().toJS;
+      }
+      domWindow.console.error(
+        'URL rejected by TrustedTypes policy flutter-engine: $url'
+        '(download prevented)',
+      );
 
-          return null;
-        }.toJS,
+      return null;
+    }.toJS,
   ),
 );
 
