@@ -58,11 +58,7 @@ class BuildApkCommand extends BuildSubCommand {
             'Generate build files used by flutter but '
             'do not build any artifacts.',
       )
-      ..addFlag(
-        'from-app-bundle',
-        help:
-            'Generates an APK from an app bundle.',
-      )
+      ..addFlag('from-app-bundle', help: 'Generates an APK from an app bundle.')
       ..addMultiOption(
         'target-platform',
         allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -174,7 +170,6 @@ class BuildApkCommand extends BuildSubCommand {
         // - validateDeferredComponents: boolArg('validate-deferred-components'),
         // - deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
         validateDeferredComponents: false,
-        deferredComponentsEnabled: false,
       );
       final File bundleFile = findBundleFile(project, buildInfo, logger, analytics);
       final Directory bundleDir = bundleFile.parent;
@@ -186,7 +181,7 @@ class BuildApkCommand extends BuildSubCommand {
       final File expectedApkFile = androidGradleBuilder
           .findExpectedFilesForApk(androidBuildInfo, project)
           .first;
-      const String universalApkName = 'universal.apk';
+      const universalApkName = 'universal.apk';
 
       _processUtils.runSync(
         <String>[
@@ -207,7 +202,7 @@ class BuildApkCommand extends BuildSubCommand {
 
       final List<int> bytes = globals.fs.file(apksOutput).readAsBytesSync();
       final Archive archive = ZipDecoder().decodeBytes(bytes);
-      for (final ArchiveFile file in archive) {
+      for (final file in archive) {
         if (file.name == universalApkName) {
           if (!expectedApkFile.parent.existsSync()) {
             expectedApkFile.parent.createSync(recursive: true);
