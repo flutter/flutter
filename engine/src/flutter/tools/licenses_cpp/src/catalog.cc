@@ -4,7 +4,9 @@
 
 #include "flutter/tools/licenses_cpp/src/catalog.h"
 
+#include <algorithm>
 #include <fstream>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -145,15 +147,46 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
   hit_results.reserve(selector_results.size());
   for (int selector_result : selector_results) {
     RE2* matcher = matchers_[selector_result].get();
-    std::string_view match_text;
-    if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
-                       &match_text,
-                       /*nsubmatch=*/1)) {
-      results.emplace_back(
-          Catalog::Match::MakeWithView(names_[selector_result], match_text));
-      hit_results.push_back(selector_result);
+    int num_groups = matcher->NumberOfCapturingGroups();
+
+    if (num_groups == 0) {
+      std::string_view match_text;
+      if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
+                         &match_text,
+                         /*nsubmatch=*/1)) {
+        results.emplace_back(
+            Catalog::Match::MakeWithView(names_[selector_result], match_text));
+        hit_results.push_back(selector_result);
+      } else {
+        missed_results.push_back(selector_result);
+      }
     } else {
-      missed_results.push_back(selector_result);
+      std::vector<re2::StringPiece> submatches(num_groups + 1);
+      if (matcher->Match(query, 0, query.length(), RE2::Anchor::UNANCHORED,
+                         submatches.data(), num_groups + 1)) {
+        std::string_view full_match = submatches[0];
+        const char* full_match_end = full_match.data() + full_match.size();
+
+        std::string non_group_text;
+        non_group_text.reserve(full_match.size());
+        const char* position = full_match.data();
+        for (int i = 1; i <= num_groups; ++i) {
+          std::string_view submatch = submatches[i];
+          if (submatch.data() > position) {
+            non_group_text.append(position, submatch.data() - position);
+            position = submatch.data() + submatch.size();
+          }
+        }
+        if (position < full_match_end) {
+          non_group_text.append(position, full_match_end - position);
+        }
+
+        results.emplace_back(Catalog::Match::MakeWithString(
+            names_[selector_result], std::move(non_group_text)));
+        hit_results.push_back(selector_result);
+      } else {
+        missed_results.push_back(selector_result);
+      }
     }
   }
   if (selector_results.size() != results.size()) {
@@ -179,10 +212,11 @@ absl::StatusOr<std::vector<Catalog::Match>> Catalog::FindMatch(
   } else {
     for (size_t i = 0; i < results.size(); ++i) {
       for (size_t j = i + 1; j < results.size(); ++j) {
-        if (Overlaps(results[i].GetMatchedText(), results[j].GetMatchedText())) {
-          return absl::InvalidArgumentError(
-              absl::StrCat("Selected matchers overlap (", results[i].GetMatcher(),
-                           ", ", results[j].GetMatcher(), ")."));
+        if (Overlaps(results[i].GetMatchedText(),
+                     results[j].GetMatchedText())) {
+          return absl::InvalidArgumentError(absl::StrCat(
+              "Selected matchers overlap (", results[i].GetMatcher(), ", ",
+              results[j].GetMatcher(), ")."));
         }
       }
     }
