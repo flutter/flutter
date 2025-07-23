@@ -784,7 +784,7 @@ void main() {
       final ResidentCompiler residentCompiler = FakeResidentCompiler()
         ..output = const CompilerOutput('a', 0, <Uri>[]);
 
-      const devConfig = WebDevServerConfig();
+      const webDevServerConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -810,7 +810,7 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
-        devConfig: devConfig,
+        webDevServerConfig: webDevServerConfig,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -890,7 +890,7 @@ void main() {
         outputFile.parent.childFile('a.map').writeAsStringSync('{}');
         outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-        const devConfig = WebDevServerConfig();
+        const webDevServerConfig = WebDevServerConfig();
         final webDevFS = WebDevFS(
           packagesFilePath: '.dart_tool/package_config.json',
           urlTunneller: null,
@@ -916,7 +916,7 @@ void main() {
           isWasm: false,
           useLocalCanvasKit: false,
           rootDirectory: globals.fs.currentDirectory,
-          devConfig: devConfig,
+          webDevServerConfig: webDevServerConfig,
           fileSystem: globals.fs,
           logger: globals.logger,
           platform: globals.platform,
@@ -968,7 +968,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    const devConfig = WebDevServerConfig();
+    const webDevServerConfig = WebDevServerConfig();
     final webDevFS = WebDevFS(
       packagesFilePath: '.dart_tool/package_config.json',
       urlTunneller: null,
@@ -989,7 +989,7 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      devConfig: devConfig,
+      webDevServerConfig: webDevServerConfig,
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
@@ -1010,7 +1010,7 @@ void main() {
     outputFile.parent.childFile('a.json').writeAsStringSync('{}');
     outputFile.parent.childFile('a.map').writeAsStringSync('{}');
 
-    const devConfig = WebDevServerConfig();
+    const webDevServerConfig = WebDevServerConfig();
     final webDevFS = WebDevFS(
       packagesFilePath: '.dart_tool/package_config.json',
       urlTunneller: null,
@@ -1037,7 +1037,7 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      devConfig: devConfig,
+      webDevServerConfig: webDevServerConfig,
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
@@ -1065,7 +1065,7 @@ void main() {
     final String dummyCertPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
     final String dummyCertKeyPath = globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
 
-    final devConfig = WebDevServerConfig(
+    final webDevServerConfig = WebDevServerConfig(
       https: HttpsConfig(certPath: dummyCertPath, certKeyPath: dummyCertKeyPath),
     );
     final webDevFS = WebDevFS(
@@ -1088,7 +1088,7 @@ void main() {
       isWasm: false,
       useLocalCanvasKit: false,
       rootDirectory: globals.fs.currentDirectory,
-      devConfig: devConfig,
+      webDevServerConfig: webDevServerConfig,
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
@@ -1107,7 +1107,7 @@ void main() {
   test(
     'allows frame embedding',
     () => testbed.run(() async {
-      const devConfig = WebDevServerConfig();
+      const webDevServerConfig = WebDevServerConfig();
       final WebAssetServer webAssetServer = await WebAssetServer.start(
         null,
         null,
@@ -1128,7 +1128,7 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        devConfig: devConfig,
+        webDevServerConfig: webDevServerConfig,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -1144,7 +1144,7 @@ void main() {
     () => testbed.run(() async {
       const extraHeaderKey = 'hurray';
       const extraHeaderValue = 'flutter';
-      const devConfig = WebDevServerConfig(
+      const webDevServerConfig = WebDevServerConfig(
         headers: <String, String>{extraHeaderKey: extraHeaderValue},
       );
       final WebAssetServer webAssetServer = await WebAssetServer.start(
@@ -1167,7 +1167,7 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        devConfig: devConfig,
+        webDevServerConfig: webDevServerConfig,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -1233,7 +1233,7 @@ void main() {
       outputFile.parent.childFile('a.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
 
-      const devConfig = WebDevServerConfig();
+      const webDevServerConfig = WebDevServerConfig();
       final webDevFS = WebDevFS(
         packagesFilePath: '.dart_tool/package_config.json',
         urlTunneller: null,
@@ -1254,7 +1254,7 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         rootDirectory: globals.fs.currentDirectory,
-        devConfig: devConfig,
+        webDevServerConfig: webDevServerConfig,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,

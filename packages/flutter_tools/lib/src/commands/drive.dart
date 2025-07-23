@@ -305,14 +305,17 @@ class DriveCommand extends RunCommandBase {
       _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
 
-    final WebDevServerConfig? devConfig = (device is WebServerDevice || device is ChromiumDevice)
-        ? await loadDevConfig(
-            hostname: stringArg('web-hostname'),
-            port: stringArg('web-port'),
-            tlsCertPath: stringArg('web-tls-cert-path'),
-            tlsCertKeyPath: stringArg('web-tls-cert-key-path'),
+    final WebDevServerConfig? webDevServerConfig =
+        (device is WebServerDevice || device is ChromiumDevice)
+        ? await WebDevServerConfig.loadFromFile(
+            overrideHostname: stringArg('web-hostname'),
+            overridePort: stringArg('web-port'),
+            overrideTlsCertPath: stringArg('web-tls-cert-path'),
+            overrideTlsCertKeyPath: stringArg('web-tls-cert-key-path'),
           )
         : null;
+    final web = webDevServerConfig != null;
+
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
@@ -334,7 +337,9 @@ class DriveCommand extends RunCommandBase {
       devConfig != null,
     );
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions(devConfig: devConfig);
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
         : _fileSystem.file(applicationBinaryPath);

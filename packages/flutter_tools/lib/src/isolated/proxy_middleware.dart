@@ -21,11 +21,14 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
 shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
   return (shelf.Handler innerHandler) {
     return (shelf.Request request) async {
-      final String requestPath = _normalizePath(request.url.path);
+      String requestPath = request.url.path;
+      if (!requestPath.startsWith('/')) {
+        requestPath = '/$requestPath';
+      }
       for (final rule in effectiveProxy) {
         if (rule.matches(requestPath)) {
           final Uri targetBaseUri = Uri.parse(rule.target);
-          final String rewrittenRequest = rule.replace(requestPath);
+          final String rewrittenRequest = rule.replacement != null ? rule.replace(requestPath) : requestPath;
           final Uri finalTargetUrl = targetBaseUri.resolve(rewrittenRequest);
           try {
             final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
@@ -59,11 +62,4 @@ shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
       return innerHandler(request);
     };
   };
-}
-
-String _normalizePath(String path) {
-  if (!path.startsWith('/')) {
-    path = '/$path';
-  }
-  return path;
 }
