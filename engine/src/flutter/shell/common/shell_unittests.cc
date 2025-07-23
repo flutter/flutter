@@ -4590,6 +4590,7 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
 
 // Test that remove view fails if the view ID does not exist.
 TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
