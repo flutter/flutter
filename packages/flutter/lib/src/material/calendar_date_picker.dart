@@ -889,8 +889,8 @@ class _MonthPickerState extends State<_MonthPicker> {
               child: _FocusedDate(
                 calendarDelegate: widget.calendarDelegate,
                 date: _dayGridFocus.hasFocus ? _focusedDay : null,
-                // Wrap with Material to paint the selected date decorator
-                // here instead of on the Dialog during transitions.
+                // Wrap the PageView with `Material`, so when its child paints on materials
+                // the content won't go out of boundary during page transition.
                 child: Material(
                   type: MaterialType.transparency,
                   child: PageView.builder(
