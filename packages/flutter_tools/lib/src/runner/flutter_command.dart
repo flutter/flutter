@@ -605,18 +605,14 @@ abstract class FlutterCommand extends Command<void> {
         );
       }
       ddsEnabled = !boolArg('disable-dds');
-      // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
-      // ignore: dead_code, literal_only_boolean_expressions
-      if (false) {
-        if (ddsEnabled) {
-          globals.printWarning(
-            '${globals.logger.terminal.warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.',
-          );
-        } else {
-          globals.printWarning(
-            '${globals.logger.terminal.warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.',
-          );
-        }
+      if (ddsEnabled) {
+        globals.printWarning(
+          '${globals.logger.terminal.warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.',
+        );
+      } else {
+        globals.printWarning(
+          '${globals.logger.terminal.warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.',
+        );
       }
     } else {
       ddsEnabled = boolArg('dds');
@@ -1992,7 +1988,7 @@ abstract class FlutterCommand extends Command<void> {
   @mustCallSuper
   Future<void> validateCommand() async {
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
-      // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
+      // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent
       // until one can be found.

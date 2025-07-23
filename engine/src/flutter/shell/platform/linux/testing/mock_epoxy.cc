@@ -283,6 +283,12 @@ EGLDisplay _eglGetCurrentDisplay() {
   return &mock_display;
 }
 
+EGLDisplay _eglGetPlatformDisplayEXT(EGLenum platform,
+                                     void* native_display,
+                                     const EGLint* attrib_list) {
+  return &mock_display;
+}
+
 EGLint _eglGetError() {
   EGLint error = mock_error;
   mock_error = EGL_SUCCESS;
@@ -612,6 +618,9 @@ EGLBoolean (*epoxy_eglGetConfigAttrib)(EGLDisplay dpy,
                                        EGLint attribute,
                                        EGLint* value);
 EGLDisplay (*epoxy_eglGetDisplay)(EGLNativeDisplayType display_id);
+EGLDisplay (*epoxy_eglGetPlatformDisplayEXT)(EGLenum platform,
+                                             void* native_display,
+                                             const EGLint* attrib_list);
 EGLint (*epoxy_eglGetError)();
 void (*(*epoxy_eglGetProcAddress)(const char* procname))(void);
 EGLBoolean (*epoxy_eglInitialize)(EGLDisplay dpy, EGLint* major, EGLint* minor);
@@ -693,6 +702,7 @@ static void library_init() {
   epoxy_eglGetConfigAttrib = _eglGetConfigAttrib;
   epoxy_eglGetDisplay = _eglGetDisplay;
   epoxy_eglGetCurrentDisplay = _eglGetCurrentDisplay;
+  epoxy_eglGetPlatformDisplayEXT = _eglGetPlatformDisplayEXT;
   epoxy_eglGetError = _eglGetError;
   epoxy_eglGetProcAddress = _eglGetProcAddress;
   epoxy_eglInitialize = _eglInitialize;
