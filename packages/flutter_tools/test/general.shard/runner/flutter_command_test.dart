@@ -47,7 +47,7 @@ void main() {
     late MemoryFileSystem fileSystem;
     late Platform platform;
     late FileSystemUtils fileSystemUtils;
-    late Logger logger;
+    late BufferLogger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
 
@@ -728,15 +728,17 @@ void main() {
     );
 
     testUsingContext(
-      'dds options --disable-dds',
+      'dds options --disable-dds works, but is deprecated',
       () async {
         final ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--disable-dds']);
         expect(ddsCommand.enableDds, isFalse);
+        expect(logger.warningText, contains('"--disable-dds" argument is deprecated'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
+        Logger: () => logger,
         ProcessManager: () => processManager,
       },
     );
@@ -748,9 +750,14 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--no-disable-dds']);
         expect(ddsCommand.enableDds, isTrue);
+        expect(
+          logger.warningText,
+          contains('"--no-disable-dds" argument is deprecated and redundant'),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
+        Logger: () => logger,
         ProcessManager: () => processManager,
       },
     );
