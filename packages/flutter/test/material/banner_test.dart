@@ -1207,6 +1207,20 @@ void main() {
     final Size materialBarSize = tester.getSize(find.byType(MaterialBanner));
     expect(materialBarSize.height, equals(minActionBarHeight));
   });
+
+  testWidgets('MaterialBanner renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: MaterialBanner(content: Text('X'), actions: <Widget>[SizedBox.shrink()]),
+          ),
+        ),
+      ),
+    );
+    final Finder content = find.text('X');
+    expect(tester.getSize(content).isEmpty, isTrue);
+  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
