@@ -701,26 +701,30 @@ void main() {
         isFalse,
       );
 
-      await SemanticsService.announce('announcement 1', TextDirection.ltr);
+      await SemanticsService.announce(0, 'announcement 1', TextDirection.ltr);
       await SemanticsService.announce(
+        0,
         'announcement 2',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
       );
-      await SemanticsService.announce('announcement 3', TextDirection.rtl);
+      await SemanticsService.announce(0, 'announcement 3', TextDirection.rtl);
 
       final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
       expect(list, hasLength(3));
       final CapturedAccessibilityAnnouncement first = list[0];
+      expect(first.viewId, 0);
       expect(first.message, 'announcement 1');
       expect(first.textDirection, TextDirection.ltr);
 
       final CapturedAccessibilityAnnouncement second = list[1];
+      expect(second.viewId, 0);
       expect(second.message, 'announcement 2');
       expect(second.textDirection, TextDirection.rtl);
       expect(second.assertiveness, Assertiveness.assertive);
 
       final CapturedAccessibilityAnnouncement third = list[2];
+      expect(third.viewId, 0);
       expect(third.message, 'announcement 3');
       expect(third.textDirection, TextDirection.rtl);
       expect(third.assertiveness, Assertiveness.polite);
@@ -741,6 +745,7 @@ void main() {
           .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
       await SemanticsService.announce(
+        0,
         'announcement 1',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
@@ -751,6 +756,7 @@ void main() {
           <String, dynamic>{
             'type': 'announce',
             'data': <String, dynamic>{
+              'viewId': 0,
               'message': 'announcement 1',
               'textDirection': 0,
               'assertiveness': 1,

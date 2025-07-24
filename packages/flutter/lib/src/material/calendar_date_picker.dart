@@ -236,6 +236,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       SemanticsService.announce(
+        View.of(context).viewId,
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
         _textDirection,
       );
@@ -264,7 +265,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        SemanticsService.announce(message, _textDirection);
+        SemanticsService.announce(View.of(context).viewId, message, _textDirection);
       }
     });
   }
@@ -315,6 +316,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
           SemanticsService.announce(
+            View.of(context).viewId,
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
           );
@@ -665,6 +667,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
         SemanticsService.announce(
+          View.of(context).viewId,
           widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
           _textDirection,
         );

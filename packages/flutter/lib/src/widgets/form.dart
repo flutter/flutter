@@ -22,6 +22,7 @@ import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
+import 'view.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
@@ -271,10 +272,10 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        _validate();
+        _validate(View.of(context).viewId);
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
-          _validate();
+          _validate(View.of(context).viewId);
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
@@ -335,7 +336,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate();
+    return _validate(View.of(context).viewId);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -352,11 +353,11 @@ class FormState extends State<Form> {
     final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(invalidFields);
+    _validate(View.of(context).viewId, invalidFields);
     return invalidFields;
   }
 
-  bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
+  bool _validate(int viewId, [Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
@@ -384,6 +385,7 @@ class FormState extends State<Form> {
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
             SemanticsService.announce(
+              viewId,
               errorMessage,
               directionality,
               assertiveness: Assertiveness.assertive,
@@ -392,6 +394,7 @@ class FormState extends State<Form> {
         );
       } else {
         SemanticsService.announce(
+          viewId,
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
