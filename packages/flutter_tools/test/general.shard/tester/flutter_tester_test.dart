@@ -30,11 +30,11 @@ void main() {
   });
 
   testWithoutContext('FlutterTesterApp can be created from the current directory', () async {
-    const String projectPath = '/home/my/projects/my_project';
+    const projectPath = '/home/my/projects/my_project';
     await fileSystem.directory(projectPath).create(recursive: true);
     fileSystem.currentDirectory = projectPath;
 
-    final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+    final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
 
     expect(app.name, 'my_project');
   });
@@ -83,7 +83,7 @@ void main() {
     late FakeProcessManager fakeProcessManager;
     late TestBuildSystem buildSystem;
 
-    final Map<Type, Generator> startOverrides = <Type, Generator>{
+    final startOverrides = <Type, Generator>{
       Platform: () => FakePlatform(),
       FileSystem: () => fileSystem,
       ProcessManager: () => fakeProcessManager,
@@ -144,9 +144,9 @@ void main() {
     });
 
     testUsingContext('performs a build and starts in debug mode', () async {
-      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+      final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
       final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       fakeProcessManager.addCommand(
         FakeCommand(
           command: const <String>[
@@ -188,9 +188,9 @@ Hello!
     testUsingContext(
       'performs a build and starts in debug mode with track-widget-creation',
       () async {
-        final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
+        final app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
         final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
-        final Completer<void> completer = Completer<void>();
+        final completer = Completer<void>();
         fakeProcessManager.addCommand(
           FakeCommand(
             command: const <String>[

@@ -23,9 +23,9 @@ class TaskQueue<T> {
   /// The maximum number of jobs that this queue will run simultaneously.
   final int maxJobs;
 
-  final Queue<_TaskQueueItem<T>> _pendingTasks = Queue<_TaskQueueItem<T>>();
-  final Set<_TaskQueueItem<T>> _activeTasks = <_TaskQueueItem<T>>{};
-  final Set<Completer<void>> _completeListeners = <Completer<void>>{};
+  final _pendingTasks = Queue<_TaskQueueItem<T>>();
+  final _activeTasks = <_TaskQueueItem<T>>{};
+  final _completeListeners = <Completer<void>>{};
 
   /// Returns a future that completes when all tasks in the [TaskQueue] are
   /// complete.
@@ -35,7 +35,7 @@ class TaskQueue<T> {
     if (_activeTasks.isEmpty && _pendingTasks.isEmpty) {
       return Future<void>.value();
     }
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _completeListeners.add(completer);
     return completer.future;
   }
@@ -43,7 +43,7 @@ class TaskQueue<T> {
   /// Adds a single closure to the task queue, returning a future that
   /// completes when the task completes.
   Future<T> add(TaskQueueClosure<T> task) {
-    final Completer<T> completer = Completer<T>();
+    final completer = Completer<T>();
     _pendingTasks.add(_TaskQueueItem<T>(task, completer));
     if (_activeTasks.length < maxJobs) {
       _processTask();

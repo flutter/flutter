@@ -24,7 +24,7 @@ void main() {
   late FakeProcessManager processManager;
   UpgradeCommand command;
   late CommandRunner<void> runner;
-  const String flutterRoot = '/path/to/flutter';
+  const flutterRoot = '/path/to/flutter';
 
   setUpAll(() {
     Cache.disableLocking();
@@ -45,10 +45,10 @@ void main() {
   testUsingContext(
     'can auto-migrate a user from dev to beta',
     () async {
-      const String startingTag = '3.0.0-1.2.pre';
-      const String latestUpstreamTag = '3.0.0-1.3.pre';
-      const String upstreamHeadRevision = 'deadbeef';
-      final Completer<void> reEntryCompleter = Completer<void>();
+      const startingTag = '3.0.0-1.2.pre';
+      const latestUpstreamTag = '3.0.0-1.3.pre';
+      const upstreamHeadRevision = 'deadbeef';
+      final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
         await runner.run(<String>[
@@ -127,14 +127,14 @@ void main() {
     },
   );
 
-  const String startingTag = '3.0.0';
-  const String latestUpstreamTag = '3.1.0';
-  const String upstreamHeadRevision = '5765737420536964652053746f7279';
+  const startingTag = '3.0.0';
+  const latestUpstreamTag = '3.1.0';
+  const upstreamHeadRevision = '5765737420536964652053746f7279';
 
   testUsingContext(
     'can push people from master to beta',
     () async {
-      final Completer<void> reEntryCompleter = Completer<void>();
+      final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
         await runner.run(<String>[
@@ -224,7 +224,7 @@ void main() {
   testUsingContext(
     'do not push people from beta to anything else',
     () async {
-      final Completer<void> reEntryCompleter = Completer<void>();
+      final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
         await runner.run(<String>[
