@@ -488,7 +488,10 @@ class PluginHandlerTest {
         every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
     }
 
-    private fun setupPluginMocks(project: Project, pluginHandler: PluginHandler) {
+    private fun setupPluginMocks(
+        project: Project,
+        pluginHandler: PluginHandler
+    ) {
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns listOf(cameraDependency)
         every { project.extraProperties } returns mockk()
