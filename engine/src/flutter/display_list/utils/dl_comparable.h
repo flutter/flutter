@@ -47,7 +47,8 @@ bool Equals(const T* a, const std::shared_ptr<U>& b) {
 }
 
 template <class T, class U>
-bool Equals(const std::shared_ptr<const T>& a, const std::shared_ptr<const U>& b) {
+bool Equals(const std::shared_ptr<const T>& a,
+            const std::shared_ptr<const U>& b) {
   return Equals(a.get(), b.get());
 }
 
@@ -92,7 +93,8 @@ bool NotEquals(const T* a, const std::shared_ptr<U>& b) {
 }
 
 template <class T, class U>
-bool NotEquals(const std::shared_ptr<const T>& a, const std::shared_ptr<const U>& b) {
+bool NotEquals(const std::shared_ptr<const T>& a,
+               const std::shared_ptr<const U>& b) {
   return !Equals(a.get(), b.get());
 }
 

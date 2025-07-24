@@ -4651,7 +4651,10 @@ class ClipExpector : public virtual DlOpReceiver,
   std::vector<ClipExpectation> clip_expectations_;
 
   template <typename T>
-  void check(const T& shape, DlClipOp clip_op, bool is_aa, bool is_oval = false) {
+  void check(const T& shape,
+             DlClipOp clip_op,
+             bool is_aa,
+             bool is_oval = false) {
     ASSERT_LT(index_, clip_expectations_.size())
         << label() << std::endl
         << "extra clip shape = " << shape << (is_oval ? " (oval)" : "");

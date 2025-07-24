@@ -695,7 +695,8 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         return true;
       });
 
-  if (const auto& depth = render_target.GetDepthAttachment(); depth.has_value()) {
+  if (const auto& depth = render_target.GetDepthAttachment();
+      depth.has_value()) {
     builder.SetDepthStencilAttachment(
         depth->texture->GetTextureDescriptor().format,        //
         depth->texture->GetTextureDescriptor().sample_count,  //

@@ -14,15 +14,15 @@
 namespace vulkan {
 
 // static
-VKAPI_ATTR VkBool32 VulkanApplication::DebugReportCallback(
-    VkDebugReportFlagsEXT flags,
-    VkDebugReportObjectTypeEXT objectType,
-    uint64_t object,
-    size_t location,
-    int32_t messageCode,
-    const char* pLayerPrefix,
-    const char* pMessage,
-    void* pUserData) {
+VKAPI_ATTR VkBool32
+VulkanApplication::DebugReportCallback(VkDebugReportFlagsEXT flags,
+                                       VkDebugReportObjectTypeEXT objectType,
+                                       uint64_t object,
+                                       size_t location,
+                                       int32_t messageCode,
+                                       const char* pLayerPrefix,
+                                       const char* pMessage,
+                                       void* pUserData) {
   auto application = static_cast<VulkanApplication*>(pUserData);
   if (application->initialization_logs_enabled_) {
     application->initialization_logs_ += pMessage;
