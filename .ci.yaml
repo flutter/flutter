@@ -589,6 +589,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
+      docs_actions: >
+        ["build_master", "deploy"]
       validation: docs
       validation_name: Docs
       firebase_project: main-docs-flutter-prod
@@ -615,6 +617,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
+      docs_actions: >
+        ["build_stable"]
       validation: docs
       validation_name: Docs
       # TODO(matanlurey): Neither of these properties are actually used, since
@@ -647,6 +651,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
+      docs_actions: >
+        ["post_process", "deploy"]
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
