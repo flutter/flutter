@@ -43,7 +43,7 @@ dependencies:
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.6
+  test_api: 0.7.7
   typed_data: 1.4.0
   unified_analytics: 8.0.1
   url_launcher_android: 6.3.16
@@ -62,4 +62,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: mkiihb
+# PUBSPEC CHECKSUM: patulg
