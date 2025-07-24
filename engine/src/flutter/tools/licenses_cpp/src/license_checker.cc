@@ -219,8 +219,8 @@ absl::Status MatchLicenseFile(const fs::path& path,
 
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
-        license_map->Add(package.name, match.matched_text);
-        VLOG(1) << "OK: " << path << " : " << match.matcher;
+        license_map->Add(package.name, match.GetMatchedText());
+        VLOG(1) << "OK: " << path << " : " << match.GetMatcher();
       }
     } else {
       return absl::NotFoundError(
@@ -262,9 +262,9 @@ bool ProcessSourceCode(const fs::path& relative_path,
           if (matches.ok()) {
             did_find_copyright = true;
             for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.matched_text);
+              license_map->Add(package.name, match.GetMatchedText());
               VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.matcher;
+                      << match.GetMatcher();
             }
           } else {
             if (flags.treat_unmatched_comments_as_errors) {
@@ -332,10 +332,10 @@ bool ProcessNotices(const fs::path& relative_path,
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
         for (std::string_view project : projects) {
-          license_map->Add(project, match.matched_text);
+          license_map->Add(project, match.GetMatchedText());
         }
         VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                << match.matcher;
+                << match.GetMatcher();
       }
     } else {
       VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
