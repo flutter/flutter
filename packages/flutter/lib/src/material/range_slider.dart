@@ -460,7 +460,6 @@ class RangeSlider extends StatefulWidget {
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
-  final FocusNode focusNode = FocusNode();
   final FocusNode startFocusNode = FocusNode();
   final FocusNode endFocusNode = FocusNode();
 
@@ -1269,6 +1268,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _enableAnimation.addListener(markNeedsPaint);
     _state.startPositionController.addListener(markNeedsPaint);
     _state.endPositionController.addListener(markNeedsPaint);
+    _state.startFocusNode.addListener(markNeedsPaint);
+    _state.endFocusNode.addListener(markNeedsPaint);
   }
 
   @override
@@ -1278,6 +1279,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _enableAnimation.removeListener(markNeedsPaint);
     _state.startPositionController.removeListener(markNeedsPaint);
     _state.endPositionController.removeListener(markNeedsPaint);
+    _state.startFocusNode.addListener(markNeedsPaint);
+    _state.endFocusNode.removeListener(markNeedsPaint);
     super.detach();
   }
 
@@ -1587,6 +1590,40 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final bool startThumbSelected = _lastThumbSelection == Thumb.start && !hoveringEndThumb;
     final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
+
+    if (_state.startFocusNode.hasFocus) {
+      _sliderTheme.overlayShape!.paint(
+        context,
+        _startThumbCenter,
+        activationAnimation: const AlwaysStoppedAnimation<double>(1.0),
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        labelPainter: _startLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        value: startValue,
+        textScaleFactor: _textScaleFactor,
+        sizeWithOverflow: resolvedscreenSize,
+      );
+    }
+
+    if (_state.endFocusNode.hasFocus) {
+      _sliderTheme.overlayShape!.paint(
+        context,
+        _endThumbCenter,
+        activationAnimation: const AlwaysStoppedAnimation<double>(1.0),
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        labelPainter: _endLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        value: endValue,
+        textScaleFactor: _textScaleFactor,
+        sizeWithOverflow: resolvedscreenSize,
+      );
+    }
 
     if (!_overlayAnimation.isDismissed) {
       if (startThumbSelected || hoveringStartThumb) {
