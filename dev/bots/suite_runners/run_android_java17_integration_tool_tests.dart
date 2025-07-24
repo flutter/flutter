@@ -26,12 +26,12 @@ Future<void> androidJava17IntegrationToolTestsRunner() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
   final List<String> allTests =
-  Directory(path.join(toolsPath, 'test', 'android_java17_integration.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-      .toList();
+      Directory(path.join(toolsPath, 'test', 'android_java17_integration.shard'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList();
 
   await runDartTest(
     toolsPath,
