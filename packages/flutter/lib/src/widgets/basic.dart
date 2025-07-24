@@ -6193,6 +6193,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// {@template flutter.widgets.Wrap.maxLines}
   /// The maximum number of lines to display before wrapping.
   ///
   /// If null, there is no limit on the number of lines.
@@ -6200,6 +6201,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// Children that would exceed this limit are not displayed.
   ///
   /// Defaults to null.
+  /// {@endtemplate}
   final int? maxLines;
 
   @override

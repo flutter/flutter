@@ -453,13 +453,7 @@ class RenderWrap extends RenderBox
     }
   }
 
-  /// The maximum number of lines to display.
-  ///
-  /// If null, there is no limit on the number of lines.
-  /// If not null, the wrap will stop creating new lines after reaching this limit.
-  /// Children that would exceed this limit are not displayed or laid out.
-  ///
-  /// Defaults to null.
+  /// {@macro flutter.widgets.Wrap.maxLines}
   int? get maxLines => _maxLines;
   int? _maxLines;
   set maxLines(int? value) {
