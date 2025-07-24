@@ -3515,8 +3515,11 @@ void main() {
   testWidgets(
     'Tooltip does not show while transitioning from another route with secondary animation',
     (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
+
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           home: Scaffold(
             body: Builder(
               builder: (BuildContext context) {
@@ -3551,15 +3554,19 @@ void main() {
         ),
       );
 
+      expect(find.text('Go to Second Page'), findsOneWidget);
       await tester.tap(find.text('Go to Second Page'));
       await tester.pumpAndSettle();
+      expect(find.text('Go to Third Page'), findsOneWidget);
+
       await tester.tap(find.text('Go to Third Page'));
       await tester.pumpAndSettle();
+      expect(find.text('Third Page'), findsOneWidget);
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
       await tester.tap(find.byType(BackButton));
-      await tester.pump(const Duration(milliseconds: 250));
+      await observer.pumpPastTransition(tester);
       await gesture.moveTo(tester.getCenter(find.text('World')));
       await tester.pumpAndSettle();
 

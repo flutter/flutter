@@ -606,9 +606,17 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
+  bool _isTooltipInteractive() {
+    final bool routeIsCurrent = _route?.isCurrent ?? false;
+    // If the route's secondary animation is animating, the route is on its way
+    // out. So, the tooltip should be non-interactive.
+    final bool routeIsAnimating = _route?.secondaryAnimation?.isAnimating ?? false;
+    return routeIsCurrent && !routeIsAnimating;
+  }
+
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
-    if (!(_route?.isCurrent ?? true) || (_route?.secondaryAnimation?.isAnimating ?? false)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     // PointerDeviceKinds that don't support hovering.
@@ -724,7 +732,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
     assert(mounted);
-    if (!(_route?.isCurrent ?? true) || (_route?.secondaryAnimation?.isAnimating ?? false)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     // _handleMouseEnter is only called when the mouse starts to hover over this
@@ -749,7 +757,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handleMouseExit(PointerExitEvent event) {
     assert(mounted);
-    if (!(_route?.isCurrent ?? true) || (_route?.secondaryAnimation?.isAnimating ?? false)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     if (_activeHoveringPointerDevices.isEmpty) {
