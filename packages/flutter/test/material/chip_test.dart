@@ -2736,7 +2736,6 @@ void main() {
     WidgetTester tester,
   ) async {
     final ThemeData themeData = ThemeData(
-      platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     Widget buildApp({
