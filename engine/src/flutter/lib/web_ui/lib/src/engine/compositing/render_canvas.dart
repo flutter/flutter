@@ -2,28 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../compositing/rasterizer.dart';
 import '../display.dart';
 import '../dom.dart';
 import '../util.dart';
+import 'rasterizer.dart';
 
-/// A visible (on-screen) canvas that can display bitmaps produced by CanvasKit
-/// in the (off-screen) SkSurface which is backed by an OffscreenCanvas.
+/// A visible (on-screen) canvas that can display bitmaps.
 ///
-/// In a typical frame, the content will be rendered via CanvasKit in an
-/// OffscreenCanvas, and then the contents will be transferred to the
-/// RenderCanvas via `transferFromImageBitmap()`.
+/// In a typical frame, the content will be rendered in an OffscreenCanvas, and
+/// then the contents will be transferred to the RenderCanvas via
+/// `transferFromImageBitmap()`.
 ///
 /// If we need more RenderCanvases, for example in the case where there are
 /// platform views and we need overlays to render the frame correctly, then
 /// we will create multiple RenderCanvases, but crucially still only have
 /// one OffscreenCanvas which transfers bitmaps to all of the RenderCanvases.
 ///
-/// To render into the OffscreenCanvas with CanvasKit we need to create a
-/// WebGL context, which is not only expensive, but the browser has a limit
-/// on the maximum amount of WebGL contexts which can be live at once. Using
-/// a single OffscreenCanvas and multiple RenderCanvases allows us to only
-/// create a single WebGL context.
+/// To render into the OffscreenCanvas we need to create a WebGL context, which
+/// is not only expensive, but the browser has a limit on the maximum amount of
+/// WebGL contexts which can be live at once. Using a single OffscreenCanvas and
+/// multiple RenderCanvases allows us to only create a single WebGL context.
 class RenderCanvas extends DisplayCanvas {
   RenderCanvas() {
     canvasElement.setAttribute('aria-hidden', 'true');

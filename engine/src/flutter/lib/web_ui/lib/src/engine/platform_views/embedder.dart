@@ -6,6 +6,8 @@ import 'dart:math' as math;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../compositing/composition.dart';
+
 /// Used for clipping and filter svg resources.
 ///
 /// Position needs to be absolute since these svgs are sandwiched between
@@ -53,11 +55,11 @@ class PlatformViewEmbedder {
   /// The most recent composition order.
   final List<int> _activeCompositionOrder = <int>[];
 
-  /// The most recent rendering.
-  Rendering _activeRendering = Rendering();
+  /// The most recent composition.
+  Composition _activeComposition = Composition();
 
-  /// Returns the most recent rendering. Only used in tests.
-  Rendering get debugActiveRendering => _activeRendering;
+  /// Returns the most recent composition. Only used in tests.
+  Composition get debugActiveComposition => _activeComposition;
 
   /// If [debugOverlayOptimizationBounds] is true, this canvas will draw
   /// semitransparent rectangles showing the computed bounds of the platform
@@ -73,8 +75,8 @@ class PlatformViewEmbedder {
 
   /// Returns a list of canvases for the optimized rendering. These are used in
   /// the paint step.
-  Iterable<CkCanvas> getOptimizedCanvases() {
-    return _context.optimizedCanvasRecorders!.map((CkPictureRecorder r) => r.recordingCanvas!);
+  Iterable<LayerCanvas> getOptimizedCanvases() {
+    return _context.pictureToOptimizedCanvasMap!.values;
   }
 
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
@@ -242,7 +244,7 @@ class PlatformViewEmbedder {
                 'rect(${rect.top}px, ${rect.right}px, '
                 '${rect.bottom}px, ${rect.left}px)';
           } else if (mutator.rrect != null) {
-            final CkPath path = CkPath();
+            final LayerPath path = ui.Path() as LayerPath;
             path.addRRect(mutator.rrect!);
             _ensureSvgPathDefs();
             final DomElement pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
@@ -259,7 +261,7 @@ class PlatformViewEmbedder {
             _svgClipDefs.putIfAbsent(viewId, () => <String>{}).add(clipId);
             clipView.style.clipPath = 'url(#$clipId)';
           } else if (mutator.path != null) {
-            final CkPath path = (mutator.path! as LazyPath).builtPath as CkPath;
+            final LayerPath path = (mutator.path! as LazyPath).builtPath as LayerPath;
             _ensureSvgPathDefs();
             final DomElement pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
             _clipPathCount += 1;
@@ -323,24 +325,25 @@ class PlatformViewEmbedder {
 
   /// Optimizes the scene to use the fewest possible canvases. This sets up
   /// the final paint pass to paint the pictures into the optimized canvases.
-  void optimizeRendering() {
-    Rendering rendering = createOptimizedRendering(
+  void optimizeComposition() {
+    Composition composition = createOptimizedComposition(
       _context.sceneElements,
       _currentCompositionParams,
     );
-    rendering = _modifyRenderingForMaxCanvases(rendering);
-    _context.optimizedRendering = rendering;
+    composition = _modifyRenderingForMaxCanvases(composition);
+    _context.optimizedComposition = composition;
     // Create new picture recorders for the optimized render canvases and record
     // which pictures go in which canvas.
-    final List<CkPictureRecorder> optimizedCanvasRecorders = <CkPictureRecorder>[];
-    final Map<PictureLayer, CkPictureRecorder> pictureToOptimizedCanvasMap =
-        <PictureLayer, CkPictureRecorder>{};
-    for (final RenderingRenderCanvas renderCanvas in rendering.canvases) {
-      final CkPictureRecorder pictureRecorder = CkPictureRecorder();
-      pictureRecorder.beginRecording(ui.Offset.zero & _frameSize.toSize());
+    final List<LayerPictureRecorder> optimizedCanvasRecorders = <LayerPictureRecorder>[];
+    final Map<PictureLayer, LayerCanvas> pictureToOptimizedCanvasMap =
+        <PictureLayer, LayerCanvas>{};
+    for (final CompositionCanvas canvas in composition.canvases) {
+      final LayerPictureRecorder pictureRecorder = ui.PictureRecorder() as LayerPictureRecorder;
       optimizedCanvasRecorders.add(pictureRecorder);
-      for (final PictureLayer picture in renderCanvas.pictures) {
-        pictureToOptimizedCanvasMap[picture] = pictureRecorder;
+      final LayerCanvas layerCanvas =
+          ui.Canvas(pictureRecorder, ui.Offset.zero & _frameSize.toSize()) as LayerCanvas;
+      for (final PictureLayer picture in canvas.pictures) {
+        pictureToOptimizedCanvasMap[picture] = layerCanvas;
       }
     }
     _context.optimizedCanvasRecorders = optimizedCanvasRecorders;
@@ -349,33 +352,33 @@ class PlatformViewEmbedder {
 
   /// Returns the canvas that this picture layer should draw into in the
   /// optimized scene.
-  CkCanvas getOptimizedCanvasFor(PictureLayer picture) {
-    assert(_context.optimizedRendering != null);
-    return _context.pictureToOptimizedCanvasMap![picture]!.recordingCanvas!;
+  LayerCanvas getOptimizedCanvasFor(PictureLayer picture) {
+    assert(_context.optimizedComposition != null);
+    return _context.pictureToOptimizedCanvasMap![picture]!;
   }
 
   Future<void> submitFrame() async {
-    final Rendering rendering = _context.optimizedRendering!;
-    _updateDomForNewRendering(rendering);
-    if (rendering.equalsForRendering(_activeRendering)) {
-      // Copy the display canvases to the new rendering.
-      for (int i = 0; i < rendering.canvases.length; i++) {
-        rendering.canvases[i].displayCanvas = _activeRendering.canvases[i].displayCanvas;
-        _activeRendering.canvases[i].displayCanvas = null;
+    final Composition composition = _context.optimizedComposition!;
+    _updateDomForNewComposition(composition);
+    if (composition.equalsForCompositing(_activeComposition)) {
+      // Copy the display canvases to the new composition.
+      for (int i = 0; i < composition.canvases.length; i++) {
+        composition.canvases[i].displayCanvas = _activeComposition.canvases[i].displayCanvas;
+        _activeComposition.canvases[i].displayCanvas = null;
       }
     }
-    _activeRendering = rendering;
+    _activeComposition = composition;
 
-    final List<RenderingRenderCanvas> renderCanvases = rendering.canvases;
+    final List<CompositionCanvas> compositionCanvases = composition.canvases;
     int renderCanvasIndex = 0;
-    for (final RenderingRenderCanvas renderCanvas in renderCanvases) {
-      final CkPicture renderPicture = _context.optimizedCanvasRecorders![renderCanvasIndex++]
+    for (final CompositionCanvas compositionCanvas in compositionCanvases) {
+      final ui.Picture picture = _context.optimizedCanvasRecorders![renderCanvasIndex++]
           .endRecording();
-      await rasterizer.rasterizeToCanvas(renderCanvas.displayCanvas!, <CkPicture>[renderPicture]);
-      renderPicture.dispose();
+      await rasterizer.rasterizeToCanvas(compositionCanvas.displayCanvas!, <ui.Picture>[picture]);
+      picture.dispose();
     }
 
-    for (final CkPictureRecorder recorder in _context.measuringPictureRecorders.values) {
+    for (final LayerPictureRecorder recorder in _context.measuringPictureRecorders.values) {
       if (recorder.isRecording) {
         recorder.endRecording();
       }
@@ -385,25 +388,27 @@ class PlatformViewEmbedder {
     // optimization debugging is enabled.
     if (debugOverlayOptimizationBounds) {
       debugBoundsCanvas ??= rasterizer.displayFactory.getCanvas();
-      final CkPictureRecorder boundsRecorder = CkPictureRecorder();
-      final CkCanvas boundsCanvas = boundsRecorder.beginRecording(
-        ui.Rect.fromLTWH(0, 0, _frameSize.width.toDouble(), _frameSize.height.toDouble()),
+      final ui.PictureRecorder boundsRecorder = ui.PictureRecorder();
+      final ui.Canvas boundsCanvas = ui.Canvas(
+        boundsRecorder,
+        ui.Offset.zero & _frameSize.toSize(),
       );
-      final CkPaint platformViewBoundsPaint = CkPaint()
+      final ui.Paint platformViewBoundsPaint = ui.Paint()
         ..color = const ui.Color.fromARGB(100, 0, 255, 0);
-      final CkPaint pictureBoundsPaint = CkPaint()..color = const ui.Color.fromARGB(100, 0, 0, 255);
-      for (final RenderingEntity entity in _activeRendering.entities) {
-        if (entity is RenderingPlatformView) {
+      final ui.Paint pictureBoundsPaint = ui.Paint()
+        ..color = const ui.Color.fromARGB(100, 0, 0, 255);
+      for (final CompositionEntity entity in _activeComposition.entities) {
+        if (entity is CompositionPlatformView) {
           if (entity.debugComputedBounds != null) {
             boundsCanvas.drawRect(entity.debugComputedBounds!, platformViewBoundsPaint);
           }
-        } else if (entity is RenderingRenderCanvas) {
+        } else if (entity is CompositionCanvas) {
           for (final PictureLayer picture in entity.pictures) {
             boundsCanvas.drawRect(picture.sceneBounds!, pictureBoundsPaint);
           }
         }
       }
-      await rasterizer.rasterizeToCanvas(debugBoundsCanvas!, <CkPicture>[
+      await rasterizer.rasterizeToCanvas(debugBoundsCanvas!, <ui.Picture>[
         boundsRecorder.endRecording(),
       ]);
       sceneHost.append(debugBoundsCanvas!.hostElement);
@@ -464,19 +469,21 @@ class PlatformViewEmbedder {
 
   /// Modify the given rendering by removing canvases until the number of
   /// canvases is less than or equal to the maximum number of canvases.
-  Rendering _modifyRenderingForMaxCanvases(Rendering rendering) {
-    final Rendering result = Rendering();
-    final int numCanvases = rendering.canvases.length;
+  Composition _modifyRenderingForMaxCanvases(Composition composition) {
+    final Composition result = Composition();
+    final int numCanvases = composition.canvases.length;
     if (numCanvases <= maximumCanvases) {
-      return rendering;
+      return composition;
     }
     int numCanvasesToDelete = numCanvases - maximumCanvases;
     final List<PictureLayer> picturesForLastCanvas = <PictureLayer>[];
-    final List<RenderingEntity> modifiedEntities = List<RenderingEntity>.from(rendering.entities);
+    final List<CompositionEntity> modifiedEntities = List<CompositionEntity>.from(
+      composition.entities,
+    );
     bool sawLastCanvas = false;
-    for (int i = rendering.entities.length - 1; i >= 0; i--) {
-      final RenderingEntity entity = modifiedEntities[i];
-      if (entity is RenderingRenderCanvas) {
+    for (int i = composition.entities.length - 1; i >= 0; i--) {
+      final CompositionEntity entity = modifiedEntities[i];
+      if (entity is CompositionCanvas) {
         if (!sawLastCanvas) {
           sawLastCanvas = true;
           continue;
@@ -494,8 +501,8 @@ class PlatformViewEmbedder {
     // canvas (or the last canvas if there is only one).
     sawLastCanvas = (maximumCanvases == 1);
     for (int i = modifiedEntities.length - 1; i > 0; i--) {
-      final RenderingEntity entity = modifiedEntities[i];
-      if (entity is RenderingRenderCanvas) {
+      final CompositionEntity entity = modifiedEntities[i];
+      if (entity is CompositionCanvas) {
         if (sawLastCanvas) {
           entity.pictures.addAll(picturesForLastCanvas);
           break;
@@ -508,12 +515,12 @@ class PlatformViewEmbedder {
     return result;
   }
 
-  void _updateDomForNewRendering(Rendering rendering) {
-    if (rendering.equalsForRendering(_activeRendering)) {
+  void _updateDomForNewComposition(Composition composition) {
+    if (composition.equalsForCompositing(_activeComposition)) {
       // The rendering has not changed, so no DOM manipulation is needed.
       return;
     }
-    final List<int> indexMap = _getIndexMapFromPreviousRendering(_activeRendering, rendering);
+    final List<int> indexMap = _getIndexMapFromPreviousRendering(_activeComposition, composition);
     final List<int> existingIndexMap = indexMap.where((int index) => index != -1).toList();
 
     final List<int> staticElements = longestIncreasingSubsequence(existingIndexMap);
@@ -525,17 +532,17 @@ class PlatformViewEmbedder {
 
     // Remove elements which are in the active rendering, but not in the new
     // rendering.
-    for (int i = 0; i < _activeRendering.entities.length; i++) {
+    for (int i = 0; i < _activeComposition.entities.length; i++) {
       if (indexMap.contains(i)) {
         continue;
       }
-      final RenderingEntity entity = _activeRendering.entities[i];
-      if (entity is RenderingPlatformView) {
+      final CompositionEntity entity = _activeComposition.entities[i];
+      if (entity is CompositionPlatformView) {
         disposeView(entity.viewId);
-      } else if (entity is RenderingRenderCanvas) {
+      } else if (entity is CompositionCanvas) {
         assert(
           entity.displayCanvas != null,
-          'RenderCanvas in previous rendering was '
+          'RenderCanvas in previous composition was '
           'not assigned a DisplayCanvas',
         );
         rasterizer.releaseOverlay(entity.displayCanvas!);
@@ -546,15 +553,15 @@ class PlatformViewEmbedder {
     // Updates [renderCanvas] (located in [index] in the next rendering) to have
     // a display canvas, either taken from the associated render canvas in the
     // previous rendering, or newly created.
-    void updateRenderCanvasWithDisplay(RenderingRenderCanvas renderCanvas, int index) {
+    void updateRenderCanvasWithDisplay(CompositionCanvas renderCanvas, int index) {
       // Does [nextEntity] correspond with a render canvas in the previous
       // rendering? If so, then the render canvas in the previous rendering
       // had an associated display canvas. Use this display canvas for
       // [nextEntity].
       if (indexMap[index] != -1) {
-        final RenderingEntity previousEntity = _activeRendering.entities[indexMap[index]];
-        assert(previousEntity is RenderingRenderCanvas && previousEntity.displayCanvas != null);
-        renderCanvas.displayCanvas = (previousEntity as RenderingRenderCanvas).displayCanvas;
+        final CompositionEntity previousEntity = _activeComposition.entities[indexMap[index]];
+        assert(previousEntity is CompositionCanvas && previousEntity.displayCanvas != null);
+        renderCanvas.displayCanvas = (previousEntity as CompositionCanvas).displayCanvas;
         previousEntity.displayCanvas = null;
       } else {
         // There is no corresponding render canvas in the previous
@@ -571,20 +578,20 @@ class PlatformViewEmbedder {
     while (staticElementIndex < staticElements.length) {
       final int staticElementIndexInActiveRendering = staticElements[staticElementIndex];
       final DomElement staticDomElement = _getElement(
-        _activeRendering.entities[staticElementIndexInActiveRendering],
+        _activeComposition.entities[staticElementIndexInActiveRendering],
       );
       // Go through next rendering elements until we reach the static element.
       while (indexMap[nextRenderingIndex] != staticElementIndexInActiveRendering) {
-        final RenderingEntity nextEntity = rendering.entities[nextRenderingIndex];
-        if (nextEntity is RenderingRenderCanvas) {
+        final CompositionEntity nextEntity = composition.entities[nextRenderingIndex];
+        if (nextEntity is CompositionCanvas) {
           updateRenderCanvasWithDisplay(nextEntity, nextRenderingIndex);
         }
         sceneHost.insertBefore(_getElement(nextEntity), staticDomElement);
         nextRenderingIndex++;
       }
-      if (rendering.entities[nextRenderingIndex] is RenderingRenderCanvas) {
+      if (composition.entities[nextRenderingIndex] is CompositionCanvas) {
         updateRenderCanvasWithDisplay(
-          rendering.entities[nextRenderingIndex] as RenderingRenderCanvas,
+          composition.entities[nextRenderingIndex] as CompositionCanvas,
           nextRenderingIndex,
         );
       }
@@ -595,9 +602,9 @@ class PlatformViewEmbedder {
     }
 
     // Add the leftover entities.
-    while (nextRenderingIndex < rendering.entities.length) {
-      final RenderingEntity nextEntity = rendering.entities[nextRenderingIndex];
-      if (nextEntity is RenderingRenderCanvas) {
+    while (nextRenderingIndex < composition.entities.length) {
+      final CompositionEntity nextEntity = composition.entities[nextRenderingIndex];
+      if (nextEntity is CompositionCanvas) {
         updateRenderCanvasWithDisplay(nextEntity, nextRenderingIndex);
       }
       sceneHost.append(_getElement(nextEntity));
@@ -605,20 +612,20 @@ class PlatformViewEmbedder {
     }
   }
 
-  DomElement _getElement(RenderingEntity entity) {
+  DomElement _getElement(CompositionEntity entity) {
     return switch (entity) {
-      RenderingRenderCanvas() => entity.displayCanvas!.hostElement,
-      RenderingPlatformView() => _viewClipChains[entity.viewId]!.root,
+      CompositionCanvas() => entity.displayCanvas!.hostElement,
+      CompositionPlatformView() => _viewClipChains[entity.viewId]!.root,
     };
   }
 
   /// Returns a [List] of ints mapping elements from the [next] rendering to
   /// elements of the [previous] rendering. If there is no matching element in
   /// the previous rendering, then the index map for that element is `-1`.
-  List<int> _getIndexMapFromPreviousRendering(Rendering previous, Rendering next) {
+  List<int> _getIndexMapFromPreviousRendering(Composition previous, Composition next) {
     assert(
-      !previous.equalsForRendering(next),
-      'Should not be in this method if the Renderings are equal',
+      !previous.equalsForCompositing(next),
+      'Should not be in this method if the Compositions are equal',
     );
     final List<int> result = <int>[];
     int index = 0;
@@ -632,9 +639,9 @@ class PlatformViewEmbedder {
 
     // Add the unchanged elements from the beginning of the list.
     while (index < maxUnchangedLength &&
-        previous.entities[index].equalsForRendering(next.entities[index])) {
+        previous.entities[index].equalsForCompositing(next.entities[index])) {
       result.add(index);
-      if (previous.entities[index] is RenderingRenderCanvas) {
+      if (previous.entities[index] is CompositionCanvas) {
         alreadyClaimedCanvases.add(index);
       }
       index += 1;
@@ -643,10 +650,10 @@ class PlatformViewEmbedder {
     while (index < next.entities.length) {
       bool foundForIndex = false;
       for (int oldIndex = 0; oldIndex < previous.entities.length; oldIndex += 1) {
-        if (previous.entities[oldIndex].equalsForRendering(next.entities[index]) &&
+        if (previous.entities[oldIndex].equalsForCompositing(next.entities[index]) &&
             !alreadyClaimedCanvases.contains(oldIndex)) {
           result.add(oldIndex);
-          if (previous.entities[oldIndex] is RenderingRenderCanvas) {
+          if (previous.entities[oldIndex] is CompositionCanvas) {
             alreadyClaimedCanvases.add(oldIndex);
           }
           foundForIndex = true;
@@ -690,7 +697,7 @@ class PlatformViewEmbedder {
     _viewsToRecomposite.clear();
     _activeCompositionOrder.clear();
     _compositionOrder.clear();
-    _activeRendering = Rendering();
+    _activeComposition = Composition();
   }
 
   /// Clears the state. Used in tests.
@@ -873,23 +880,23 @@ class PlatformViewSceneElement extends SceneElement {
 /// The state for the current frame.
 class EmbedderFrameContext {
   /// Picture recorders which were created d the final bounds of the picture in the scene.
-  final Map<PictureLayer, CkPictureRecorder> measuringPictureRecorders =
-      <PictureLayer, CkPictureRecorder>{};
+  final Map<PictureLayer, LayerPictureRecorder> measuringPictureRecorders =
+      <PictureLayer, LayerPictureRecorder>{};
 
   /// List of picture recorders and platform view ids in the order they were
   /// painted.
   final List<SceneElement> sceneElements = <SceneElement>[];
 
   /// The optimized rendering for this frame. This is set by calling
-  /// [optimizeRendering].
-  Rendering? optimizedRendering;
+  /// [optimizeComposition].
+  Composition? optimizedComposition;
 
-  /// The picture recorders for the optimized rendering. This is set by calling
-  /// [optimizeRendering].
-  List<CkPictureRecorder>? optimizedCanvasRecorders;
+  /// The picture recorders for the optimized composition. This is set by
+  /// calling [optimizeComposition].
+  List<LayerPictureRecorder>? optimizedCanvasRecorders;
 
-  /// A map from the original PictureLayer to the picture recorder it should go
-  /// into in the optimized rendering. This is set by calling
-  /// [optimizedRendering].
-  Map<PictureLayer, CkPictureRecorder>? pictureToOptimizedCanvasMap;
+  /// A map from the original PictureLayer to the Canvas it should be drawn
+  /// into in the optimized composition. This is set by calling
+  /// [optimizeComposition].
+  Map<PictureLayer, LayerCanvas>? pictureToOptimizedCanvasMap;
 }

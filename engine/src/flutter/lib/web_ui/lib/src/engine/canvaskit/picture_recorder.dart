@@ -19,7 +19,7 @@ class CkPictureRecorder implements LayerPictureRecorder {
     final SkPictureRecorder recorder = _skRecorder = SkPictureRecorder();
     final Float32List skRect = toSkRect(bounds);
     final SkCanvas skCanvas = recorder.beginRecording(skRect);
-    return _recordingCanvas = CkCanvas(skCanvas);
+    return _recordingCanvas = CkCanvas.fromSkCanvas(skCanvas);
   }
 
   CkCanvas? get recordingCanvas => _recordingCanvas;

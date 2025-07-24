@@ -18,7 +18,12 @@ abstract class LayerCanvas implements ui.Canvas {
   /// This is the same as a normal `saveLayer` call, but we can pass a backdrop image filter.
   void saveLayerWithFilter(ui.Rect? bounds, ui.Paint paint, ui.ImageFilter backdropFilter);
 
+  /// Clears the canvas and replaces it with the given [color].
   void clear(ui.Color color);
+
+  /// Returns [true] if [rect] can quickly be determined to be clipped out of
+  /// canvas. May give false negatives, but never false positives.
+  bool quickReject(ui.Rect rect);
 }
 
 /// A [ui.Picture] that provides approximate bounds for the drawings contained

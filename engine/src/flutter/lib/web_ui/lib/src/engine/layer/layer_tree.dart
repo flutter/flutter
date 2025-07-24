@@ -89,7 +89,7 @@ class Frame {
     timeAction<void>(kProfilePrerollFrame, () {
       layerTree.preroll(this, ignoreRasterCache: ignoreRasterCache);
       layerTree.measure(this, size, ignoreRasterCache: ignoreRasterCache);
-      viewEmbedder?.optimizeRendering();
+      viewEmbedder?.optimizeComposition();
     });
     timeAction<void>(kProfileApplyFrame, () {
       layerTree.paint(this, ignoreRasterCache: ignoreRasterCache);

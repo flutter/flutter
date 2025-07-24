@@ -13,7 +13,7 @@ import 'surface.dart';
 class OffscreenCanvasRasterizer extends Rasterizer {
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
-  final Surface offscreenSurface = Surface();
+  final SkwasmSurface offscreenSurface = SkwasmSurface();
 
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {

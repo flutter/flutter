@@ -11,8 +11,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import 'canvas.dart';
 import 'canvaskit_api.dart';
-import 'canvaskit_canvas.dart';
 import 'color_filter.dart';
 import 'fonts.dart';
 import 'image.dart';
@@ -168,7 +168,7 @@ class CanvasKitRenderer implements Renderer {
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CanvasKitCanvas(recorder, cullRect);
+      CkCanvas(recorder, cullRect);
 
   @override
   ui.Gradient createLinearGradient(

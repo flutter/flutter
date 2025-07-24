@@ -15,8 +15,7 @@ import '../platform_dispatcher.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
-import 'picture.dart';
-import 'render_canvas.dart';
+import '../compositing/render_canvas.dart';
 import 'util.dart';
 
 // Only supported in profile/release mode. Allows Flutter to use MSAA but
@@ -140,7 +139,7 @@ class Surface extends DisplayCanvas {
   Future<void> rasterizeToCanvas(
     BitmapSize bitmapSize,
     RenderCanvas canvas,
-    List<CkPicture> pictures,
+    List<ui.Picture> pictures,
   ) async {
     final CkCanvas skCanvas = getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
@@ -524,7 +523,7 @@ class CkSurface {
 
   CkCanvas getCanvas() {
     assert(!_isDisposed, 'Attempting to use the canvas of a disposed surface');
-    return CkCanvas(surface.getCanvas());
+    return CkCanvas.fromSkCanvas(surface.getCanvas());
   }
 
   /// The underlying CanvasKit surface object.

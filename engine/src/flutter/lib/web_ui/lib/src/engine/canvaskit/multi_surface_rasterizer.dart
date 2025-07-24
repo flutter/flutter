@@ -6,7 +6,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'canvas.dart';
-import 'picture.dart';
 import 'surface.dart';
 
 /// A Rasterizer which uses one or many on-screen WebGL contexts to display the
@@ -58,7 +57,7 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) {
+  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<ui.Picture> pictures) {
     final Surface surface = canvas as Surface;
     surface.createOrUpdateSurface(currentFrameSize);
     surface.positionToShowFrame(currentFrameSize);

@@ -4,8 +4,8 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../canvaskit/canvas.dart';
 import '../canvaskit/canvaskit_api.dart';
-import '../canvaskit/canvaskit_canvas.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
 import 'debug.dart';
@@ -40,7 +40,7 @@ class TextPaint {
   }
 
   void paintLineOnCanvasKit(
-    CanvasKitCanvas canvas,
+    CkCanvas canvas,
     TextLayout layout,
     TextLine line,
     double x,
@@ -63,7 +63,7 @@ class TextPaint {
   }
 
   void paintCluster(
-    CanvasKitCanvas canvas,
+    CkCanvas canvas,
     ExtendedTextCluster webTextCluster,
     ui.Offset clusterOffset,
     ui.Offset lineOffset,

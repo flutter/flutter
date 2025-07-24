@@ -431,4 +431,15 @@ class SkwasmCanvas implements LayerCanvas {
       return scope.convertMatrix44FromNative(outMatrix);
     });
   }
+
+  @override
+  void clear(ui.Color color) {
+    // TODO: implement clear
+  }
+
+  @override
+  bool quickReject(ui.Rect rect) {
+    // TODO: implement quickReject
+    throw UnimplementedError();
+  }
 }

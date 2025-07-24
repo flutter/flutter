@@ -224,7 +224,7 @@ class PrerollVisitor extends LayerVisitor {
 class MeasureVisitor extends LayerVisitor {
   MeasureVisitor(BitmapSize size, this.viewEmbedder)
     : measuringRecorder = ui.PictureRecorder() as LayerPictureRecorder {
-    measuringCanvas = measuringRecorder.beginRecording(ui.Offset.zero & size.toSize());
+    measuringCanvas = ui.Canvas(measuringRecorder, ui.Offset.zero & size.toSize()) as LayerCanvas;
   }
 
   /// A stack of image filters which apply their transforms to measured bounds.
