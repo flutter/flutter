@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/windows/platform_handler.h"
 
 #include <windows.h>
-#include <iostream>
 
 #include <cstring>
 #include <optional>
