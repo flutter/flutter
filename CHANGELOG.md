@@ -34,7 +34,7 @@ INTERNAL NOTE
 - [flutter/150131](https://github.com/flutter/flutter/issues/150131) iOS users on macOS 15 may see a tool/app crash if permissions are missing. Can work around by enabling mDNS permissions.
 - [flutter/155294](https://github.com/flutter/flutter/issues/155294) [flutter/169506](https://github.com/flutter/flutter/issues/169506) On android Add a new api for requesting a new surface from the embedder that is different from any previously returned.
 - [flutter/172602](https://github.com/flutter/flutter/pull/172602)  Do not call hasUnifiedMemory that was introduced in macOS 10.15 on versions before 10.15.
-- [flutter/172250](https://github.com/flutter/flutter/issues/172250) All platforms, `TextInput.hide` call incorrectly clears the text in the active text field.
+- [flutter/172250](https://github.com/flutter/flutter/issues/172250) `TextInput.hide` call incorrectly clears the text in the active text field on iOS.
 
 ### [3.32.7](https://github.com/flutter/flutter/releases/tag/3.32.7)
 
