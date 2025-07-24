@@ -1449,7 +1449,7 @@ void main() {
       final MaterialInkController outerMaterial = Material.of(
         tester.element(find.byType(FocusableActionDetector)),
       );
-      // Material directly wrapping the PageView
+      // Material directly wrapping the PageView.
       final MaterialInkController innerMaterial = Material.of(
         tester.element(find.byType(PageView)),
       );
