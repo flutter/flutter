@@ -607,11 +607,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   bool _isTooltipInteractive() {
-    final bool routeIsCurrent = _route?.isCurrent ?? false;
+    if (_route == null) {
+      return true;
+    }
     // If the route's secondary animation is animating, the route is on its way
     // out. So, the tooltip should be non-interactive.
-    final bool routeIsAnimating = _route?.secondaryAnimation?.isAnimating ?? false;
-    return routeIsCurrent && !routeIsAnimating;
+    final bool routeIsAnimating = _route!.secondaryAnimation?.isAnimating ?? false;
+    return _route!.isCurrent && !routeIsAnimating;
   }
 
   void _handlePointerDown(PointerDownEvent event) {
