@@ -4327,7 +4327,6 @@ void main() {
     tester.view.physicalSize = const Size(390, 810);
     tester.view.devicePixelRatio = 1.0;
     const String shortLabel = 'Male';
-    // Specifiying width of 200
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
