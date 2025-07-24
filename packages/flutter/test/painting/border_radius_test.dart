@@ -345,6 +345,42 @@ void main() {
     );
   });
 
+  // to test _MixedBorderRadius using `add()` and `subtract()` methods
+  test('resolve method throws detailed error when TextDirection is null', () {
+    const BorderRadius a = BorderRadius.only(
+      topLeft: Radius.elliptical(10.0, 20.0),
+      topRight: Radius.elliptical(30.0, 40.0),
+      bottomLeft: Radius.elliptical(50.0, 60.0),
+    );
+    const BorderRadiusDirectional b = BorderRadiusDirectional.only(
+      topEnd: Radius.elliptical(100.0, 110.0),
+      bottomStart: Radius.elliptical(120.0, 130.0),
+      bottomEnd: Radius.elliptical(140.0, 150.0),
+    );
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+
+    expect(
+      () => b.subtract(a).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
   test('BorderRadiusDirectional.lerp() invariants', () {
     final BorderRadiusDirectional a = BorderRadiusDirectional.circular(10.0);
     final BorderRadiusDirectional b = BorderRadiusDirectional.circular(20.0);
