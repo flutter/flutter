@@ -4473,24 +4473,34 @@ targets:
       - engine/**
       - DEPS
 
+  # - name: Mac plugin_test_macos
+  #   recipe: devicelab/devicelab_drone
+  #   timeout: 60
+  #   properties:
+  #     dependencies: >-
+  #       [
+  #         {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+  #       ]
+  #     tags: >
+  #       ["devicelab", "hostonly", "mac"]
+  #     task_name: plugin_test_macos
+  #   runIf:
+  #     - dev/**
+  #     - packages/flutter_tools/**
+  #     - bin/**
+  #     - .ci.yaml
+  #     - engine/**
+  #     - DEPS
+
   - name: Mac plugin_test_macos
+  # - name: Mac macos_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    # bringup: true
     properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: plugin_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
+      task_name: macos_integration_test
 
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
