@@ -5,7 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_H_
 
-#include <glib-object.h>
+#include <cairo.h>
+#include <gdk/gdk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -19,6 +20,8 @@ struct _FlCompositorClass {
   gboolean (*present_layers)(FlCompositor* compositor,
                              const FlutterLayer** layers,
                              size_t layers_count);
+
+  gboolean (*render)(FlCompositor* compositor, cairo_t* cr, GdkWindow* window);
 };
 
 /**
@@ -33,14 +36,27 @@ struct _FlCompositorClass {
  * @layers: layers to be composited.
  * @layers_count: number of layers.
  *
- * Callback invoked by the engine to composite the contents of each layer
- * onto the screen.
+ * Composite layers. Called from the Flutter rendering thread.
  *
  * Returns %TRUE if successful.
  */
 gboolean fl_compositor_present_layers(FlCompositor* compositor,
                                       const FlutterLayer** layers,
                                       size_t layers_count);
+
+/**
+ * fl_compositor_render:
+ * @compositor: an #FlCompositor.
+ * @cr: a Cairo rendering context.
+ * @window: window being rendered into.
+ *
+ * Renders the current frame. Called from the GTK thread.
+ *
+ * Returns %TRUE if successful.
+ */
+gboolean fl_compositor_render(FlCompositor* compositor,
+                              cairo_t* cr,
+                              GdkWindow* window);
 
 G_END_DECLS
 
