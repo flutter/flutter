@@ -4326,7 +4326,7 @@ void main() {
   ) async {
     tester.view.physicalSize = const Size(390, 810);
     tester.view.devicePixelRatio = 1.0;
-    const shortLabel = 'Male';
+    const String shortLabel = 'Male';
     // Specifiying width of 200
     await tester.pumpWidget(
       const MaterialApp(
