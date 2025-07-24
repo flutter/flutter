@@ -366,7 +366,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
       &state->seen_license_files;
 
   bool did_find_copyright = false;
-  fs::path relative_path = fs::relative(full_path, working_dir_path);
+  fs::path relative_path = full_path.lexically_relative(working_dir_path);
   VLOG(2) << relative_path;
   if (!data.include_filter.Matches(relative_path.string()) ||
       data.exclude_filter.Matches(relative_path.string())) {
