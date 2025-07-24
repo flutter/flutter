@@ -89,7 +89,7 @@ Future<void> testMain() async {
     builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });
@@ -117,6 +117,10 @@ Future<void> testMain() async {
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
     builder.addText('ABC لم def');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_ltr.png', region: region);
   });
 
@@ -131,12 +135,11 @@ Future<void> testMain() async {
       textDirection: TextDirection.rtl,
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-
     builder.addText('لABC لم def لل لم ghi');
     //لABC لم def لل لم ghi
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix1_multilined_rtl.png', region: region);
   });
@@ -237,7 +240,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored.png', region: region);
   });
@@ -300,7 +303,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
   });
@@ -320,12 +323,12 @@ Future<void> testMain() async {
       foreground: blackPaint,
     );
 
-    final WebTextStyle normal_normal = WebTextStyle(
+    final WebTextStyle normalNormal = WebTextStyle(
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.normal,
     );
 
-    final WebTextStyle normal_bold = WebTextStyle(
+    final WebTextStyle normalBold = WebTextStyle(
       fontStyle: FontStyle.normal,
       fontWeight: FontWeight.bold,
     );
@@ -352,11 +355,11 @@ Future<void> testMain() async {
 
     final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
 
-    builder.pushStyle(normal_normal);
+    builder.pushStyle(normalNormal);
     builder.addText('Normal normal\n');
     builder.pop();
 
-    builder.pushStyle(normal_bold);
+    builder.pushStyle(normalBold);
     builder.addText('Normal bold\n');
     builder.pop();
 
@@ -378,7 +381,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multifontstyled.png', region: region);
   });
@@ -534,7 +537,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 400));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multidecorated.png', region: region);
   });
@@ -621,7 +624,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multiplefont.png', region: region);
   });
@@ -661,7 +664,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_letter_word_spacing.png', region: region);
   });
@@ -694,7 +697,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 500));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
 
     {
       final rects = paragraph.getBoxesForRange(
@@ -829,16 +832,15 @@ Future<void> testMain() async {
     builder.pop();
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 500));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
 
-    final rects1 = paragraph.getBoxesForPlaceholders();
-    final rects2 = paragraph.getBoxesForPlaceholders();
+    final rects = paragraph.getBoxesForPlaceholders();
     paragraph.getBoxesForRange(0, paragraph.text.length);
     final Paint bluePaint = Paint()
       ..color = const Color(0xFF0000FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    for (final rect in rects1) {
+    for (final rect in rects) {
       canvas.drawRect(rect.toRect(), bluePaint);
     }
 
@@ -860,7 +862,7 @@ Future<void> testMain() async {
       fontSize: 20,
       foreground: blackPaint,
     );
-    final WebTextStyle no_liga = WebTextStyle(
+    final WebTextStyle noLiga = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
       fontFeatures: const [FontFeature('liga', 0)],
@@ -868,11 +870,11 @@ Future<void> testMain() async {
     final WebTextStyle smcp = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 20,
-      fontFeatures: const [FontFeature('smcp', 1)],
+      fontFeatures: const [FontFeature('smcp' /*1*/)],
     );
     final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
 
-    builder.pushStyle(no_liga);
+    builder.pushStyle(noLiga);
     builder.addText('fi ffi. ');
     builder.pop();
     builder.addText('fi ffi.\n');
@@ -883,7 +885,7 @@ Future<void> testMain() async {
 
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 250));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_font_features.png', region: region);
   });

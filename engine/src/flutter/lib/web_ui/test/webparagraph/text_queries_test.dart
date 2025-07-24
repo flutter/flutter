@@ -31,7 +31,7 @@ Future<void> testMain() async {
       for (int i = start; i < end; i++) {
         expect(
           paragraph.getWordBoundary(
-            ui.TextPosition(offset: i, affinity: ui.TextAffinity.downstream),
+            ui.TextPosition(offset: i /*affinity: ui.TextAffinity.downstream*/),
           ),
           ui.TextRange(start: start, end: end),
         );

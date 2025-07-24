@@ -10,8 +10,7 @@ import 'package:ui/ui.dart';
 import '../common/test_initialization.dart';
 
 // TODO(jlavrova): To make the tests consistent in all environments, we need to use the Ahem font.
-final WebParagraphStyle ahemStyle = WebParagraphStyle(
-    fontFamily: 'Arial', fontSize: 50);
+final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -22,7 +21,7 @@ Future<void> testMain() async {
 
   test(
     'Text wrapper, 10 lines, 3 trailing whitespaces on each line except the one that has a cluster break',
-        () {
+    () {
       final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
       builder.addText(
         'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',

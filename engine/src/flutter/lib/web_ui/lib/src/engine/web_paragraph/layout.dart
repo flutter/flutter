@@ -83,34 +83,34 @@ class TextLayout {
         : fontWeight.value.toStringAsFixed(2);
   }
 
+  bool nextToEachOtherHorizontally(ui.Rect rect1, ui.Rect rect2) {
+    if ((rect1.right - rect2.left).abs() < epsilon) {
+      return true;
+    }
+    if ((rect1.left - rect2.right).abs() < epsilon) {
+      return true;
+    }
+    return false;
+  }
+
   ui.Rect getAdvance(DomTextMetrics textMetrics, TextRange textRange) {
     final List<DomRectReadOnly> rects = textMetrics.getSelectionRects(
       textRange.start,
       textRange.end,
     );
-    if (rects.length != 1) {
-      // TODO(jlavrova): assert that this is a continuous set of rectangles
-      ui.Rect union = ui.Rect.fromLTWH(
-        rects.first.left,
-        rects.first.top,
-        rects.first.width,
-        rects.first.height,
-      );
-      for (final rect in rects) {
-        WebParagraphDebug.log('[${rect.left}:${rect.right})');
-        final r = ui.Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height);
-        union = union.expandToInclude(r);
-        WebParagraphDebug.log('[${union.left}:${union.right})');
-      }
-      return union;
-    }
-    //assert(rects.length == 1, 'Cluster text must be presented by a single rectangle');
-    return ui.Rect.fromLTWH(
+    ui.Rect union = ui.Rect.fromLTWH(
       rects.first.left,
       rects.first.top,
       rects.first.width,
       rects.first.height,
     );
+    for (final rect in rects.skip(1)) {
+      final r = ui.Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height);
+      // Assert that this is a continuous set of rectangles
+      assert(nextToEachOtherHorizontally(union, r));
+      union = union.expandToInclude(r);
+    }
+    return union;
   }
 
   ui.Rect getBounds(DomTextMetrics textMetrics, TextRange textRange) {
@@ -123,7 +123,7 @@ class TextLayout {
     double blockStart = 0.0;
     layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
-      final String text = paragraph.getText(styledBlock as TextRange);
+      final String text = styledBlock.textFrom(paragraph);
       if (text.isEmpty) {
         continue;
       }
@@ -168,6 +168,7 @@ class TextLayout {
       }
 
       // Setup all the font affecting attributes
+      // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
       layoutContext.font = styledBlock.style.buildCssFontString();
       layoutContext.letterSpacing = styledBlock.style.buildLetterSpacingString();
       layoutContext.wordSpacing = styledBlock.style.buildWordSpacingString();
@@ -218,6 +219,8 @@ class TextLayout {
         }
       }
 
+      // We need one more "fake" cluster so we can loop through clusters
+      // without checking indexes for being outside of the range
       textToClusterMap[paragraph.text.length] = textClusters.length;
       textClusters.add(ExtendedTextCluster.fromLast(textClusters.last));
       printClusters('Full text');
@@ -255,7 +258,7 @@ class TextLayout {
       start: math.min(start.textRange.start, end.textRange.end),
       end: math.max(start.textRange.start, end.textRange.end),
     );
-    return paragraph.getText(textRange);
+    return textRange.textFrom(paragraph);
   }
 
   void extractBidiRuns() {
@@ -285,7 +288,7 @@ class TextLayout {
     WebParagraphDebug.log('Text Clusters ($header): ${textClusters.length}');
     int i = 0;
     for (final ExtendedTextCluster cluster in textClusters) {
-      final String clusterText = paragraph.getText(cluster.textRange);
+      final String clusterText = cluster.textRange.textFrom(paragraph);
       WebParagraphDebug.log(
         'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
       );
@@ -317,7 +320,7 @@ class TextLayout {
       );
       for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.getText(cluster.textRange);
+        final String clusterText = cluster.textRange.textFrom(paragraph);
         WebParagraphDebug.log(
           '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
         );
@@ -329,7 +332,7 @@ class TextLayout {
   void wrapText(double width) {
     lines.clear();
 
-    final TextWrapper wrapper = TextWrapper(paragraph.text, this);
+    final TextWrapper wrapper = TextWrapper(this);
     wrapper.breakLines(width);
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
     paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
@@ -351,7 +354,7 @@ class TextLayout {
 
   String getTextFromClusterRange(ClusterRange clusterRange) {
     final TextRange textRange = convertSequentialClusterRangeToText(clusterRange);
-    return paragraph.getText(textRange);
+    return textRange.textFrom(paragraph);
   }
 
   double addLine(
@@ -607,7 +610,7 @@ class TextLayout {
     }
   }
 
-  static double EPSILON = 0.001;
+  static double epsilon = 0.001;
 
   List<ui.TextBox> getBoxesForRange(
     int start,
@@ -669,11 +672,11 @@ class TextLayout {
                 line.fontBoundingBoxAscent -
                 block.rawFontBoundingBoxAscent;
             bottom = top + block.rawHeight;
-            assert((block.correctedAdvance.height - (bottom - top).abs() < EPSILON));
+            assert((block.correctedAdvance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.max:
             top = firstRect.top + line.advance.top;
             bottom = firstRect.top + line.advance.bottom;
-            assert((line.advance.height - (bottom - top).abs() < EPSILON));
+            assert((line.advance.height - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.strut:
             // TODO(jlavrova): implement
             throw UnimplementedError('BoxHeightStyle.strut not implemented');
@@ -712,7 +715,7 @@ class TextLayout {
       }
 
       if (boxWidthStyle == ui.BoxWidthStyle.max && paragraph.requiredWidth != double.infinity) {
-        if ((result.first.left - 0).abs() > EPSILON) {
+        if ((result.first.left - 0).abs() > epsilon) {
           result.insert(
             0,
             ui.TextBox.fromLTRBD(
@@ -724,7 +727,7 @@ class TextLayout {
             ),
           );
         }
-        if ((result.last.right - paragraph.requiredWidth).abs() > EPSILON) {
+        if ((result.last.right - paragraph.requiredWidth).abs() > epsilon) {
           result.add(
             ui.TextBox.fromLTRBD(
               result.last.right,
@@ -787,7 +790,7 @@ class TextLayout {
         assert(lineNum == 1);
         return ui.TextPosition(
           offset: line.textClusterRange.start,
-          affinity: ui.TextAffinity.downstream,
+          /*affinity: ui.TextAffinity.downstream,*/
         );
       } else if (line.advance.bottom < offset.dy) {
         // We are not there yet; we need a line closest to the offset.
@@ -805,7 +808,7 @@ class TextLayout {
           assert(blockNum == 1);
           return ui.TextPosition(
             offset: line.textClusterRange.end,
-            affinity: ui.TextAffinity.downstream,
+            /*affinity: ui.TextAffinity.downstream,*/
           );
         } else if (block.correctedAdvance.right < offset.dx) {
           // We are not there yet; we need a block containing the offset (or the closest to it)
@@ -827,7 +830,7 @@ class TextLayout {
                 line.advance.left + line.formattingShift + block.clusterShiftInLine,
                 line.advance.top + line.fontBoundingBoxAscent,
               )
-              .inflate(EPSILON);
+              .inflate(epsilon);
           WebParagraphDebug.log('Check cluster: $rect $offset');
           if (rect.contains(offset)) {
             // TODO(jlavrova): proportionally calculate the text position? I wouldn't...
@@ -839,7 +842,7 @@ class TextLayout {
             } else {
               return ui.TextPosition(
                 offset: cluster.textRange.end,
-                affinity: ui.TextAffinity.downstream,
+                /*affinity: ui.TextAffinity.downstream,*/
               );
             }
           }
@@ -853,7 +856,7 @@ class TextLayout {
       // So all the blocks are on the left
       return ui.TextPosition(
         offset: line.textClusterRange.end,
-        affinity: ui.TextAffinity.downstream,
+        /*affinity: ui.TextAffinity.downstream,*/
       );
     }
     // We didn't find the line containing our offset and
@@ -892,7 +895,7 @@ class ExtendedTextCluster {
     this.advance,
     this.shift,
     this.placeholder,
-  ) : start = cluster == null ? 0 : cluster!.begin,
+  ) : start = cluster == null ? 0 : cluster.begin,
       end = cluster == null ? 0 : cluster.end;
 
   ExtendedTextCluster.fromLast(ExtendedTextCluster lastCluster)

@@ -116,12 +116,11 @@ class Canvas2DPainter extends Painter {
 
         case ui.TextDecorationStyle.dashed:
         case ui.TextDecorationStyle.dotted:
-          final Float32List dashes =
-              Float32List(2)
-                ..[0] =
-                    thickness *
-                    (block.textStyle.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
-                ..[1] = thickness;
+          final Float32List dashes = Float32List(2)
+            ..[0] =
+                thickness *
+                (block.textStyle.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
+            ..[1] = thickness;
 
           paintContext.setLineDash(dashes);
           paintContext.beginPath();

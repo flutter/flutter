@@ -3,19 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
-import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
-  TextWrapper(this._text, this._layout) {
+  TextWrapper(this._layout) {
     startNewLine(0, 0.0);
   }
 
-  final String _text;
   final TextLayout _layout;
 
   int _startLine = 0;

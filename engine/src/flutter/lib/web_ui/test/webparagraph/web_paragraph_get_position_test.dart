@@ -25,8 +25,8 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    final ui.TextPosition positiontt = paragraph.getPositionForOffset(ui.Offset(-1, -1));
-    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset(0, 0));
+    final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
+    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
       ui.Offset(paragraph.width, paragraph.height),
     );
@@ -36,10 +36,10 @@ Future<void> testMain() async {
     final ui.TextPosition positionbb = paragraph.getPositionForOffset(
       ui.Offset(paragraph.width + 1, paragraph.height + 1),
     );
-    expect(positiontt, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream));
+    expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
     expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
-    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.downstream));
+    expect(positionee, const ui.TextPosition(offset: 81 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
   });
 
@@ -53,8 +53,8 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
 
-    final ui.TextPosition positiontt = paragraph.getPositionForOffset(ui.Offset(-1, -1));
-    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset(0, 0));
+    final ui.TextPosition positiontt = paragraph.getPositionForOffset(const ui.Offset(-1, -1));
+    final ui.TextPosition position00 = paragraph.getPositionForOffset(ui.Offset.zero);
     final ui.TextPosition positionee = paragraph.getPositionForOffset(
       ui.Offset(paragraph.width, paragraph.height),
     );
@@ -65,11 +65,10 @@ Future<void> testMain() async {
       ui.Offset(paragraph.width + 1, paragraph.height + 1),
     );
 
-    expect(positiontt, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.downstream));
+    expect(positiontt, const ui.TextPosition(offset: 0 /*affinity: ui.TextAffinity.downstream)*/));
     expect(position00, const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream));
     expect(positionmm, const ui.TextPosition(offset: 37, affinity: ui.TextAffinity.upstream));
-    expect(positionee, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.downstream));
+    expect(positionee, const ui.TextPosition(offset: 81 /*affinity: ui.TextAffinity.downstream)*/));
     expect(positionbb, const ui.TextPosition(offset: 81, affinity: ui.TextAffinity.upstream));
   });
 }
-// SkParagraph_PositionInsideEmoji
