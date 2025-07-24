@@ -99,7 +99,7 @@ void main() {
         daemon: false,
         windows: false,
       ),
-      isA<MachineFlagLogger>(),
+      isA<MachineOutputLogger>(),
     );
   });
 
@@ -249,7 +249,7 @@ void main() {
     expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
     expect(asLogger<FakeLogger>(notifyingLogger), fakeLogger);
 
-    expect(() => asLogger<MachineFlagLogger>(notifyingLogger), throwsStateError);
+    expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
   group('AppContext', () {
@@ -798,7 +798,7 @@ void main() {
 
     testWithoutContext('MachineFlagLogger does not output text statuses', () async {
       final buffer = BufferLogger.test();
-      final logger = MachineFlagLogger(parent: buffer);
+      final logger = MachineOutputLogger(parent: buffer);
 
       logger.startProgress('Test status...').stop();
 

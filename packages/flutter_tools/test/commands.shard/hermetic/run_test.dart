@@ -539,7 +539,7 @@ void main() {
             FileSystem: () => fs,
             ProcessManager: () => FakeProcessManager.any(),
             Stdio: () => FakeStdio(),
-            Logger: () => MachineFlagLogger(parent: logger),
+            Logger: () => MachineOutputLogger(parent: logger),
           },
         );
 
@@ -565,7 +565,7 @@ void main() {
             FileSystem: () => fs,
             ProcessManager: () => FakeProcessManager.any(),
             Stdio: () => FakeStdio(),
-            Logger: () => MachineFlagLogger(parent: logger),
+            Logger: () => MachineOutputLogger(parent: logger),
           },
         );
       });

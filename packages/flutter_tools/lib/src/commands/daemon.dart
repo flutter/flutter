@@ -752,7 +752,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineFlagLogger>(globals.logger),
+      asLogger<MachineOutputLogger>(globals.logger),
     );
   }
 
@@ -764,7 +764,7 @@ class AppDomain extends Domain {
     bool enableHotReload,
     Directory cwd,
     LaunchMode launchMode,
-    MachineFlagLogger logger,
+    MachineOutputLogger logger,
   ) async {
     final app = AppInstance(
       _getNewAppId(),
@@ -1554,13 +1554,13 @@ class AppInstance {
     this.id, {
     required this.runner,
     this.logToStdout = false,
-    required MachineFlagLogger logger,
+    required MachineOutputLogger logger,
   }) : _logger = logger;
 
   final String id;
   final ResidentRunner runner;
   final bool logToStdout;
-  final MachineFlagLogger _logger;
+  final MachineOutputLogger _logger;
 
   Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) {
     return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
@@ -1779,8 +1779,8 @@ class ProxyDomain extends Domain {
 }
 
 /// A [Logger] which omits log messages to avoid breaking `--machine` formatting.
-final class MachineFlagLogger extends DelegatingLogger {
-  MachineFlagLogger({required Logger parent}) : super(parent);
+final class MachineOutputLogger extends DelegatingLogger {
+  MachineOutputLogger({required Logger parent}) : super(parent);
 
   AppDomain? _domain;
   late final AppInstance _app;

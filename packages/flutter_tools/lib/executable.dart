@@ -323,7 +323,7 @@ class LoggerFactory {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return MachineFlagLogger(parent: logger);
+      return MachineOutputLogger(parent: logger);
     }
     return logger;
   }
