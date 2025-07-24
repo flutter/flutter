@@ -34,7 +34,11 @@ show up in source code or in its own LICENSE file.  The format is the following:
 2) Second line - Unique regex which cannot overlap with other matcher's unique
    regexes.
 3) Remaining lines - Matcher regex that will be used to extract the full text
-   of the accepted license.
+   of the accepted license.  The regexes have the following properties:
+   - All whitespace is considered `\s+`.
+   - Trailing whitespace is ignored.
+   - Matched groups are extracted from the output.  Example:
+     `match("\[(.*)\]", "[hi]") -> "[]"`.
 
 ## secondary/
 
