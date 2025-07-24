@@ -30,6 +30,8 @@ import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
+const int kImplicitViewId = 0;
+
 class MockTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildHandle(
@@ -245,7 +247,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   testWidgets('Live Text button shows and hides correctly when LiveTextStatus changes', (

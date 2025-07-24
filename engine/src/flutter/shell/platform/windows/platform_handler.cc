@@ -37,8 +37,11 @@ static constexpr char kExitResponseExit[] = "exit";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kTextKey[] = "text";
+static constexpr char kViewIdKey[] = "viewId";
 static constexpr char kUnknownClipboardFormatMessage[] =
     "Unknown clipboard format";
+static constexpr char kUnknownClipboardViewIdMessage[] =
+    "Unknown clipboard viewId";
 
 static constexpr char kValueKey[] = "value";
 static constexpr int kAccessDeniedErrorCode = 5;
@@ -247,10 +250,9 @@ PlatformHandler::~PlatformHandler() = default;
 
 void PlatformHandler::GetPlainText(
     std::unique_ptr<MethodResult<rapidjson::Document>> result,
-    std::string_view key) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
+    std::string_view key,
+    FlutterViewId viewId) {
+  const FlutterWindowsView* view = engine_->view(viewId);
   if (view == nullptr) {
     result->Error(kClipboardError,
                   "Clipboard is not available in Windows headless mode");
@@ -292,10 +294,9 @@ void PlatformHandler::GetPlainText(
 }
 
 void PlatformHandler::GetHasStrings(
-    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
+    std::unique_ptr<MethodResult<rapidjson::Document>> result,
+    FlutterViewId viewId) {
+  const FlutterWindowsView* view = engine_->view(viewId);
   if (view == nullptr) {
     result->Error(kClipboardError,
                   "Clipboard is not available in Windows headless mode");
@@ -332,10 +333,9 @@ void PlatformHandler::GetHasStrings(
 
 void PlatformHandler::SetPlainText(
     const std::string& text,
-    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
+    std::unique_ptr<MethodResult<rapidjson::Document>> result,
+    FlutterViewId viewId) {
+  const FlutterWindowsView* view = engine_->view(viewId);
   if (view == nullptr) {
     result->Error(kClipboardError,
                   "Clipboard is not available in Windows headless mode");
@@ -475,35 +475,47 @@ void PlatformHandler::HandleMethodCall(
     SystemExitApplication(StringToAppExitType(exit_type), exit_code,
                           std::move(result));
   } else if (method.compare(kGetClipboardDataMethod) == 0) {
-    // Only one string argument is expected.
+    // Only two arguments are expected.
     const rapidjson::Value& format = method_call.arguments()[0];
+    const rapidjson::Value& viewId = method_call.arguments()[1];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    GetPlainText(std::move(result), kTextKey);
+    GetPlainText(std::move(result), kTextKey, viewId.GetInt64());
   } else if (method.compare(kHasStringsClipboardMethod) == 0) {
-    // Only one string argument is expected.
+    // Only two arguments are expected.
     const rapidjson::Value& format = method_call.arguments()[0];
+    const rapidjson::Value& viewId = method_call.arguments()[1];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    GetHasStrings(std::move(result));
+    GetHasStrings(std::move(result), viewId.GetInt64());
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
     const rapidjson::Value& document = *method_call.arguments();
-    rapidjson::Value::ConstMemberIterator itr = document.FindMember(kTextKey);
-    if (itr == document.MemberEnd()) {
+    rapidjson::Value::ConstMemberIterator textItr =
+        document.FindMember(kTextKey);
+    if (textItr == document.MemberEnd()) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    if (!itr->value.IsString()) {
+    if (!textItr->value.IsString()) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    SetPlainText(itr->value.GetString(), std::move(result));
+
+    rapidjson::Value::ConstMemberIterator viewIdItr =
+        document.FindMember(kViewIdKey);
+    if (viewIdItr == document.MemberEnd() || !viewIdItr->value.IsInt64()) {
+      result->Error(kClipboardError, kUnknownClipboardViewIdMessage);
+      return;
+    }
+
+    SetPlainText(textItr->value.GetString(), std::move(result),
+                 viewIdItr->value.GetInt64());
   } else if (method.compare(kPlaySoundMethod) == 0) {
     // Only one string argument is expected.
     const rapidjson::Value& sound_type = method_call.arguments()[0];

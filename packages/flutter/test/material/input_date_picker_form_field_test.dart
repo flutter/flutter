@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 
+const int kImplicitViewId = 0;
+
 class TestMaterialLocalizations extends DefaultMaterialLocalizations {
   @override
   String formatCompactDate(DateTime date) {
@@ -278,7 +280,7 @@ void main() {
         SystemChannels.platform,
         mockClipboard.handleMethodCall,
       );
-      await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+      await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
       addTearDown(
         () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
           SystemChannels.platform,

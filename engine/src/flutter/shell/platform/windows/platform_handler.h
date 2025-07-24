@@ -55,22 +55,27 @@ class PlatformHandler {
                               UINT exit_code);
 
  protected:
+  using FlutterViewId = int64_t;
+
   // Gets plain text from the clipboard and provides it to |result| as the
   // value in a dictionary with the given |key|.
   virtual void GetPlainText(
       std::unique_ptr<MethodResult<rapidjson::Document>> result,
-      std::string_view key);
+      std::string_view key,
+      FlutterViewId viewId);
 
   // Provides a boolean to |result| as the value in a dictionary at key
   // "value" representing whether or not the clipboard has a non-empty string.
   virtual void GetHasStrings(
-      std::unique_ptr<MethodResult<rapidjson::Document>> result);
+      std::unique_ptr<MethodResult<rapidjson::Document>> result,
+      FlutterViewId viewId);
 
   // Sets the clipboard's plain text to |text|, and reports the result (either
   // an error, or null for success) to |result|.
   virtual void SetPlainText(
       const std::string& text,
-      std::unique_ptr<MethodResult<rapidjson::Document>> result);
+      std::unique_ptr<MethodResult<rapidjson::Document>> result,
+      FlutterViewId viewId);
 
   virtual void SystemSoundPlay(
       const std::string& sound_type,

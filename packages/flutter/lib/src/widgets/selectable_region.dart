@@ -35,6 +35,7 @@ import 'selection_container.dart';
 import 'text_editing_intents.dart';
 import 'text_selection.dart';
 import 'text_selection_toolbar_anchors.dart';
+import 'view.dart';
 
 // Examples can assume:
 // late GlobalKey key;
@@ -1572,7 +1573,7 @@ class SelectableRegionState extends State<SelectableRegion>
     if (data == null) {
       return;
     }
-    await Clipboard.setData(ClipboardData(text: data.plainText));
+    await Clipboard.setData(ClipboardData(text: data.plainText), View.of(context).viewId);
   }
 
   Future<void> _share() async {

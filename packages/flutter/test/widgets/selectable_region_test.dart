@@ -14,6 +14,8 @@ import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
 
+const int kImplicitViewId = 0;
+
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset =
@@ -35,7 +37,7 @@ void main() {
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
-    await Clipboard.setData(const ClipboardData(text: 'empty'));
+    await Clipboard.setData(const ClipboardData(text: 'empty'), kI);
   });
 
   tearDown(() {
