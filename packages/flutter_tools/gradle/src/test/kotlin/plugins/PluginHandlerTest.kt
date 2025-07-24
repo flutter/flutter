@@ -6,6 +6,7 @@ package com.flutter.gradle.plugins
 
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.FlutterExtension
+import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.EXAMPLE_ENGINE_VERSION
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.cameraDependency
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.flutterPluginAndroidLifecycleDependency
@@ -325,5 +326,173 @@ class PluginHandlerTest {
                 engineVersionValue = EXAMPLE_ENGINE_VERSION
             )
         }
+    }
+
+    @Test
+    fun `configurePlugins copies all build types when plugin is an app project`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+
+        // Setup basic mocks
+        setupBasicMocks(project, pluginProject, mockBuildType, tempDir)
+
+        // Mock isBuiltAsApp to return true for plugin project (it's an app)
+        mockkObject(FlutterPluginUtils)
+        every { FlutterPluginUtils.isBuiltAsApp(pluginProject) } returns true
+
+        val mockProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+        every { mockPluginProjectBuildTypes.addAll(any()) } returns true
+
+        every { mockProjectBuildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+
+        val pluginHandler = PluginHandler(project)
+        setupPluginMocks(project, pluginHandler)
+
+        pluginHandler.configurePlugins(EXAMPLE_ENGINE_VERSION)
+
+        // Verify that addAll was called (app project behavior)
+        verify { mockPluginProjectBuildTypes.addAll(mockProjectBuildTypes) }
+    }
+
+    @Test
+    fun `configurePlugins creates individual build types when plugin is a library project`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+
+        // Setup basic mocks
+        setupBasicMocks(project, pluginProject, mockBuildType, tempDir)
+
+        // Mock isBuiltAsApp to return false for plugin project (it's a library)
+        mockkObject(FlutterPluginUtils)
+        every { FlutterPluginUtils.isBuiltAsApp(pluginProject) } returns false
+
+        val mockProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockCreatedBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>(relaxed = true)
+
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+
+        // Mock that the build type doesn't exist yet
+        every { mockPluginProjectBuildTypes.findByName("debug") } returns null
+        every { mockPluginProjectBuildTypes.create("debug", any()) } returns mockCreatedBuildType
+
+        // Setup build type properties
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        every { mockBuildType.isMinifyEnabled } returns false
+
+        every { mockProjectBuildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+        every { mockProjectBuildTypes.forEach(any()) } answers {
+            val action = firstArg<(com.android.build.gradle.internal.dsl.BuildType) -> Unit>()
+            action(mockBuildType)
+        }
+
+        val pluginHandler = PluginHandler(project)
+        setupPluginMocks(project, pluginHandler)
+
+        pluginHandler.configurePlugins(EXAMPLE_ENGINE_VERSION)
+
+        // Verify that addAll was NOT called
+        verify(exactly = 0) { mockPluginProjectBuildTypes.addAll(any()) }
+
+        // Verify that create was called with the build type name
+        verify { mockPluginProjectBuildTypes.create("debug", any()) }
+    }
+
+    @Test
+    fun `configurePlugins does not recreate existing build types in library project`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        val existingBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+
+        // Setup basic mocks
+        setupBasicMocks(project, pluginProject, mockBuildType, tempDir)
+
+        // Mock isBuiltAsApp to return false for plugin project (it's a library)
+        mockkObject(FlutterPluginUtils)
+        every { FlutterPluginUtils.isBuiltAsApp(pluginProject) } returns false
+
+        val mockProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+
+        // Mock that the build type already exists
+        every { mockPluginProjectBuildTypes.findByName("debug") } returns existingBuildType
+
+        // Setup build type properties
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        every { mockBuildType.isMinifyEnabled } returns false
+
+        every { mockProjectBuildTypes.iterator() } returns mutableListOf(mockBuildType).iterator()
+        every { mockProjectBuildTypes.forEach(any()) } answers {
+            val action = firstArg<(com.android.build.gradle.internal.dsl.BuildType) -> Unit>()
+            action(mockBuildType)
+        }
+
+        val pluginHandler = PluginHandler(project)
+        setupPluginMocks(project, pluginHandler)
+
+        pluginHandler.configurePlugins(EXAMPLE_ENGINE_VERSION)
+
+        // Verify that create was NOT called since build type already exists
+        verify(exactly = 0) { mockPluginProjectBuildTypes.create(any<String>(), any()) }
+    }
+
+    private fun setupBasicMocks(
+        project: Project,
+        pluginProject: Project,
+        mockBuildType: com.android.build.gradle.internal.dsl.BuildType,
+        tempDir: Path
+    ) {
+        // Configuration for project directory
+        val projectDir = tempDir.resolve("my-plugin")
+        projectDir.toFile().mkdirs()
+        every { project.projectDir } returns projectDir.toFile()
+        val settingsGradle = File(projectDir.parent.toFile(), "settings.gradle")
+        settingsGradle.createNewFile()
+        val mockLogger = mockk<Logger>()
+        every { project.logger } returns mockLogger
+
+        // Plugin project setup
+        every { pluginProject.hasProperty("local-engine-repo") } returns false
+        every { pluginProject.hasProperty("android") } returns true
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns pluginProject
+        every { pluginProject.extensions.create(any(), any<Class<Any>>()) } returns mockk()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { pluginProject.afterEvaluate(any<Action<Project>>()) } returns Unit
+
+        // Dependencies and configurations
+        every { pluginProject.configurations.named(any<String>()) } returns mockk()
+        every { pluginProject.dependencies.add(any(), any()) } returns mockk()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+    }
+
+    private fun setupPluginMocks(project: Project, pluginHandler: PluginHandler) {
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns listOf(cameraDependency)
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
     }
 }
