@@ -16,7 +16,6 @@ workspace:
   - dev/benchmarks/platform_views_layout_hybrid_composition
   - dev/benchmarks/test_apps/stocks
   - dev/bots
-  - dev/checks_tool
   - dev/customer_testing
   - dev/devicelab
   - dev/forbidden_from_release_tests
