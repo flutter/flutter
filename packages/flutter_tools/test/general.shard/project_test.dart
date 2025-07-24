@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -2009,6 +2008,25 @@ KGP Version: $kgpV
   );
 }
 
+/// Returns a fake of the `cache/artifacts/gradle_wrapper` directory.
+///
+/// Otherwise this hermeric (general.shard) test needs to download files from
+/// the internet to run.
+///
+/// See https://github.com/flutter/flutter/issues/83275 for details.
+void _insertFakeGradleArtifactDir({required Directory flutterRoot}) {
+  final Directory artifactDir = flutterRoot
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childDirectory('artifacts')
+      .childDirectory('gradle_wrapper');
+
+  artifactDir
+    ..childFile('gradlew').createSync(recursive: true)
+    ..childFile('gradlew.bat').createSync(recursive: true)
+    ..childDirectory('wrapper').childFile('gradle-wrapper.jar').createSync(recursive: true);
+}
+
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
 @isTest
@@ -2023,24 +2041,9 @@ void _testInMemory(
 }) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
-  // Transfer needed parts of the Flutter installation folder
-  // to the in-memory file system used during testing.
-  final Logger logger = BufferLogger.test();
-  transfer(
-    Cache(
-      fileSystem: globals.fs,
-      logger: logger,
-      artifacts: <ArtifactSet>[],
-      osUtils: OperatingSystemUtils(
-        fileSystem: globals.fs,
-        logger: logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-      ),
-      platform: globals.platform,
-    ).getArtifactDirectory('gradle_wrapper'),
-    testFileSystem,
-  );
+
+  final Directory fakeFlutterRoot = testFileSystem.directory(Cache.flutterRoot);
+  _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
   transfer(
     globals.fs
         .directory(Cache.flutterRoot)
@@ -2050,7 +2053,7 @@ void _testInMemory(
     testFileSystem,
   );
   // Set up enough of the packages to satisfy the templating code.
-  final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
+  final Directory dummyTemplateImagesDirectory = fakeFlutterRoot.parent;
   dummyTemplateImagesDirectory.createSync(recursive: true);
   writePackageConfigFiles(
     directory: testFileSystem
