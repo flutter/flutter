@@ -5696,7 +5696,6 @@ targets:
 
   - name: Mac_ios keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
