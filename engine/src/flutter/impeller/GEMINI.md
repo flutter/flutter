@@ -6,15 +6,18 @@ This directory contains Flutter's graphics renderer, Impeller.
 
 ### Unit testing
 
+Running all unit tests can take over 10 minutes. It's best to run a subset of
+tests while developing, then verify all tests at the end.
+
 #### Building and running unit-tests
 
 ```shell
-../../bin/et build --no-rbe -c host_debug_unopt_arm64 \
+../bin/et build -c host_debug_unopt_arm64 \
   //flutter/impeller:impeller_unittests
 ../../out/host_debug_unopt_arm64/impeller_unittests
 ```
 
-#### Running a specific unit-test
+#### Running a specific unit test
 
 ```shell
 ../../out/host_debug_unopt_arm64/impeller_unittests \
@@ -32,6 +35,8 @@ This directory contains Flutter's graphics renderer, Impeller.
 The executable for golden testing is `impeller_golden_tests`.  The CWD must be
 the parent directory of `impeller_golden_tests` when executing it in order for
 the dyld to resolve successfully.
+
+The golden tests are currently only supported on macOS.
 
 #### Build/run/examine golden test
 
