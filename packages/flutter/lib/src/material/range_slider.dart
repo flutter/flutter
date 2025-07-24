@@ -460,6 +460,9 @@ class RangeSlider extends StatefulWidget {
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
+  final FocusNode focusNode = FocusNode();
+  final FocusNode startFocusNode = FocusNode();
+  final FocusNode endFocusNode = FocusNode();
 
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // changes visibility in response to user interaction.
@@ -769,12 +772,22 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       result = Padding(padding: padding, child: result);
     }
 
-    return FocusableActionDetector(
-      enabled: _enabled,
-      onShowHoverHighlight: _handleHoverChanged,
-      includeFocusSemantics: false,
-      mouseCursor: effectiveMouseCursor,
-      child: result,
+
+    return Stack(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Focus(focusNode: startFocusNode, child: const SizedBox.shrink()),
+            Focus(focusNode: endFocusNode, child: const SizedBox.shrink()),
+          ],
+        ),
+        MouseRegion(
+          onEnter: (_) => _handleHoverChanged(true),
+          onExit: (_) => _handleHoverChanged(false),
+          cursor: effectiveMouseCursor,
+          child: result,
+        ),
+      ],
     );
   }
 
@@ -1803,12 +1816,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double increasedValue,
     double decreasedValue,
     VoidCallback increaseAction,
-    VoidCallback decreaseAction,
-  ) {
+    VoidCallback decreaseAction, {
+    required bool focused,
+  }) {
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
     config.textDirection = textDirection;
     config.isSlider = true;
+    config.isFocusable = true;
+    config.isFocused = focused;
     if (isEnabled) {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
@@ -1841,6 +1857,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       _decreasedStartValue,
       _increaseStartAction,
       _decreaseStartAction,
+      focused: _state.startFocusNode.hasFocus,
     );
     final SemanticsConfiguration endSemanticsConfiguration = _createSemanticsConfiguration(
       values.end,
@@ -1848,6 +1865,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       _decreasedEndValue,
       _increaseEndAction,
       _decreaseEndAction,
+      focused: _state.endFocusNode.hasFocus,
     );
 
     // Split the semantics node area between the start and end nodes.
