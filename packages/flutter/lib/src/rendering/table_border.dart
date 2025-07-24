@@ -56,12 +56,12 @@ class TableBorder {
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
-  }) : top = outside,
-       right = outside,
-       bottom = outside,
-       left = outside,
-       horizontalInside = inside,
-       verticalInside = inside;
+  })  : top = outside,
+        right = outside,
+        bottom = outside,
+        left = outside,
+        horizontalInside = inside,
+        verticalInside = inside;
 
   /// The top side of this border.
   final BorderSide top;
@@ -122,16 +122,13 @@ class TableBorder {
   bool _outerSidesMatch<T>(T Function(BorderSide borderSide) selector) {
     final T topValue = selector(top);
 
-    return selector(right) == topValue &&
-        selector(bottom) == topValue &&
-        selector(left) == topValue;
+    return selector(right) == topValue && selector(bottom) == topValue && selector(left) == topValue;
   }
 
   /// Returns the set of distinct visible colors from the outer border sides.
   ///
   /// Only includes colors from border sides that are not [BorderStyle.none].
-  @visibleForTesting
-  Set<Color> distinctVisibleOuterColors() {
+  Set<Color> _distinctVisibleOuterColors() {
     return <Color>{
       if (top.style != BorderStyle.none) top.color,
       if (right.style != BorderStyle.none) right.color,
@@ -149,7 +146,7 @@ class TableBorder {
       return;
     }
 
-    final Set<Color> visibleColors = distinctVisibleOuterColors();
+    final Set<Color> visibleColors = _distinctVisibleOuterColors();
     if (visibleColors.length == 1 && borderRadius != BorderRadius.zero) {
       _paintNonUniformBorderWithRadius(
         canvas,
@@ -396,10 +393,8 @@ class TableBorder {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
+  int get hashCode => Object.hash(top, right, bottom, left, horizontalInside, verticalInside, borderRadius);
 
   @override
-  String toString() =>
-      'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
+  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside, $borderRadius)';
 }
