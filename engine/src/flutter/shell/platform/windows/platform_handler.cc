@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/platform_handler.h"
 
 #include <windows.h>
+#include <iostream>
 
 #include <cstring>
 #include <optional>
@@ -476,8 +477,9 @@ void PlatformHandler::HandleMethodCall(
                           std::move(result));
   } else if (method.compare(kGetClipboardDataMethod) == 0) {
     // Only two arguments are expected.
-    const rapidjson::Value& format = method_call.arguments()[0];
-    const rapidjson::Value& viewId = method_call.arguments()[1];
+    auto const* args = method_call.arguments();
+    const rapidjson::Value& format = (*args)[0];
+    const rapidjson::Value& viewId = (*args)[1];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
@@ -486,8 +488,9 @@ void PlatformHandler::HandleMethodCall(
     GetPlainText(std::move(result), kTextKey, viewId.GetInt64());
   } else if (method.compare(kHasStringsClipboardMethod) == 0) {
     // Only two arguments are expected.
-    const rapidjson::Value& format = method_call.arguments()[0];
-    const rapidjson::Value& viewId = method_call.arguments()[1];
+    auto const* args = method_call.arguments();
+    const rapidjson::Value& format = (*args)[0];
+    const rapidjson::Value& viewId = (*args)[1];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
