@@ -1445,7 +1445,7 @@ void main() {
         ),
       );
 
-      // Material outside the PageView
+      // Material outside the PageView.
       final MaterialInkController outerMaterial = Material.of(
         tester.element(find.byType(FocusableActionDetector)),
       );
