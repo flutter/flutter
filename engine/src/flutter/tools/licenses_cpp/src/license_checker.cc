@@ -26,8 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 5> kLicenseFileNames = {
-    "LICENSE", "LICENSE.TXT", "LICENSE.md", "LICENSE.MIT", "COPYING"};
+const std::array<std::string_view, 7> kLicenseFileNames = {
+    "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
+    "LICENSE.MIT", "COPYING",     "License.txt"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -218,8 +219,8 @@ absl::Status MatchLicenseFile(const fs::path& path,
 
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
-        license_map->Add(package.name, match.matched_text);
-        VLOG(1) << "OK: " << path << " : " << match.matcher;
+        license_map->Add(package.name, match.GetMatchedText());
+        VLOG(1) << "OK: " << path << " : " << match.GetMatcher();
       }
     } else {
       return absl::NotFoundError(
@@ -261,9 +262,9 @@ bool ProcessSourceCode(const fs::path& relative_path,
           if (matches.ok()) {
             did_find_copyright = true;
             for (const Catalog::Match& match : matches.value()) {
-              license_map->Add(package.name, match.matched_text);
+              license_map->Add(package.name, match.GetMatchedText());
               VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                      << match.matcher;
+                      << match.GetMatcher();
             }
           } else {
             if (flags.treat_unmatched_comments_as_errors) {
@@ -324,15 +325,17 @@ bool ProcessNotices(const fs::path& relative_path,
   while (RE2::FindAndConsume(&input, regex, &projects_text, &license)) {
     std::vector<std::string_view> projects = SplitLines(projects_text);
 
+    VLOG(4) << license;
+
     absl::StatusOr<std::vector<Catalog::Match>> matches =
         data.catalog.FindMatch(license);
     if (matches.ok()) {
       for (const Catalog::Match& match : matches.value()) {
         for (std::string_view project : projects) {
-          license_map->Add(project, match.matched_text);
+          license_map->Add(project, match.GetMatchedText());
         }
         VLOG(1) << "OK: " << relative_path.lexically_normal() << " : "
-                << match.matcher;
+                << match.GetMatcher();
       }
     } else {
       VLOG(2) << "NOT_FOUND: " << relative_path.lexically_normal() << " : "
