@@ -244,9 +244,8 @@ class CupertinoSheetTransition extends StatefulWidget {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     bool allowSnapshotting,
-    Widget? child, {
-    double? topGap,
-  }) {
+    Widget? child,
+  ) {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
       return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
     }
@@ -292,7 +291,7 @@ class CupertinoSheetTransition extends StatefulWidget {
           )
         : child;
 
-    final double topGapHeight = MediaQuery.sizeOf(context).height * (topGap ?? _kTopGapRatio);
+    final double topGapHeight = MediaQuery.sizeOf(context).height * _kTopGapRatio;
 
     return Stack(
       children: <Widget>[
@@ -531,6 +530,9 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   double get topGap => _topGap ?? _kTopGapRatio;
 
   @override
+  bool get hasCustomTopGap => _topGap != null;
+
+  @override
   Widget buildContent(BuildContext context) {
     final double topPadding = MediaQuery.heightOf(context) * topGap;
     return MediaQuery.removePadding(
@@ -608,21 +610,12 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition =>
-      (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        bool allowSnapshotting,
-        Widget? child,
-      ) => CupertinoSheetTransition.delegateTransition(
-        context,
-        animation,
-        secondaryAnimation,
-        allowSnapshotting,
-        child,
-        topGap: topGap,
-      );
+  DelegatedTransitionBuilder? get delegatedTransition {
+    if (hasCustomTopGap) {
+      return null;
+    }
+    return CupertinoSheetTransition.delegateTransition;
+  }
 
   /// Determines whether the content can be dragged.
   ///
@@ -632,6 +625,9 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   /// The gap between the top of the screen and the top of the sheet as a ratio
   /// of the screen height (0.0 to 1.0). Defaults to [_kTopGapRatio].
   double get topGap;
+
+  /// Whether a custom top gap has been set.
+  bool get hasCustomTopGap;
 
   @override
   Widget buildPage(
@@ -678,7 +674,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
     if (this is CupertinoSheetRoute<dynamic>) {
-      return (this as CupertinoSheetRoute<dynamic>)._topGap == null;
+      return !hasCustomTopGap;
     }
     return true;
   }
@@ -686,7 +682,6 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     if (this is CupertinoSheetRoute<dynamic>) {
-      final bool hasCustomTopGap = (this as CupertinoSheetRoute<dynamic>)._topGap != null;
       return !hasCustomTopGap && nextRoute is _CupertinoSheetRouteTransitionMixin;
     }
     return nextRoute is _CupertinoSheetRouteTransitionMixin;
