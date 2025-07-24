@@ -118,15 +118,29 @@ void main() {
   });
 
   test('Border.dimensions', () {
-    expect(
-      const Border(
-        left: BorderSide(width: 2.0),
-        top: BorderSide(width: 3.0),
-        bottom: BorderSide(width: 5.0),
-        right: BorderSide(width: 7.0),
-      ).dimensions,
-      const EdgeInsets.fromLTRB(2.0, 3.0, 7.0, 5.0),
+    const Border inside = Border(
+      left: BorderSide(width: 2.0),
+      top: BorderSide(width: 3.0),
+      bottom: BorderSide(width: 5.0),
+      right: BorderSide(width: 7.0),
     );
+    expect(inside.dimensions, EdgeInsets.zero);
+
+    const Border center = Border(
+      left: BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignCenter),
+      top: BorderSide(width: 3.0, strokeAlign: BorderSide.strokeAlignCenter),
+      bottom: BorderSide(width: 5.0, strokeAlign: BorderSide.strokeAlignCenter),
+      right: BorderSide(width: 7.0, strokeAlign: BorderSide.strokeAlignCenter),
+    );
+    expect(center.dimensions, const EdgeInsets.fromLTRB(1.0, 1.5, 3.5, 2.5));
+
+    const Border outside = Border(
+      left: BorderSide(width: 2.0, strokeAlign: BorderSide.strokeAlignOutside),
+      top: BorderSide(width: 3.0, strokeAlign: BorderSide.strokeAlignOutside),
+      bottom: BorderSide(width: 5.0, strokeAlign: BorderSide.strokeAlignOutside),
+      right: BorderSide(width: 7.0, strokeAlign: BorderSide.strokeAlignOutside),
+    );
+    expect(outside.dimensions, const EdgeInsets.fromLTRB(2.0, 3.0, 7.0, 5.0));
   });
 
   test('Border.isUniform', () {
@@ -267,13 +281,13 @@ void main() {
 
   test('Border.dimension', () {
     final Border insideBorder = Border.all(width: 10);
-    expect(insideBorder.dimensions, const EdgeInsets.all(10));
+    expect(insideBorder.dimensions, EdgeInsets.zero);
 
     final Border centerBorder = Border.all(width: 10, strokeAlign: BorderSide.strokeAlignCenter);
     expect(centerBorder.dimensions, const EdgeInsets.all(5));
 
     final Border outsideBorder = Border.all(width: 10, strokeAlign: BorderSide.strokeAlignOutside);
-    expect(outsideBorder.dimensions, EdgeInsets.zero);
+    expect(outsideBorder.dimensions, const EdgeInsets.all(10));
 
     const BorderSide insideSide = BorderSide(width: 10);
     const BorderDirectional insideBorderDirectional = BorderDirectional(
@@ -282,7 +296,7 @@ void main() {
       start: insideSide,
       end: insideSide,
     );
-    expect(insideBorderDirectional.dimensions, const EdgeInsetsDirectional.all(10));
+    expect(insideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
 
     const BorderSide centerSide = BorderSide(width: 10, strokeAlign: BorderSide.strokeAlignCenter);
     const BorderDirectional centerBorderDirectional = BorderDirectional(
@@ -303,7 +317,7 @@ void main() {
       start: outsideSide,
       end: outsideSide,
     );
-    expect(outsideBorderDirectional.dimensions, EdgeInsetsDirectional.zero);
+    expect(outsideBorderDirectional.dimensions, const EdgeInsetsDirectional.all(10));
 
     const Border nonUniformBorder = Border(
       left: BorderSide(width: 5),
@@ -311,7 +325,7 @@ void main() {
       right: BorderSide(width: 15, strokeAlign: BorderSide.strokeAlignOutside),
       bottom: BorderSide(width: 20),
     );
-    expect(nonUniformBorder.dimensions, const EdgeInsets.fromLTRB(5, 5, 0, 20));
+    expect(nonUniformBorder.dimensions, const EdgeInsets.fromLTRB(0, 5, 15, 0));
 
     const BorderDirectional nonUniformBorderDirectional = BorderDirectional(
       start: BorderSide(width: 5),
@@ -321,7 +335,7 @@ void main() {
     );
     expect(
       nonUniformBorderDirectional.dimensions,
-      const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20),
+      const EdgeInsetsDirectional.fromSTEB(0, 5, 15, 0),
     );
 
     const Border uniformWidthNonUniformStrokeAlignBorder = Border(
@@ -332,7 +346,7 @@ void main() {
     );
     expect(
       uniformWidthNonUniformStrokeAlignBorder.dimensions,
-      const EdgeInsets.fromLTRB(10, 5, 0, 10),
+      const EdgeInsets.fromLTRB(0, 5, 10, 0),
     );
 
     const BorderDirectional uniformWidthNonUniformStrokeAlignBorderDirectional = BorderDirectional(
@@ -343,7 +357,7 @@ void main() {
     );
     expect(
       uniformWidthNonUniformStrokeAlignBorderDirectional.dimensions,
-      const EdgeInsetsDirectional.fromSTEB(10, 5, 0, 10),
+      const EdgeInsetsDirectional.fromSTEB(0, 5, 10, 0),
     );
   });
 
