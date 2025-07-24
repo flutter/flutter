@@ -528,7 +528,7 @@ deps = {
   Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + 'c788c52156f3ef7bc7ab769cb03c110a53ac8fcb',
 
   'engine/src/flutter/third_party/abseil-cpp':
-  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '182d30b2816f3fada3b7707cf9b0eb7d2e71a111',
+  Var('flutter_git') + '/third_party/abseil-cpp.git' + '@' + '3ff870f957d511627690f4d3601987ce40d0d97c',
 
    # Dart packages
   'engine/src/flutter/third_party/pkg/archive':
