@@ -91,7 +91,7 @@ class WindowSizing {
 
   /// Constraints for the window.
   ///
-  /// This might not behonored by the platform.
+  /// This might not be honored by the platform.
   ///
   /// This field enforces a miniumum and maximum size on the window.
   /// If null, the window will be unconstrained.
