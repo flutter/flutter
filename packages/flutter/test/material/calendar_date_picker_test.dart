@@ -1454,7 +1454,7 @@ void main() {
         tester.element(find.byType(PageView)),
       );
 
-      // Only the inner Material should have ink features
+      // Only the inner Material should have ink features.
       expect((outerMaterial as dynamic).debugInkFeatures, isNull);
       expect((innerMaterial as dynamic).debugInkFeatures, hasLength(31));
     });
