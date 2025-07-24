@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
@@ -15,6 +14,7 @@ import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'features.dart';
+import 'git.dart';
 import 'globals.dart' as globals;
 
 /// The default version when a version could not be determined.
@@ -73,6 +73,7 @@ abstract class FlutterVersion {
   factory FlutterVersion({
     SystemClock clock = const SystemClock(),
     required FileSystem fs,
+    required Git git,
     required String flutterRoot,
     @protected bool fetchTags = false,
   }) {
@@ -81,6 +82,7 @@ abstract class FlutterVersion {
     if (!fetchTags && versionFile.existsSync()) {
       final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(
         versionFile,
+        git: git,
         flutterRoot: flutterRoot,
       );
       if (version != null) {
@@ -97,11 +99,10 @@ abstract class FlutterVersion {
       }
     }
 
-    final String frameworkRevision = _runGit(
-      gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
-      globals.processUtils,
-      flutterRoot,
-    );
+    final String frameworkRevision = git
+        .logSync(['-n', '1', '--pretty=format:%H'], workingDirectory: flutterRoot)
+        .stdout
+        .trim();
 
     return FlutterVersion.fromRevision(
       clock: clock,
@@ -109,22 +110,29 @@ abstract class FlutterVersion {
       fs: fs,
       flutterRoot: flutterRoot,
       fetchTags: fetchTags,
+      git: git,
     );
   }
 
-  FlutterVersion._({required SystemClock clock, required this.flutterRoot, required this.fs})
-    : _clock = clock;
+  FlutterVersion._({
+    required SystemClock clock,
+    required Git git,
+    required this.flutterRoot,
+    required this.fs,
+  }) : _clock = clock,
+       _git = git;
 
   factory FlutterVersion.fromRevision({
     SystemClock clock = const SystemClock(),
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
+    required Git git,
     bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      globals.processUtils,
       globals.platform,
+      git: globals.git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
       fetchTags: fetchTags,
@@ -137,6 +145,7 @@ abstract class FlutterVersion {
       frameworkVersion: frameworkVersion,
       gitTagVersion: gitTagVersion,
       fs: fs,
+      git: git,
     );
     if (fetchTags) {
       result.ensureVersionFile();
@@ -158,11 +167,17 @@ abstract class FlutterVersion {
     if (channel != 'master' && channel != 'main') {
       return this;
     }
-    return FlutterVersion(clock: clock, flutterRoot: flutterRoot, fs: fs, fetchTags: true);
+    return FlutterVersion(
+      clock: clock,
+      flutterRoot: flutterRoot,
+      fs: fs,
+      fetchTags: true,
+      git: _git,
+    );
   }
 
   final FileSystem fs;
-
+  final Git _git;
   final SystemClock _clock;
 
   String? get repositoryUrl;
@@ -207,16 +222,15 @@ abstract class FlutterVersion {
   final String flutterRoot;
 
   String _getTimeSinceCommit({String? revision}) {
-    return _runGit(
-      FlutterVersion.gitLog(<String>[
-        '-n',
-        '1',
-        '--pretty=format:%ar',
-        if (revision != null) revision,
-      ]).join(' '),
-      globals.processUtils,
-      flutterRoot,
-    );
+    return _git
+        .logSync([
+          '-n',
+          '1',
+          '--pretty=format:%ar',
+          if (revision != null) revision,
+        ], workingDirectory: flutterRoot)
+        .stdout
+        .trim();
   }
 
   // TODO(fujino): calculate this relative to frameworkCommitDate for
@@ -306,7 +320,9 @@ abstract class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       // Don't perform the update check if fetching the latest local commit failed.
-      localFrameworkCommitDate = DateTime.parse(_gitCommitDate(workingDirectory: flutterRoot));
+      localFrameworkCommitDate = DateTime.parse(
+        _gitCommitDate(git: _git, workingDirectory: flutterRoot),
+      );
     } on VersionCheckError {
       return;
     } on FormatException {
@@ -355,7 +371,7 @@ abstract class FlutterVersion {
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(
-        await fetchRemoteFrameworkCommitDate(),
+        await _fetchRemoteFrameworkCommitDate(),
       );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: now,
@@ -378,11 +394,15 @@ abstract class FlutterVersion {
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  static Future<String> fetchRemoteFrameworkCommitDate() async {
+  Future<String> _fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
-      await _run(<String>['git', 'fetch', '--tags']);
-      return _gitCommitDate(gitRef: kGitTrackingUpstream, workingDirectory: Cache.flutterRoot);
+      await _run(_git, ['fetch', '--tags']);
+      return _gitCommitDate(
+        git: _git,
+        gitRef: kGitTrackingUpstream,
+        workingDirectory: Cache.flutterRoot,
+      );
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
       rethrow;
@@ -408,11 +428,10 @@ abstract class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'` ([kUserBranch]).
   String getBranchName({bool redactUnknownBranches = false}) {
     _branch ??= () {
-      final String branch = _runGit(
-        'git symbolic-ref --short HEAD',
-        globals.processUtils,
-        flutterRoot,
-      );
+      final String branch = _git
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: flutterRoot)
+          .stdout
+          .trim();
       return branch == 'HEAD' ? '' : branch;
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
@@ -437,14 +456,6 @@ abstract class FlutterVersion {
       // Ignore, since we don't mind if the file didn't exist in the first place.
     }
   }
-
-  /// log.showSignature=false is a user setting and it will break things,
-  /// so we want to disable it for every git log call. This is a convenience
-  /// wrapper that does that.
-  @visibleForTesting
-  static List<String> gitLog(List<String> args) {
-    return <String>['git', '-c', 'log.showSignature=false', 'log'] + args;
-  }
 }
 
 // The date of the given commit hash as [gitRef]. If no hash is specified,
@@ -455,32 +466,34 @@ abstract class FlutterVersion {
 String _gitCommitDate({
   String gitRef = 'HEAD',
   bool lenient = false,
+  required Git git,
   required String? workingDirectory,
 }) {
-  final List<String> args = FlutterVersion.gitLog(<String>[
+  final RunResult result = git.logSync([
     gitRef,
     '-n',
     '1',
     '--pretty=format:%ad',
     '--date=iso',
-  ]);
-  try {
-    // Don't plumb 'lenient' through directly so that we can print an error
-    // if something goes wrong.
-    return _runSync(args, lenient: false, workingDirectory: workingDirectory);
-  } on VersionCheckError catch (e) {
-    if (lenient) {
-      final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
-      globals.printError(
-        'Failed to find the latest git commit date: $e\n'
-        'Returning $dummyDate instead.',
-      );
-      // Return something that DateTime.parse() can parse.
-      return dummyDate.toString();
-    } else {
-      rethrow;
-    }
+  ], workingDirectory: workingDirectory);
+  if (result.exitCode == 0) {
+    return result.stdout.trim();
   }
+  final error = VersionCheckError(
+    'Command exited with code ${result.exitCode}: ${result.command.join(' ')}\n'
+    'Standard out: ${result.stdout}\n'
+    'Standard error: ${result.stderr}',
+  );
+  if (lenient) {
+    final dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+    globals.printError(
+      'Failed to find the latest git commit date: $error\n'
+      'Returning $dummyDate instead.',
+    );
+    // Return something that DateTime.parse() can parse.
+    return dummyDate.toString();
+  }
+  throw error;
 }
 
 class _FlutterVersionFromFile extends FlutterVersion {
@@ -500,11 +513,13 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.engineBuildDate,
     required super.flutterRoot,
     required super.fs,
+    required super.git,
   }) : super._();
 
   static _FlutterVersionFromFile? tryParseFromFile(
     File jsonFile, {
     required String flutterRoot,
+    required Git git,
     SystemClock clock = const SystemClock(),
   }) {
     try {
@@ -513,6 +528,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
       return _FlutterVersionFromFile._(
         clock: clock,
+        git: git,
         frameworkVersion: manifest['frameworkVersion']! as String,
         channel: manifest['channel']! as String,
         repositoryUrl: manifest['repositoryUrl']! as String,
@@ -594,6 +610,7 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.frameworkVersion,
     required this.gitTagVersion,
     required super.fs,
+    required super.git,
   }) : super._();
 
   late final FlutterEngineStampFromFile? _engineStamp = FlutterEngineStampFromFile.tryParseFromFile(
@@ -607,7 +624,8 @@ class _FlutterVersionGit extends FlutterVersion {
   final String frameworkRevision;
 
   @override
-  String get frameworkCommitDate => _gitCommitDate(lenient: true, workingDirectory: flutterRoot);
+  String get frameworkCommitDate =>
+      _gitCommitDate(git: _git, lenient: true, workingDirectory: flutterRoot);
 
   // This uses 'late final' instead of 'String get' because unlike frameworkCommitDate, it is
   // operating based on a 'gitRef: ...', which we can assume to be immutable in the context of
@@ -615,25 +633,33 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   late final String engineCommitDate =
       _engineStamp?.gitRevisionDate.toString() ??
-      _gitCommitDate(gitRef: engineRevision, lenient: true, workingDirectory: flutterRoot);
+      _gitCommitDate(
+        git: _git,
+        gitRef: engineRevision,
+        lenient: true,
+        workingDirectory: flutterRoot,
+      );
 
   String? _repositoryUrl;
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
-      final String gitChannel = _runGit(
-        'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
-        globals.processUtils,
-        flutterRoot,
-      );
+      final String gitChannel = _git
+          .runSync([
+            'rev-parse',
+            '--abbrev-ref',
+            '--symbolic',
+            kGitTrackingUpstream,
+          ], workingDirectory: flutterRoot)
+          .stdout
+          .trim();
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _runGit(
-          'git ls-remote --get-url $remote',
-          globals.processUtils,
-          flutterRoot,
-        );
+        _repositoryUrl = _git
+            .runSync(['ls-remote', '--get-url', remote], workingDirectory: flutterRoot)
+            .stdout
+            .trim();
       }
     }
     return _repositoryUrl;
@@ -733,7 +759,7 @@ class VersionUpstreamValidator {
     }
 
     // Strip `.git` suffix before comparing the remotes
-    final List<String> sanitizedStandardRemotes = <String>[
+    final List<String> sanitizedStandardRemotes = [
       // If `FLUTTER_GIT_URL` is set, use that as standard remote.
       if (flutterGit != null)
         flutterGit
@@ -771,7 +797,7 @@ class VersionUpstreamValidator {
   }
 
   // The predefined list of remotes that are considered to be standard.
-  static final _standardRemotes = <String>[
+  static final _standardRemotes = [
     'https://github.com/flutter/flutter.git',
     'git@github.com:flutter/flutter.git',
     'ssh://git@github.com/flutter/flutter.git',
@@ -907,47 +933,16 @@ class VersionCheckError implements Exception {
   String toString() => '$VersionCheckError: $message';
 }
 
-/// Runs [command] and returns the standard output as a string.
-///
-/// If [lenient] is true and the command fails, returns an empty string.
-/// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, {bool lenient = true, required String? workingDirectory}) {
-  final ProcessResult results = globals.processManager.runSync(
-    command,
-    workingDirectory: workingDirectory,
-  );
-
-  if (results.exitCode == 0) {
-    return (results.stdout as String).trim();
-  }
-
-  if (!lenient) {
-    throw VersionCheckError(
-      'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-      'Standard out: ${results.stdout}\n'
-      'Standard error: ${results.stderr}',
-    );
-  }
-
-  return '';
-}
-
-String _runGit(String command, ProcessUtils processUtils, String? workingDirectory) {
-  return processUtils.runSync(command.split(' '), workingDirectory: workingDirectory).stdout.trim();
-}
-
 /// Runs [command] in the root of the Flutter installation and returns the
 /// standard output as a string.
 ///
 /// If the command fails, throws a [ToolExit] exception.
-Future<String> _run(List<String> command) async {
-  final ProcessResult results = await globals.processManager.run(
-    command,
-    workingDirectory: Cache.flutterRoot,
-  );
+Future<String> _run(Git git, List<String> command) async {
+  // TODO(matanlurey): Inline this in the single place it's called in this file.
+  final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
-    return (results.stdout as String).trim();
+    return results.stdout.trim();
   }
 
   throw VersionCheckError(
@@ -1015,33 +1010,34 @@ class GitTagVersion {
   final String gitTag;
 
   static GitTagVersion determine(
-    ProcessUtils processUtils,
     Platform platform, {
+    required Git git,
     String? workingDirectory,
     bool fetchTags = false,
     String gitRef = 'HEAD',
   }) {
     if (fetchTags) {
-      final String channel = _runGit(
-        'git symbolic-ref --short HEAD',
-        processUtils,
-        workingDirectory,
-      );
+      final String channel = git
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: workingDirectory)
+          .stdout
+          .trim();
       if (!kDevelopmentChannels.contains(channel) && kOfficialChannels.contains(channel)) {
         globals.printTrace('Skipping request to fetchTags - on well known channel $channel.');
       } else {
         final String flutterGit =
             platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-        _runGit('git fetch $flutterGit --tags -f', processUtils, workingDirectory);
+        git.runSync(['fetch', flutterGit, '--tags', '-f'], workingDirectory: workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]. These are returned in alphabetical order, so
     // we reverse the set of tags to examine the most recent tag versions first.
-    final List<String> tags = _runGit(
-      'git tag --points-at $gitRef',
-      processUtils,
-      workingDirectory,
-    ).trim().split('\n').reversed.toList();
+    final List<String> tags = git
+        .runSync(['tag', '--points-at', gitRef], workingDirectory: workingDirectory)
+        .stdout
+        .trim()
+        .split('\n')
+        .reversed
+        .toList();
 
     // Check first for a stable tag
     final stableTagPattern = RegExp(r'^\d+\.\d+\.\d+$');
@@ -1061,7 +1057,17 @@ class GitTagVersion {
     // If we're not currently on a tag, use git describe to find the most
     // recent tag and number of commits past.
     return parse(
-      _runGit('git describe --match *.*.* --long --tags $gitRef', processUtils, workingDirectory),
+      git
+          .runSync([
+            'describe',
+            '--match',
+            '*.*.*',
+            '--long',
+            '--tags',
+            gitRef,
+          ], workingDirectory: workingDirectory)
+          .stdout
+          .trim(),
     );
   }
 

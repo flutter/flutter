@@ -11,6 +11,7 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
@@ -584,7 +585,7 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
+    assert(debugCheckCanResolveTextDirection(direction, '$AlignmentDirectional'));
     return switch (direction!) {
       TextDirection.rtl => Alignment(-start, y),
       TextDirection.ltr => Alignment(start, y),
@@ -653,7 +654,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedAlignment'));
     return switch (direction!) {
       TextDirection.rtl => Alignment(_x - _start, _y),
       TextDirection.ltr => Alignment(_x + _start, _y),

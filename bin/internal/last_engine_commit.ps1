@@ -5,7 +5,7 @@
 # Based on the current repository state, writes on stdout the last commit in the
 # git tree that edited either `DEPS` or any file in the `engine/` sub-folder,
 # which is used to ensure `bin/internal/engine.version` is set correctly.
-
+#
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
@@ -20,52 +20,48 @@
 #
 # -------------------------------------------------------------------------- #
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop" # Equivalent to 'set -e' in bash
 
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 $gitToplevel = (git rev-parse --show-toplevel).Trim()
-# 1. Determine when we diverged from master.
-$MERGE_BASE_COMMIT = ""
+
+$Path1 = Join-Path $gitToplevel "bin"
+$Path2 = Join-Path $Path1 "internal"
+$RELEASE_CANDIDATE_VERSION_PATH = Join-Path $Path2 "release-candidate-branch.version"
+
+# 1. Determine the reference commit: the last commit that changed
+#    'bin/internal/release-candidate-branch.version'.
+#    This serves as the starting point for evaluating changes on the current branch.
+$REFERENCE_COMMIT = ""
 try {
-    $MERGE_BASE_COMMIT = (git merge-base HEAD master).Trim()
+    $REFERENCE_COMMIT = (git log -1 --pretty=format:%H -- "$RELEASE_CANDIDATE_VERSION_PATH" -ErrorAction Stop).Trim()
 }
 catch {
-    # If git merge-base fails (e.g., master not found, no common history),
-    # $MERGE_BASE_COMMIT will remain empty.
+    # If git log fails (e.g., file not found or no history), $REFERENCE_COMMIT will remain empty.
 }
 
-# If we did not find a merge-base, fail
-if ([string]::IsNullOrEmpty($MERGE_BASE_COMMIT)) {
+# If we did not find this reference commit, fail.
+if ([string]::IsNullOrEmpty($REFERENCE_COMMIT)) {
     Write-Error "Error: Could not determine a suitable engine commit." -ErrorAction Stop
-    Write-Error "Current branch: $(git rev-parse --abbrev-ref HEAD).Trim()" -ErrorAction Stop
-    Write-Error "Expected a different branch, from 'master', or a 'master' branch that exists and has history." -ErrorAction Stop
+    Write-Error "Current branch: $((git rev-parse --abbrev-ref HEAD).Trim())" -ErrorAction Stop
+    Write-Error "No file $RELEASE_CANDIDATE_VERSION_PATH found, or it has no history." -ErrorAction Stop
     exit 1
 }
 
-# 2. Define and search history range to search within (unique to changes on this branch).
-$HISTORY_RANGE = "$MERGE_BASE_COMMIT..HEAD"
+# 2. Define the history range to search within: commits reachable from HEAD
+#    but not from the REFERENCE_COMMIT. This focuses the search on commits
+#    *unique to the current branch* since that file was last changed.
+$HISTORY_RANGE = "$REFERENCE_COMMIT..HEAD"
 $DEPS_PATH = Join-Path $gitToplevel "DEPS"
 $ENGINE_PATH = Join-Path $gitToplevel "engine"
 
 $ENGINE_COMMIT = (git log -1 --pretty=format:%H --ancestry-path $HISTORY_RANGE -- "$DEPS_PATH" "$ENGINE_PATH")
 
-# 3. If no engine-related commit was found within the current branch's history, fallback to the first commit on this branch.
+# 3. If no engine-related commit was found within the current branch's history,
+#    fallback to the REFERENCE_COMMIT itself.
 if ([string]::IsNullOrEmpty($ENGINE_COMMIT)) {
-    # Find the oldest commit on HEAD that is *not* reachable from MERGE_BASE_COMMIT.
-    # This is the first commit *on this branch* after it diverged from 'master'.
-    $ENGINE_COMMIT = (git log --pretty=format:%H --reverse --ancestry-path "$MERGE_BASE_COMMIT..HEAD" | Select-Object -First 1).Trim()
-
-    # Final check: If even this fallback fails (which would be highly unusual if MERGE_BASE_COMMIT was found),
-    # then something is truly wrong.
-    if ([string]::IsNullOrEmpty($ENGINE_COMMIT)) {
-        Write-Error "Error: Unexpected state. MERGE_BASE_COMMIT was found ($MERGE_BASE_COMMIT), but no commits found on current branch after it." -ErrorAction Stop
-        Write-Error "Current branch: $((git rev-parse --abbrev-ref HEAD).Trim())" -ErrorAction Stop
-        Write-Error "History range searched for fallback: $HISTORY_RANGE" -ErrorAction Stop
-        Write-Error "All commits on current branch (for debug):" -ErrorAction Stop
-        (git log --pretty=format:%H) | Write-Error -ErrorAction Stop
-        exit 1
-    }
+    $ENGINE_COMMIT = $REFERENCE_COMMIT
 }
 
 Write-Output $ENGINE_COMMIT

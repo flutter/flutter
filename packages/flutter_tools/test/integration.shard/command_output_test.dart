@@ -42,6 +42,19 @@ void main() {
     );
   });
 
+  testWithoutContext('Flutter help is shown with /? command line argument', () async {
+    final ProcessResult result = await processManager.run(<String>[flutterBin, '/?']);
+
+    // Development tools.
+    expect(
+      result.stdout,
+      contains(
+        'Run "flutter help <command>" for more information about a command.\n'
+        'Run "flutter help -v" for verbose help output, including less commonly used options.',
+      ),
+    );
+  });
+
   testWithoutContext('flutter doctor is not verbose', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, 'doctor', '-v']);
 

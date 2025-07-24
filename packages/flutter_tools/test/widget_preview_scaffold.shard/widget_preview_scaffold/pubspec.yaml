@@ -36,7 +36,7 @@ dependencies:
   lints: 6.0.0
   matcher: 0.12.17
   material_color_utilities: 0.11.1
-  meta: 1.16.0
+  meta: 1.17.0
   path: 1.9.1
   plugin_platform_interface: 2.1.8
   source_span: 1.10.1
@@ -62,4 +62,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: jug770
+# PUBSPEC CHECKSUM: mkiihb

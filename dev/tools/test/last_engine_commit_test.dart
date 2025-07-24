@@ -163,12 +163,8 @@ void main() {
     run('git', <String>['commit', '-m', 'Wrote ${files.length} files']);
   }
 
-  void changeBranch({required String newBranchName}) {
-    run('git', <String>['checkout', '-b', newBranchName]);
-  }
-
   test('returns the last engine commit', () {
-    changeBranch(newBranchName: 'flutter-1.2.3-candidate.0');
+    writeCommit(<String>['bin/internal/release-candidate-branch.version']);
     writeCommit(<String>['DEPS', 'engine/README.md']);
 
     final String lastEngine = getLastEngineCommit();
@@ -179,7 +175,7 @@ void main() {
   });
 
   test('considers DEPS an engine change', () {
-    changeBranch(newBranchName: 'flutter-1.2.3-candidate.0');
+    writeCommit(<String>['bin/internal/release-candidate-branch.version']);
     writeCommit(<String>['DEPS', 'engine/README.md']);
 
     final String lastEngineA = getLastEngineCommit();
@@ -196,9 +192,8 @@ void main() {
     // Make an engine change *before* the branch.
     writeCommit(<String>['engine/README.md']);
     final String engineCommitPreBranch = getLastCommit();
-    changeBranch(newBranchName: 'flutter-1.2.3-candidate.0');
 
-    // Make a non-engine change, but no engine changes, after branching.
+    // Write the branch file.
     writeCommit(<String>['bin/internal/release-candidate-branch.version']);
     final String initialBranchCommit = getLastCommit();
 
@@ -213,10 +208,10 @@ void main() {
       initialBranchCommit,
       reason:
           'The git history for this simulation looks like this:\n'
-          'master (intial commit)    | $initialStartingCommit\n'
-          'master (touches engine)   | $engineCommitPreBranch\n'
-          'flutter-1.2.3-candidate.0 | $initialBranchCommit\n'
-          'flutter-1.2.3-candidate.0 | $latestCommitIgnore\n'
+          'master                    | $initialStartingCommit\n'
+          'master                    | $engineCommitPreBranch\n'
+          'release                   | $initialBranchCommit\n'
+          'release                   | $latestCommitIgnore\n'
           '\n'
           'We expected our script to select HEAD~2, $initialBranchCommit, but '
           'instead it selected $lastCommitToEngine, which is incorrect. See '

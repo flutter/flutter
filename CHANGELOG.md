@@ -31,6 +31,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 ## Flutter 3.32 Changes
 
+### [3.32.7](https://github.com/flutter/flutter/releases/tag/3.32.7)
+
+- [flutter/172121](https://github.com/flutter/flutter/pull/172121) - Fix iOS images replaced with pink fill when coming out of background.
+
 ### [3.32.6](https://github.com/flutter/flutter/releases/tag/3.32.6)
 
 - [flutter/171106](https://github.com/flutter/flutter/pull/171106) - When a scroll view contains a `LayoutBuilder` on any platform, prevent null check crash.

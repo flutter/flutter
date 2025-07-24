@@ -5,6 +5,8 @@
 /// @docImport 'mock_canvas.dart';
 library;
 
+import 'dart:ui' show Image, PointMode, Vertices;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -80,7 +82,7 @@ class TestRecordingCanvas implements Canvas {
     _saveCount += 1;
     invocations.add(
       RecordedInvocation(
-        _MethodCall(#saveLayer, <dynamic>[bounds, paint]),
+        _MethodCall(#saveLayer, <dynamic>[bounds, Paint.from(paint)]),
         stack: StackTrace.current,
       ),
     );
@@ -96,6 +98,224 @@ class TestRecordingCanvas implements Canvas {
   @override
   void noSuchMethod(Invocation invocation) {
     invocations.add(RecordedInvocation(invocation, stack: StackTrace.current));
+  }
+
+  @override
+  void drawCircle(Offset c, double radius, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawCircle, <dynamic>[c, radius, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawRect, <dynamic>[rect, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawRRect(RRect rrect, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawRRect, <dynamic>[rrect, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawDRRect, <dynamic>[outer, inner, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawPath(Path path, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawPath, <dynamic>[path, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawLine(Offset p1, Offset p2, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawLine, <dynamic>[p1, p2, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawArc, <dynamic>[
+          rect,
+          startAngle,
+          sweepAngle,
+          useCenter,
+          Paint.from(paint),
+        ]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawPaint(Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawPaint, <dynamic>[Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawRSuperellipse, <dynamic>[rsuperellipse, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawOval(Rect rect, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawOval, <dynamic>[rect, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawImage(Image image, Offset offset, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawImage, <dynamic>[image, offset, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawImageRect, <dynamic>[image, src, dst, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawImageNine(Image image, Rect center, Rect dst, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawImageNine, <dynamic>[image, center, dst, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawPoints, <dynamic>[pointMode, points, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawRawPoints(PointMode pointMode, Float32List points, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawRawPoints, <dynamic>[pointMode, points, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawVertices, <dynamic>[vertices, blendMode, Paint.from(paint)]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawAtlas(
+    Image atlas,
+    List<RSTransform> transforms,
+    List<Rect> rects,
+    List<Color>? colors,
+    BlendMode? blendMode,
+    Rect? cullRect,
+    Paint paint,
+  ) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawAtlas, <dynamic>[
+          atlas,
+          transforms,
+          rects,
+          colors,
+          blendMode,
+          cullRect,
+          Paint.from(paint),
+        ]),
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
+  @override
+  void drawRawAtlas(
+    Image atlas,
+    Float32List rstTransforms,
+    Float32List rects,
+    Int32List? colors,
+    BlendMode? blendMode,
+    Rect? cullRect,
+    Paint paint,
+  ) {
+    invocations.add(
+      RecordedInvocation(
+        _MethodCall(#drawRawAtlas, <dynamic>[
+          atlas,
+          rstTransforms,
+          rects,
+          colors,
+          blendMode,
+          cullRect,
+          Paint.from(paint),
+        ]),
+        stack: StackTrace.current,
+      ),
+    );
   }
 }
 

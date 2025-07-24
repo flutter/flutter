@@ -284,7 +284,7 @@ class Configurator {
       'homepage: https://flutter.dev',
       'version: 0.0.0',
       'environment:',
-      "  sdk: '>=3.2.0-0 <4.0.0'",
+      "  sdk: '^${FlutterInformation.instance.getDartSdkVersion()}'",
       'dependencies:',
       for (final String package in findPackageNames(filesystem)) '  $package:\n    sdk: flutter',
       '  $kPlatformIntegrationPackageName: 0.0.1',
@@ -1193,6 +1193,9 @@ class FlutterInformation {
 
   /// Gets the name of the current branch in the Flutter framework in the repo.
   String getBranchName() => getFlutterInformation()['branchName']! as String;
+
+  /// Gets the current Dart SDK version.
+  Version getDartSdkVersion() => getFlutterInformation()['dartSdkVersion']! as Version;
 
   Map<String, Object>? _cachedFlutterInformation;
 

@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -46,7 +47,7 @@ void main() {
     late MemoryFileSystem fileSystem;
     late Platform platform;
     late FileSystemUtils fileSystemUtils;
-    late Logger logger;
+    late BufferLogger logger;
     late FakeProcessManager processManager;
     late PreRunValidator preRunValidator;
 
@@ -727,15 +728,17 @@ void main() {
     );
 
     testUsingContext(
-      'dds options --disable-dds',
+      'dds options --disable-dds works, but is deprecated',
       () async {
         final ddsCommand = FakeDdsCommand();
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--disable-dds']);
         expect(ddsCommand.enableDds, isFalse);
+        expect(logger.warningText, contains('"--disable-dds" argument is deprecated'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
+        Logger: () => logger,
         ProcessManager: () => processManager,
       },
     );
@@ -747,9 +750,14 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
         await runner.run(<String>['test', '--no-disable-dds']);
         expect(ddsCommand.enableDds, isTrue);
+        expect(
+          logger.warningText,
+          contains('"--no-disable-dds" argument is deprecated and redundant'),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
+        Logger: () => logger,
         ProcessManager: () => processManager,
       },
     );
@@ -1586,8 +1594,7 @@ Use the "flutter config" command to enable feature flags.''',
             final fileSystem = MemoryFileSystem.test();
             fileSystem
               ..file('lib/main.dart').createSync(recursive: true)
-              ..file('pubspec.yaml').createSync()
-              ..file('.packages').createSync();
+              ..file('pubspec.yaml').createSync();
             fileSystem.file('config.json')
               ..createSync()
               ..writeAsStringSync('{"FLUTTER_ENABLED_FEATURE_FLAGS": "AlreadySet"}');

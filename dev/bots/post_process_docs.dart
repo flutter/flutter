@@ -46,8 +46,12 @@ Future<void> postProcess() async {
 
   // Generate versions file.
   await runProcessWithValidations(<String>['flutter', '--version'], docsPath);
-  final File versionFile = File('version');
-  final String version = versionFile.readAsStringSync();
+  final File versionFile = File(path.join(checkoutPath, 'bin', 'cache', 'flutter.version.json'));
+  final String version = () {
+    final Map<String, Object?> json =
+        jsonDecode(versionFile.readAsStringSync()) as Map<String, Object?>;
+    return json['flutterVersion']! as String;
+  }();
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
   final File footerFile = File(publishPath)..createSync(recursive: true);
