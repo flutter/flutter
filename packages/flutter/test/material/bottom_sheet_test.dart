@@ -2890,7 +2890,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('BottomSheet renders at zero size', (WidgetTester tester) async {
+  testWidgets('BottomSheet renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2904,7 +2904,7 @@ void main() {
       ),
     );
     final Finder xText = find.text('X');
-    expect(tester.getSize(xText).isEmpty, isTrue);
+    expect(tester.getSize(xText), Size.zero);
   });
 }
 
