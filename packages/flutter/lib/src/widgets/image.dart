@@ -18,8 +18,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import '../painting/_web_image_info_io.dart'
-    if (dart.library.js_util) '../painting/_web_image_info_web.dart';
-import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart';
+    if (dart.library.js_interop) '../painting/_web_image_info_web.dart';
+import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';

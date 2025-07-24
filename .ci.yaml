@@ -719,17 +719,15 @@ targets:
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
         ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
           "--device", "model=Nexus5.gce_x86,version=21",
           "--device", "model=Nexus5.gce_x86,version=22",
           "--device", "model=Nexus5.gce_x86,version=23",
           "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
+          "--device", "model=MediumPhone.arm,version=26",
+          "--device", "model=MediumPhone.arm,version=27",
+          "--device", "model=SmallPhone.arm,version=29"
         ]
 
   - name: Linux flutter_packaging_test
@@ -1185,6 +1183,23 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
+  - name: Linux linux_feature_flags_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    presubmit: false
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: linux_feature_flags_test
+
   - name: Linux_android_emu android_display_cutout
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -1513,7 +1528,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux android_java11_tool_integration_tests
+  - name: Linux android_java17_tool_integration_tests
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1526,9 +1542,9 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
-      shard: android_java11_tool_integration_tests
+      shard: android_java17_tool_integration_tests
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -3033,7 +3049,6 @@ targets:
       task_name: image_list_reported_duration
 
   - name: Linux_pixel_7pro integration_ui_driver
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/167638
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3112,7 +3127,6 @@ targets:
 
   - name: Linux_android_emu native_assets_android
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
@@ -3121,7 +3135,6 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/165963
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5090,7 +5103,6 @@ targets:
   - name: Mac_arm64_ios imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5684,7 +5696,6 @@ targets:
 
   - name: Mac_ios keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

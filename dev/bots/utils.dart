@@ -62,6 +62,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
+final String engineInfoFile = path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json');
 final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
 final bool runningInDartHHHBot =
     luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');
@@ -740,7 +741,7 @@ Future<void> _runFromList(
 /// Returns null if the contents are good. Returns a string if they are bad.
 /// The string is an error message.
 Future<String?> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
+  final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre([-\.]\d+)?)?$');
   if (!file.existsSync()) {
     return 'The version logic failed to create the Flutter version file.';
   }

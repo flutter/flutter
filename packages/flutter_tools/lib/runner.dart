@@ -14,6 +14,7 @@ import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/error_handling_io.dart';
+import 'src/base/exit.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -44,6 +45,8 @@ Future<int> run(
     args = List<String>.of(args);
     args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
+
+  final bool usingLocalEngine = args.any((a) => a.startsWith('--local-engine'));
 
   return runInContext<int>(() async {
     globals.terminal.applyFeatureFlags(featureFlags);
@@ -120,6 +123,7 @@ Future<int> run(
             getVersion,
             shutdownHooks,
             featureFlags: featureFlags,
+            usingLocalEngine: usingLocalEngine,
           );
         }
       },
@@ -138,6 +142,7 @@ Future<int> run(
           getVersion,
           shutdownHooks,
           featureFlags: featureFlags,
+          usingLocalEngine: usingLocalEngine,
         );
       },
     )!;
@@ -152,6 +157,7 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
   required FeatureFlags featureFlags,
 }) async {
   if (error is UsageException) {
@@ -204,25 +210,28 @@ Future<int> _handleToolError(
     }
 
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
-    await asyncGuard(
-      () async {
-        final crashReportSender = CrashReportSender(
-          platform: globals.platform,
-          logger: globals.logger,
-          operatingSystemUtils: globals.os,
-          analytics: globals.analytics,
-        );
-        await crashReportSender.sendReport(
-          error: error,
-          stackTrace: stackTrace!,
-          getFlutterVersion: getFlutterVersion,
-          command: args.join(' '),
-        );
-      },
-      onError: (dynamic error) {
-        globals.printError('Error sending crash report: $error');
-      },
-    );
+
+    if (!usingLocalEngine) {
+      await asyncGuard(
+        () async {
+          final crashReportSender = CrashReportSender(
+            platform: globals.platform,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            analytics: globals.analytics,
+          );
+          await crashReportSender.sendReport(
+            error: error,
+            stackTrace: stackTrace!,
+            getFlutterVersion: getFlutterVersion,
+            command: args.join(' '),
+          );
+        },
+        onError: (dynamic error) {
+          globals.printError('Error sending crash report: $error');
+        },
+      );
+    }
 
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
