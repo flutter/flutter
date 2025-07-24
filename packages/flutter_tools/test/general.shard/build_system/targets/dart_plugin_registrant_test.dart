@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -55,33 +54,12 @@ environment:
   flutter: ">=1.20.0"
 ''';
 
-/// Returns a `pubspec.yaml` where `$platform` uses `dartPluginClass: 'none'`.
-String samplePluginPubspecWithDartPluginClassNone({required String platform}) =>
-    '''
-name: path_provider_$platform
-description: $platform implementation of the path_provider plugin
-// version: 2.0.1
-// homepage: https://github.com/flutter/plugins/tree/main/packages/path_provider/path_provider_$platform
-flutter:
-  plugin:
-    implements: path_provider
-    platforms:
-      $platform:
-        dartPluginClass: none
-        pluginClass: none
-environment:
-  sdk: ^3.7.0-0
-  flutter: ">=1.20.0"
-''';
-
 void main() {
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
-    late BufferLogger logger;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
-      logger = BufferLogger.test();
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
@@ -179,59 +157,6 @@ name: path_provider_example
         Pub: ThrowingPub.new,
       },
     );
-
-    for (final platform in ['linux', 'macos', 'windows']) {
-      testUsingContext(
-        '$platform treats dartPluginClass: "none" as omitted',
-        () async {
-          final Directory projectDir = fileSystem.directory('project')..createSync();
-          final environment = Environment.test(
-            fileSystem.currentDirectory,
-            projectDir: projectDir,
-            artifacts: Artifacts.test(),
-            fileSystem: fileSystem,
-            logger: BufferLogger.test(),
-            processManager: FakeProcessManager.any(),
-            defines: <String, String>{
-              kTargetFile: projectDir.childDirectory('lib').childFile('main.dart').absolute.path,
-            },
-            generateDartPluginRegistry: true,
-          );
-
-          writePackageConfigFiles(
-            directory: projectDir,
-            mainLibName: 'path_provider_example',
-            packages: <String, String>{'path_provider_$platform': '/path_provider_$platform'},
-            languageVersions: <String, String>{'path_provider_example': '2.12'},
-          );
-
-          projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
-
-          projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
-
-          environment.fileSystem.currentDirectory
-              .childDirectory('path_provider_$platform')
-              .childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync(samplePluginPubspecWithDartPluginClassNone(platform: platform));
-
-          final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
-          await DartPluginRegistrantTarget.test(testProject).build(environment);
-
-          final File generatedMain = projectDir
-              .childDirectory('.dart_tool')
-              .childDirectory('flutter_build')
-              .childFile('dart_plugin_registrant.dart');
-          expect(generatedMain, isNot(exists));
-          expect(logger.warningText, contains('Use of `dartPluginClass: none`'));
-        },
-        overrides: {
-          Logger: () => logger,
-          ProcessManager: () => FakeProcessManager.any(),
-          Pub: ThrowingPub.new,
-        },
-      );
-    }
 
     testUsingContext(
       'regenerates dart_plugin_registrant.dart',
