@@ -4646,31 +4646,31 @@ base class Shader extends NativeFieldWrapperClass1 {
   }
 }
 
-/// Defines what happens at the edge of a gradient or the sampling of a source image
-/// in an [ImageFilter].
+/// Defines how to handle areas outside the defined bounds of a gradient or image filter.
 ///
-/// A gradient is defined along a finite inner area. In the case of a linear
-/// gradient, this is the line between the start and end points. For a radial
-/// gradient, this is the circle defined by the center and radius. For a sweep
-/// gradient, this is the angular sector between [startAngle] and [endAngle].
+/// ## For Gradients
 ///
-/// An image filter reads source samples from a source image and performs operations
-/// on those samples to produce a result image. An image defines color samples only
-/// for pixels within the bounds of the image but some filter operations, such as a blur
-/// filter, read samples over a wide area to compute the output for a given pixel. Such
-/// a filter would need to combine samples from inside the image with hypothetical
-/// color values from outside the image.
+/// Gradients are defined within specific bounds, and `TileMode` controls how colors
+/// are determined for areas outside these bounds:
 ///
-/// This enum is used to define how the gradient or image filter should treat the regions
-/// outside that defined inner area.
+/// - **Linear gradients**: The bounds are the line segment connecting two points
+///   (typically referred to as `start` and [end](cci:1://file:///home/newelectron/dev_folder/Flutter/flutter/engine/src/flutter/lib/ui/painting.dart:439:2-479:3) in the gradient API). Colors
+///   outside this line are determined by the `TileMode`.
 ///
-/// The behavior when sampling outside this inner area is defined by the
-/// `TileMode` specified when creating the gradient or image filter.
+/// - **Radial gradients**: The bounds are the disc defined by a center and radius.
+///   Colors outside this disc are determined by the `TileMode`.
 ///
-/// For sweep gradients, the `tileMode` determines how the gradient behaves
-/// outside the angular sector defined by [startAngle] and [endAngle]. The
-/// gradient is only painted in the sector between these angles, and the
-/// `tileMode` controls what's shown outside this sector.
+/// - **Sweep gradients**: The bounds are the angular sector between `startAngle`
+///   and `endAngle`. Colors outside this sector are determined by the `TileMode`.
+///
+/// ## For Image Filters
+///
+/// When applying filters (like blur) that sample colors from outside an image's bounds,
+/// `TileMode` defines how those out-of-bounds samples are determined:
+///
+/// - It controls what color values are used when the filter needs to sample
+///   from areas outside the original image.
+/// - This is particularly important for effects like blurring near image edges.
 ///
 /// See also:
 ///
