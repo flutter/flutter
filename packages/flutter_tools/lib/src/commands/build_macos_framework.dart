@@ -38,10 +38,10 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   });
 
   @override
-  final String name = 'macos-framework';
+  final name = 'macos-framework';
 
   @override
-  final String description =
+  final description =
       'Produces .xcframeworks for a Flutter project '
       'and its plugins for integration into existing, plain macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
@@ -73,7 +73,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     );
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
-    for (final BuildInfo buildInfo in buildInfos) {
+    for (final buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
       // Create the build-mode specific metadata.
       //
@@ -195,7 +195,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       final String artifactsMode = FlutterDarwinPlatform.macos.artifactName(mode);
       final String frameworkName = FlutterDarwinPlatform.macos.frameworkName;
 
-      final String podspecContents = '''
+      final podspecContents =
+          '''
 Pod::Spec.new do |s|
   s.name                  = '${FlutterDarwinPlatform.macos.binaryName}'
   s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
@@ -234,7 +235,7 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
-      final Environment environment = Environment(
+      final environment = Environment(
         projectDir: globals.fs.currentDirectory,
         packageConfigPath: packageConfigPath(),
         outputDir: macosBuildOutput,
@@ -255,8 +256,9 @@ end
         processManager: globals.processManager,
         platform: globals.platform,
         analytics: globals.analytics,
-        engineVersion:
-            globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
+        engineVersion: globals.artifacts!.usesLocalArtifacts
+            ? null
+            : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;
@@ -321,7 +323,7 @@ end
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
-      final List<String> pluginsBuildCommand = <String>[
+      final pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
@@ -346,9 +348,10 @@ end
 
       final Directory buildConfiguration = buildOutput.childDirectory(xcodeBuildConfiguration);
 
-      final Iterable<Directory> products =
-          buildConfiguration.listSync(followLinks: false).whereType<Directory>();
-      for (final Directory builtProduct in products) {
+      final Iterable<Directory> products = buildConfiguration
+          .listSync(followLinks: false)
+          .whereType<Directory>();
+      for (final builtProduct in products) {
         for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
           if (globals.fs.path.extension(podFrameworkName) != '.framework') {

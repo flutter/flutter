@@ -20,8 +20,8 @@ final Directory flutterRoot = fileSystem.directory(flutterRootPath);
 
 Future<void> main() async {
   test('verify terminating flutter/bin/dart terminates the underlying dart process', () async {
-    final Completer<void> childReadyCompleter = Completer<void>();
-    String stdout = '';
+    final childReadyCompleter = Completer<void>();
+    var stdout = '';
     final Process process = await processManager.start(<String>[
       dartBash.path,
       listenForSigtermScript.path,
@@ -74,8 +74,9 @@ Future<void> main() async {
           .childDirectory('bin')
           .childDirectory('internal')
           .childFile('shared.sh');
-      final File fakeSharedSh = (tempDir.childDirectory('bin').childDirectory('internal')
-        ..createSync(recursive: true)).childFile('shared.sh');
+      final File fakeSharedSh =
+          (tempDir.childDirectory('bin').childDirectory('internal')..createSync(recursive: true))
+              .childFile('shared.sh');
       trueSharedSh.copySync(fakeSharedSh.path);
       final File fakeDartBash = tempDir.childDirectory('bin').childFile('dart');
       dartBash.copySync(fakeDartBash.path);
@@ -83,20 +84,21 @@ Future<void> main() async {
       makeExecutable(fakeDartBash);
 
       // create no-op fake update_dart_sdk.sh script
-      final File updateDartSdk = tempDir
-        .childDirectory('bin')
-        .childDirectory('internal')
-        .childFile('update_dart_sdk.sh')..writeAsStringSync('''
+      final File updateDartSdk =
+          tempDir.childDirectory('bin').childDirectory('internal').childFile('update_dart_sdk.sh')
+            ..writeAsStringSync('''
 #!/usr/bin/env bash
 
 echo downloaded dart sdk
 ''');
       makeExecutable(updateDartSdk);
 
-      final File updateEngine = tempDir
-        .childDirectory('bin')
-        .childDirectory('internal')
-        .childFile('update_engine_version.sh')..writeAsStringSync('''
+      final File updateEngine =
+          tempDir
+              .childDirectory('bin')
+              .childDirectory('internal')
+              .childFile('update_engine_version.sh')
+            ..writeAsStringSync('''
 #!/usr/bin/env bash
 
 echo engine version
@@ -104,11 +106,14 @@ echo engine version
       makeExecutable(updateEngine);
 
       // create a fake dart runtime
-      final File dartBin = (tempDir
-        .childDirectory('bin')
-        .childDirectory('cache')
-        .childDirectory('dart-sdk')
-        .childDirectory('bin')..createSync(recursive: true)).childFile('dart');
+      final File dartBin =
+          (tempDir
+                  .childDirectory('bin')
+                  .childDirectory('cache')
+                  .childDirectory('dart-sdk')
+                  .childDirectory('bin')
+                ..createSync(recursive: true))
+              .childFile('dart');
       dartBin.writeAsStringSync('''
 #!/usr/bin/env bash
 

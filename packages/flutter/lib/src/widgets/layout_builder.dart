@@ -238,10 +238,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
       }
@@ -254,10 +253,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
         _child = updateChild(null, built, slot);
@@ -267,8 +265,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
       }
     }
 
-    final VoidCallback? callback =
-        _needsBuild || (layoutInfo != _previousLayoutInfo) ? updateChildCallback : null;
+    final VoidCallback? callback = _needsBuild || (layoutInfo != _previousLayoutInfo)
+        ? updateChildCallback
+        : null;
     owner!.buildScope(this, callback);
   }
 

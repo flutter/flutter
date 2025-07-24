@@ -301,24 +301,20 @@ class TimelineSummary {
       'frame_rasterizer_count': countRasterizations(),
       'new_gen_gc_count': newGenerationGarbageCollections(),
       'old_gen_gc_count': oldGenerationGarbageCollections(),
-      'frame_build_times':
-          _extractFrameDurations()
-              .map<int>((Duration duration) => duration.inMicroseconds)
-              .toList(),
-      'frame_rasterizer_times':
-          _extractGpuRasterizerDrawDurations()
-              .map<int>((Duration duration) => duration.inMicroseconds)
-              .toList(),
-      'frame_begin_times':
-          _extractBeginTimestamps(
-            kBuildFrameEventName,
-          ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
-      'frame_rasterizer_begin_times':
-          _extractBeginTimestamps(
-            kRasterizeFrameEventName,
-          ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
-      'average_vsync_transitions_missed':
-          sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
+      'frame_build_times': _extractFrameDurations()
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
+          .map<int>((Duration duration) => duration.inMicroseconds)
+          .toList(),
+      'frame_begin_times': _extractBeginTimestamps(
+        kBuildFrameEventName,
+      ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
+      'frame_rasterizer_begin_times': _extractBeginTimestamps(
+        kRasterizeFrameEventName,
+      ).map<int>((Duration duration) => duration.inMicroseconds).toList(),
+      'average_vsync_transitions_missed': sceneDisplayLagSummarizer
+          .computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer
           .computePercentileVsyncTransitionsMissed(90.0),
       '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer
@@ -333,8 +329,8 @@ class TimelineSummary {
       'average_layer_cache_count': rasterCacheSummarizer.computeAverageLayerCount(),
       '90th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(90.0),
       '99th_percentile_layer_cache_count': rasterCacheSummarizer.computePercentileLayerCount(99.0),
-      'average_frame_request_pending_latency':
-          frameRequestPendingLatencySummarizer.computeAverageFrameRequestPendingLatency(),
+      'average_frame_request_pending_latency': frameRequestPendingLatencySummarizer
+          .computeAverageFrameRequestPendingLatency(),
       '90th_percentile_frame_request_pending_latency': frameRequestPendingLatencySummarizer
           .computePercentileFrameRequestPendingLatency(90.0),
       '99th_percentile_frame_request_pending_latency': frameRequestPendingLatencySummarizer
@@ -506,10 +502,9 @@ class TimelineSummary {
       throw StateError(_kEmptyDurationMessage);
     }
     assert(percentile >= 0.0 && percentile <= 100.0);
-    final List<double> doubles =
-        durations
-            .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
-            .toList();
+    final List<double> doubles = durations
+        .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
+        .toList();
     return findPercentile(doubles, percentile);
   }
 

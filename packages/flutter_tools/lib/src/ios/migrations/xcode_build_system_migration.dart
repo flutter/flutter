@@ -26,7 +26,7 @@ class XcodeBuildSystemMigration extends ProjectMigrator {
     final String contents = xcodeWorkspaceSharedSettings.readAsStringSync();
 
     // Only delete this file when it is pointing to the legacy build system.
-    const String legacyBuildSettingsWorkspace = '''
+    const legacyBuildSettingsWorkspace = '''
 	<key>BuildSystemType</key>
 	<string>Original</string>''';
 
