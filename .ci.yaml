@@ -1528,7 +1528,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Linux android_java11_tool_integration_tests
+  - name: Linux android_java17_tool_integration_tests
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1541,9 +1542,9 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
-      shard: android_java11_tool_integration_tests
+      shard: android_java17_tool_integration_tests
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -3048,7 +3049,6 @@ targets:
       task_name: image_list_reported_duration
 
   - name: Linux_pixel_7pro integration_ui_driver
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/167638
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3135,7 +3135,6 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/165963
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5104,7 +5103,6 @@ targets:
   - name: Mac_arm64_ios imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5698,7 +5696,6 @@ targets:
 
   - name: Mac_ios keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

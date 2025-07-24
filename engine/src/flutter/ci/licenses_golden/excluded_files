@@ -26,6 +26,7 @@
 ../../../flutter/common/README.md
 ../../../flutter/display_list/benchmarking/dl_complexity_unittests.cc
 ../../../flutter/display_list/display_list_unittests.cc
+../../../flutter/display_list/dl_canvas_unittests.cc
 ../../../flutter/display_list/dl_color_unittests.cc
 ../../../flutter/display_list/dl_paint_unittests.cc
 ../../../flutter/display_list/dl_storage_unittests.cc
@@ -39,6 +40,7 @@
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
+../../../flutter/display_list/skia/dl_sk_canvas_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_conversions_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_paint_dispatcher_unittests.cc
 ../../../flutter/display_list/testing
@@ -1489,6 +1491,7 @@
 ../../../flutter/third_party/dart/runtime/observatory/tests
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
 ../../../flutter/third_party/dart/runtime/tests
+../../../flutter/third_party/dart/runtime/tools/.dart_tool
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/android_finder.py
 ../../../flutter/third_party/dart/runtime/tools/benchmark.py
@@ -1524,6 +1527,7 @@
 ../../../flutter/third_party/dart/runtime/tools/profiling/README.md
 ../../../flutter/third_party/dart/runtime/tools/profiling/analysis_options.yaml
 ../../../flutter/third_party/dart/runtime/tools/profiling/pubspec.yaml
+../../../flutter/third_party/dart/runtime/tools/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/utils.py
 ../../../flutter/third_party/dart/runtime/tools/valgrind.py
 ../../../flutter/third_party/dart/runtime/tools/wiki/README.md
