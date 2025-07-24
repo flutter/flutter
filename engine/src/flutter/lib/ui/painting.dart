@@ -215,7 +215,7 @@ class Color {
   final ColorSpace colorSpace;
 
   static int _floatToInt8(double x) {
-    return (x * 255.0).round() & 0xff;
+    return (x * 255.0).round().clamp(0, 255);
   }
 
   /// A 32 bit value representing this color.
@@ -233,7 +233,7 @@ class Color {
   ///
   /// Unlike accessing the floating point equivalent channels individually
   /// ([a], [r], [g], [b]), this method is intentionally _lossy_, and scales
-  /// each channel using `(channel * 255.0).round() & 0xff`.
+  /// each channel using `(channel * 255.0).round().clamp(0, 255)`.
   ///
   /// While useful for storing a 32-bit integer value, prefer accessing the
   /// individual channels (and storing the double equivalent) where higher
@@ -263,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use (*.a * 255.0).round() & 0xff')
+  @Deprecated('Use (*.a * 255.0).round().clamp(0, 255)')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -274,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use (*.r * 255.0).round() & 0xff')
+  @Deprecated('Use (*.r * 255.0).round().clamp(0, 255)')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use (*.g * 255.0).round() & 0xff')
+  @Deprecated('Use (*.g * 255.0).round().clamp(0, 255)')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use (*.b * 255.0).round() & 0xff')
+  @Deprecated('Use (*.b * 255.0).round().clamp(0, 255)')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
