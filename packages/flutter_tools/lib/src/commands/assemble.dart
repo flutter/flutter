@@ -98,6 +98,7 @@ class AssembleCommand extends FlutterCommand {
       'define',
       abbr: 'd',
       valueHelp: 'target=key=value',
+      hide: !verboseHelp,
       help:
           'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
           '\n'
