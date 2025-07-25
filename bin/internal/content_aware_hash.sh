@@ -27,10 +27,22 @@ unset GIT_WORK_TREE
 # .github/workflows/content-aware-hash.yml: github action for CI/CD hashing
 TRACKEDFILES="DEPS engine bin/internal/release-candidate-branch.version"
 BASEREF="HEAD"
+
+set +e
+# We will fallback to origin/master if upstream is not detected.
+git -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1
+exit_code=$?
+set -e
+if [[ $exit_code -eq 0 ]]; then
+  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+else
+  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD origin/master)
+fi
+
 # Check to see if we're in a local development branch and the branch has any
 # changes to engine code - including non-committed changes.
 if [ "$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)" != "master" ] && \
-    ! git -C "$FLUTTER_ROOT" diff --quiet "$(git -C "$FLUTTER_ROOT" merge-base master HEAD)" -- $TRACKEDFILES; then
-  BASEREF="master"
+    ! git -C "$FLUTTER_ROOT" diff --quiet "$MERGEBASE" -- $TRACKEDFILES; then
+  BASEREF="$MERGEBASE"
 fi
 git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" $BASEREF -- $TRACKEDFILES | git hash-object --stdin
