@@ -78,7 +78,7 @@ public class PlatformViewsControllerDelegator
   @Override
   public void offset(int viewId, double top, double left) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      // this is a no op
+      // no op
     } else {
       platformViewsController.channelHandler.offset(viewId, top, left);
     }
