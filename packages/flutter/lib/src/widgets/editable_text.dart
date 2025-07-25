@@ -2604,6 +2604,11 @@ class EditableTextState extends State<EditableText>
   late final AppLifecycleListener _appLifecycleListener;
   static bool _justResumed = false;
 
+  @visibleForTesting
+  static void resetJustResumedForTest() {
+    _justResumed = false;
+  }
+
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
