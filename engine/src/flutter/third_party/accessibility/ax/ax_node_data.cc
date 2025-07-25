@@ -1462,6 +1462,9 @@ std::string AXNodeData::ToString() const {
       case ax::mojom::StringAttribute::kFontFamily:
         result += " font-family=" + value;
         break;
+      case ax::mojom::StringAttribute::kHtmlId:
+        result += " html_id=" + value;
+        break;
       case ax::mojom::StringAttribute::kHtmlTag:
         result += " html_tag=" + value;
         break;
