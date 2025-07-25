@@ -11,3 +11,10 @@ code_review:
     # These tend to be verbose, and since we expect PR authors to clearly
     # describe their PRs this would be at best duplicative.
     summary: false
+ignore_patterns:
+  # Avoid code reviews on rolls.
+  - DEPS
+  - bin/internal/**
+  - engine/src/flutter/ci/licenses_golden/**
+  # Avoid code reviews on all third_party files.
+  - **/third_party/**
