@@ -50,7 +50,7 @@ class BuildWebCommand extends BuildSubCommand {
       'static-assets-url',
       help:
           'Used when serving the static assets from a different domain the application is hosted on. '
-          'The value has to start with http and end with a slash "/". '
+          'The value has to end with a slash "/". '
           'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
     );
     argParser.addOption(
@@ -256,11 +256,10 @@ class BuildWebCommand extends BuildSubCommand {
         '--base-href should start and end with /',
       );
     }
-    if (staticAssetsUrl != null &&
-        !(staticAssetsUrl.startsWith('http') && staticAssetsUrl.endsWith('/'))) {
+    if (staticAssetsUrl != null && !staticAssetsUrl.endsWith('/')) {
       throwToolExit(
         'Received a --static-assets-url value of "$staticAssetsUrl"\n'
-        '--static-assets-url should start with http and end with /',
+        '--static-assets-url should end with /',
       );
     }
     if (!project.web.existsSync()) {
