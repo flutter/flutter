@@ -2343,7 +2343,6 @@ targets:
   - name: Linux_android_emu_unstable android_defines_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "linux"]
