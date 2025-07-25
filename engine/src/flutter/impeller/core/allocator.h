@@ -30,6 +30,21 @@ class Allocator {
   std::shared_ptr<DeviceBuffer> CreateBuffer(
       const DeviceBufferDescriptor& desc);
 
+  //------------------------------------------------------------------------------
+  /// @brief      Creates a new texture.
+  ///
+  /// @param[in]  desc        The descriptor of the texture to create.
+  /// @param[in]  threadsafe  Whether mutations to this texture should be
+  ///                         protected with a threadsafe barrier.
+  ///
+  ///                         This parameter only affects the OpenGLES rendering
+  ///                         backend.
+  ///
+  ///                         If any interaction with this texture (including
+  ///                         creation) will be done on a thread other than
+  ///                         where the OpenGLES context resides, then
+  ///                         `threadsafe`, must be set to `true`.
+  ///
   std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc,
                                          bool threadsafe = false);
 
