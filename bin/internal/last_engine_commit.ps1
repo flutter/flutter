@@ -52,8 +52,8 @@ if ([string]::IsNullOrEmpty($REFERENCE_COMMIT)) {
 #    but not from the REFERENCE_COMMIT. This focuses the search on commits
 #    *unique to the current branch* since that file was last changed.
 $HISTORY_RANGE = "$REFERENCE_COMMIT..HEAD"
-$DEPS_PATH = Join-Path $gitToplevel "DEPS"
-$ENGINE_PATH = Join-Path $gitToplevel "engine"
+$DEPS_PATH = Join-Path $flutterRoot "DEPS"
+$ENGINE_PATH = Join-Path $flutterRoot "engine"
 
 $ENGINE_COMMIT = (git log -1 --pretty=format:%H --ancestry-path $HISTORY_RANGE -- "$DEPS_PATH" "$ENGINE_PATH")
 
