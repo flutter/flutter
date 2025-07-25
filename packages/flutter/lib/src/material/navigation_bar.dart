@@ -420,6 +420,18 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
+  /// How the [label] text should be aligned horizontally.
+  ///
+  /// This parameter sets the [TextAlign] for the [Text] widget that displays
+  /// the [label] below the icon in this [NavigationDestination].
+  ///
+  /// If null, the default alignment is [TextAlign.center].
+  ///
+  /// This can be useful when customizing the label's appearance in cases where
+  /// the destination has additional layout constraints or text direction
+  /// requirements.
+  final TextAlign? textAlign;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
@@ -508,7 +520,7 @@ class NavigationDestination extends StatelessWidget {
             // sizes. To opt out, wrap the [label] widget in a [MediaQuery] widget
             // with a different `TextScaler`.
             maxScaleFactor: _kMaxLabelTextScaleFactor,
-            child: Text(label, style: textStyle),
+            child: Text(label, style: textStyle, textAlign: textAlign),
           ),
         );
       },
