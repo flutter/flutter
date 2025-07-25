@@ -953,6 +953,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     super.settings,
     super.requestFocus,
     this.popUpAnimationStyle,
+    this.registerCloseCallback,
   }) : assert(
          (position != null) != (positionBuilder != null),
          'Either position or positionBuilder must be provided.',
@@ -979,6 +980,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final BoxConstraints? constraints;
   final Clip clipBehavior;
   final AnimationStyle? popUpAnimationStyle;
+  final void Function(VoidCallback close)? registerCloseCallback;
 
   CurvedAnimation? _animation;
 
@@ -993,6 +995,19 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       );
     }
     return super.createAnimation();
+  }
+
+  @override
+  TickerFuture didPush() {
+    final TickerFuture future = super.didPush();
+    // Registers a callback that allows programmatic dismissal of the menu,
+    // This forces the menu to close with a null result
+    registerCloseCallback?.call(() {
+      if (isActive) {
+        navigator?.pop();
+      }
+    });
+    return future;
   }
 
   void scrollTo(int selectedItemIndex) {
@@ -1157,6 +1172,10 @@ typedef PopupMenuPositionBuilder =
 /// The `requestFocus` argument specifies whether the menu should request focus
 /// when it appears. If it is null, [Navigator.requestFocus] is used instead.
 ///
+/// The [registerCloseCallback] argument provides a callback that lets the caller
+/// register a way to programmatically close the menu by invoking the supplied
+/// close function.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -1185,6 +1204,7 @@ Future<T?> showMenu<T>({
   RouteSettings? routeSettings,
   AnimationStyle? popUpAnimationStyle,
   bool? requestFocus,
+  void Function(VoidCallback close)? registerCloseCallback,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1230,6 +1250,7 @@ Future<T?> showMenu<T>({
       settings: routeSettings,
       popUpAnimationStyle: popUpAnimationStyle,
       requestFocus: requestFocus,
+      registerCloseCallback: registerCloseCallback,
     ),
   );
 }
