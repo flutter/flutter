@@ -197,6 +197,7 @@ class EngineFlutterView implements ui.FlutterView {
   /// the CSS box-model restrictions imposed on its `hostElement` (especially when
   /// hiding `overflow`). Flutter does not attempt to interpret the styles of
   /// `hostElement` to compute its `physicalConstraints`, only its current size.
+  @visibleForTesting
   void resize(ui.Size newPhysicalSize) {
     // The browser uses CSS, and CSS operates in logical sizes.
     final ui.Size logicalSize = newPhysicalSize / devicePixelRatio;
@@ -205,7 +206,7 @@ class EngineFlutterView implements ui.FlutterView {
       ..height = '${logicalSize.height}px';
 
     // Force an update of the physicalSize so it's ready for the renderer.
-    _computePhysicalSize();
+    _physicalSize = _computePhysicalSize();
   }
 
   /// Lazily populated and cleared at the end of the frame.

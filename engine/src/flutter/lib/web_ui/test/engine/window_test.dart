@@ -744,6 +744,9 @@ Future<void> testMain() async {
       // Resize the host to 20x20 (physical pixels).
       view.resize(const ui.Size.square(50));
 
+      // The view's physicalSize should be updated too.
+      expect(view.physicalSize, const ui.Size(50.0, 50.0));
+
       await view.onResize.first;
 
       // The host tightly wraps the rootElement:
