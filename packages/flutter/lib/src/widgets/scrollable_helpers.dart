@@ -227,13 +227,20 @@ class EdgeDraggingAutoScroller {
 
   Future<void> _scroll() async {
     final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
+    final Matrix4 transform = scrollRenderBox.getTransformTo(null);
     final Rect globalRect = MatrixUtils.transformRect(
-      scrollRenderBox.getTransformTo(null),
+      transform,
       Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height),
     );
+    final Rect transformedDragTarget = MatrixUtils.transformRect(
+      transform,
+      _dragTargetRelatedToScrollOrigin,
+    );
+    const double tolerance = 1e-10;
+
     assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
+      (globalRect.size.width + tolerance) >= transformedDragTarget.size.width &&
+          (globalRect.size.height + tolerance) >= transformedDragTarget.size.height,
       'Drag target size is larger than scrollable size, which may cause bouncing',
     );
     _scrolling = true;
