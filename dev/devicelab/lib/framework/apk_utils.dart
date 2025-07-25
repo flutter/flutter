@@ -10,7 +10,7 @@ import 'task_result.dart';
 import 'utils.dart';
 
 final List<String> flutterAssets = <String>[
-  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/AssetManifest.bin',
   'assets/flutter_assets/NOTICES.Z',
   'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',

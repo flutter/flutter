@@ -726,7 +726,6 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     // actually located in the parent project, meaning their paths did not need
     // to be modified.
     if (key == 'AssetManifest.bin' ||
-        key == 'AssetManifest.json' ||
         key == 'FontManifest.json' ||
         key.startsWith(_kPackagesPrefix) ||
         packageName == null) {
