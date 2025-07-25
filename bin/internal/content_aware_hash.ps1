@@ -36,6 +36,16 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # 3. Out-File -NoNewline -Encoding ascii outputs 8bit ascii
 # 4. git hash-object with stdin from a pipeline consumes UTF-16, so consume
 #.   the contents of hash.txt
-(git -C "$flutterRoot" ls-tree --format "%(objectname) %(path)" HEAD DEPS engine bin/internal/release-candidate-branch.version | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
+$trackedFiles = "DEPS", "engine", "bin/internal/release-candidate-branch.version"
+$baseRef = "HEAD"
+# Check to see if we're in a local development branch and the branch has any
+# changes to engine code - including non-committed changes.
+if ((git -C "$flutterRoot" rev-parse --abbrev-ref HEAD) -ne "master") {
+    git -C "$flutterRoot" diff --quiet "$(git -C "$flutterRoot" merge-base master HEAD)" -- $trackedFiles | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        $baseRef = "master"
+    }
+}
+(git -C "$flutterRoot" ls-tree --format "%(objectname) %(path)" $baseRef -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
 git hash-object hash.txt
 Remove-Item hash.txt
