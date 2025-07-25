@@ -17,7 +17,7 @@ public class PlatformViewCreationRequest {
     TEXTURE_WITH_VIRTUAL_FALLBACK,
     /** Use Texture Layer Hybrid Composition (TLHC), falling back to Hybrid Composition (HC) if not. */
     TEXTURE_WITH_HYBRID_FALLBACK,
-    /** Use Hybrid Composition in all cases. */
+    /** Use Hybrid Composition (HC) in all cases. */
     HYBRID_ONLY,
   }
 
