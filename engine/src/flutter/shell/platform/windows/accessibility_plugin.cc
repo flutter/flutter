@@ -64,12 +64,14 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
 
     const auto& view_itr = data->find(EncodableValue{kViewIdKey});
     if (view_itr == data->end()) {
-      FML_LOG(ERROR) << "Accessibility message 'viewId' property must be provided.";
+      FML_LOG(ERROR)
+          << "Accessibility message 'viewId' property must be provided.";
       return;
     }
     const auto* view_id = std::get_if<FlutterViewId>(&view_itr->second);
     if (!view_id) {
-      FML_LOG(ERROR) << "Accessibility message 'viewId' property must be an int64.";
+      FML_LOG(ERROR)
+          << "Accessibility message 'viewId' property must be an int64.";
       return;
     }
 
