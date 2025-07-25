@@ -30,6 +30,14 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
+/// A callback used by [ReorderableList] to report continuous updates during
+/// item drag operations.
+///
+/// Called whenever the dragged item moves to a new potential position, with
+/// [fromIndex] being the original index and [toIndex] being the final index
+/// where the item would be positioned if dropped.
+typedef ReorderUpdateCallback = void Function(int fromIndex, int toIndex);
+
 // class MyDataObject {}
 
 /// A callback used by [ReorderableList] to report that a list item has moved
@@ -154,6 +162,7 @@ class ReorderableList extends StatefulWidget {
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
+    this.onReorderUpdate,
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
@@ -237,6 +246,9 @@ class ReorderableList extends StatefulWidget {
   ///     location.
   /// {@endtemplate}
   final void Function(int index)? onReorderEnd;
+
+  /// {@macro flutter.material.ReorderableListView.onReorderUpdate}
+  final ReorderUpdateCallback? onReorderUpdate;
 
   /// {@template flutter.widgets.reorderable_list.proxyDecorator}
   /// A callback that allows the app to add an animated decoration around
@@ -466,6 +478,7 @@ class ReorderableListState extends State<ReorderableList> {
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
+            onReorderUpdate: widget.onReorderUpdate,
             proxyDecorator: widget.proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
             dragBoundaryProvider: widget.dragBoundaryProvider,
@@ -511,6 +524,7 @@ class SliverReorderableList extends StatefulWidget {
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
+    this.onReorderUpdate,
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
@@ -546,6 +560,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
   final void Function(int)? onReorderEnd;
+
+  /// {@macro flutter.material.ReorderableListView.onReorderUpdate}
+  final ReorderUpdateCallback? onReorderUpdate;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -927,6 +944,14 @@ class SliverReorderableListState extends State<SliverReorderableList>
     _autoScroller?.startAutoScrollIfNecessary(_dragTargetRect);
   }
 
+  /// Convert insertion point to final index
+  static int _insertionPointToFinalIndex({
+    required int insertionPoint,
+    required int originalIndex,
+  }) {
+    return insertionPoint > originalIndex ? insertionPoint - 1 : insertionPoint;
+  }
+
   void _dragUpdateItems() {
     assert(_dragInfo != null);
     final double gapExtent = _dragInfo!.itemExtent;
@@ -996,6 +1021,29 @@ class SliverReorderableListState extends State<SliverReorderableList>
       }
     }
 
+    // Calculate final indices to handle Flutter's unintuitive index behavior
+    // Reference: https://github.com/flutter/flutter/issues/24786
+    //
+    // Flutter's newIndex represents the insertion point before the dragged item
+    // is removed, which differs from native platform conventions. We convert to
+    // the actual destination index after removal for intuitive behavior.
+    final int finalNewIndex = _insertionPointToFinalIndex(
+      insertionPoint: newIndex,
+      originalIndex: _dragIndex!,
+    );
+    final int? previousFinalIndex = _insertIndex != null
+        ? _insertionPointToFinalIndex(
+            insertionPoint: _insertIndex!,
+            originalIndex: _dragIndex!,
+          )
+        : null;
+
+    // Fire callback when final position changes
+    if (previousFinalIndex == null || finalNewIndex != previousFinalIndex) {
+      widget.onReorderUpdate?.call(_dragIndex!, finalNewIndex);
+    }
+
+    // Update internal tracking
     if (newIndex != _insertIndex) {
       _insertIndex = newIndex;
       for (final _ReorderableItemState item in _items.values) {
