@@ -13,7 +13,7 @@ public class PlatformViewCreationRequest {
   /** Platform view display modes that can be requested at creation time. */
   // TODO(gmackall) explain why this value is null for hcpp and why it should be.
   public enum RequestedDisplayMode {
-    /** Use Texture Layer if possible, falling back to Virtual Display if not. */
+    /** Use Texture Layer Hybrid Composition (TLHC) if possible, falling back to Virtual Display (VD) if not. */
     TEXTURE_WITH_VIRTUAL_FALLBACK,
     /** Use Texture Layer if possible, falling back to Hybrid Composition if not. */
     TEXTURE_WITH_HYBRID_FALLBACK,
