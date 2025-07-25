@@ -69,7 +69,7 @@ public class PlatformViewsControllerDelegator
       @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
       @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
     if (platformViewsController2.getPlatformViewById(request.viewId) != null) {
-      // this is a no op
+      // no op
     } else {
       platformViewsController.channelHandler.resize(request, onComplete);
     }
