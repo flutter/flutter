@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -419,7 +419,7 @@ void main() {
     testUsingContext(
       'prints analytics welcome message',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
         final shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, contains(analytics.getConsentMessage));
@@ -430,13 +430,45 @@ void main() {
     testUsingContext(
       'does not print analytics welcome message if Analytics instance indicates it should not be printed',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         analytics.clientShowedMessage();
 
         final shutdownHooks = ShutdownHooks();
         await exitWithHooks(0, shutdownHooks: shutdownHooks);
         expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
+
+    testUsingContext(
+      '[sync] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
+      },
+      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+    );
+
+    testUsingContext(
+      '[async] exceptions thrown from a hook do not crash the tool',
+      () async {
+        setExitFunctionForTests((int exitCode) {});
+
+        final shutdownHooks = ShutdownHooks();
+        shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
+        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        expect(
+          logger.warningText,
+          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        );
       },
       overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
     );

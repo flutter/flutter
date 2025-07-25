@@ -9,6 +9,7 @@ import 'package:args/args.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -49,7 +50,7 @@ void main(List<String> args) {
 
 Future<void> run(List<String> args) async {
   final parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .packages file')
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
     ..addOption(_kOptionShell, help: 'The flutter_tester binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
