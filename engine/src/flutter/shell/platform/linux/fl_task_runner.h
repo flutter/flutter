@@ -38,20 +38,6 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* task_runner,
                                       uint64_t target_time_nanos);
 
 /**
- * fl_task_runner_post_callback:
- * @task_runner: an #FlTaskRunner.
- * @callback: callback to be scheduled
- * @data: data to be passed to the callback
- *
- * Schedules arbitrary callback to be executed on main thread. The callback
- * will be executed in next run loop turn. This function is thread
- * safe and may be called from any thread.
- */
-void fl_task_runner_post_callback(FlTaskRunner* task_runner,
-                                  void (*callback)(gpointer data),
-                                  gpointer data);
-
-/**
  * fl_task_runner_block_main_thread:
  * @task_runner: an #FlTaskRunner.
  *

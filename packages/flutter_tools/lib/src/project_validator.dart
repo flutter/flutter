@@ -7,6 +7,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
 import 'flutter_manifest.dart';
+import 'git.dart';
 import 'project.dart';
 import 'project_validator_result.dart';
 import 'version.dart';
@@ -36,11 +37,13 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     required this.logger,
     required this.fileSystem,
     required this.platform,
+    required this.git,
   });
 
   final Logger logger;
   final FileSystem fileSystem;
   final Platform platform;
+  final Git git;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -53,7 +56,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem);
+    final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem, git: git);
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,

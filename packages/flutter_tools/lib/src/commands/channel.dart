@@ -85,8 +85,8 @@ class ChannelCommand extends FlutterCommand {
     final rawOutput = <String>[];
 
     globals.printStatus('Flutter channels:');
-    final int result = await globals.processUtils.stream(
-      <String>['git', 'branch', '-r'],
+    final int result = await globals.git.stream(
+      ['branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
@@ -185,14 +185,12 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> _checkout(String branchName) async {
     // Get latest refs from upstream.
-    RunResult runResult = await globals.processUtils.run(<String>[
-      'git',
+    RunResult runResult = await globals.git.run(<String>[
       'fetch',
     ], workingDirectory: Cache.flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
-      runResult = await globals.processUtils.run(<String>[
-        'git',
+      runResult = await globals.git.run(<String>[
         'show-ref',
         '--verify',
         '--quiet',
@@ -200,16 +198,14 @@ class ChannelCommand extends FlutterCommand {
       ], workingDirectory: Cache.flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
-        runResult = await globals.processUtils.run(<String>[
-          'git',
+        runResult = await globals.git.run(<String>[
           'checkout',
           branchName,
           '--',
         ], workingDirectory: Cache.flutterRoot);
       } else {
         // branch does not exist, we have to create it
-        runResult = await globals.processUtils.run(<String>[
-          'git',
+        runResult = await globals.git.run(<String>[
           'checkout',
           '--track',
           '-b',

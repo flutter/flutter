@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-    if (dart.library.js_util) '_network_image_web.dart'
+    if (dart.library.js_interop) '_network_image_web.dart'
     as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
