@@ -99,11 +99,11 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     this.message,
     this.textDirection, {
     this.assertiveness = Assertiveness.polite,
-    this.viewId = 0,
+    this.viewId = null,
   }) : super('announce');
 
   /// The id of the view that this announcement is on.
-  final int viewId;
+  final int? viewId;
 
   /// The message to announce.
   final String message;

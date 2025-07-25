@@ -22,7 +22,7 @@ export 'dart:ui' show TextDirection;
 /// trigger announcements over using this event.
 abstract final class SemanticsService {
   /// Sends a semantic announcement.
-  /// 
+  ///
   /// This method is deprecated. Prefer using [sendAnnouncement] instead.
   ///
   /// {@template flutter.semantics.service.announce}
@@ -48,7 +48,11 @@ abstract final class SemanticsService {
   /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
   /// {@endtemplate}
   ///
-  @Deprecated('Use sendAnnouncement instead.')
+  @Deprecated(
+    'Use sendAnnouncement instead. '
+    'This API is incompatible with multiple windows. '
+    'This feature was deprecated after 3.35.0-0.1.pre.'
+  )
   static Future<void> announce(
     String message,
     TextDirection textDirection, {
