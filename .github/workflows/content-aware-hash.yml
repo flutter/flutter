@@ -13,10 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Fetch base commit and origin/master
-        run: |
-          git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
-
       - name: Generate Hash
         run: |
           engine_content_hash=$(bin/internal/content_aware_hash.sh)
