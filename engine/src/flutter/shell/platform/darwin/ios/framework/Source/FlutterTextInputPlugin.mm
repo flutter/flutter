@@ -893,6 +893,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                              shareSelectedText:[self textInRange:_selectedTextRange]];
 }
 
+
 // DFS algorithm to search a UICommand from the menu tree.
 - (UICommand*)searchCommandWithSelector:(SEL)selector
                                 element:(UIMenuElement*)element API_AVAILABLE(ios(16.0)) {
@@ -1003,6 +1004,24 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                    selector:@selector(captureTextFromCamera:)
                               suggestedMenu:suggestedMenu];
       }
+    } else if ([type isEqualToString:@"custom"]) {
+      NSString* customId = encodedItem[@"id"];
+      NSString* title = encodedItem[@"title"];
+      if (customId && title) {
+        __weak FlutterTextInputView* weakSelf = self;
+        UIAction* action = [UIAction actionWithTitle:title
+                                               image:nil
+                                          identifier:nil
+                                             handler:^(__kindof UIAction* _Nonnull action) {
+          FlutterTextInputView* strongSelf = weakSelf;
+          if (strongSelf) {
+            [strongSelf.textInputDelegate flutterTextInputView:strongSelf
+                performPlatformChannelContextMenuCustomAction:customId
+                                                   withClient:strongSelf->_textInputClient];
+          }
+        }];
+        [items addObject:action];
+      }
     }
   }
   return [UIMenu menuWithChildren:items];
@@ -1025,6 +1044,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                              items:(NSArray<NSDictionary*>*)items API_AVAILABLE(ios(16.0)) {
   _editMenuTargetRect = targetRect;
   _editMenuItems = items;
+
   UIEditMenuConfiguration* config =
       [UIEditMenuConfiguration configurationWithIdentifier:nil sourcePoint:CGPointZero];
   [self.editMenuInteraction presentEditMenuWithConfiguration:config];
