@@ -757,6 +757,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDartDefineOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefinesOption,
+      abbr: 'D',
       aliases: <String>[kDartDefines], // supported for historical reasons
       help:
           'Additional key-value pairs that will be available as constants '
