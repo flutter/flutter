@@ -232,7 +232,7 @@ void main() {
         'assemble',
         '--output',
         'Output',
-        '--DartDefines=flutter.inspector.structuredErrors%3Dtrue',
+        '-DartDefines=flutter.inspector.structuredErrors%3Dtrue',
         'debug_macos_bundle_flutter_assets',
       ];
       expect(

@@ -117,12 +117,7 @@ $fontsSection
         await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.bin',
-            'AssetManifest.json',
-            'FontManifest.json',
-            'NOTICES.Z',
-          ]),
+          unorderedEquals(<String>['AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']),
         );
       },
       overrides: <Type, Generator>{
