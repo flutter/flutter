@@ -1144,10 +1144,19 @@ class WidgetStatesController extends ValueNotifier<Set<WidgetState>> {
   /// Creates a WidgetStatesController.
   WidgetStatesController([Set<WidgetState>? value]) : super(<WidgetState>{...?value});
 
+  @override
+    Set<WidgetState> get value => <WidgetState>{...super.value};
+
+    @override
+    set value(Set<WidgetState> newValue) {
+      super.value = <WidgetState>{...newValue};
+    }
+
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.
   void update(WidgetState state, bool add) {
-    final bool valueChanged = add ? value.add(state) : value.remove(state);
+  final Set<WidgetState> mutable = super.value;
+    final bool valueChanged = add ? mutable.add(state) : mutable.remove(state);
     if (valueChanged) {
       notifyListeners();
     }
