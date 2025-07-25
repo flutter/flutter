@@ -114,8 +114,21 @@ void main() {
     return run(executable, args);
   }
 
+  /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root].
+  ///
+  /// The remote points at itself (`testRoot.root.path`) for ease of testing.
+  void setupRemote({required String remote, String? rootPath}) {
+    run('git', <String>[
+      'remote',
+      'add',
+      remote,
+      rootPath ?? testRoot.root.path,
+    ], workingPath: rootPath);
+    run('git', <String>['fetch', remote], workingPath: rootPath);
+  }
+
   /// Initializes a blank git repo in [testRoot.root].
-  void initGitRepoWithBlankInitialCommit({String? workingPath}) {
+  void initGitRepoWithBlankInitialCommit({String? workingPath, String remote = 'upstream'}) {
     run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
     // autocrlf is very important for tests to work on windows.
     run('git', 'config --local core.autocrlf true'.split(' '), workingPath: workingPath);
@@ -133,6 +146,8 @@ void main() {
       '-m',
       'Initial commit',
     ], workingPath: workingPath);
+
+    setupRemote(remote: remote, rootPath: workingPath);
   }
 
   void writeFileAndCommit(File file, String contents) {
@@ -150,22 +165,47 @@ void main() {
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
-  test('ignores local engine branch', () async {
-    initGitRepoWithBlankInitialCommit();
-    gitSwitchBranch('engineTest');
-    testRoot.deps.writeAsStringSync('deps changed');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-      reason: 'content hash from master for non-committed file',
-    );
+  test('generates a hash for origin', () {
+    initGitRepoWithBlankInitialCommit(remote: 'origin');
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+  });
 
-    writeFileAndCommit(testRoot.deps, 'deps changed');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-      reason: 'content hash from master for committed file',
-    );
+  group('ignores local engine for', () {
+    test('upstream', () {
+      initGitRepoWithBlankInitialCommit();
+      gitSwitchBranch('engineTest');
+      testRoot.deps.writeAsStringSync('deps changed');
+      expect(
+        runContentAwareHash(),
+        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        reason: 'content hash from master for non-committed file',
+      );
+
+      writeFileAndCommit(testRoot.deps, 'deps changed');
+      expect(
+        runContentAwareHash(),
+        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        reason: 'content hash from master for committed file',
+      );
+    });
+
+    test('origin', () {
+      initGitRepoWithBlankInitialCommit(remote: 'origin');
+      gitSwitchBranch('engineTest');
+      testRoot.deps.writeAsStringSync('deps changed');
+      expect(
+        runContentAwareHash(),
+        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        reason: 'content hash from master for non-committed file',
+      );
+
+      writeFileAndCommit(testRoot.deps, 'deps changed');
+      expect(
+        runContentAwareHash(),
+        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
+        reason: 'content hash from master for committed file',
+      );
+    });
   });
 
   group('generates a different hash when', () {
