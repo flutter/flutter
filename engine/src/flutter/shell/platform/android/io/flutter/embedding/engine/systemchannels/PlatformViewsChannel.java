@@ -94,7 +94,7 @@ public class PlatformViewsChannel {
           try {
             // TODO(gmackall): Enable hcpp path in a follow up PR to
             //                 https://github.com/flutter/flutter/pull/170553/.
-            //                 Also, change the flag name.
+            //                 with a new more externally friendly flag name. 
             //            if (handler.isHcppEnabled()) {
             //              final PlatformViewCreationRequest request =
             //                  PlatformViewCreationRequest.createHCPPRequest(
