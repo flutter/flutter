@@ -98,7 +98,8 @@ public class PlatformViewCreationRequest {
         params);
   }
 
-  /** Creates a request to construct a platform view. */
+  /** Creates a request to construct a platform view. Prefer use of the
+   * mode-specific named constructors above where possible. */
   @VisibleForTesting
   public PlatformViewCreationRequest(
       int viewId,
