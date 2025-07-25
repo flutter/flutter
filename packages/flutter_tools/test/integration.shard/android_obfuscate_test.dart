@@ -24,7 +24,7 @@ void main() {
   });
 
   test('Dart identifiers are obfuscated with build apk --obfuscate', () async {
-    const String projectName = 'hello_world';
+    const projectName = 'hello_world';
     await processManager.run(<String>[
       flutterBin,
       'create',
@@ -61,7 +61,7 @@ void main() {
   });
 
   test('Dart identifiers are obfuscated with build aar --obfuscate', () async {
-    const String moduleName = 'hello_module';
+    const moduleName = 'hello_module';
     await processManager.run(<String>[
       flutterBin,
       'create',
@@ -111,7 +111,7 @@ bool _containsSymbol(File outputArchive, String libappPath, String symbol) {
   final ArchiveFile? libapp = archive.findFile(libappPath);
   expect(libapp, isNotNull);
 
-  final Uint8List libappBytes = libapp!.content as Uint8List;
+  final libappBytes = libapp!.content as Uint8List;
   final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
 
   return libappStrings.contains(symbol);
