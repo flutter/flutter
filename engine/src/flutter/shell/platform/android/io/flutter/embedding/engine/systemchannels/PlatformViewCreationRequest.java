@@ -12,8 +12,10 @@ import java.nio.ByteBuffer;
 
 /** Request sent from Flutter to create a new platform view. */
 public class PlatformViewCreationRequest {
-  /** Platform view display modes that can be requested at creation time. */
-  // TODO(gmackall) explain why this value is null for hcpp and why it should be.
+  /** Platform view display modes that can be requested at creation time.
+   *  Not used by Hybrid Composition++ (HCPP), as HCPP always takes priority if enabled and does
+   *  not use fallbacks in the creation path, and as such does not need to be requested.
+   */
   public enum RequestedDisplayMode {
     /** Use Texture Layer Hybrid Composition (TLHC) if possible, falling back to Virtual Display (VD) if not. */
     TEXTURE_WITH_VIRTUAL_FALLBACK,
