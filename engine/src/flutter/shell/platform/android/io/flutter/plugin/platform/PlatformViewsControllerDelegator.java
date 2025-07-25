@@ -116,6 +116,9 @@ public class PlatformViewsControllerDelegator
     platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
   }
 
+  /**
+   * Returns true if creation of HCPP platform views is currently supported.
+   */
   @Override
   public boolean isHcppEnabled() {
     return platformViewsController2.isHcppEnabled();
