@@ -26,7 +26,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 - Constructors come first in a class definition, with the default constructor preceding named constructors.
 - Other class members should be ordered logically (e.g., by lifecycle, or grouping related fields and methods).
 
-## Other Languages
+## Miscellaneous Languages
 
 - Python code is formatted using `yapf`, linted with `pylint`, and should follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html).
 - C++ code is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
@@ -34,7 +34,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 - Kotlin code is formatted using `ktformat`, linted with `ktlint`, and should follow the [Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide).
 - Java code is formatted using `google-java-format` and should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
 - Objective-C is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.html).
-- Swift is formatted using `swift-format` and should follow the [Google Swift Style Guide](https://google.github.io/swift).
+- Swift is formatted and linted using `swift-format` and should follow the [Google Swift Style Guide](https://google.github.io/swift).
 - GN code is formatted using `gn format` and should follow the [GN Style Guide](https://gn.googlesource.com/gn/+/main/docs/style_guide.md).
 
 ## Documentation
@@ -58,4 +58,3 @@ For more detailed guidance, refer to the following documents:
 - [Writing effective tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-Effective-Tests.md)
 - [Running and writing tests guide](https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Running-and-writing-tests.md)
 - [Engine testing guide](https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/testing/Testing-the-engine.md)
-
