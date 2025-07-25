@@ -17,7 +17,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 
 - **Optimize for readability**: Code is read more often than it is written.
 - **Avoid duplicating state**: Keep only one source of truth.
-- **Lazy programming**: Write what you need and no more, but when you write it, do it right.
+- Write what you need and no more, but when you write it, do it right.
 - **Error messages should be useful**: Every error message is an opportunity to make someone love our product.
 
 ## Dart Formatting
@@ -25,6 +25,17 @@ flutter/flutter repository. It is based on the more comprehensive official
 - All Dart code is formatted using `dart format`. This is enforced by CI.
 - Constructors come first in a class definition, with the default constructor preceding named constructors.
 - Other class members should be ordered logically (e.g., by lifecycle, or grouping related fields and methods).
+
+## Other Languages
+
+- Python code is formatted using `yapf`, linted with `pylint`, and should follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html).
+- C++ code is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+- Shaders are formatted using `clang-format`.
+- Kotlin code is formatted using `ktformat`, linted with `ktlint`, and should follow the [Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide).
+- Java code is formatted using `google-java-format` and should follow the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
+- Objective-C is formatted using `clang-format`, linted with `clang-tidy`, and should follow the [Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.html).
+- Swift is formatted using `swift-format` and should follow the [Google Swift Style Guide](https://google.github.io/swift).
+- GN code is formatted using `gn format` and should follow the [GN Style Guide](https://gn.googlesource.com/gn/+/main/docs/style_guide.md).
 
 ## Documentation
 
