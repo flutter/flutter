@@ -59,13 +59,10 @@ class Firefox extends Browser {
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
-    print('========== <FIREFOX VERSION> ==========');
-    Process.runSync(installation.executable, ['--version']);
-    print('========== </FIREFOX VERSION> ==========');
-    return Firefox._(
-      BrowserProcess(() async {
-        // Using a profile on opening will prevent popups related to profiles.
-        const String profile = '''
+    printVersion(installation);
+    final browserProcess = BrowserProcess(() async {
+      // Using a profile on opening will prevent popups related to profiles.
+      const String profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
@@ -73,56 +70,65 @@ user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 ''';
 
-        final Directory temporaryProfileDirectory = Directory(
-          path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
-        );
+      final Directory temporaryProfileDirectory = Directory(
+        path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
+      );
 
-        // A good source of various Firefox Command Line options:
-        // https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#Browser
-        //
-        if (temporaryProfileDirectory.existsSync()) {
+      // A good source of various Firefox Command Line options:
+      // https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#Browser
+      //
+      if (temporaryProfileDirectory.existsSync()) {
+        temporaryProfileDirectory.deleteSync(recursive: true);
+      }
+      temporaryProfileDirectory.createSync(recursive: true);
+      File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
+
+      final List<String> args = <String>[
+        url.toString(),
+        '--profile',
+        temporaryProfileDirectory.path,
+        if (!debug) '--headless',
+        '-width $kMaxScreenshotWidth',
+        '-height $kMaxScreenshotHeight',
+        '-new-window',
+        '-new-instance',
+        '--start-debugger-server $kDevtoolsPort',
+      ];
+
+      final Process process = await Process.start(installation.executable, args);
+      process.stdout
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .listen((String string) => print('[Firefox:stdout] $string'));
+      process.stderr
+          .transform<String>(const Utf8Decoder(allowMalformed: true))
+          .listen((String string) => print('[Firefox:stderr] $string'));
+
+      remoteDebuggerCompleter.complete(
+        getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
+      );
+
+      unawaited(
+        process.exitCode.then((_) {
           temporaryProfileDirectory.deleteSync(recursive: true);
-        }
-        temporaryProfileDirectory.createSync(recursive: true);
-        File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
+        }),
+      );
 
-        final List<String> args = <String>[
-          url.toString(),
-          '--profile',
-          temporaryProfileDirectory.path,
-          if (!debug) '--headless',
-          '-width $kMaxScreenshotWidth',
-          '-height $kMaxScreenshotHeight',
-          '-new-window',
-          '-new-instance',
-          '--start-debugger-server $kDevtoolsPort',
-        ];
-
-        final Process process = await Process.start(installation.executable, args);
-        process.stdout
-            .transform<String>(const Utf8Decoder(allowMalformed: true))
-            .listen((String string) => print('[Firefox:stdout] $string'));
-        process.stderr
-            .transform<String>(const Utf8Decoder(allowMalformed: true))
-            .listen((String string) => print('[Firefox:stderr] $string'));
-
-        remoteDebuggerCompleter.complete(
-          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
-        );
-
-        unawaited(
-          process.exitCode.then((_) {
-            temporaryProfileDirectory.deleteSync(recursive: true);
-          }),
-        );
-
-        return process;
-      }),
-      remoteDebuggerCompleter.future,
-    );
+      return process;
+    });
+    browserProcess.onExit.whenComplete(() => printVersion(installation));
+    return Firefox._(browserProcess, remoteDebuggerCompleter.future);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static void printVersion(BrowserInstallation installation) {
+    print('========== <FIREFOX VERSION> ==========');
+    final result = Process.runSync(installation.executable, ['--version']);
+    print(result.stdout);
+    print('-' * 20);
+    print(result.stderr);
+    print('========== </FIREFOX VERSION> ==========');
+  }
 
   final BrowserProcess _process;
 
