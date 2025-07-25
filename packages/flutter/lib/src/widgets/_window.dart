@@ -14,7 +14,7 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
-import 'dart:ui' show AppExitType, Display, FlutterView;
+import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';

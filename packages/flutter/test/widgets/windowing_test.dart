@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show Display;
 import 'package:flutter/src/widgets/_window.dart'
     show
         RegularWindow,
@@ -47,7 +48,7 @@ class _StubWindowController extends RegularWindowController {
   }
 
   @override
-  void setFullscreen(bool fullscreen, {int? displayId}) {}
+  void setFullscreen(bool fullscreen, {Display? display}) {}
 
   @override
   void setMinimized(bool minimized) {}
@@ -67,7 +68,7 @@ void main() {
       final WindowingOwner owner = WindowingOwner.createDefaultOwner();
       expect(
         () => owner.createRegularWindowController(
-          contentSize: WindowSizing(),
+          preferredContentSize: WindowSizing(),
           delegate: RegularWindowControllerDelegate(),
         ),
         throwsUnsupportedError,
