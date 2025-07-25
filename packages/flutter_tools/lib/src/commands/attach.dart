@@ -378,7 +378,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             true,
             _fileSystem.currentDirectory,
             LaunchMode.attach,
-            _logger as AppRunLogger,
+            _logger as MachineOutputLogger,
           );
         } on Exception catch (error) {
           throwToolExit(error.toString());
