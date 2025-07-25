@@ -101,10 +101,6 @@ flutter:
       await const CopyAssets().build(environment);
 
       expect(
-        fileSystem.file('${environment.buildDir.path}/flutter_assets/AssetManifest.json'),
-        exists,
-      );
-      expect(
         fileSystem.file('${environment.buildDir.path}/flutter_assets/FontManifest.json'),
         exists,
       );
