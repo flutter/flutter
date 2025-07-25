@@ -64,12 +64,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
     }
 
-    final processArgs = <String>[
-      ...toolArgs,
-      ...?args.toolArgs,
-      if (program != null) program,
-      ...?args.args,
-    ];
+    final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
 
     await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
 
