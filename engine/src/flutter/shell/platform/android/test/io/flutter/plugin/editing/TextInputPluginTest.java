@@ -1231,6 +1231,121 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void imeVisibilityListener_restartsImmWhenIMEHidden() {
+    // Initialize a general TextInputPlugin.
+    InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+    assertEquals(1, testImm.getRestartCount(testView));
+
+    // Imm restarts when IME is hidden.
+    ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
+    imeSyncCallback.getImeVisibilityListener().onImeVisibilityChanged(false);
+    assertEquals(2, testImm.getRestartCount(testView));
+  }
+
+  @Test
+  public void clearTextInputClient_restartsImmWhenIMEHidden() {
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FlutterView testView = spy(new FlutterView(activity));
+
+            InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+            TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+            testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+            TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+            ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+            TextInputPlugin textInputPlugin =
+                new TextInputPlugin(
+                    testView,
+                    textInputChannel,
+                    scribeChannel,
+                    mock(PlatformViewsController.class),
+                    mock(PlatformViewsController2.class));
+            textInputPlugin.setTextInputClient(
+                0,
+                new TextInputChannel.Configuration(
+                    false,
+                    false,
+                    true,
+                    true,
+                    false,
+                    TextInputChannel.TextCapitalization.NONE,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null));
+            ImeSyncDeferringInsetsCallback imeSyncCallback = textInputPlugin.getImeSyncCallback();
+            FlutterEngine flutterEngine =
+                spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+            FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+            when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+            assertEquals(0, testImm.getRestartCount(testView));
+            // FlutterView restarts the input method to inform the Android framework that an engine
+            // has
+            // been attached.
+            testView.attachToFlutterEngine(flutterEngine);
+            assertEquals(1, testImm.getRestartCount(testView));
+
+            ArgumentCaptor<FlutterRenderer.ViewportMetrics> viewportMetricsCaptor =
+                ArgumentCaptor.forClass(FlutterRenderer.ViewportMetrics.class);
+
+            WindowInsets.Builder builder = new WindowInsets.Builder();
+
+            // There's a pending restart since we initialized the text input client. Flush that now.
+            textInputPlugin.setTextInputEditingState(
+                testView, new TextInputChannel.TextEditState("", 0, 0, -1, -1));
+            assertEquals(2, testImm.getRestartCount(testView));
+
+            // Set the initial insets and verify that they were set and the bottom view inset is
+            // correct.
+            builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 0));
+            when(testView.getRootWindowInsets()).thenReturn(builder.build());
+            imeSyncCallback.getInsetsListener().onApplyWindowInsets(testView, builder.build());
+            verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
+            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+
+            // Imm restarts when clearTextInputClient is called while the IME is hidden.
+            textInputPlugin.clearTextInputClient();
+            assertEquals(3, testImm.getRestartCount(testView));
+          });
+    }
+  }
+
+  @Test
   public void destroy_clearTextInputMethodHandler() {
     View testView = new View(ctx);
     TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
