@@ -6,6 +6,8 @@ package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import java.nio.ByteBuffer;
 
 /** Request sent from Flutter to create a new platform view. */
@@ -65,7 +67,7 @@ public class PlatformViewCreationRequest {
         viewId, viewType, 0, 0, 0, 0, direction, RequestedDisplayMode.HYBRID_ONLY, params);
   }
 
-  public static PlatformViewCreationRequest createTLHCWithFallbacksRequest(
+  public static PlatformViewCreationRequest createTLHCWithFallbackRequest(
       int viewId,
       String viewType,
       double top,
@@ -90,6 +92,7 @@ public class PlatformViewCreationRequest {
   }
 
   /** Creates a request to construct a platform view. */
+  @VisibleForTesting
   public PlatformViewCreationRequest(
       int viewId,
       @NonNull String viewType,

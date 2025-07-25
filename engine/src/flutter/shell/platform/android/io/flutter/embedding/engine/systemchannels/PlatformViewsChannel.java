@@ -119,14 +119,8 @@ public class PlatformViewsChannel {
               final boolean hybridFallback =
                   createArgs.containsKey("hybridFallback")
                       && (boolean) createArgs.get("hybridFallback");
-              final PlatformViewCreationRequest.RequestedDisplayMode displayMode =
-                  hybridFallback
-                      ? PlatformViewCreationRequest.RequestedDisplayMode
-                          .TEXTURE_WITH_HYBRID_FALLBACK
-                      : PlatformViewCreationRequest.RequestedDisplayMode
-                          .TEXTURE_WITH_VIRTUAL_FALLBACK;
               final PlatformViewCreationRequest request =
-                  PlatformViewCreationRequest.createTLHCWithFallbacksRequest(
+                  PlatformViewCreationRequest.createTLHCWithFallbackRequest(
                       (int) createArgs.get("id"),
                       (String) createArgs.get("viewType"),
                       createArgs.containsKey("top") ? (double) createArgs.get("top") : 0.0,
