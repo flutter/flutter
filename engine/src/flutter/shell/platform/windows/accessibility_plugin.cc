@@ -68,9 +68,7 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
       const auto* view_id_val = std::get_if<FlutterViewId>(&view_itr->second);
       if (view_id_val) {
         view_id = *view_id_val;
-        return;
       }
-      return;
     }
 
     plugin->Announce(view_id, *message);
