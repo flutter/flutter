@@ -15,7 +15,7 @@ public class PlatformViewCreationRequest {
   public enum RequestedDisplayMode {
     /** Use Texture Layer Hybrid Composition (TLHC) if possible, falling back to Virtual Display (VD) if not. */
     TEXTURE_WITH_VIRTUAL_FALLBACK,
-    /** Use Texture Layer if possible, falling back to Hybrid Composition if not. */
+    /** Use Texture Layer Hybrid Composition (TLHC), falling back to Hybrid Composition (HC) if not. */
     TEXTURE_WITH_HYBRID_FALLBACK,
     /** Use Hybrid Composition in all cases. */
     HYBRID_ONLY,
