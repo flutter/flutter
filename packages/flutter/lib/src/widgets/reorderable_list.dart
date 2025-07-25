@@ -30,6 +30,12 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
+/// A callback used by [ReorderableList] to report real-time updates during
+/// item drag operations.
+///
+/// Called whenever the dragged item moves to a new potential insertion position.
+typedef ReorderUpdateCallback = void Function(int fromIndex, int toIndex);
+
 // class MyDataObject {}
 
 /// A callback used by [ReorderableList] to report that a list item has moved
@@ -154,6 +160,7 @@ class ReorderableList extends StatefulWidget {
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
+    this.onReorderUpdate,
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
@@ -237,6 +244,9 @@ class ReorderableList extends StatefulWidget {
   ///     location.
   /// {@endtemplate}
   final void Function(int index)? onReorderEnd;
+
+  /// {@macro flutter.material.ReorderableListView.onReorderUpdate}
+  final ReorderUpdateCallback? onReorderUpdate;
 
   /// {@template flutter.widgets.reorderable_list.proxyDecorator}
   /// A callback that allows the app to add an animated decoration around
@@ -511,6 +521,7 @@ class SliverReorderableList extends StatefulWidget {
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
+    this.onReorderUpdate,
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
@@ -546,6 +557,9 @@ class SliverReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.reorderable_list.onReorderEnd}
   final void Function(int)? onReorderEnd;
+
+  /// {@macro flutter.material.ReorderableListView.onReorderUpdate}
+  final ReorderUpdateCallback? onReorderUpdate;
 
   /// {@macro flutter.widgets.reorderable_list.proxyDecorator}
   final ReorderItemProxyDecorator? proxyDecorator;
@@ -680,6 +694,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
   Offset? _finalDropPosition;
   MultiDragGestureRecognizer? _recognizer;
   int? _recognizerPointer;
+  
+  // Track whether we've moved from original position during drag
+  bool _hasMovedFromOriginal = false;
 
   EdgeDraggingAutoScroller? _autoScroller;
 
@@ -809,6 +826,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
     item.rebuild();
 
     _insertIndex = item.index;
+    _hasMovedFromOriginal = false;
     _dragInfo = _DragInfo(
       item: item,
       initialPosition: position,
@@ -935,6 +953,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _scrollDirection,
     );
     final double proxyItemEnd = proxyItemStart + gapExtent;
+    
+    // Track if we've ever moved away from the original position
+    _hasMovedFromOriginal = _hasMovedFromOriginal || (_insertIndex != _dragIndex);
 
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
@@ -997,7 +1018,20 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
 
     if (newIndex != _insertIndex) {
+      // Check if we're returning to original position after having moved away
+      final bool returningToOriginal = _hasMovedFromOriginal && newIndex == _dragIndex;
+      
       _insertIndex = newIndex;
+      
+      // HACK: When returning to original position, the normal onReorderUpdate
+      // would get fromIndex == toIndex, which skips haptic feedback.
+      // We work around this by passing a fake index to force the haptic.
+      if (returningToOriginal) {
+        widget.onReorderUpdate?.call(_dragIndex!, _dragIndex! + _items.length);
+      } else {
+        widget.onReorderUpdate?.call(_dragIndex!, newIndex);
+      }
+      
       for (final _ReorderableItemState item in _items.values) {
         if (item.index == _dragIndex! || !item.mounted) {
           continue;
