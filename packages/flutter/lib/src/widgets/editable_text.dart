@@ -2602,7 +2602,7 @@ class EditableTextState extends State<EditableText>
   }
 
   late final AppLifecycleListener _appLifecycleListener;
-  bool _justResumed = false;
+  static bool _justResumed = false;
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
@@ -3214,7 +3214,7 @@ class EditableTextState extends State<EditableText>
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _appLifecycleListener = AppLifecycleListener(onResume: () => _justResumed = true);
+    _appLifecycleListener = AppLifecycleListener(onResume: () => EditableTextState._justResumed = true);
     _initProcessTextActions();
   }
 
@@ -4734,8 +4734,8 @@ class EditableTextState extends State<EditableText>
         widget.selectionEnabled &&
         !_isMultiline &&
         !_nextFocusChangeIsInternal &&
-        !_justResumed;
-    _justResumed = false;
+        !EditableTextState._justResumed;
+    EditableTextState._justResumed = false;
     if (shouldSelectAll) {
       // On native web and desktop platforms, single line <input> tags
       // select all when receiving focus.
