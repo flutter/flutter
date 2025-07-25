@@ -18,7 +18,6 @@ import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
 import 'binding.dart';
