@@ -59,6 +59,9 @@ class Firefox extends Browser {
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    print('========== <FIREFOX VERSION> ==========');
+    Process.runSync(installation.executable, ['--version']);
+    print('========== </FIREFOX VERSION> ==========');
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
