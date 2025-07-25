@@ -16525,6 +16525,9 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/163399.
     testWidgets('when selectAllOnFocus is turned on', (WidgetTester tester) async {
+      // Reset the static justResumed flag before the test to avoid leaks.
+      EditableTextState.resetJustResumedForTest();
+
       controller.text = 'Text';
 
       await tester.pumpWidget(
