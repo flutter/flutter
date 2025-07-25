@@ -121,7 +121,8 @@ public class PlatformViewCreationRequest {
         params);
   }
 
-  /** Creates a request to construct a platform view with the given display mode. */
+  /** Creates a request to construct a platform view with the given display mode. Prefer use of
+   * the mode-specific named constructors above where possible. */
   public PlatformViewCreationRequest(
       int viewId,
       @NonNull String viewType,
