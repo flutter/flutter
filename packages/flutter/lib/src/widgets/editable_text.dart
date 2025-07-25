@@ -2604,6 +2604,7 @@ class EditableTextState extends State<EditableText>
   late final AppLifecycleListener _appLifecycleListener;
   static bool _justResumed = false;
 
+  /// Resets the [_justResumed] flag for test purposes.
   @visibleForTesting
   static void resetJustResumedForTest() {
     _justResumed = false;
@@ -3219,7 +3220,9 @@ class EditableTextState extends State<EditableText>
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _appLifecycleListener = AppLifecycleListener(onResume: () => EditableTextState._justResumed = true);
+    _appLifecycleListener = AppLifecycleListener(
+      onResume: () => EditableTextState._justResumed = true,
+    );
     _initProcessTextActions();
   }
 
