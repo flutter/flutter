@@ -728,22 +728,6 @@ void main() {
     );
 
     testUsingContext(
-      'dds options --disable-dds works, but is deprecated',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--disable-dds']);
-        expect(ddsCommand.enableDds, isFalse);
-        expect(logger.warningText, contains('"--disable-dds" argument is deprecated'));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        ProcessManager: () => processManager,
-      },
-    );
-
-    testUsingContext(
       'dds options --no-disable-dds',
       () async {
         final ddsCommand = FakeDdsCommand();
@@ -758,20 +742,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         Logger: () => logger,
-        ProcessManager: () => processManager,
-      },
-    );
-
-    testUsingContext(
-      'dds options --dds --disable-dds',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--dds', '--disable-dds']);
-        expect(() => ddsCommand.enableDds, throwsToolExit());
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
     );
