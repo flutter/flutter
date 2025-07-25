@@ -93,12 +93,13 @@ abstract class SemanticsEvent {
 /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
 ///
 class AnnounceSemanticsEvent extends SemanticsEvent {
-  /// Constructs an event that triggers an announcement by the platform.
+  /// Constructs an event that triggers an announcement by the platform
+  /// on the implicit view
   const AnnounceSemanticsEvent(
-    this.viewId,
     this.message,
     this.textDirection, {
     this.assertiveness = Assertiveness.polite,
+    this.viewId = 0,
   }) : super('announce');
 
   /// The id of the view that this announcement is on.

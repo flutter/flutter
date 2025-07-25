@@ -20,8 +20,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-    await SemanticsService.announce(1, 'announcement 1', TextDirection.ltr);
-    await SemanticsService.announce(
+    await SemanticsService.sendAnnouncement(1, 'announcement 1', TextDirection.ltr);
+    await SemanticsService.sendAnnouncement(
       2,
       'announcement 2',
       TextDirection.rtl,

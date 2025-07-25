@@ -384,7 +384,7 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.announce(
+            SemanticsService.sendAnnouncement(
               viewId,
               errorMessage,
               directionality,
@@ -393,7 +393,7 @@ class FormState extends State<Form> {
           }),
         );
       } else {
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
           viewId,
           errorMessage,
           directionality,

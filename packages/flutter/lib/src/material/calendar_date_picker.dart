@@ -235,7 +235,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-      SemanticsService.announce(
+      SemanticsService.sendAnnouncement(
         View.of(context).viewId,
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
         _textDirection,
@@ -265,7 +265,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        SemanticsService.announce(View.of(context).viewId, message, _textDirection);
+        SemanticsService.sendAnnouncement(View.of(context).viewId, message, _textDirection);
       }
     });
   }
@@ -315,7 +315,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         case TargetPlatform.windows:
           final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-          SemanticsService.announce(
+          SemanticsService.sendAnnouncement(
             View.of(context).viewId,
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
@@ -666,7 +666,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
           View.of(context).viewId,
           widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
           _textDirection,

@@ -22,7 +22,10 @@ export 'dart:ui' show TextDirection;
 /// trigger announcements over using this event.
 abstract final class SemanticsService {
   /// Sends a semantic announcement.
+  /// 
+  /// This method is deprecated. Prefer using [sendAnnouncement] instead.
   ///
+  /// {@template flutter.semantics.service.announce}
   /// This should be used for announcement that are not seamlessly announced by
   /// the system as a result of a UI state change.
   ///
@@ -43,18 +46,38 @@ abstract final class SemanticsService {
   /// trigger announcements.
   ///
   /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
+  /// {@endtemplate}
   ///
+  @Deprecated('Use sendAnnouncement instead.')
   static Future<void> announce(
+    String message,
+    TextDirection textDirection, {
+    Assertiveness assertiveness = Assertiveness.polite,
+  }) async {
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
+      message,
+      textDirection,
+      assertiveness: assertiveness,
+    );
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+
+  /// Sends a semantic announcement for a particular view.
+  ///
+  /// {@macro flutter.semantics.service.announce}
+  ///
+  static Future<void> sendAnnouncement(
     int viewId,
     String message,
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
-      viewId,
       message,
       textDirection,
       assertiveness: assertiveness,
+      viewId: viewId
     );
     await SystemChannels.accessibility.send(event.toMap());
   }
