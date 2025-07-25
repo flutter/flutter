@@ -4911,7 +4911,7 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
 
   await _getPackages(workingDir);
 
-  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', if (target != null) target];
+  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', ?target];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),

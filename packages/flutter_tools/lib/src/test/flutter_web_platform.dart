@@ -661,7 +661,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
     await Future.wait<void>(<Future<dynamic>>[
-      if (_browserManager != null) _browserManager!.close(),
+      ?_browserManager?.close(),
       _server.close(),
       _testGoldenComparator.close(),
     ]);

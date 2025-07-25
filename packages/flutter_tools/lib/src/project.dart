@@ -165,10 +165,7 @@ class FlutterProject {
     if (android.existsSync()) {
       final String? applicationId = android.applicationId;
       final String? group = android.group;
-      candidates.addAll(<String>[
-        if (applicationId != null) applicationId,
-        if (group != null) group,
-      ]);
+      candidates.addAll(<String>[?applicationId, ?group]);
     }
     if (example.android.existsSync()) {
       final String? applicationId = example.android.applicationId;
