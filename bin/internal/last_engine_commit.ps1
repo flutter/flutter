@@ -24,9 +24,8 @@ $ErrorActionPreference = "Stop" # Equivalent to 'set -e' in bash
 
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
-$gitToplevel = (git rev-parse --show-toplevel).Trim()
 
-$Path1 = Join-Path $gitToplevel "bin"
+$Path1 = Join-Path $flutterRoot "bin"
 $Path2 = Join-Path $Path1 "internal"
 $RELEASE_CANDIDATE_VERSION_PATH = Join-Path $Path2 "release-candidate-branch.version"
 
