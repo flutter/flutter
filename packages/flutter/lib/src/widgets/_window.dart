@@ -9,7 +9,7 @@
 // All APIs in this file must be private or must:
 //
 // 1. Have the `@internal` attribute.
-// 2. Throw an  `UnsupportedError` if `isWindowingEnabled`
+// 2. Throw an `UnsupportedError` if `isWindowingEnabled`
 //    is `false.
 //
 // See: https://github.com/flutter/flutter/issues/30701.
@@ -93,7 +93,7 @@ class WindowSizing {
   ///
   /// This might not be honored by the platform.
   ///
-  /// This field enforces a miniumum and maximum size on the window.
+  /// This field enforces a minimum and maximum size on the window.
   /// If null, the window will be unconstrained.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -115,8 +115,7 @@ class WindowSizing {
 /// Each [BaseWindowController] is associated with exactly one root [FlutterView].
 ///
 /// When the window is destroyed for any reason (either by the caller or by the
-/// platform), the content of the controller will thereafter be invalid. Callers
-/// might check if this content is invalid via the [isReady] property.
+/// platform), the content of the controller will thereafter be invalid.
 ///
 /// This class implements the [Listenable] interface, so callers can listen
 /// for changes to the window's properties.
@@ -140,7 +139,6 @@ abstract class BaseWindowController with ChangeNotifier {
   /// The current size of the window.
   ///
   /// This might differ from the requested size.
-  ///
   ///
   /// This might also differ from the actual size of the window if the window has
   /// decorations such as title bar, borders, etc.
@@ -170,9 +168,10 @@ abstract class BaseWindowController with ChangeNotifier {
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 mixin class RegularWindowControllerDelegate {
-  /// Invoked when user attempts to close the window. Default implementation
-  /// destroys the window. Subclass can override the behavior to delay
-  /// or prevent the window from closing.
+  /// Invoked when user attempts to close the window.
+  /// 
+  /// The default implmentation destroys the window. Subclasses 
+  /// can override the behavior to delay or prevent the window from closing.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -185,9 +184,6 @@ mixin class RegularWindowControllerDelegate {
   }
 
   /// Invoked when the window is closed.
-  ///
-  /// Default implementation exits the application if this was
-  /// the last top-level window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -242,10 +238,15 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// Upon construction, the window is created for the platform.
   ///
-  /// [contentSize] sizing requests for the window. This might not behonored by the platform
-  /// [title] the title of the window
-  /// [state] the initial state of the window
-  /// [delegate] optional delegate for the controller controller.
+  /// The [preferredContentSize] argument sets the window's initial size preference.
+  /// This might not be honored by the platform.
+  ///
+  /// The [title] argument configures the window's initial title.
+  /// If omitted, some platforms might fall back to the app's name.
+  ///
+  /// The [delegate] argument can be used to listen to the window's
+  /// lifecycle. For example, it can be used to save state before
+  /// a window is closed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -272,9 +273,8 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// Creates an empty [RegularWindowController].
   ///
-  /// TODO(mattkae): Replace @internal with @visibleForTesting when this API is non-experimental
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
+  // TODO(mattkae): Replace @internal with @visibleForTesting when this API is non-experimental
   @internal
   @protected
   RegularWindowController.empty();
@@ -298,7 +298,6 @@ abstract class RegularWindowController extends BaseWindowController {
   void updateContentSize(WindowSizing sizing);
 
   /// Request change for the window title.
-  /// [title] new title of the window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -344,9 +343,14 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// Request change for the window to enter or exit fullscreen state.
   ///
-  /// [fullscreen] whether to enter or exit fullscreen state.
-  /// [display] optional [Display] to use for fullscreen mode.
-  /// The [display] might not be honored by the platform
+  /// If [fullscreen] is set to true, the platform will attempt to change
+  /// the state of the window to fullscreen. If false, the window will
+  /// return to a previous non-hidden state. Both cases might not be
+  /// honored by the platform.
+  /// 
+  /// The [display] specifies an optional [Display] on which the window
+  /// would like to be fullscreened. This might not be honored by the
+  /// platform.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -436,9 +440,12 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 ///   ),
 ///   title: "Example Window",
 /// );
-/// runApp(RegularWindow(
-///   controller: controller,
-///   child: MaterialApp(home: Container())));
+/// runApp(
+///   RegularWindow(
+///     controller: controller,
+///     child: MaterialApp(home: Container()),
+///   ),
+/// );
 /// ```
 ///
 /// When a [RegularWindow] widget is removed from the tree, the window that was created
@@ -502,10 +509,15 @@ class _RegularWindowState extends State<RegularWindow> {
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 class WindowControllerContext extends InheritedWidget {
-  /// Creates a new [WindowControllerContext]
+  /// Creates a new [WindowControllerContext].
   ///
-  /// [controller] the controller associated with this window
-  /// [child] the child widget
+  /// This widget is used by the window widgets to provide
+  /// widgets in a window's subtree with access to information about
+  /// the window.
+  /// 
+  /// The [controller] is the controller associated with this window,
+  /// and the [child] is the widget tree that will have access
+  /// to this context.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
