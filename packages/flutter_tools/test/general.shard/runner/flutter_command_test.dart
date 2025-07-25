@@ -727,25 +727,6 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'dds options --no-disable-dds',
-      () async {
-        final ddsCommand = FakeDdsCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(ddsCommand);
-        await runner.run(<String>['test', '--no-disable-dds']);
-        expect(ddsCommand.enableDds, isTrue);
-        expect(
-          logger.warningText,
-          contains('"--no-disable-dds" argument is deprecated and redundant'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Logger: () => logger,
-        ProcessManager: () => processManager,
-      },
-    );
-
     group('findTargetDevice', () {
       final device1 = FakeDevice('device1', 'device1');
       final device2 = FakeDevice('device2', 'device2');
