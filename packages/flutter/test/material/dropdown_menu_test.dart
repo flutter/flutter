@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -4515,6 +4516,51 @@ void main() {
       expect(selectedValueText.style.color, disabledColor);
     },
   );
+
+  testWidgets('DropdownMenu skipTrailingIconTraversal skips trailing icon in focus traversal', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode textFieldFocusNode = FocusNode();
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                skipTrailingIconTraversal: true,
+                focusNode: textFieldFocusNode,
+              ),
+              ElevatedButton(
+                focusNode: buttonFocusNode,
+                onPressed: () {},
+                child: const Text('Button'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    primaryFocus!.nextFocus();
+    await tester.pump();
+
+    // Ensure the trailing icon does not have focus.
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasFocus, isFalse);
+
+    // Ensure the TextField has focus.
+    expect(textFieldFocusNode.hasFocus, isTrue);
+
+    // Ensure the button has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
 }
 
 enum TestMenu {

@@ -167,6 +167,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.showTrailingIcon = true,
+    this.skipTrailingIconTraversal = false,
     this.label,
     this.hintText,
     this.helperText,
@@ -246,6 +247,11 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool showTrailingIcon;
+
+  /// Specifies if the [DropdownMenu] should skip the trailing icon traversal when navigating with the keyboard.
+  ///
+  /// Defaults to false.
+  final bool skipTrailingIconTraversal;
 
   /// Optional widget that describes the input field.
   ///
@@ -1080,6 +1086,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
                 child: IconButton(
+                  focusNode: FocusNode(skipTraversal: widget.skipTrailingIconTraversal),
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
                   padding: isCollapsed ? EdgeInsets.zero : null,
