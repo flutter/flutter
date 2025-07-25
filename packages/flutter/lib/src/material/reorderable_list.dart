@@ -104,6 +104,10 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
+    this.spreadEnabled = false,
+    this.onSpreadInsert,
+    this.spreadPlaceholderBuilder,
+    this.spreadPlaceholderHeight = 92.0,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -175,6 +179,10 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
+    this.spreadEnabled = false,
+    this.onSpreadInsert,
+    this.spreadPlaceholderBuilder,
+    this.spreadPlaceholderHeight = 92.0,
   }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||

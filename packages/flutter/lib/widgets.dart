@@ -151,6 +151,7 @@ export 'src/widgets/sliver_tree.dart';
 export 'src/widgets/slotted_render_object_widget.dart';
 export 'src/widgets/snapshot_widget.dart';
 export 'src/widgets/spacer.dart';
+export 'src/widgets/spread_gesture_detector.dart';
 export 'src/widgets/spell_check.dart';
 export 'src/widgets/standard_component_type.dart';
 export 'src/widgets/status_transitions.dart';
