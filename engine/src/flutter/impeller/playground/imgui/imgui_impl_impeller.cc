@@ -38,7 +38,7 @@
 struct ImGui_ImplImpeller_Data {
   explicit ImGui_ImplImpeller_Data(
       impeller::raw_ptr<const impeller::Sampler> p_sampler)
-      : sampler(p_sampler) {}
+      : sampler(std::move(p_sampler)) {}
 
   std::shared_ptr<impeller::Context> context;
   std::shared_ptr<impeller::Texture> font_texture;
