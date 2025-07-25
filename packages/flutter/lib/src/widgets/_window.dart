@@ -169,8 +169,8 @@ abstract class BaseWindowController with ChangeNotifier {
 @internal
 mixin class RegularWindowControllerDelegate {
   /// Invoked when user attempts to close the window.
-  /// 
-  /// The default implmentation destroys the window. Subclasses 
+  ///
+  /// The default implmentation destroys the window. Subclasses
   /// can override the behavior to delay or prevent the window from closing.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -347,7 +347,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// the state of the window to fullscreen. If false, the window will
   /// return to a previous non-hidden state. Both cases might not be
   /// honored by the platform.
-  /// 
+  ///
   /// The [display] specifies an optional [Display] on which the window
   /// would like to be fullscreened. This might not be honored by the
   /// platform.
@@ -514,7 +514,7 @@ class WindowControllerContext extends InheritedWidget {
   /// This widget is used by the window widgets to provide
   /// widgets in a window's subtree with access to information about
   /// the window.
-  /// 
+  ///
   /// The [controller] is the controller associated with this window,
   /// and the [child] is the widget tree that will have access
   /// to this context.
