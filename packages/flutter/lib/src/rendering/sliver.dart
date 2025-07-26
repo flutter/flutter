@@ -8,6 +8,7 @@
 /// @docImport 'proxy_sliver.dart';
 /// @docImport 'sliver_fill.dart';
 /// @docImport 'sliver_grid.dart';
+/// @docImport 'sliver_group.dart';
 /// @docImport 'sliver_list.dart';
 /// @docImport 'sliver_padding.dart';
 /// @docImport 'sliver_persistent_header.dart';
@@ -1664,6 +1665,10 @@ abstract class RenderSliver extends RenderObject {
   /// Returns the scroll offset for the leading edge of the given child.
   ///
   /// The `child` must be a child of this sliver.
+  ///
+  /// If there are pinned slivers before [child], the offset should be reduced
+  /// by the extent of the pinned children. This can occur in [RenderSliver]s
+  /// that have multiple sliver children, such as [RenderSliverMainAxisGroup].
   ///
   /// This method differs from [childMainAxisPosition] in that
   /// [childMainAxisPosition] gives the distance from the leading _visible_ edge
