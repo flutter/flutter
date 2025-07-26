@@ -235,6 +235,8 @@ void sendSemanticsUpdate() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0.0',
+    maxValue: '100.0',
   );
   _semanticsUpdate(builder.build());
 }
@@ -289,6 +291,8 @@ void sendSemanticsUpdateWithRole() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: '0.0',
+    maxValue: '100.0',
   );
   _semanticsUpdate(builder.build());
 }
@@ -373,9 +377,10 @@ external void validateConfiguration();
 Future<void> encodeImageProducesExternalUint8List() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -405,9 +410,10 @@ external void _validateNotNull(Object? object);
 Future<void> toByteDataWithoutGPU() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -430,9 +436,10 @@ Future<void> toByteDataWithoutGPU() async {
 Future<void> toByteDataRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -453,9 +460,10 @@ Future<void> toByteDataRetries() async {
 Future<void> toByteDataRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -492,9 +500,10 @@ Future<void> toByteDataRetryOverflows() async {
 Future<void> toImageRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -514,9 +523,10 @@ Future<void> toImageRetries() async {
 Future<void> toImageRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
