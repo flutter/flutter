@@ -15,6 +15,8 @@
 
 #include "flutter/impeller/typographer/text_frame.h"
 
+// NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
+
 namespace flutter {
 
 // Most Ops can be bulk compared using memcmp because they contain
@@ -1069,5 +1071,7 @@ DEFINE_DRAW_SHADOW_OP(ShadowTransparentOccluder, true)
 #pragma pack(pop, DLOpPackLabel)
 
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.CallAndMessage)
 
 #endif  // FLUTTER_DISPLAY_LIST_DL_OP_RECORDS_H_
