@@ -382,14 +382,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
+    // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
+    // the native architecture.
+    final onlyActiveArch = activeArch == getCurrentDarwinArch();
+
+    buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
+    
     // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
     // as it cannot be build for the architecture of the Flutter app.
     if (!hasWatchCompanion) {
-      // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
-      // the native architecture.
-      final onlyActiveArch = activeArch == getCurrentDarwinArch();
-
-      buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
       buildCommands.add('ARCHS=${activeArch.name}');
     }
   }
