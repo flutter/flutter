@@ -494,6 +494,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // From InheritedWidgets
   late bool _visible;
+  late ModalRoute<dynamic>? _route;
   late TooltipThemeData _tooltipTheme;
 
   Duration get _showDuration =>
@@ -605,9 +606,19 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
+  bool _isTooltipInteractive() {
+    if (_route == null) {
+      return true;
+    }
+    // If the route's secondary animation is animating, the route is on its way
+    // out. So, the tooltip should be non-interactive.
+    final bool routeIsAnimating = _route!.secondaryAnimation?.isAnimating ?? false;
+    return _route!.isCurrent && !routeIsAnimating;
+  }
+
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
-    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     // PointerDeviceKinds that don't support hovering.
@@ -723,7 +734,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
     assert(mounted);
-    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     // _handleMouseEnter is only called when the mouse starts to hover over this
@@ -748,7 +759,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   void _handleMouseExit(PointerExitEvent event) {
     assert(mounted);
-    if (!(ModalRoute.isCurrentOf(context) ?? true)) {
+    if (!_isTooltipInteractive()) {
       return;
     }
     if (_activeHoveringPointerDevices.isEmpty) {
@@ -797,6 +808,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _visible = TooltipVisibility.of(context);
+    _route = ModalRoute.of(context);
     _tooltipTheme = TooltipTheme.of(context);
   }
 
