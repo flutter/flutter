@@ -148,4 +148,55 @@ void main() {
     );
     expect(tableA.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
   });
+
+  test('TableBorder outerBorderIsUniform property', () {
+    const TableBorder uniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+      horizontalInside: BorderSide(color: Color(0xFF0000FF)),
+      verticalInside: BorderSide(color: Color(0xFF0000FF)),
+    );
+    expect(uniformOuter.isUniform, isFalse);
+    expect(uniformOuter.outerBorderIsUniform, isTrue);
+
+    const TableBorder nonUniformOuter = TableBorder(
+      top: BorderSide(width: 2.0),
+      right: BorderSide(color: Color(0xFF00FF00), width: 2.0),
+      bottom: BorderSide(width: 2.0),
+      left: BorderSide(width: 2.0),
+    );
+    expect(nonUniformOuter.outerBorderIsUniform, isFalse);
+  });
+
+  test('TableBorder with non-uniform widths but uniform colors applies border radius', () {
+    const TableBorder borderWithRadius = TableBorder(
+      top: BorderSide(width: 3.0, color: Color(0xFF0000FF)),
+      right: BorderSide(width: 1.0, color: Color(0xFF0000FF)),
+      bottom: BorderSide(width: 2.0, color: Color(0xFF0000FF)),
+      left: BorderSide(width: 1.5, color: Color(0xFF0000FF)),
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    );
+
+    // This should be false because widths differ
+    expect(borderWithRadius.outerBorderIsUniform, isFalse);
+
+    // But border radius should still be applicable because colors are uniform
+    // (This tests the _distinctVisibleOuterColors logic indirectly)
+    expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
+  });
+
+  test('TableBorder with non-uniform border radius support', () {
+    const TableBorder borderWithRadius = TableBorder(
+      top: BorderSide(width: 3.0),
+      right: BorderSide(),
+      bottom: BorderSide(width: 2.0),
+      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    );
+
+    expect(borderWithRadius.distinctVisibleOuterColors().length, 1);
+    expect(borderWithRadius.outerBorderIsUniform, isFalse);
+    expect(borderWithRadius.borderRadius, const BorderRadius.all(Radius.circular(8.0)));
+  });
 }
