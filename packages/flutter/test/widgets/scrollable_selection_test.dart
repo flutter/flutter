@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
+const int kImplicitViewId = 0;
+
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
@@ -31,7 +33,7 @@ void main() {
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
-    await Clipboard.setData(const ClipboardData(text: 'empty'));
+    await Clipboard.setData(const ClipboardData(text: 'empty'), kImplicitViewId);
   });
 
   tearDown(() {

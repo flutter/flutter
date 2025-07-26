@@ -10,6 +10,8 @@ import '../system_context_menu_utils.dart';
 import '../widgets/clipboard_utils.dart';
 import 'text_input_utils.dart';
 
+const int kImplicitViewId = 0;
+
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -21,7 +23,7 @@ void main() {
     );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {

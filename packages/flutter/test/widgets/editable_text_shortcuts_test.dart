@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
+const int kImplicitViewId = 0;
+
 Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
   const Iterable<bool> trueFalse = <bool>[false, true];
   return trueFalse.expand((bool shift) {
@@ -33,7 +35,7 @@ void main() {
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
-    await Clipboard.setData(const ClipboardData(text: 'empty'));
+    await Clipboard.setData(const ClipboardData(text: 'empty'), kImplicitViewId);
   });
 
   tearDown(() {

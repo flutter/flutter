@@ -1623,7 +1623,7 @@ void main() {
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
-        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier(viewId: 0);
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
@@ -1649,7 +1649,7 @@ void main() {
       });
 
       test('update sets value based on clipboard contents', () async {
-        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier();
+        final ClipboardStatusNotifier notifier = ClipboardStatusNotifier(viewId: 0);
         expect(notifier.value, ClipboardStatus.unknown);
 
         await expectLater(notifier.update(), completes);
@@ -2141,7 +2141,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
 }
 
 class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
-  FakeClipboardStatusNotifier() : super(value: ClipboardStatus.unknown);
+  FakeClipboardStatusNotifier() : super(viewId: 0, value: ClipboardStatus.unknown);
 
   bool updateCalled = false;
   @override

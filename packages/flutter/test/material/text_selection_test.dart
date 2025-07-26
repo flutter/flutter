@@ -16,6 +16,8 @@ import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart'
     show findRenderEditable, globalize, textOffsetToPosition;
 
+const int kImplicitViewId = 0;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -27,7 +29,7 @@ void main() {
     );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'clipboard data'));
+    await Clipboard.setData(const ClipboardData(text: 'clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {
@@ -739,7 +741,7 @@ void main() {
       );
 
       // Make sure the clipboard is empty to start.
-      await Clipboard.setData(const ClipboardData(text: ''));
+      await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
 
       // Double tap to select the first word.
       const int index = 4;

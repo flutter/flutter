@@ -20,6 +20,7 @@ import 'editable_text_utils.dart';
 
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+const int kImplicitViewId = 0;
 
 void main() {
   late TextEditingController controller;
@@ -29,7 +30,7 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
     controller = TextEditingController();
     focusNode = FocusNode();
     focusScopeNode = FocusScopeNode();

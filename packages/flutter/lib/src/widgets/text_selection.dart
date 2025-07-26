@@ -3757,8 +3757,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 /// synchronously. Call [update] to asynchronously update value if needed.
 class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with WidgetsBindingObserver {
   /// Create a new ClipboardStatusNotifier.
-  ClipboardStatusNotifier({ClipboardStatus value = ClipboardStatus.unknown}) : super(value);
+  ClipboardStatusNotifier({required this.viewId, ClipboardStatus value = ClipboardStatus.unknown})
+    : super(value);
 
+  final int viewId;
   bool _disposed = false;
 
   /// Check the [Clipboard] and update [value] if needed.
@@ -3769,7 +3771,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
     final bool hasStrings;
     try {
-      hasStrings = await Clipboard.hasStrings();
+      hasStrings = await Clipboard.hasStrings(viewId);
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(

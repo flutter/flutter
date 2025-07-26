@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
 
+const int kImplicitViewId = 0;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -23,7 +25,7 @@ void main() {
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {

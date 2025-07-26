@@ -32,9 +32,10 @@ abstract final class Clipboard {
   static const String kTextPlain = 'text/plain';
 
   /// Stores the given clipboard data on the clipboard.
-  static Future<void> setData(ClipboardData data) async {
+  static Future<void> setData(ClipboardData data, int viewId) async {
     await SystemChannels.platform.invokeMethod<void>('Clipboard.setData', <String, dynamic>{
       'text': data.text,
+      'viewId': viewId,
     });
   }
 
@@ -45,10 +46,10 @@ abstract final class Clipboard {
   ///
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
-  static Future<ClipboardData?> getData(String format) async {
+  static Future<ClipboardData?> getData(String format, int viewId) async {
     final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
-      format,
+      <dynamic>[format, viewId],
     );
     if (result == null) {
       return null;
@@ -61,10 +62,10 @@ abstract final class Clipboard {
   ///
   /// See also:
   ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
-  static Future<bool> hasStrings() async {
+  static Future<bool> hasStrings(int viewId) async {
     final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.hasStrings',
-      Clipboard.kTextPlain,
+      <dynamic>[Clipboard.kTextPlain, viewId],
     );
     if (result == null) {
       return false;

@@ -2484,13 +2484,7 @@ class EditableTextState extends State<EditableText>
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier clipboardStatus = kIsWeb
-      // Web browsers will show a permission dialog when Clipboard.hasStrings is
-      // called. In an EditableText, this will happen before the paste button is
-      // clicked, often before the context menu is even shown. To avoid this
-      // poor user experience, always show the paste button on web.
-      ? _WebClipboardStatusNotifier()
-      : ClipboardStatusNotifier();
+  late final ClipboardStatusNotifier clipboardStatus;
 
   /// Detects whether the Live Text input is enabled.
   ///
@@ -2739,7 +2733,7 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2776,7 +2770,7 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -2802,7 +2796,10 @@ class EditableTextState extends State<EditableText>
     }
     // Snapshot the input before using `await`.
     // See https://github.com/flutter/flutter/issues/11427
-    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    final ClipboardData? data = await Clipboard.getData(
+      Clipboard.kTextPlain,
+      View.of(context).viewId,
+    );
     if (data == null) {
       return;
     }
@@ -3208,6 +3205,14 @@ class EditableTextState extends State<EditableText>
   @override
   void initState() {
     super.initState();
+    clipboardStatus = kIsWeb
+        // Web browsers will show a permission dialog when Clipboard.hasStrings is
+        // called. In an EditableText, this will happen before the paste button is
+        // clicked, often before the context menu is even shown. To avoid this
+        // poor user experience, always show the paste button on web.
+        ? _WebClipboardStatusNotifier()
+        : ClipboardStatusNotifier(viewId: View.of(context).viewId);
+
     _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
     clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
@@ -6673,6 +6678,8 @@ class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
 /// Useful to avoid showing a permission dialog on web, which happens when
 /// [Clipboard.hasStrings] is called.
 class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
+  _WebClipboardStatusNotifier() : super(viewId: 0);
+
   @override
   ClipboardStatus value = ClipboardStatus.pasteable;
 
