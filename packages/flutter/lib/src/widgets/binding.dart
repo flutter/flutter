@@ -35,6 +35,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart';
+import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -459,6 +461,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
+    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1437,6 +1440,50 @@ mixin WidgetsBinding
   /// `supportedLocales`.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+  }
+
+  /// The [WindowingOwner] is responsible for creating and managing [WindowController]s.
+  /// Default [WindowingOwner] supports standard Flutter desktop embedders.
+  ///
+  /// Custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
+  ///
+  /// {@template flutter.widgets.windowing.experimental}
+  /// Do not use this API in production applications or packages published to
+  /// pub.dev. Flutter will make breaking changes to this API, even in patch
+  /// versions.
+  ///
+  /// This API throws an [UnsupportedError] error unless Flutter’s windowing
+  /// feature is enabled by [isWindowingEnabled].
+  ///
+  /// See: https://github.com/flutter/flutter/issues/30701.
+  /// {@endtemplate}
+  @internal
+  WindowingOwner get windowingOwner {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    return _windowingOwner;
+  }
+
+  late WindowingOwner _windowingOwner;
+
+  /// Creates the [WindowingOwner] instance available via [windowingOwner].
+  /// Can be overriden in subclasses to create embedder-specific [WindowingOwner]
+  /// implementation.
+  @protected
+  WindowingOwner createWindowingOwner() {
+    return WindowingOwner.createDefaultOwner();
   }
 }
 
