@@ -158,7 +158,17 @@ class ResidentWebRunner extends ResidentRunner {
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
   /// WebServer device is debuggable when running with --start-paused.
-  bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
+  bool get deviceIsDebuggable =>
+      device!.device is! WebServerDevice ||
+      debuggingOptions.startPaused ||
+      _useDwdsWebSocketConnection;
+
+  bool get _useDwdsWebSocketConnection {
+    if (device?.devFS is WebDevFS) {
+      return (device!.devFS! as WebDevFS).useDwdsWebSocketConnection;
+    }
+    return false;
+  }
 
   @override
   // Web uses a different plugin registry.
