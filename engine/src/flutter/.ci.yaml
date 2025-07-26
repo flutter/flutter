@@ -570,7 +570,7 @@ targets:
       # Don't run this on release branches
       - master
     properties:
-      release_build: "true"
+      release_build: "false"
       config_name: linux_android_aot_engine_size_exp
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
