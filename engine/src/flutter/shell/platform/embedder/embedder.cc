@@ -436,7 +436,7 @@ InferOpenGLPlatformViewCreationCallback(
         [ptr = config->open_gl.surface_transformation, user_data]() {
           FlutterTransformation transformation = ptr(user_data);
           // clang-format off
-          return DlMatrix(
+          return flutter::DlMatrix(
               transformation.scaleX, transformation.skewY,  0.0f, transformation.pers0,
               transformation.skewX,  transformation.scaleY, 0.0f, transformation.pers1,
               0.0f,                  0.0f,                  1.0f, 0.0f,
