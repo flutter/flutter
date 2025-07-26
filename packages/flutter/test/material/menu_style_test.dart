@@ -287,7 +287,7 @@ void main() {
       );
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(372.0, 68.0, 565.0, 82.0)),
+        equals(const Rect.fromLTRB(372.0, 70.0, 565.0, 84.0)),
       );
       expect(
         tester.getRect(
@@ -295,7 +295,7 @@ void main() {
               .ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material))
               .at(1),
         ),
-        equals(const Rect.fromLTRB(352.0, 48.0, 585.0, 186.0)),
+        equals(const Rect.fromLTRB(352.0, 48.0, 585.0, 190.0)),
       );
     });
   });
