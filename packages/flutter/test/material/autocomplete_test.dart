@@ -730,4 +730,23 @@ void main() {
     final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
     expect(field2.controller!.text, textSelection);
   });
+
+  testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: Autocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText), Size.zero);
+  });
 }
