@@ -559,7 +559,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;
 
-  /// {@macro flutter.widgets.TextField.cursorHeight}
+  /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
 
   /// {@macro flutter.material.textfield.restorationId}
