@@ -506,9 +506,7 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If set to null, will default to
-  /// - [SystemMouseCursors.basic], if [onPressed] is null
-  /// - [SystemMouseCursors.click], otherwise
+  /// If set to null, will default to [SystemMouseCursors.basic].
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -699,12 +697,13 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: disabledMouseCursor == null && enabledMouseCursor == null
-          ? null
-          : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
-              WidgetState.disabled: disabledMouseCursor,
-              WidgetState.any: enabledMouseCursor,
-            }),
+      mouseCursor:
+          disabledMouseCursor == null && enabledMouseCursor == null
+              ? null
+              : WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+                WidgetState.disabled: disabledMouseCursor,
+                WidgetState.any: enabledMouseCursor,
+              }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -719,12 +718,10 @@ class IconButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     if (theme.useMaterial3) {
-      final Size? minSize = constraints == null
-          ? null
-          : Size(constraints!.minWidth, constraints!.minHeight);
-      final Size? maxSize = constraints == null
-          ? null
-          : Size(constraints!.maxWidth, constraints!.maxHeight);
+      final Size? minSize =
+          constraints == null ? null : Size(constraints!.minWidth, constraints!.minHeight);
+      final Size? maxSize =
+          constraints == null ? null : Size(constraints!.maxWidth, constraints!.maxHeight);
 
       ButtonStyle adjustedStyle = styleFrom(
         visualDensity: visualDensity,
@@ -813,7 +810,8 @@ class IconButton extends StatelessWidget {
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
       mouseCursor:
-          mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
+          mouseCursor ??
+          ((onPressed != null && kIsWeb) ? SystemMouseCursors.click : SystemMouseCursors.basic),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -1004,9 +1002,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `iconSize` - 24
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - SystemMouseCursors.basic
   /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -1147,13 +1143,9 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1295,13 +1287,9 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1443,13 +1431,9 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1586,13 +1570,9 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
