@@ -435,16 +435,14 @@ InferOpenGLPlatformViewCreationCallback(
     gl_surface_transformation_callback =
         [ptr = config->open_gl.surface_transformation, user_data]() {
           FlutterTransformation transformation = ptr(user_data);
-          return SkMatrix::MakeAll(transformation.scaleX,  //
-                                   transformation.skewX,   //
-                                   transformation.transX,  //
-                                   transformation.skewY,   //
-                                   transformation.scaleY,  //
-                                   transformation.transY,  //
-                                   transformation.pers0,   //
-                                   transformation.pers1,   //
-                                   transformation.pers2    //
+          // clang-format off
+          return DlMatrix(
+              transformation.scaleX, transformation.skewY,  0.0f, transformation.pers0,
+              transformation.skewX,  transformation.scaleY, 0.0f, transformation.pers1,
+              0.0f,                  0.0f,                  1.0f, 0.0f,
+              transformation.transX, transformation.transY, 0.0f, transformation.pers2
           );
+          // clang-format on
         };
 
     // If there is an external view embedder, ask it to apply the surface
