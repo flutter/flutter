@@ -970,16 +970,21 @@ Future<bool> _handleIssues(
     logger.printError(noDevelopmentTeamInstruction, emphasis: true);
   } else if (hasProvisioningProfileIssue) {
     logger.printError('');
-    logger.printError(
-      'It appears that there was a problem signing your application prior to installation on the device.',
-    );
+    logger.printError('Error: could not code sign the application.');
     logger.printError('');
-    logger.printError(
-      'Verify that the Bundle Identifier in your project is your signing id in Xcode',
-    );
-    logger.printError('  open ios/Runner.xcworkspace');
+    logger.printError('To fix this:');
     logger.printError('');
-    logger.printError("Also try selecting 'Product > Build' to fix the problem.");
+    logger.printError('1. Open the project in Xcode:');
+    logger.printError('   open ios/Runner.xcworkspace');
+    logger.printError('');
+    logger.printError('2. Open the Runner target and the Signing & Capabilities tab.');
+    logger.printError('   Verify that the Team is correct.');
+    logger.printError('   Verify that the Bundle Identifier is correct.');
+    logger.printError('');
+    logger.printError('3. Open Xcode > Settings > Accounts.');
+    logger.printError('   Verify that you are signed in to the correct Apple Developer account.');
+    logger.printError('');
+    logger.printError('4. Fix any issues reported by Product > Build.');
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (duplicateModules.isNotEmpty) {
