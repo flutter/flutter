@@ -81,7 +81,6 @@ Directory getApkDirectory(FlutterProject project) {
 }
 
 /// The directory where the app bundle artifact is generated.
-@visibleForTesting
 Directory getBundleDirectory(FlutterProject project) {
   return project.isModule
       ? project.android.buildDirectory
@@ -631,9 +630,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return;
     }
     // Gradle produced APKs.
-    final Iterable<String> apkFilesPaths = project.isModule
-        ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
-        : listApkPaths(androidBuildInfo);
+    await calculateShaAndProcessApks(project, androidBuildInfo);
+  }
+
+  Future<void> calculateShaAndProcessApks(
+    FlutterProject project,
+    AndroidBuildInfo androidBuildInfo,
+  ) async {
+    final Iterable<String> apkFilesPaths = getApkFilesPaths(project, androidBuildInfo);
     final Directory apkDirectory = getApkDirectory(project);
 
     // Generate sha1 for every generated APKs.
@@ -652,7 +656,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
       apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-      final appSize = (buildInfo.mode == BuildMode.debug)
+      final appSize = (androidBuildInfo.buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsPlatformMB(apkFile.lengthSync())})';
       _logger.printStatus(
@@ -661,10 +665,30 @@ class AndroidGradleBuilder implements AndroidBuilder {
         color: TerminalColor.green,
       );
 
-      if (buildInfo.codeSizeDirectory != null) {
+      if (androidBuildInfo.buildInfo.codeSizeDirectory != null) {
         await _performCodeSizeAnalysis('apk', apkFile, androidBuildInfo);
       }
     }
+  }
+
+  Iterable<String> getApkFilesPaths(FlutterProject project, AndroidBuildInfo androidBuildInfo) {
+    final Iterable<String> apkFilesPaths = project.isModule
+        ? findApkFilesModule(project, androidBuildInfo, _logger, _analytics)
+        : listApkPaths(androidBuildInfo);
+    return apkFilesPaths;
+  }
+
+  Iterable<File> findExpectedFilesForApk(
+    AndroidBuildInfo androidBuildInfo,
+    FlutterProject project,
+  ) {
+    final Iterable<String> apkFilesPaths = getApkFilesPaths(project, androidBuildInfo);
+    final Directory apkDirectory = getApkDirectory(project);
+
+    final Iterable<File> apks = apkFilesPaths.map((String apkFileName) {
+      return apkDirectory.childFile(apkFileName);
+    });
+    return apks;
   }
 
   // Checks whether AGP has successfully stripped debug symbols from native libraries
@@ -1158,7 +1182,6 @@ Iterable<String> listApkPaths(AndroidBuildInfo androidBuildInfo) {
   ];
 }
 
-@visibleForTesting
 File findBundleFile(
   FlutterProject project,
   BuildInfo buildInfo,
