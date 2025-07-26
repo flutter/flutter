@@ -1501,6 +1501,7 @@ class _RenderTheater extends RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1790,6 +1791,7 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
+    this.skipSemantics = false,
   }) : _targetRootOverlay = false;
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
@@ -1800,6 +1802,7 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
+    this.skipSemantics = false,
   }) : _targetRootOverlay = true;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
@@ -1859,6 +1862,17 @@ class OverlayPortal extends StatefulWidget {
   /// A widget below this widget in the tree.
   final Widget? child;
 
+  /// Whether to skip adding parent and child identifiers.
+  ///
+  /// Two identifiers are added in OverlayPortal to identify each other when
+  /// traversal tree is generated. However, some overlayChildBuilders, such as
+  /// a [Positioned] widget, requires a direct [Stack] parent. In this case,
+  /// setting [skipSemantics] to true will allow the overlay child skip
+  /// inserting a [Semantics] in between.
+  ///
+  /// Defaults to false.
+  final bool skipSemantics;
+
   final bool _targetRootOverlay;
 
   @override
@@ -1866,6 +1880,10 @@ class OverlayPortal extends StatefulWidget {
 }
 
 class _OverlayPortalState extends State<OverlayPortal> {
+  final String identifier = UniqueKey().toString();
+  late final String parentIdentifier;
+  late final String childIdentifier;
+
   int? _zOrderIndex;
   // The location of the overlay child within the overlay. This object will be
   // used as the slot of the overlay child widget.
@@ -1914,6 +1932,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void initState() {
     super.initState();
     _setupController(widget.controller);
+    parentIdentifier = '$identifier parent';
+    childIdentifier = '$identifier child';
   }
 
   void _setupController(OverlayPortalController controller) {
@@ -1987,13 +2007,20 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
+    Widget overlayChild = Builder(builder: widget.overlayChildBuilder);
+    Widget? overlayParent = widget.child;
+    if (!widget.skipSemantics) {
+      overlayChild = Semantics(identifier: childIdentifier, child: overlayChild);
+      overlayParent = Semantics(identifier: parentIdentifier, child: overlayParent);
+    }
+
     if (zOrderIndex == null) {
-      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child);
+      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: overlayParent);
     }
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
-      overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
-      child: widget.child,
+      overlayChild: _DeferredLayout(child: overlayChild),
+      child: overlayParent,
     );
   }
 }
@@ -2443,9 +2470,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
   }
 
   @override
-  RenderObject? get semanticsParent => _layoutSurrogate;
-
-  @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     final RenderBox? child = this.child;
     if (child == null) {
@@ -2596,15 +2620,6 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
     }
   }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    super.visitChildrenForSemantics(visitor);
-    final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
-    if (deferredChild != null) {
-      visitor(deferredChild);
-    }
-  }
 }
 
 class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayoutInfo> {
@@ -2646,10 +2661,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
   Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
 
   @override
-  _RenderTheater get theater => switch (parent) {
-    final _RenderDeferredLayoutBox parent => parent.theater,
-    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
-  };
+  _RenderTheater get theater => _findDeferredLayoutBoxParent().theater;
 
   @override
   bool get sizedByParent => true;
@@ -2669,9 +2681,26 @@ class _RenderLayoutBuilder extends RenderProxyBox
   OverlayChildLayoutInfo get layoutInfo => _layoutInfo!;
   // The size here is the child size of the regular child in its own parent's coordinates.
   OverlayChildLayoutInfo? _layoutInfo;
+
+  // Helper method to find the _RenderDeferredLayoutBox parent
+  _RenderDeferredLayoutBox _findDeferredLayoutBoxParent() {
+    RenderObject? currentParent = parent;
+    while (currentParent != null) {
+      if (currentParent is _RenderDeferredLayoutBox) {
+        break;
+      }
+      if (currentParent is! RenderSemanticsAnnotations) {
+        throw FlutterError('$currentParent of $this is not a _RenderDeferredLayoutBox');
+      }
+      currentParent = currentParent.parent;
+    }
+    assert(currentParent != null);
+    return currentParent! as _RenderDeferredLayoutBox;
+  }
+
   OverlayChildLayoutInfo _computeNewLayoutInfo() {
     final _RenderTheater theater = this.theater;
-    final _RenderDeferredLayoutBox parent = this.parent! as _RenderDeferredLayoutBox;
+    final _RenderDeferredLayoutBox parent = _findDeferredLayoutBoxParent();
     final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
     assert(() {
       for (
