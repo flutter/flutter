@@ -1382,7 +1382,7 @@ abstract class RenderSliver extends RenderObject {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[
         ErrorSummary('RenderSliver geometry setter called incorrectly.'),
         violation,
-        if (hint != null) hint,
+        ?hint,
         contract,
         describeForError('The RenderSliver in question is'),
       ];

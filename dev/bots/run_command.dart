@@ -212,7 +212,7 @@ Future<CommandResult> runCommand(
     }
     final String allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
     foundError(<String>[
-      if (failureMessage != null) failureMessage,
+      ?failureMessage,
       '${bold}Command: $green$commandDescription$reset',
       if (failureMessage == null)
         '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',

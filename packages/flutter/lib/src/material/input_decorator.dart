@@ -2284,7 +2284,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   static Widget _topStartLayout(Widget? currentChild, List<Widget> previousChildren) {
-    return Stack(children: <Widget>[...previousChildren, if (currentChild != null) currentChild]);
+    return Stack(children: <Widget>[...previousChildren, ?currentChild]);
   }
 
   @override
