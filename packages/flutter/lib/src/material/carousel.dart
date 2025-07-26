@@ -1315,13 +1315,14 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
         ? getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent)
         : null;
 
-    // Calculate the closest item to the center of the viewport.
+    // Finds the item that takes up the most space in pixels in the viewport.
     // This is used to determine the current item index for the carousel.
-    final double center = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2;
-
     RenderBox? currentChild = firstChild;
     int? newIndex;
-    double minDistance = double.infinity;
+    double maxVisibleExtent = -1.0; // Start with a negative value to ensure we find a valid item.
+
+    final double viewportStart = constraints.scrollOffset;
+    final double viewportEnd = constraints.scrollOffset + constraints.viewportMainAxisExtent;
 
     while (currentChild != null) {
       final SliverMultiBoxAdaptorParentData parentData =
@@ -1329,11 +1330,17 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       final int index = parentData.index!;
       final double layoutOffset = parentData.layoutOffset ?? 0.0;
       final double itemExtent = _buildItemExtent(index, _currentLayoutDimensions);
-      final double item = layoutOffset + itemExtent / 2;
 
-      final double distance = (center - item).abs();
-      if (distance < minDistance) {
-        minDistance = distance;
+      final double itemStart = layoutOffset;
+      final double itemEnd = layoutOffset + itemExtent;
+
+      final double intersectionStart = math.max(viewportStart, itemStart);
+      final double intersectionEnd = math.min(viewportEnd, itemEnd);
+
+      final double visibleExtent = math.max(0.0, intersectionEnd - intersectionStart);
+
+      if (visibleExtent > maxVisibleExtent) {
+        maxVisibleExtent = visibleExtent;
         newIndex = index;
       }
 
