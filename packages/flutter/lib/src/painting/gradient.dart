@@ -1014,10 +1014,10 @@ class SweepGradient extends Gradient {
   /// The gradient will be painted in the sector between [startAngle] and
   /// [endAngle]. The [tileMode] determines what happens in the remaining area:
   ///
-  /// - [TileMode.clamp]: The edge colors are extended to fill the remaining area.
-  /// - [TileMode.repeated]: The gradient is repeated in the angular direction.
-  /// - [TileMode.mirror]: The gradient is mirrored in the angular direction.
-  /// - [TileMode.decal]: Only the gradient is drawn, leaving the remaining area
+  /// * [TileMode.clamp]: The edge colors are extended to fill the remaining area.
+  /// * [TileMode.repeated]: The gradient is repeated in the angular direction.
+  /// * [TileMode.mirror]: The gradient is mirrored in the angular direction.
+  /// * [TileMode.decal]: Only the gradient is drawn, leaving the remaining area
   ///   transparent.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
