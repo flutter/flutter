@@ -50,7 +50,7 @@ android {
     }
 
     unitTests.all {
-      jvmArgs "-Xmx8g" // Max JVM heap size is 8G/30G available in the CI bot.
+      jvmArgs += ["-Xmx8g", "-Djdk.charset.GB18030=2000"] // Max JVM heap size is 8G/30G available in the CI bot.
       maxHeapSize "8g"
       maxParallelForks availableProcessors // The CI bot has 8 CPUs.
       testLogging {
