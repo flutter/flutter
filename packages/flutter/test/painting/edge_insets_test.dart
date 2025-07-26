@@ -490,7 +490,7 @@ void main() {
     );
   });
 
-  test('resolve method throws detailed error when TextDirection is null', () {
+  test('resolve method of _MixedEdgeInsets throws detailed error when TextDirection is null', () {
     const EdgeInsets a = EdgeInsets.only(top: 5.0, left: 5.0);
     const EdgeInsetsDirectional b = EdgeInsetsDirectional.only(top: 15.0, start: 15.0);
 
