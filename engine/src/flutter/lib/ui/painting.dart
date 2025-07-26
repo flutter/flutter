@@ -4653,7 +4653,7 @@ base class Shader extends NativeFieldWrapperClass1 {
 /// Gradients are defined within specific bounds, and `TileMode` controls how colors
 /// are determined for areas outside these bounds:
 ///
-/// - **Linear gradients**: The bounds are the line segment connecting two points
+/// - **Linear gradients**: The bounds is the line segment connecting two points
 ///   (typically referred to as `start` and `end` in the gradient API). Colors
 ///   outside this line are determined by the `TileMode`.
 ///
