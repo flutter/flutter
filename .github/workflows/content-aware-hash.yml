@@ -13,11 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Fetch base commit and origin/master
+        run: |
+          git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
+
       - name: Generate Hash
         run: |
-          # IMPORTANT: Keep the list of files in sync with bin/internal/content_aware_hash.sh
-          # We call this directly here as we're expected to be in the merge queue (not master)
-          engine_content_hash=$(git ls-tree --format "%(objectname) %(path)" HEAD -- DEPS engine bin/internal/release-candidate-branch.version | git hash-object --stdin)
+          engine_content_hash=$(bin/internal/content_aware_hash.sh)
           # test notice annotation for retrival from api
           echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
           # test summary writing
