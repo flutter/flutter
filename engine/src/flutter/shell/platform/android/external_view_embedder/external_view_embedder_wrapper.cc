@@ -113,7 +113,7 @@ void AndroidExternalViewEmbedderWrapper::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::PrepareFlutterView(
-    SkISize frame_size,
+    DlISize frame_size,
     double device_pixel_ratio) {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
