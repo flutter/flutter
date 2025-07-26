@@ -59,6 +59,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1652,6 +1653,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getBackGestureChannel()).thenReturn(mock(BackGestureChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(mock(PlatformViewsController.class));
     when(engine.getPlatformViewsController2()).thenReturn(mock(PlatformViewsController2.class));
+    when(engine.getPlatformViewsControllerDelegator())
+        .thenReturn(mock(PlatformViewsControllerDelegator.class));
 
     FlutterRenderer renderer = mock(FlutterRenderer.class);
     when(engine.getRenderer()).thenReturn(renderer);
