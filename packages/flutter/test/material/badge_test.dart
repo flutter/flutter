@@ -454,7 +454,7 @@ void main() {
       ),
     );
     final Finder label = find.text('X');
-    expect(tester.getSize(label), Size.zero);
+    expect(tester.getSize(label).isEmpty, isTrue);
   });
 
   testWidgets('Badge.count maxCount limits displayed value', (WidgetTester tester) async {
