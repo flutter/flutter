@@ -1,0 +1,22 @@
+name: Sync Latest from Flutter framework
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # Once per day at noon
+  workflow_dispatch: # on button click
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - uses: tgymnich/fork-sync@v1.8
+        with:
+          owner: matthew-carroll
+          repo: flutter
+          base: master
+          head: master
+          pr_title: Sync latest upstream Flutter framework changes
+          pr_message: This is an auto-generated PR that pulls the latest changes from the Flutter framework. To adjust this behavior, see `.gihub/workflows/sync-with-upstream.yaml`.
+          ignore_fail: false
