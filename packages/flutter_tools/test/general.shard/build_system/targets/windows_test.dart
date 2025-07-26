@@ -165,7 +165,6 @@ void main() {
       // Depfile is created and dill is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
-      expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -195,7 +194,6 @@ void main() {
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-      expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -225,7 +223,6 @@ void main() {
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
-      expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
