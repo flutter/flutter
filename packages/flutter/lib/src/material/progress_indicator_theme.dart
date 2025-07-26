@@ -54,6 +54,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
+    this.controller,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -138,6 +139,24 @@ class ProgressIndicatorThemeData with Diagnosticable {
   )
   final bool? year2023;
 
+  /// ## Animation synchronization
+  ///
+  /// When multiple [ProgressIndicator] widgets are animating on screen
+  /// simultaneously (e.g., in a list of loading items), their uncoordinated
+  /// animations can appear visually cluttered. To address this, the animation of
+  /// an indicator can be driven by a custom [AnimationController].
+  ///
+  /// This allows multiple indicators to be synchronized to a single animation
+  /// source. The most convenient way to achieve this for a group of indicators is
+  /// by providing a controller via [ProgressIndicatorTheme]. All
+  /// [ProgressIndicator] widgets within that theme's subtree will then share
+  /// the same animation, resulting in a more coordinated and visually pleasing
+  /// effect.
+  ///
+  /// Alternatively, a specific [AnimationController] can be passed directly to the
+  /// [controller] property of an individual indicator.
+  final AnimationController? controller;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -156,6 +175,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     double? trackGap,
     EdgeInsetsGeometry? circularTrackPadding,
     bool? year2023,
+    AnimationController? controller,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -173,6 +193,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       trackGap: trackGap ?? this.trackGap,
       circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
       year2023: year2023 ?? this.year2023,
+      controller: controller ?? this.controller,
     );
   }
 
@@ -207,6 +228,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
         t,
       ),
       year2023: t < 0.5 ? a?.year2023 : b?.year2023,
+      controller: t < 0.5 ? a?.controller : b?.controller,
     );
   }
 
@@ -227,6 +249,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     trackGap,
     circularTrackPadding,
     year2023,
+    controller,
   );
 
   @override
@@ -252,7 +275,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
         other.constraints == constraints &&
         other.trackGap == trackGap &&
         other.circularTrackPadding == circularTrackPadding &&
-        other.year2023 == year2023;
+        other.year2023 == year2023 &&
+        other.controller == controller;
   }
 
   @override
@@ -285,6 +309,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<bool>('year2023', year2023, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AnimationController>('controller', controller, defaultValue: null),
+    );
   }
 }
 
