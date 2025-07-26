@@ -4654,7 +4654,7 @@ base class Shader extends NativeFieldWrapperClass1 {
 /// are determined for areas outside these bounds:
 ///
 /// - **Linear gradients**: The bounds are the line segment connecting two points
-///   (typically referred to as `start` and [end](cci:1://file:///home/newelectron/dev_folder/Flutter/flutter/engine/src/flutter/lib/ui/painting.dart:439:2-479:3) in the gradient API). Colors
+///   (typically referred to as `start` and `end` in the gradient API). Colors
 ///   outside this line are determined by the `TileMode`.
 ///
 /// - **Radial gradients**: The bounds are the disc defined by a center and radius.
