@@ -778,11 +778,21 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     required Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
     required Iterable<Locale> supportedLocales,
   }) {
+    final bool didChange = _locale != locale
+      || _localeListResolutionCallback != localeListResolutionCallback
+      || _localeResolutionCallback != localeResolutionCallback
+      || _localizationsDelegates != localizationsDelegates
+      || !listEquals(_supportedLocales.toList(), supportedLocales.toList());
+
     _locale = locale;
     _localeListResolutionCallback = localeListResolutionCallback;
     _localeResolutionCallback = localeResolutionCallback;
     _localizationsDelegates = localizationsDelegates;
     _supportedLocales = supportedLocales;
+
+    if (didChange) {
+      didChangeLocales(WidgetsBinding.instance.platformDispatcher.locales);
+    }
   }
 
   /// The currently resolved [Locale] based on the current platform locale and
