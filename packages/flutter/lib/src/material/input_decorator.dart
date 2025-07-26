@@ -747,17 +747,17 @@ class _RenderDecoration extends RenderBox
   Iterable<RenderBox> get children {
     final RenderBox? helperError = childForSlot(_DecorationSlot.helperError);
     return <RenderBox>[
-      if (icon != null) icon!,
-      if (input != null) input!,
-      if (prefixIcon != null) prefixIcon!,
-      if (suffixIcon != null) suffixIcon!,
-      if (prefix != null) prefix!,
-      if (suffix != null) suffix!,
-      if (label != null) label!,
-      if (hint != null) hint!,
-      if (helperError != null) helperError,
-      if (counter != null) counter!,
-      if (container != null) container!,
+      ?icon,
+      ?input,
+      ?prefixIcon,
+      ?suffixIcon,
+      ?prefix,
+      ?suffix,
+      ?label,
+      ?hint,
+      ?helperError,
+      ?counter,
+      ?container,
     ];
   }
 
