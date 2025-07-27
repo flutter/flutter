@@ -736,7 +736,7 @@ class Text extends StatelessWidget {
             style: effectiveTextStyle,
             text: data,
             locale: locale,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : <InlineSpan>[],
           ),
         ),
       );
