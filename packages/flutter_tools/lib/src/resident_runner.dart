@@ -1458,12 +1458,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   void printHelpDetails() {
-    commandHelp.v.print();
     if (flutterDevices.any((FlutterDevice? d) => d!.device!.supportsScreenshot)) {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
       if (isRunningDebug) {
+        commandHelp.v.print();
         commandHelp.w.print();
         commandHelp.t.print();
         commandHelp.L.print();
@@ -1476,6 +1476,14 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.o.print();
         commandHelp.b.print();
       } else {
+        final bool isRunningOnWeb = flutterDevices.every(
+          (FlutterDevice? device) => device?.device?.platformType == PlatformType.web,
+        );
+
+        if (!isRunningOnWeb) {
+          commandHelp.v.print();
+        }
+
         commandHelp.S.print();
         commandHelp.U.print();
       }
@@ -1728,9 +1736,17 @@ class TerminalHandler {
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
-        return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
-          flutterDevices: residentRunner.flutterDevices,
+        final bool isRunningOnWeb = residentRunner.flutterDevices.every(
+          (FlutterDevice? device) => device?.device?.platformType == PlatformType.web,
         );
+
+        if (residentRunner.isRunningDebug || !isRunningOnWeb) {
+          return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
+            flutterDevices: residentRunner.flutterDevices,
+          );
+        }
+
+        return false;
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
