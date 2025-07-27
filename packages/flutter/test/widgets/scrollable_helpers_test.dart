@@ -8,10 +8,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final LogicalKeyboardKey modifierKey =
-    defaultTargetPlatform == TargetPlatform.macOS
-        ? LogicalKeyboardKey.metaLeft
-        : LogicalKeyboardKey.controlLeft;
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
+    ? LogicalKeyboardKey.metaLeft
+    : LogicalKeyboardKey.controlLeft;
 
 class _NoNotificationContextScrollable extends Scrollable {
   const _NoNotificationContextScrollable({super.controller, required super.viewportBuilder});
@@ -500,21 +499,20 @@ void main() {
           home: CustomScrollView(
             controller: controller,
             center: const ValueKey<String>('Center'),
-            slivers:
-                items.map<Widget>((String item) {
-                  return SliverToBoxAdapter(
-                    key: item == 'Item 10' ? const ValueKey<String>('Center') : null,
-                    child: Focus(
-                      autofocus: item == 'Item 10',
-                      child: Container(
-                        key: ValueKey<String>(item),
-                        alignment: Alignment.center,
-                        height: 100,
-                        child: Text(item),
-                      ),
-                    ),
-                  );
-                }).toList(),
+            slivers: items.map<Widget>((String item) {
+              return SliverToBoxAdapter(
+                key: item == 'Item 10' ? const ValueKey<String>('Center') : null,
+                child: Focus(
+                  autofocus: item == 'Item 10',
+                  child: Container(
+                    key: ValueKey<String>(item),
+                    alignment: Alignment.center,
+                    height: 100,
+                    child: Text(item),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ),
       );
@@ -622,16 +620,15 @@ void main() {
               autofocus: true,
               child: _NoNotificationContextScrollable(
                 controller: controller,
-                viewportBuilder:
-                    (BuildContext context, ViewportOffset offset) => Viewport(
-                      offset: offset,
-                      slivers: List<Widget>.generate(
-                        20,
-                        (int index) => SliverToBoxAdapter(
-                          child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
-                        ),
-                      ),
+                viewportBuilder: (BuildContext context, ViewportOffset offset) => Viewport(
+                  offset: offset,
+                  slivers: List<Widget>.generate(
+                    20,
+                    (int index) => SliverToBoxAdapter(
+                      child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
                     ),
+                  ),
+                ),
               ),
             ),
           ),

@@ -10,7 +10,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  const String customLLDBInitFileSchemeSetting =
+  const customLLDBInitFileSchemeSetting =
       r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"';
   test(
     'Ensure lldb is added to Xcode project',
@@ -20,7 +20,7 @@ void main() {
       );
       try {
         final String workingDirectoryPath = workingDirectory.path;
-        const String appName = 'lldb_test';
+        const appName = 'lldb_test';
 
         final ProcessResult createResult = await processManager.run(<String>[
           flutterBin,
@@ -111,8 +111,8 @@ void main() {
       );
       try {
         final String workingDirectoryPath = workingDirectory.path;
-        const String appName = 'lldb_test';
-        const String flavor = 'vanilla';
+        const appName = 'lldb_test';
+        const flavor = 'vanilla';
 
         final ProcessResult createResult = await processManager.run(<String>[
           flutterBin,

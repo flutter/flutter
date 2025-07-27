@@ -7,11 +7,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
-  final List<Offset> testAnswers =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
   expect(testAnswers, equals(answerKey));
 }
 

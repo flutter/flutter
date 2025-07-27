@@ -18,7 +18,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
@@ -98,13 +100,7 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()) {
-                dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_debug:$engineVersion")
-                dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-            }
+            maybeAddAndroidStudioNativeConfiguration(plugins, dependencies)
         }
 
         project.apply {
@@ -175,12 +171,12 @@ class FlutterPlugin : Plugin<Project> {
             // settings will take precedence over these defaults.
             FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
                 buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach({ platform ->
+                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
                     val abiValue: String =
                         FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
                             ?: throw GradleException("Invalid platform: $platform")
                     buildType.ndk.abiFilters.add(abiValue)
-                })
+                }
             }
         }
         val propDeferredComponentNames = "deferred-component-names"
@@ -217,8 +213,7 @@ class FlutterPlugin : Plugin<Project> {
         val shouldSkipDependencyChecks: Boolean =
             project.hasProperty("skipDependencyChecks") &&
                 (
-                    project.properties["skipDependencyChecks"] as? Boolean
-                        ?: false
+                    project.properties["skipDependencyChecks"].toString().toBoolean()
                 )
         if (!shouldSkipDependencyChecks) {
             try {
@@ -407,7 +402,7 @@ class FlutterPlugin : Plugin<Project> {
                 //
                 // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
                 // Where:
-                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86_64` only if the flag `split-per-abi` is set.
                 //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.forEach { output ->
@@ -756,10 +751,12 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     dependsOn(compileTask)
                     with(compileTask.assets)
-                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
-                    //   minimum supported Gradle version is 8.3.
-                    @Suppress("DEPRECATION")
-                    fileMode = 420 // corresponds to unix 0644 in base 8
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
                         dependsOn(packageAssets)
@@ -826,4 +823,19 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
+
+    private fun shouldAddAndroidStudioNativeConfiguration(plugins: PluginContainer): Boolean =
+        plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()
+
+    private fun maybeAddAndroidStudioNativeConfiguration(
+        plugins: PluginContainer,
+        dependencies: DependencyHandler
+    ) {
+        if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
+            dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
+            dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
+        }
+    }
 }

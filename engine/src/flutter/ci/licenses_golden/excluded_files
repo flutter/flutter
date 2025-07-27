@@ -26,6 +26,7 @@
 ../../../flutter/common/README.md
 ../../../flutter/display_list/benchmarking/dl_complexity_unittests.cc
 ../../../flutter/display_list/display_list_unittests.cc
+../../../flutter/display_list/dl_canvas_unittests.cc
 ../../../flutter/display_list/dl_color_unittests.cc
 ../../../flutter/display_list/dl_paint_unittests.cc
 ../../../flutter/display_list/dl_storage_unittests.cc
@@ -39,6 +40,7 @@
 ../../../flutter/display_list/geometry/dl_path_unittests.cc
 ../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
+../../../flutter/display_list/skia/dl_sk_canvas_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_conversions_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_paint_dispatcher_unittests.cc
 ../../../flutter/display_list/testing
@@ -435,6 +437,7 @@
 ../../../flutter/shell/platform/windows/task_runner_unittests.cc
 ../../../flutter/shell/platform/windows/testing
 ../../../flutter/shell/platform/windows/text_input_plugin_unittest.cc
+../../../flutter/shell/platform/windows/window_manager_unittests.cc
 ../../../flutter/shell/platform/windows/window_proc_delegate_manager_unittests.cc
 ../../../flutter/shell/platform/windows/window_unittests.cc
 ../../../flutter/shell/platform/windows/windows_lifecycle_manager_unittests.cc
@@ -1133,6 +1136,7 @@
 ../../../flutter/third_party/boringssl/src/third_party/fiat/METADATA
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.chromium
 ../../../flutter/third_party/boringssl/src/third_party/fiat/README.md
+../../../flutter/third_party/boringssl/src/third_party/fiat/bedrock_platform_test.cc
 ../../../flutter/third_party/boringssl/src/third_party/googletest
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/METADATA
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aead_aes_siv_cmac_test.json
@@ -1487,6 +1491,7 @@
 ../../../flutter/third_party/dart/runtime/observatory/tests
 ../../../flutter/third_party/dart/runtime/observatory/web/third_party/README.md
 ../../../flutter/third_party/dart/runtime/tests
+../../../flutter/third_party/dart/runtime/tools/.dart_tool
 ../../../flutter/third_party/dart/runtime/tools/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/android_finder.py
 ../../../flutter/third_party/dart/runtime/tools/benchmark.py
@@ -1522,6 +1527,7 @@
 ../../../flutter/third_party/dart/runtime/tools/profiling/README.md
 ../../../flutter/third_party/dart/runtime/tools/profiling/analysis_options.yaml
 ../../../flutter/third_party/dart/runtime/tools/profiling/pubspec.yaml
+../../../flutter/third_party/dart/runtime/tools/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/utils.py
 ../../../flutter/third_party/dart/runtime/tools/valgrind.py
 ../../../flutter/third_party/dart/runtime/tools/wiki/README.md
@@ -1720,10 +1726,12 @@
 ../../../flutter/third_party/dart/third_party/pkg
 ../../../flutter/third_party/dart/third_party/requirejs
 ../../../flutter/third_party/dart/tools
+../../../flutter/third_party/dart/utils/.dart_tool
 ../../../flutter/third_party/dart/utils/OWNERS
 ../../../flutter/third_party/dart/utils/compiler/.gitignore
 ../../../flutter/third_party/dart/utils/dartanalyzer/.gitignore
 ../../../flutter/third_party/dart/utils/dynamic_module_runner/dynamic_interface.yaml
+../../../flutter/third_party/dart/utils/pubspec.yaml
 ../../../flutter/third_party/depot_tools
 ../../../flutter/third_party/expat/.git
 ../../../flutter/third_party/expat/.github
@@ -3113,8 +3121,11 @@
 ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/ganesh/vk/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/BUILD.bazel
+../../../flutter/third_party/skia/include/gpu/graphite/dawn/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/mtl/BUILD.bazel
+../../../flutter/third_party/skia/include/gpu/graphite/precompile/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/graphite/vk/BUILD.bazel
+../../../flutter/third_party/skia/include/gpu/graphite/vk/precompile/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/include/gpu/vk/BUILD.bazel
 ../../../flutter/third_party/skia/include/pathops/BUILD.bazel
@@ -3179,9 +3190,6 @@
 ../../../flutter/third_party/skia/modules/pathkit/npm-wasm/package.json
 ../../../flutter/third_party/skia/modules/pathkit/package.json
 ../../../flutter/third_party/skia/modules/pathkit/tests
-../../../flutter/third_party/skia/modules/pathops/BUILD.bazel
-../../../flutter/third_party/skia/modules/pathops/include/BUILD.bazel
-../../../flutter/third_party/skia/modules/pathops/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skcms/OWNERS
 ../../../flutter/third_party/skia/modules/skcms/README.chromium
@@ -3279,10 +3287,13 @@
 ../../../flutter/third_party/skia/src/gpu/graphite/dawn/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/geom/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/mtl/BUILD.bazel
+../../../flutter/third_party/skia/src/gpu/graphite/precompile/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/render/BUILD.bazel
+../../../flutter/third_party/skia/src/gpu/graphite/surface/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/task/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/text/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/graphite/vk/BUILD.bazel
+../../../flutter/third_party/skia/src/gpu/graphite/vk/precompile/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/mtl/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/tessellate/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/vk/BUILD.bazel
@@ -3888,6 +3899,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.broker/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.power.observability/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.system/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.systemmode/meta.json
@@ -3908,6 +3920,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.system.state/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.test/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.thermal/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.time.alarms/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.controller/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.perfetto/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
@@ -3951,9 +3964,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 ../../../fuchsia/sdk/linux/meta
-../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/hwasan/ld.so.1
-../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/dist/lib/ld.so.1
@@ -3966,11 +3976,12 @@
 ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-27/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-28/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-28/sysroot/dist/lib/hwasan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-28/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/hwasan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/dist/lib/ld.so.1
-../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/dist/lib/asan/ld.so.1
@@ -3979,10 +3990,10 @@
 ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-27/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-28/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-28/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/dist/lib/ld.so.1
-../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/asan/ld.so.1
-../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/dist/lib/asan/ld.so.1
@@ -3991,6 +4002,8 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-27/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-28/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-28/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/packages/blobs

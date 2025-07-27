@@ -790,12 +790,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             localFocalPoint: _localFocalPoint,
             pointerCount: pointerCount,
             sourceTimeStamp: _initialEventTimestamp,
-            kind:
-                _pointerQueue.isNotEmpty
-                    ? getKindForPointer(_pointerQueue.first)
-                    : _pointerPanZooms.isNotEmpty
-                    ? getKindForPointer(_pointerPanZooms.keys.first)
-                    : null,
+            kind: _pointerQueue.isNotEmpty
+                ? getKindForPointer(_pointerQueue.first)
+                : _pointerPanZooms.isNotEmpty
+                ? getKindForPointer(_pointerPanZooms.keys.first)
+                : null,
           ),
         );
       });

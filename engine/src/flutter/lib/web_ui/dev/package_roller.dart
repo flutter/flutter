@@ -13,18 +13,17 @@ import 'common.dart';
 import 'package_lock.dart';
 import 'utils.dart';
 
-final ArgParser _argParser =
-    ArgParser(allowTrailingOptions: false)
-      ..addFlag(
-        'dry-run',
-        help:
-            'Whether or not to push changes to CIPD. When --dry-run is set, the '
-            'script will download everything and attempt to prepare the bundle '
-            'but will stop before publishing. When not set, the bundle will be '
-            'published.',
-        negatable: false,
-      )
-      ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output.', negatable: false);
+final ArgParser _argParser = ArgParser(allowTrailingOptions: false)
+  ..addFlag(
+    'dry-run',
+    help:
+        'Whether or not to push changes to CIPD. When --dry-run is set, the '
+        'script will download everything and attempt to prepare the bundle '
+        'but will stop before publishing. When not set, the bundle will be '
+        'published.',
+    negatable: false,
+  )
+  ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output.', negatable: false);
 
 late final bool dryRun;
 late final bool verbose;

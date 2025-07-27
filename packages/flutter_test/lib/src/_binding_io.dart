@@ -432,12 +432,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.firstWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 
@@ -477,12 +476,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.lastWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 
@@ -516,12 +514,11 @@ class _MockHttpResponse implements HttpClientResponse {
   }) {
     return _delegate.singleWhere(
       test,
-      orElse:
-          orElse == null
-              ? null
-              : () {
-                return Uint8List.fromList(orElse());
-              },
+      orElse: orElse == null
+          ? null
+          : () {
+              return Uint8List.fromList(orElse());
+            },
     );
   }
 
