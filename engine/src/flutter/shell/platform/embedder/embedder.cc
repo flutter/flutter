@@ -430,7 +430,8 @@ InferOpenGLPlatformViewCreationCallback(
         };
   }
 
-  std::function<SkMatrix(void)> gl_surface_transformation_callback = nullptr;
+  std::function<flutter::DlMatrix(void)> gl_surface_transformation_callback =
+      nullptr;
   if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) != nullptr) {
     gl_surface_transformation_callback =
         [ptr = config->open_gl.surface_transformation, user_data]() {
