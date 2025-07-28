@@ -850,32 +850,63 @@ class SliverReorderableListState extends State<SliverReorderableList>
     });
   }
 
+  /// Converts insertion index (calculated with dragged item present) to final index.
+  /// This addresses the fundamental issue where Flutter's ReorderableList calculates
+  /// insertion indices before the item is removed, causing off-by-one errors when
+  /// dragging down (see issue #24786).
+  static int _insertionIndexToFinalIndex({
+    required int insertionIndex,
+    required int originalIndex,
+  }) {
+    return insertionIndex > originalIndex ? insertionIndex - 1 : insertionIndex;
+  }
+
+  /// Calculates where the proxy should animate to based on the final target index.
+  /// This provides a clean abstraction over the complex positioning logic.
+  Offset _getProxyAnimationTarget(int dragIndex, int insertIndex, double draggedItemExtent) {
+    // Convert insertion index to final index (where the item will actually be)
+    final int targetIndex = _insertionIndexToFinalIndex(
+      insertionIndex: insertIndex,
+      originalIndex: dragIndex,
+    );
+
+    // If not moving, animate to current position
+    if (targetIndex == dragIndex) {
+      return _itemOffsetAt(dragIndex);
+    }
+
+    // Calculate the gap position for the insertion index.
+    // In normal mode, gaps are "before" the index; in reverse mode, they're "after"
+    if (_reverse) {
+      if (insertIndex >= _items.length) {
+        // Inserting after all items in reverse mode (no next item to position before)
+        return _itemOffsetAt(_items.length - 1) -
+            _extentOffset(draggedItemExtent, _scrollDirection);
+      } else {
+        // Reverse case: gap is after the current item
+        return _itemOffsetAt(insertIndex) +
+            _extentOffset(_itemExtentAt(insertIndex), _scrollDirection);
+      }
+    } else {
+      if (insertIndex == 0) {
+        // Inserting before all items (no previous item to position after)
+        return _itemOffsetAt(0) -
+            _extentOffset(draggedItemExtent, _scrollDirection);
+      } else {
+        // Normal case: gap is after the previous item
+        return _itemOffsetAt(insertIndex - 1) +
+            _extentOffset(_itemExtentAt(insertIndex - 1), _scrollDirection);
+      }
+    }
+  }
+
   void _dragEnd(_DragInfo item) {
     setState(() {
-      if (_insertIndex == item.index) {
-        _finalDropPosition = _itemOffsetAt(_insertIndex!);
-      } else if (_reverse) {
-        if (_insertIndex! >= _items.length) {
-          // Drop at the starting position of the last element and offset its own extent
-          _finalDropPosition =
-              _itemOffsetAt(_items.length - 1) - _extentOffset(item.itemExtent, _scrollDirection);
-        } else {
-          // Drop at the end of the current element occupying the insert position
-          _finalDropPosition =
-              _itemOffsetAt(_insertIndex!) +
-              _extentOffset(_itemExtentAt(_insertIndex!), _scrollDirection);
-        }
-      } else {
-        if (_insertIndex! == 0) {
-          // Drop at the starting position of the first element and offset its own extent
-          _finalDropPosition = _itemOffsetAt(0) - _extentOffset(item.itemExtent, _scrollDirection);
-        } else {
-          // Drop at the end of the previous element occupying the insert position
-          final int atIndex = _insertIndex! - 1;
-          _finalDropPosition =
-              _itemOffsetAt(atIndex) + _extentOffset(_itemExtentAt(atIndex), _scrollDirection);
-        }
-      }
+      _finalDropPosition = _getProxyAnimationTarget(
+        item.index,
+        _insertIndex!,
+        item.itemExtent,
+      );
     });
     widget.onReorderEnd?.call(_insertIndex!);
   }
