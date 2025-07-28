@@ -4980,13 +4980,13 @@ class EditableTextState extends State<EditableText>
   }
 
   // The time when the last call to [hideSystemToolbar] was made.
-  DateTime? _hideSystemToolbarLastTimestamp;
+  Duration? _hideSystemToolbarLastTimestamp;
   static const Duration _systemToolbarToggleDebounceThreshold = Duration(milliseconds: 100);
 
   /// This is called by the [SystemContextMenu] when the platform dismisses the system
   /// context menu.
   void hideSystemToolbar() {
-    _hideSystemToolbarLastTimestamp = DateTime.now();
+    _hideSystemToolbarLastTimestamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
     hideToolbar(false);
   }
 
@@ -5010,7 +5010,7 @@ class EditableTextState extends State<EditableText>
       hideToolbar(hideHandles);
     } else {
       if (_hideSystemToolbarLastTimestamp != null &&
-          _hideSystemToolbarLastTimestamp!.difference(DateTime.now()) <
+          (SchedulerBinding.instance.currentSystemFrameTimeStamp - _hideSystemToolbarLastTimestamp!) <
               _systemToolbarToggleDebounceThreshold) {
         // Do not show the system toolbar if it was only just hidden. This is
         // needed to prevent the system toolbar from being shown again when tapping
