@@ -63,6 +63,16 @@ FlEngine* fl_engine_new_with_binary_messenger(
     FlBinaryMessenger* binary_messenger);
 
 /**
+ * fl_engine_get_has_ui_on_platform_thread:
+ * @engine: an #FlEngine.
+ *
+ * Checks if UI updates are done on the platform thread.
+ *
+ * Returns: %TRUE if UI updates occur on the platform thread.
+ */
+gboolean fl_engine_get_has_ui_on_platform_thread(FlEngine* engine);
+
+/**
  * fl_engine_get_renderer_type:
  * @engine: an #FlEngine.
  *

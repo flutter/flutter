@@ -4,8 +4,13 @@
 
 #include "fl_compositor_software.h"
 
+#include "flutter/shell/platform/linux/fl_engine_private.h"
+
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
+
+  // TRUE if frame updates come on different thread.
+  gboolean smooth_resize;
 
   // Width of frame in pixels.
   size_t width;
@@ -84,8 +89,10 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   gint scale_factor = gdk_window_get_scale_factor(window);
   size_t width = gdk_window_get_width(window) * scale_factor;
   size_t height = gdk_window_get_height(window) * scale_factor;
-  while (self->width != width || self->height != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+  if (self->smooth_resize) {
+    while (self->width != width || self->height != height) {
+      g_cond_wait(&self->frame_cond, &self->frame_mutex);
+    }
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
@@ -122,8 +129,9 @@ static void fl_compositor_software_init(FlCompositorSoftware* self) {
   g_cond_init(&self->frame_cond);
 }
 
-FlCompositorSoftware* fl_compositor_software_new() {
+FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
       g_object_new(fl_compositor_software_get_type(), nullptr));
+  self->smooth_resize = !fl_engine_get_has_ui_on_platform_thread(engine);
   return self;
 }

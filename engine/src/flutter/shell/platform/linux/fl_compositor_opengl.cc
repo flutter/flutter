@@ -44,6 +44,9 @@ struct _FlCompositorOpenGL {
   // Engine we are rendering.
   GWeakRef engine;
 
+  // TRUE if frame updates come on different thread.
+  gboolean smooth_resize;
+
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
 
@@ -343,9 +346,11 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   gint scale_factor = gdk_window_get_scale_factor(window);
   size_t width = gdk_window_get_width(window) * scale_factor;
   size_t height = gdk_window_get_height(window) * scale_factor;
-  while (fl_framebuffer_get_width(self->framebuffer) != width ||
-         fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+  if (self->smooth_resize) {
+    while (fl_framebuffer_get_width(self->framebuffer) != width ||
+           fl_framebuffer_get_height(self->framebuffer) != height) {
+      g_cond_wait(&self->frame_cond, &self->frame_mutex);
+    }
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
@@ -405,6 +410,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
   g_weak_ref_init(&self->engine, engine);
+  self->smooth_resize = !fl_engine_get_has_ui_on_platform_thread(engine);
   self->shareable = shareable;
   self->opengl_manager =
       FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
