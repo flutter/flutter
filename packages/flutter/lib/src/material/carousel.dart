@@ -146,7 +146,9 @@ class CarouselView extends StatefulWidget {
     required double this.itemExtent,
     required this.children,
   }) : consumeMaxWeight = true,
-       flexWeights = null;
+       flexWeights = null,
+       itemBuilder = null,
+       itemCount = null;
 
   /// Creates a scrollable list where the size of each child widget is dynamically
   /// determined by the provided [flexWeights].
@@ -207,7 +209,94 @@ class CarouselView extends StatefulWidget {
     this.enableSplash = true,
     required List<int> this.flexWeights,
     required this.children,
-  }) : itemExtent = null;
+  }) : itemExtent = null,
+       itemBuilder = null,
+       itemCount = null;
+
+  /// Creates a scrollable carousel with fixed-sized items created on demand.
+  ///
+  /// This constructor allows lazy loading of carousel items. Only items that
+  /// are visible (or about to be visible) are built, improving performance
+  /// when dealing with large numbers of items.
+  ///
+  /// The [itemBuilder] callback will be called only with indices greater than
+  /// or equal to zero and less than [itemCount].
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to create a carousel with 1000 items using lazy loading:
+  ///
+  /// ** See code in examples/api/lib/material/carousel/carousel.1.dart **
+  /// {@end-tool}
+  const CarouselView.builder({
+    super.key,
+    this.padding,
+    this.backgroundColor,
+    this.elevation,
+    this.shape,
+    this.itemClipBehavior,
+    this.overlayColor,
+    this.itemSnapping = false,
+    this.shrinkExtent = 0.0,
+    this.controller,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
+    this.onTap,
+    this.enableSplash = true,
+    required double this.itemExtent,
+    required this.itemBuilder,
+    this.itemCount,
+  }) : consumeMaxWeight = true,
+       flexWeights = null,
+       children = const <Widget>[];
+
+  /// Creates a scrollable carousel with weighted items created on demand.
+  ///
+  /// This constructor combines the benefits of [CarouselView.weighted] with
+  /// lazy loading. Items are built on demand while maintaining the weighted
+  /// layout system.
+  ///
+  /// The [flexWeights] parameter determines the layout, and [itemBuilder]
+  /// creates items as they become visible.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to create a weighted carousel with lazy loading:
+  ///
+  /// ```dart
+  /// CarouselView.weightedBuilder(
+  ///   flexWeights: const <int>[1, 7, 1],
+  ///   itemCount: 100,
+  ///   itemBuilder: (BuildContext context, int index) {
+  ///     return ColoredBox(
+  ///       color: Colors.primaries[index % Colors.primaries.length],
+  ///       child: Center(
+  ///         child: Text('Item $index'),
+  ///       ),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  const CarouselView.weightedBuilder({
+    super.key,
+    this.padding,
+    this.backgroundColor,
+    this.elevation,
+    this.shape,
+    this.itemClipBehavior,
+    this.overlayColor,
+    this.itemSnapping = false,
+    this.shrinkExtent = 0.0,
+    this.controller,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
+    this.consumeMaxWeight = true,
+    this.onTap,
+    this.enableSplash = true,
+    required List<int> this.flexWeights,
+    required this.itemBuilder,
+    this.itemCount,
+  }) : itemExtent = null,
+       children = const <Widget>[];
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -345,6 +434,20 @@ class CarouselView extends StatefulWidget {
   /// The child widgets for the carousel.
   final List<Widget> children;
 
+  /// Called to build carousel item on demand.
+  ///
+  /// Will be called only for indices greater than or equal to zero and less
+  /// than [itemCount] (if [itemCount] is non-null).
+  ///
+  /// Should return null if asked to build a widget with a greater index than
+  /// exists.
+  final NullableIndexedWidgetBuilder? itemBuilder;
+
+  /// The number of items in the carousel.
+  ///
+  /// If null, the carousel will continue to build items until [itemBuilder] returns null.
+  final int? itemCount;
+
   @override
   State<CarouselView> createState() => _CarouselViewState();
 }
@@ -444,6 +547,7 @@ class _CarouselViewState extends State<CarouselView> {
         });
 
     Widget contents = widget.children[index];
+
     if (widget.enableSplash) {
       contents = Stack(
         fit: StackFit.expand,
@@ -475,13 +579,17 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildSliverCarousel(ThemeData theme) {
+    // Determine the child count and builder based on whether we're using lazy loading
+    final int? childCount = widget.itemBuilder != null ? widget.itemCount : widget.children.length;
+    final NullableIndexedWidgetBuilder effectiveBuilder = widget.itemBuilder != null
+        ? widget.itemBuilder!
+        : (BuildContext context, int index) => _buildCarouselItem(index);
+
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          return _buildCarouselItem(index);
-        }, childCount: widget.children.length),
+        delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
       );
     }
 
@@ -493,9 +601,7 @@ class _CarouselViewState extends State<CarouselView> {
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-        return _buildCarouselItem(index);
-      }, childCount: widget.children.length),
+      delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
     );
   }
 
@@ -1628,7 +1734,12 @@ class CarouselController extends ScrollController {
     }
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
-    index = index.clamp(0, _carouselState!.widget.children.length - 1);
+    if (_carouselState!.widget.itemBuilder != null) {
+      final int? itemCount = _carouselState!.widget.itemCount;
+      index = itemCount != null ? index.clamp(0, itemCount - 1) : 0;
+    } else {
+      index = index.clamp(0, _carouselState!.widget.children.length - 1);
+    }
 
     await Future.wait<void>(<Future<void>>[
       for (final _CarouselPosition position in positions.cast<_CarouselPosition>())
@@ -1652,7 +1763,13 @@ class CarouselController extends ScrollController {
 
     final int maxWeightIndex = weights.indexOf(weights.max);
     int leadingIndex = carouselState._consumeMaxWeight ? index : index - maxWeightIndex;
-    leadingIndex = leadingIndex.clamp(0, _carouselState!.widget.children.length - 1);
+    if (carouselState.widget.itemBuilder != null) {
+      final int? itemCount = carouselState.widget.itemCount;
+      leadingIndex = itemCount != null ? leadingIndex.clamp(0, itemCount - 1) : 0;
+    } else {
+      final int itemCount = carouselState.widget.children.length;
+      leadingIndex = leadingIndex.clamp(0, itemCount - 1);
+    }
 
     return dimension * (weights.first / totalWeight) * leadingIndex;
   }
