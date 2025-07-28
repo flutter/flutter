@@ -54,6 +54,24 @@ static constexpr char kClipboardHasStringsMessage[] =
     "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/plain\"}";
 static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
     "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/madeupcontenttype\"}";
+static constexpr char kClipboardHasStringsOnViewMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":0,"
+    "\"format\":\"text/plain\"}}";
+static constexpr char kClipboardHasStringsOnViewFakeContentTypeMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":0,"
+    "\"format\":\"text/madeupcontenttype\"}}";
+static constexpr char kClipboardHasStringsOnViewNonStringFormatMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":0,"
+    "\"format\":123}}";
+static constexpr char kClipboardHasStringsOnViewMissingFormatMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":0}}";
+static constexpr char kClipboardHasStringsOnViewMissingViewIdMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"format\":\"text/"
+    "plain\"}}";
+static constexpr char kClipboardHasStringsOnViewNonIntegerViewIdMessage[] =
+    "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":"
+    "\"notanint\","
+    "\"format\":\"text/plain\"}}";
 static constexpr char kClipboardSetDataMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
 static constexpr char kClipboardSetDataNullTextMessage[] =
@@ -477,6 +495,170 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsReportsErrors) {
 
   std::string result =
       SimulatePlatformMessage(&messenger, kClipboardHasStringsMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(true));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsOnViewMessage);
+
+  EXPECT_EQ(result, "[{\"value\":true}]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewReturnsFalse) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(false));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsOnViewMessage);
+
+  EXPECT_EQ(result, "[{\"value\":false}]");
+}
+
+TEST_F(PlatformHandlerTest,
+       ClipboardHasStringsOnViewRejectsUnknownContentType) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsOnViewFakeContentTypeMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerTest,
+       ClipboardHasStringsOnViewRejectsNonStringTypeForFormat) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a non-string type for the format is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsOnViewNonStringFormatMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerTest,
+       ClipboardHasStringsOnViewRejectsMissingFormatField) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a missing format field is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsOnViewMissingFormatMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewRejectsMissingViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a missing viewId is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsOnViewMissingViewIdMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard viewId\",null]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewRejectsNonIntegerViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a non-integer viewId is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardHasStringsOnViewNonIntegerViewIdMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard viewId\",null]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewRequiresView) {
+  UseHeadlessEngine();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsOnViewMessage);
+
+  EXPECT_EQ(result,
+            "[\"Clipboard error\",\"Clipboard is not available in Windows "
+            "headless mode\",null]");
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/95817.
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewIgnoresPermissionErrors) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kAccessDeniedErrorCode));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsOnViewMessage);
+
+  EXPECT_EQ(result, "[{\"value\":false}]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewReportsErrors) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kArbitraryErrorCode));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardHasStringsOnViewMessage);
 
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
 }
