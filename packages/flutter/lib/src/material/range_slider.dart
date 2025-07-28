@@ -790,6 +790,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
     return Stack(
       children: <Widget>[
+        //Adds two invisible focus nodes to the range slider for its two thumbs.
         Row(
           children: <Widget>[
             Focus(focusNode: startFocusNode, child: const SizedBox.shrink()),
