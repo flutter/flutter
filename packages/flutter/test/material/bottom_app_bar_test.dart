@@ -733,6 +733,18 @@ void main() {
     expect(iconButton.center.dy, barCenter);
     expect(fab.center.dy, barCenter);
   });
+
+  testWidgets('BottomAppBar renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: SizedBox.shrink(child: BottomAppBar(child: Text('X'))),
+        ),
+      ),
+    );
+    final Finder bottomAppBarChild = find.text('X');
+    expect(tester.getSize(bottomAppBarChild).isEmpty, isTrue);
+  });
 }
 
 // The bottom app bar clip path computation is only available at paint time.

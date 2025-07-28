@@ -75,6 +75,7 @@ void main() {
     final allowedPaths = <String>[
       // This is a standalone script invoked by xcode, not part of the tool
       fileSystem.path.join(flutterTools, 'bin', 'xcode_backend.dart'),
+      fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'exit.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
@@ -277,6 +278,31 @@ void main() {
       if (line.startsWith(RegExp(r'import.*package:.*'))) {
         final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
         fail('$relativePath imports a package');
+      }
+    }
+  });
+
+  test('no import of base/exit.dart in lib/** outside of allow-listed paths', () {
+    final allowedPaths = <String>[fileSystem.path.join(flutterTools, 'lib', 'runner.dart')];
+
+    bool isNotAllowed(FileSystemEntity entity) {
+      return allowedPaths.every((String path) => !entity.path.contains(path));
+    }
+
+    for (final dirName in <String>['lib']) {
+      final Iterable<File> files = fileSystem
+          .directory(fileSystem.path.join(flutterTools, dirName))
+          .listSync(recursive: true)
+          .where(_isDartFile)
+          .where(isNotAllowed)
+          .map(_asFile);
+      for (final file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*src/base/exit.dart'))) {
+            final String relativePath = fileSystem.path.relative(file.path, from: flutterTools);
+            fail('$relativePath imports flutter_tools/src/base/exit.dart');
+          }
+        }
       }
     }
   });

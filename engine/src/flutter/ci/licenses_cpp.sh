@@ -83,10 +83,18 @@ fi
   --licenses_path "$LICENSES_OUTPUT_PATH" \
   --v $VERBOSITY
 
-git diff \
+if ! git diff \
   --no-index \
+  --exit-code \
   --ignore-cr-at-eol \
   --ignore-matching-lines="^You may obtain a copy of this library's Source Code Form from:.*" \
   "$LICENSES_PATH" \
-  "$LICENSES_OUTPUT_PATH"
+  "$LICENSES_OUTPUT_PATH"; then
+  echo "The licenses have changed."
+  echo "Please review added licenses and update //engine/src/flutter/sky/packages/sky_engine/LICENSE"
+  echo "The license check can be repeated locally with //engine/src/flutter/ci/licenses_cpp.sh"
+  echo "When executed locally the following command can update the licenses after a run:"
+  echo "cp $LICENSES_OUTPUT_PATH $LICENSES_PATH"
+  exit 1
+fi
 rm "$LICENSES_OUTPUT_PATH"

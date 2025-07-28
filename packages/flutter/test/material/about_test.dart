@@ -1888,6 +1888,20 @@ void main() {
     final ThemeData licensePageTheme = Theme.of(tester.element(find.text('Powered by Flutter')));
     expect(theme.colorScheme.primary, licensePageTheme.colorScheme.primary);
   });
+
+  testWidgets('AboutDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: AboutDialog(children: <Widget>[Text('X')])),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

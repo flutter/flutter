@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -43,7 +44,7 @@ void main() {
       // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
-      io.setExitFunctionForTests((int exitCode) {
+      setExitFunctionForTests((int exitCode) {
         firstExitCode ??= exitCode;
 
         // TODO(jamesderlin): Ideally only the first call to exit() would be
@@ -63,7 +64,7 @@ void main() {
     });
 
     tearDown(() {
-      io.restoreExitFunction();
+      restoreExitFunction();
       Cache.enableLocking();
     });
 
@@ -105,6 +106,64 @@ void main() {
         // *original* crash, and not the crash from the first crash report
         // attempt.
         expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
+    testUsingContext(
+      'error handling crash report (local engine)',
+      () async {
+        fileSystem
+            .directory('engine')
+            .childDirectory('src')
+            .childDirectory('out')
+            .createSync(recursive: true);
+
+        final completer = Completer<void>();
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>[
+                    '--local-engine=host_debug',
+                    '--local-engine-src-path=./engine/src',
+                    'crash',
+                  ],
+                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              expect(firstExitCode, isNotNull);
+              expect(firstExitCode, isNot(0));
+              expect(error.toString(), 'Exception: test exit');
+              completer.complete();
+            },
+          ),
+        );
+        await completer.future;
+
+        expect(
+          fakeAnalytics.sentEvents,
+          isNot(contains(Event.exception(exception: '_Exception'))),
+          reason: 'Does not send a report when using --local-engine',
+        );
       },
       overrides: <Type, Generator>{
         Platform: () => FakePlatform(
@@ -422,7 +481,7 @@ void main() {
     late MemoryFileSystem fs;
 
     setUp(() {
-      io.setExitFunctionForTests((int exitCode) {});
+      setExitFunctionForTests((int exitCode) {});
 
       fs = MemoryFileSystem.test();
 
@@ -430,7 +489,7 @@ void main() {
     });
 
     tearDown(() {
-      io.restoreExitFunction();
+      restoreExitFunction();
       Cache.enableLocking();
     });
 
@@ -535,7 +594,7 @@ void main() {
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 
@@ -559,7 +618,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics enables/disables telemetry',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 
@@ -589,7 +648,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
         await globals.analytics.setTelemetry(true);
 
         await runner.run(
@@ -624,7 +683,7 @@ void main() {
     testUsingContext(
       '--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         await globals.analytics.setTelemetry(false);
         await runner.run(
@@ -654,7 +713,7 @@ void main() {
     testUsingContext(
       'throw error when both flags passed',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
 

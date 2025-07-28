@@ -189,7 +189,6 @@ class ManifestAssetBundle implements AssetBundle {
   DateTime? _lastBuildTimestamp;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
-  static const _kAssetManifestJsonFilename = 'AssetManifest.json';
   static const _kAssetManifestBinFilename = 'AssetManifest.bin';
   static const _kAssetManifestBinJsonFilename = 'AssetManifest.bin.json';
 
@@ -258,11 +257,6 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     if (flutterManifest.isEmpty) {
-      entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
-        DevFSStringContent('{}'),
-        kind: AssetKind.regular,
-        transformers: const <AssetTransformerEntry>[],
-      );
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -528,7 +522,6 @@ class ManifestAssetBundle implements AssetBundle {
       deferredComponentsAssetVariants,
     );
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
-    final assetManifestJson = DevFSStringContent(json.encode(assetManifest));
     final fontManifest = DevFSStringContent(json.encode(fonts));
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(
       packageConfig,
@@ -556,7 +549,6 @@ class ManifestAssetBundle implements AssetBundle {
       );
     }
 
-    _setIfChanged(_kAssetManifestJsonFilename, assetManifestJson, AssetKind.regular);
     _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
     // Create .bin.json on web builds.
     if (targetPlatform == TargetPlatform.web_javascript) {

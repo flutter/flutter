@@ -42,19 +42,14 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
 /**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
+ * @width: output width in pixels.
+ * @height: output height in pixels.
  *
  * Renders the current frame.
  */
-void fl_compositor_opengl_render(FlCompositorOpenGL* compositor);
-
-/**
- * fl_compositor_opengl_cleanup:
- * @compositor: an #FlCompositorOpenGL.
- *
- * Removes OpenGL resources used for rendering. Requires an active
- * context.
- */
-void fl_compositor_opengl_cleanup(FlCompositorOpenGL* compositor);
+void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
+                                 size_t width,
+                                 size_t height);
 
 G_END_DECLS
 
