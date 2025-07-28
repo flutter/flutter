@@ -69,6 +69,8 @@ user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 user_pref("app.update.auto", false);
+user_pref("app.update.enabled", false);
+user_pref("app.update.silent", false);
 ''';
 
         final Directory temporaryProfileDirectory = Directory(
