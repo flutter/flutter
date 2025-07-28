@@ -532,6 +532,11 @@ void main() {
       ),
     );
   });
+
+  test('PictureRecorder getter', () {
+    final PaintingContext context = PaintingContext(ContainerLayer(), Rect.zero);
+    expect(context.recorder.isRecording, isTrue);
+  });
 }
 
 class TestObservingRenderObject extends RenderBox {

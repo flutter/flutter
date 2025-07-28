@@ -368,6 +368,7 @@ targets:
 
   - name: Linux linux_web_engine_tests
     recipe: engine_v2/engine_v2
+    bringup: true # Failing, see https://github.com/flutter/flutter/issues/172713
     timeout: 120
     properties:
       config_name: linux_web_engine_test
@@ -555,11 +556,11 @@ targets:
     properties:
       config_name: windows_unopt
 
-  #          _____________________⚠️__________________________
+  #          _________________[WARNING]_______________________
   #
   #      This is a size experiment for reducing engine binary sizes.
   #     It is highly volatile and will not be supported if you use it.
-  #          _____________________⚠️__________________________
+  #          _________________[WARNING]_______________________
   #
   - name: Linux linux_android_aot_engine_size_exp
     recipe: engine_v2/engine_v2
@@ -569,7 +570,7 @@ targets:
       # Don't run this on release branches
       - master
     properties:
-      release_build: "true"
+      release_build: "false"
       config_name: linux_android_aot_engine_size_exp
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform

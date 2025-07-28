@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/ast/ast.dart' as analyzer;
-import 'package:analyzer/dart/ast/visitor.dart' as analyzer;
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart' as analyzer;
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
+// ignore: implementation_imports, can be removed when package:analyzer 8.1.0 is released.
 import 'package:analyzer/src/dart/constant/value.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
@@ -43,6 +42,7 @@ class PreviewCodeGenerator {
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
       fs.path.join('lib', 'src', 'generated_preview.dart');
 
+  // TODO(bkonyi): update generated example now that we're computing constants
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
   /// [previews].
   ///
