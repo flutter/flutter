@@ -157,17 +157,16 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
-  /// WebServer device is debuggable when running with --start-paused.
+  /// Device is debuggable if not a WebServer device, or if running with
+  /// --start-paused or using DWDS WebSocket connection (WebServer device).
   bool get deviceIsDebuggable =>
       device!.device is! WebServerDevice ||
       debuggingOptions.startPaused ||
       _useDwdsWebSocketConnection;
 
   bool get _useDwdsWebSocketConnection {
-    if (device?.devFS is WebDevFS) {
-      return (device!.devFS! as WebDevFS).useDwdsWebSocketConnection;
-    }
-    return false;
+    final DevFS? devFS = device?.devFS;
+    return devFS is WebDevFS && devFS.useDwdsWebSocketConnection;
   }
 
   @override
