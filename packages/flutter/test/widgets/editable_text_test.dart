@@ -82,7 +82,7 @@ void main() {
     debugResetSemanticsIdCounter();
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
     controller = TextEditingController();
     focusNode = FocusNode(debugLabel: 'EditableText Node');
     focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
@@ -2234,7 +2234,7 @@ void main() {
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
     // Make sure the clipboard has a valid string on it.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
 
     // Show the toolbar.
     state.renderEditable.selectWordsInRange(from: Offset.zero, cause: SelectionChangedCause.tap);
@@ -2252,7 +2252,7 @@ void main() {
     expect(find.text('Paste'), findsNothing);
 
     // Clear the clipboard
-    await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: ''), kImplicitViewId);
 
     // Show the toolbar again.
     expect(state.showToolbar(), kIsWeb ? isFalse : isTrue);
@@ -2592,17 +2592,17 @@ void main() {
     // Select all.
     state.selectAll(SelectionChangedCause.toolbar);
     await tester.pump();
-    await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: ''), kImplicitViewId);
     state.cutSelection(SelectionChangedCause.toolbar);
-    ClipboardData? data = await Clipboard.getData('text/plain', kImplicitViewId);
+    ClipboardData? data = await Clipboard.sendGetData('text/plain', kImplicitViewId);
     expect(data, isNotNull);
     expect(data!.text, isEmpty);
 
     state.selectAll(SelectionChangedCause.toolbar);
     await tester.pump();
-    await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: ''), kImplicitViewId);
     state.copySelection(SelectionChangedCause.toolbar);
-    data = await Clipboard.getData('text/plain', kImplicitViewId);
+    data = await Clipboard.sendGetData('text/plain', kImplicitViewId);
     expect(data, isNotNull);
     expect(data!.text, isEmpty);
   });
@@ -2720,7 +2720,7 @@ void main() {
         await tester.pump();
 
         expect(controller.text, isEmpty);
-        final ClipboardData? data = await Clipboard.getData('text/plain', kImplicitViewId);
+        final ClipboardData? data = await Clipboard.sendGetData('text/plain', kImplicitViewId);
         expect(data, isNotNull);
         expect(data!.text, equals(text));
       },
@@ -2789,7 +2789,7 @@ void main() {
         await tester.pump();
 
         expect(controller.text, equals(text));
-        final ClipboardData? data = await Clipboard.getData('text/plain', kImplicitViewId);
+        final ClipboardData? data = await Clipboard.sendGetData('text/plain', kImplicitViewId);
         expect(data, isNotNull);
         expect(data!.text, equals(text));
       },
@@ -2855,7 +2855,7 @@ void main() {
         expect(pasteButton.type, ContextMenuButtonType.paste);
 
         // Setting data which will be pasted into the clipboard.
-        await Clipboard.setData(const ClipboardData(text: text), kImplicitViewId);
+        await Clipboard.sendSetData(const ClipboardData(text: text), kImplicitViewId);
 
         pasteButton.onPressed?.call();
         await tester.pump();
@@ -3302,7 +3302,7 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    Clipboard.setData(const ClipboardData(text: clipboardContent), kImplicitViewId);
+    Clipboard.sendSetData(const ClipboardData(text: clipboardContent), kImplicitViewId);
 
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byType(EditableText);
@@ -5160,7 +5160,7 @@ void main() {
         owner.performAction(expectedNodeId, SemanticsAction.copy);
         expect(tester.takeException(), isNull);
         expect(
-          (await Clipboard.getData(Clipboard.kTextPlain, kImplicitViewId))!.text,
+          (await Clipboard.sendGetData(Clipboard.kTextPlain, kImplicitViewId))!.text,
           equals('ABCDEFG'),
         );
 
@@ -6933,7 +6933,7 @@ void main() {
       reason: 'on $platform',
     );
     expect(
-      (await Clipboard.getData(Clipboard.kTextPlain, kImplicitViewId))!.text,
+      (await Clipboard.sendGetData(Clipboard.kTextPlain, kImplicitViewId))!.text,
       equals('is the'),
       reason: 'on $platform',
     );
@@ -7107,7 +7107,7 @@ void main() {
     );
     expect(controller.text, equals(testText), reason: 'on $platform');
     expect(
-      (await Clipboard.getData(Clipboard.kTextPlain, kImplicitViewId))!.text,
+      (await Clipboard.sendGetData(Clipboard.kTextPlain, kImplicitViewId))!.text,
       equals(testText),
     );
 
@@ -7223,7 +7223,7 @@ void main() {
       await tester.pump(); // Wait for autofocus to take effect.
 
       const String clipboardContent = 'read-only';
-      await Clipboard.setData(const ClipboardData(text: clipboardContent), kImplicitViewId);
+      await Clipboard.sendSetData(const ClipboardData(text: clipboardContent), kImplicitViewId);
 
       // Paste
       await sendKeys(
@@ -7278,7 +7278,7 @@ void main() {
       );
       expect(controller.text, equals(testText), reason: 'on $platform');
       expect(
-        (await Clipboard.getData(Clipboard.kTextPlain, kImplicitViewId))!.text,
+        (await Clipboard.sendGetData(Clipboard.kTextPlain, kImplicitViewId))!.text,
         equals(clipboardContent),
         reason: 'on $platform',
       );
@@ -7304,7 +7304,7 @@ void main() {
       );
       expect(controller.text, equals(testText), reason: 'on $platform');
       expect(
-        (await Clipboard.getData(Clipboard.kTextPlain, kImplicitViewId))!.text,
+        (await Clipboard.sendGetData(Clipboard.kTextPlain, kImplicitViewId))!.text,
         equals(testText),
         reason: 'on $platform',
       );
@@ -13035,7 +13035,7 @@ void main() {
       ),
     );
 
-    await Clipboard.setData(
+    await Clipboard.sendSetData(
       const ClipboardData(text: 'Fairly long text to be pasted'),
       kImplicitViewId,
     );
@@ -16958,7 +16958,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) {
-          if (methodCall.method == 'Clipboard.hasStrings') {
+          if (methodCall.method == 'Clipboard.hasStringsOnView') {
             calls += 1;
           }
           return Future<void>.value();
@@ -17558,7 +17558,7 @@ void main() {
     controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
 
     // Set the clipboard.
-    await Clipboard.setData(const ClipboardData(text: 'foo'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'foo'), kImplicitViewId);
 
     // Paste shortcut should be ignored.
     await sendKeys(
@@ -17577,7 +17577,7 @@ void main() {
       targetPlatform: defaultTargetPlatform,
     );
 
-    final ClipboardData? data = await Clipboard.getData('text/plain', kImplicitViewId);
+    final ClipboardData? data = await Clipboard.sendGetData('text/plain', kImplicitViewId);
     expect(controller.text, 'Hello world');
     expect(data?.text, 'foo');
   });

@@ -29,7 +29,7 @@ void main() {
     );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {
@@ -741,7 +741,7 @@ void main() {
       );
 
       // Make sure the clipboard is empty to start.
-      await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
+      await Clipboard.sendSetData(const ClipboardData(text: ''), kImplicitViewId);
 
       // Double tap to select the first word.
       const int index = 4;

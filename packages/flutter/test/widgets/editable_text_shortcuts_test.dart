@@ -35,7 +35,7 @@ void main() {
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
-    await Clipboard.setData(const ClipboardData(text: 'empty'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'empty'), kImplicitViewId);
   });
 
   tearDown(() {

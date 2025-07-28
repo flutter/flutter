@@ -14,8 +14,10 @@ class MockClipboard {
   Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
+      case 'Clipboard.getDataFromView':
         return clipboardData;
       case 'Clipboard.hasStrings':
+      case 'Clipboard.hasStringsOnView':
         if (hasStringsThrows) {
           throw Exception();
         }

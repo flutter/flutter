@@ -32,7 +32,19 @@ abstract final class Clipboard {
   static const String kTextPlain = 'text/plain';
 
   /// Stores the given clipboard data on the clipboard.
-  static Future<void> setData(ClipboardData data, int viewId) async {
+  @Deprecated(
+    'Use Clipboard.sendSetData instead. '
+    'This API is incompatible with multiple windows. '
+    'This feature was deprecated after 3.35.0-0.1.pre.',
+  )
+  static Future<void> setData(ClipboardData data) async {
+    await SystemChannels.platform.invokeMethod<void>('Clipboard.setData', <String, dynamic>{
+      'text': data.text,
+    });
+  }
+
+  /// Stores the given clipboard data on the clipboard for a specific view.
+  static Future<void> sendSetData(ClipboardData data, int viewId) async {
     await SystemChannels.platform.invokeMethod<void>('Clipboard.setData', <String, dynamic>{
       'text': data.text,
       'viewId': viewId,
@@ -46,10 +58,34 @@ abstract final class Clipboard {
   ///
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
-  static Future<ClipboardData?> getData(String format, int viewId) async {
+  @Deprecated(
+    'Use Clipboard.sendGetData instead. '
+    'This API is incompatible with multiple windows. '
+    'This feature was deprecated after 3.35.0-0.1.pre.',
+  )
+  static Future<ClipboardData?> getData(String format) async {
     final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
-      <dynamic>[format, viewId],
+      format,
+    );
+    if (result == null) {
+      return null;
+    }
+    return ClipboardData(text: result['text'] as String);
+  }
+
+  /// Retrieves data from the clipboard that matches the given format for a
+  /// specific view.
+  ///
+  /// The `format` argument specifies the media type, such as `text/plain`, of
+  /// the data to obtain.
+  ///
+  /// Returns a future which completes to null if the data could not be
+  /// obtained, and to a [ClipboardData] object if it could.
+  static Future<ClipboardData?> sendGetData(String format, int viewId) async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
+      'Clipboard.getDataFromView',
+      <String, dynamic>{'format': format, 'viewId': viewId},
     );
     if (result == null) {
       return null;
@@ -62,10 +98,31 @@ abstract final class Clipboard {
   ///
   /// See also:
   ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
-  static Future<bool> hasStrings(int viewId) async {
+  @Deprecated(
+    'Use Clipboard.sendHasStrings instead. '
+    'This API is incompatible with multiple windows. '
+    'This feature was deprecated after 3.35.0-0.1.pre.',
+  )
+  static Future<bool> hasStrings() async {
     final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
       'Clipboard.hasStrings',
-      <dynamic>[Clipboard.kTextPlain, viewId],
+      Clipboard.kTextPlain,
+    );
+    if (result == null) {
+      return false;
+    }
+    return result['value'] as bool;
+  }
+
+  /// Returns a future that resolves to true, if (and only if)
+  /// the clipboard contains string data on the provided view.
+  ///
+  /// See also:
+  ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).
+  static Future<bool> sendHasStrings(int viewId) async {
+    final Map<String, dynamic>? result = await SystemChannels.platform.invokeMethod(
+      'Clipboard.hasStringsOnView',
+      <String, dynamic>{'format': Clipboard.kTextPlain, 'viewId': viewId},
     );
     if (result == null) {
       return false;

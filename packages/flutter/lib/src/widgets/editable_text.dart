@@ -2733,7 +2733,7 @@ class EditableTextState extends State<EditableText>
       return;
     }
     final String text = textEditingValue.text;
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
+    Clipboard.sendSetData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -2770,7 +2770,7 @@ class EditableTextState extends State<EditableText>
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
+    Clipboard.sendSetData(ClipboardData(text: selection.textInside(text)), View.of(context).viewId);
     _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       // Schedule a call to bringIntoView() after renderEditable updates.
@@ -2796,7 +2796,7 @@ class EditableTextState extends State<EditableText>
     }
     // Snapshot the input before using `await`.
     // See https://github.com/flutter/flutter/issues/11427
-    final ClipboardData? data = await Clipboard.getData(
+    final ClipboardData? data = await Clipboard.sendGetData(
       Clipboard.kTextPlain,
       View.of(context).viewId,
     );
@@ -3206,7 +3206,7 @@ class EditableTextState extends State<EditableText>
   void initState() {
     super.initState();
     clipboardStatus = kIsWeb
-        // Web browsers will show a permission dialog when Clipboard.hasStrings is
+        // Web browsers will show a permission dialog when Clipboard.sendHasStrings is
         // called. In an EditableText, this will happen before the paste button is
         // clicked, often before the context menu is even shown. To avoid this
         // poor user experience, always show the paste button on web.
@@ -6676,7 +6676,7 @@ class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
 /// [ClipboardStatus.pasteable].
 ///
 /// Useful to avoid showing a permission dialog on web, which happens when
-/// [Clipboard.hasStrings] is called.
+/// [Clipboard.sendHasStrings] is called.
 class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
   _WebClipboardStatusNotifier() : super(viewId: 0);
 

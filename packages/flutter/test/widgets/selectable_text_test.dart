@@ -190,7 +190,7 @@ void main() {
     );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {
@@ -1780,7 +1780,7 @@ void main() {
     ) async {
       if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
-      } else if (methodCall.method == 'Clipboard.getData') {
+      } else if (methodCall.method == 'Clipboard.getDataFromView') {
         return <String, dynamic>{'text': clipboardContent};
       }
       return null;

@@ -106,10 +106,10 @@ abstract final class SystemChannels {
   ///    argument, which must be a [Map], onto the system clipboard. See
   ///    [Clipboard.setData].
   ///
-  ///  * `Clipboard.getData`: Returns the data that has the format specified in
+  ///  * `Clipboard.sendGetData`: Returns the data that has the format specified in
   ///    the argument, a [String], from the system clipboard. The only format
   ///    currently supported is `text/plain` ([Clipboard.kTextPlain]). The
-  ///    result is a [Map] with a single key, `text`. See [Clipboard.getData].
+  ///    result is a [Map] with a single key, `text`. See [Clipboard.sendGetData].
   ///
   ///  * `HapticFeedback.vibrate`: Triggers a system-default haptic response.
   ///    See [HapticFeedback.vibrate].

@@ -247,7 +247,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   testWidgets('Live Text button shows and hides correctly when LiveTextStatus changes', (

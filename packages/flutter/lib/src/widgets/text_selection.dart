@@ -1536,7 +1536,7 @@ class SelectionOverlay {
   /// be pasted or not.
   ///
   /// Useful because the actual value of the clipboard can only be checked
-  /// asynchronously (see [Clipboard.getData]).
+  /// asynchronously (see [Clipboard.sendGetData]).
   final ClipboardStatusNotifier? clipboardStatus;
 
   /// The location of where the toolbar should be drawn in relative to the
@@ -3753,7 +3753,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 /// the clipboard can be pasted.
 ///
 /// The contents of the clipboard can only be read asynchronously, via
-/// [Clipboard.getData], so this maintains a value that can be used
+/// [Clipboard.sendGetData], so this maintains a value that can be used
 /// synchronously. Call [update] to asynchronously update value if needed.
 class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with WidgetsBindingObserver {
   /// Create a new ClipboardStatusNotifier.
@@ -3771,7 +3771,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
 
     final bool hasStrings;
     try {
-      hasStrings = await Clipboard.hasStrings(viewId);
+      hasStrings = await Clipboard.sendHasStrings(viewId);
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -3846,7 +3846,7 @@ enum ClipboardStatus {
   pasteable,
 
   /// The status of the clipboard is unknown. Since getting clipboard data is
-  /// asynchronous (see [Clipboard.getData]), this status often exists while
+  /// asynchronous (see [Clipboard.sendGetData]), this status often exists while
   /// waiting to receive the clipboard contents for the first time.
   unknown,
 

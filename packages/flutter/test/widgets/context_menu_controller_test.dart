@@ -21,7 +21,7 @@ void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   testWidgets('Hides and shows only a single menu', (WidgetTester tester) async {

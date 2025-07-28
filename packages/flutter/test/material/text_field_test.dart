@@ -56,7 +56,7 @@ void main() {
     );
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
-    await Clipboard.setData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: 'Clipboard data'), kImplicitViewId);
   });
 
   tearDown(() {
@@ -6191,7 +6191,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'), kImplicitViewId);
+      Clipboard.sendSetData(const ClipboardData(text: '一4二\n5三6'), kImplicitViewId);
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -6236,7 +6236,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'), kImplicitViewId);
+      Clipboard.sendSetData(const ClipboardData(text: '一4二\n5三6'), kImplicitViewId);
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -7656,7 +7656,7 @@ void main() {
         if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        } else if (methodCall.method == 'Clipboard.getData') {
+        } else if (methodCall.method == 'Clipboard.getDataFromView') {
           return <String, dynamic>{'text': clipboardContent};
         }
         return null;
@@ -7732,7 +7732,7 @@ void main() {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
-        if (methodCall.method == 'Clipboard.getData') {
+        if (methodCall.method == 'Clipboard.getDataFromView') {
           return <String, dynamic>{'text': clipboardContent};
         }
         return null;
@@ -7784,7 +7784,7 @@ void main() {
         if (methodCall.method == 'Clipboard.setData') {
           // ignore: avoid_dynamic_calls
           clipboardContent = methodCall.arguments['text'] as String;
-        } else if (methodCall.method == 'Clipboard.getData') {
+        } else if (methodCall.method == 'Clipboard.getDataFromView') {
           return <String, dynamic>{'text': clipboardContent};
         }
         return null;
@@ -9010,7 +9010,7 @@ void main() {
     final Key key = UniqueKey();
 
     // Clear the clipboard.
-    await Clipboard.setData(const ClipboardData(text: ''), kImplicitViewId);
+    await Clipboard.sendSetData(const ClipboardData(text: ''), kImplicitViewId);
 
     await tester.pumpWidget(
       overlay(
@@ -15046,7 +15046,7 @@ void main() {
         MethodCall methodCall,
       ) async {
         switch (methodCall.method) {
-          case 'Clipboard.getData':
+          case 'Clipboard.getDataFromView':
             calledGetData = true;
           case 'Clipboard.hasStrings':
             calledHasStrings = true;

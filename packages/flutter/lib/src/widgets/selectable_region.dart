@@ -1573,7 +1573,7 @@ class SelectableRegionState extends State<SelectableRegion>
     if (data == null) {
       return;
     }
-    await Clipboard.setData(ClipboardData(text: data.plainText), View.of(context).viewId);
+    await Clipboard.sendSetData(ClipboardData(text: data.plainText), View.of(context).viewId);
   }
 
   Future<void> _share() async {
