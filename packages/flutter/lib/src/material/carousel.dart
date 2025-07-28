@@ -715,9 +715,11 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     );
 
     if (maxExtent > 0.0) {
-      final double center = constraints.scrollOffset + constraints.viewportMainAxisExtent / 2.0;
-      final double item = center / maxExtent;
-      final int newIndex = item.round().clamp(0, childManager.childCount - 1);
+      final int newIndex = (constraints.scrollOffset / maxExtent).round().clamp(
+        0,
+        childManager.childCount - 1,
+      );
+
       if (newIndex != _currentIndex) {
         _currentIndex = newIndex;
         controller._currentIndex = newIndex;
@@ -1716,19 +1718,24 @@ class CarouselController extends ScrollController {
   /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
-  /// The index of the item currently centered in the viewport.
+  /// The index of the "active" item in the carousel, determined by its
+  /// visibility within the viewport.
   ///
-  /// This value is:
-  /// - Initialized to [initialItem].
-  /// - Dynamically updated during layout based on the item closest to the
-  ///   viewport's center.
+  /// This value is initialized to [initialItem] and is dynamically updated
+  /// during layout to reflect the primary visible item.
   ///
-  /// The logic differs slightly based on the view type:
-  /// - In [CarouselView], it's based on fixed-size item layout.
-  /// - In [CarouselView.weighted], it uses item weights to determine visual prominence.
+  /// The criteria for the active item depends on the carousel type:
   ///
-  /// This is maintained by the carousel's layout logic and reflects the most
-  /// up-to-date state after layout.
+  /// - For [CarouselView] (fixed-size items):
+  ///   Represents the index of the first visible item at the leading edge
+  ///   of the viewport.
+  ///
+  /// - For [CarouselView.weighted] (variable-weight items):
+  ///   Represents the index of the visible item that has the highest `weight`
+  ///   among all visible items.
+  ///
+  /// This property is managed internally by the widget and always reflects the
+  /// most up-to-date state after a layout cycle.
   int get currentIndex => _currentIndex ?? initialItem;
   int? _currentIndex;
 
