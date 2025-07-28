@@ -35,45 +35,76 @@ class WidgetPreviewWorkspace {
     _pubspecYaml.setLastModifiedSync(DateTime.now());
   }
 
-  WidgetPreviewProject createWorkspaceProject({required String name}) {
+  Future<WidgetPreviewProject> createWorkspaceProject({required String name}) async {
     if (_packages.containsKey(name)) {
       throw StateError('Project with name "$name" already exists.');
     }
     final project = WidgetPreviewProject(
       projectRoot: _packagesRoot.childDirectory(name)..createSync(),
       inWorkspace: true,
+      packageName: name,
     );
     project._writePubspec(project.pubspecContents);
     _packages[name] = project;
-    _updatePubspec();
+    await _updatePubspec();
     return project;
   }
 
-  void deleteWorkspaceProject({required String name}) {
+  Future<void> deleteWorkspaceProject({required String name}) async {
     if (!_packages.containsKey(name)) {
       throw StateError('Project with name "$name" does not exist.');
     }
     _packages[name]!.projectRoot.deleteSync(recursive: true);
-    _updatePubspec();
+    await _updatePubspec();
   }
 
-  void _updatePubspec() {
+  Future<void> _updatePubspec() async {
     final pubspec = StringBuffer('workspace:\n');
     for (final String package in _packages.keys) {
       pubspec.writeln('  - packages/$package');
     }
     _pubspecYaml.writeAsStringSync(pubspec.toString());
+
+    final String flutterRoot = getFlutterRoot();
+    await savePackageConfig(
+      PackageConfig(
+        <Package>[
+          for (final String package in _packages.keys)
+            Package(package, workspaceRoot.childDirectory('packages').childDirectory(package).uri),
+          Package(
+            'flutter',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'flutter_localizations',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter_localizations/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'sky_engine',
+            Uri(scheme: 'file', path: '$flutterRoot/bin/cache/pkg/sky_engine/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+        ],
+        extraData: {'flutterRoot': 'file://$flutterRoot', 'flutterVersion': '3.33.0'},
+      ),
+      workspaceRoot,
+    );
   }
 }
 
 /// A utility class used to manage a fake Flutter project for widget preview testing.
 class WidgetPreviewProject {
-  WidgetPreviewProject({required this.projectRoot, this.inWorkspace = false})
-    : _libDirectory = projectRoot.childDirectory('lib')..createSync(recursive: true),
-      _pubspecYaml = projectRoot.childFile(_kPubspec)..createSync();
+  WidgetPreviewProject({
+    required this.projectRoot,
+    this.packageName = 'foo',
+    this.inWorkspace = false,
+  }) : _libDirectory = projectRoot.childDirectory('lib')..createSync(recursive: true),
+       _pubspecYaml = projectRoot.childFile(_kPubspec)..createSync();
 
   /// The name for the package defined by this project.
-  String get packageName => 'foo';
+  final String packageName;
 
   /// The initial contents of the pubspec.yaml for the project.
   String get pubspecContents =>
@@ -87,6 +118,8 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
 ''';
 
@@ -122,9 +155,29 @@ dependencies:
   /// Writes `pubspec.yaml` and `.dart_tool/package_config.json` at [projectRoot].
   Future<void> initializePubspec() async {
     _writePubspec(pubspecContents);
-
+    final String flutterRoot = getFlutterRoot();
     await savePackageConfig(
-      PackageConfig(<Package>[Package(packageName, projectRoot.uri)]),
+      PackageConfig(
+        <Package>[
+          Package(packageName, projectRoot.uri),
+          Package(
+            'flutter',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'flutter_localizations',
+            Uri(scheme: 'file', path: '$flutterRoot/packages/flutter_localizations/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+          Package(
+            'sky_engine',
+            Uri(scheme: 'file', path: '$flutterRoot/bin/cache/pkg/sky_engine/'),
+            packageUriRoot: Uri(path: 'lib/'),
+          ),
+        ],
+        extraData: {'flutterRoot': 'file://$flutterRoot', 'flutterVersion': '3.33.0'},
+      ),
       projectRoot,
     );
   }

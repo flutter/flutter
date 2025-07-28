@@ -127,6 +127,14 @@ base class Preview {
   final PreviewLocalizations? localizations;
 }
 
+abstract base class MultiPreview {
+  const MultiPreview({this.prefix});
+
+  final String? prefix;
+
+  List<Preview> get previews;
+}
+
 /// A collection of localization objects and callbacks for use in widget previews.
 base class PreviewLocalizationsData {
   /// Creates a collection of localization objects and callbacks for use in

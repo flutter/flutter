@@ -128,12 +128,14 @@ part '$partPath';
       packageName: packageName,
       functionName: 'attributesPreview',
       isBuilder: false,
-      nameSymbol: 'kAttributesPreview',
-      size: 'Size(100.0, 100)',
-      textScaleFactor: '2.0',
+      name: 'Attributes preview',
+      // This is DartObject's toString() representation for the constant evaluation of a Size.
+      size: 'Size ((super) = OffsetBase (_dx = double (100.0); _dy = double (100.0)))',
+      textScaleFactor: 2.0,
       wrapper: 'testWrapper',
       theme: 'theming',
-      brightness: 'Brightness.dark',
+      // This is DartObject's toString() representation for an enum value.
+      brightness: 'Brightness dark',
       localizations: 'localizations',
     ),
     PreviewDetailsMatcher(
@@ -157,6 +159,11 @@ part '$partPath';
   ];
 
   static const _previewContainingFileContents = '''
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 @Preview(name: 'Top-level preview')
 Widget previews() => Text('Foo');
 
@@ -215,7 +222,7 @@ class MyWidget extends StatelessWidget {
   MyWidget.preview();
 
   @Preview(name: 'Factory constructor preview')
-  MyWidget.factoryPreview() => MyWidget.preview();
+  factory MyWidget.factoryPreview() => MyWidget.preview();
 
   @Preview(name: 'Static preview')
   static Widget previewStatic() => Text('Static');
