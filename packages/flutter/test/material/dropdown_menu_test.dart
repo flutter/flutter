@@ -4112,11 +4112,11 @@ void main() {
         ),
       ),
     );
-    // Pressing the tab key 3 times moves the focus to the icon button.
-    for (int i = 0; i < 3; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-    }
+
+    // Adding FocusNode to IconButton causes the IconButton to receive focus.
+    // Thus the it does not matter if the TextField has a FocusNode or not.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
 
     // Now the focus is on the icon button.
     final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
@@ -4153,17 +4153,11 @@ void main() {
           ),
         ),
       );
-      // If there is no `FocusNode`, by default, `TextField` can receive focus
-      // on desktop platforms, but not on mobile platforms. Therefore, on desktop
-      // platforms, it takes 3 tabs to reach the icon button.
-      final int tabCount = switch (defaultTargetPlatform) {
-        TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => 2,
-        TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 3,
-      };
-      for (int i = 0; i < tabCount; i++) {
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pump();
-      }
+
+      // Adding FocusNode to IconButton causes the IconButton to receive focus.
+      // Thus the it does not matter if the TextField has a FocusNode or not.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
 
       // Now the focus is on the icon button.
       final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
