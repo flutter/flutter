@@ -1,6 +1,8 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
@@ -413,29 +415,23 @@ abstract class _RangeStartEnd {
   }
 
   _RangeStartEnd.collapsed(int offset) : this(offset, offset);
-
   _RangeStartEnd.zero() : this.collapsed(0);
 
   int _start = -1;
-
   int get start => _start;
-
   set start(int value) {
     assert(value >= -1, 'Start index cannot be negative: $value');
     _start = value;
   }
 
   int _end = -1;
-
   int get end => _end;
-
   set end(int value) {
     assert(value >= -1, 'End index cannot be negative: $value');
     _end = value;
   }
 
   int get size => _end - _start;
-
   bool get isEmpty => _start == _end;
 
   @override
@@ -477,8 +473,18 @@ class ClusterRange extends _RangeStartEnd {
     }
     return other is ClusterRange && super == other;
   }
+
+  static ClusterRange intersectClusterRange(ClusterRange a, ClusterRange b) {
+    return ClusterRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
+  }
+
+  static ClusterRange mergeSequentialClusterRanges(ClusterRange a, ClusterRange b) {
+    assert(a.end == b.start || b.end == a.start);
+    return ClusterRange(start: math.min(a.start, b.start), end: math.max(a.end, b.end));
+  }
 }
 
+// TODO(jlvrova): either rename it or remove it
 class TextRange extends _RangeStartEnd {
   TextRange({required int start, required int end}) : super(start, end);
 
@@ -505,10 +511,12 @@ class TextRange extends _RangeStartEnd {
     return '[$start:$end)';
   }
 
-  String textFrom(WebParagraph paragraph) => paragraph.text.substring(_start, _end);
-
   TextRange translate(int offset) {
     return TextRange(start: start + offset, end: end + offset);
+  }
+
+  static TextRange intersectTextRange(TextRange a, TextRange b) {
+    return TextRange(start: math.max(a.start, b.start), end: math.min(a.end, b.end));
   }
 }
 
@@ -682,6 +690,12 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
+  void paint(ui.Canvas canvas, ui.Offset offset) {
+    for (final line in _layout.lines) {
+      _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+    }
+  }
+
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
     final int codepointPosition = switch (position.affinity) {
@@ -767,7 +781,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this, Canvas2DPainter());
+  late final TextPaint _paint = TextPaint(this, CanvasKitPainter());
 }
 
 class WebLineMetrics implements ui.LineMetrics {
@@ -878,6 +892,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   final WebParagraphStyle paragraphStyle;
 
   // TODO(jlavrova): Combine these two. We can do this with only a List<StyledTextRange>.
+  // Answer: not without adding extra information to the list.
+  // Currently, the list serves just as a flattened list of style/range
+  // The stack serves as a structure for push/pop (which cannot be done with the list).
   final List<StyledTextRange> textStylesList;
   final List<WebTextStyle> textStylesStack;
 
@@ -980,6 +997,8 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   void finishStyledTextRange() {
     // TODO(jlavrova): Instead of removing empty styles, can we try reusing the last one if it's empty?
     //                 We would need to make `StyledTextRange.style` non-final.
+    // Answer: we can but we we still have to (possibly) remove few empty styles in the middle.
+    // It's a small gain at expense of clarity, I think.
 
     // Remove all text styles without text
     while (textStylesList.length > 1 && textStylesList.last.start == textBuffer.length) {

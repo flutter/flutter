@@ -25,7 +25,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     final TextLayout layout = TextLayout(paragraph);
-    layout.codeUnitFlags = CodeUnitFlags.extractForParagraph(paragraph);
+    layout.codeUnitFlags.addAll(CodeUnitFlags.extractForParagraph(paragraph));
 
     int i = 0;
     for (final CodeUnitFlags flags in layout.codeUnitFlags) {

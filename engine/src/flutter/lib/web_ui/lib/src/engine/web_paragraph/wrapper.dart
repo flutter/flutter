@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'paragraph.dart';
 /// Wraps the text by a given width.
 class TextWrapper {
   TextWrapper(this._layout) {
+    // Start a new line from the beginning of the text
     startNewLine(0, 0.0);
   }
 
@@ -44,6 +45,8 @@ class TextWrapper {
   }
 
   // TODO(jlavrova): Consider combining this with `_layout.addLine`.
+  // Answer: startNewLine and _layout.addLine should not be combined.
+  // It's too much trouble to keep them in accord and there are cases when we call one without another.
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
     _whitespaces = ClusterRange.collapsed(start);
@@ -63,7 +66,6 @@ class TextWrapper {
     bool hardLineBreak = false;
     for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
-      // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
       double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
@@ -83,8 +85,7 @@ class TextWrapper {
           hardLineBreak,
           _top,
         );
-
-        // Start a new line
+        // Start a new line with an empty text
         startNewLine(index, 0.0);
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
         WebParagraphDebug.log('isSoftLineBreak: $index');
@@ -167,7 +168,7 @@ class TextWrapper {
           _top,
         );
 
-        // Start a new line but keep the clusters sequence
+        // Start a new line with already collected clusters sequence
         startNewLine(_whitespaces.end, _widthLetters);
       }
 

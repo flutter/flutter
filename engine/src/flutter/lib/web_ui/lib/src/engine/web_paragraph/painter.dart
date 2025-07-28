@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
-import '../canvaskit/canvaskit_canvas.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
 import '../util.dart';
@@ -18,58 +17,34 @@ import 'paragraph.dart';
 abstract class Painter {
   Painter();
 
-  void paintTextCluster(
-    CanvasKitCanvas canvas,
-    ExtendedTextCluster webTextCluster,
-    bool isDefaultLtr,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  );
+  void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr);
+  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
-  void paintShadows(
-    CanvasKitCanvas canvas,
-    ExtendedTextCluster webTextCluster,
-    bool isDefaultLtr,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  );
+  void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
+  void paintShadow(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   void paintBackground(
-    CanvasKitCanvas canvas,
+    ui.Canvas canvas,
     LineClusterBlock block,
     ui.Rect sourceRect,
     ui.Rect targetRect,
   );
 
-  void paintDecorations(
-    CanvasKitCanvas canvas,
-    LineClusterBlock block,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  );
+  void fillDecorations(LineClusterBlock block, ui.Rect sourceRect);
+  void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 }
 
 final DomOffscreenCanvas _paintCanvas = createDomOffscreenCanvas(500, 500);
 final paintContext = _paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
-class Canvas2DPainter extends Painter {
+class CanvasKitPainter extends Painter {
   @override
-  void paintBackground(
-    CanvasKitCanvas canvas,
-    LineBlock block,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  ) {
+  void paintBackground(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect) {
     canvas.drawRect(targetRect, block.textStyle.background!);
   }
 
   @override
-  void paintDecorations(
-    CanvasKitCanvas canvas,
-    LineClusterBlock block,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  ) {
+  void fillDecorations(LineClusterBlock block, ui.Rect sourceRect) {
     paintContext.fillStyle = block.textStyle.foreground?.color.toCssString();
 
     final double thickness = calculateThickness(block.textStyle);
@@ -95,7 +70,6 @@ class Canvas2DPainter extends Painter {
       final double x = sourceRect.left;
       final double y = sourceRect.top + position;
 
-      // TODO(jlavrova): setup style
       paintContext.reset();
       paintContext.lineWidth = thickness;
       paintContext.strokeStyle = block.textStyle.decorationColor!.toCssString();
@@ -139,7 +113,10 @@ class Canvas2DPainter extends Painter {
           );
       }
     }
+  }
 
+  @override
+  void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
@@ -157,73 +134,64 @@ class Canvas2DPainter extends Painter {
   }
 
   @override
-  void paintShadows(
-    CanvasKitCanvas canvas,
-    ExtendedTextCluster webTextCluster,
-    bool isDefaultLtr,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  ) {
+  void fillShadow(ExtendedTextCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
+
+    // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
+    // Answer: we cannot, and also there is a question of calculating the size of the shadow which we have to
+    // take from Chrome as well (performing another measure text operation with shadow attribute set).
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
+    paintContext.shadowColor = shadow.color.toCssString();
+    paintContext.shadowBlur = shadow.blurRadius;
+    paintContext.shadowOffsetX = shadow.offset.dx;
+    paintContext.shadowOffsetY = shadow.offset.dy;
+    WebParagraphDebug.log(
+      'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
+    );
 
-    for (final ui.Shadow shadow in textStyle.shadows!) {
-      // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times
-      paintContext.shadowColor = shadow.color.toCssString();
-      paintContext.shadowBlur = shadow.blurRadius;
-      paintContext.shadowOffsetX = shadow.offset.dx;
-      paintContext.shadowOffsetY = shadow.offset.dy;
-      WebParagraphDebug.log(
-        'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
-      );
+    // We fill the text cluster into a rectange [0,0,w,h]
+    // but we need to shift the y coordinate by the font ascent
+    // becase the text is drawn at the ascent, not at 0
+    paintContext.fillTextCluster(
+      webTextCluster.cluster!,
+      /*left:*/ 0,
+      /*top:*/ webTextCluster.fontBoundingBoxAscent,
+      /*ignore the text cluster shift from the text run*/ {
+        'x': (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
+        'y': 100,
+      },
+    );
 
-      // We fill the text cluster into a rectange [0,0,w,h]
-      // but we need to shift the y coordinate by the font ascent
-      // becase the text is drawn at the ascent, not at 0
-      paintContext.fillTextCluster(
-        webTextCluster.cluster!,
-        /*left:*/ 0,
-        /*top:*/ webTextCluster.fontBoundingBoxAscent,
-        /*ignore the text cluster shift from the text run*/ {
-          'x': (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
-          'y': 100,
-        },
-      );
-
-      // Clean the shadow context
-      paintContext.shadowColor = '';
-      paintContext.shadowBlur = 0;
-      paintContext.shadowOffsetX = 0;
-      paintContext.shadowOffsetY = 0;
-
-      // TODO(jlavrova): calculate the shadow bounds properly
-      final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
-      final ui.Rect shadowTargetRect = targetRect.inflate(100);
-
-      final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
-
-      final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-      if (skImage == null) {
-        throw Exception('Failed to convert text image bitmap to an SkImage.');
-      }
-      final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-      canvas.drawImageRect(
-        ckImage,
-        shadowSourceRect,
-        shadowTargetRect,
-        ui.Paint()..filterQuality = ui.FilterQuality.none,
-      );
-    }
+    // Clean the shadow context
+    paintContext.shadowColor = '';
+    paintContext.shadowBlur = 0;
+    paintContext.shadowOffsetX = 0;
+    paintContext.shadowOffsetY = 0;
   }
 
   @override
-  void paintTextCluster(
-    CanvasKitCanvas canvas,
-    ExtendedTextCluster webTextCluster,
-    bool isDefaultLtr,
-    ui.Rect sourceRect,
-    ui.Rect targetRect,
-  ) {
+  void paintShadow(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    // TODO(jlavrova): calculate the shadow bounds properly
+    final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
+    final ui.Rect shadowTargetRect = targetRect.inflate(100);
+
+    final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
+
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    final CkImage ckImage = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    canvas.drawImageRect(
+      ckImage,
+      shadowSourceRect,
+      shadowTargetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  @override
+  void fillTextCluster(ExtendedTextCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
     paintContext.fillStyle = textStyle.foreground?.color.toCssString();
 
@@ -239,6 +207,10 @@ class Canvas2DPainter extends Painter {
         'y': 0,
       },
     );
+  }
+
+  @override
+  void paintTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     final DomImageBitmap bitmap = _paintCanvas.transferToImageBitmap();
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);

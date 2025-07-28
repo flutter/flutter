@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,6 +14,7 @@ import 'paragraph.dart';
 typedef PaintBlock =
     void Function(CanvasKitCanvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect);
 
+// TODO(jlavrova): switch to abstract
 typedef PaintCluster =
     void Function(
       CanvasKitCanvas canvas,
@@ -33,9 +34,11 @@ class TextPaint {
   final Painter painter;
 
   // TODO(jlavrova): painting the entire block could require a really big canvas
+  // Answer: we only do blocks for background and decorations which we do not draw on canvas
+  // but rather implement ourselves via CanvasKit API
   void paintByBlocks(
     StyleElements styleElement,
-    CanvasKitCanvas canvas,
+    ui.Canvas canvas,
     TextLayout layout,
     TextLine line,
     double x,
@@ -65,7 +68,8 @@ class TextPaint {
         case StyleElements.background:
           painter.paintBackground(canvas, block, sourceRect, targetRect);
         case StyleElements.decorations:
-          painter.paintDecorations(canvas, block, sourceRect, targetRect);
+          painter.fillDecorations(block, sourceRect);
+          painter.paintDecorations(canvas, sourceRect, targetRect);
         default:
           assert(false);
       }
@@ -74,7 +78,7 @@ class TextPaint {
 
   void paintByClusters(
     StyleElements styleElement,
-    CanvasKitCanvas canvas,
+    ui.Canvas canvas,
     TextLayout layout,
     TextLine line,
     double x,
@@ -115,15 +119,13 @@ class TextPaint {
         );
         switch (styleElement) {
           case StyleElements.shadows:
-            painter.paintShadows(canvas, clusterText, layout.isDefaultLtr, sourceRect, targetRect);
+            for (final ui.Shadow shadow in clusterText.textStyle!.shadows!) {
+              painter.fillShadow(clusterText, shadow, layout.isDefaultLtr);
+              painter.paintShadow(canvas, sourceRect, targetRect);
+            }
           case StyleElements.text:
-            painter.paintTextCluster(
-              canvas,
-              clusterText,
-              layout.isDefaultLtr,
-              sourceRect,
-              targetRect,
-            );
+            painter.fillTextCluster(clusterText, layout.isDefaultLtr);
+            painter.paintTextCluster(canvas, sourceRect, targetRect);
           default:
             assert(false);
         }
@@ -174,8 +176,7 @@ class TextPaint {
     ui.Offset blockOffset,
     ui.Offset paragraphOffset,
   ) {
-    final ui.Rect advance = paragraph.getLayout().getAdvance(
-      block.textMetrics!,
+    final ui.Rect advance = block.textMetrics!.getAdvance(
       block.textRange.translate(-block.textMetricsZero),
     );
 
@@ -240,5 +241,50 @@ class TextPaint {
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
+  }
+
+  void paintLine(ui.Canvas canvas, TextLayout layout, TextLine line, double x, double y) {
+    WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
+    paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
+
+    WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
+    paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
+
+    WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
+    paintByClusters(StyleElements.text, canvas, layout, line, x, y);
+
+    WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
+    paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
+  }
+}
+
+extension on DomTextMetrics {
+  static double epsilon = 0.001;
+
+  bool nextToEachOtherHorizontally(ui.Rect rect1, ui.Rect rect2) {
+    if ((rect1.right - rect2.left).abs() < epsilon) {
+      return true;
+    }
+    if ((rect1.left - rect2.right).abs() < epsilon) {
+      return true;
+    }
+    return false;
+  }
+
+  ui.Rect getAdvance(TextRange textRange) {
+    final List<DomRectReadOnly> rects = getSelectionRects(textRange.start, textRange.end);
+    ui.Rect union = ui.Rect.fromLTWH(
+      rects.first.left,
+      rects.first.top,
+      rects.first.width,
+      rects.first.height,
+    );
+    for (final rect in rects.skip(1)) {
+      final r = ui.Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height);
+      // Assert that this is a continuous set of rectangles
+      assert(nextToEachOtherHorizontally(union, r));
+      union = union.expandToInclude(r);
+    }
+    return union;
   }
 }
