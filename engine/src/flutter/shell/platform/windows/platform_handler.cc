@@ -485,9 +485,8 @@ void PlatformHandler::HandleMethodCall(
     FML_LOG(ERROR) << kGetClipboardDataMethod
                    << " is now deprecated. "
                       "Use "
-                   << kGetClipboardDataFromViewMethod
-        " instead"
-        " which has support for multiple views.";
+                   << kGetClipboardDataFromViewMethod << " instead"
+                   << " which has support for multiple views.";
 
     // Only one string argument is expected.
     const rapidjson::Value& format = method_call.arguments()[0];
@@ -516,7 +515,7 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
 
-    if (strcmp(formatItr->Value().GetString(), kTextPlainFormat) != 0) {
+    if (strcmp(formatItr->value.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
@@ -535,9 +534,8 @@ void PlatformHandler::HandleMethodCall(
     FML_LOG(ERROR) << kHasStringsClipboardMethod
                    << " is now deprecated. "
                       "Use "
-                   << kHasStringsOnViewClipboardMethod
-        " instead"
-        " which has support for multiple views.";
+                   << kHasStringsOnViewClipboardMethod << " instead"
+                   << " which has support for multiple views.";
 
     // Only one string argument is expected.
     const rapidjson::Value& format = method_call.arguments()[0];
@@ -566,7 +564,7 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
 
-    if (strcmp(formatItr->Value().GetString(), kTextPlainFormat) != 0) {
+    if (strcmp(formatItr->value.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }

@@ -116,16 +116,19 @@ class MockPlatformHandler : public PlatformHandler {
   MOCK_METHOD(void,
               GetPlainText,
               (std::unique_ptr<MethodResult<rapidjson::Document>>,
-               std::string_view key),
+               std::string_view key,
+               FlutterViewId view_id),
               (override));
   MOCK_METHOD(void,
               GetHasStrings,
-              (std::unique_ptr<MethodResult<rapidjson::Document>>),
+              (std::unique_ptr<MethodResult<rapidjson::Document>>,
+               FlutterViewId view_id),
               (override));
   MOCK_METHOD(void,
               SetPlainText,
               (const std::string&,
-               std::unique_ptr<MethodResult<rapidjson::Document>>),
+               std::unique_ptr<MethodResult<rapidjson::Document>>,
+               FlutterViewId view_id),
               (override));
   MOCK_METHOD(void,
               SystemSoundPlay,
@@ -306,7 +309,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataReportsGetDataFailure) {
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to get clipboard data\",1]");
 }
 
-TEST_F(PlatformHandlerText, GetClipboardDataFromView) {
+TEST_F(PlatformHandlerTest, GetClipboardDataFromView) {
   UseEngineWithView();
 
   TestBinaryMessenger messenger;
@@ -343,7 +346,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataFromViewRejectsUnknownContentType) {
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
 }
 
-TEST_F(PlatformHandlerText,
+TEST_F(PlatformHandlerTest,
        GetClipboardDataFromViewRejectsNonStringTypeForFormat) {
   UseEngineWithView();
 
