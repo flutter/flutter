@@ -4324,8 +4324,6 @@ void main() {
   testWidgets('ensure items are constrained to intrinsic size of DropdownMenu (width or anchor) when no maximumSize', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 810);
-    tester.view.devicePixelRatio = 1.0;
     const String shortLabel = 'Male';
     await tester.pumpWidget(
       const MaterialApp(
@@ -4355,7 +4353,7 @@ void main() {
           body: SizedBox(
             width: double.infinity,
             child: DropdownMenu<int>(
-              expandedInsets: EdgeInsets.zero,
+              expandedInsets: EdgeInsets.symmetric(horizontal: 20),
               dropdownMenuEntries: <DropdownMenuEntry<int>>[
                 DropdownMenuEntry<int>(value: 0, label: shortLabel),
               ],
@@ -4370,7 +4368,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(tester.getSize(findMenuItemButton(shortLabel)).width, 390.0);
+    expect(tester.getSize(findMenuItemButton(shortLabel)).width, 760.0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
