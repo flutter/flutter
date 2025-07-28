@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/shader.h"
 
+#include <iostream>
 #include <utility>
 
 #include "flutter/lib/gpu/formats.h"
@@ -53,6 +54,7 @@ fml::RefPtr<Shader> Shader::Make(
   shader->uniform_structs_ = std::move(uniform_structs);
   shader->uniform_textures_ = std::move(uniform_textures);
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
+  shader->is_first_time_ = true;
   return shader;
 }
 
@@ -67,23 +69,37 @@ bool Shader::IsRegistered(Context& context) {
 }
 
 bool Shader::RegisterSync(Context& context) {
-  if (IsRegistered(context)) {
-    return true;  // Already registered.
-  }
+  if (is_first_time_) {
+    if (IsRegistered(context)) {
+      std::cout << "Attempt to override shader: " << entrypoint_ << "\n";
+      auto& lib = *context.GetContext()->GetShaderLibrary();
+      lib.UnregisterFunction(entrypoint_, stage_);
+    }
+    auto& lib = *context.GetContext()->GetShaderLibrary();
+    std::promise<bool> promise;
 
-  auto& lib = *context.GetContext()->GetShaderLibrary();
-
-  std::promise<bool> promise;
-  auto future = promise.get_future();
-  lib.RegisterFunction(
-      entrypoint_, stage_, code_mapping_,
-      fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
-        promise.set_value(result);
-      }));
-  if (!future.get()) {
-    return false;  // Registration failed.
+    auto future = promise.get_future();
+    lib.RegisterFunction(
+        entrypoint_, stage_, code_mapping_,
+        fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
+          promise.set_value(result);
+        }));
+    if (!future.get()) {
+      return false;  // Registration failed.
+    }
+    is_first_time_ = false;
+    return true;
   }
   return true;
+}
+
+bool Shader::UnRegisterSync(Context& context) {
+  if (IsRegistered(context)) {
+    auto& lib = *context.GetContext()->GetShaderLibrary();
+    lib.UnregisterFunction(entrypoint_, stage_);
+    return true;
+  }
+  return false;
 }
 
 std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
@@ -156,4 +172,9 @@ int InternalFlutterGpu_Shader_GetUniformMemberOffset(
   }
 
   return member->offset;
+}
+
+bool InternalFlutterGpu_Shader_Remove(flutter::gpu::Shader* wrapper,
+                                      flutter::gpu::Context* gpu_context) {
+  return wrapper->UnRegisterSync(*gpu_context);
 }

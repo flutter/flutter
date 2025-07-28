@@ -58,6 +58,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   bool RegisterSync(Context& context);
 
+  bool UnRegisterSync(Context& context);
+
   std::shared_ptr<impeller::VertexDescriptor> CreateVertexDescriptor() const;
 
   const std::vector<impeller::DescriptorSetLayout>& GetDescriptorSetLayouts()
@@ -81,6 +83,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+  bool is_first_time_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);
 };
@@ -105,6 +108,10 @@ extern int InternalFlutterGpu_Shader_GetUniformMemberOffset(
     Dart_Handle struct_name_handle,
     Dart_Handle member_name_handle);
 
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Shader_Remove(
+    flutter::gpu::Shader* wrapper,
+    flutter::gpu::Context* gpu_context);
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_SHADER_H_
