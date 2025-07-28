@@ -200,7 +200,6 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return OverlayPortal(
-          skipSemantics: true,
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
             final BuildContext headerContext = _headerKey.currentContext!;

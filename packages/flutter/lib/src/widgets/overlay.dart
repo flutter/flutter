@@ -1501,6 +1501,7 @@ class _RenderTheater extends RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      print('child run time type: ${child.runtimeType}}');
       childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
@@ -1791,7 +1792,6 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-    this.skipSemantics = false,
   }) : _targetRootOverlay = false;
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
@@ -1802,7 +1802,6 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-    this.skipSemantics = false,
   }) : _targetRootOverlay = true;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
@@ -1861,17 +1860,6 @@ class OverlayPortal extends StatefulWidget {
 
   /// A widget below this widget in the tree.
   final Widget? child;
-
-  /// Whether to skip adding parent and child identifiers.
-  ///
-  /// Two identifiers are added in OverlayPortal to identify each other when
-  /// traversal tree is generated. However, some overlayChildBuilders, such as
-  /// a [Positioned] widget, requires a direct [Stack] parent. In this case,
-  /// setting [skipSemantics] to true will allow the overlay child skip
-  /// inserting a [Semantics] in between.
-  ///
-  /// Defaults to false.
-  final bool skipSemantics;
 
   final bool _targetRootOverlay;
 
@@ -2007,20 +1995,22 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
-    Widget overlayChild = Builder(builder: widget.overlayChildBuilder);
-    Widget? overlayParent = widget.child;
-    if (!widget.skipSemantics) {
-      overlayChild = Semantics(identifier: childIdentifier, child: overlayChild);
-      overlayParent = Semantics(identifier: parentIdentifier, child: overlayParent);
-    }
-
     if (zOrderIndex == null) {
-      return _OverlayPortal(overlayLocation: null, overlayChild: null, child: overlayParent);
+      return _OverlayPortal(
+        overlayLocation: null,
+        overlayChild: null,
+        child: Semantics(identifier: parentIdentifier, child: widget.child),
+      );
     }
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
-      overlayChild: _DeferredLayout(child: overlayChild),
-      child: overlayParent,
+      overlayChild: _DeferredLayout(
+        child: Semantics(
+          identifier: childIdentifier,
+          child: Builder(builder: widget.overlayChildBuilder),
+        ),
+      ),
+      child: Semantics(identifier: parentIdentifier, child: widget.child),
     );
   }
 }

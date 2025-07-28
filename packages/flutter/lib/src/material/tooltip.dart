@@ -948,7 +948,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       );
     }
     return OverlayPortal(
-      skipSemantics: true,
       controller: _overlayController,
       overlayChildBuilder: _buildTooltipOverlay,
       child: result,
