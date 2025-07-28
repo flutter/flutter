@@ -17118,7 +17118,6 @@ void main() {
         expect(find.byType(SystemContextMenu), findsOneWidget);
 
         // Tap the selection to toggle the toolbar (hide).
-        await tester.tapAt(textOffsetToPosition(tester, 1));
         // Simulate system hiding the menu as a result of tapping outside of it.
         final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'method': 'ContextMenu.onDismissSystemContextMenu',
@@ -17133,6 +17132,7 @@ void main() {
         } catch (e) {
           error = e;
         }
+        await tester.tapAt(textOffsetToPosition(tester, 1));
         await tester.pumpAndSettle();
 
         expect(error, isNull);
