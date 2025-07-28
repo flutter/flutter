@@ -3495,6 +3495,7 @@ void main() {
     final FocusNode buttonFocusNode = FocusNode();
     final FocusNode textFieldFocusNode = FocusNode();
     addTearDown(buttonFocusNode.dispose);
+    addTearDown(textFieldFocusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
