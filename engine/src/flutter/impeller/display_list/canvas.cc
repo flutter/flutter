@@ -1214,7 +1214,6 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
 
   FML_CHECK(!render_passes_.empty());
   const LazyRenderingConfig& back_render_pass = render_passes_.back();
-  FML_CHECK(back_render_pass.inline_pass_context->IsValid());
   std::shared_ptr<Texture> back_texture =
       back_render_pass.inline_pass_context->GetTexture();
   FML_CHECK(back_texture);
