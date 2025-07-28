@@ -72,8 +72,14 @@ static constexpr char kClipboardHasStringsOnViewNonIntegerViewIdMessage[] =
     "{\"method\":\"Clipboard.hasStringsOnView\",\"args\":{\"viewId\":"
     "\"notanint\","
     "\"format\":\"text/plain\"}}";
-static constexpr char kClipboardSetDataMessage[] =
+static constexpr char kClipboardSetDataWithoutViewIdMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
+static constexpr char kClipboardSetDataWithViewIdMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\","
+    "\"viewId\":0}}";
+static constexpr char kClipboardSetDataWithNonIntegerViewIdMessage[] =
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\","
+    "\"viewId\":\"notanint\"}}";
 static constexpr char kClipboardSetDataNullTextMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":null}}";
 static constexpr char kClipboardSetDataUnknownTypeMessage[] =
@@ -663,7 +669,33 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsOnViewReportsErrors) {
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
 }
 
-TEST_F(PlatformHandlerTest, ClipboardSetData) {
+TEST_F(PlatformHandlerTest, ClipboardSetDataImplicitView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), SetString)
+        .Times(1)
+        .WillOnce([](std::wstring string) {
+          EXPECT_EQ(string, L"hello");
+          return kErrorSuccess;
+        });
+
+    return clipboard;
+  });
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataWithoutViewIdMessage);
+
+  EXPECT_EQ(result, "[null]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardSetDataWithView) {
   UseEngineWithView();
 
   TestBinaryMessenger messenger;
@@ -684,9 +716,21 @@ TEST_F(PlatformHandlerTest, ClipboardSetData) {
   });
 
   std::string result =
-      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+      SimulatePlatformMessage(&messenger, kClipboardSetDataWithViewIdMessage);
 
   EXPECT_EQ(result, "[null]");
+}
+
+TEST_F(PlatformHandlerTest, ClipboardSetDataNonIntegerViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataWithNonIntegerViewIdMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard viewId\",null]");
 }
 
 // Regression test for: https://github.com/flutter/flutter/issues/121976
@@ -720,8 +764,8 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataRequiresView) {
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
 
-  std::string result =
-      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataWithoutViewIdMessage);
 
   EXPECT_EQ(result,
             "[\"Clipboard error\",\"Clipboard is not available in Windows "
@@ -742,8 +786,8 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataReportsOpenFailure) {
     return clipboard;
   });
 
-  std::string result =
-      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataWithoutViewIdMessage);
 
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to open clipboard\",1]");
 }
@@ -765,8 +809,8 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataReportsSetDataFailure) {
     return clipboard;
   });
 
-  std::string result =
-      SimulatePlatformMessage(&messenger, kClipboardSetDataMessage);
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardSetDataWithoutViewIdMessage);
 
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to set clipboard data\",1]");
 }
