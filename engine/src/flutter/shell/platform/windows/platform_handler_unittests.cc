@@ -32,6 +32,24 @@ static constexpr char kClipboardGetDataMessage[] =
     "{\"method\":\"Clipboard.getData\",\"args\":\"text/plain\"}";
 static constexpr char kClipboardGetDataFakeContentTypeMessage[] =
     "{\"method\":\"Clipboard.getData\",\"args\":\"text/madeupcontenttype\"}";
+static constexpr char kClipboardGetDataFromViewMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"viewId\":0,"
+    "\"format\":\"text/plain\"}}";
+static constexpr char kClipboardGetDataFromViewFakeContentTypeMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"viewId\":0,"
+    "\"format\":\"text/madeupcontenttype\"}}";
+static constexpr char kClipboardGetDataFromViewNonStringFormatMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"viewId\":0,"
+    "\"format\":123}}";
+static constexpr char kClipboardGetDataFromViewMissingFormatMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"viewId\":0}}";
+static constexpr char kClipboardGetDataFromViewMissingViewIdMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"format\":\"text/"
+    "plain\"}}";
+static constexpr char kClipboardGetDataFromViewNonIntegerViewIdMessage[] =
+    "{\"method\":\"Clipboard.getDataFromView\",\"args\":{\"viewId\":"
+    "\"notanint\","
+    "\"format\":\"text/plain\"}}";
 static constexpr char kClipboardHasStringsMessage[] =
     "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/plain\"}";
 static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
@@ -262,6 +280,96 @@ TEST_F(PlatformHandlerTest, GetClipboardDataReportsGetDataFailure) {
       SimulatePlatformMessage(&messenger, kClipboardGetDataMessage);
 
   EXPECT_EQ(result, "[\"Clipboard error\",\"Unable to get clipboard data\",1]");
+}
+
+TEST_F(PlatformHandlerText, GetClipboardDataFromView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine(), []() {
+    auto clipboard = std::make_unique<MockScopedClipboard>();
+
+    EXPECT_CALL(*clipboard.get(), Open)
+        .Times(1)
+        .WillOnce(Return(kErrorSuccess));
+    EXPECT_CALL(*clipboard.get(), HasString).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*clipboard.get(), GetString)
+        .Times(1)
+        .WillOnce(Return(std::wstring(L"Hello world from view")));
+
+    return clipboard;
+  });
+
+  std::string result =
+      SimulatePlatformMessage(&messenger, kClipboardGetDataFromViewMessage);
+
+  EXPECT_EQ(result, "[{\"text\":\"Hello world from view\"}]");
+}
+
+TEST_F(PlatformHandlerTest, GetClipboardDataFromViewRejectsUnknownContentType) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting an unknown content type is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFromViewFakeContentTypeMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerText,
+       GetClipboardDataFromViewRejectsNonStringTypeForFormat) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a non-string type for the format is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFromViewNonStringFormatMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerTest, GetClipboardDataFromViewRejectsMissingFormatField) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a missing format field is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFromViewMissingFormatMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard format\",null]");
+}
+
+TEST_F(PlatformHandlerTest, GetClipboardDataFromViewRejectsMissingViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a missing viewId is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFromViewMissingViewIdMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard viewId\",null]");
+}
+
+TEST_F(PlatformHandlerTest, GetClipboardFromViewRejectsNonIntegerViewId) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger;
+  PlatformHandler platform_handler(&messenger, engine());
+
+  // Requesting a non-integer viewId is an error.
+  std::string result = SimulatePlatformMessage(
+      &messenger, kClipboardGetDataFromViewNonIntegerViewIdMessage);
+
+  EXPECT_EQ(result, "[\"Clipboard error\",\"Unknown clipboard viewId\",null]");
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStrings) {
