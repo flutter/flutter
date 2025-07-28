@@ -590,6 +590,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? _selectedEntryIndex;
   late final void Function() _clearSelectedEntryIndex;
 
+  late final FocusNode _trailingIconButtonFocusNode;
+
   @override
   void initState() {
     super.initState();
@@ -610,6 +612,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
+    _trailingIconButtonFocusNode = FocusNode(skipTraversal: widget.skipTrailingIconTraversal);
   }
 
   @override
@@ -618,6 +621,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
+    _trailingIconButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -677,6 +681,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
         _selectedEntryIndex = index;
       }
+    }
+
+    if (oldWidget.skipTrailingIconTraversal != widget.skipTrailingIconTraversal) {
+      _trailingIconButtonFocusNode.skipTraversal = widget.skipTrailingIconTraversal;
     }
   }
 
@@ -1086,7 +1094,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
                 child: IconButton(
-                  focusNode: FocusNode(skipTraversal: widget.skipTrailingIconTraversal),
+                  focusNode: _trailingIconButtonFocusNode,
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
                   padding: isCollapsed ? EdgeInsets.zero : null,

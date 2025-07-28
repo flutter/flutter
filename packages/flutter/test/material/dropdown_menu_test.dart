@@ -3493,6 +3493,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/131120.
   testWidgets('Focus traversal ignores non visible entries', (WidgetTester tester) async {
     final FocusNode buttonFocusNode = FocusNode();
+    final FocusNode textFieldFocusNode = FocusNode();
     addTearDown(buttonFocusNode.dispose);
 
     await tester.pumpWidget(
@@ -3500,7 +3501,10 @@ void main() {
         home: Scaffold(
           body: Column(
             children: <Widget>[
-              DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                focusNode: textFieldFocusNode,
+              ),
               ElevatedButton(
                 focusNode: buttonFocusNode,
                 onPressed: () {},
@@ -3512,17 +3516,16 @@ void main() {
       ),
     );
 
-    // Move the focus to the text field.
-    primaryFocus!.nextFocus();
-    await tester.pump();
-    final Element textField = tester.element(find.byType(TextField));
-    expect(Focus.of(textField).hasFocus, isTrue);
-
     // Move the focus to the dropdown trailing icon.
     primaryFocus!.nextFocus();
     await tester.pump();
     final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
     expect(Focus.of(iconButton).hasFocus, isTrue);
+
+    // Move the focus to the text field.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(textFieldFocusNode.hasFocus, isTrue);
 
     // Move the focus to the elevated button.
     primaryFocus!.nextFocus();
