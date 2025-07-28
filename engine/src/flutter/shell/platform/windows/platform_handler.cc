@@ -19,9 +19,11 @@
 static constexpr char kChannelName[] = "flutter/platform";
 
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
-static constexpr char kGetClipboardDataFromViewMethod[] = "Clipboard.getDataFromView";
+static constexpr char kGetClipboardDataFromViewMethod[] =
+    "Clipboard.getDataFromView";
 static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
-static constexpr char kHasStringsOnViewClipboardMethod[] = "Clipboard.hasStringsOnView";
+static constexpr char kHasStringsOnViewClipboardMethod[] =
+    "Clipboard.hasStringsOnView";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
 static constexpr char kExitApplicationMethod[] = "System.exitApplication";
 static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
@@ -480,9 +482,12 @@ void PlatformHandler::HandleMethodCall(
   } else if (method.compare(kGetClipboardDataMethod) == 0) {
     // This method is deprecated and should not be used.
     // Use kGetClipboardDataFromViewMethod instead.
-    FML_LOG(ERROR) << kGetClipboardDataMethod << " is now deprecated. "
-                      "Use " << kGetClipboardDataFromViewMethod " instead"
-                      " which has support for multiple views.";
+    FML_LOG(ERROR) << kGetClipboardDataMethod
+                   << " is now deprecated. "
+                      "Use "
+                   << kGetClipboardDataFromViewMethod
+        " instead"
+        " which has support for multiple views.";
 
     // Only one string argument is expected.
     const rapidjson::Value& format = method_call.arguments()[0];
@@ -527,9 +532,12 @@ void PlatformHandler::HandleMethodCall(
   } else if (method.compare(kHasStringsClipboardMethod) == 0) {
     // This method is deprecated and should not be used.
     // Use kHasStringsOnViewClipboardMethod instead.
-    FML_LOG(ERROR) << kHasStringsClipboardMethod << " is now deprecated. "
-                      "Use " << kHasStringsOnViewClipboardMethod " instead"
-                      " which has support for multiple views.";
+    FML_LOG(ERROR) << kHasStringsClipboardMethod
+                   << " is now deprecated. "
+                      "Use "
+                   << kHasStringsOnViewClipboardMethod
+        " instead"
+        " which has support for multiple views.";
 
     // Only one string argument is expected.
     const rapidjson::Value& format = method_call.arguments()[0];
@@ -599,8 +607,8 @@ void PlatformHandler::HandleMethodCall(
       FML_LOG(ERROR) << "Calling " << kSetClipboardDataMethod
                      << " without a viewId is deprecated. "
                         "Use "
-                        << kSetClipboardDataMethod
-                        << " with a " << kViewIdKey << " key instead.";
+                     << kSetClipboardDataMethod << " with a " << kViewIdKey
+                     << " key instead.";
     } else if (!viewIdItr->value.IsInt64()) {
       result->Error(kClipboardError, kUnknownClipboardViewIdMessage);
       return;
