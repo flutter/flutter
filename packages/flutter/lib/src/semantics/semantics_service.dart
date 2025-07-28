@@ -70,7 +70,6 @@ abstract final class SemanticsService {
   /// Sends a semantic announcement for a particular view.
   ///
   /// {@macro flutter.semantics.service.announce}
-  ///
   static Future<void> sendAnnouncement(
     int viewId,
     String message,
