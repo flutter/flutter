@@ -5010,7 +5010,8 @@ class EditableTextState extends State<EditableText>
       hideToolbar(hideHandles);
     } else {
       if (_hideSystemToolbarLastTimestamp != null &&
-          (SchedulerBinding.instance.currentSystemFrameTimeStamp - _hideSystemToolbarLastTimestamp!) <
+          (SchedulerBinding.instance.currentSystemFrameTimeStamp -
+                  _hideSystemToolbarLastTimestamp!) <
               _systemToolbarToggleDebounceThreshold) {
         // Do not show the system toolbar if it was only just hidden. This is
         // needed to prevent the system toolbar from being shown again when tapping
