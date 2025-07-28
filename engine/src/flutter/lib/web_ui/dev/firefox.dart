@@ -70,7 +70,7 @@ user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 user_pref("app.update.auto", false);
 user_pref("app.update.enabled", false);
-user_pref("app.update.silent", false);
+user_pref("app.update.silent", true);
 ''';
 
         final Directory temporaryProfileDirectory = Directory(
