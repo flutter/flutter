@@ -29,23 +29,19 @@ using ::testing::Return;
 static constexpr char kChannelName[] = "flutter/platform";
 
 static constexpr char kClipboardGetDataMessage[] =
-    "{\"method\":\"Clipboard.getData\",\"args\":[\"text/plain\",0]}";
+    "{\"method\":\"Clipboard.getData\",\"args\":\"text/plain\"}";
 static constexpr char kClipboardGetDataFakeContentTypeMessage[] =
-    "{\"method\":\"Clipboard.getData\",\"args\":[\"text/madeupcontenttype\", "
-    "0]}";
+    "{\"method\":\"Clipboard.getData\",\"args\":\"text/madeupcontenttype\"}";
 static constexpr char kClipboardHasStringsMessage[] =
-    "{\"method\":\"Clipboard.hasStrings\",\"args\":[\"text/plain\",0]}";
+    "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/plain\"}";
 static constexpr char kClipboardHasStringsFakeContentTypeMessage[] =
-    "{\"method\":\"Clipboard.hasStrings\",\"args\":[\"text/"
-    "madeupcontenttype\", 0]}";
+    "{\"method\":\"Clipboard.hasStrings\",\"args\":\"text/madeupcontenttype\"}";
 static constexpr char kClipboardSetDataMessage[] =
-    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\",\"viewId\":"
-    "0}}";
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":\"hello\"}}";
 static constexpr char kClipboardSetDataNullTextMessage[] =
-    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":null,\"viewId\":0}}";
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"text\":null}}";
 static constexpr char kClipboardSetDataUnknownTypeMessage[] =
-    "{\"method\":\"Clipboard.setData\",\"args\":{\"madeuptype\":\"hello\","
-    "\"viewId\":0}}";
+    "{\"method\":\"Clipboard.setData\",\"args\":{\"madeuptype\":\"hello\"}}";
 static constexpr char kSystemSoundTypeAlertMessage[] =
     "{\"method\":\"SystemSound.play\",\"args\":\"SystemSoundType.alert\"}";
 static constexpr char kSystemExitApplicationRequiredMessage[] =
@@ -78,19 +74,16 @@ class MockPlatformHandler : public PlatformHandler {
   MOCK_METHOD(void,
               GetPlainText,
               (std::unique_ptr<MethodResult<rapidjson::Document>>,
-               std::string_view key,
-               FlutterViewId view_id),
+               std::string_view key),
               (override));
   MOCK_METHOD(void,
               GetHasStrings,
-              (std::unique_ptr<MethodResult<rapidjson::Document>>,
-               FlutterViewId view_id),
+              (std::unique_ptr<MethodResult<rapidjson::Document>>),
               (override));
   MOCK_METHOD(void,
               SetPlainText,
               (const std::string&,
-               std::unique_ptr<MethodResult<rapidjson::Document>>,
-               FlutterViewId view_id),
+               std::unique_ptr<MethodResult<rapidjson::Document>>),
               (override));
   MOCK_METHOD(void,
               SystemSoundPlay,

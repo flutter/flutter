@@ -19,7 +19,9 @@
 static constexpr char kChannelName[] = "flutter/platform";
 
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
+static constexpr char kGetClipboardDataFromViewMethod[] = "Clipboard.getDataFromView";
 static constexpr char kHasStringsClipboardMethod[] = "Clipboard.hasStrings";
+static constexpr char kHasStringsOnViewClipboardMethod[] = "Clipboard.hasStringsOnView";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
 static constexpr char kExitApplicationMethod[] = "System.exitApplication";
 static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
@@ -37,6 +39,7 @@ static constexpr char kExitResponseExit[] = "exit";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kTextKey[] = "text";
+static constexpr char kFormatKey[] = "format";
 static constexpr char kViewIdKey[] = "viewId";
 static constexpr char kUnknownClipboardFormatMessage[] =
     "Unknown clipboard format";
@@ -475,28 +478,105 @@ void PlatformHandler::HandleMethodCall(
     SystemExitApplication(StringToAppExitType(exit_type), exit_code,
                           std::move(result));
   } else if (method.compare(kGetClipboardDataMethod) == 0) {
-    // Only two arguments are expected.
-    auto const* args = method_call.arguments();
-    const rapidjson::Value& format = (*args)[0];
-    const rapidjson::Value& viewId = (*args)[1];
+    // This method is deprecated and should not be used.
+    // Use kGetClipboardDataFromViewMethod instead.
+    FML_LOG(ERROR) << kGetClipboardDataMethod << " is now deprecated. "
+                      "Use " << kGetClipboardDataFromViewMethod " instead"
+                      " which has support for multiple views.";
+
+    // Only one string argument is expected.
+    const rapidjson::Value& format = method_call.arguments()[0];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    GetPlainText(std::move(result), kTextKey, viewId.GetInt64());
+    GetPlainText(std::move(result), kTextKey, kImplicitViewId);
+  } else if (method.compare(kGetClipboardDataFromViewMethod) == 0) {
+    // Expected argument of shape:
+    // {
+    //   "format": "text/plain",
+    //   "viewId": <int64>
+    // }
+    const rapidjson::Value& document = *method_call.arguments();
+
+    rapidjson::Value::ConstMemberIterator formatItr =
+        document.FindMember(kFormatKey);
+    if (formatItr == document.MemberEnd()) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+    if (!formatItr->value.IsString()) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+
+    if (strcmp(formatItr->Value().GetString(), kTextPlainFormat) != 0) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+
+    rapidjson::Value::ConstMemberIterator viewIdItr =
+        document.FindMember(kViewIdKey);
+    if (viewIdItr == document.MemberEnd() || !viewIdItr->value.IsInt64()) {
+      result->Error(kClipboardError, kUnknownClipboardViewIdMessage);
+      return;
+    }
+
+    GetPlainText(std::move(result), kTextKey, viewIdItr->value.GetInt64());
   } else if (method.compare(kHasStringsClipboardMethod) == 0) {
-    // Only two arguments are expected.
-    auto const* args = method_call.arguments();
-    const rapidjson::Value& format = (*args)[0];
-    const rapidjson::Value& viewId = (*args)[1];
+    // This method is deprecated and should not be used.
+    // Use kHasStringsOnViewClipboardMethod instead.
+    FML_LOG(ERROR) << kHasStringsClipboardMethod << " is now deprecated. "
+                      "Use " << kHasStringsOnViewClipboardMethod " instead"
+                      " which has support for multiple views.";
+
+    // Only one string argument is expected.
+    const rapidjson::Value& format = method_call.arguments()[0];
 
     if (strcmp(format.GetString(), kTextPlainFormat) != 0) {
       result->Error(kClipboardError, kUnknownClipboardFormatMessage);
       return;
     }
-    GetHasStrings(std::move(result), viewId.GetInt64());
+    GetHasStrings(std::move(result), kImplicitViewId);
+  } else if (method.compare(kHasStringsOnViewClipboardMethod) == 0) {
+    // Expected argument of shape:
+    // {
+    //   "format": "text/plain",
+    //   "viewId": <int64>
+    // }
+    const rapidjson::Value& document = *method_call.arguments();
+
+    rapidjson::Value::ConstMemberIterator formatItr =
+        document.FindMember(kFormatKey);
+    if (formatItr == document.MemberEnd()) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+    if (!formatItr->value.IsString()) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+
+    if (strcmp(formatItr->Value().GetString(), kTextPlainFormat) != 0) {
+      result->Error(kClipboardError, kUnknownClipboardFormatMessage);
+      return;
+    }
+
+    rapidjson::Value::ConstMemberIterator viewIdItr =
+        document.FindMember(kViewIdKey);
+    if (viewIdItr == document.MemberEnd() || !viewIdItr->value.IsInt64()) {
+      result->Error(kClipboardError, kUnknownClipboardViewIdMessage);
+      return;
+    }
+
+    GetHasStrings(std::move(result), viewIdItr->value.GetInt64());
   } else if (method.compare(kSetClipboardDataMethod) == 0) {
+    // Expected argument of shape:
+    // {
+    //   "text": <string>,
+    //   "viewId": <int64> | <null>
+    // }
     const rapidjson::Value& document = *method_call.arguments();
     rapidjson::Value::ConstMemberIterator textItr =
         document.FindMember(kTextKey);
@@ -509,15 +589,26 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
 
+    FlutterViewId view_id = kImplicitViewId;
     rapidjson::Value::ConstMemberIterator viewIdItr =
         document.FindMember(kViewIdKey);
-    if (viewIdItr == document.MemberEnd() || !viewIdItr->value.IsInt64()) {
+    if (viewIdItr == document.MemberEnd()) {
+      // Deprecated, but still supported.
+      //
+      // Callers are encouraged to provide a viewId.
+      FML_LOG(ERROR) << "Calling " << kSetClipboardDataMethod
+                     << " without a viewId is deprecated. "
+                        "Use "
+                        << kSetClipboardDataMethod
+                        << " with a " << kViewIdKey << " key instead.";
+    } else if (!viewIdItr->value.IsInt64()) {
       result->Error(kClipboardError, kUnknownClipboardViewIdMessage);
       return;
+    } else {
+      view_id = viewIdItr->value.GetInt64();
     }
 
-    SetPlainText(textItr->value.GetString(), std::move(result),
-                 viewIdItr->value.GetInt64());
+    SetPlainText(textItr->value.GetString(), std::move(result), view_id);
   } else if (method.compare(kPlaySoundMethod) == 0) {
     // Only one string argument is expected.
     const rapidjson::Value& sound_type = method_call.arguments()[0];
