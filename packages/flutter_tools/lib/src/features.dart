@@ -86,7 +86,7 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
-    windowingFeature
+    windowingFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.

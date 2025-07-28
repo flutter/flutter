@@ -87,7 +87,7 @@ void main() {
       );
     });
 
-    testWidgets('Accessing WindowControllerContet.of throws UnsupportedError', (
+    testWidgets('Accessing WindowControllerContext.of throws UnsupportedError', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(LookupBoundary(child: Container()));

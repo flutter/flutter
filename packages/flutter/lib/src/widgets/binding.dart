@@ -1443,7 +1443,8 @@ mixin WidgetsBinding
   }
 
   /// The [WindowingOwner] is responsible for creating and managing [WindowController]s.
-  /// Default [WindowingOwner] supports standard Flutter desktop embedders.
+  ///
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
   ///
   /// Custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
   ///
@@ -1479,6 +1480,7 @@ See: https://github.com/flutter/flutter/issues/30701.
   late WindowingOwner _windowingOwner;
 
   /// Creates the [WindowingOwner] instance available via [windowingOwner].
+  ///
   /// Can be overriden in subclasses to create embedder-specific [WindowingOwner]
   /// implementation.
   @protected

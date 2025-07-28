@@ -54,6 +54,11 @@ enum WindowType {
   /// Defines a traditional window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [RegularWindow], the widget for a regular window.
+  ///  * [RegularWindowController], the controller that creates and manages regular windows.
   @internal
   regular,
 }
@@ -75,7 +80,7 @@ class WindowSizing {
 
   /// Preferred size of the window.
   ///
-  /// This might not behonored by the platform.
+  /// This might not be honored by the platform.
   ///
   /// This is the size that the platform will try to  apply to the window
   /// when it is created. In contrast, the [preferredConstraints] field enforces
@@ -120,15 +125,12 @@ class WindowSizing {
 /// for changes to the window's properties.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [RegularWindowController], the controller for regular top-level windows
 @internal
 abstract class BaseWindowController with ChangeNotifier {
-  /// Sets the view associated with this window.
-  // ignore: use_setters_to_change_properties
-  @protected
-  set rootView(FlutterView view) {
-    _view = view;
-  }
-
   /// The type of the window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -160,16 +162,27 @@ abstract class BaseWindowController with ChangeNotifier {
   @internal
   FlutterView get rootView => _view;
   late final FlutterView _view;
+
+  /// Sets the view associated with this window.
+  @protected
+  set rootView(FlutterView view) {
+    _view = view;
+  }
 }
 
 /// Delegate class for regular window controller.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [RegularWindowController], the controller that creates and manages regular windows.
+///  * [RegularWindow], the widget for a regular window.
 @internal
 mixin class RegularWindowControllerDelegate {
   /// Invoked when user attempts to close the window.
   ///
-  /// The default implmentation destroys the window. Subclasses
+  /// The default implementation destroys the window. Subclasses
   /// can override the behavior to delay or prevent the window from closing.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -349,7 +362,7 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// The [display] specifies an optional [Display] on which the window
   /// would like to be fullscreened. This might not be honored by the
-  /// platform.
+  /// platform. The [display] argument is ignored if [fullscreen] is `false`.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -371,6 +384,10 @@ abstract class RegularWindowController extends BaseWindowController {
 @internal
 abstract class WindowingOwner {
   /// Creates a [RegularWindowController] with the provided properties.
+  ///
+  /// Most app developers should use [RegularWindowController]'s constructor
+  /// instead of calling this method directly. This method allows platforms
+  /// to inject platform-specific logic.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -456,9 +473,9 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// {@macro flutter.widgets.windowing.experimental}
 class RegularWindow extends StatefulWidget {
   /// Creates a regular window widget.
-  /// [controller] the controller for this window
-  /// [child] the content to render into this window
-  /// [key] the key for this widget
+  ///
+  /// The [controller] creates the native backing window into which the
+  /// [child] widget is rendered.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -506,6 +523,10 @@ class _RegularWindowState extends State<RegularWindow> {
 /// the window that is being rendered.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [RegularWindow], the widget to create a regular window.
 @internal
 class WindowControllerContext extends InheritedWidget {
   /// Creates a new [WindowControllerContext].
@@ -532,16 +553,75 @@ class WindowControllerContext extends InheritedWidget {
   @internal
   final BaseWindowController controller;
 
-  /// Returns the [WindowContext] if any
+  /// Returns the [WindowControllerContext].
+  ///
+  /// If [isWindowingEnabled] is `false`, this method will throw an
+  /// [UnsupportedError].
+  ///
+  /// If there is no [WindowControllerContext] in scope, this method
+  /// will throw a [TypeError] exception in release builds, and thrown
+  /// a descriptive [FlutterError] in debug builds.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [RegularWindow], the widget for a regular window.
+  /// * [maybeOf], which doesn't throw or assert if it doesn't find a
+  ///   [WindowControllerContext] ancestor. It returns null instead.
   @internal
-  static BaseWindowController? of(BuildContext context) {
+  static BaseWindowController of(BuildContext context) {
+    assert(_debugCheckHasWindowController(context));
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()!.controller;
+  }
+
+  /// Returns the [WindowControllerContext] if one exists, otherwise null.
+  ///
+  /// If [isWindowingEnabled] is `false`, this method will throw an
+  /// [UnsupportedError].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  /// * [RegularWindowController], the controller for regular top-level windows.
+  /// * [RegularWindow], the widget for a regular window.
+  /// * [of], which will throw if it doesn't find a [WindowControllerContext] ancestor,
+  ///   instead of returning null.
+  @internal
+  static BaseWindowController? maybeOf(BuildContext context) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_windowingDisabledErrorMessage);
+    }
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
+  }
+
+  static bool _debugCheckHasWindowController(BuildContext context) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_windowingDisabledErrorMessage);
     }
 
-    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
+    assert(() {
+      if (context.dependOnInheritedWidgetOfExactType<WindowControllerContext>() == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('No WindowControllerContext found in context.'),
+          ErrorDescription(
+            '${context.widget.runtimeType} widgets require a WindowControllerContext widget ancestor.',
+          ),
+          context.describeWidget(
+            'The specific widget that could not find a WindowControllerContext ancestor was',
+          ),
+          context.describeOwnershipChain('The ownership chain for the affected widget is'),
+          ErrorHint(
+            'No WindowControllerContext ancestor could be found starting from the context '
+            'that was passed to WindowControllerContext.of(). This can happen because the '
+            'context used is not a descendant of a RegularWindow widget, which introduces '
+            'a WindowControllerContext.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return true;
   }
 
   /// {@macro flutter.widgets.windowing.experimental}
