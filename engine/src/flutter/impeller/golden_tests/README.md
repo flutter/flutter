@@ -2,7 +2,7 @@
 
 This is the executable that will generate the golden image results that can then
 be sent to Skia Gold vial the
-[golden_tests_harvester]("../../tools/golden_tests_harvester").
+[golden_tests_harvester](%22../../tools/golden_tests_harvester%22).
 
 Running these tests should happen from
 [//flutter/testing/run_tests.py](../../testing/run_tests.py). That will do all
@@ -29,7 +29,7 @@ If a test case is added to [golden_tests.cc](./golden_tests.cc), for example
 is used.
 
 The examples in `golden_tests.cc` use GLFW for rendering the tests, but
-technically anything could be used.  Using the `SaveScreenshot()` function will
+technically anything could be used. Using the `SaveScreenshot()` function will
 automatically update the `GoldenDigest::Instance()` which will make sure that it
 is included in the generated `digest.json`. If that function isn't used the
 `GoldenDigest` should be updated manually.

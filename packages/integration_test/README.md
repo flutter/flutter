@@ -1,8 +1,8 @@
 # integration_test
 
-This package enables self-driving testing of Flutter code on devices and emulators.
-It adapts flutter_test results into a format that is compatible with `flutter drive`
-and native Android instrumentation testing.
+This package enables self-driving testing of Flutter code on devices and
+emulators. It adapts flutter_test results into a format that is compatible with
+`flutter drive` and native Android instrumentation testing.
 
 ## Usage
 
@@ -49,8 +49,11 @@ Future<void> main() => integrationDriver();
 
 You can also use different driver scripts to customize the behavior of the app
 under test. For example, `FlutterDriver` can also be parameterized with
-different [options](https://api.flutter.dev/flutter/flutter_driver/FlutterDriver/connect.html).
-See the [extended driver](https://github.com/flutter/flutter/blob/main/packages/integration_test/example/test_driver/extended_integration_test.dart) for an example.
+different
+[options](https://api.flutter.dev/flutter/flutter_driver/FlutterDriver/connect.html).
+See the
+[extended driver](https://github.com/flutter/flutter/blob/main/packages/integration_test/example/test_driver/extended_integration_test.dart)
+for an example.
 
 ### Package Structure
 
@@ -86,8 +89,8 @@ flutter drive \
 ### Web
 
 Make sure you have [enabled web support](https://flutter.dev/to/add-web-support)
-then [download and run](https://flutter.dev/to/integration-test-on-web)
-the web driver in another process.
+then [download and run](https://flutter.dev/to/integration-test-on-web) the web
+driver in another process.
 
 Use following command to execute the tests:
 
@@ -100,8 +103,8 @@ flutter drive \
 
 ### Screenshots
 
-You can use `integration_test` to take screenshots of the UI rendered on the mobile device or
-Web browser at a specific time during the test.
+You can use `integration_test` to take screenshots of the UI rendered on the
+mobile device or Web browser at a specific time during the test.
 
 This feature is currently supported on Android, iOS, and Web.
 
@@ -128,9 +131,9 @@ void main() {
 }
 ```
 
-You can use a driver script to pull in the screenshot from the device.
-This way, you can store the images locally on your computer. On iOS, the
-screenshot will also be available in Xcode test results.
+You can use a driver script to pull in the screenshot from the device. This way,
+you can store the images locally on your computer. On iOS, the screenshot will
+also be available in Xcode test results.
 
 **test_driver/integration_test.dart**
 
@@ -221,9 +224,9 @@ physical):
 ./gradlew app:connectedAndroidTest -Ptarget=`pwd`/../integration_test/foo_test.dart
 ```
 
-Note:
-To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
-and pass them to gradle in a comma separated list:
+Note: To use `--dart-define` with `gradlew` you must `base64` encode all
+parameters, and pass them to gradle in a comma separated list:
+
 ```sh
 ./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
 ```
@@ -231,12 +234,13 @@ and pass them to gradle in a comma separated list:
 ## Firebase Test Lab
 
 If this is your first time testing with Firebase Test Lab, you'll need to follow
-the guides in the [Firebase test lab
-documentation](https://firebase.google.com/docs/test-lab/?gclid=EAIaIQobChMIs5qVwqW25QIV8iCtBh3DrwyUEAAYASAAEgLFU_D_BwE)
+the guides in the
+[Firebase test lab documentation](https://firebase.google.com/docs/test-lab/?gclid=EAIaIQobChMIs5qVwqW25QIV8iCtBh3DrwyUEAAYASAAEgLFU_D_BwE)
 to set up a project.
 
-To run a test on Android devices using Firebase Test Lab, use gradle commands to build an
-instrumentation test for Android, after creating `androidTest` as suggested in the last section.
+To run a test on Android devices using Firebase Test Lab, use gradle commands to
+build an instrumentation test for Android, after creating `androidTest` as
+suggested in the last section.
 
 ```sh
 pushd android
@@ -247,8 +251,9 @@ flutter build apk
 popd
 ```
 
-Upload the build apks Firebase Test Lab, making sure to replace <PATH_TO_KEY_FILE>,
-<PROJECT_NAME>, <RESULTS_BUCKET>, and <RESULTS_DIRECTORY> with your values.
+Upload the build apks Firebase Test Lab, making sure to replace
+\<PATH_TO_KEY_FILE>, \<PROJECT_NAME>, \<RESULTS_BUCKET>, and
+\<RESULTS_DIRECTORY> with your values.
 
 ```sh
 gcloud auth activate-service-account --key-file=<PATH_TO_KEY_FILE>
@@ -261,19 +266,21 @@ gcloud firebase test android run --type instrumentation \
   --results-dir=<RESULTS_DIRECTORY>
 ```
 
-You can pass additional parameters on the command line, such as the
-devices you want to test on. See
+You can pass additional parameters on the command line, such as the devices you
+want to test on. See
 [gcloud firebase test android run](https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run).
 
 ## iOS Device Testing
 
-Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you
-do not already have one via `File > New > Target...` and select `Unit Testing Bundle`.
-Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is set to `Runner` and language is set to `Objective-C`.
-Select `Finish`.
-Make sure that the **iOS Deployment Target** of `RunnerTests` within the **Build Settings** section is the same as `Runner`.
+Open `ios/Runner.xcworkspace` in Xcode. Create a test target if you do not
+already have one via `File > New > Target...` and select `Unit Testing Bundle`.
+Change the `Product Name` to `RunnerTests`. Make sure `Target to be Tested` is
+set to `Runner` and language is set to `Objective-C`. Select `Finish`. Make sure
+that the **iOS Deployment Target** of `RunnerTests` within the **Build
+Settings** section is the same as `Runner`.
 
-Add the new test target to `ios/Podfile` by embedding in the existing `Runner` target.
+Add the new test target to `ios/Podfile` by embedding in the existing `Runner`
+target.
 
 ```ruby
 target 'Runner' do
@@ -292,8 +299,8 @@ To build `integration_test/foo_test.dart` from the command line, run:
 flutter build ios --config-only integration_test/foo_test.dart
 ```
 
-In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to the new target and
-replace the file:
+In Xcode, add a test file called `RunnerTests.m` (or any name of your choice) to
+the new target and replace the file:
 
 ```objective-c
 @import XCTest;
@@ -332,7 +339,8 @@ find . -name "Runner_*.xctestrun" -exec zip -r --must-match "ios_tests.zip" "Rel
 popd
 ```
 
-You can verify locally that your tests are successful by running the following command:
+You can verify locally that your tests are successful by running the following
+command:
 
 ```sh
 xcodebuild test-without-building \
@@ -340,7 +348,8 @@ xcodebuild test-without-building \
   -destination id=<YOUR_DEVICE_ID>
 ```
 
-Once everything is ok, you can upload the resulting zip to Firebase Test Lab (change the model with your values):
+Once everything is ok, you can upload the resulting zip to Firebase Test Lab
+(change the model with your values):
 
 ```sh
 gcloud firebase test ios run \

@@ -4,13 +4,13 @@ _See also: [Flutter's code of conduct][code_of_conduct]_
 
 ## Welcome
 
-For an introduction to contributing to Flutter, see [our contributor
-guide][contrib_guide].
+For an introduction to contributing to Flutter, see
+[our contributor guide][contrib_guide].
 
-For specific instructions regarding building Flutter's engine, see [Setting up
-the Engine development environment][engine_dev_setup] on our wiki. Those
-instructions are part of the broader onboarding instructions described in the
-contributing guide.
+For specific instructions regarding building Flutter's engine, see
+[Setting up the Engine development environment][engine_dev_setup] on our wiki.
+Those instructions are part of the broader onboarding instructions described in
+the contributing guide.
 
 ## Style
 
@@ -59,10 +59,9 @@ performance implications. See [#49801][pr_49801] for an example.
 
 #### Linux Embedding
 
-> [!NOTE]
-> The Linux embedding instead follows idiomatic GObject-based C style.
+> [!NOTE] The Linux embedding instead follows idiomatic GObject-based C style.
 
-Use of C++ in the [Linux embedding][] is discouraged in that embedding to avoid
+Use of C++ in the [Linux embedding] is discouraged in that embedding to avoid
 creating hybrid code that feels unfamiliar to either developers used to working
 with `GObject` or C++ developers.
 
@@ -86,8 +85,7 @@ types. The engine is moving towards the Dart style guide, but this is a gradual
 process. In the meantime, follow these guidelines:
 
 - **Always** annotate when inference is not possible.
-- **Prefer** annotating when inference is possible but the type is not
-  obvious.
+- **Prefer** annotating when inference is possible but the type is not obvious.
 
 Some cases when using `var`/`final`/`const` is appropriate:
 
@@ -166,30 +164,14 @@ Objective-C++ and is automatically formatted with `clang-format`.
 Follows the [Google Python Style Guide][google_python_style] and is
 automatically formatted with `yapf`.
 
-> [!WARNING]
-> Historically, the engine grew a number of one-off Python scripts, often as
-> part of the testing or build infrastructure (i.e. command-line tools). We are
-> instead moving towards using Dart for these tasks, so new Python scripts
-> should be avoided whenever possible.
+> [!WARNING] Historically, the engine grew a number of one-off Python scripts,
+> often as part of the testing or build infrastructure (i.e. command-line
+> tools). We are instead moving towards using Dart for these tasks, so new
+> Python scripts should be avoided whenever possible.
 
 ### GN
 
 Automatically formatted with `gn format`.
-
-[cpp_auto]: https://google.github.io/styleguide/cppguide.html#Type_deduction
-[cpp_ownership]: https://google.github.io/styleguide/cppguide.html#Ownership_and_Smart_Pointers
-[dart_inference]: https://dart.dev/effective-dart/design#types
-[dart_style]: https://dart.dev/effective-dart/style
-[linux embedding]: shell/platform/linux
-[google_cpp_style]: https://google.github.io/styleguide/cppguide.html
-[pr_49801]: https://github.com/flutter/engine/pull/49801
-[code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
-[contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
-[engine_dev_setup]: docs/contributing/Setting-up-the-Engine-development-environment.md
-[flutter_style]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
-[objc_style]: https://google.github.io/styleguide/objcguide.html
-[java_style]: https://google.github.io/styleguide/javaguide.html
-[google_python_style]: https://google.github.io/styleguide/pyguide.html
 
 ## Testing
 
@@ -218,8 +200,6 @@ in postsubmit.
 The Flutter engine uses [Skia Gold][skia_gold] for image comparison tests which
 fail if the image is different from an accepted baseline image.
 
-[skia_gold]: https://flutter-engine-gold.skia.org/
-
 Any untriaged failures will block presubmit and postsubmit tests.
 
 ### Example run_tests.py invocation
@@ -236,44 +216,49 @@ $ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 
 ### Directory
 
-| Name                                     | run_tests.py type   | Description                                                     |
-| ---------------------------------------- | ------------------- | --------------------------------------------------------------- |
-| accessibility_unittests                  | engine              |                                                                 |
-| assets_unittests                         | engine              |                                                                 |
-| client_wrapper_glfw_unittests            | engine              |                                                                 |
-| client_wrapper_unittests                 | engine              |                                                                 |
-| common_cpp_core_unittests                | engine              |                                                                 |
-| common_cpp_unittests                     | engine              |                                                                 |
-| dart_plugin_registrant_unittests         | engine              |                                                                 |
-| display_list_rendertests                 | engine              |                                                                 |
-| display_list_unittests                   | engine              |                                                                 |
-| embedder_a11y_unittests                  | engine              |                                                                 |
-| embedder_proctable_unittests             | engine              |                                                                 |
-| embedder_unittests                       | engine              |                                                                 |
-| felt                                     | n/a                 | The test runner for flutter web. See //lib/web_ui               |
-| flow_unittests                           | engine              |                                                                 |
-| flutter_tester                           | dart                | Launcher for engine dart tests.                                 |
-| fml_unittests                            | engine              | Unit tests for //fml                                            |
-| framework_common_unittests               | engine(mac)         |                                                                 |
-| gpu_surface_metal_unittests              | engine(mac)         |                                                                 |
-| impeller_dart_unittests                  | engine              |                                                                 |
-| impeller_golden_tests                    | engine(mac)         | Generates golden images for impeller (vulkan, metal, opengles). |
-| impeller_unittests                       | engine              | impeller unit tests and interactive tests                       |
-| ios_scenario_app                         | android             | Integration and golden tests for iOS.                           |
-| ios_test_flutter                         | objc                | dynamic library of objc tests to be run with XCTest             |
-| jni_unittests                            | engine(not windows) |                                                                 |
-| no_dart_plugin_registrant_unittests      | engine              |                                                                 |
-| platform_view_android_delegate_unittests | engine(not windows) |                                                                 |
-| runtime_unittests                        | engine              |                                                                 |
-| shell_unittests                          | engine(not windows) |                                                                 |
-| tonic_unittests                          | engine              | Unit tests for //third_party/tonic                              |
-| txt_unittests                            | engine(linux)       |                                                                 |
-| ui_unittests                             | engine              |                                                                 |
-
-[tree_hygiene_wiki]: https://github.com/flutter/flutter/wiki/Tree-hygiene#tests
-[testing_the_engine_wiki]: https://github.com/flutter/flutter/wiki/Testing-the-engine
+| Name | run_tests.py type | Description | |
+---------------------------------------- | ------------------- |
+--------------------------------------------------------------- | |
+accessibility_unittests | engine | | | assets_unittests | engine | | |
+client_wrapper_glfw_unittests | engine | | | client_wrapper_unittests | engine |
+| | common_cpp_core_unittests | engine | | | common_cpp_unittests | engine | | |
+dart_plugin_registrant_unittests | engine | | | display_list_rendertests |
+engine | | | display_list_unittests | engine | | | embedder_a11y_unittests |
+engine | | | embedder_proctable_unittests | engine | | | embedder_unittests |
+engine | | | felt | n/a | The test runner for flutter web. See //lib/web_ui | |
+flow_unittests | engine | | | flutter_tester | dart | Launcher for engine dart
+tests. | | fml_unittests | engine | Unit tests for //fml | |
+framework_common_unittests | engine(mac) | | | gpu_surface_metal_unittests |
+engine(mac) | | | impeller_dart_unittests | engine | | | impeller_golden_tests |
+engine(mac) | Generates golden images for impeller (vulkan, metal, opengles). |
+| impeller_unittests | engine | impeller unit tests and interactive tests | |
+ios_scenario_app | android | Integration and golden tests for iOS. | |
+ios_test_flutter | objc | dynamic library of objc tests to be run with XCTest |
+| jni_unittests | engine(not windows) | | | no_dart_plugin_registrant_unittests
+| engine | | | platform_view_android_delegate_unittests | engine(not windows) |
+| | runtime_unittests | engine | | | shell_unittests | engine(not windows) | | |
+tonic_unittests | engine | Unit tests for //third_party/tonic | | txt_unittests
+| engine(linux) | | | ui_unittests | engine | |
 
 ## Fuchsia Contributions from Googlers
 
 Googlers contributing to Fuchsia should follow the additional steps at:
 go/flutter-fuchsia-pr-policy.
+
+[code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
+[contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
+[cpp_auto]: https://google.github.io/styleguide/cppguide.html#Type_deduction
+[cpp_ownership]: https://google.github.io/styleguide/cppguide.html#Ownership_and_Smart_Pointers
+[dart_inference]: https://dart.dev/effective-dart/design#types
+[dart_style]: https://dart.dev/effective-dart/style
+[engine_dev_setup]: docs/contributing/Setting-up-the-Engine-development-environment.md
+[flutter_style]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
+[google_cpp_style]: https://google.github.io/styleguide/cppguide.html
+[google_python_style]: https://google.github.io/styleguide/pyguide.html
+[java_style]: https://google.github.io/styleguide/javaguide.html
+[linux embedding]: shell/platform/linux
+[objc_style]: https://google.github.io/styleguide/objcguide.html
+[pr_49801]: https://github.com/flutter/engine/pull/49801
+[skia_gold]: https://flutter-engine-gold.skia.org/
+[testing_the_engine_wiki]: https://github.com/flutter/flutter/wiki/Testing-the-engine
+[tree_hygiene_wiki]: https://github.com/flutter/flutter/wiki/Tree-hygiene#tests

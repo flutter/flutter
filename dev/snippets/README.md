@@ -22,17 +22,16 @@ There are three kinds of code blocks.
   magically determine how to analyze.
 
 - A `dartpad` sample, which gets placed into a full-fledged application, and can
-  be executed inline in the documentation on the web page using
-  DartPad.
+  be executed inline in the documentation on the web page using DartPad.
 
 - A `sample`, which gets placed into a full-fledged application, but isn't
   placed into DartPad in the documentation because it doesn't make sense to do
   so.
 
-Ideally, every sample is a DartPad sample, but some samples don't have any visual
-representation and some just don't make sense that way (for example, sample
-code for setting the system UI's notification area color on Android won't do
-anything on the web).
+Ideally, every sample is a DartPad sample, but some samples don't have any
+visual representation and some just don't make sense that way (for example,
+sample code for setting the system UI's notification area color on Android won't
+do anything on the web).
 
 ### Snippet Tool
 
@@ -41,7 +40,7 @@ anything on the web).
 The code `snippet` tool generates a block containing a description and example
 code. Here is an example of the code `snippet` tool in use:
 
-```dart
+````dart
 /// {@tool snippet}
 ///
 /// If the avatar is to have an image, the image should be specified in the
@@ -53,21 +52,21 @@ code. Here is an example of the code `snippet` tool in use:
 /// )
 /// ```
 /// {@end-tool}
-```
+````
 
 This will generate sample code that can be copied to the clipboard and added to
 existing applications.
 
 This uses the skeleton for `snippet` snippets when generating the HTML to put
-into the Dart docs. You can find this [template in the Flutter
-repo](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/snippet.html).
+into the Dart docs. You can find this
+[template in the Flutter repo](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/snippet.html).
 
 #### Analysis
 
 The
 [`analyze_sample_code.dart`](https://github.com/flutter/flutter/blob/main/dev/bots/analyze_sample_code.dart)
-script finds code inside the `@tool
-snippet` sections and uses the Dart analyzer to check them.
+script finds code inside the `@tool snippet` sections and uses the Dart analyzer
+to check them.
 
 There are several kinds of sample code you can specify:
 
@@ -98,9 +97,8 @@ example:
 // final String userAvatarUrl;
 ```
 
-You can assume that the entire Flutter framework and most common
-`dart:*` packages are imported and in scope; `dart:math` as `math` and
-`dart:ui` as `ui`.
+You can assume that the entire Flutter framework and most common `dart:*`
+packages are imported and in scope; `dart:math` as `math` and `dart:ui` as `ui`.
 
 ### Sample Tool
 
@@ -113,7 +111,8 @@ demonstrate the API's functionality in a sample application, or used with the
 `dartpad` samples are embedded into the API docs web page and are live
 applications in the API documentation.
 
-This uses the skeleton for [application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
+This uses the skeleton for
+[application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
 snippets in the Flutter repo.
 
 The `sample` and `dartpad` tools also allow for quick Flutter app generation
@@ -133,8 +132,8 @@ to check the sample code.
 
 ## Skeletons
 
-A skeleton (concerning this tool) is an HTML template into which the Dart
-code blocks and descriptions are interpolated.
+A skeleton (concerning this tool) is an HTML template into which the Dart code
+blocks and descriptions are interpolated.
 
 There is currently one skeleton for
 [application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
@@ -145,16 +144,15 @@ and one for
 code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
-be interpolated into the template. It doesn't use the mustache
-package since these are simple string substitutions, but it uses the same
-syntax.
+be interpolated into the template. It doesn't use the mustache package since
+these are simple string substitutions, but it uses the same syntax.
 
 The code block generation tools that process the source input and emit HTML for
 output, which dartdoc places back into the documentation. Any options given to
 the `{@tool ...}` directive are passed on verbatim to the tool.
 
-The `snippets` tool renders these examples through a combination of markdown
-and HTML using the `{@inject-html}` dartdoc directive.
+The `snippets` tool renders these examples through a combination of markdown and
+HTML using the `{@inject-html}` dartdoc directive.
 
 ## Test Doc Generation Workflow
 
@@ -163,13 +161,12 @@ block, follow these steps to generate a local copy of the API docs and verify
 that your code blocks are showing up correctly:
 
 1. Make an update to a code block or create a new code block.
-2. From the root directory, run `./dev/bots/docs.sh`. This should start
-   generating a local copy of the API documentation.
-   Supplying the "--output" argument allows you to specify the output zip file
-   for the completed documentation. Defaults to `api_docs.zip`` in the current
-   directory.
-3. Once complete, unzip the files to the desired location and open the `index.html`
-   within.
+1. From the root directory, run `./dev/bots/docs.sh`. This should start
+   generating a local copy of the API documentation. Supplying the "--output"
+   argument allows you to specify the output zip file for the completed
+   documentation. Defaults to \`api_docs.zip\`\` in the current directory.
+1. Once complete, unzip the files to the desired location and open the
+   `index.html` within.
 
 Note that generating the sample output will not allow you to run your code in
 DartPad, because DartPad pulls the code it runs from the appropriate docs server
@@ -185,7 +182,8 @@ into a DartPad at [https://dartpad.dartlang.org].
 If all you want to do is analyze the sample code you have written locally, then
 generating the entire docs output takes a long time.
 
-Instead, you can run the analysis locally with this command from the Flutter root:
+Instead, you can run the analysis locally with this command from the Flutter
+root:
 
 ```bash
 TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart --temp=samples
@@ -193,12 +191,13 @@ TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze_sample_code.dart --temp
 
 This will analyze the samples, and leave the generated files in `/tmp/samples`
 
-You can find the sample you are working on in `/tmp/samples`. It is named using the
-path to the file it is in, and the line of the file that the `{@tool ...}` directive
-is on.
+You can find the sample you are working on in `/tmp/samples`. It is named using
+the path to the file it is in, and the line of the file that the `{@tool ...}`
+directive is on.
 
-For example, the file `sample.src.widgets.animated_list.52.dart` points to the sample
-in `packages/flutter/src/widgets/animated_list.dart` at line 52. You can then take the
-contents of that file, and paste it into [Dartpad](https://dartpad.dev) and see if it
-works. If the sample relies on new features that have just landed, it may not work
-until the features make it into the `dev` branch.
+For example, the file `sample.src.widgets.animated_list.52.dart` points to the
+sample in `packages/flutter/src/widgets/animated_list.dart` at line 52. You can
+then take the contents of that file, and paste it into
+[Dartpad](https://dartpad.dev) and see if it works. If the sample relies on new
+features that have just landed, it may not work until the features make it into
+the `dev` branch.

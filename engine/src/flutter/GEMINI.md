@@ -1,11 +1,11 @@
 # Flutter Engine
 
-This project contains the engine for Flutter. GN is used as the build system
-and there are many targets. The engine is built for the local ("host") platform
-but also built for the the target platform (ex. iOS or Android).
+This project contains the engine for Flutter. GN is used as the build system and
+there are many targets. The engine is built for the local ("host") platform but
+also built for the the target platform (ex. iOS or Android).
 
 The tool at `./bin/et` is used as a wrapper around GN and ninja to easily build
-targets. The results are placed in "../out/\<config name\>". Build config names
+targets. The results are placed in "../out/\<config name>". Build config names
 describe the target platform, but also codify the optimization level and the
 target architecture. For example, when developing on an arm64 mac,
 `host_debug_unopt_arm64` is the most likely configuration for testing.

@@ -1,14 +1,18 @@
-Tests are a critical framework tool for stability and education. Tests fulfill the following roles:
+Tests are a critical framework tool for stability and education. Tests fulfill
+the following roles:
 
-* Automatically protect against regressions
-* Define an executable specification that engrains original intent
-* Educate other developers about why and how to use an API
+- Automatically protect against regressions
+- Define an executable specification that engrains original intent
+- Educate other developers about why and how to use an API
 
-To facilitate the above roles, there are some practices to keep in mind when writing tests:
+To facilitate the above roles, there are some practices to keep in mind when
+writing tests:
 
 ## Name tests based on the behavior being tested
 
-It is common to find tests that are simply named after the object under test rather than the behavior under test.  For example, a developer might find tests that look like the following:
+It is common to find tests that are simply named after the object under test
+rather than the behavior under test. For example, a developer might find tests
+that look like the following:
 
 ```dart
 // Bad test name
@@ -20,7 +24,10 @@ test('RenderViewport', () {...});
 // etc.
 ```
 
-The above test names do not communicate anything useful to the developer reading the tests. The developer probably already knows which object is being tested, so these names are no better than an empty string. Instead, each test should succinctly declare the behavior under test and/or the expected results:
+The above test names do not communicate anything useful to the developer reading
+the tests. The developer probably already knows which object is being tested, so
+these names are no better than an empty string. Instead, each test should
+succinctly declare the behavior under test and/or the expected results:
 
 ```dart
 // Better test name
@@ -49,7 +56,14 @@ test('SliverGeometry', () {
 });
 ```
 
-Don't test multiple behaviors in a single test. When multiple behaviors exist within a test then reported test failures become misleading. Is one thing broken, or many things? Is one method broken, or multiple methods, or are entire object interactions broken? When multiple behaviors exist in a single test then a broken test requires a developer to carefully analyze the code within the test just to get a feel for the magnitude of the bug. Add to this fact that the name of the test probably does not explain everything the test is doing, because the test is doing multiple things.  Instead, include exactly one behavior per test:
+Don't test multiple behaviors in a single test. When multiple behaviors exist
+within a test then reported test failures become misleading. Is one thing
+broken, or many things? Is one method broken, or multiple methods, or are entire
+object interactions broken? When multiple behaviors exist in a single test then
+a broken test requires a developer to carefully analyze the code within the test
+just to get a feel for the magnitude of the bug. Add to this fact that the name
+of the test probably does not explain everything the test is doing, because the
+test is doing multiple things. Instead, include exactly one behavior per test:
 
 ```dart
 test('SliverGeometry with no arguments is valid', () {
@@ -69,13 +83,26 @@ test('SliverGeometry throws error when maxPaintExtent is less than paintExtent',
 });
 ```
 
-What constitutes a single behavior? The answer to that question can vary. In most circumstances, only a single method should be invoked on the object under test, and it should be invoked only one time. However, that heuristic is not always correct. There can be cases where multiple method calls represent a singular behavior and a single set of expectations. Developers should use their discretion in this regard. That said, a higher number of shorter tests will tend to be a safer bet than a smaller number of longer tests.
+What constitutes a single behavior? The answer to that question can vary. In
+most circumstances, only a single method should be invoked on the object under
+test, and it should be invoked only one time. However, that heuristic is not
+always correct. There can be cases where multiple method calls represent a
+singular behavior and a single set of expectations. Developers should use their
+discretion in this regard. That said, a higher number of shorter tests will tend
+to be a safer bet than a smaller number of longer tests.
 
 ## Only include relevant details in a test
 
-Tests often involve some amount of setup before the behavior-under-test can be executed. Some of these setup details are critical to the behavior-under-test, but many of these details are completely irrelevant.
+Tests often involve some amount of setup before the behavior-under-test can be
+executed. Some of these setup details are critical to the behavior-under-test,
+but many of these details are completely irrelevant.
 
-Including irrelevant details in a test can only confuse the issue in the mind of the developer reading the test. The developer may become confused about which parts are relevant to him/her, and which are not. In such a scenario, the developer is likely to copy and paste the entire test without fully understanding what the code is doing, which is a recipe for disaster in a production app.
+Including irrelevant details in a test can only confuse the issue in the mind of
+the developer reading the test. The developer may become confused about which
+parts are relevant to him/her, and which are not. In such a scenario, the
+developer is likely to copy and paste the entire test without fully
+understanding what the code is doing, which is a recipe for disaster in a
+production app.
 
 ```dart
 // Notice how much of the widget setup has nothing to do with the behavior-under-test...
@@ -130,7 +157,9 @@ testWidgets('Title Section is empty, Button section is not empty.', (WidgetTeste
 });
 ```
 
-Strive to write tests that only communicate details that are relevant to the behavior-under-test. This can be accomplished by extracting unrelated setup into other methods that are clearly named by their purpose:
+Strive to write tests that only communicate details that are relevant to the
+behavior-under-test. This can be accomplished by extracting unrelated setup into
+other methods that are clearly named by their purpose:
 
 ```dart
 // Now the unrelated details are factored out...
@@ -162,7 +191,8 @@ testWidgets('Title Section is empty, Button section is not empty.', (WidgetTeste
 
 ## Optimize tests for comprehension
 
-To illustrate the way that a small adjustment can make a test much more comprehensible to another developer, consider this test from above:
+To illustrate the way that a small adjustment can make a test much more
+comprehensible to another developer, consider this test from above:
 
 ```dart
 testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
@@ -191,7 +221,9 @@ testWidgets('Title Section is empty, Button section is not empty.', (WidgetTeste
 });
 ```
 
-This test was presented as an improvement because it factored out unrelated details. But we can make this test better by slightly adjusting how we decompose the individual lines in the test:
+This test was presented as an improvement because it factored out unrelated
+details. But we can make this test better by slightly adjusting how we decompose
+the individual lines in the test:
 
 ```dart
 testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
@@ -221,9 +253,13 @@ testWidgets('Title Section is empty, Button section is not empty.', (WidgetTeste
 });
 ```
 
-By extracting the declaration of the `CupertinoAlertDialog` into its own statement, we have clearly disambiguated between the dialog we're here to test vs. the action of launching the dialog for testing purposes.
+By extracting the declaration of the `CupertinoAlertDialog` into its own
+statement, we have clearly disambiguated between the dialog we're here to test
+vs. the action of launching the dialog for testing purposes.
 
-When writing tests, think about the developer who will read this test 6 months from now and ask if there is anything you can do to help that developer comprehend what the test is doing, and why.
+When writing tests, think about the developer who will read this test 6 months
+from now and ask if there is anything you can do to help that developer
+comprehend what the test is doing, and why.
 
 # See also
 

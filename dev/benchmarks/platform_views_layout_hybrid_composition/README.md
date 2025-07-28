@@ -8,10 +8,11 @@ To run the scrolling benchmark on a device:
 flutter drive --profile test_driver/scroll_perf.dart
 ```
 
-Results should be in the file `build/platform_views_scroll_perf_hybrid_composition.timeline_summary.json`.
+Results should be in the file
+`build/platform_views_scroll_perf_hybrid_composition.timeline_summary.json`.
 
-More detailed logs should be in `build/platform_views_scroll_perf_hybrid_composition.timeline.json`.
-
+More detailed logs should be in
+`build/platform_views_scroll_perf_hybrid_composition.timeline.json`.
 
 ## Startup benchmark
 

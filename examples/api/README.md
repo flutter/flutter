@@ -14,8 +14,8 @@ class in Chrome, you would run it like so from the [api](.) directory:
 ```
 
 All of these same examples are available on the API docs site. For instance, the
-example above is available on [this page](
-https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
+example above is available on
+[this page](https://api.flutter.dev/flutter/animation/Curve2D-class.html#animation.Curve2D.1).
 Most of the samples are available as interactive examples in
 [Dartpad](https://dartpad.dev), but some (the ones marked with `{@tool sample}`
 in the framework source code), just don't make sense on the web, and so are
@@ -105,10 +105,11 @@ hasn't been used in an example before, you may have to add it to the
 
 ## Snippets
 
-There is another type of example that can also be authored, using `{@tool
-snippet}`. Snippet examples are just written inline in the source, like so:
+There is another type of example that can also be authored, using
+`{@tool snippet}`. Snippet examples are just written inline in the source, like
+so:
 
-```dart
+````dart
 /// {@tool dartpad}
 /// Write a description of the example here. This description will appear in the
 /// API web documentation to introduce the example.
@@ -118,15 +119,15 @@ snippet}`. Snippet examples are just written inline in the source, like so:
 /// const Widget emptyBox = SizedBox();
 /// ```
 /// {@end-tool}
-```
+````
 
 The source for these snippets isn't stored under the [`examples/api`](.)
 directory, or available in Dartpad in the API docs, since they're not intended
 to be runnable, they just show some incomplete snippet of example code. It must
 compile (in the context of the sample analyzer), but doesn't need to do
-anything. See [the snippets documentation](
-https://pub.dev/packages/snippets#snippet-tool) for more information about the
-context that the analyzer uses.
+anything. See
+[the snippets documentation](https://pub.dev/packages/snippets#snippet-tool) for
+more information about the context that the analyzer uses.
 
 ## Writing Tests
 
@@ -148,7 +149,7 @@ functionality and integrity of the example itself.
 Tests go into a directory under [test](./test) that matches their location under
 [lib](./lib). They are named the same as the example they are testing, with
 `_test.dart` at the end, like other tests. For instance, a `LayoutBuilder`
-example that resides in [`lib/widgets/layout_builder/layout_builder.0.dart`](
-./lib/widgets/layout_builder/layout_builder.0.dart) would have its tests in a
-file named [`test/widgets/layout_builder/layout_builder.0_test.dart`](
-./test/widgets/layout_builder/layout_builder.0_test.dart)
+example that resides in
+[`lib/widgets/layout_builder/layout_builder.0.dart`](./lib/widgets/layout_builder/layout_builder.0.dart)
+would have its tests in a file named
+[`test/widgets/layout_builder/layout_builder.0_test.dart`](./test/widgets/layout_builder/layout_builder.0_test.dart)

@@ -1,9 +1,10 @@
 # mouse-input
 
-`mouse-input-test` exercises mouse input through a child view (in this case, the `mouse-input-view` Dart component) and
-asserting the location as well as what button was used (mouse down, mouse up, wheel, etc) during the event. We do this by
-attaching the child view, injecting mouse input, and validating that the view reports the event back with the expected
-payload.
+`mouse-input-test` exercises mouse input through a child view (in this case, the
+`mouse-input-view` Dart component) and asserting the location as well as what
+button was used (mouse down, mouse up, wheel, etc) during the event. We do this
+by attaching the child view, injecting mouse input, and validating that the view
+reports the event back with the expected payload.
 
 ```shell
 Injecting the mouse input
@@ -20,39 +21,48 @@ Successfully received response from view
 
 ## Running the Test
 
-Reference the Flutter integration test [documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/fuchsia/flutter/tests/integration/README.md) at `//flutter/shell/platform/fuchsia/flutter/tests/integration/README.md`
+Reference the Flutter integration test
+[documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/fuchsia/flutter/tests/integration/README.md)
+at `//flutter/shell/platform/fuchsia/flutter/tests/integration/README.md`
 
 ## Playing around with `mouse-input-view`
 
 Build Fuchsia with `terminal.qemu-x64`
+
 ```shell
 fx set terminal.qemu-x64 && fx build
 ```
 
 Build flutter/engine
+
 ```shell
 $ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto && ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input:tests
 ```
 
 Start a Fuchsia package server
+
 ```shell
 cd "$FUCHSIA_DIR"
 fx serve
 ```
 
 Publish `mouse-input-view`
+
 ```shell
 $FUCHSIA_DIR/.jiri_root/bin/fx pm publish -a -repo $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files -f $ENGINE_DIR/out/fuchsia_debug_x64/gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
 ```
 
 Launch Fuchsia emulator in a graphical environment
+
 ```shell
 ffx emu start
 ```
 
-**Before proceeding, make sure you have successfully completed the "Set a Password" screen**
+**Before proceeding, make sure you have successfully completed the "Set a
+Password" screen**
 
 Add `mouse-input-view`
+
 ```shell
 ffx session add fuchsia-pkg://fuchsia.com/mouse-input-view#meta/mouse-input-view.cm
 ```

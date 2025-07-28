@@ -1,12 +1,12 @@
 # Learning to Read GPU Frame Captures
 
 This is a gentle introduction to learning how one may go about reading a GPU
-frame capture. This would be using a tool like the [Xcode GPU Frame
-Debugger](https://developer.apple.com/documentation/metal/frame_capture_debugging_tools?language=objc),
-[RenderDoc](https://renderdoc.org/), or [Android GPU
-Inspector](https://gpuinspector.dev/). If you are already comfortable using one
-or all of these tools, this introduction is likely too rudimentary for you. If
-so, please skip this.
+frame capture. This would be using a tool like the
+[Xcode GPU Frame Debugger](https://developer.apple.com/documentation/metal/frame_capture_debugging_tools?language=objc),
+[RenderDoc](https://renderdoc.org/), or
+[Android GPU Inspector](https://gpuinspector.dev/). If you are already
+comfortable using one or all of these tools, this introduction is likely too
+rudimentary for you. If so, please skip this.
 
 If you are working on Impeller (or any low-level graphics API for that matter),
 it is unlikely you are going to get any work done without a frame debugger.
@@ -50,60 +50,59 @@ Give Xcode a few seconds to capture the frame and show the frame overview.
 
 Let’s figure out what the gauges of this car mean.
 
-* In box `4`, the overview shows that there are no draw calls and one command
+- In box `4`, the overview shows that there are no draw calls and one command
   buffer with one render command encoder. This is for the playground to render
   the blank screen with the clear-color.
-    * The playground renders a dark slate gray clear color as it was adequately
-      contrasty with the primary colors and also black and white.
-* Box `2` shows the Metal calls made grouped by the API call. If you click on
+  - The playground renders a dark slate gray clear color as it was adequately
+    contrasty with the primary colors and also black and white.
+- Box `2` shows the Metal calls made grouped by the API call. If you click on
   the Group by API Call dropdown, you can group the calls made according to the
   pipeline state. But we have no draw calls remember, so this will be empty.
   But, realize that in a more complicated application where you are looking for
   a single class of draw calls, viewing by the pipeline state is going to be
   more useful.
-* When grouping by the API call, absolutely all calls made to the Metal API will
+- When grouping by the API call, absolutely all calls made to the Metal API will
   be shown in the sidebar. Most of them are not particularly interesting. These
   include calls to allocate memory, create command buffers, set labels, etc.. To
   whittle down this list to a (potentially) more interesting subset, click the
   little flag at the bottom (see box `8`). But, if you ever find a call you were
   looking for is not present in the sidebar, you may have filtered it away.
-* Box `5` shows frame performance. But there is nothing to show as we are not
+- Box `5` shows frame performance. But there is nothing to show as we are not
   rendering anything. We’ll come back to this later.
-* Box `6` shows the graphics memory overview. We’ll revisit this in detail later
+- Box `6` shows the graphics memory overview. We’ll revisit this in detail later
   too. But, it is a good idea to see what memory rendering a blank slate needs.
   Realize that all graphics memory is not equal and learning when to use one vs
   the other can lead to some interesting performance improvements.
-* Box `7` is Xcodes attempt at showing you how you can improve performance.
+- Box `7` is Xcodes attempt at showing you how you can improve performance.
   These are just insights though and not warnings or errors. But, in every
   frame, try to understand and reason about each insight to see if action is
   necessary. In most cases, you can address these insights fairly easily. In the
   example above, there are three insights. Lets reason about them:
-    * There are two insights for the late creation of two textures. From the
-      names of the textures, you can tell that one is the texture used for the
-      stencil buffer and another the color texture used for the 4xMSAA resolve
-      step. Impeller uses memory-less textures for those on iOS and the
-      playground is running on Mac. So it hasn’t bothered to create and reuse
-      textures in the playground runner. But, it should. And Xcode’s point that
-      texture allocations should not occur in a frame workload is well made.
-      Advice that is universally prudent when working on Impeller.
-    * The last insight is that the main render pass is empty. Well, no shit,
-      Sherlock. We won’t have this concern in a real application. The playground
-      will always render frames over and over specifically so that a frame
-      debugger can capture a frame. Even if nothing is in that frame. This won’t
-      be a problem in Flutter where no frame will be rendered if nothing
-      changes.
-    * Notice that we could immediately tell what the two textures that were
-      created late were for. This is because all GPU objects in Impeller have
-      the ability to be labelled. In fact most APIs in Impeller make it very
-      hard to create unlabelled objects. If you notice an object that is not
-      labelled, file a bug to label it. Better yet, find and label it yourself.
-      Building for easier instrumentation must be done diligently and
-      proactively. And it is your responsibility!
-* Box `1` is the nav stack that you will use often and is unreasonably effective
+  - There are two insights for the late creation of two textures. From the names
+    of the textures, you can tell that one is the texture used for the stencil
+    buffer and another the color texture used for the 4xMSAA resolve step.
+    Impeller uses memory-less textures for those on iOS and the playground is
+    running on Mac. So it hasn’t bothered to create and reuse textures in the
+    playground runner. But, it should. And Xcode’s point that texture
+    allocations should not occur in a frame workload is well made. Advice that
+    is universally prudent when working on Impeller.
+  - The last insight is that the main render pass is empty. Well, no shit,
+    Sherlock. We won’t have this concern in a real application. The playground
+    will always render frames over and over specifically so that a frame
+    debugger can capture a frame. Even if nothing is in that frame. This won’t
+    be a problem in Flutter where no frame will be rendered if nothing changes.
+  - Notice that we could immediately tell what the two textures that were
+    created late were for. This is because all GPU objects in Impeller have the
+    ability to be labelled. In fact most APIs in Impeller make it very hard to
+    create unlabelled objects. If you notice an object that is not labelled,
+    file a bug to label it. Better yet, find and label it yourself. Building for
+    easier instrumentation must be done diligently and proactively. And it is
+    your responsibility!
+- Box `1` is the nav stack that you will use often and is unreasonably effective
   in Xcode relative to other debuggers. It’s a good idea to remember its key
   binding (mine is ctrl+cmd+arrow). If you click on something and find yourself
   lost, go back to a known point (usually the summary).
-* Box `3` highlights an `Export` button. This allows you to export a GPU trace.
+- Box `3` highlights an `Export` button. This allows you to export a GPU trace.
   But, realize that whoever views a GPU Trace needs to have identical hardware.
   The traces are also rather large. So, in a single debugging session, you
   should store these traces locally so you can check how your iterations are
@@ -171,10 +170,10 @@ solid red triangle in the playground.
 
 We notice two changes in the overview.
 
-* When grouping the calls by the pipeline state, we see one pipeline listed with
+- When grouping the calls by the pipeline state, we see one pipeline listed with
   one draw call. Since all GPU objects in Impeller are labelled, we see one
   pipeline aptly called the `SolidFillPipeline` with one draw call.
-* The `Performance` section in box `5` from the last section is no longer empty.
+- The `Performance` section in box `5` from the last section is no longer empty.
 
 Let’s dive into each of the new sections.
 
@@ -202,8 +201,8 @@ created.
 So, if you see multiple instances of a named pipeline in the grouping of calls
 by pipeline state, realize that it is a different variant of a prototype
 pipeline state. If these are not named appropriately and you can’t tell the
-difference, file a bug to disambiguate them or [tag them
-yourself](#finding-where-api-calls-were-made-in-the-codebase)!
+difference, file a bug to disambiguate them or
+[tag them yourself](#finding-where-api-calls-were-made-in-the-codebase)!
 
 Let’s click on the `SolidFill Pipeline` in the example to analyze that pipeline.
 All draw calls listed below that pipeline use the same programmable and fixed
@@ -247,8 +246,8 @@ To inspect how each draw call is configured, select the call in the sidebar.
 To get an overview of the draw call, the Bound Resources section is the most
 useful view. Let’s ensure we understand each item.
 
-The `Pipeline States` section we have already [covered in
-detail](#inspecting-the-pipeline-state-object).
+The `Pipeline States` section we have already
+[covered in detail](#inspecting-the-pipeline-state-object).
 
 In the `Vertex` section, the `Geometry` lists how each vertex is transformed by
 the vertex shader.
@@ -296,13 +295,12 @@ So viewing the entire range of values in the stencil buffer would have made the
 changes in the buffer indiscernible to you. Xcode helpfully selected the “Min to
 Max” view for us. You can do the same for any attachment.
 
-
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image11.avif "image_tooltip")
 
 ## Debugging a Shader
 
-The shaders authored in Impeller use [GLSL
-4.60](https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf).
+The shaders authored in Impeller use
+[GLSL 4.60](https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.4.60.pdf).
 Xcode does not support debugging these shaders natively. To work around this,
 the Impeller shader compiler will convert those shaders to Metal source code and
 embed them inside debug and profile mode engine binaries alongside the shaders
@@ -351,7 +349,8 @@ The team has been unable to to find documentation for this type of error. But
 through trial-and-error, we have determined that the way to fix this is to set
 the deployment target of the application to the current OS version during the
 instrumentation run (either on macOS or iOS). To information about this line of
-troubleshooting can be found [here](https://github.com/flutter/engine/pull/39532).
+troubleshooting can be found
+[here](https://github.com/flutter/engine/pull/39532).
 
 ### Debugging a Fragment Shader
 
@@ -360,12 +359,10 @@ the draw call, it is easiest to find invocations of the fragment shader by
 opening one of the attachments used by the draw call.
 
 Find and open either the color or stencil attachments in the `Bound Resources`
-section as described in the section on [inspecting a single draw
-call](#inspecting-a-single-draw-call).
-
+section as described in the section on
+[inspecting a single draw call](#inspecting-a-single-draw-call).
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image12.avif "image_tooltip")
-
 
 At the bottom right corner of the attachment preview, you will see a disabled
 `Debug` button with a crosshair to its right. The button is disabled because no
@@ -379,23 +376,21 @@ that draw call.
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image13.avif "image_tooltip")
 
-
 In the sidebar on the left, each step of execution of the fragment shader is
 listed. You can click on each to move back and forth through the invocation. The
 values of local variables will be updated as you do.
 
 Some of the usual things to look out for when debugging fragment shaders:
 
-* Pay attention to the input to the fragment stage from the vertex stage. This
+- Pay attention to the input to the fragment stage from the vertex stage. This
   is present in the argument marked with `[[stage_in]]`.
-* The output of the stage (which defines the color of the texture element for
+- The output of the stage (which defines the color of the texture element for
   that invocation) is the return value of the invocation.
-* If you aren’t sure of a particular operation within the shader, try adding
+- If you aren’t sure of a particular operation within the shader, try adding
   intermediate variables to the shader. The Impeller shader compiler will
   faithfully add those intermediate for ease of debugging. Optimizations that
   hinder debuggability are reserved for optimized release modes and occur on the
   intermediate representation.
-
 
 ### Debugging a Vertex Shader
 
@@ -403,12 +398,10 @@ Since vertex shaders are run once per vertex in the draw call, it is easiest to
 find an invocation of the vertex shader in the geometry viewer.
 
 In the `Bound Resources` of a specific draw call, open the `Geometry` section as
-described in the section on [inspecting a single draw
-call](#inspecting-a-single-draw-call).
-
+described in the section on
+[inspecting a single draw call](#inspecting-a-single-draw-call).
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image14.avif "image_tooltip")
-
 
 In this view, the `Debug` button on the bottom right will be disabled unless a
 specific vertex in the geometry has been selected. Once you select the vertex
@@ -417,24 +410,22 @@ Click it.
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image15.avif "image_tooltip")
 
-
 In the sidebar on the left, each step of execution of the vertex shader is
 listed. You can click on each to move back and forth through the invocation. The
 values of local variables will be updated as you do.
 
 Some of the usual things to look out for when debugging vertex shaders:
 
-* Pay attention to the input to the vertex stage invocation. This is present in
+- Pay attention to the input to the vertex stage invocation. This is present in
   the argument marked with `[[stage_in]]`. This is the data you packed into the
   vertex buffer for the draw call using an `impeller::VertexBufferBuilder`.
-* The output of the stage (which defines vertex position in normalized device
+- The output of the stage (which defines vertex position in normalized device
   coordinates) is the return value of the invocation.
-* If you aren’t sure of a particular operation within the shader, try adding
+- If you aren’t sure of a particular operation within the shader, try adding
   intermediate variables to the shader. The Impeller shader compiler will
   faithfully add those intermediate for ease of debugging. Optimizations that
   hinder debuggability are reserved for optimized release modes and occur on the
   intermediate representation.
-
 
 ### Live Shader Editing & Debugging
 
@@ -446,9 +437,7 @@ have the ability to edit the Metal source code. When you do, the `Reload Shader`
 button at the bottom of the shader viewer that is typically disabled becomes
 enabled.
 
-
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image16.avif "image_tooltip")
-
 
 Click on that button to see what that invocation would look like had it used the
 updated shader. In the example above, I added an additional offset of 150 units
@@ -476,17 +465,16 @@ been labelled and you’ll find the call in `AllocatorMTL::CreateTexture`.
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/read_frame_captures/image18.avif "image_tooltip")
 
-
 This trace-first approach of navigating an unfamiliar codebase is unreasonably
 effective.
 
 # Next Steps & Further Reading
 
-* Try repeating similar steps using a different profiler like RenderDoc or
+- Try repeating similar steps using a different profiler like RenderDoc or
   Android GPU Inspector.
-* [Watch] WWDC 2018: [Metal Shader Debugging &
-  Profiling](https://developer.apple.com/videos/play/wwdc2018/608/).
-* [Watch] WWDC 2020: [Gain insights into your Metal app with
-  Xcode 12](https://developer.apple.com/videos/play/wwdc2020/10605).
-* [Watch] WWDC 2020: [Optimize Metal apps and games with GPU
-  counters](https://developer.apple.com/videos/play/wwdc2020/10603).
+- [Watch] WWDC 2018:
+  [Metal Shader Debugging & Profiling](https://developer.apple.com/videos/play/wwdc2018/608/).
+- [Watch] WWDC 2020:
+  [Gain insights into your Metal app with Xcode 12](https://developer.apple.com/videos/play/wwdc2020/10605).
+- [Watch] WWDC 2020:
+  [Optimize Metal apps and games with GPU counters](https://developer.apple.com/videos/play/wwdc2020/10603).

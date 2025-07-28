@@ -17,19 +17,23 @@ diligently check the workflow for any potential security issues.
 
 ## Adding a new GitHub Actions workflow
 
-To add a new workflow please open a new bug using the [ticket queue process](Infra-Ticket-Queue.md). The following data points are required:
+To add a new workflow please open a new bug using the
+[ticket queue process](Infra-Ticket-Queue.md). The following data points are
+required:
 
-*   Description/reason to enable this workflow
-*   workflow repository
-*   pinned commit
+- Description/reason to enable this workflow
+- workflow repository
+- pinned commit
 
 ## Updating a GitHub Actions workflow
 
-To update an existing workflow please open a new bug using the [ticket queue process](Infra-Ticket-Queue.md). The following data points are required:
+To update an existing workflow please open a new bug using the
+[ticket queue process](Infra-Ticket-Queue.md). The following data points are
+required:
 
-*   Description/reason to update the pinned version
-*   workflow/old_pinned_version
-*   workflow/new_pinned_version
+- Description/reason to update the pinned version
+- workflow/old_pinned_version
+- workflow/new_pinned_version
 
 ## flutter/engine and flutter/flutter
 
@@ -45,15 +49,15 @@ artifacts.
 
 New workflow:
 
-*   Does it have an associated bug?
-*   Was the workflow/commit added to the allow list? Is the workflow pinned to a
-    given commit?
-*   If the workflow require write access, is it overriding the ACLs explicitly?
-*   If the target repository has branch protection, is the configuration using
-    ***secrets.FLUTTERGITHUBBOT_TOKEN*** instead of the default one?
-*   Is the workflow configured to not run on forks?
+- Does it have an associated bug?
+- Was the workflow/commit added to the allow list? Is the workflow pinned to a
+  given commit?
+- If the workflow require write access, is it overriding the ACLs explicitly?
+- If the target repository has branch protection, is the configuration using
+  ***secrets.FLUTTERGITHUBBOT_TOKEN*** instead of the default one?
+- Is the workflow configured to not run on forks?
 
 Update workflow:
 
-*   Does it have an associated bug?
-*   Was the workflow with old and new commits added to the allowed list?
+- Does it have an associated bug?
+- Was the workflow with old and new commits added to the allowed list?

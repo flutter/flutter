@@ -1,4 +1,5 @@
-_For user information about Flutter's new rendering backend, check out [Impeller preview](https://docs.flutter.dev/perf/impeller)._
+_For user information about Flutter's new rendering backend, check out
+[Impeller preview](https://docs.flutter.dev/perf/impeller)._
 
 Team-facing documentation specific to Impeller:
 

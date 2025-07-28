@@ -1,4 +1,5 @@
-This is an index of team-facing documentation for the [flutter/packages repository](https://github.com/flutter/packages/).
+This is an index of team-facing documentation for the
+[flutter/packages repository](https://github.com/flutter/packages/).
 
 - [Contributing to Plugins and Packages](contributing/README.md)
 - [Flutter migrate](../wiki_archive/Flutter-migrate.md)

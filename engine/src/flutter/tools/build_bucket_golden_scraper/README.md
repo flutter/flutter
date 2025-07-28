@@ -29,8 +29,8 @@ You're recommended to still use `git diff` to verify the changes look good.
 ## Upgrading `git diff`
 
 By default, `git diff` is not very helpful for binary files. You can install
-[`imagemagick`](https://imagemagick.org/) and configure your local git client
-to make `git diff` show a PNG diff:
+[`imagemagick`](https://imagemagick.org/) and configure your local git client to
+make `git diff` show a PNG diff:
 
 ```shell
 # On MacOS.

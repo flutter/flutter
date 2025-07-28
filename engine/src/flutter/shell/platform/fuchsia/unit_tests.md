@@ -23,14 +23,18 @@ $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh
 ```
 
 - Pass `--unopt` to turn off C++ compiler optimizations.
+
 - Pass `--count N` to do N test runs. Useful for testing for flakes.
-- Pass `--package-filter` to run a specific test package instead of all the test packages. For example:
+
+- Pass `--package-filter` to run a specific test package instead of all the test
+  packages. For example:
 
   ```sh
   $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh --package-filter flow_tests-0.far
   ```
 
-- Pass `--gtest-filter` to run specific tests from the test package instead of all the tests. For example:
+- Pass `--gtest-filter` to run specific tests from the test package instead of
+  all the tests. For example:
 
   ```sh
   $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh --package-filter flutter_runner_tests-0.far --gtest-filter "*FlatlandConnection*"

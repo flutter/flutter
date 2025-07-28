@@ -2,30 +2,29 @@
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web, and desktop from a single codebase. Flutter works with existing
-code, is used by developers and organizations around the world, and is free
-and open source.
+code, is used by developers and organizations around the world, and is free and
+open source.
 
-This API reference covers all libraries that are exported by the Flutter
-SDK.
+This API reference covers all libraries that are exported by the Flutter SDK.
 
 ## More Documentation
 
 This site hosts Flutter's API documentation. Other documentation can be found at
 the following locations:
 
-* [flutter.dev](https://flutter.dev) (main Flutter site)
-* [Stable channel API Docs](https://api.flutter.dev)
-* [Main channel API Docs](https://main-api.flutter.dev)
-* Engine Embedder API documentation:
-  * [Android Embedder](../javadoc/index.html)
-  * [iOS Embedder](../ios-embedder/index.html)
-  * [macOS Embedder](../macos-embedder/index.html)
-  * [Linux Embedder](../linux-embedder/index.html)
-  * [Windows Embedder](../windows-embedder/index.html)
-  * [Web Embedder](dart-ui_web/dart-ui_web-library.html)
-* [Installation](https://flutter.dev/docs/get-started/install)
-* [Codelabs](https://flutter.dev/docs/codelabs)
-* [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
+- [flutter.dev](https://flutter.dev) (main Flutter site)
+- [Stable channel API Docs](https://api.flutter.dev)
+- [Main channel API Docs](https://main-api.flutter.dev)
+- Engine Embedder API documentation:
+  - [Android Embedder](../javadoc/index.html)
+  - [iOS Embedder](../ios-embedder/index.html)
+  - [macOS Embedder](../macos-embedder/index.html)
+  - [Linux Embedder](../linux-embedder/index.html)
+  - [Windows Embedder](../windows-embedder/index.html)
+  - [Web Embedder](dart-ui_web/dart-ui_web-library.html)
+- [Installation](https://flutter.dev/docs/get-started/install)
+- [Codelabs](https://flutter.dev/docs/codelabs)
+- [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
 ## Offline Documentation
 
@@ -38,17 +37,17 @@ to 900 MB.**
 
 Offline HTML documentation ZIP bundles:
 
- * [Stable channel](https://api.flutter.dev/offline/flutter.docs.zip)
- * [Main channel](https://main-api.flutter.dev/offline/flutter.docs.zip)
+- [Stable channel](https://api.flutter.dev/offline/flutter.docs.zip)
+- [Main channel](https://main-api.flutter.dev/offline/flutter.docs.zip)
 
 Or, you can add Flutter to the open-source [Zeal](https://zealdocs.org/) app
 using the following XML configurations. Follow the instructions in the
 application for adding a feed.
 
- * Stable channel Zeal XML configuration URL:
-   <https://api.flutter.dev/offline/flutter.xml>
- * Main channel Zeal XML configuration URL:
-   <https://main-api.flutter.dev/offline/flutter.xml>
+- Stable channel Zeal XML configuration URL:
+  <https://api.flutter.dev/offline/flutter.xml>
+- Main channel Zeal XML configuration URL:
+  <https://main-api.flutter.dev/offline/flutter.xml>
 
 ## Importing a Library
 
@@ -90,7 +89,7 @@ import 'package:file/local.dart';
 
 Flutter has a rich ecosystem of packages that have been contributed by the
 Flutter team and the broader open source community to a central repository.
-Among the thousands of packages, you'll find support for Firebase, Google
-Fonts, hardware services like Bluetooth and camera, new widgets and
-animations, and integration with other popular web services. You can browse
-those packages at [pub.dev](https://pub.dev).
+Among the thousands of packages, you'll find support for Firebase, Google Fonts,
+hardware services like Bluetooth and camera, new widgets and animations, and
+integration with other popular web services. You can browse those packages at
+[pub.dev](https://pub.dev).

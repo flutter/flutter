@@ -3,8 +3,8 @@
 `clangd_check` is a tool to run clangd on a codebase and check for diagnostics.
 
 The practical use of this tool is intentionally limited; it's designed to
-provide a quick way to verify that `clangd` is able to parse and analyze a
-C++ codebase.
+provide a quick way to verify that `clangd` is able to parse and analyze a C++
+codebase.
 
 ## Usage
 

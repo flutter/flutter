@@ -1,6 +1,7 @@
 # Flutter gallery
 
-An older copy of the Flutter gallery demo application used for integration testing.
+An older copy of the Flutter gallery demo application used for integration
+testing.
 
 For the current Flutter Gallery app sample, see this repo:
 https://github.com/flutter/gallery

@@ -10,8 +10,7 @@ You can read more about
 
 ## iOS
 
-You can open `ios/Runner.xcworkspace` in Xcode and build the project as
-usual.
+You can open `ios/Runner.xcworkspace` in Xcode and build the project as usual.
 
 ## Android
 

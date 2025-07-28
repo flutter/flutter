@@ -30,8 +30,8 @@ More detailed logs should be in `build/cubic_bezier_perf.timeline.json`.
 
 ### Backdrop filter benchmark
 
-To run the backdrop filter benchmark on a device:
-To run a mobile benchmark on a device:
+To run the backdrop filter benchmark on a device: To run a mobile benchmark on a
+device:
 
 ```sh
 flutter drive --profile -t test_driver/run_app.dart --driver test_driver/[test_name]_test.dart
@@ -75,21 +75,23 @@ flutter drive --profile -t test/[test_name]_e2e.dart --driver test_driver/e2e_te
 
 ## Web benchmarks
 
-Web benchmarks are compiled from the same entry point in `lib/web_benchmarks.dart`.
+Web benchmarks are compiled from the same entry point in
+`lib/web_benchmarks.dart`.
 
 ### How to write a web benchmark
 
-Create a new file for your benchmark under `lib/src/web`. See `bench_draw_rect.dart`
-as an example.
+Create a new file for your benchmark under `lib/src/web`. See
+`bench_draw_rect.dart` as an example.
 
 Choose one of the two benchmark types:
 
 - A "raw benchmark" records performance metrics from direct interactions with
   `dart:ui` with no framework. This kind of benchmark is good for benchmarking
-  low-level engine primitives, such as layer, picture, and semantics performance.
+  low-level engine primitives, such as layer, picture, and semantics
+  performance.
 - A "widget benchmark" records performance metrics using a widget. This kind of
-  benchmark is good for measuring the performance of widgets, often together with
-  engine work that widget-under-test incurs.
+  benchmark is good for measuring the performance of widgets, often together
+  with engine work that widget-under-test incurs.
 - A "widget build benchmark" records the cost of building a widget from nothing.
   This is different from the "widget benchmark" because typically the latter
   only performs incremental UI updates, such as an animation. In contrast, this
@@ -102,8 +104,8 @@ For a raw benchmark extend `RawRecorder` (tip: you can start by copying
 For a widget benchmark extend `WidgetRecorder` (tip: you can start by copying
 `bench_simple_lazy_text_scroll.dart`).
 
-For a widget build benchmark extend `WidgetBuildRecorder` (tip: you can start by copying
-`bench_build_material_checkbox.dart`).
+For a widget build benchmark extend `WidgetBuildRecorder` (tip: you can start by
+copying `bench_build_material_checkbox.dart`).
 
 Pick a unique benchmark name and class name and add it to the `benchmarks` list
 in `lib/web_benchmarks.dart`.
@@ -111,10 +113,10 @@ in `lib/web_benchmarks.dart`.
 ### How to run a web benchmark
 
 Web benchmarks can be run using `flutter run` in debug, profile, and release
-modes, using either the CanvasKit or the Skwasm rendering backend. Note, however,
-that running in debug mode will result in worse numbers. Profile mode is useful
-for profiling in Chrome DevTools because the numbers are close to release mode
-and the profile contains unobfuscated names.
+modes, using either the CanvasKit or the Skwasm rendering backend. Note,
+however, that running in debug mode will result in worse numbers. Profile mode
+is useful for profiling in Chrome DevTools because the numbers are close to
+release mode and the profile contains unobfuscated names.
 
 Example:
 
@@ -136,7 +138,10 @@ cd dev/devicelab
 
 ## Frame policy test
 
-File `test/frame_policy.dart` and its driving script `test_driver/frame_policy_test.dart`
-are used for testing [`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
-and [`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
-policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).
+File `test/frame_policy.dart` and its driving script
+`test_driver/frame_policy_test.dart` are used for testing
+[`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+and
+[`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
+policies in terms of its effect on
+[`WidgetTester.handlePointerEventRecord`](https://api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).

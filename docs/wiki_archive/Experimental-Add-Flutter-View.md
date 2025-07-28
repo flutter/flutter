@@ -1,12 +1,16 @@
-_**Everything in this doc and linked from this doc is experimental. These details WILL change. Do not use these instructions or APIs in production code because we will break you.**_
+_**Everything in this doc and linked from this doc is experimental. These
+details WILL change. Do not use these instructions or APIs in production code
+because we will break you.**_
 
 # Add a Flutter View
 
-Flutter can be added to an Android app as a single `View` in an `Activity`'s `View` hierarchy.
+Flutter can be added to an Android app as a single `View` in an `Activity`'s
+`View` hierarchy.
 
-Before adding Flutter as a single `View`, you should consider if it is possible to add Flutter as a `Fragment` to reduce your development burden.
+Before adding Flutter as a single `View`, you should consider if it is possible
+to add Flutter as a `Fragment` to reduce your development burden.
 
-* [How to use a `FlutterFragment`](Experimental-Add-Flutter-Fragment-ViewPager.md)
+- [How to use a `FlutterFragment`](Experimental-Add-Flutter-Fragment-ViewPager.md)
 
 If you really need to add Flutter as a single `View` then do the following.
 
@@ -14,7 +18,8 @@ If you really need to add Flutter as a single `View` then do the following.
 
 ### Create and start a FlutterEngine
 
-Create and start a `FlutterEngine` by following the appropriate instructions. See the [FlutterEngine page](Experimental-Reuse-FlutterEngine-across-screens.md)
+Create and start a `FlutterEngine` by following the appropriate instructions.
+See the [FlutterEngine page](Experimental-Reuse-FlutterEngine-across-screens.md)
 
 ### Create a FlutterView and add to layout
 
@@ -28,7 +33,8 @@ FrameLayout frameLayout = findViewById(R.id.framelayout);
 frameLayout.addView(flutterView);
 ```
 
-Your `FlutterView` will not render anything at this point because it is not backed by any particular Flutter app.
+Your `FlutterView` will not render anything at this point because it is not
+backed by any particular Flutter app.
 
 ### Attach your FlutterView to your FlutterEngine
 
@@ -36,13 +42,17 @@ Your `FlutterView` will not render anything at this point because it is not back
 flutterView.attachToFlutterEngine(flutterEngine);
 ```
 
-At this point you should see your Flutter UI rendering to your `FlutterView`, and touch interaction should work.
+At this point you should see your Flutter UI rendering to your `FlutterView`,
+and touch interaction should work.
 
 ### Create and configure platform plugin
 
 TODO(mattcarroll): update this info about the platform plugin
 
-Fundamental communication between the Android platform and your Flutter app takes place over a `MethodChannel` with the name `"flutter/platform"`. For example, Android's `onPostResume()` call must be forwarded over the `flutterPlatformChannel` with the message `"AppLifecycleState.resumed"`.
+Fundamental communication between the Android platform and your Flutter app
+takes place over a `MethodChannel` with the name `"flutter/platform"`. For
+example, Android's `onPostResume()` call must be forwarded over the
+`flutterPlatformChannel` with the message `"AppLifecycleState.resumed"`.
 
 ```java
   platformPlugin = new PlatformPlugin(activity);

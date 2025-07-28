@@ -1,60 +1,73 @@
 # Flutter postmortem: Windows Defender alert
 
-Status: final<br>
-Owner: drewroengoogle
+Status: final<br> Owner: drewroengoogle
 
 ## Summary
 
-Description: A change to Windows Defender caused transient CI failures and, more importantly, flagged Flutter as malware for some users.<br>
-Component: Release<br>
-Date/time: 2023-03-26<br>
-Duration: two days<br>
-User impact: An unknown number of users and potential new users were unable to use Flutter. Some tests failed.
+Description: A change to Windows Defender caused transient CI failures and, more
+importantly, flagged Flutter as malware for some users.<br> Component:
+Release<br> Date/time: 2023-03-26<br> Duration: two days<br> User impact: An
+unknown number of users and potential new users were unable to use Flutter. Some
+tests failed.
 
 ## Timeline (all times in PST/PDT)
 
 ### 2023-03-26
 
-??:?? - Microsoft deploys an update to Windows Defender **&lt;START OF OUTAGE&gt;**<br>
-13:02 - We receive a message to security@flutter.dev reporting "Flutter Windows Installation WacAtac Trojan" from user S01.<br>
-20:57 - A test [fails in CI](https://ci.chromium.org/ui/p/flutter/builders/prod/Windows_android%20hot_mode_dev_cycle_win__benchmark/9172/overview) with the message "the file contains a virus or potentially unwanted software".<br>
-22:10 - @zanderso files [#123519](https://github.com/flutter/flutter/issues/123519) and marks it P0.<br>
-12:51 - @andrewkolos files [#123525](https://github.com/flutter/flutter/issues/123525) after seeing multiple other CI failures.<br>
-12:52 - @andrewkolos marks #123525 as a duplicate of #123519.<br>
+??:?? - Microsoft deploys an update to Windows Defender **\<START OF
+OUTAGE>**<br> 13:02 - We receive a message to security@flutter.dev reporting
+"Flutter Windows Installation WacAtac Trojan" from user S01.<br> 20:57 - A test
+[fails in CI](https://ci.chromium.org/ui/p/flutter/builders/prod/Windows_android%20hot_mode_dev_cycle_win__benchmark/9172/overview)
+with the message "the file contains a virus or potentially unwanted
+software".<br> 22:10 - @zanderso files
+[#123519](https://github.com/flutter/flutter/issues/123519) and marks it P0.<br>
+12:51 - @andrewkolos files
+[#123525](https://github.com/flutter/flutter/issues/123525) after seeing
+multiple other CI failures.<br> 12:52 - @andrewkolos marks #123525 as a
+duplicate of #123519.<br>
 
 ### 2023-03-27
 
-08:05 - @drewroengoogle begins investigating.<br>
-08:40 - @drewroengoogle was unable to reproduce the problem and lowers the priority of the issue after the previously failing tests passed on rerun.<br>
-09:02 - User Woo⛈ on Discord reports getting a Windows Defender warning for windows-x64.zip.<br>
-10:03 - @MP00 reports on #123519 that Windows Defender quarantined windows-x64.zip on their machine at 10:42 in some unspecified time zone.<br>
-10:27 - @godofredoc forwards the security e-mail from S01 to @sealesj and @drewroengoogle.<br>
-10:59 - @Hixie replies to S01 by e-mail asking for more details.<br>
-11:12 - S01 provides the specific URL that caused issues.<br>
-11:45 - @Hixie asks S01 for even more details.<br>
-11:47 - @Hixie flags this as a P0 to @godofredoc, @sealesj, and @drewroengoogle.<br>
-11:53 - @godofredoc asks @drewroengoogle if #123519 is related.<br>
-11:53 - @drewroengoogle marks #123519 as P0.<br>
-12:03 - S01 provides the sha256 for flutter_windows_3.7.8-stable.zip.<br>
-12:10 - @Hixie provides the reporter with the issue number.<br>
-12:21 - @drewroengoogle verifies that the hash of flutter_windows_3.7.8-stable.zip in storage matches the hash reported by S01, confirming that the file was not corrupted or compromised during download by the reporter.<br>
-12:34 - @Hixie attempts to upload the files to virustotal.com for independent verification of the file state. windows-x64.zip is marked as uncompromised and flutter_windows_3.7.8-stable.zip is too big to be uploaded.<br>
-12:40 - @Hixie asks anyone on Discord who has a Windows machine whether they can reproduce the problem.<br>
-12:52 - @gspencergoog reports getting the same message for gen_snapshot.exe.<br>
-13:00 - @timsneath provides information on how to report this to Microsoft.<br>
-13:04 - @Hixie creates an #incident-response channel on Discord to coordinate the response.<br>
-13:48 - @gspencergoog successfully uploads windows-x64.zip to Microsoft for analysis. The instant report was that no malware was detected but the report was still pending.<br>
-14:18 - @gspencergoog confirms that virustotal.com does not detect any malware in the affected files.<br>
-??:?? - Microsoft deploys an update to Windows Defender **&lt;END OF OUTAGE&gt;**<br>
-14:59 - @gspencergoog reports being unable to reproduce the problem for files that previously were affected.<br>
-15:18 - @godofredoc attempts to rebuild the affected files.<br>
+08:05 - @drewroengoogle begins investigating.<br> 08:40 - @drewroengoogle was
+unable to reproduce the problem and lowers the priority of the issue after the
+previously failing tests passed on rerun.<br> 09:02 - User Woo⛈ on Discord
+reports getting a Windows Defender warning for windows-x64.zip.<br> 10:03 -
+@MP00 reports on #123519 that Windows Defender quarantined windows-x64.zip on
+their machine at 10:42 in some unspecified time zone.<br> 10:27 - @godofredoc
+forwards the security e-mail from S01 to @sealesj and @drewroengoogle.<br> 10:59
+\- @Hixie replies to S01 by e-mail asking for more details.<br> 11:12 - S01
+provides the specific URL that caused issues.<br> 11:45 - @Hixie asks S01 for
+even more details.<br> 11:47 - @Hixie flags this as a P0 to @godofredoc,
+@sealesj, and @drewroengoogle.<br> 11:53 - @godofredoc asks @drewroengoogle if
+#123519 is related.<br> 11:53 - @drewroengoogle marks #123519 as P0.<br> 12:03 -
+S01 provides the sha256 for flutter_windows_3.7.8-stable.zip.<br> 12:10 - @Hixie
+provides the reporter with the issue number.<br> 12:21 - @drewroengoogle
+verifies that the hash of flutter_windows_3.7.8-stable.zip in storage matches
+the hash reported by S01, confirming that the file was not corrupted or
+compromised during download by the reporter.<br> 12:34 - @Hixie attempts to
+upload the files to virustotal.com for independent verification of the file
+state. windows-x64.zip is marked as uncompromised and
+flutter_windows_3.7.8-stable.zip is too big to be uploaded.<br> 12:40 - @Hixie
+asks anyone on Discord who has a Windows machine whether they can reproduce the
+problem.<br> 12:52 - @gspencergoog reports getting the same message for
+gen_snapshot.exe.<br> 13:00 - @timsneath provides information on how to report
+this to Microsoft.<br> 13:04 - @Hixie creates an #incident-response channel on
+Discord to coordinate the response.<br> 13:48 - @gspencergoog successfully
+uploads windows-x64.zip to Microsoft for analysis. The instant report was that
+no malware was detected but the report was still pending.<br> 14:18 -
+@gspencergoog confirms that virustotal.com does not detect any malware in the
+affected files.<br> ??:?? - Microsoft deploys an update to Windows Defender
+**\<END OF OUTAGE>**<br> 14:59 - @gspencergoog reports being unable to reproduce
+the problem for files that previously were affected.<br> 15:18 - @godofredoc
+attempts to rebuild the affected files.<br>
 
 ### 2023-03-28
 
-05:38 - User @FusoraTech reports having a similar problem.<br>
-08:47 - @godofredoc confirms using Google Cloud Storage audit logs that the affected artifact never changed while in storage.<br>
-10:28 - @gpencergoog reports that Microsoft confirmed the submission did not contain malware.<br>
-10:39 - @Hixie closes the issue as a transient Windows Defender issue.<br>
+05:38 - User @FusoraTech reports having a similar problem.<br> 08:47 -
+@godofredoc confirms using Google Cloud Storage audit logs that the affected
+artifact never changed while in storage.<br> 10:28 - @gpencergoog reports that
+Microsoft confirmed the submission did not contain malware.<br> 10:39 - @Hixie
+closes the issue as a transient Windows Defender issue.<br>
 
 ## Impact
 
@@ -64,49 +77,80 @@ Some tests in continuous integration failed.
 
 ## Root causes
 
-As best we can determine, the cause was a transient issue with Windows Defender that caused certain Flutter binaries to be flagged as having the Trojan:Script/Wacatac.B!ml trojan when downloaded.
+As best we can determine, the cause was a transient issue with Windows Defender
+that caused certain Flutter binaries to be flagged as having the
+Trojan:Script/Wacatac.B!ml trojan when downloaded.
 
 ## History
 
-This is not the first time Flutter binaries have been labeled as "Trojan:Script/Wacatac.B!ml" by Windows Defender.
+This is not the first time Flutter binaries have been labeled as
+"Trojan:Script/Wacatac.B!ml" by Windows Defender.
 
-In March 2021, @esDotDev reported a similar problem in [#78463](https://github.com/flutter/flutter/issues/78463), though at the time we were unable to reproduce it and the issue was closed due to insufficient information.
+In March 2021, @esDotDev reported a similar problem in
+[#78463](https://github.com/flutter/flutter/issues/78463), though at the time we
+were unable to reproduce it and the issue was closed due to insufficient
+information.
 
-In January 2023, @anggoran reported a similar problem in [#118430](https://github.com/flutter/flutter/issues/118430). We were again unable to reproduce the problem and closed the issue.
+In January 2023, @anggoran reported a similar problem in
+[#118430](https://github.com/flutter/flutter/issues/118430). We were again
+unable to reproduce the problem and closed the issue.
 
-In general there is a history of false positives with virus tools, we generally mark them as duplicates of [#95167](https://github.com/flutter/flutter/issues/95167) which is a non-actionable placeholder issue for us, or [#61997](https://github.com/flutter/flutter/issues/61997), which is an umbrella issue tracking any work we would do to react more gracefully when antivirus tools flag Flutter components or generated code as malware.
+In general there is a history of false positives with virus tools, we generally
+mark them as duplicates of
+[#95167](https://github.com/flutter/flutter/issues/95167) which is a
+non-actionable placeholder issue for us, or
+[#61997](https://github.com/flutter/flutter/issues/61997), which is an umbrella
+issue tracking any work we would do to react more gracefully when antivirus
+tools flag Flutter components or generated code as malware.
 
 ## Lessons learned
 
-This section refers to the actual root cause, i.e., a false positive in Windows Defender. It may be worth considering our processes for handling a similar situation in the event that it was real.
+This section refers to the actual root cause, i.e., a false positive in Windows
+Defender. It may be worth considering our processes for handling a similar
+situation in the event that it was real.
 
 ### What worked
 
 We did not in fact get compromised.
 
-Our release bucket has audit logs configured, which allowed us to check that the artifact was not modified after the initial upload.
+Our release bucket has audit logs configured, which allowed us to check that the
+artifact was not modified after the initial upload.
 
 ### Where we got lucky
 
-The damage caused by the false positive seems to have been minimal. We are only aware of three user reports, the CI failures happened mainly over a weekend, and the tests were not reliably failing so rerunning the bots allowed PRs to land. There was no press cycle, and a quick Google search found no mention of this in social media channels.
+The damage caused by the false positive seems to have been minimal. We are only
+aware of three user reports, the CI failures happened mainly over a weekend, and
+the tests were not reliably failing so rerunning the bots allowed PRs to land.
+There was no press cycle, and a quick Google search found no mention of this in
+social media channels.
 
 ### What didn't work
 
 Windows Defender, obviously.
 
-Our builds are not reproducible: rerunning the same build stage does not create identical bits. This makes it hard for us to confirm that builds are not compromised by rerunning the build in a new VM.
+Our builds are not reproducible: rerunning the same build stage does not create
+identical bits. This makes it hard for us to confirm that builds are not
+compromised by rerunning the build in a new VM.
 
-Had this been a real compromise, our response rate would not have been especially prompt.
+Had this been a real compromise, our response rate would not have been
+especially prompt.
 
-We do not have a way to communicate effectively to our users about incidents like this.
+We do not have a way to communicate effectively to our users about incidents
+like this.
 
-We don’t know the appropriate identification information/channel to expedite malware analysis at Microsoft (or other antivirus providers), even though that channel almost certainly exists and is available to us.
+We don’t know the appropriate identification information/channel to expedite
+malware analysis at Microsoft (or other antivirus providers), even though that
+channel almost certainly exists and is available to us.
 
-Devs did not have quick access to Windows machines to be able to attempt to reproduce the behavior, adding extra time to the triage process.
+Devs did not have quick access to Windows machines to be able to attempt to
+reproduce the behavior, adding extra time to the triage process.
 
-Although we have audit logs enabled, there was no documentation on how to search them, also adding to the total triage time.
+Although we have audit logs enabled, there was no documentation on how to search
+them, also adding to the total triage time.
 
-We don't publish the hashes of the artifacts we allow developers to download. One user who was affected by this failure asked if there was a list anywhere so that they could verify their download locally.
+We don't publish the hashes of the artifacts we allow developers to download.
+One user who was affected by this failure asked if there was a list anywhere so
+that they could verify their download locally.
 
 ## Action items
 
@@ -116,15 +160,18 @@ It is unclear what we can do to avoid such problems in the future.
 
 ### Detection
 
-We could intentionally run Windows Defender updates and scans against recent artifacts continually to detect when an event occurs.
+We could intentionally run Windows Defender updates and scans against recent
+artifacts continually to detect when an event occurs.
 
 ### Mitigation
 
-It's unclear there is much we can do to prevent third-party tools from accidentally reporting Flutter as malware.
+It's unclear there is much we can do to prevent third-party tools from
+accidentally reporting Flutter as malware.
 
 ### Process
 
-As part of this incident we created a new Discord channel, #incident-response. We should document this.
+As part of this incident we created a new Discord channel, #incident-response.
+We should document this.
 
 ### Fixes
 
@@ -132,7 +179,8 @@ No fixes were necessary.
 
 ### Documentation
 
-Add documentation on how Flutter infra can triage these issues quicker through audit logs.
+Add documentation on how Flutter infra can triage these issues quicker through
+audit logs.
 
 ## Appendix
 

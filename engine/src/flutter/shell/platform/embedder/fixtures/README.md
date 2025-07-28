@@ -1,7 +1,7 @@
 # `platform/embedder/fixtures`
 
-The files in this directory are golden-file outputss of [`tests`](../tests),
-but lack a simple way to be re-generated.
+The files in this directory are golden-file outputss of [`tests`](../tests), but
+lack a simple way to be re-generated.
 
 For example, here is what a failure might look like on CI:
 
@@ -79,5 +79,5 @@ $ cp \
 
 ⚠️ **WARNING**: Some of the golden tests do not run on non-Linux OSes, which
 means its not currently possible to re-generate them on non-Linux OSes
-(<https://github.com/flutter/flutter/issues/53784>). So uh, setup a Linux VM
-or find a friend with a Linux machine.
+(<https://github.com/flutter/flutter/issues/53784>). So uh, setup a Linux VM or
+find a friend with a Linux machine.

@@ -15,8 +15,9 @@ however support ways to reduce redundancy, namely anchors.
 
 ## Backporting //engine.code-workspace
 
-If something is accidentally introduced into //engine.code-workspace without editing
-the YAML file here there are tools that can be used to more easily fix that.
+If something is accidentally introduced into //engine.code-workspace without
+editing the YAML file here there are tools that can be used to more easily fix
+that.
 
 ```sh
 ./merge.sh

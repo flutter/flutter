@@ -59,8 +59,8 @@ dart ./tools/clang_tidy/bin/main.dart --checks="-*,<only-check-to-run>"
 
 ### Specify a specific build
 
-There are some rules that are only applicable to certain builds, or to check
-a difference in behavior between two builds.
+There are some rules that are only applicable to certain builds, or to check a
+difference in behavior between two builds.
 
 Use `--target-variant` to specify a build:
 
@@ -74,8 +74,8 @@ For example, to check the `android_debug_unopt` build:
 dart ./tools/clang_tidy/bin/main.dart --target-variant android_debug_unopt
 ```
 
-In rarer cases, for example comparing two different checkouts of the engine,
-use `--src-dir=<path/to/engine/src>`.
+In rarer cases, for example comparing two different checkouts of the engine, use
+`--src-dir=<path/to/engine/src>`.
 
 ### Lint entire repository
 
@@ -96,8 +96,7 @@ dart ./tools/clang_tidy/bin/main.dart --lint-regex=".*test.*\.cc"
 
 > **⚠️ WARNING**: This may take a long time to run if a pattern is not provided
 > or if the pattern matches a large number of files, i.e. on the order of
-> thousands of files could take 30 minutes or more to run and lock your
-> machine.
+> thousands of files could take 30 minutes or more to run and lock your machine.
 
-[^1]: Modified files are determined by a `git diff` command compared to `HEAD`.
-[^2]: Latest build is the last updated directory in `src/out/`.
+\[^1\]: Modified files are determined by a `git diff` command compared to
+`HEAD`. \[^2\]: Latest build is the last updated directory in `src/out/`.

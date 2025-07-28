@@ -2,12 +2,12 @@
 
 🔗 Permalink: [flutter.dev/to/et](https://flutter.dev/to/et)
 
----
+______________________________________________________________________
 
-`et`, or _engine tool_, is a command-line tool that intends to provide a
-unified interface for building and working in the flutter engine.
+`et`, or _engine tool_, is a command-line tool that intends to provide a unified
+interface for building and working in the flutter engine.
 
-[![Open `e: engine-tool` issues](https://img.shields.io/github/issues/flutter/flutter/e%3A%20engine-tool)](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22e%3A+engine-tool%22)
+[![Open  issues](https://img.shields.io/github/issues/flutter/flutter/e%3A%20engine-tool)](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22e%3A+engine-tool%22)
 
 <img width="500" src="https://github.com/user-attachments/assets/879e6442-016d-40e5-909c-f3210065d878" />
 
@@ -33,21 +33,16 @@ unified interface for building and working in the flutter engine.
 ## Getting Started
 
 `et` assumes that you have a working knowledge of the Flutter framework and
-engine (see: [architectural layers][]), and have a valid checkout of the engine
+engine (see: [architectural layers]), and have a valid checkout of the engine
 source on a supported platform (see:
-[setting up the engine development environment][]); in fact, the tool will not
-run at all outside of a valid repository setup.
+[setting up the engine development environment]); in fact, the tool will not run
+at all outside of a valid repository setup.
 
-[architectural layers]: https://docs.flutter.dev/resources/architectural-overview#architectural-layers
-[setting up the engine development environment]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
-
-It is recommended to add `et` to your `PATH` by adding the [`bin` folder][]:
+It is recommended to add `et` to your `PATH` by adding the [`bin` folder]:
 
 ```sh
 PATH=$PATH:/path/to/engine/flutter/bin
 ```
-
-[`bin` folder]: ../../bin
 
 To verify you have a working installation, try `et help`:
 
@@ -106,11 +101,10 @@ et build --config host_debug_unopt_arm64
 See [building a host engine](#building-a-host-engine) and
 [building a target engine](#building-a-target-engine) for more details.
 
-> [!CAUTION]
-> Each build configuration (sometimes called a _variant_) produces a different
-> set of output files in `$ENGINE/src/out`, e.g. ``$ENGINE/src/out/host_debug`;
-> these outputs can be multiple GBs, and add up quickly. Consider using
-> [`et cleanup`](#reclaiming-older-output-directories) to delete older output
+> [!CAUTION] Each build configuration (sometimes called a _variant_) produces a
+> different set of output files in `$ENGINE/src/out`, e.g.
+> \`\`$ENGINE/src/out/host_debug`; these outputs can be multiple GBs, and add up quickly. Consider using [`et
+> cleanup\`\](#reclaiming-older-output-directories) to delete older output
 > directories automatically.
 
 ## Common Tasks
@@ -133,15 +127,17 @@ et build
 et build --config host_debug
 ```
 
-> [!TIP]
-> To understand where the names come from, see
+> [!TIP] To understand where the names come from, see
 > [understanding the concept of a build configuration](#understanding-the-concept-of-a-build-configuration).
 
 A host engine is useful when:
 
-- You want to test, debug, or iterate functionality independent of a specific device or platform;
-- You are working on functionality specific to the (desktop) platform you currently have;
-- You want to use a combination of a host engine and target engine to [run a Flutter app](#running-a-flutter-app-with-a-local-engine-build).
+- You want to test, debug, or iterate functionality independent of a specific
+  device or platform;
+- You are working on functionality specific to the (desktop) platform you
+  currently have;
+- You want to use a combination of a host engine and target engine to
+  [run a Flutter app](#running-a-flutter-app-with-a-local-engine-build).
 
 ### Building a target engine
 
@@ -163,7 +159,8 @@ By convention, target engines are not prefixed with `host`.
 A target engine is useful when:
 
 - You are working on functionality specific to the (target) platform;
-- You want to use a combination of a host engine and target engine to [run a Flutter app](#running-a-flutter-app-with-a-local-engine-build).
+- You want to use a combination of a host engine and target engine to
+  [run a Flutter app](#running-a-flutter-app-with-a-local-engine-build).
 
 ### Building specific targets
 
@@ -211,8 +208,8 @@ et test //flutter/impeller:impeller_unittests
 
 Both `/...` and `:all` are supported as well.
 
-> [!NOTE]
-> Support for non-C++ tests is limited. See [running Dart tests](#running-dart-tests).
+> [!NOTE] Support for non-C++ tests is limited. See
+> [running Dart tests](#running-dart-tests).
 
 ### Running formatters
 
@@ -258,8 +255,8 @@ cd to/project/dir
 et run
 ```
 
-> [!NOTE] > `et run` will rebuild (if necessary) host and target builds, which can take
-> a significant amount of time.
+> [!NOTE] > `et run` will rebuild (if necessary) host and target builds, which
+> can take a significant amount of time.
 
 ## Advanced Features
 
@@ -274,7 +271,8 @@ Google employees have the option of using remote-build execution, or RBE, to
 greatly speed up many builds by reusing previously built (and cached) artifacts
 as well as delegating the compiler to a high-powered (remote) virtual machine.
 
-To enable RBE, follow [flutter.dev/to/engine-rbe](https://flutter.dev/to/engine-rbe).
+To enable RBE, follow
+[flutter.dev/to/engine-rbe](https://flutter.dev/to/engine-rbe).
 
 Once enabled, by default, `et` builds will use RBE where possible, which also
 (implicitly) requires an active internet connection. It is possible to
@@ -297,11 +295,10 @@ To _disable_ RBE once it is enabled, a build can use `--no-rbe`:
 et build --no-rbe
 ```
 
-> [!CAUTION]
-> Disabling RBE invalidates the build context, which means that previously built
-> artifacts (when the flag was enabled) are _not_ re-used. It is recommended to
-> use `--build-strategy=local` instead unless you are debugging the tool or the
-> RBE configuration itself.
+> [!CAUTION] Disabling RBE invalidates the build context, which means that
+> previously built artifacts (when the flag was enabled) are _not_ re-used. It
+> is recommended to use `--build-strategy=local` instead unless you are
+> debugging the tool or the RBE configuration itself.
 
 ### Running Dart tests
 
@@ -311,20 +308,20 @@ There is limited support for running _Dart_ unittests using `et`:
 et test //flutter/tools/engine_tool/...
 ```
 
-> [!NOTE]
-> Unlike C++, it is not currently required to have `BUILD.gn` targets declared
-> for Dart tests, and the vast majority of packages do not have them. As we add
-> and adopt GN more broadly this command will become more generally useful.
+> [!NOTE] Unlike C++, it is not currently required to have `BUILD.gn` targets
+> declared for Dart tests, and the vast majority of packages do not have them.
+> As we add and adopt GN more broadly this command will become more generally
+> useful.
 
 ### Using a custom engine configuration
 
-Most of the time developers will use a pre-configured engine configuration
-(see [understanding the concept of a build configuration](#understanding-the-concept-of-a-build-configuration))
+Most of the time developers will use a pre-configured engine configuration (see
+[understanding the concept of a build configuration](#understanding-the-concept-of-a-build-configuration))
 as these configurations are already generally supported, and often tested on CI.
 If you need to build a configuration _not-specified_, consider the following:
 
-1. Does my configuration represent a combination of flags that should be
-   tested on CI or re-used by others?
+1. Does my configuration represent a combination of flags that should be tested
+   on CI or re-used by others?
 
    If so, the best option may be adding the build to
    [ci/builders](../../ci/builders/), either as a CI build or merely as a
@@ -332,7 +329,7 @@ If you need to build a configuration _not-specified_, consider the following:
    build here it will be reproducible for other developers, documented, and
    automatically usable within the `et` command-line tool.
 
-2. Is my configuration for 1-off testing or validation only?
+1. Is my configuration for 1-off testing or validation only?
 
    If so, any combination of _additional_ GN arguments (i.e. arguments that
    otherwise would be parsed by [tools/gn](../gn)) can be provided by passing
@@ -350,8 +347,8 @@ If you need to build a configuration _not-specified_, consider the following:
    et build --config host_debug --gn-args="--no-prebuilt-dart-sdk"
    ```
 
-> [!TIP]
-> For more information on [build configurations, see the README](../../ci/builders/README.md).
+> [!TIP] For more information on
+> [build configurations, see the README](../../ci/builders/README.md).
 
 ### Reclaiming older output directories
 
@@ -376,7 +373,8 @@ et cleanup --untouched-since=2024-01-01
 
 We welcome contributions to improve `et` for our all developers.
 
-- Follow the [Flutter style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo)
+- Follow the
+  [Flutter style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo)
   for Dart code that are relevant outside of the framework repo. It contains
   conventions that go beyond code formatting, which we'll follow even if using
   `dart format` in the future.
@@ -395,6 +393,11 @@ Run tests using `et`:
 et test //flutter/tools/engine_tool/...
 ```
 
-If you're not sure what to work on, consider our existing label of `e: engine-tool`:
+If you're not sure what to work on, consider our existing label of
+`e: engine-tool`:
 
-[![Open `e: engine-tool` issues](https://img.shields.io/github/issues/flutter/flutter/e%3A%20engine-tool)](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22e%3A+engine-tool%22)
+[![Open  issues](https://img.shields.io/github/issues/flutter/flutter/e%3A%20engine-tool)](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22e%3A+engine-tool%22)
+
+[architectural layers]: https://docs.flutter.dev/resources/architectural-overview#architectural-layers
+[setting up the engine development environment]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
+[`bin` folder]: ../../bin

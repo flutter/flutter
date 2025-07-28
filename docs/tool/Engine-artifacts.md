@@ -11,21 +11,23 @@ for Android, iOS, and so-on).
 
 ![An example of cached engine artifacts](https://github.com/user-attachments/assets/47c45971-5c5c-4a01-8239-8af0b98cabb8)
 
-When using a _released_ version of Flutter, i.e. from a channel such as `stable`,
-[`bin/internal/engine.version`](../../bin/internal/engine.version) is set to the
-content hash SHA for a merged commit in `https://github.com/flutter/flutter`, where
-the engine artifacts have already been pre-built and uploaded.
+When using a _released_ version of Flutter, i.e. from a channel such as
+`stable`, [`bin/internal/engine.version`](../../bin/internal/engine.version) is
+set to the content hash SHA for a merged commit in
+`https://github.com/flutter/flutter`, where the engine artifacts have already
+been pre-built and uploaded.
 
-When using the `master` channel, or _contributing_ to Flutter (which is typically
-as a fork of Flutter's `master` channel), the engine SHA is _computed_ by
-generating a content-aware hash of files that affect the engine build (such as
-`DEPS` and the `engine` directory itself).
+When using the `master` channel, or _contributing_ to Flutter (which is
+typically as a fork of Flutter's `master` channel), the engine SHA is _computed_
+by generating a content-aware hash of files that affect the engine build (such
+as `DEPS` and the `engine` directory itself).
 
 For _advanced_ use-cases, such as on CI platforms, or for custom 1-off testing
 using a pre-built Flutter engine (to use a _locally_ built Flutter engine see
-[locally built engines](../contributing/testing/Running-and-writing-tests.md#locally-built-engines)), the environment variable `FLUTTER_PREBUILT_ENGINE_VERSION` can be set,
-again to a engine SHA for a merged commit in `flutter/flutter`. This is only needed
-if different artifacts from the content sha are desired:
+[locally built engines](../contributing/testing/Running-and-writing-tests.md#locally-built-engines)),
+the environment variable `FLUTTER_PREBUILT_ENGINE_VERSION` can be set, again to
+a engine SHA for a merged commit in `flutter/flutter`. This is only needed if
+different artifacts from the content sha are desired:
 
 ```sh
 $ FLUTTER_PREBUILT_ENGINE_VERSION=abc123 flutter --version
@@ -57,12 +59,11 @@ stateDiagram-v2
 On Cocoon (Flutter's internal CI/CD) we _often_ set
 `FLUTTER_PREBUILT_ENGINE_VERSION` to the following:
 
-| Branch                    | Presubmit     | Merge Queue   | Postsubmit    |
-| ------------------------- | ------------- | ------------- | ------------- |
-| `main`                    | `content.sha` | `content.sha` | `content.sha` |
-| `flutter-x.x-candidate.x` | `content.sha` | N/A[^1]       | `content.sha` |
-| `stable` or `beta`        | N/A[^3]       | N/A[^1]       | N/A[^3]       |
-| _anything else_[^2]       | `content.sha` | `content.sh`  | `content.sha` |
+| Branch | Presubmit | Merge Queue | Postsubmit | | ------------------------- |
+------------- | ------------- | ------------- | | `main` | `content.sha` |
+`content.sha` | `content.sha` | | `flutter-x.x-candidate.x` | `content.sha` |
+N/A[^1] | `content.sha` | | `stable` or `beta` | N/A[^3] | N/A[^1] | N/A[^3] | |
+_anything else_[^2] | `content.sha` | `content.sh` | `content.sha` |
 
 > To generate a new `engine.version`:
 >
@@ -70,12 +71,14 @@ On Cocoon (Flutter's internal CI/CD) we _often_ set
 > ./bin/internal/content_aware_hash.sh > ./bin/internal/engine.version
 > ```
 >
-> As of [`b0ccfb53801abc9b0aa93e7cca3a3841513c3086`](https://flutter.googlesource.com/recipes/+/b0ccfb53801abc9b0aa93e7cca3a3841513c3086) (May 6 2025), the packaging release process will refuse to let you publish a
+> As of
+> [`b0ccfb53801abc9b0aa93e7cca3a3841513c3086`](https://flutter.googlesource.com/recipes/+/b0ccfb53801abc9b0aa93e7cca3a3841513c3086)
+> (May 6 2025), the packaging release process will refuse to let you publish a
 > release with an out of date `engine.version`.
 
-[^1]: Does not use a merge queue.
-[^2]: I.e. experimental branches that do not fall into one of the above.
-[^3]: Only updated through `flutter-x.x-candidate.x` branches.
+\[^1\]: Does not use a merge queue. \[^2\]: I.e. experimental branches that do
+not fall into one of the above. \[^3\]: Only updated through
+`flutter-x.x-candidate.x` branches.
 
 ## References
 

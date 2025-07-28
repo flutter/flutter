@@ -1,19 +1,19 @@
 # Flutter Infra Team Triage
 
-_Canonical Link: [flutter.dev/to/team-infra](https://flutter.dev/to/team-infra)._
+_Canonical Link:
+[flutter.dev/to/team-infra](https://flutter.dev/to/team-infra)._
 
-This doc details how to triage and work on issues marked [`team-infra`][].
+This doc details how to triage and work on issues marked [`team-infra`].
 
-[`team-infra`]: https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3Ateam-infra
+______________________________________________________________________
 
----
+The _infrastructure_ sub-team works a bit differently than our externally facing
+product, as it is producing (and maintaining) infrastructure _for_ Flutter,
+which includes tools and services that are open source but are **not supported
+for external use**.
 
-The _infrastructure_ sub-team works a bit differently than our externally
-facing product, as it is producing (and maintaining) infrastructure _for_
-Flutter, which includes tools and services that are open source but are **not
-supported for external use**.
-
-As a result, our process _differs_ from the general [issue hygiene](../contributing/issue_hygiene/) and [issue triage](README.md):
+As a result, our process _differs_ from the general
+[issue hygiene](../contributing/issue_hygiene/) and [issue triage](README.md):
 
 - We [own](#ownership) _general_ infrastructure, and decline other requests
 - We use [_priority_ labels](#priorities) to mean specific things
@@ -56,8 +56,9 @@ across the Flutter project, but _not all_ testing and or tooling infrastructure;
 that is, unless the tool is mentioned below, we may decline or direct you at
 another sub-team:
 
-- General CI/CD issues affecting [flutter/flutter](https://github.com/flutter/flutter)
-  or [flutter/packages](https://github.com/flutter/packages)
+- General CI/CD issues affecting
+  [flutter/flutter](https://github.com/flutter/flutter) or
+  [flutter/packages](https://github.com/flutter/packages)
 - The [dashboard](https://flutter-dashboard.appspot.com/)
 - Anything in [flutter/cocoon](https://github.com/flutter/cocoon),
   [flutter/recipes](https://flutter.googlesource.com/recipes/), and
@@ -66,9 +67,10 @@ another sub-team:
 
 ## Priorities
 
-Our prioritization is _similar_ to [team-wide priorities](../contributing/issue_hygiene/README.md#priorities),
-but with a few more specifics. Unless you work _on_ the infra team, we ask you
-do not add or change priority labels.
+Our prioritization is _similar_ to
+[team-wide priorities](../contributing/issue_hygiene/README.md#priorities), but
+with a few more specifics. Unless you work _on_ the infra team, we ask you do
+not add or change priority labels.
 
 ### [P0](https://github.com/flutter/flutter/issues?q=state%3Aopen%20label%3Ateam-infra%20label%3AP0)
 
@@ -105,7 +107,8 @@ Examples might include:
 
 A change we agree with, but do not have bandwidth for.
 
-An individual _could_ meaningfully make progress on this issue, and we would review it. If there are no volunteers, it may never be completed.
+An individual _could_ meaningfully make progress on this issue, and we would
+review it. If there are no volunteers, it may never be completed.
 
 _See also: [contributing](#contributing)._
 
@@ -125,18 +128,18 @@ _See also: [contributions](#contributions)._
 ## We prefer closing issues
 
 [Unlike the external Flutter product](../contributing/issue_hygiene/README.md#closing-issues),
-we do not accept contributions on all issues, and run the `team-infra` label more
-like an operations team; that is, if an issue is unlikely to be addressed or
-does not meet the [priorities criteria](#priorities) above, we often will close
-the issue as _not planned_.
+we do not accept contributions on all issues, and run the `team-infra` label
+more like an operations team; that is, if an issue is unlikely to be addressed
+or does not meet the [priorities criteria](#priorities) above, we often will
+close the issue as _not planned_.
 
 An issue closed as _not planned_ does not mean the issue does not have validity,
 or that a subsequent more fleshed out issue or request would get more attention,
 it just represents the limited bandwidth and capability of the team responsible.
 
 We encourage you/your team to manage your own "wishlist" of items, which could
-be in the format of a github issue (but _not_ tagged `team-infra`), a gist,
-a github project, a Google doc, or another format, and to
+be in the format of a github issue (but _not_ tagged `team-infra`), a gist, a
+github project, a Google doc, or another format, and to
 [share it with us](#how-to-contact-us).
 
 _See also: [contributing](#contributing)._
@@ -158,12 +161,17 @@ For other issues, if you are part of the core Flutter team, please
 
 The team primarily uses GitHub and internal Google chat for communication, which
 is unavailable to non-Google employees. For issues that are important to the
-broader community, we use [Discord](https://discord.com/channels/608014603317936148/608116355836805126)
+broader community, we use
+[Discord](https://discord.com/channels/608014603317936148/608116355836805126)
 and [flutter-announce@](https://groups.google.com/g/flutter-announce) as needed.
 
 ### How to contact us
 
-If you work at Google, see [go/flutter-infra-team](http://goto.google.com/flutter-infra-team).
+If you work at Google, see
+[go/flutter-infra-team](http://goto.google.com/flutter-infra-team).
 
-Otherwise, see [#hackers-infra](https://discord.com/channels/608014603317936148/608021351567065092)
+Otherwise, see
+[#hackers-infra](https://discord.com/channels/608014603317936148/608021351567065092)
 on Discord. Note responses may be infrequent.
+
+[`team-infra`]: https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3Ateam-infra

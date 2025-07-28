@@ -2,7 +2,8 @@
 
 This directory contains a mock implementation of the GLES backend.
 
-Most functions are implemented as no-ops, have a default implementation that is not configurable, or just record the call. The latter is useful for testing:
+Most functions are implemented as no-ops, have a default implementation that is
+not configurable, or just record the call. The latter is useful for testing:
 
 ```cc
 TEST(MockGLES, Example) {
@@ -34,7 +35,7 @@ To add a new function, do the following:
    }
    ```
 
-2. Edit the `kMockResolver`, and add a new `else if` clause:
+1. Edit the `kMockResolver`, and add a new `else if` clause:
 
    ```diff
    + else if (strcmp(name, "glFooBar") == 0) {

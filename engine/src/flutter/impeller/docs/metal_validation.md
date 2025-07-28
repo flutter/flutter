@@ -3,14 +3,15 @@
 Metal validation can be enabled for command-line application using environment
 variables.
 
-Apple [documents these environment variables on their developer site](https://developer.apple.com/documentation/xcode/validating-your-apps-metal-api-usage#Enable-API-Validation-with-environment-variables).
+Apple
+[documents these environment variables on their developer site](https://developer.apple.com/documentation/xcode/validating-your-apps-metal-api-usage#Enable-API-Validation-with-environment-variables).
 More documentation about these environment variables is also available via a man
 page entry: `man MetalValidation`
 
 To enable all relevant Metal API and shader validation without using Xcode, add
 the following to your `.rc` file.
 
-``` sh
+```sh
 # Metal Validation Defaults
 export MTL_DEBUG_LAYER=1
 export MTL_DEBUG_LAYER_ERROR_MODE=assert

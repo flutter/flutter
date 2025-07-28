@@ -1,10 +1,9 @@
 ## Flutter Self Service Index
 
-Flutter provides multiple functionality through self-service services. Most of these services are available to any member of the Flutter GitHub organization.
-
+Flutter provides multiple functionality through self-service services. Most of
+these services are available to any member of the Flutter GitHub organization.
 
 ### Audiences
-
 
 <table>
   <tr>
@@ -39,10 +38,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   </tr>
 </table>
 
-
-
 ### Infrastructure
-
 
 <table>
   <tr>
@@ -191,10 +187,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   </tr>
 </table>
 
-
-
 ### Release
-
 
 <table>
   <tr>
@@ -259,9 +252,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   </tr>
 </table>
 
-
 ### Security
-
 
 <table>
   <tr>
@@ -314,5 +305,5 @@ Flutter provides multiple functionality through self-service services. Most of t
   </tr>
 </table>
 
-
-Googlers can access the internal version using [go/flutter-self-service](http://go/flutter-self-service)
+Googlers can access the internal version using
+[go/flutter-self-service](http://go/flutter-self-service)

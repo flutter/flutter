@@ -2,8 +2,8 @@
 
 ### How do I enable Impeller to try it out myself?
 
-See the instructions in the README on how to [try Impeller in
-Flutter](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
+See the instructions in the README on how to
+[try Impeller in Flutter](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
 
 Support on some platforms is further along than on others. The current priority
 for the team is to support iOS, Android, Desktops, and Embedder API users (in
@@ -11,13 +11,13 @@ that rough order).
 
 ### I am running into issues when Impeller is enabled, how do I report them?
 
-Like any other Flutter issue, you can report them on the [GitHub issue
-tracker](https://github.com/flutter/flutter/issues/new/choose).
+Like any other Flutter issue, you can report them on the
+[GitHub issue tracker](https://github.com/flutter/flutter/issues/new/choose).
 
 Please explicitly mention that this is an Impeller specific regression. You can
 quickly swap between the Impeller and Skia backends using the command line flag
-flag detailed in [section in the README on how to try
-Impeller](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
+flag detailed in
+[section in the README on how to try Impeller](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
 
 Reduced test cases are the most useful. Please also report any performance
 regressions.
@@ -92,8 +92,9 @@ this time for the small team working on Impeller.
 
 We are aware that these priorities might change in the future. There have been
 sanity checks to ensure that the Impeller API can be ported to WASM and also
-that Impeller shaders can be [compiled to
-WGSL](https://github.com/chinmaygarde/wgsl_sandbox) for eventual WebGPU support.
+that Impeller shaders can be
+[compiled to WGSL](https://github.com/chinmaygarde/wgsl_sandbox) for eventual
+WebGPU support.
 
 ### How will Impeller affect the way in which Flutter applications are created and packaged?
 
@@ -127,8 +128,8 @@ Skia after years of effort by graphics experts. The longer answer...
 
 Flutter applications, via their use of Skia, were susceptible to the problem of
 jank (user-perceptible stuttering/choppiness in animations and interactions) due
-to shader compilation. Such problems were [reported as early as
-2015](https://github.com/flutter/flutter/issues/813).
+to shader compilation. Such problems were
+[reported as early as 2015](https://github.com/flutter/flutter/issues/813).
 
 Shaders are tiny programs that run on the GPU when a specific combination of
 rendering intent is requested by the application. Flutter's API is extremely
@@ -142,15 +143,14 @@ But this led to the problem of jank during the initial run of performance
 sensitive areas of the application when there were no cached shaders.
 
 Fortunately, early on, the team was able to predict the common shaders the
-application was likely going to need. A generic ["warm
-up"](https://github.com/flutter/flutter/pull/27660) phase was added where these
-shaders were given a chance to be compiled and cached at the launch of a Flutter
-application.
+application was likely going to need. A generic
+["warm up"](https://github.com/flutter/flutter/pull/27660) phase was added where
+these shaders were given a chance to be compiled and cached at the launch of a
+Flutter application.
 
 As Flutter applications became more complex, the generic shader warmup was no
 longer suitable for all apps. So the ability to specify shaders to warm up was
-[exposed to end
-users](https://api.flutter.dev/flutter/painting/ShaderWarmUp-class.html).
+[exposed to end users](https://api.flutter.dev/flutter/painting/ShaderWarmUp-class.html).
 
 But, this was exceedingly hard to do and also platform specific (iOS Metal,
 Android OpenGL, Fuchsia Vulkan, etc.). So much so that only a handful of
@@ -160,11 +160,11 @@ specific to the app version. If the app was updated to add or remove more
 features, the warmup routines were invalid and mostly just served to slow down
 application startup.
 
-To make this process self-service, [a scheme was
-devised](https://github.com/flutter/flutter/issues/53607) to run the application
-and its tests during development in training phase, capture the shaders, package
-them with the application, and during a new "warm up" phase,  pre-compile the
-shaders.
+To make this process self-service,
+[a scheme was devised](https://github.com/flutter/flutter/issues/53607) to run
+the application and its tests during development in training phase, capture the
+shaders, package them with the application, and during a new "warm up" phase,
+pre-compile the shaders.
 
 Remember, these shaders were platform specific. The scheme detailed above
 unfortunately moved the burden to developers. It also made the application sizes
@@ -180,14 +180,14 @@ into. Also, some animation frames could be skipped during training because jank
 during previous frames in the training run. So training runs not only had to be
 run over the entire app, but also multiple times (on all platforms) to ensure
 success. Moreover, applications that were really effective at training began to
-run into egregiously high first-frame times ([some as high as 6
-seconds](http://github.com/flutter/flutter/issues/97884)). Shaders captured from
-training runs weren't fully guaranteed to be consistent across devices on the
-same platform either and [bugs were
-common](https://github.com/flutter/flutter/issues/102655#issuecomment-1115179271).
-All the while the team was [desperately trying to
-reduce](https://github.com/flutter/flutter/issues/84213) the number of shader
-variants that might be required.
+run into egregiously high first-frame times
+([some as high as 6 seconds](http://github.com/flutter/flutter/issues/97884)).
+Shaders captured from training runs weren't fully guaranteed to be consistent
+across devices on the same platform either and
+[bugs were common](https://github.com/flutter/flutter/issues/102655#issuecomment-1115179271).
+All the while the team was
+[desperately trying to reduce](https://github.com/flutter/flutter/issues/84213)
+the number of shader variants that might be required.
 
 Due to these reasons, developers abandoned this self-serve warmup mechanism. For
 instance, no application in Google used this due to the all the problems
@@ -224,7 +224,6 @@ hearing from our customers.
 Today, Impeller outperforms the old renderer not only in worst-frame timed
 benchmarks, but is also faster on average.
 
-
 ### What makes Impeller different, compared to Skia, for Flutter?
 
 We want to start by saying Skia is amazing. We'd also never say Impeller is
@@ -236,8 +235,8 @@ continues to use Skia for text layout and its image codecs and has no plans to
 migrate away from using those sub-components. We wholeheartedly recommend Skia
 for most rendering needs.
 
-All of Impellers shaders are [manually authored and
-compiled](https://github.com/flutter/engine/tree/0a8de3dd3285c0b64de47630a8218ae38b8e04e1/impeller#the-offline-shader-compilation-pipeline)
+All of Impellers shaders are
+[manually authored and compiled](https://github.com/flutter/engine/tree/0a8de3dd3285c0b64de47630a8218ae38b8e04e1/impeller#the-offline-shader-compilation-pipeline)
 during build time and packaged with the Flutter engine. There is no runtime
 shader generation, reflection, or compilation. Skia can and does generate and
 compile shaders at runtime.
@@ -252,21 +251,22 @@ times.
 Because the processing of shaders in Impeller happens at build time when
 compiling the engine, Impeller's binary size impact is a fraction as that of
 Skia's. Since there is no shader compilation and reflection machinery at
-runtime, Impeller [adds only around
-100kb](https://github.com/flutter/flutter/issues/123741#issuecomment-1553382501)
+runtime, Impeller
+[adds only around 100kb](https://github.com/flutter/flutter/issues/123741#issuecomment-1553382501)
 of binary size at runtime (compressed) even when all the generated shaders are
 packaged in a Flutter engine. Removing Skia GPU (which includes the SKSL shader
-compilation machinery) [reduces the binary size of the Flutter engine by
-17%](https://github.com/flutter/engine/pull/52748). That is to say, the
-machinery to generate, parse, compile, and reflect shaders is larger than the
-backend specific shaders themselves. Using an Impeller-only build leads to much
-smaller Flutter engines.
+compilation machinery)
+[reduces the binary size of the Flutter engine by 17%](https://github.com/flutter/engine/pull/52748).
+That is to say, the machinery to generate, parse, compile, and reflect shaders
+is larger than the backend specific shaders themselves. Using an Impeller-only
+build leads to much smaller Flutter engines.
 
 Impeller doesn't have a software backend unlike Skia. Instead, software
 rendering using Impeller can be achieved using a Vulkan or OpenGL implementation
 running in software using projects like SwiftShader, LLVMPipe, etc.
 
 ### Where did Impeller get its name?
+
 Impeller began as a modest experiment to solve the problem of shader compilation
 jank. After the theory of operation was settled on, the process of hacking
 together a prototype began with a component tacked onto Flutter's compositor.
@@ -290,13 +290,20 @@ at startup time. But it still aims to support Skia’s general 2D API and has th
 same spec. requirements. The design decisions made to support those requirements
 make offline shader compilation impossible.
 
-As of May 2025, Flutter has no plans to use Graphite. However, we, the
-Flutter team, are in constant communication with the Skia team and freely share
-insights and ideas across Impeller and Graphite.
+As of May 2025, Flutter has no plans to use Graphite. However, we, the Flutter
+team, are in constant communication with the Skia team and freely share insights
+and ideas across Impeller and Graphite.
 
 ### How does WebGPU/Dawn fit into the rendering landscape in Flutter?
 
-To access graphics/compute accelerators on the device, you need to go through a client API like Vulkan, OpenGL, Metal, DirectX, etc… Rendering engines like Impeller, Skia, ThreeJS (we’ll call them middleware) all have the same concern. The client APIs are extremely low-level, not fully platform/device agnostic, and difficult to target/maintain individually. Depending on the application's needs, you can get away with targeting just one client API. Sometimes, client APIs can be layered on top of another. For instance, running WebGL in the browser likely uses Metal under the hood (via Angle) when the browser is running on macOS.
+To access graphics/compute accelerators on the device, you need to go through a
+client API like Vulkan, OpenGL, Metal, DirectX, etc… Rendering engines like
+Impeller, Skia, ThreeJS (we’ll call them middleware) all have the same concern.
+The client APIs are extremely low-level, not fully platform/device agnostic, and
+difficult to target/maintain individually. Depending on the application's needs,
+you can get away with targeting just one client API. Sometimes, client APIs can
+be layered on top of another. For instance, running WebGL in the browser likely
+uses Metal under the hood (via Angle) when the browser is running on macOS.
 
 ```mermaid
 flowchart TD
@@ -316,7 +323,12 @@ flowchart TD
         
 ```
 
-WebGPU, or Dawn/wgpu.rs in JS garb, purports to be a sensible and portable abstraction layer over the [client APIs](https://dawn.googlesource.com/dawn/+/HEAD/docs/support.md). For middleware, that presents an interesting value proposition. Instead of doing mostly the same thing multiple times, you just target one API and let the WebGPU library take care of the rest.
+WebGPU, or Dawn/wgpu.rs in JS garb, purports to be a sensible and portable
+abstraction layer over the
+[client APIs](https://dawn.googlesource.com/dawn/+/HEAD/docs/support.md). For
+middleware, that presents an interesting value proposition. Instead of doing
+mostly the same thing multiple times, you just target one API and let the WebGPU
+library take care of the rest.
 
 ```mermaid
 flowchart TD
@@ -332,12 +344,58 @@ flowchart TD
         Dawn --> Vulkan
 ```
 
-However, for middleware like Impeller, there are a few practical considerations that make Dawn unsuitable for use today. For one, the binary size of the library is larger than the entire Flutter Engine. Flutter users are incredibly sensitive to binary size and more than doubling the size of the engine is a tough pill to swallow. In comparison, Impeller adds only about 100kb of binary size to the Flutter Engine today. Next, the WebGPU abstraction locks us out of features available directly in client API that Impeller freely exploits for performance (framebuffer-fetch, fixed-rate compression for intermediate render targets, etc…). Impeller would either have to wait for official support for it in Dawn or poke holes in the API which increases our support surface. But, we are not averse to having a WebGPU backend for Flutter. In fact, we’ve already done experiments where our compiler can target [WGSL](https://github.com/chinmaygarde/wgsl_sandbox) and are ready to support WebGPU when/where it makes sense. But, right now, we are in a situation where a WebGPU backend will be **in-addition-to** the other backends and not **instead-of**. This defeats the primary value proposition of WebGPU/Dawn which is not having to maintain multiple backends in the first place.
+However, for middleware like Impeller, there are a few practical considerations
+that make Dawn unsuitable for use today. For one, the binary size of the library
+is larger than the entire Flutter Engine. Flutter users are incredibly sensitive
+to binary size and more than doubling the size of the engine is a tough pill to
+swallow. In comparison, Impeller adds only about 100kb of binary size to the
+Flutter Engine today. Next, the WebGPU abstraction locks us out of features
+available directly in client API that Impeller freely exploits for performance
+(framebuffer-fetch, fixed-rate compression for intermediate render targets,
+etc…). Impeller would either have to wait for official support for it in Dawn or
+poke holes in the API which increases our support surface. But, we are not
+averse to having a WebGPU backend for Flutter. In fact, we’ve already done
+experiments where our compiler can target
+[WGSL](https://github.com/chinmaygarde/wgsl_sandbox) and are ready to support
+WebGPU when/where it makes sense. But, right now, we are in a situation where a
+WebGPU backend will be **in-addition-to** the other backends and not
+**instead-of**. This defeats the primary value proposition of WebGPU/Dawn which
+is not having to maintain multiple backends in the first place.
 
-As of May 2025, Impeller has no plans to add a WebGPU/Dawn backend. We will re-evaluate this decision if/when one or both of the following conditions hold:
-* WebGPU is the only available client API on the platform capable of servicing Flutters needs. Hypothetically, this could be a path Impeller takes on the web instead of using WebGL 2. Though, we must admit it's a tough decision today.
-* WebGPU is the preferred client API on a platform and is available on that platform already (negating Impellers concerns about binary size). Flutter targets no such platforms today.
+As of May 2025, Impeller has no plans to add a WebGPU/Dawn backend. We will
+re-evaluate this decision if/when one or both of the following conditions hold:
 
-We do get queries about WebGPU from the perspective of application developers, **not** middleware like Impeller. Flutter does have the ability to poke a hole in the middleware for applications to support specific rendering use-cases. For instance, plugins use it to render into a texture using client APIs directly. But as soon as you attempt to do your own rendering, you hit a massive usability cliff where you need to support all client APIs portably. WebGPU starts looking like just the thing you need. FWIW, application developers can write bindings to WebGPU using the plugin model with FFI and use those bindings to write a renderer that renders to a texture that gets composited in a Flutter application. But it's going to be very hard. And developers will likely lose the benefits of stateful hot-reload and all the other developer affordances that are part of Flutters value proposition unless significant investments are made in the developer experience. The author's role as a middleware developer with the constraints listed above disincentives them from making such an investment. So this is a call to the community for a high-quality WebGPU package.
+- WebGPU is the only available client API on the platform capable of servicing
+  Flutters needs. Hypothetically, this could be a path Impeller takes on the web
+  instead of using WebGL 2. Though, we must admit it's a tough decision today.
+- WebGPU is the preferred client API on a platform and is available on that
+  platform already (negating Impellers concerns about binary size). Flutter
+  targets no such platforms today.
 
-Admittedly, a gap in Flutters rendering support is that there is no way to create a delightful 3D renderer in Flutter without also first escaping from Flutter. That an escape hatch (via FFI/plugins) exists is perhaps missing the point. Talking about how someone could use WebGPU once they use that escape hatch even more so. A potentially exciting proposal is [Flutter GPU](https://docs.google.com/document/d/1Sh1BAC5c_kkuMVreo7ymBzPoMzb7lamZRPsI7GBXv5M/edit?resourcekey=0-5w8u2V-LS41tCHeoE8bDTQ&tab=t.0). It would expose a really low-level (but still Dart) interface to accelerators in a portable manner. Package authors will then be able to write renderers in Dart (similar to ThreeJS) that integrate well with existing Canvas APIs (no platform views, no texture composition, etc…). The progress is compelling but slow given current resource constraints on the team.
+We do get queries about WebGPU from the perspective of application developers,
+**not** middleware like Impeller. Flutter does have the ability to poke a hole
+in the middleware for applications to support specific rendering use-cases. For
+instance, plugins use it to render into a texture using client APIs directly.
+But as soon as you attempt to do your own rendering, you hit a massive usability
+cliff where you need to support all client APIs portably. WebGPU starts looking
+like just the thing you need. FWIW, application developers can write bindings to
+WebGPU using the plugin model with FFI and use those bindings to write a
+renderer that renders to a texture that gets composited in a Flutter
+application. But it's going to be very hard. And developers will likely lose the
+benefits of stateful hot-reload and all the other developer affordances that are
+part of Flutters value proposition unless significant investments are made in
+the developer experience. The author's role as a middleware developer with the
+constraints listed above disincentives them from making such an investment. So
+this is a call to the community for a high-quality WebGPU package.
+
+Admittedly, a gap in Flutters rendering support is that there is no way to
+create a delightful 3D renderer in Flutter without also first escaping from
+Flutter. That an escape hatch (via FFI/plugins) exists is perhaps missing the
+point. Talking about how someone could use WebGPU once they use that escape
+hatch even more so. A potentially exciting proposal is
+[Flutter GPU](https://docs.google.com/document/d/1Sh1BAC5c_kkuMVreo7ymBzPoMzb7lamZRPsI7GBXv5M/edit?resourcekey=0-5w8u2V-LS41tCHeoE8bDTQ&tab=t.0).
+It would expose a really low-level (but still Dart) interface to accelerators in
+a portable manner. Package authors will then be able to write renderers in Dart
+(similar to ThreeJS) that integrate well with existing Canvas APIs (no platform
+views, no texture composition, etc…). The progress is compelling but slow given
+current resource constraints on the team.

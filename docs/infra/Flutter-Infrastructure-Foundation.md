@@ -1,14 +1,17 @@
 # Flutter Infrastructure Foundation
 
-The Flutter Infrastructure Foundation Team is responsible for setting up, maintaining and improving the low level infrastructure used to build, test and release Flutter.
-
+The Flutter Infrastructure Foundation Team is responsible for setting up,
+maintaining and improving the low level infrastructure used to build, test and
+release Flutter.
 
 ## DeviceLab Hardware
 
-Flutter keeps a lab of test beds that include hosts and phones for all the supported platforms. These test beds are used to collect performance benchmarks and detect regressions.
+Flutter keeps a lab of test beds that include hosts and phones for all the
+supported platforms. These test beds are used to collect performance benchmarks
+and detect regressions.
 
-As of May 2023 the Flutter DeviceLab contains 99 test beds with the following hardware and software:
-
+As of May 2023 the Flutter DeviceLab contains 99 test beds with the following
+hardware and software:
 
 <table>
   <tr>
@@ -123,12 +126,11 @@ As of May 2023 the Flutter DeviceLab contains 99 test beds with the following ha
   </tr>
 </table>
 
-
-
 ## VMs
 
-Flutter uses Linux and Windows virtual machines to build and test Flutter. These VMs are auto-provisioned and distributed to 4 different pools. The following is the configuration distribution:
-
+Flutter uses Linux and Windows virtual machines to build and test Flutter. These
+VMs are auto-provisioned and distributed to 4 different pools. The following is
+the configuration distribution:
 
 <table>
   <tr>
@@ -155,15 +157,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 32</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 15</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 480</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.prod
@@ -175,15 +177,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 135</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 1080</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.try
@@ -195,15 +197,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 32</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 30</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 960</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.try
@@ -215,15 +217,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 137</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 1096</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.staging
@@ -235,15 +237,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 32</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 4</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 128</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.staging
@@ -255,15 +257,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 30</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 240</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.dart-internal.flutter
@@ -275,15 +277,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 32</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 20</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 640</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.prod
@@ -295,15 +297,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 59</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 472</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.try
@@ -315,15 +317,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 130</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 1040</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.staging
@@ -335,15 +337,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 12</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 96</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.dart-internal.flutter
@@ -355,15 +357,15 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 8</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 20</p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 160</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">
@@ -391,20 +393,19 @@ Flutter uses Linux and Windows virtual machines to build and test Flutter. These
    <td style="background-color: null"><p style="text-align: right">
 <strong>592</strong></p>
 
-   </td>
+</td>
    <td style="background-color: null"><p style="text-align: right">
 <strong>6392</strong></p>
 
-   </td>
+</td>
   </tr>
 </table>
 
-
-
 ## Mac hostonly machines
 
-Mac machines are organized in a different category because they are provisioned in chrome labs and have no phones attached. The machine configurations are the following:
-
+Mac machines are organized in a different category because they are provisioned
+in chrome labs and have no phones attached. The machine configurations are the
+following:
 
 <table>
   <tr>
@@ -427,7 +428,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 28</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.prod
@@ -439,7 +440,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 31</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.try
@@ -451,7 +452,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 74</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.try
@@ -463,7 +464,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 71</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.staging
@@ -475,7 +476,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 5</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.flutter.staging
@@ -487,7 +488,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 7</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.dart-internal.flutter
@@ -499,7 +500,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 15</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">luci.dart-internal.flutter
@@ -511,7 +512,7 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 2</p>
 
-   </td>
+</td>
   </tr>
   <tr>
    <td style="background-color: null">
@@ -533,18 +534,17 @@ Mac machines are organized in a different category because they are provisioned 
    <td style="background-color: null"><p style="text-align: right">
 <strong>233</strong></p>
 
-   </td>
+</td>
   </tr>
 </table>
 
-
-
 ## Services
 
-Flutter Infrastructure Foundation owns the DeviceLab provisioning services, maintains Flutter LUCI service configurations, and provides lab maintenance services.
+Flutter Infrastructure Foundation owns the DeviceLab provisioning services,
+maintains Flutter LUCI service configurations, and provides lab maintenance
+services.
 
 This is the list of services with their descriptions:
-
 
 <table>
   <tr>

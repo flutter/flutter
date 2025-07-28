@@ -9,8 +9,8 @@ up.
 ## Testing
 
 The server can be run an queried manually with the following example queries.
-Automated testing is a bit lacking until we can get it integrated with the
-dart workspace.
+Automated testing is a bit lacking until we can get it integrated with the dart
+workspace.
 
 ```json
 { "jsonrpc": "2.0", "id": 1, "method": "tools/list" }

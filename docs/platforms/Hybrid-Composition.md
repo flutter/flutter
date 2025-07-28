@@ -1,21 +1,33 @@
-Hybrid composition refers to the ability of composing native views alongside Flutter widgets. For example, displaying the native Webview inside a Flutter app.
+Hybrid composition refers to the ability of composing native views alongside
+Flutter widgets. For example, displaying the native Webview inside a Flutter
+app.
 
 ## Android
+
 *Requires API level 19*
 
-_See also: [Texture Layer Hybrid Composition](./android/Texture-Layer-Hybrid-Composition.md)_
+_See also:
+[Texture Layer Hybrid Composition](./android/Texture-Layer-Hybrid-Composition.md)_
 
-Starting from Flutter 1.20.0, hybrid composition can be used on Android. This new feature fixes most of the [issues with the preview platform view approach](./android/Virtual-Display.md#associated-problems-and-workarounds) (Virtual Display); in particular, accessibility and keyboard related issues. See also [Android Platform Views](./android/Android-Platform-Views.md) for an overview of modes.
+Starting from Flutter 1.20.0, hybrid composition can be used on Android. This
+new feature fixes most of the
+[issues with the preview platform view approach](./android/Virtual-Display.md#associated-problems-and-workarounds)
+(Virtual Display); in particular, accessibility and keyboard related issues. See
+also [Android Platform Views](./android/Android-Platform-Views.md) for an
+overview of modes.
 
-To see all known issues specific to this mode, search for the [`hc-only` label](https://github.com/flutter/flutter/labels/hc-only).
+To see all known issues specific to this mode, search for the
+[`hc-only` label](https://github.com/flutter/flutter/labels/hc-only).
 
 ### Dart side
 
-To start using this feature, you would need to create a `Widget`, and add the following `build` implementation:
+To start using this feature, you would need to create a `Widget`, and add the
+following `build` implementation:
 
 `native_view_example.dart`
 
 1. Add imports:
+
 ```dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -24,6 +36,7 @@ import 'package:flutter/services.dart';
 ```
 
 2. Implement `build` method:
+
 ```dart
 Widget build(BuildContext context) {
   // This is used in the platform side to register the view.
@@ -56,11 +69,15 @@ Widget build(BuildContext context) {
 }
 ```
 
-For more documentation see: [PlatformViewLink](https://api.flutter.dev/flutter/widgets/PlatformViewLink-class.html), [AndroidViewSurface](https://api.flutter.dev/flutter/widgets/AndroidViewSurface-class.html), [PlatformViewsService](https://api.flutter.dev/flutter/services/PlatformViewsService-class.html).
+For more documentation see:
+[PlatformViewLink](https://api.flutter.dev/flutter/widgets/PlatformViewLink-class.html),
+[AndroidViewSurface](https://api.flutter.dev/flutter/widgets/AndroidViewSurface-class.html),
+[PlatformViewsService](https://api.flutter.dev/flutter/services/PlatformViewsService-class.html).
 
 ### Platform side
 
-Finally, on the platform side, you use the standard `io.flutter.plugin.platform` package in Java or Kotlin:
+Finally, on the platform side, you use the standard `io.flutter.plugin.platform`
+package in Java or Kotlin:
 
 `NativeView.java`
 
@@ -152,7 +169,8 @@ public class MainActivity extends FlutterActivity {
 }
 ```
 
-For plugin registration, modify the main plugin file (e.g. `PlatformViewPlugin.java`):
+For plugin registration, modify the main plugin file (e.g.
+`PlatformViewPlugin.java`):
 
 ```java
 package dev.flutter.plugin.example;
@@ -173,9 +191,14 @@ public class PlatformViewPlugin implements FlutterPlugin {
 }
 ```
 
-For more documentation, see [PlatformViewRegistry](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html), [PlatformViewFactory](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html), and [PlatformView](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformView.html).
+For more documentation, see
+[PlatformViewRegistry](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html),
+[PlatformViewFactory](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html),
+and
+[PlatformView](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformView.html).
 
-Finally, indicate the minimum API Level required for the application to run in `build.gradle`.
+Finally, indicate the minimum API Level required for the application to run in
+`build.gradle`.
 
 ```groovy
 android {
@@ -184,34 +207,34 @@ android {
     }
 }
 ```
+
 ## iOS
 
-In Flutter 1.22, platform views are enabled by default. This means
-that it's no longer required to add the
-`io.flutter.embedded_views_preview` flag to `Info.plist`.
+In Flutter 1.22, platform views are enabled by default. This means that it's no
+longer required to add the `io.flutter.embedded_views_preview` flag to
+`Info.plist`.
 
 To create a platform view on iOS, follow these steps:
 
 ### On the Dart side
 
-On the Dart side, create a `Widget`
-and add the following build implementation,
+On the Dart side, create a `Widget` and add the following build implementation,
 as shown in the following steps.
 
-In your Dart file, for example `native_view_example.dart`,
-do the following:
+In your Dart file, for example `native_view_example.dart`, do the following:
 
 1. Add the following imports:
 
 <!-- skip -->
+
 ```dart
 import 'package:flutter/widget.dart';
 ```
 
-
 2. Implement a `build()` method:
 
 <!-- skip -->
+
 ```dart
 Widget build(BuildContext context) {
   // This is used in the platform side to register the view.
@@ -306,7 +329,6 @@ Implement the factory and the platform view in `FLNativeView.m`
 
 Finally, register the platform view. This can be done in an app or a plugin.
 
-
 For app registration, modify the App's `AppDelegate.m`:
 
 ```objc
@@ -352,43 +374,45 @@ For plugin registration, modify the main plugin file (e.g. `FLPlugin.m`):
 
 For more information, see the API docs for:
 
-* [`FlutterPlatformViewFactory`](https://api.flutter.dev/objcdoc/Protocols/FlutterPlatformViewFactory.html)
-* [`FlutterPlatformView`](https://api.flutter.dev/objcdoc/Protocols/FlutterPlatformView.html)
-* [`PlatformView`](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformView.html)
+- [`FlutterPlatformViewFactory`](https://api.flutter.dev/objcdoc/Protocols/FlutterPlatformViewFactory.html)
+- [`FlutterPlatformView`](https://api.flutter.dev/objcdoc/Protocols/FlutterPlatformView.html)
+- [`PlatformView`](https://api.flutter.dev/javadoc/io/flutter/plugin/platform/PlatformView.html)
 
-By default, the `UIKitView` widget appends the native `UIView` to the view hierarchy. For more documentation, see [UIKitView](https://api.flutter.dev/flutter/widgets/UiKitView-class.html).
+By default, the `UIKitView` widget appends the native `UIView` to the view
+hierarchy. For more documentation, see
+[UIKitView](https://api.flutter.dev/flutter/widgets/UiKitView-class.html).
 
 ## Performance
 
 Platform views in Flutter come with performance trade-offs.
 
-For example, in a typical Flutter app, the Flutter UI is composed
-on a dedicated raster thread. This allows Flutter apps to be fast,
-as the main platform thread is rarely blocked.
+For example, in a typical Flutter app, the Flutter UI is composed on a dedicated
+raster thread. This allows Flutter apps to be fast, as the main platform thread
+is rarely blocked.
 
-While a platform view is rendered with Hybrid Composition, the Flutter UI is composed from
-the platform thread, which competes with other tasks like
-handling OS or plugin messages, etc.
+While a platform view is rendered with Hybrid Composition, the Flutter UI is
+composed from the platform thread, which competes with other tasks like handling
+OS or plugin messages, etc.
 
-Prior to Android 10, Hybrid Composition copies each Flutter frame
-out of the graphic memory into main memory and then copied back to
-a GPU texture. As this copy happens per frame, the performance of
-the entire Flutter UI may be impacted.
+Prior to Android 10, Hybrid Composition copies each Flutter frame out of the
+graphic memory into main memory and then copied back to a GPU texture. As this
+copy happens per frame, the performance of the entire Flutter UI may be
+impacted.
 
-On the other hand, Virtual Display makes each pixel of the native view
-flow through additional intermediate graphic buffers, which cost graphic
-memory and drawing performance.
+On the other hand, Virtual Display makes each pixel of the native view flow
+through additional intermediate graphic buffers, which cost graphic memory and
+drawing performance.
 
-For complex cases, there are some techniques that can be used to mitigate
-these issues.
+For complex cases, there are some techniques that can be used to mitigate these
+issues.
 
-For example, you could use a placeholder texture while an animation is
-happening in Dart. In other words, if an animation is slow while a
-platform view is rendered, then consider taking a screenshot of the
-native view and rendering it as a texture.
+For example, you could use a placeholder texture while an animation is happening
+in Dart. In other words, if an animation is slow while a platform view is
+rendered, then consider taking a screenshot of the native view and rendering it
+as a texture.
 
 For more information, see:
 
-* [`TextureLayer`](https://api.flutter.dev/flutter/rendering/TextureLayer-class.html)
-* [`TextureRegistry`](https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html)
-* [`FlutterTextureRegistry`](https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html)
+- [`TextureLayer`](https://api.flutter.dev/flutter/rendering/TextureLayer-class.html)
+- [`TextureRegistry`](https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html)
+- [`FlutterTextureRegistry`](https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html)

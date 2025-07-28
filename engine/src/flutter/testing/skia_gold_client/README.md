@@ -1,9 +1,6 @@
 # Skia Gold Client
 
-This package interacts with [Skia Gold][] for uploading and comparing
-screenshots.
-
-[skia gold]: https://skia.org/docs/dev/testing/skiagold/
+This package interacts with [Skia Gold] for uploading and comparing screenshots.
 
 The web UI for the engine is located at <https://flutter-engine-gold.skia.org/>.
 
@@ -46,11 +43,10 @@ will fail to authenticate if run elsewhere.
 
 To use the client in CI, you'll need to make two changes:
 
-[^1]:
-    The `flutter/flutter` repository has a workaround which downloads digests
-    and does basic local image comparison, but because we have forked the
-    client and not kept it up-to-date, we cannot use that workaround. Send
-    a PR or file an issue if you'd like to see this fixed!
+\[^1\]: The `flutter/flutter` repository has a workaround which downloads
+digests and does basic local image comparison, but because we have forked the
+client and not kept it up-to-date, we cannot use that workaround. Send a PR or
+file an issue if you'd like to see this fixed!
 
 1. **Add a dependency on `goldctl`**
 
@@ -69,7 +65,7 @@ To use the client in CI, you'll need to make two changes:
    +         ]
    ```
 
-2. **Ensure the builder (i.e. `config_name: {name}`) also has a dependency**
+1. **Ensure the builder (i.e. `config_name: {name}`) also has a dependency**
 
    For example, for `linux_android_emulator`, modify
    [`ci/builders/linux_android_emulator.json`](../../ci/builders/linux_android_emulator.json):
@@ -85,21 +81,24 @@ To use the client in CI, you'll need to make two changes:
 
 ## Release Testing
 
-> [!NOTE]
-> This workflow is a work in progress. Contact @matanlurey for more information.
+> [!NOTE] This workflow is a work in progress. Contact @matanlurey for more
+> information.
 
 When we create a release branch (i.e. for a beta or stable release), all
 golden-file tests will have to be regenerated for the new release. This is
-because it's possible that the rendering of the engine has changed in a way
-that affects the golden files (either due to a bug, or intentionally) as we
-apply cherry-picks and other changes to the release branch.
+because it's possible that the rendering of the engine has changed in a way that
+affects the golden files (either due to a bug, or intentionally) as we apply
+cherry-picks and other changes to the release branch.
 
 Fortunately this process is easy and mostly automated. Here's how it works:
 
 1. Create your release branch, e.g. `flutter-3.21-candidate.1`.
+
 1. Edit [`.engine-release.verison`](../../.engine-release.version) to the new
    release version (e.g. `3.21`).
+
 1. Run all the tests, generating new golden files.
+
 1. Bulk triage all of the images as positive using the web UI (ensure you are
    logged in, or triaging will fail silently).
 
@@ -110,3 +109,5 @@ can easily filter them in the web UI and they can diverge from the `main` branch
 as needed. As cherry-picks are applied to the release branch, the tests should
 continue to pass, and the golden files should either _not_ change, or change in
 a way that is expected (i.e. fixing a bug).
+
+[skia gold]: https://skia.org/docs/dev/testing/skiagold/

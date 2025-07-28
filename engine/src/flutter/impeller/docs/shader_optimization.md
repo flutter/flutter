@@ -40,8 +40,8 @@ essentially specialized SIMD engines.
 
 GPU parallelism generally comes in two broad architectural flavors:
 **Instruction-level parallelism** and **Thread-level parallelism** -- these
-architecture designs handle shader branching very differently and are covered
-in the sections below. In general, older GPU architectures (on some products
+architecture designs handle shader branching very differently and are covered in
+the sections below. In general, older GPU architectures (on some products
 released before ~2015) leverage instruction-level parallelism, while most if not
 all newer GPUs leverage thread-level parallelism.
 
@@ -52,9 +52,9 @@ for every possible branch combination, and then executing all of them. However,
 virtually all GPU architectures in use today have instruction-level support for
 dynamic branching, and it's quite unlikely that we'll come across a mobile
 device capable of running Flutter that doesn't. For example, the old devices we
-test against in CI (iPhone 6s and Moto G4) run GPUs that support dynamic
-runtime branching. For these reasons, the optimization advice in this document
-isn't aimed at branchless architectures.
+test against in CI (iPhone 6s and Moto G4) run GPUs that support dynamic runtime
+branching. For these reasons, the optimization advice in this document isn't
+aimed at branchless architectures.
 
 ### Instruction-level parallelism
 
@@ -130,10 +130,11 @@ While it's true that driver stacks have the opportunity to generate multiple
 pipeline variants ahead of time to handle these branches, this advanced
 functionality isn't actually necessary to achieve for good runtime performance
 of uniform branches on widely used mobile architectures:
-* On SIMT architectures, branching on a uniform means that every thread in every
+
+- On SIMT architectures, branching on a uniform means that every thread in every
   warp will resolve to the same path, so only one path in the branch will ever
   execute.
-* On VLIW/SIMD architectures, the compiler can be certain that all of the
+- On VLIW/SIMD architectures, the compiler can be certain that all of the
   elements in the data path for every functional unit will resolve to the same
   path, and so it can safely emit fully parallelized instructions for the
   contents of the branch!
@@ -218,10 +219,10 @@ call).
 
 On SIMT architectures, this branch incurs very little overhead because
 `DoExtremelyExpensiveThing` will be skipped over if `color.a == 0` across all
-the threads in a given warp.
-However, architectures that use instruction-level parallelism (VLIW or SIMD)
-can't handle this branch efficiently because the compiler can't safely emit
-parallelized instructions on either side of the branch.
+the threads in a given warp. However, architectures that use instruction-level
+parallelism (VLIW or SIMD) can't handle this branch efficiently because the
+compiler can't safely emit parallelized instructions on either side of the
+branch.
 
 To achieve maximum parallelism across all of these architectures, one possible
 solution is to unbranch the more complex path:
@@ -248,6 +249,7 @@ portion of a draw call's coverage area, alternative designs may be favorable.
 ### Beware of return branching
 
 Consider the following glsl function:
+
 ```glsl
 vec4 FrobnicateColor(vec4 color) {
   if (color.a == 0) {

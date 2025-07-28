@@ -1,8 +1,8 @@
 # Example of calling platform services from Flutter
 
 This project demonstrates how to connect a Flutter app to platform-specific
-services on iOS using Swift. The equivalent version of this project in
-Objective C is found in examples/platform_channel.
+services on iOS using Swift. The equivalent version of this project in Objective
+C is found in examples/platform_channel.
 
 You can read more about
 [accessing platform and third-party services in Flutter](https://flutter.dev/to/platform-channels/).

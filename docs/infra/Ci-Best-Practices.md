@@ -3,9 +3,10 @@
 [flutter.dev/to/ci-yaml](https://flutter.dev/to/ci-yaml)
 
 This is a supplemental resource to provide best practices for using Flutter's
-internal CI/CD system. It is not a comprehensive guide, but rather a collection of tips and tricks to be as efficient as possible.
+internal CI/CD system. It is not a comprehensive guide, but rather a collection
+of tips and tricks to be as efficient as possible.
 
----
+______________________________________________________________________
 
 Table of Contents
 
@@ -20,9 +21,9 @@ Table of Contents
 ## "This branch is out-of-date" is not (always) a failure
 
 <img
-  alt="This branch is out-of-date"
-  width="600"
-  src="https://github.com/user-attachments/assets/0de2ad69-fca0-4c63-81ab-79d1b53162d1" />
+alt="This branch is out-of-date"
+width="600"
+src="https://github.com/user-attachments/assets/0de2ad69-fca0-4c63-81ab-79d1b53162d1" />
 
 This message is automatically created by GitHub when at least one commit has
 merged into the ancestor branch of the PR. On Flutter's owned repositories, this
@@ -30,34 +31,35 @@ is just a warning, and does not prevent merging.
 
 There are two edge cases where merging/rebasing is required or recommended:
 
-1. **When the commit your PR was branched from is causing a test to fail**. If
-   a forward fix or revert has since been merged into the ancestor branch, it is
+1. **When the commit your PR was branched from is causing a test to fail**. If a
+   forward fix or revert has since been merged into the ancestor branch, it is
    recommended to rebase your PR to pick up the fix.
 
-2. **When the commit your PR was branched from is more than a few days old**. If
+1. **When the commit your PR was branched from is more than a few days old**. If
    the commit is more than a few days old, it is recommended to rebase your PR
    in order to make sure that the tests are run against the latest code.
 
 ## Prefer the `auto-submit` label over pressing "merge"
 
 <img
-  width="400"
-  alt="Adding the auto-submit label"
-  src="https://github.com/user-attachments/assets/2b9a3d5a-afb0-4c24-8959-5262ce993beb" />
+width="400"
+alt="Adding the auto-submit label"
+src="https://github.com/user-attachments/assets/2b9a3d5a-afb0-4c24-8959-5262ce993beb" />
 
 The `auto-submit` label is a special label that can be added to a PR to be
 automatically merged (or queued for merging, in `flutter/flutter`'s case) when
 the tests are passing. This is the preferred way to merge PRs.
 
 If one or more tests fail, and you're confident that the failure is not related
-to your PR (i.e. is a flake), see [prefer re-running test suites over re-triggering all tests](#prefer-re-running-test-suites-over-re-triggering-all-tests).
+to your PR (i.e. is a flake), see
+[prefer re-running test suites over re-triggering all tests](#prefer-re-running-test-suites-over-re-triggering-all-tests).
 
 ## Prefer the `revert` label over manual reverts of recent commits
 
 <img
-  width="394"
-  alt="Adding the revert label"
-  src="https://github.com/user-attachments/assets/30fb773e-8b14-4580-94f0-6a650c475469" />
+width="394"
+alt="Adding the revert label"
+src="https://github.com/user-attachments/assets/30fb773e-8b14-4580-94f0-6a650c475469" />
 
 The `revert` label is a special label that can be added to a PR to revert the
 commit(s) that are causing a CI failure, and is the preferred way to revert
@@ -77,9 +79,9 @@ could cause confusion if used incorrectly.
 ## Prefer re-running test suites over re-triggering all tests
 
 <img
-  width="341"
-  alt="Failing tests with a re-run button"
-  src="https://github.com/user-attachments/assets/0076dd4f-3bc3-4ade-8d71-24b1a5e28272" />
+width="341"
+alt="Failing tests with a re-run button"
+src="https://github.com/user-attachments/assets/0076dd4f-3bc3-4ade-8d71-24b1a5e28272" />
 
 Each full test run in `flutter/flutter` uses between 100 and 200 virtual
 machines, and takes between 30 and 60 minutes to complete. This is a lot of
@@ -91,9 +93,9 @@ more expensive than re-running a single test suite or even a few test suites.
 
 ## Cost of Adding New Test Targets
 
-The Flutter team has a finite amount of resources to run tests, and adding
-new test targets, while incrementally useful, can add up to a lot of waiting
-time for the team.
+The Flutter team has a finite amount of resources to run tests, and adding new
+test targets, while incrementally useful, can add up to a lot of waiting time
+for the team.
 
 As of 2025/05/23, the presubmit pool for `flutter/flutter` has:
 
@@ -165,9 +167,12 @@ targets:
 
 This will require the following steps:
 
-1. Add 3 new shards to the `.ci.yaml` file, and set `bringup: true` for each of them.
-2. Wait for the new shards to be successfully running.
-3. Remove the old shards from the `.ci.yaml` file, and set `bringup: false` for each of them.
-4. Cherry-pick the `.ci.yaml` file into each release candidate branch to restore the test coverage.
+1. Add 3 new shards to the `.ci.yaml` file, and set `bringup: true` for each of
+   them.
+1. Wait for the new shards to be successfully running.
+1. Remove the old shards from the `.ci.yaml` file, and set `bringup: false` for
+   each of them.
+1. Cherry-pick the `.ci.yaml` file into each release candidate branch to restore
+   the test coverage.
 
 This could require up to 4 PRs, and a lot of coordination with the release team.

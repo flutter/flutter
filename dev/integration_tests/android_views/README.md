@@ -17,11 +17,12 @@ virtual display has the same origin (this makes the MotionEvent comparison
 easier as we don't need to translate the coordinates).
 
 The app includes the following control buttons:
-  * RECORD - Start listening for MotionEvents for 3 seconds, matched/unmatched events are
-    displayed in the listview as they arrive.
-  * CLEAR - Clears the events that were recorded so far.
-  * SAVE - Saves the events that hit FlutterView to a file.
-  * PLAY FILE - Send a list of events from a bundled asset file to FlutterView.
+
+- RECORD - Start listening for MotionEvents for 3 seconds, matched/unmatched
+  events are displayed in the listview as they arrive.
+- CLEAR - Clears the events that were recorded so far.
+- SAVE - Saves the events that hit FlutterView to a file.
+- PLAY FILE - Send a list of events from a bundled asset file to FlutterView.
 
 A recorded touch events sequence is bundled as an asset in the
 assets_for_android_view package which lives in the goldens repository.

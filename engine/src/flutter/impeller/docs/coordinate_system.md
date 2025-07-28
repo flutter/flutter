@@ -19,13 +19,22 @@ alternatives.
 The following table describes the Impeller coordinate system along with how it
 differs with that of popular client rendering APIs and backends.
 
-| API           | Normalized Device Coordinate                          | Viewport / Framebuffer Coordinate     | Texture Coordinate                   |
+| API | Normalized Device Coordinate | Viewport / Framebuffer Coordinate |
+Texture Coordinate |
 |---------------|-------------------------------------------------------|---------------------------------------|--------------------------------------|
-| **Impeller**  | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Top-Left Origin, `+Y` down.   | `(0,0)` Top-Left Origin, `+Y` down.  |
-| **Metal**     | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Top-Left Origin, `+Y` down.   | `(0,0)` Top-Left Origin, `+Y` down.  |
-| **OpenGL**    | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up. |
-| **OpenGL ES** | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up. |
-| **WebGL**     | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up.  | `(0,0)` Bottom-Left Origin, `+Y` up. |
-| **Direct 3D** | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Top-Left Origin, `+Y` down.   | `(0,0)` Top-Left Origin, `+Y` down.  |
-| **Vulkan**    | `(-1,-1)` Top-Left, `(+1,+1)` Bottom-Right, `+Y` down.| `(0,0)` Top-Left Origin, `+Y` down.   | `(0,0)` Top-Left Origin, `+Y` down.  |
-| **WebGPU**    | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up.  | `(0,0)` Top-Left Origin, `+Y` down.   | `(0,0)` Top-Left Origin, `+Y` down.  |
+| **Impeller** | `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)`
+Top-Left Origin, `+Y` down. | `(0,0)` Top-Left Origin, `+Y` down. | | **Metal**
+| `(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Top-Left
+Origin, `+Y` down. | `(0,0)` Top-Left Origin, `+Y` down. | | **OpenGL** |
+`(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Bottom-Left
+Origin, `+Y` up. | `(0,0)` Bottom-Left Origin, `+Y` up. | | **OpenGL ES** |
+`(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Bottom-Left
+Origin, `+Y` up. | `(0,0)` Bottom-Left Origin, `+Y` up. | | **WebGL** |
+`(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Bottom-Left
+Origin, `+Y` up. | `(0,0)` Bottom-Left Origin, `+Y` up. | | **Direct 3D** |
+`(-1,-1)` Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Top-Left Origin,
+`+Y` down. | `(0,0)` Top-Left Origin, `+Y` down. | | **Vulkan** | `(-1,-1)`
+Top-Left, `(+1,+1)` Bottom-Right, `+Y` down.| `(0,0)` Top-Left Origin, `+Y`
+down. | `(0,0)` Top-Left Origin, `+Y` down. | | **WebGPU** | `(-1,-1)`
+Bottom-Left, `(+1,+1)` Top-Right, `+Y` up. | `(0,0)` Top-Left Origin, `+Y` down.
+| `(0,0)` Top-Left Origin, `+Y` down. |

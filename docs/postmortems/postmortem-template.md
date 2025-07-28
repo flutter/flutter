@@ -1,26 +1,24 @@
 # Flutter postmortem: {Incident Title}
 
-Status: {draft|final}<br>
-Owners: {who drove the incident resolution}
+Status: {draft|final}<br> Owners: {who drove the incident resolution}
 
 ## Summary
 
-Description: {brief description of symptoms and root cause}<br>
-Component: {affected area}<br>
-Date/time: {YYYY-MM-DD HH:MM}<br>
-Duration: {time from initial breakage to final resolution}<br>
-User impact: {who was affected by the incident}
+Description: {brief description of symptoms and root cause}<br> Component:
+{affected area}<br> Date/time: {YYYY-MM-DD HH:MM}<br> Duration: {time from
+initial breakage to final resolution}<br> User impact: {who was affected by the
+incident}
 
 ## Timeline (all times in PST/PDT)
 
 ### 1900-01-01
 
-14:44 - something happened<br>
-14:45 - next thing happened **&lt;START OF OUTAGE&gt;**
+14:44 - something happened<br> 14:45 - next thing happened **\<START OF
+OUTAGE>**
 
 ### 1900-01-02
 
-09:12 - another thing happened **&lt;END OF OUTAGE&gt;**
+09:12 - another thing happened **\<END OF OUTAGE>**
 
 ## Impact
 
@@ -50,23 +48,29 @@ User impact: {who was affected by the incident}
 
 ### Prevention
 
-{link to github issues for things that would have prevented this failure from happening in the first place, such as input validation, pinning dependencies, etc}
+{link to github issues for things that would have prevented this failure from
+happening in the first place, such as input validation, pinning dependencies,
+etc}
 
 ### Detection
 
-{link to github issues for things that would have detected this failure before it became An Incident, such as better testing, monitoring, etc}
+{link to github issues for things that would have detected this failure before
+it became An Incident, such as better testing, monitoring, etc}
 
 ### Mitigation
 
-{link to github issues for things that would have made this failure less serious, such as graceful degradation, better exception handling, etc}
+{link to github issues for things that would have made this failure less
+serious, such as graceful degradation, better exception handling, etc}
 
 ### Process
 
-{link to github issues for things that would have helped us resolve this failure faster, such as documented processes and protocols, etc}
+{link to github issues for things that would have helped us resolve this failure
+faster, such as documented processes and protocols, etc}
 
 ### Fixes
 
-{link to github issues or PRs/commits for the actual fixes that were necessary to resolve this incident}
+{link to github issues or PRs/commits for the actual fixes that were necessary
+to resolve this incident}
 
 ## Appendix
 

@@ -10,20 +10,24 @@ configuration (called "Pipeline Blends"), and those which cannot (called
 All blend modes conform to the
 [W3C Compositing and Blending recommendation](https://www.w3.org/TR/compositing-1/).
 
-Blend operations are driven by the `BlendMode` enum. In the Aiks layer,
-all drawing operations conform to the given `Paint::blend_mode`. In the Entities
+Blend operations are driven by the `BlendMode` enum. In the Aiks layer, all
+drawing operations conform to the given `Paint::blend_mode`. In the Entities
 layer, all Entities have an associated blend mode, which can be set via
 `Entity::SetBlendMode(BlendMode)`.
 
 ## Glossary of blending terms
-| Term | Definition |
-| --- | --- |
-| Source color | Any color that is output by a fragment shader. |
-| Destination color | The backdrop color in a blend operation. |
-| Premultiplied color | A color that has its alpha multiplied into it. Used for additive blending operations as well as colors presented to a surface. |
-| Porter-Duff alpha composite | One of several operations that add together a source color and destination color, with both the source and destination colors being multiplied by respective alpha factors. |
-| Pipeline blend | A blend mode that Impeller can always implement by using the raster pipeline blend configuration provided by the underlying graphics backend. Most of these are simple _Porter-Duff alpha composites_. |
-| Advanced blend | A blend mode that Impeller computes using a fragment program. |
+
+| Term | Definition | | --- | --- | | Source color | Any color that is output by
+a fragment shader. | | Destination color | The backdrop color in a blend
+operation. | | Premultiplied color | A color that has its alpha multiplied into
+it. Used for additive blending operations as well as colors presented to a
+surface. | | Porter-Duff alpha composite | One of several operations that add
+together a source color and destination color, with both the source and
+destination colors being multiplied by respective alpha factors. | | Pipeline
+blend | A blend mode that Impeller can always implement by using the raster
+pipeline blend configuration provided by the underlying graphics backend. Most
+of these are simple _Porter-Duff alpha composites_. | | Advanced blend | A blend
+mode that Impeller computes using a fragment program. |
 
 ## Premultiplied colors
 
@@ -46,22 +50,9 @@ behavior of the blend.
 Pipeline blends are always cheap and don't require additional draw calls to
 render.
 
-| Pipeline blend |
-| --- |
-| Clear |
-| Source |
-| Destination |
-| SourceOver |
-| DestinationOver |
-| SourceIn |
-| DestinationIn |
-| SourceOut |
-| DestinationOut |
-| SourceATop |
-| DestinationATop |
-| Xor |
-| Plus |
-| Modulate |
+| Pipeline blend | | --- | | Clear | | Source | | Destination | | SourceOver | |
+DestinationOver | | SourceIn | | DestinationIn | | SourceOut | | DestinationOut
+| | SourceATop | | DestinationATop | | Xor | | Plus | | Modulate |
 
 ## Advanced blends
 
@@ -78,28 +69,15 @@ when rendering all advanced blends.
 
 Advanced blends are expensive when compared to pipeline blends (which are
 essentially free) for the following reasons:
-* For each advanced blend, the current render pass ends because the backdrop
+
+- For each advanced blend, the current render pass ends because the backdrop
   texture needs to be sampled.
-* A potentially large texture (the render pass backdrop) is sampled. Although in
+- A potentially large texture (the render pass backdrop) is sampled. Although in
   practice, just the coverage rectangle of the source being blended is actually
   used.
-* An intermediary texture is allocated for the blend output before being blitted
+- An intermediary texture is allocated for the blend output before being blitted
   back to the render pass texture.
 
-| Advanced blend |
-| --- |
-| kScreen |
-| Overlay |
-| Darken |
-| Lighten |
-| ColorDodge |
-| ColorBurn |
-| HardLight |
-| SoftLight |
-| Difference |
-| Exclusion |
-| Multiply |
-| Hue |
-| Saturation |
-| Color |
-| Luminosity |
+| Advanced blend | | --- | | kScreen | | Overlay | | Darken | | Lighten | |
+ColorDodge | | ColorBurn | | HardLight | | SoftLight | | Difference | |
+Exclusion | | Multiply | | Hue | | Saturation | | Color | | Luminosity |

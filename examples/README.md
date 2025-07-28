@@ -1,9 +1,9 @@
-Flutter Examples
-================
+# Flutter Examples
 
 This directory contains several examples of using Flutter. To run an example,
-use `flutter run` inside that example's directory. See the [getting started
-guide](https://flutter.dev/getting-started/) to install the `flutter` tool.
+use `flutter run` inside that example's directory. See the
+[getting started guide](https://flutter.dev/getting-started/) to install the
+`flutter` tool.
 
 For additional samples, see the
 [`flutter/samples`](https://github.com/flutter/samples) repo.
@@ -17,17 +17,17 @@ Available examples include:
   Please see the [gallery repo](https://github.com/flutter/gallery).
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
-  in the Flutter framework. For details, see the [layers
-  README](layers/README.md).
+  in the Flutter framework. For details, see the
+  [layers README](layers/README.md).
 
 - **Platform Channel** The [platform channel app](platform_channel) demonstrates
   how to connect a Flutter app to platform-specific APIs. For documentation, see
   <https://flutter.dev/to/platform-channels/>.
 
-- **Platform Channel Swift** The [platform channel swift
-  app](platform_channel_swift) is the same as [platform
-  channel](platform_channel) but the iOS version is in Swift and there is no
-  Android version.
+- **Platform Channel Swift** The
+  [platform channel swift app](platform_channel_swift) is the same as
+  [platform channel](platform_channel) but the iOS version is in Swift and there
+  is no Android version.
 
 ## Notes
 

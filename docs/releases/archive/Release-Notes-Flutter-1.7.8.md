@@ -1,1 +1,2 @@
-This page has moved [here](https://flutter.dev/docs/development/tools/sdk/release-notes/release-notes-1.7.8).
+This page has moved
+[here](https://flutter.dev/docs/development/tools/sdk/release-notes/release-notes-1.7.8).

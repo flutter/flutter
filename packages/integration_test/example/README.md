@@ -14,8 +14,8 @@ flutter drive \
 
 ## Web
 
-In one shell, run Chromedriver ([download
-here](https://chromedriver.chromium.org/downloads)):
+In one shell, run Chromedriver
+([download here](https://chromedriver.chromium.org/downloads)):
 
 ```sh
 chromedriver --port 8444

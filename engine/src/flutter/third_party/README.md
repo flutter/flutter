@@ -12,8 +12,8 @@ This directory contains third-party code that is a combination of:
   alterations) into the Flutter repository. For an example, see
   [`third_party/spring_animation`](spring_animation/README.md).
 
-- Code that is licensed separately from the rest of the Flutter repository.
-  For example, see [`third_party/txt`](txt/).
+- Code that is licensed separately from the rest of the Flutter repository. For
+  example, see [`third_party/txt`](txt/).
 
 When adding a new _externally_ sourced third-party library, update `.gitignore`:
 

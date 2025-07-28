@@ -27,7 +27,6 @@ threads for the fence waiter and resource manager respectively.
 
 A summary of the interaction between the various threads is drawn below:
 
-
 ```mermaid
 sequenceDiagram
     participant rt as Render Thread

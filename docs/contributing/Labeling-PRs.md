@@ -1,8 +1,11 @@
 # Labeling PRs
 
-Across the Flutter organization, the [labeler](https://github.com/actions/labeler) GitHub action is used per repo.
+Across the Flutter organization, the
+[labeler](https://github.com/actions/labeler) GitHub action is used per repo.
 
-For repos that already use it, only `.github/labeler.yml` needs to be edited. For bringing up new repos, `.github/workflows/labeler.yml` should be copied from an existing repo into the new repo.
+For repos that already use it, only `.github/labeler.yml` needs to be edited.
+For bringing up new repos, `.github/workflows/labeler.yml` should be copied from
+an existing repo into the new repo.
 
 ## How to add new labels
 
@@ -18,6 +21,8 @@ macos:
 
 ## Verifying changes in presubmit
 
-GitHub actions do not test changes in presubmit. To verify, copy your local change into a YAML linter to verify the file is not malformed.
+GitHub actions do not test changes in presubmit. To verify, copy your local
+change into a YAML linter to verify the file is not malformed.
 
-Once landed, you can look at new workflow runs to see if the matches are being used.
+Once landed, you can look at new workflow runs to see if the matches are being
+used.

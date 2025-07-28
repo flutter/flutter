@@ -6,7 +6,7 @@ The Flutter tool (`flutter`) supports the concept of _feature flags_, or boolean
 flags that can inform, change, allow, or deny access to behavior, either in the
 tool itself, or in the framework (`package:flutter`, and related).
 
----
+______________________________________________________________________
 
 Table of Contents
 
@@ -31,15 +31,12 @@ For example, [enabling the use of Swift Package Manager][enable-spm]:
 flutter config --enable-swift-package-manager
 ```
 
-Feature flags can be configured globally (for an entire _machine_), locally
-(for a particular _app_), per-test, and be automatically enabled for different
+Feature flags can be configured globally (for an entire _machine_), locally (for
+a particular _app_), per-test, and be automatically enabled for different
 release channels (`master`, versus `beta`, versus `stable`), giving multiple
 consistent options for developing.
 
 _See also, [Flutter pubspec options > Fields > Config][pubspec-config]._
-
-[enable-spm]: https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers
-[pubspec-config]: https://docs.flutter.dev/tools/pubspec#config
 
 ### Why feature flags
 
@@ -64,9 +61,8 @@ For example:
 
 ## Adding a flag
 
-Flags are managed in [`packages/flutter_tools/lib/src/features.dart`][flag-path].
-
-[flag-path]: ../../packages/flutter_tools/lib/src/features.dart
+Flags are managed in
+[`packages/flutter_tools/lib/src/features.dart`][flag-path].
 
 The following steps are required:
 
@@ -78,8 +74,8 @@ The following steps are required:
    );
    ```
 
-   Additional parameters are required to make the flag configurable outside of
-   a [unit test](#tests).
+   Additional parameters are required to make the flag configurable outside of a
+   [unit test](#tests).
 
    To allow `flutter config`, or in `pubspec.yaml`'s `config: ...` section,
    include `configSetting`:
@@ -118,7 +114,7 @@ The following steps are required:
    }
    ```
 
-1. Implement the same getter in [`FlutterFeatureFlagsIsEnabled`][]:
+1. Implement the same getter in [`FlutterFeatureFlagsIsEnabled`]:
 
    ```dart
    mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
@@ -126,8 +122,6 @@ The following steps are required:
      bool get isUnicornEmojisEnabled => isEnabled(unicornEmojis);
    }
    ```
-
-   [`FlutterFeatureFlagsIsEnabled`]: ../../packages/flutter_tools/lib/src/flutter_features.dart
 
 1. Add a new entry in `FeatureFlags.allFeatures`:
 
@@ -138,28 +132,25 @@ The following steps are required:
    ];
    ```
 
-1. Create a [G3Fix][] to update google3's [`Google3Features`][]:
+1. Create a [G3Fix] to update google3's [`Google3Features`]:
 
-   [G3Fix]: http://go/g3fix
-   [`Google3Features`]: http://go/flutter-google3features
+   1. Add a new field to `Google3Features` :
 
-    1. Add a new field to `Google3Features` :
+      ```dart
+      class Google3Features extends FeatureFlags {
+        @override
+        bool get isUnicornEmojisEnabled => true;
+      }
+      ```
 
-       ```dart
-       class Google3Features extends FeatureFlags {
-         @override
-         bool get isUnicornEmojisEnabled => true;
-       }
-       ```
+   1. Add a new entry to `Google3Features.allFeatures`:
 
-    2. Add a new entry to `Google3Features.allFeatures`:
-
-       ```dart
-       List<Feature> get allFeatures => const <Feature>[
-         // ...
-         unicornEmojis,
-       ];
-       ```
+      ```dart
+      List<Feature> get allFeatures => const <Feature>[
+        // ...
+        unicornEmojis,
+      ];
+      ```
 
 ### Allowing flags to be enabled
 
@@ -222,19 +213,18 @@ const Feature unicornEmojis = Feature.fullyEnabled(
 
 ### Removing a flag
 
-After a flag is no longer useful (perhaps the experiment has concluded, the
-flag has been enabled successfully for 1+ stable releases), _most_[^1] flags
-should be removed so that the older behavior (or lack of a feature) can be
-refactored and removed from the codebase, and there is less of a possibility of
-conflicting flags.
+After a flag is no longer useful (perhaps the experiment has concluded, the flag
+has been enabled successfully for 1+ stable releases), _most_[^1] flags should
+be removed so that the older behavior (or lack of a feature) can be refactored
+and removed from the codebase, and there is less of a possibility of conflicting
+flags.
 
-To remove a flag, follow the opposite steps of
-[adding a flag](#adding-a-flag).
+To remove a flag, follow the opposite steps of [adding a flag](#adding-a-flag).
 
 You may need to remove references to the (disabled) flag from unit or
 integration tests as well.
 
-[^1]: Some flags might have a longer or indefinite lifespan, but this is rare.
+\[^1\]: Some flags might have a longer or indefinite lifespan, but this is rare.
 
 ### Precedence
 
@@ -258,20 +248,20 @@ Flutter uses the following precendence order:
        enable-unicorn-emojis: true
    ```
 
-2. The tool's global configuration:
+1. The tool's global configuration:
 
    ```sh
    flutter config --enable-unicorn-emojis
    ```
 
-3. Environment variables:
+1. Environment variables:
 
    ```sh
    FLUTTER_ENABLE_UNICORN_EMOJIS=true flutter some-command
    ```
 
-If none of these are set, Flutter falls back to the feature's
-default value for the current release channel.
+If none of these are set, Flutter falls back to the feature's default value for
+the current release channel.
 
 ## Using a flag to drive behavior
 
@@ -340,9 +330,9 @@ final class SensitiveContent extends StatelessWidget {
 Note that feature flag usage in the framework runtime is very new, and is likely
 to evolve over time.
 
-Feature flags are not designed to help tree shaking. For example, you
-cannot conditionally import Dart code depending on the enabled feature flags.
-Tree shaking might not remove code that is feature flagged off.
+Feature flags are not designed to help tree shaking. For example, you cannot
+conditionally import Dart code depending on the enabled feature flags. Tree
+shaking might not remove code that is feature flagged off.
 
 ### Tests
 
@@ -407,7 +397,8 @@ to evolve over time.
 
 The Flutter engine and embedders cannot use Flutter's feature flags directly.
 
-If an embedder needs feature flags, you can instead use the project's platform-specific configuration.
+If an embedder needs feature flags, you can instead use the project's
+platform-specific configuration.
 
 On Android, use `AndroidManifest.xml`:
 
@@ -435,6 +426,13 @@ On iOS and macOS, use `Info.plist`:
 
 See Impeller and UI thread merging for prior art.
 
-> [!IMPORTANT]
-> If possible, prefer to use Flutter feature flags instead of platform-specific configuration files.
-> Flutter feature flags are easier for Flutter app developers.
+> [!IMPORTANT] If possible, prefer to use Flutter feature flags instead of
+> platform-specific configuration files. Flutter feature flags are easier for
+> Flutter app developers.
+
+[enable-spm]: https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers
+[flag-path]: ../../packages/flutter_tools/lib/src/features.dart
+[g3fix]: http://go/g3fix
+[pubspec-config]: https://docs.flutter.dev/tools/pubspec#config
+[`flutterfeatureflagsisenabled`]: ../../packages/flutter_tools/lib/src/flutter_features.dart
+[`google3features`]: http://go/flutter-google3features

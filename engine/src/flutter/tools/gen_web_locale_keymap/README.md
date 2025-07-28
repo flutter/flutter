@@ -5,18 +5,25 @@ This script generates mapping data for `web_locale_keymap`.
 ## Usage
 
 1. `cd` to this folder, and run `dart pub get`.
-2. [Create a Github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token), then store it to environment variable `$GITHUB_TOKEN`. This token is only for quota controlling and does not need any scopes.
+1. [Create a Github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token),
+   then store it to environment variable `$GITHUB_TOKEN`. This token is only for
+   quota controlling and does not need any scopes.
+
 ```
 # ~/.zshrc
 export GITHUB_TOKEN=<YOUR_TOKEN>
 ```
+
 3. Run
+
 ```
 dart --enable-asserts bin/gen_web_locale_keymap.dart
 ```
 
 ### Help
+
 For help on CLI,
+
 ```
 dart --enable-asserts bin/gen_web_locale_keymap.dart -h
 ```
@@ -24,15 +31,19 @@ dart --enable-asserts bin/gen_web_locale_keymap.dart -h
 ## Explanation
 
 To derive a key map that allows international layout to properly trigger
-shortcuts, we can't [simply map logical keys from the current
-event](https://github.com/flutter/flutter/issues/100456). Instead, we need to
-analyze the entire current layout and plan ahead. This algorithm,
-which we call the benchmark planner, goes as follows:
+shortcuts, we can't
+[simply map logical keys from the current event](https://github.com/flutter/flutter/issues/100456).
+Instead, we need to analyze the entire current layout and plan ahead. This
+algorithm, which we call the benchmark planner, goes as follows:
 
 > Analyze every key of the current layout,
-> 1. If a key can produce an alnum under some modifier, then this key is mapped to this alnum.
-> 2. After the previous step, if some alnum is not mapped, they're mapped to their corresponding key on the US keyboard.
-> 3. The remaining keys are mapped to the unicode plane according to their produced character.
+>
+> 1. If a key can produce an alnum under some modifier, then this key is mapped
+>    to this alnum.
+> 1. After the previous step, if some alnum is not mapped, they're mapped to
+>    their corresponding key on the US keyboard.
+> 1. The remaining keys are mapped to the unicode plane according to their
+>    produced character.
 
 However, we can't simply apply this algorithm to Web: unlike other desktop
 platforms, Web DOM API does not tell which keyboard layout the user is on, or

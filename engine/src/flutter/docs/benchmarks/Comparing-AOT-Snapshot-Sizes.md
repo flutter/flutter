@@ -1,8 +1,18 @@
-These instructions can be used to prepare a tabulated summary of the differences in the sizes of two AOT snapshots. The instructions assume that the Flutter Engine has been [setup](../contributing/Setting-up-the-Engine-development-environment.md) on the host (at `FLUTTER_ENGINE` in these instructions).
+These instructions can be used to prepare a tabulated summary of the differences
+in the sizes of two AOT snapshots. The instructions assume that the Flutter
+Engine has been
+[setup](../contributing/Setting-up-the-Engine-development-environment.md) on the
+host (at `FLUTTER_ENGINE` in these instructions).
 
-Build the AOT snapshot (`flutter build aot`) for the application but pass in the `--verbose` flag. We need to find the `gen_snapshot` invocation and re-run it with an extra option (`--print-instructions-sizes-to`). If you are instrumenting with a local engine, the `flutter build` [takes a `--local-engine` and `--local-engine-host` flag](../Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine) as well.
+Build the AOT snapshot (`flutter build aot`) for the application but pass in the
+`--verbose` flag. We need to find the `gen_snapshot` invocation and re-run it
+with an extra option (`--print-instructions-sizes-to`). If you are instrumenting
+with a local engine, the `flutter build`
+[takes a `--local-engine` and `--local-engine-host` flag](../Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine)
+as well.
 
-Here is an example of the updated invocation. Specify the path to a JSON file that acts as a summary (`SUMMARY_LOCATION` in these instructions) as follows.
+Here is an example of the updated invocation. Specify the path to a JSON file
+that acts as a summary (`SUMMARY_LOCATION` in these instructions) as follows.
 
 ```bash
 $FLUTTER_ENGINE/out/host_debug_unopt/gen_snapshot                    \
@@ -20,13 +30,18 @@ $FLUTTER_ENGINE/out/host_debug_unopt/gen_snapshot                    \
 
 Save the file at `SUMMARY_LOCATION` as `before.json`
 
-Now, either change the Dart code with the changes you wish to see the effects, or, rebuild the engine to create an updated `gen_snapshot` binary.
+Now, either change the Dart code with the changes you wish to see the effects,
+or, rebuild the engine to create an updated `gen_snapshot` binary.
 
-After you have made necessary changes, re-run `flutter build aot` again. This step is important because AOT compilation has a [kernel compilation step](../Custom-Flutter-Engine-Embedding-in-AOT-Mode.md#generating-the-kernel-snapshot) before the `gen_snapshot` invocation.
+After you have made necessary changes, re-run `flutter build aot` again. This
+step is important because AOT compilation has a
+[kernel compilation step](../Custom-Flutter-Engine-Embedding-in-AOT-Mode.md#generating-the-kernel-snapshot)
+before the `gen_snapshot` invocation.
 
 Re-run the gen_snapshot invocation and save the resulting file to `after.json`.
 
-Run the `compare_size.dart` tool and pass in the `before.json` and `after.json` files to generate the summary.
+Run the `compare_size.dart` tool and pass in the `before.json` and `after.json`
+files to generate the summary.
 
 An example invocation looks as follow.
 

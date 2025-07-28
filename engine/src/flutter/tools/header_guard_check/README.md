@@ -20,7 +20,8 @@ The tool checks _all_ header files for the following pattern:
 
 If the header file does not follow this pattern, the tool will print an error
 message and exit with a non-zero exit code. For more information about why we
-use this pattern, see [the Google C++ style guide](https://google.github.io/styleguide/cppguide.html#The__define_Guard).
+use this pattern, see
+[the Google C++ style guide](https://google.github.io/styleguide/cppguide.html#The__define_Guard).
 
 ## Automatic fixes
 

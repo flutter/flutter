@@ -1,9 +1,14 @@
 # touch-input
 
-`touch-input-test` exercises touch through a child view (in this case, the `touch-input-view` Dart component) and asserting
-the precise location of the touch event. We validate a touch event as valid through two ways:
-- By attaching the child view, injecting touch, and validating that the view reports the touch event back with the correct coordinates.
-- By embedding a child view into a parent view, injecting touch into both views, and validating that each view reports its touch event back with the correct coordinates.
+`touch-input-test` exercises touch through a child view (in this case, the
+`touch-input-view` Dart component) and asserting the precise location of the
+touch event. We validate a touch event as valid through two ways:
+
+- By attaching the child view, injecting touch, and validating that the view
+  reports the touch event back with the correct coordinates.
+- By embedding a child view into a parent view, injecting touch into both views,
+  and validating that each view reports its touch event back with the correct
+  coordinates.
 
 ```shell
 Injecting the tap event
@@ -25,53 +30,67 @@ Successfully received response from view
 
 Some interesting details (thanks to abrusher@):
 
-There exists two coordinate spaces within our testing realm. The first is `touch-input-view`'s "logical" coordinate space. This
-is determined based on `touch-input-view`'s size and is the space in which it sees incoming events. The second is the "injector"
-coordinate space, which spans [-1000, 1000] on both axes.
+There exists two coordinate spaces within our testing realm. The first is
+`touch-input-view`'s "logical" coordinate space. This is determined based on
+`touch-input-view`'s size and is the space in which it sees incoming events. The
+second is the "injector" coordinate space, which spans [-1000, 1000] on both
+axes.
 
-The size/position of a view doesn't always match the bounds of a display exactly. As a result, Scenic has a separate coordinate space
-to specify the location at which to inject a touch event. This is always fixed to the display bounds. Scenic knows how to map this
-coordinate space onto the client view's space.
+The size/position of a view doesn't always match the bounds of a display
+exactly. As a result, Scenic has a separate coordinate space to specify the
+location at which to inject a touch event. This is always fixed to the display
+bounds. Scenic knows how to map this coordinate space onto the client view's
+space.
 
-For example, if we inject at (-500, -500) `touch-input-view` will see a touch event at the middle of the upper-left quadrant of the screen.
+For example, if we inject at (-500, -500) `touch-input-view` will see a touch
+event at the middle of the upper-left quadrant of the screen.
 
 ## Running the Test
 
-Reference the Flutter integration test [documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/fuchsia/flutter/tests/integration/README.md) at //flutter/shell/platform/fuchsia/flutter/tests/integration/README.md
+Reference the Flutter integration test
+[documentation](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/fuchsia/flutter/tests/integration/README.md)
+at //flutter/shell/platform/fuchsia/flutter/tests/integration/README.md
 
 ## Playing around with `touch-input-view`
 
 Build Fuchsia with `terminal.qemu-x64`
+
 ```shell
 fx set terminal.qemu-x64 && fx build
 ```
 
 Build flutter/engine
+
 ```shell
 $ENGINE_DIR/flutter/tools/gn --fuchsia --no-lto && ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia/flutter/tests/
 integration/touch_input:tests
 ```
 
 Start a Fuchsia package server
+
 ```shell
 cd "$FUCHSIA_DIR"
 fx serve
 ```
 
 Publish `touch-input-view`
+
 ```shell
 $FUCHSIA_DIR/.jiri_root/bin/fx pm publish -a -repo $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files -f $ENGINE_DIR/out/
 fuchsia_debug_x64/gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
 ```
 
 Launch Fuchsia emulator in a graphical environment
+
 ```shell
 ffx emu start
 ```
 
-**Before proceeding, make sure you have successfully completed the "Set a Password" screen**
+**Before proceeding, make sure you have successfully completed the "Set a
+Password" screen**
 
 Add `touch-input-view`
+
 ```shell
 ffx session add fuchsia-pkg://fuchsia.com/touch-input-view#meta/touch-input-view.cm
 ```

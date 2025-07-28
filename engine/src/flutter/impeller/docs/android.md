@@ -2,10 +2,14 @@
 
 ## Rendering Backend Selection
 
-> [!IMPORTANT]
-> During the preview period, while the team focuses on production readiness, Flutter will fallback to the Skia OpenGL ES backend instead of Impellers OpenGL backend.
+> [!IMPORTANT] During the preview period, while the team focuses on production
+> readiness, Flutter will fallback to the Skia OpenGL ES backend instead of
+> Impellers OpenGL backend.
 
-Impeller supports both Vulkan and Open GL ES rendering on Android. Impeller will prefer rendering with Vulkan and fallback to OpenGL ES 2.0 for compatibility. With both the Vulkan and OpenGL ES, Impeller supports rendering on [all existing Android versions supported by Flutter](https://docs.flutter.dev/reference/supported-platforms).
+Impeller supports both Vulkan and Open GL ES rendering on Android. Impeller will
+prefer rendering with Vulkan and fallback to OpenGL ES 2.0 for compatibility.
+With both the Vulkan and OpenGL ES, Impeller supports rendering on
+[all existing Android versions supported by Flutter](https://docs.flutter.dev/reference/supported-platforms).
 
 The rough logic for backend selection on Android is depicted below.
 
@@ -36,7 +40,9 @@ flowchart TD
 
 ### Vulkan Version
 
-For Vulkan, Impeller needs at least Vulkan version 1.1. As of January 06, 2023, this includes 77% of all Android devices per the [Android Distribution dashboard](https://developer.android.com/about/dashboards#Vulkan).
+For Vulkan, Impeller needs at least Vulkan version 1.1. As of January 06, 2023,
+this includes 77% of all Android devices per the
+[Android Distribution dashboard](https://developer.android.com/about/dashboards#Vulkan).
 
 ```mermaid
 pie title Vulkan version
@@ -45,13 +51,20 @@ pie title Vulkan version
 	"Vulkan 1.1" : 77
 ```
 
-Impeller could theoretically support older version of Vulkan but at a significant cost of implementation and for ultimately diminishing returns on investment. The team would rather spend that time improving the OpenGL ES backend.
+Impeller could theoretically support older version of Vulkan but at a
+significant cost of implementation and for ultimately diminishing returns on
+investment. The team would rather spend that time improving the OpenGL ES
+backend.
 
-Besides older devices still in use, devices you can buy new that don't support Vulkan are configurations with 64-bit kernels and 32-bit user-spaces (`armv7l`) or other RAM constrained devices.
+Besides older devices still in use, devices you can buy new that don't support
+Vulkan are configurations with 64-bit kernels and 32-bit user-spaces (`armv7l`)
+or other RAM constrained devices.
 
 ### Android Version
 
-For Vulkan support, Impeller needs at least Android 10, API level 29 (Q, Quince Tart). Cumulative usage of Android 10 as of June 04, 2024 is 84.5% per [apilevels.com](https://apilevels.com/).
+For Vulkan support, Impeller needs at least Android 10, API level 29 (Q, Quince
+Tart). Cumulative usage of Android 10 as of June 04, 2024 is 84.5% per
+[apilevels.com](https://apilevels.com/).
 
 ```mermaid
 pie title Vulkan version
@@ -61,11 +74,19 @@ pie title Vulkan version
 
 Android 9 and older will unconditionally use OpenGL.
 
-Android 10, API level 29 provides necessary support to work with [`HardwareBuffer`](https://developer.android.com/reference/android/hardware/HardwareBuffer)s  efficiently. This is critical to support platform views.
+Android 10, API level 29 provides necessary support to work with
+[`HardwareBuffer`](https://developer.android.com/reference/android/hardware/HardwareBuffer)s
+efficiently. This is critical to support platform views.
 
 ### Vulkan Extensions
 
-Besides the Vulkan and Android versions. On Android, Impeller needs some extensions for interoperability with the underlying platform to support features like platform views and external texture composition. The expectation is that very Android devices will be filtered out in this check because support for extensions like `VK_ANDROID_external_memory_android_hardware_buffer` [is almost universal on devices with Android 10](https://vulkan.gpuinfo.org/listextensions.php?platform=android) and above.
+Besides the Vulkan and Android versions. On Android, Impeller needs some
+extensions for interoperability with the underlying platform to support features
+like platform views and external texture composition. The expectation is that
+very Android devices will be filtered out in this check because support for
+extensions like `VK_ANDROID_external_memory_android_hardware_buffer`
+[is almost universal on devices with Android 10](https://vulkan.gpuinfo.org/listextensions.php?platform=android)
+and above.
 
 ## Platform Views
 
@@ -77,7 +98,8 @@ automatically.
 
 Flutter's Java API allows for developers to register custom SurfaceTexture
 backed textures that can be rendered inside of a Flutter application. See
-`TextureRegistry.registerSurfaceTexture` and `TextureRegistry.createSurfaceTexture`.
+`TextureRegistry.registerSurfaceTexture` and
+`TextureRegistry.createSurfaceTexture`.
 
 ### GLES
 
@@ -88,4 +110,3 @@ There are no issues with SurfaceTextures when using the GLES backend.
 We do not currently support rendering these textures when using the Vulkan
 backend. Supporting this will require adding support for importing GL textures
 into Vulkan textures which will have performance implications.
-

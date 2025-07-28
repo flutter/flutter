@@ -1,4 +1,6 @@
-Instead of manually updating dependencies in a `pubspec.yaml` file, use the [`update-packages`](/packages/flutter_tools/lib/src/commands/update_packages.dart) CLI tool:
+Instead of manually updating dependencies in a `pubspec.yaml` file, use the
+[`update-packages`](/packages/flutter_tools/lib/src/commands/update_packages.dart)
+CLI tool:
 
 ## To update all dependencies:
 
@@ -6,15 +8,19 @@ Instead of manually updating dependencies in a `pubspec.yaml` file, use the [`up
 
 ## To pin a dependency:
 
-Sometimes you need to prevent a dependency from being updated when you run `flutter update-packages --force-upgrade`.
+Sometimes you need to prevent a dependency from being updated when you run
+`flutter update-packages --force-upgrade`.
 
-In that case, first pin the dependency in [`kManuallyPinnedDependencies`](/packages/flutter_tools/lib/src/update_packages_pins.dart) and include a comment with a link to an issue to unpin the dependency.
+In that case, first pin the dependency in
+[`kManuallyPinnedDependencies`](/packages/flutter_tools/lib/src/update_packages_pins.dart)
+and include a comment with a link to an issue to unpin the dependency.
 
 You can then re-run `flutter update-packages --force-upgrade`.
 
 ## To update a single dependency for cherrypicks:
 
-Sometimes you need to update a single dependency as a [cherrypick to a release candidate branch](../releases/Flutter-Cherrypick-Process.md).
+Sometimes you need to update a single dependency as a
+[cherrypick to a release candidate branch](../releases/Flutter-Cherrypick-Process.md).
 
 In that case, you can run:
 

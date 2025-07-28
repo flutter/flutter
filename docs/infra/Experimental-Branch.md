@@ -30,8 +30,8 @@ targets not applicable to your experiment.
 
 For an example, see <https://github.com/flutter/flutter/pull/168860>.
 
-> NOTE: _New_ targets are not supported, that is, target names must exist already
-> at tip-of-tree in the `master` branch.
+> NOTE: _New_ targets are not supported, that is, target names must exist
+> already at tip-of-tree in the `master` branch.
 
 ## Testing and Submitting PRs
 

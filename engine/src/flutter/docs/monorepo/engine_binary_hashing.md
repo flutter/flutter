@@ -1,25 +1,39 @@
 # Engine Binary Hashing
 
-Today; the framework finds the engine binaries to download from google storage via a file checked into the tree:
+Today; the framework finds the engine binaries to download from google storage
+via a file checked into the tree:
 
 ```shell
 cat bin/internal/engine.version
 76b7abb5c853860cb5b488ab5b8e1ad8c41b603e
 ```
 
-This hash represents the Git commit hash of the engine version used to produce the production binaries. However, this approach becomes problematic when repositories are merged:
+This hash represents the Git commit hash of the engine version used to produce
+the production binaries. However, this approach becomes problematic when
+repositories are merged:
 
-1. Requiring engineers to manually update this file would lead to frequent merge conflicts for any engine changes.
-1. Predicting the hash value beforehand is impossible, as the HEAD commit is constantly changing.
-1. Git merge queues will produce binaries for engine changes before they are merged to the main branch.
+1. Requiring engineers to manually update this file would lead to frequent merge
+   conflicts for any engine changes.
+1. Predicting the hash value beforehand is impossible, as the HEAD commit is
+   constantly changing.
+1. Git merge queues will produce binaries for engine changes before they are
+   merged to the main branch.
 
-Therefore, we need a mechanism to hash the specific content used to generate the engine binaries, enabling reproducible builds and easier A/B testing.
+Therefore, we need a mechanism to hash the specific content used to generate the
+engine binaries, enabling reproducible builds and easier A/B testing.
 
 ## Content-based hashing
 
-One approach is to calculate a checksum (e.g., SHA1) of all relevant files locally, similar to using `git ls-files`. However, `ls-files` operates on the working tree, which introduces challenges for A/B testing. Local modifications should be testable with `et run` using only the modified content, independent of the committed state.
+One approach is to calculate a checksum (e.g., SHA1) of all relevant files
+locally, similar to using `git ls-files`. However, `ls-files` operates on the
+working tree, which introduces challenges for A/B testing. Local modifications
+should be testable with `et run` using only the modified content, independent of
+the committed state.
 
-Git provides a solution by allowing us to operate on the index with `git ls-tree -r HEAD`. This command lists the tree objects within the index, providing a consistent snapshot of the content. Here's an example showing how `ls-tree` works for hashing:
+Git provides a solution by allowing us to operate on the index with
+`git ls-tree -r HEAD`. This command lists the tree objects within the index,
+providing a consistent snapshot of the content. Here's an example showing how
+`ls-tree` works for hashing:
 
 ```bash
 # Regenerate a "blob" hash
@@ -32,7 +46,12 @@ git ls-tree -r HEAD  engine/src/flutter/vulkan/vulkan_window.h
 
 ## Scoping the Hash to the Engine
 
-To accurately track engine binaries, we only want to include files that directly contribute to the engine build. This includes the `engine/` directory and the root `DEPS` file, which tracks third-party dependencies managed by `gclient sync`. Using `git ls-tree -r HEAD engine DEPS` effectively captures all necessary files while excluding irrelevant content from the `third_party` directory.
+To accurately track engine binaries, we only want to include files that directly
+contribute to the engine build. This includes the `engine/` directory and the
+root `DEPS` file, which tracks third-party dependencies managed by
+`gclient sync`. Using `git ls-tree -r HEAD engine DEPS` effectively captures all
+necessary files while excluding irrelevant content from the `third_party`
+directory.
 
 ```shell
 100644 blob 5143313ce5826665309e8a086a281ad3ab1a9ce7    DEPS
@@ -49,7 +68,8 @@ To accurately track engine binaries, we only want to include files that directly
 # ... all files
 ```
 
-To generate a consistent hash across different platforms (including Windows CI environments), we can use `git hash-object`:
+To generate a consistent hash across different platforms (including Windows CI
+environments), we can use `git hash-object`:
 
 ```bash
 git ls-tree -r HEAD engine DEPS | git hash-object --stdin
@@ -58,7 +78,11 @@ git ls-tree -r HEAD engine DEPS | git hash-object --stdin
 
 ## Supporting A/B Testing
 
-When developing a pull request (PR), your branch might contain multiple commits. To enable A/B testing against the engine version at the time of branching, we can modify the hash calculation to use the merge-base. This ensures that the generated hash reflects the engine state at the branch point, facilitating accurate comparisons.
+When developing a pull request (PR), your branch might contain multiple commits.
+To enable A/B testing against the engine version at the time of branching, we
+can modify the hash calculation to use the merge-base. This ensures that the
+generated hash reflects the engine state at the branch point, facilitating
+accurate comparisons.
 
 ```bash
 git ls-tree -r $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
@@ -72,15 +96,27 @@ For now, the recommended formula for calculating the engine hash is:
 git ls-tree -r $(git merge-base HEAD master) engine DEPS | git hash-object --stdin
 ```
 
-To ensure backwards compatibility and allow for future updates, this formula should be implemented in both `.sh` and `.bat` scripts checked into the repository. This approach enables controlled updates to the hash calculation logic without disrupting existing workflows.
+To ensure backwards compatibility and allow for future updates, this formula
+should be implemented in both `.sh` and `.bat` scripts checked into the
+repository. This approach enables controlled updates to the hash calculation
+logic without disrupting existing workflows.
 
 ## Considerations and Future Refinements
 
-Using the recomended formula incorporates the blob hash, permissions, and paths into the hash calculation. Consequently, moving, renaming, or changing permissions of a file will change the hash output and trigger rebuilding the engine. While acceptable initially, this behavior could be fine tuned in the future.
+Using the recomended formula incorporates the blob hash, permissions, and paths
+into the hash calculation. Consequently, moving, renaming, or changing
+permissions of a file will change the hash output and trigger rebuilding the
+engine. While acceptable initially, this behavior could be fine tuned in the
+future.
 
-If we want to focus solely on file contents, we could use `git ls-tree -r --object-only engine DEPS | sort | git hash-object --stdin`. The output of `ls-tree` will only contain the githash of the blobs; sorting that output should make it resiliant to renames. However, this relies on consistent sorting across operating systems, which might introduce complexities.
+If we want to focus solely on file contents, we could use
+`git ls-tree -r --object-only engine DEPS | sort | git hash-object --stdin`. The
+output of `ls-tree` will only contain the githash of the blobs; sorting that
+output should make it resiliant to renames. However, this relies on consistent
+sorting across operating systems, which might introduce complexities.
 
 An example showing renaming doesn't affect `ls-tree` blob hash:
+
 ```shell
 #
 # Not using --object-only for demonstration. We would use --blob-only to get just the hash

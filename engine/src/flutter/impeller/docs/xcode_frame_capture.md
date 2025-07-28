@@ -74,8 +74,8 @@ Xcode doesn’t know that the executable you are trying to instrument is Metal
 enabled. You just asked it to launch a random executable it knows nothing about.
 
 In the `Options` tab on the `Edit Scheme…` pop-up, in the `GPU Frame Capture`
-section, set API detection to `Metal` and check `Profile GPU trace after
-capture`.
+section, set API detection to `Metal` and check
+`Profile GPU trace after capture`.
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image10.avif "image_tooltip")
 
@@ -95,21 +95,22 @@ frame capture enabled.
 # Select the Playground Enabled Test to Profile
 
 Tests that launch Playground instances are just Google Test cases. You just need
-to [pass the right Google Test
-flags](https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests)
+to
+[pass the right Google Test flags](https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests)
 to the running executable as command line arguments.
 
-To do this, in the `Options` tab on the `Edit Scheme…` pop-up, in the `Arguments
-Passed on Launch` section, add the right `--gtest_filter=` to launch, and
-instrument just the one test you want.
+To do this, in the `Options` tab on the `Edit Scheme…` pop-up, in the
+`Arguments Passed on Launch` section, add the right `--gtest_filter=` to launch,
+and instrument just the one test you want.
 
-You also need to set the `--enable_playground` flag in order to do frame capturing.
+You also need to set the `--enable_playground` flag in order to do frame
+capturing.
 
 ![alt_text](https://raw.githubusercontent.com/flutter/assets-for-api-docs//5da33067f5cfc7f177d9c460d618397aad9082ca/assets/engine/impeller/xcode_frame_capture/image12.avif "image_tooltip")
 
 This is also the spot where you will add other command line arguments that will
 aid in your debugging. In that example, `–timeout=-1` will disable the Flutter
 test hang watchdog which will kill your process if the test doesn’t complete in
-30 seconds. I also like to set the VM service port to a known value so I can
-get to it and disable service auth codes so I can just refresh the page to
-connect to a new instance of the VM service.
+30 seconds. I also like to set the VM service port to a known value so I can get
+to it and disable service auth codes so I can just refresh the page to connect
+to a new instance of the VM service.
