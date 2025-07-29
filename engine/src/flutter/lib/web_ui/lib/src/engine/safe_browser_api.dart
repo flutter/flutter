@@ -56,6 +56,34 @@ num? parseFontSize(DomElement element) {
   return fontSize;
 }
 
+/// Parses the given style property [attributeName] of [element] and returns the
+/// value without a unit.
+num? parseStyleProperty(DomElement element, String attributeName) {
+  num? styleProperty;
+
+  if (element.has('computedStyleMap')) {
+    styleProperty = element
+        .computedStyleMap()
+        .get(attributeName)
+        ?.getProperty<JSNumber>('value'.toJS)
+        .toDartDouble;
+  }
+
+  // Fallback to `getComputedStyle` if the first attempt fails.
+  if (styleProperty == null) {
+    final String stylePropertyString = domWindow
+        .getComputedStyle(element)
+        .getPropertyValue(attributeName);
+
+    final num? parsed = parseFloat(stylePropertyString);
+    if (parsed != null && !parsed.isNaN) {
+      styleProperty = parsed;
+    }
+  }
+
+  return styleProperty;
+}
+
 /// Provides haptic feedback.
 void vibrate(int durationMs) {
   final DomNavigator navigator = domWindow.navigator;
