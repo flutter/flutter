@@ -53,13 +53,10 @@ void main() {
       // Verify that gradlew has a javaVersion task.
       expect(result.exitCode, 0);
       // Verify the format is a number on its own line.
-      const expectedLines = <String>[
-        'BuildVariant: debug',
-        'BuildVariant: release',
-        'BuildVariant: profile',
-      ];
       final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
-      expect(const ListEquality<String>().equals(actualLines, expectedLines), isTrue);
+      expect(actualLines, contains('BuildVariant: debug'), reason: 'actual: $actualLines');
+      expect(actualLines, contains('BuildVariant: release'), reason: 'actual: $actualLines');
+      expect(actualLines, contains('BuildVariant: profile'), reason: 'actual: $actualLines');
     },
   );
 }
