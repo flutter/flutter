@@ -1446,7 +1446,7 @@ mixin WidgetsBinding
   ///
   /// The default [WindowingOwner] supports macOS, Linux, and Windows.
   ///
-  /// Custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
+  /// A custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
   ///
   /// {@template flutter.widgets.windowing.experimental}
   /// Do not use this API in production applications or packages published to
