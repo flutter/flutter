@@ -735,6 +735,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/150843
+    // This tests the overshoot case where an item is dragged back 110% of the way
     final List<int> items = List<int>.generate(3, (int index) => index);
 
     // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
@@ -768,6 +769,7 @@ void main() {
     'SliverReorderableList - properly animates the drop at starting position with reverse:true',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150843
+      // This tests the overshoot case where an item is dragged back 110% of the way in a reverse list
       final List<int> items = List<int>.generate(3, (int index) => index);
 
       // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
@@ -795,6 +797,76 @@ void main() {
       // It should not go to index 0 and come back
       await tester.pump(const Duration(milliseconds: 200));
       expect(tester.getTopLeft(find.text('item 2')).dy, greaterThan(350));
+    },
+  );
+
+  testWidgets(
+    'SliverReorderableList - properly animates the drop at starting position (undershoot)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/88331
+      // This tests the edge case where an item is dragged back only 90% of the way
+      final List<int> items = List<int>.generate(3, (int index) => index);
+
+      // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
+      // Each item has a text widget with 'item $index' that can be moved by a
+      // press and drag gesture. For this test the first item is at the top
+      await tester.pumpWidget(TestList(items: items));
+
+      expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+      // Drag item 0 downwards and then upwards (but not all the way back).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 100));
+      await tester.pumpAndSettle();
+      await drag.moveBy(const Offset(0, -90));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('item 0')), const Offset(0, 10));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+      // Now leave the drag, it should go to index 0.
+      await drag.up();
+      await tester.pump();
+
+      // It should animate back to the original position
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.getTopLeft(find.text('item 0')).dy, lessThan(10));
+    },
+  );
+
+  testWidgets(
+    'SliverReorderableList - properly animates the drop at starting position with reverse:true (undershoot)',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/88331
+      // This tests the edge case where an item is dragged back only 90% of the way in a reverse list
+      final List<int> items = List<int>.generate(3, (int index) => index);
+
+      // The TestList is 300x100 SliverReorderableList with 3 items 100x100 each.
+      // Each item has a text widget with 'item $index' that can be moved by a
+      // press and drag gesture. For this test the first item is at the top
+      await tester.pumpWidget(TestList(items: items, reverse: true));
+
+      expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 300.0));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 400.0));
+
+      // Drag item 2 downwards and then upwards (but not all the way back).
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 2')));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 100));
+      await tester.pumpAndSettle();
+      await drag.moveBy(const Offset(0, -90));
+      await tester.pump();
+      expect(tester.getTopLeft(find.text('item 2')), const Offset(0, 310));
+      expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 300));
+
+      // Now leave the drag, it should go to index 1.
+      await drag.up();
+      await tester.pump();
+
+      // It should animate back to the original position
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.getTopLeft(find.text('item 2')).dy, closeTo(300, 10));
     },
   );
 
