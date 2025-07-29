@@ -186,8 +186,8 @@ class DriveCommand extends RunCommandBase {
       );
   }
 
-  static const String _kKeepAppRunning = 'keep-app-running';
-  static const String _kUseExistingApp = 'use-existing-app';
+  static const _kKeepAppRunning = 'keep-app-running';
+  static const _kUseExistingApp = 'use-existing-app';
 
   final Signals signals;
 
@@ -216,10 +216,10 @@ class DriveCommand extends RunCommandBase {
   Map<ProcessSignal, Object>? screenshotTokens;
 
   @override
-  final String name = 'drive';
+  final name = 'drive';
 
   @override
-  final String description =
+  final description =
       'Builds and installs the app, and runs a Dart program that connects to '
       'the app, often to run externally facing integration tests, such as with '
       'package:test and package:flutter_driver.\n'
@@ -230,7 +230,7 @@ class DriveCommand extends RunCommandBase {
   String get category => FlutterCommandCategory.project;
 
   @override
-  final List<String> aliases = <String>['driver'];
+  final aliases = <String>['driver'];
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -325,10 +325,11 @@ class DriveCommand extends RunCommandBase {
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File? applicationBinary =
-        applicationBinaryPath == null ? null : _fileSystem.file(applicationBinaryPath);
+    final File? applicationBinary = applicationBinaryPath == null
+        ? null
+        : _fileSystem.file(applicationBinaryPath);
 
-    bool screenshotTaken = false;
+    var screenshotTaken = false;
     try {
       if (stringArg(_kUseExistingApp) == null) {
         await driverService.start(
@@ -361,8 +362,9 @@ class DriveCommand extends RunCommandBase {
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
         browserDimension: stringArg('browser-dimension')!.split(RegExp('[,x@]')),
         browserName: stringArg('browser-name'),
-        driverPort:
-            stringArg('driver-port') != null ? int.tryParse(stringArg('driver-port')!) : null,
+        driverPort: stringArg('driver-port') != null
+            ? int.tryParse(stringArg('driver-port')!)
+            : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
       );
@@ -439,7 +441,7 @@ class DriveCommand extends RunCommandBase {
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
     _logger.printTrace('Registering signal handlers...');
-    final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
+    final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();

@@ -221,19 +221,17 @@ FakeProcessManager _formatProcessManager({
   final FakeProcess formatProcess = FakeProcess(exitCode: exitCode, stdout: stdout, stderr: stderr);
   return FakeProcessManager(
     canRun: canRun ?? (Object? exe, {String? workingDirectory}) => true,
-    onRun:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
-        },
-    onStart:
-        (FakeCommandLogEntry entry) => switch (entry.command) {
-          [final String exe, final String fmt, ...final List<String> rest]
-              when exe.endsWith('dart') &&
-                  fmt.endsWith('ci/bin/format.dart') &&
-                  rest.length == expectedFlags.length &&
-                  expectedFlags.every(rest.contains) =>
-            formatProcess,
-          _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
-        },
+    onRun: (FakeCommandLogEntry entry) => switch (entry.command) {
+      _ => failUnknown ? io.ProcessResult(1, 1, '', '') : success,
+    },
+    onStart: (FakeCommandLogEntry entry) => switch (entry.command) {
+      [final String exe, final String fmt, ...final List<String> rest]
+          when exe.endsWith('dart') &&
+              fmt.endsWith('ci/bin/format.dart') &&
+              rest.length == expectedFlags.length &&
+              expectedFlags.every(rest.contains) =>
+        formatProcess,
+      _ => failUnknown ? FakeProcess(exitCode: 1) : FakeProcess(),
+    },
   );
 }

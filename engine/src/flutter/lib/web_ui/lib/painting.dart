@@ -707,8 +707,9 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   final bool swapRedBlue = switch (format) {
     PixelFormat.bgra8888 => true,
     PixelFormat.rgba8888 => false,
-    PixelFormat.rgbaFloat32 =>
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+    PixelFormat.rgbaFloat32 => throw UnimplementedError(
+      'RGB conversion from rgbaFloat32 data is not implemented',
+    ),
   };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.

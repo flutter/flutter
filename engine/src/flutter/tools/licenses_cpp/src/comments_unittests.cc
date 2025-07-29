@@ -84,6 +84,23 @@ TEST(CommentsTest, CWithLeadingStars) {
   EXPECT_EQ(comments[0], "hello\nworld\n");
 }
 
+TEST(CommentsTest, CWithTrailingStars) {
+  std::string test = R"test(
+/*************
+ * hello *
+ * world *
+ */
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "hello\nworld\n");
+}
+
 TEST(CommentsTest, CTextOnEndingLine) {
   std::string test = R"test(
 /*hello
