@@ -927,58 +927,27 @@ class IOSDevice extends Device {
         );
       });
 
-      XcodeDebugProject debugProject;
+      final String bundlePath;
       final FlutterProject flutterProject = FlutterProject.current();
 
       if (package is PrebuiltIOSApp) {
-        debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-          package.deviceBundlePath,
-          templateRenderer: globals.templateRenderer,
-          verboseLogging: _logger.isVerbose,
-        );
+        bundlePath = package.deviceBundlePath;
       } else if (package is BuildableIOSApp) {
-        // Before installing/launching/debugging with Xcode, update the build
-        // settings to use a custom configuration build directory so Xcode
-        // knows where to find the app bundle to launch.
         final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          configurationBuildDir: bundle.parent.absolute.path,
-        );
-
-        final IosProject project = package.project;
-        final XcodeProjectInfo? projectInfo = await project.projectInfo();
-        if (projectInfo == null) {
-          globals.printError('Xcode project not found.');
-          return false;
-        }
-        if (project.xcodeWorkspace == null) {
-          globals.printError('Unable to get Xcode workspace.');
-          return false;
-        }
-        final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-        if (scheme == null) {
-          projectInfo.reportFlavorNotFoundAndExit();
-        }
-
-        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
-
-        debugProject = XcodeDebugProject(
-          scheme: scheme,
-          xcodeProject: project.xcodeProject,
-          xcodeWorkspace: project.xcodeWorkspace!,
-          hostAppProjectName: project.hostAppProjectName,
-          expectedConfigurationBuildDir: bundle.parent.absolute.path,
-          verboseLogging: _logger.isVerbose,
-        );
+        bundlePath = bundle.absolute.path;
       } else {
         // This should not happen. Currently, only PrebuiltIOSApp and
         // BuildableIOSApp extend from IOSApp.
         _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
         return false;
       }
+
+      final XcodeDebugProject debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
+        bundlePath,
+        templateRenderer: globals.templateRenderer,
+        verboseLogging: _logger.isVerbose,
+        project: flutterProject.ios,
+      );
 
       final bool debugSuccess = await _xcodeDebug.debugApp(
         project: debugProject,

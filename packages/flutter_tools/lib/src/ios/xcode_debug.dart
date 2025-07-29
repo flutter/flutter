@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../template.dart';
 
 /// A class to handle interacting with Xcode via OSA (Open Scripting Architecture)
@@ -62,11 +63,9 @@ class XcodeDebug {
     required List<String> launchArguments,
   }) async {
     // If project is not already opened in Xcode, open it.
-    if (!await _isProjectOpenInXcode(project: project)) {
-      final bool openResult = await _openProjectInXcode(xcodeWorkspace: project.xcodeWorkspace);
-      if (!openResult) {
-        return openResult;
-      }
+    final bool openResult = await _openProjectInXcode(xcodeWorkspace: project.xcodeWorkspace);
+    if (!openResult) {
+      return openResult;
     }
 
     currentDebuggingProject = project;
@@ -234,39 +233,6 @@ class XcodeDebug {
     return true;
   }
 
-  Future<bool> _isProjectOpenInXcode({required XcodeDebugProject project}) async {
-    final RunResult result = await _processUtils.run(<String>[
-      ..._xcode.xcrunCommand(),
-      'osascript',
-      '-l',
-      'JavaScript',
-      _xcode.xcodeAutomationScriptPath,
-      'check-workspace-opened',
-      '--xcode-path',
-      _xcode.xcodeAppPath,
-      '--project-path',
-      project.xcodeProject.path,
-      '--workspace-path',
-      project.xcodeWorkspace.path,
-      if (project.verboseLogging) '--verbose',
-    ]);
-
-    if (result.exitCode != 0) {
-      _logger.printError('Error executing osascript: ${result.exitCode}\n${result.stderr}');
-      return false;
-    }
-
-    final XcodeAutomationScriptResponse? response = parseScriptResponse(result.stdout);
-    if (response == null) {
-      return false;
-    }
-    if (response.status == false) {
-      _logger.printTrace('Error checking if project opened in Xcode: ${response.errorMessage}');
-      return false;
-    }
-    return true;
-  }
-
   @visibleForTesting
   XcodeAutomationScriptResponse? parseScriptResponse(String results) {
     // Some users reported text before the json. Trim any text before the opening
@@ -366,6 +332,7 @@ class XcodeDebug {
     required TemplateRenderer templateRenderer,
     @visibleForTesting Directory? projectDestination,
     bool verboseLogging = false,
+    required IosProject project,
   }) async {
     final Directory tempXcodeProject =
         projectDestination ??
@@ -381,6 +348,7 @@ class XcodeDebug {
 
     template.render(tempXcodeProject, <String, Object>{
       'applicationBundlePath': deviceBundlePath,
+      'lldbInitFile': project.lldbInitFile.path,
     }, printStatusWhenWriting: false);
 
     return XcodeDebugProject(
