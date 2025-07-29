@@ -127,7 +127,7 @@ final class Preview {
   final PreviewLocalizations? localizations;
 }
 
-/// The interface used to define a custom 'multi-preview' annotation.
+/// The base class used to define a custom 'multi-preview' annotation.
 ///
 /// Marking functions that return a widget preview with an instance of [MultiPreview] is the
 /// equivalent of applying each [Preview] instance in the `previews` field to the function.
@@ -174,7 +174,7 @@ final class Preview {
 ///
 /// **Important Note:** all values provided to the `Preview()` instances included in the
 /// `previews` list must be constant and non-private.
-abstract interface class MultiPreview {
+abstract base class MultiPreview {
   /// Creates a [MultiPreview] annotation instance.
   const MultiPreview();
 
