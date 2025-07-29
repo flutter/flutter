@@ -13,6 +13,8 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  flutter_gpu:
+    path: ../../../engine/src/flutter/lib/gpu
 
   matcher: any
   path: any
@@ -21,5 +23,9 @@ dev_dependencies:
   test: any
 
   args: any
+
+flutter:
+  assets:
+    - test.shaderbundle
 
 # PUBSPEC CHECKSUM: r7umvv

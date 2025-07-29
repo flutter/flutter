@@ -28,13 +28,19 @@ SHARD=android_engine_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.da
 Each `lib/{prefix}_main.dart` file is a standalone Flutter app that you can run
 on an Android device or emulator.
 
-- [`flutter_rendered_blue_rectangle`](#flutter_rendered_blue_rectangle)
-- [`external_texture/surface_producer_smiley_face`](#external_texturesurface_producer_smiley_face)
-- [`external_texture/surface_texture_smiley_face`](#external_texturesurface_texture_smiley_face)
-- [`platform_view/hybrid_composition_platform_view`](#platform_viewhybrid_composition_platform_view)
-- [`platform_view/texture_layer_hybrid_composition_platform_view`](#platform_viewtexture_layer_hybrid_composition_platform_view)
-- [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
-- [`platform_view_tap_color_change`](#platform_view_tap_color_change)
+- [android\_engine\_test](#android_engine_test)
+  - [How it runs on CI (LUCI)](#how-it-runs-on-ci-luci)
+  - [Running the apps and tests](#running-the-apps-and-tests)
+    - [`flutter_rendered_blue_rectangle`](#flutter_rendered_blue_rectangle)
+    - [`external_texture/surface_producer_smiley_face`](#external_texturesurface_producer_smiley_face)
+    - [`external_texture/surface_texture_smiley_face`](#external_texturesurface_texture_smiley_face)
+    - [`platform_view/hybrid_composition_platform_view`](#platform_viewhybrid_composition_platform_view)
+    - [`platform_view/texture_layer_hybrid_composition_platform_view`](#platform_viewtexture_layer_hybrid_composition_platform_view)
+    - [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
+    - [`platform_view_tap_color_change`](#platform_view_tap_color_change)
+    - [`flutter_gpu_rendered_rectangle`](#flutter_gpu_rendered_rectangle)
+      - [Regenerate the Flutter GPU shader bundle](#regenerate-the-flutter-gpu-shader-bundle)
+  - [Deflaking](#deflaking)
 
 ### `flutter_rendered_blue_rectangle`
 
@@ -128,6 +134,28 @@ $ flutter run lib/platform_view_tap_color_change_main.dart
 
 # Run the test
 $ flutter drive lib/platform_view_tap_color_change_main_test.dart
+```
+
+### `flutter_gpu_rendered_rectangle`
+
+This app displays a green rectangle covering half of the screen. It serves as
+a basic smoke test for Flutter GPU.
+
+```sh
+# Run the app
+$ flutter run lib/flutter_gpu_rendered_rectangle_main.dart
+
+# Run the test
+$ flutter drive lib/flutter_gpu_rendered_rectangle_main.dart
+```
+
+#### Regenerate the Flutter GPU shader bundle
+
+```bash
+IMPELLERC_PATH=../../../engine/src/out/android_debug_unopt_arm64/clang_arm64/impellerc
+FIXTURES_PATH=../../../engine/src/flutter/impeller/fixtures
+
+${IMPELLERC_PATH} --sl=test.shaderbundle --shader-bundle="{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${FIXTURES_PATH}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${FIXTURES_PATH}/flutter_gpu_unlit.vert\"}}"
 ```
 
 ## Deflaking
