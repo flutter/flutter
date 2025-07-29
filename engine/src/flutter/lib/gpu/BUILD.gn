@@ -57,12 +57,15 @@ source_set("gpu") {
   deps = [
     "//flutter/assets",
     "//flutter/impeller",
-    "//flutter/impeller/display_list",
     "//flutter/impeller/display_list:skia_conversions",
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/lib/ui",
     "//flutter/third_party/tonic",
   ]
+
+  if (impeller_supports_rendering) {
+    deps += [ "//flutter/impeller/display_list" ]
+  }
 
   if (is_win) {
     # Required for M_PI and others.

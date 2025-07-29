@@ -52,10 +52,13 @@ impeller_component("display_list") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/entity",
-    "//flutter/impeller/runtime_stage",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/skia",
   ]
+
+  if (impeller_supports_rendering) {
+    public_deps += [ "//flutter/impeller/runtime_stage" ]
+  }
 
   if (!defined(defines)) {
     defines = []

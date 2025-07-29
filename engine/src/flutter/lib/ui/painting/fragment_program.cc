@@ -11,7 +11,9 @@
 
 #include "flutter/assets/asset_manager.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"  // nogncheck
+#endif
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
@@ -102,7 +104,9 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
           }
           snapshot_controller->CacheRuntimeStage(runtime_stage);
         });
+#if IMPELLER_SUPPORTS_RENDERING
     runtime_effect_ = DlRuntimeEffectImpeller::Make(std::move(runtime_stage));
+#endif
   } else {
     const auto& code_mapping = runtime_stage->GetCodeMapping();
     auto code_size = code_mapping->GetSize();
