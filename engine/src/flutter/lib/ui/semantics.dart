@@ -613,6 +613,7 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsComboBoxIndex = 1 << 31;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
   // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
@@ -1011,6 +1012,11 @@ class SemanticsFlag {
   /// {@endtemplate}
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
 
+  /// {@template dart.ui.semantics.isComboBox}
+  /// Whether the semantic node represents a combo box.
+  /// {@endtemplate}
+  static const SemanticsFlag isComboBox = SemanticsFlag._(_kIsComboBoxIndex, 'isComboBox');
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -1046,6 +1052,7 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
     _kHasRequiredStateIndex: hasRequiredState,
     _kIsRequiredIndex: isRequired,
+    _kIsComboBoxIndex: isComboBox,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
@@ -1174,6 +1181,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     this.isLink = false,
     this.isSlider = false,
     this.isKeyboardKey = false,
+    this.isComboBox = false,
   }) {
     _initSemanticsFlags(
       this,
@@ -1200,6 +1208,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink,
       isSlider,
       isKeyboardKey,
+      isComboBox,
     );
   }
 
@@ -1213,6 +1222,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
+      Bool,
       Bool,
       Bool,
       Bool,
@@ -1256,6 +1266,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool isLink,
     bool isSlider,
     bool isKeyboardKey,
+    bool isComboBox,
   );
 
   /// The set of semantics flags with every flag set to false.
@@ -1330,6 +1341,9 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// {@macro dart.ui.semantics.isKeyboardKey}
   final bool isKeyboardKey;
 
+  /// {@macro dart.ui.semantics.isComboBox}
+  final bool isComboBox;
+
   /// Combines two sets of flags, such that if a flag it set to true in any of the two sets, the resulting set contains that flag set to true.
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
@@ -1356,6 +1370,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isLink: isLink || other.isLink,
       isSlider: isSlider || other.isSlider,
       isKeyboardKey: isKeyboardKey || other.isKeyboardKey,
+      isComboBox: isComboBox || other.isComboBox,
     );
   }
 
@@ -1384,6 +1399,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     bool? isLink,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? isComboBox,
   }) {
     return SemanticsFlags(
       isChecked: isChecked ?? this.isChecked,
@@ -1409,6 +1425,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
       isExpanded: isExpanded ?? this.isExpanded,
       isRequired: isRequired ?? this.isRequired,
+      isComboBox: isComboBox ?? this.isComboBox,
     );
   }
 
@@ -1439,7 +1456,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
           isReadOnly == other.isReadOnly &&
           isLink == other.isLink &&
           isSlider == other.isSlider &&
-          isKeyboardKey == other.isKeyboardKey;
+          isKeyboardKey == other.isKeyboardKey &&
+          isComboBox == other.isComboBox;
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
@@ -1466,6 +1484,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
     isLink,
     isSlider,
     isKeyboardKey,
+    isComboBox,
   ]);
 
   /// Convert flags to a list of string.
@@ -1502,6 +1521,7 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
       if (isSelected != Tristate.none) 'hasSelectedState',
       if (isRequired != Tristate.none) 'hasRequiredState',
       if (isRequired == Tristate.isTrue) 'isRequired',
+      if (isComboBox) 'isComboBox',
     ];
   }
 
@@ -1531,7 +1551,8 @@ class SemanticsFlags extends NativeFieldWrapperClass1 {
         (isReadOnly && other.isReadOnly) ||
         (isLink && other.isLink) ||
         (isSlider && other.isSlider) ||
-        (isKeyboardKey && other.isKeyboardKey);
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isComboBox && other.isComboBox);
   }
 }
 
