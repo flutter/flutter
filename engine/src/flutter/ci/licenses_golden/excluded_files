@@ -3057,8 +3057,6 @@
 ../../../flutter/third_party/skia/docker/README.md
 ../../../flutter/third_party/skia/docker/binary-size/Dockerfile
 ../../../flutter/third_party/skia/docker/cmake-release/Dockerfile
-../../../flutter/third_party/skia/docker/skia-build-tools/Dockerfile
-../../../flutter/third_party/skia/docker/skia-release/Dockerfile
 ../../../flutter/third_party/skia/docker/skia-wasm-release/Dockerfile
 ../../../flutter/third_party/skia/docker/skia-with-swift-shader-base/Dockerfile
 ../../../flutter/third_party/skia/docs
