@@ -43,7 +43,7 @@ void main() async {
   test('should screenshot and match a Flutter GPU rectangle', () async {
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('fluttered_gpu_rendered_rectangle.png'),
+      matchesGoldenFile('flutter_gpu_rendered_rectangle.png'),
     );
   }, timeout: Timeout.none);
 }

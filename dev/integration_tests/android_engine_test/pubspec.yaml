@@ -18,6 +18,7 @@ dependencies:
 
   matcher: any
   path: any
+  vector_math: any
 
 dev_dependencies:
   test: any

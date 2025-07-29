@@ -88,22 +88,27 @@ RenderPassState createSimpleRenderPass({
   return RenderPassState(renderTexture, commandBuffer, renderPass);
 }
 
-void drawTriangle(RenderPassState state, vm.Vector4 color) {
+void drawRectangle(RenderPassState state, vm.Vector4 color) {
   final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
 
   state.renderPass.bindPipeline(pipeline);
 
   final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
   final Float32List vertexData = float32(<double>[
-    -0.5, 0.5, //
-    0.0, -0.5, //
-    0.5, 0.5, //
+    // Triangle 1
+    -0.5,  0.5,
+    -0.5, -0.5,
+     0.5,  0.5,
+    // Triangle 2
+     0.5,  0.5,
+    -0.5, -0.5,
+     0.5, -0.5,
   ]);
   final gpu.BufferView vertices = transients.emplace(ByteData.sublistView(vertexData));
 
   final Float32List uniformData = unlitUBO(Matrix4.identity(), color);
   final gpu.BufferView vertInfoData = transients.emplace(ByteData.sublistView(uniformData));
-  state.renderPass.bindVertexBuffer(vertices, 3);
+  state.renderPass.bindVertexBuffer(vertices, 6);
 
   final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
   state.renderPass.bindUniform(vertInfo, vertInfoData);
@@ -120,12 +125,6 @@ final class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SizedBox(width: 100, height: 100, child: CustomPaint(painter: _ScenePainter()));
   }
@@ -136,8 +135,8 @@ class _ScenePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final RenderPassState state = createSimpleRenderPass(width: 100, height: 100);
-    drawTriangle(state, vm.Colors.lime);
+    final RenderPassState state = createSimpleRenderPass();
+    drawRectangle(state, vm.Colors.lime);
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
@@ -145,5 +144,5 @@ class _ScenePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
