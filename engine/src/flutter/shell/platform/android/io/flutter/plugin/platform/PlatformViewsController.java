@@ -185,8 +185,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         @Override
         public void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request) {
-          throw new IllegalStateException("Trying to create an HC++ platform view from within " +
-                  "PlatformViewsController1. Request: " + request);
+          throw new IllegalStateException(
+              "Trying to create an HC++ platform view from within "
+                  + "PlatformViewsController1. Request: "
+                  + request);
         }
 
         @SuppressLint("NewApi")

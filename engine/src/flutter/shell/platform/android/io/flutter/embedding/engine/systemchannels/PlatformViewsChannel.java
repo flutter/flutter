@@ -315,8 +315,7 @@ public class PlatformViewsChannel {
     boolean isHcppEnabled();
 
     /**
-     * The Flutter application would like to display a new Platform View using Hybrid
-     * Composition++.
+     * The Flutter application would like to display a new Platform View using Hybrid Composition++.
      *
      * @param request The creation request with the parameters for the platform view.
      */
