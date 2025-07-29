@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show getGradlewFileName;
 import 'package:flutter_tools/src/base/io.dart';
