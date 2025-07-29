@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 #include "fl_compositor_software.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
+
+  // Engine we are rendering.
+  GWeakRef engine;
 
   // Width of frame in pixels.
   size_t width;
@@ -18,9 +22,6 @@ struct _FlCompositorSoftware {
 
   // Ensure Flutter and GTK can access the surface.
   GMutex frame_mutex;
-
-  // Allow GTK to wait for Flutter to generate a suitable frame.
-  GCond frame_cond;
 };
 
 G_DEFINE_TYPE(FlCompositorSoftware,
@@ -63,9 +64,6 @@ static gboolean fl_compositor_software_present_layers(
         backing_store->software.height, backing_store->software.row_bytes);
   }
 
-  // Signal a frame is ready.
-  g_cond_signal(&self->frame_cond);
-
   return TRUE;
 }
 
@@ -74,9 +72,11 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               GdkWindow* window) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
 
+  g_mutex_lock(&self->frame_mutex);
   if (self->surface == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
     return FALSE;
   }
 
@@ -85,12 +85,16 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   size_t width = gdk_window_get_width(window) * scale_factor;
   size_t height = gdk_window_get_height(window) * scale_factor;
   while (self->width != width || self->height != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_run_expired_tasks(fl_engine_get_task_runner(engine));
+    g_mutex_lock(&self->frame_mutex);
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
   cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
   cairo_paint(cr);
+
+  g_mutex_unlock(&self->frame_mutex);
 
   return TRUE;
 }
@@ -98,12 +102,12 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
+  g_weak_ref_clear(&self->engine);
   if (self->surface != nullptr) {
     free(cairo_image_surface_get_data(self->surface));
   }
   g_clear_pointer(&self->surface, cairo_surface_destroy);
   g_mutex_clear(&self->frame_mutex);
-  g_cond_clear(&self->frame_cond);
 
   G_OBJECT_CLASS(fl_compositor_software_parent_class)->dispose(object);
 }
@@ -119,11 +123,11 @@ static void fl_compositor_software_class_init(
 
 static void fl_compositor_software_init(FlCompositorSoftware* self) {
   g_mutex_init(&self->frame_mutex);
-  g_cond_init(&self->frame_cond);
 }
 
-FlCompositorSoftware* fl_compositor_software_new() {
+FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
       g_object_new(fl_compositor_software_get_type(), nullptr));
+  g_weak_ref_init(&self->engine, engine);
   return self;
 }

@@ -457,7 +457,7 @@ static void setup_opengl(FlView* self) {
 }
 
 static void setup_software(FlView* self) {
-  self->compositor = FL_COMPOSITOR(fl_compositor_software_new());
+  self->compositor = FL_COMPOSITOR(fl_compositor_software_new(self->engine));
 }
 
 static void realize_cb(FlView* self) {

@@ -77,9 +77,6 @@ struct _FlCompositorOpenGL {
 
   // Ensure Flutter and GTK can access the frame data (framebuffer or pixels).
   GMutex frame_mutex;
-
-  // Allow GTK to wait for Flutter to generate a suitable frame.
-  GCond frame_cond;
 };
 
 G_DEFINE_TYPE(FlCompositorOpenGL,
@@ -322,9 +319,6 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
 
-  // Signal a frame is ready.
-  g_cond_signal(&self->frame_cond);
-
   return TRUE;
 }
 
@@ -333,9 +327,11 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             GdkWindow* window) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
 
+  g_mutex_lock(&self->frame_mutex);
   if (self->framebuffer == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
     return FALSE;
   }
 
@@ -345,7 +341,9 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   size_t height = gdk_window_get_height(window) * scale_factor;
   while (fl_framebuffer_get_width(self->framebuffer) != width ||
          fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_cond_wait(&self->frame_cond, &self->frame_mutex);
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_run_expired_tasks(fl_engine_get_task_runner(engine));
+    g_mutex_lock(&self->frame_mutex);
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
@@ -368,6 +366,8 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   glFlush();
 
+  g_mutex_unlock(&self->frame_mutex);
+
   return TRUE;
 }
 
@@ -381,7 +381,6 @@ static void fl_compositor_opengl_dispose(GObject* object) {
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
   g_mutex_clear(&self->frame_mutex);
-  g_cond_clear(&self->frame_cond);
 
   G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
 }
@@ -396,7 +395,6 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
   g_mutex_init(&self->frame_mutex);
-  g_cond_init(&self->frame_cond);
 }
 
 FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
