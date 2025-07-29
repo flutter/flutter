@@ -72,6 +72,7 @@ Future<BrowserInstallation> getOrInstallFirefox(
       final BrowserInstallation installation = installer.getInstallation()!;
       infoLog.writeln('Installations complete. To launch it run ${installation.executable}');
     }
+    installer.deleteUpdaterFiles();
     return installer.getInstallation()!;
   } finally {
     installer?.close();
@@ -175,6 +176,23 @@ class FirefoxInstaller {
     return downloadedFile;
   }
 
+  void deleteUpdaterFiles() {
+    if (!io.Platform.isLinux) {
+      return;
+    }
+
+    final executableDir = path.dirname(
+      PlatformBinding.instance.getFirefoxExecutablePath(versionDir),
+    );
+    final updaterFiles = <String>[
+      path.join(executableDir, 'updater'),
+      path.join(executableDir, 'updater.ini'),
+    ];
+    for (final file in updaterFiles) {
+      io.File(file).deleteSync(recursive: true);
+    }
+  }
+
   /// Uncompress the downloaded browser files for operating systems that
   /// use a zip archive.
   /// See [version].
@@ -186,18 +204,6 @@ class FirefoxInstaller {
       '-C',
       versionDir.path,
     ]);
-
-    // Delete updater files to prevent Firefox from updating itself.
-    final executableDir = path.dirname(
-      PlatformBinding.instance.getFirefoxExecutablePath(versionDir),
-    );
-    final updaterFiles = <String>[
-      path.join(executableDir, 'updater'),
-      path.join(executableDir, 'updater.ini'),
-    ];
-    for (final file in updaterFiles) {
-      io.File(file).deleteSync();
-    }
 
     if (unzipResult.exitCode != 0) {
       throw BrowserInstallerException(
