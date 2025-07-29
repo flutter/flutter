@@ -187,6 +187,18 @@ class FirefoxInstaller {
       versionDir.path,
     ]);
 
+    // Delete updater files to prevent Firefox from updating itself.
+    final executableDir = path.dirname(
+      PlatformBinding.instance.getFirefoxExecutablePath(versionDir),
+    );
+    final updaterFiles = <String>[
+      path.join(executableDir, 'updater'),
+      path.join(executableDir, 'updater.ini'),
+    ];
+    for (final file in updaterFiles) {
+      io.File(file).deleteSync();
+    }
+
     if (unzipResult.exitCode != 0) {
       throw BrowserInstallerException(
         'Failed to unzip the downloaded Firefox archive ${downloadedFile.path}.\n'
