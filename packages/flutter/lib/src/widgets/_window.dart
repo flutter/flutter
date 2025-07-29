@@ -417,7 +417,7 @@ abstract class WindowingOwner {
     required RegularWindowControllerDelegate delegate,
   });
 
-  /// Returns whether application has any top level windows created by this
+  /// Returns whether the application has any top level windows created by this
   /// windowing owner.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -477,7 +477,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 ///   ),
 ///   title: "Example Window",
 /// );
-/// runApp(
+/// runWidget(
 ///   RegularWindow(
 ///     controller: controller,
 ///     child: MaterialApp(home: Container()),
