@@ -90,7 +90,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     // but using dry layout. We need to account for the child's position within
     // the parent's coordinate space.
     final Offset childOffset = switch (this) {
-      RenderAligningShiftedBox aligningBox => aligningBox.resolvedAlignment.alongOffset(
+      final RenderAligningShiftedBox aligningBox => aligningBox.resolvedAlignment.alongOffset(
         size - childSize as Offset,
       ),
       _ => Offset.zero, // For other shifted box types, assume no offset
