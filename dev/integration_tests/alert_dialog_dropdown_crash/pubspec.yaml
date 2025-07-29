@@ -1,0 +1,20 @@
+name: alert_dialog_dropdown_crash
+description: An integration test to reproduce AlertDialog with DropdownButton crash.
+environment:
+  sdk: ^3.8.0-0
+
+# resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  test: any
+
+  meta: any
+
+flutter:
+  uses-material-design: true
