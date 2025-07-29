@@ -383,6 +383,8 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
   @JS('textContent')
   external String? text;
 
+  external String? get nodeName;
+
   external DomNode? get parentNode;
   external DomNode? get nextSibling;
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
