@@ -257,7 +257,7 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// When provided to a [RegularWindow] widget, widgets inside of the [child]
 /// parameter will have access to the [RegularWindowController] via the
-/// [WindowControllerContext] widget.
+/// [WindowControllerScope] widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -489,7 +489,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// by the [controller] is automatically destroyed if it has not yet been destroyed.
 ///
 /// Widgets in the same tree as the [child] widget will have access to the
-/// [RegularWindowController] via the [WindowControllerContext] widget.
+/// [RegularWindowController] via the [WindowControllerScope] widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 class RegularWindow extends StatefulWidget {
@@ -535,7 +535,7 @@ class _RegularWindowState extends State<RegularWindow> {
   Widget build(BuildContext context) {
     return View(
       view: widget.controller.rootView,
-      child: WindowControllerContext(controller: widget.controller, child: widget.child),
+      child: WindowControllerScope(controller: widget.controller, child: widget.child),
     );
   }
 }
@@ -549,8 +549,8 @@ class _RegularWindowState extends State<RegularWindow> {
 ///
 ///  * [RegularWindow], the widget to create a regular window.
 @internal
-class WindowControllerContext extends InheritedWidget {
-  /// Creates a new [WindowControllerContext].
+class WindowControllerScope extends InheritedWidget {
+  /// Creates a new [WindowControllerScope].
   ///
   /// This widget is used by the window widgets to provide
   /// widgets in a window's subtree with access to information about
@@ -562,7 +562,7 @@ class WindowControllerContext extends InheritedWidget {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowControllerContext({super.key, required this.controller, required super.child}) {
+  WindowControllerScope({super.key, required this.controller, required super.child}) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -574,12 +574,12 @@ class WindowControllerContext extends InheritedWidget {
   @internal
   final BaseWindowController controller;
 
-  /// Returns the [WindowControllerContext].
+  /// Returns the [WindowControllerScope].
   ///
   /// If [isWindowingEnabled] is `false`, this method will throw an
   /// [UnsupportedError].
   ///
-  /// If there is no [WindowControllerContext] in scope, this method
+  /// If there is no [WindowControllerScope] in scope, this method
   /// will throw a [TypeError] exception in release builds, and thrown
   /// a descriptive [FlutterError] in debug builds.
   ///
@@ -589,14 +589,14 @@ class WindowControllerContext extends InheritedWidget {
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
-  ///   [WindowControllerContext] ancestor. It returns null instead.
+  ///   [WindowControllerScope] ancestor. It returns null instead.
   @internal
   static BaseWindowController of(BuildContext context) {
     assert(_debugCheckHasWindowController(context));
-    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()!.controller;
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerScope>()!.controller;
   }
 
-  /// Returns the [WindowControllerContext] if one exists, otherwise null.
+  /// Returns the [WindowControllerScope] if one exists, otherwise null.
   ///
   /// If [isWindowingEnabled] is `false`, this method will throw an
   /// [UnsupportedError].
@@ -606,14 +606,14 @@ class WindowControllerContext extends InheritedWidget {
   /// See also:
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
-  /// * [of], which will throw if it doesn't find a [WindowControllerContext] ancestor,
+  /// * [of], which will throw if it doesn't find a [WindowControllerScope] ancestor,
   ///   instead of returning null.
   @internal
   static BaseWindowController? maybeOf(BuildContext context) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerScope>()?.controller;
   }
 
   static bool _debugCheckHasWindowController(BuildContext context) {
@@ -622,21 +622,21 @@ class WindowControllerContext extends InheritedWidget {
     }
 
     assert(() {
-      if (context.dependOnInheritedWidgetOfExactType<WindowControllerContext>() == null) {
+      if (context.dependOnInheritedWidgetOfExactType<WindowControllerScope>() == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No WindowControllerContext found in context.'),
+          ErrorSummary('No WindowControllerScope found in context.'),
           ErrorDescription(
-            '${context.widget.runtimeType} widgets require a WindowControllerContext widget ancestor.',
+            '${context.widget.runtimeType} widgets require a WindowControllerScope widget ancestor.',
           ),
           context.describeWidget(
-            'The specific widget that could not find a WindowControllerContext ancestor was',
+            'The specific widget that could not find a WindowControllerScope ancestor was',
           ),
           context.describeOwnershipChain('The ownership chain for the affected widget is'),
           ErrorHint(
-            'No WindowControllerContext ancestor could be found starting from the context '
-            'that was passed to WindowControllerContext.of(). This can happen because the '
+            'No WindowControllerScope ancestor could be found starting from the context '
+            'that was passed to WindowControllerScope.of(). This can happen because the '
             'context used is not a descendant of a RegularWindow widget, which introduces '
-            'a WindowControllerContext.',
+            'a WindowControllerScope.',
           ),
         ]);
       }
@@ -648,7 +648,7 @@ class WindowControllerContext extends InheritedWidget {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  bool updateShouldNotify(WindowControllerContext oldWidget) {
+  bool updateShouldNotify(WindowControllerScope oldWidget) {
     return controller != oldWidget.controller;
   }
 }
