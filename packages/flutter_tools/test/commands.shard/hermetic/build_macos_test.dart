@@ -1010,4 +1010,58 @@ STDERR STUFF
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
+
+  testUsingContext(
+    'macos build --no-codesign skips codesigning',
+    () async {
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        logger: logger,
+        fileSystem: fileSystem,
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+      );
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            '/macos/Runner.xcworkspace',
+            '-configuration',
+            'Release',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            '/build/macos',
+            '-destination',
+            'generic/platform=macOS',
+            'OBJROOT=/build/macos/Build/Intermediates.noindex',
+            'SYMROOT=/build/macos/Build/Products',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGNING_IDENTITY=""',
+          ],
+        ),
+      ]);
+      createMinimalMockProjectFiles();
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--no-pub', '--no-codesign']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.statusText, contains('Warning: Building with codesigning disabled.'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    },
+  );
 }
