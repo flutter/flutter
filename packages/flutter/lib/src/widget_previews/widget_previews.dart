@@ -141,7 +141,7 @@ final class Preview {
 /// The second approach uses multiple [Preview] annotations to achieve the same result.
 ///
 /// ```dart
-/// class BrightnessPreview extends MultiPreview {
+/// class BrightnessPreview implements MultiPreview {
 ///   const BrightnessPreview();
 ///
 ///   @override
