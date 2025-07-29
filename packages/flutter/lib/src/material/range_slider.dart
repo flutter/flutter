@@ -425,10 +425,21 @@ class RangeSlider extends StatefulWidget {
   )
   final bool? year2023;
 
-  /// Focus node for the start thumb.
+  /// An optional focus node for the start thumb.
+  ///
+  /// If provided, this [FocusNode] can be used by a parent widget to
+  /// programmatically control the focus of the start thumb.
+  ///
+  /// If null, a default [FocusNode] will be created and managed internally.
   final FocusNode? startFocusNode;
 
-  /// Focus node for the end thumb.
+  /// An optional focus node for the end thumb.
+  ///
+  /// If provided, this [FocusNode] can be used by a parent widget to
+  /// programmatically control the focus of the start end.
+  ///
+  /// If null, a default [FocusNode] will be created and managed internally.
+
   final FocusNode? endFocusNode;
 
   // Touch width for the tap boundary of the slider thumbs.
@@ -567,6 +578,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+    startFocusNode.dispose();
+    endFocusNode.dispose();
     super.dispose();
   }
 
@@ -790,7 +803,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
     return Stack(
       children: <Widget>[
-        //Adds two invisible focus nodes to the range slider for its two thumbs.
+        // Adds two invisible focus nodes to the range slider for its two thumbs.
         Row(
           children: <Widget>[
             Focus(focusNode: startFocusNode, child: const SizedBox.shrink()),

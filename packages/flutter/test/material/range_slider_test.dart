@@ -2540,11 +2540,10 @@ void main() {
 
   testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
     RangeValues values = const RangeValues(20, 80);
-    bool onChangeStartCalled = false;
-    bool onChangeEndCalled = false;
-    final startFocusNode = FocusNode();
-    final endFocusNode = FocusNode();
-
+    final FocusNode startFocusNode = FocusNode();
+    final FocusNode endFocusNode = FocusNode();
+    addTearDown(startFocusNode.dispose);
+    addTearDown(endFocusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2555,7 +2554,6 @@ void main() {
                 return Center(
                   child: RangeSlider(
                     values: values,
-                    min: 0,
                     max: 100,
                     onChanged: (RangeValues newValues) {
                       setState(() {
@@ -2592,8 +2590,10 @@ void main() {
   });
 
   testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
-    final startFocusNode = FocusNode();
-    final endFocusNode = FocusNode();
+    final FocusNode startFocusNode = FocusNode();
+    final FocusNode endFocusNode = FocusNode();
+    addTearDown(startFocusNode.dispose);
+    addTearDown(endFocusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
