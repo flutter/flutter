@@ -253,11 +253,9 @@ void main() {
       expect(
         () => ByValueKey.deserialize(serialized),
         throwsA(
-          isA<ArgumentError>().having(
-            (ArgumentError e) => e.message,
-            'message',
-            'Must not be null',
-          ),
+          isA<ArgumentError>()
+              .having((ArgumentError e) => e.message, 'message', 'Must not be null')
+              .having((ArgumentError e) => e.name, 'name', 'keyValueString'),
         ),
       );
     });
