@@ -150,7 +150,7 @@ SkMatrix EmbedderSurfaceGLImpeller::GLContextSurfaceTransformation() const {
     matrix.setIdentity();
     return matrix;
   }
-  return callback();
+  return ToSkMatrix(callback());
 }
 
 // |GPUSurfaceGLDelegate|

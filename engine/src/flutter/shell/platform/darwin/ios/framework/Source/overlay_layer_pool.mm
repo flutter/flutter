@@ -19,14 +19,15 @@ OverlayLayer::OverlayLayer(UIView* overlay_view,
       surface(std::move(surface)){};
 
 void OverlayLayer::UpdateViewState(UIView* flutter_view,
-                                   SkRect rect,
+                                   DlRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
   auto screenScale = [UIScreen mainScreen].scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
-  overlay_view_wrapper.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
-                                          rect.width() / screenScale, rect.height() / screenScale);
+  overlay_view_wrapper.frame =
+      CGRectMake(rect.GetX() / screenScale, rect.GetY() / screenScale,
+                 rect.GetWidth() / screenScale, rect.GetHeight() / screenScale);
   // Set a unique view identifier, so the overlay_view_wrapper can be identified in XCUITests.
   overlay_view_wrapper.accessibilityIdentifier =
       [NSString stringWithFormat:@"platform_view[%lld].overlay[%lld]", view_id, overlay_id];
