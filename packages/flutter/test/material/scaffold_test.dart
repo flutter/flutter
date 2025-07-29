@@ -3580,6 +3580,7 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/172866
   testWidgets('BottomAppBar with noAnimation FAB does not throw null error', (
     WidgetTester tester,
   ) async {
