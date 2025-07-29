@@ -20,18 +20,17 @@ import '../base/terminal.dart';
 import '../convert.dart' show utf8;
 import 'plist_parser.dart';
 
-const String _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
-const String _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
-const String _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
-const String _provisioningProfileBuildSettingName = 'PROVISIONING_PROFILE';
+const _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
+const _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
+const _provisioningProfileSpecifierBuildSettingName = 'PROVISIONING_PROFILE_SPECIFIER';
+const _provisioningProfileBuildSettingName = 'PROVISIONING_PROFILE';
 
-const String _codeSignSelectionCanceled =
-    'Code-signing setup canceled. Your changes have not been saved.';
+const _codeSignSelectionCanceled = 'Code-signing setup canceled. Your changes have not been saved.';
 
 /// User message when no development certificates are found in the keychain.
 ///
 /// The user likely never did any iOS development.
-const String noCertificatesInstruction =
+const noCertificatesInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
@@ -52,7 +51,7 @@ Or run on an iOS simulator without code signing
 /// User message when there are no provisioning profile for the current app bundle identifier.
 ///
 /// The user did iOS development but never on this project and/or device.
-const String noProvisioningProfileInstruction =
+const noProvisioningProfileInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 No Provisioning Profile was found for your project's Bundle Identifier or your\u0020
@@ -72,7 +71,7 @@ Or run on an iOS simulator without code signing
 /// Fallback error message for signing issues.
 ///
 /// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
-const String noDevelopmentTeamInstruction =
+const noDevelopmentTeamInstruction =
     '''
 ════════════════════════════════════════════════════════════════════════════════
 Building a deployable iOS app requires a selected Development Team with a\u0020
@@ -84,7 +83,7 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
-const String fixWithDevelopmentTeamInstruction = '''
+const fixWithDevelopmentTeamInstruction = '''
   1- Open the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
@@ -103,7 +102,7 @@ const String fixWithDevelopmentTeamInstruction = '''
 ///
 /// `  1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"`
 /// extracts `iPhone Developer: Profile 1 (1111AAAA11)`
-final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern = RegExp(
+final _securityFindIdentityDeveloperIdentityExtractionPattern = RegExp(
   r'^\s*\d+\).+"(.+Develop(ment|er).+)"$',
 );
 
@@ -113,7 +112,7 @@ final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern = RegExp(
 ///
 /// `iPhone Developer: Profile 1 (1111AAAA11)`
 /// extracts `1111AAAA11`
-final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
+final _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 
 /// Pattern to extract OU (Organizational Unit) from certificate subject.
 ///
@@ -121,7 +120,7 @@ final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(
 ///
 /// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O/O=Company LLC/C=US`
 /// extracts `ABCDE1F2DH`
-final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
+final _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
 /// Pattern to extract CN (Common Name) from certificate subject.
 ///
@@ -129,7 +128,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 ///
 /// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O/O=Company LLC/C=US`
 /// extracts `Apple Development: Company Development (12ABCD234E)`
-final RegExp _certificateCommonNameExtractionPattern = RegExp(r'CN=([a-zA-Z0-9\s:\(\)]+)');
+final _certificateCommonNameExtractionPattern = RegExp(r'CN=([a-zA-Z0-9\s:\(\)]+)');
 
 /// Given a [BuildableIOSApp], find build settings for either automatic (identity)
 /// or manual (provisioning profile) code-signing.
@@ -169,7 +168,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
     return null;
   }
 
-  final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+  final settings = XcodeCodeSigningSettings(
     config: config,
     logger: logger,
     platform: platform,
@@ -202,7 +201,7 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required FileSystemUtils fileSystemUtils,
   required PlistParser plistParser,
 }) async {
-  final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+  final settings = XcodeCodeSigningSettings(
     config: config,
     logger: logger,
     platform: platform,
@@ -254,14 +253,14 @@ class XcodeCodeSigningSettings {
   /// key in that certificate.
   ///
   /// Example: Apple Development: My Name (ABC1234EFG)
-  static const String kConfigCodeSignCertificate = 'ios-signing-cert';
+  static const kConfigCodeSignCertificate = 'ios-signing-cert';
 
   /// Config key for saved provisioning profile file path. A provisioning profile
   /// sets criteria for who is allowed to sign code, what apps are allowed to be
   /// signed, where and when those apps can be run and how those apps are entitled.
   ///
   /// Example: ~/Library/Developer/Xcode/UserData/Provisioning Profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision
-  static const String kConfigCodeSignProvisioningProfile = 'ios-signing-profile';
+  static const kConfigCodeSignProvisioningProfile = 'ios-signing-profile';
 
   /// Reset both [kConfigCodeSignCertificate] and [kConfigCodeSignProvisioningProfile]
   /// config settings.
@@ -318,7 +317,7 @@ class XcodeCodeSigningSettings {
       }
     }
 
-    final String? savedProfile =
+    final savedProfile =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     if (savedProfile != null) {
@@ -343,7 +342,7 @@ class XcodeCodeSigningSettings {
       };
     }
 
-    final String? savedCertChoice =
+    final savedCertChoice =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
 
     String? identity;
@@ -631,9 +630,9 @@ class XcodeCodeSigningSettings {
       return;
     }
 
-    final String? savedCertChoice =
+    final savedCertChoice =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignCertificate) as String?;
-    final String? savedProfile =
+    final savedProfile =
         _config.getValue(XcodeCodeSigningSettings.kConfigCodeSignProvisioningProfile) as String?;
 
     if (savedCertChoice != null || savedProfile != null) {
@@ -743,7 +742,7 @@ class XcodeCodeSigningSettings {
       emphasis: true,
     );
     final int count = validCodeSigningIdentities.length;
-    for (int i = 0; i < count; i++) {
+    for (var i = 0; i < count; i++) {
       _logger.printStatus('[${i + 1}] ${validCodeSigningIdentities[i]}');
     }
     final String choice = await _terminal.promptForCharInput(
@@ -794,7 +793,7 @@ class XcodeCodeSigningSettings {
 
     final List<String> validCodeSigningIdentities = await _getSigningIdentities();
 
-    final List<_ProvisioningProfile> profiles = <_ProvisioningProfile>[];
+    final profiles = <_ProvisioningProfile>[];
     for (final FileSystemEntity entity in profileDirectory.listSync()) {
       if (entity is! File || _fileSystem.path.extension(entity.path) != '.mobileprovision') {
         continue;
@@ -830,8 +829,8 @@ class XcodeCodeSigningSettings {
       '\nValid provisioning profiles available (your choice will be saved):',
       emphasis: true,
     );
-    int count = 1;
-    for (final _ProvisioningProfile profile in validatedProfiles) {
+    var count = 1;
+    for (final profile in validatedProfiles) {
       _logger.printStatus(
         '[$count]: ${profile.name} (${profile.teamIdentifier}) | Expires ${profile.expirationDate}',
       );
@@ -886,12 +885,12 @@ class _ProvisioningProfile {
     Map<String, Object> data, {
     required FileSystem fileSystem,
   }) {
-    final String? name = data['Name']?.toString();
+    final name = data['Name']?.toString();
     if (name == null) {
       throw Exception('Unable to parse Name value for provisioning profile.');
     }
 
-    List<String> identifiers = <String>[];
+    var identifiers = <String>[];
     if (data case {'TeamIdentifier': final List<Object?> values}) {
       try {
         identifiers = List<String>.from(values);
@@ -903,14 +902,14 @@ class _ProvisioningProfile {
       }
     }
 
-    final String? uuid = data['UUID']?.toString();
+    final uuid = data['UUID']?.toString();
     if (uuid == null) {
       throw Exception('Unable to parse UUID value for provisioning profile.');
     }
 
-    final List<File> certificateFiles = <File>[];
+    final certificateFiles = <File>[];
     if (data case {'DeveloperCertificates': final List<Object?> values}) {
-      for (int i = 0; i < values.length; i++) {
+      for (var i = 0; i < values.length; i++) {
         final Object? obj = values[i];
         if (obj != null && obj is List<int>) {
           final File certFile = fileSystem.systemTempDirectory
@@ -926,7 +925,7 @@ class _ProvisioningProfile {
       throw Exception('Unable to parse DeveloperCertificates value for provisioning profile.');
     }
 
-    final String? expirationDateString = data['ExpirationDate']?.toString();
+    final expirationDateString = data['ExpirationDate']?.toString();
     if (expirationDateString == null) {
       throw Exception('Unable to parse ExpirationDate value for provisioning profile.');
     }
