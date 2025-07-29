@@ -887,6 +887,11 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
       }
       return true;
     }());
+
+    // Return geometry as-is when scale animation is disabled (noAnimation).
+    if (floatingActionButtonScale == null) {
+      return geometry;
+    }
     return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
   }
 

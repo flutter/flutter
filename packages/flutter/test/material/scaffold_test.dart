@@ -3552,6 +3552,28 @@ void main() {
       expect(tester.getSize(find.byKey(bodyKey)).height, 400);
     },
   );
+
+  testWidgets('BottomAppBar with noAnimation FAB does not throw null error', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          body: const SizedBox(),
+          bottomNavigationBar: const BottomAppBar(),
+          floatingActionButton: FloatingActionButton(onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    expect(find.byType(BottomAppBar), findsOneWidget);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
