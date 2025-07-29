@@ -1216,7 +1216,9 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
   const LazyRenderingConfig& back_render_pass = render_passes_.back();
   std::shared_ptr<Texture> back_texture =
       back_render_pass.inline_pass_context->GetTexture();
-  FML_CHECK(back_texture);
+  FML_CHECK(back_texture)
+      << "Context is valid:"
+      << render_passes_.back().inline_pass_context->IsValid();
 
   // The maximum coverage of the subpass. Subpasses textures should never
   // extend outside the parent pass texture or the current clip coverage.
