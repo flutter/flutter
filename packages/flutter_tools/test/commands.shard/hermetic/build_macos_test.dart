@@ -1014,7 +1014,7 @@ STDERR STUFF
   testUsingContext(
     'macos build --no-codesign skips codesigning',
     () async {
-      final BuildCommand command = BuildCommand(
+      final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         logger: logger,
