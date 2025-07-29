@@ -274,10 +274,13 @@ abstract class FinderExtension {
   ///
   /// See also:
   ///   * [Ancestor], a finder that uses other [Finder]s as parameters.
+  ///
+  /// The [path] is the current path to the [params] object from the parent object.
   SerializableFinder deserialize(
     Map<String, String> params,
-    DeserializeFinderFactory finderFactory,
-  );
+    DeserializeFinderFactory finderFactory, {
+    String? path,
+  });
 
   /// Signature for functions that run the given finder and return the [Element]
   /// found, if any, or null otherwise.
@@ -441,13 +444,13 @@ class FlutterDriverExtension
   }
 
   @override
-  SerializableFinder deserializeFinder(Map<String, String> json) {
+  SerializableFinder deserializeFinder(Map<String, String> json, {String? path}) {
     final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
-      return _finderExtensions[finderType]!.deserialize(json, this);
+      return _finderExtensions[finderType]!.deserialize(json, this, path: path);
     }
 
-    return super.deserializeFinder(json);
+    return super.deserializeFinder(json, path: path);
   }
 
   @override
@@ -461,13 +464,17 @@ class FlutterDriverExtension
   }
 
   @override
-  Command deserializeCommand(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+  Command deserializeCommand(
+    Map<String, String> params,
+    DeserializeFinderFactory finderFactory, {
+    String? path,
+  }) {
     final String? kind = params['command'];
     if (_commandExtensions.containsKey(kind)) {
       return _commandExtensions[kind]!.deserialize(params, finderFactory, this);
     }
 
-    return super.deserializeCommand(params, finderFactory);
+    return super.deserializeCommand(params, finderFactory, path: path);
   }
 
   @override
