@@ -717,21 +717,20 @@ class _CupertinoInspectorButton extends InspectorButton {
       padding: const EdgeInsets.all(
         (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
       ),
-      child:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? CupertinoButton.tinted(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                child: buttonIcon,
-              )
-              : CupertinoButton(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                color: backgroundColor(context),
-                child: buttonIcon,
-              ),
+      child: variant == InspectorButtonVariant.toggle && !toggledOn!
+          ? CupertinoButton.tinted(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              child: buttonIcon,
+            )
+          : CupertinoButton(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              color: backgroundColor(context),
+              child: buttonIcon,
+            ),
     );
   }
 

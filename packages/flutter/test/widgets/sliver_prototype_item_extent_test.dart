@@ -83,17 +83,16 @@ void main() {
             slivers: <Widget>[
               SliverPrototypeExtentList.list(
                 prototypeItem: const TestItem(item: -1, height: 100.0),
-                children:
-                    <int>[
-                      0,
-                      1,
-                      2,
-                      3,
-                      4,
-                      5,
-                      6,
-                      7,
-                    ].map((int index) => TestItem(item: index)).toList(),
+                children: <int>[
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                ].map((int index) => TestItem(item: index)).toList(),
               ),
             ],
           ),
@@ -192,10 +191,9 @@ void main() {
   testWidgets('SliverPrototypeExtentList first item is also the prototype', (
     WidgetTester tester,
   ) async {
-    final List<Widget> items =
-        List<Widget>.generate(10, (int index) {
-          return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
-        }).toList();
+    final List<Widget> items = List<Widget>.generate(10, (int index) {
+      return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
+    }).toList();
 
     await tester.pumpWidget(
       Directionality(
