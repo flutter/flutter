@@ -141,11 +141,12 @@ final class Preview {
 /// The second approach uses multiple [Preview] annotations to achieve the same result.
 ///
 /// ```dart
-/// class BrightnessPreview implements MultiPreview {
+/// final class BrightnessPreview extends MultiPreview {
 ///   const BrightnessPreview();
 ///
 ///   @override
-///   final List<Preview> previews = <Preview>[
+///   // ignore: avoid_field_initializers_in_const_classes
+///   final List<Preview> previews = const <Preview>[
 ///     Preview(name: 'Light', brightness: Brightness.light),
 ///     Preview(name: 'Dark', brightness: Brightness.dark),
 ///   ];
