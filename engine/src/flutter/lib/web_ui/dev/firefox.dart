@@ -84,7 +84,7 @@ user_pref("app.update.silent", true);
           temporaryProfileDirectory.deleteSync(recursive: true);
         }
         temporaryProfileDirectory.createSync(recursive: true);
-        File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
+        File(path.join(temporaryProfileDirectory.path, 'user.js')).writeAsStringSync(profile);
 
         final List<String> args = <String>[
           url.toString(),
