@@ -122,7 +122,7 @@ class Context {
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
-      if (result.exitCode != 0) {
+      if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
