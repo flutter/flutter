@@ -887,11 +887,9 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
       return true;
     }());
 
-    // Return geometry as-is when scale animation is disabled (noAnimation).
-    if (floatingActionButtonScale == null) {
-      return geometry;
-    }
-    return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
+    // A null floatingActionButtonScale implies a scale of 1.0. This can happen
+    // when animations are disabled or before they have started.
+    return geometry._scaleFloatingActionButton(floatingActionButtonScale ?? 1.0);
   }
 
   void _updateWith({
