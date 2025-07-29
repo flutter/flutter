@@ -8,7 +8,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.9.1"
+        // Consult the Android team before bumping. This is only used for IDE support, so
+        // it does not need to be bumped as part of most repo-wide upgrades.
+        classpath "com.android.tools.build:gradle:8.7.1"
     }
 }
 
