@@ -75,7 +75,7 @@ SkMatrix EmbedderSurfaceGLSkia::GLContextSurfaceTransformation() const {
     matrix.setIdentity();
     return matrix;
   }
-  return callback();
+  return ToSkMatrix(callback());
 }
 
 // |GPUSurfaceGLDelegate|
