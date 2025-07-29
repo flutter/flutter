@@ -614,6 +614,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
+  /** Returns true if support for Hybrid Composition++ Platform Views is enabled. */
   public boolean isHcppEnabled() {
     if (flutterJNI == null) {
       return false;

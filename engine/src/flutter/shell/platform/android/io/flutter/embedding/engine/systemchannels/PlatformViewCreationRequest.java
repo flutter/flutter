@@ -136,7 +136,7 @@ public class PlatformViewCreationRequest {
       double logicalWidth,
       double logicalHeight,
       int direction,
-      RequestedDisplayMode displayMode,
+      @Nullable RequestedDisplayMode displayMode,
       @Nullable ByteBuffer params) {
     this.viewId = viewId;
     this.viewType = viewType;

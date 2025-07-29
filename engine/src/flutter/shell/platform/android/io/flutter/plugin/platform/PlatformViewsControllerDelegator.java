@@ -139,7 +139,7 @@ public class PlatformViewsControllerDelegator
   public void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request) {
     platformViewsController2.channelHandler.createPlatformView(request);
   }
-
+  
   public void attach(
       @Nullable Context context,
       @NonNull TextureRegistry textureRegistry,
