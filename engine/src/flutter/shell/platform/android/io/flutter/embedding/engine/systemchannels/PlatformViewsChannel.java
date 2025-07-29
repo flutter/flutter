@@ -311,14 +311,9 @@ public class PlatformViewsChannel {
      */
     void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request);
 
-    /** Returns true if support for Hybrid Composition++ Platform Views is enabled. */
+    /** Returns true if creation of HC++ platform views is currently supported. */
     boolean isHcppEnabled();
 
-    /**
-     * The Flutter application would like to display a new Platform View using Hybrid Composition++.
-     *
-     * @param request The creation request with the parameters for the platform view.
-     */
     void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request);
 
     /**
