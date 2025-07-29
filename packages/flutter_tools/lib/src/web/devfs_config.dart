@@ -17,8 +17,8 @@ const webDevServerConfigFilePath = 'web_dev_config.yaml';
 class WebDevServerConfig {
   const WebDevServerConfig({
     this.headers = const <String, String>{},
-    this.host = 'localhost',
-    this.port = 8080,
+    this.host = 'any',
+    this.port = 0,
     this.https,
     this.proxy = const <ProxyRule>[],
   });
