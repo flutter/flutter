@@ -599,7 +599,11 @@ class DaemonDomain extends Domain {
 
       PlatformType.values.forEach(handlePlatformType);
 
-      return <String, Object>{'platformTypes': platformTypesMap};
+      return <String, Object>{
+        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
+        'platforms': platformTypes,
+        'platformTypes': platformTypesMap,
+      };
     } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, Object?>{
         'log': 'Failed to parse project metadata',
@@ -609,6 +613,7 @@ class DaemonDomain extends Domain {
       // On any sort of failure, fall back to Android and iOS for backwards
       // compatibility.
       return const <String, Object>{
+        'platforms': <String>['android', 'ios'],
         'platformTypes': <String, Object>{
           'android': <String, Object>{'isSupported': true},
           'ios': <String, Object>{'isSupported': true},
