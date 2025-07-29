@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -1059,7 +1058,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             record.addedNodes!.isNotEmpty) {
           for (int index = 0; index < record.addedNodes!.length; index += 1) {
             final DomNode node = record.addedNodes!.elementAt(index);
-            final String? nodeName = js_util.getProperty(node, 'nodeName') as String?;
+            final String? nodeName = node.nodeName;
             if (nodeName != null && nodeName == 'STYLE') {
               final double? lineHeight = parseStyleProperty(
                 domDocument.documentElement!,
