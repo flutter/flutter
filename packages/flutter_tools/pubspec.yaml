@@ -14,7 +14,7 @@ dependencies:
   args: 2.7.0
   dds: 5.0.3
   build_runner: ^2.5.4
-  dwds: 24.4.0
+  dwds: 24.4.1
   code_builder: 4.10.1
   collection: 1.19.1
   completion: 1.0.2
@@ -130,4 +130,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: kav93d
+# PUBSPEC CHECKSUM: o6rt85

@@ -28,7 +28,9 @@ shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
       for (final rule in effectiveProxy) {
         if (rule.matches(requestPath)) {
           final Uri targetBaseUri = Uri.parse(rule.target);
-          final String rewrittenRequest = rule.replacement != null ? rule.replace(requestPath) : requestPath;
+          final String rewrittenRequest = rule.replacement != null
+              ? rule.replace(requestPath)
+              : requestPath;
           final Uri finalTargetUrl = targetBaseUri.resolve(rewrittenRequest);
           try {
             final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
