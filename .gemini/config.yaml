@@ -14,7 +14,7 @@ code_review:
 ignore_patterns:
   # Avoid code reviews on rolls.
   - DEPS
-  - bin/internal/*.version
-  - engine/src/flutter/ci/licenses_golden/**
+  - "bin/internal/*.version"
+  - "engine/src/flutter/ci/licenses_golden/**"
   # Avoid code reviews on all third_party files.
-  - **/third_party/**
+  - "**/third_party/**"
