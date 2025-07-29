@@ -2542,8 +2542,6 @@ void main() {
     RangeValues values = const RangeValues(20, 80);
     final FocusNode startFocusNode = FocusNode();
     final FocusNode endFocusNode = FocusNode();
-    addTearDown(startFocusNode.dispose);
-    addTearDown(endFocusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2588,8 +2586,6 @@ void main() {
   testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
     final FocusNode startFocusNode = FocusNode();
     final FocusNode endFocusNode = FocusNode();
-    addTearDown(startFocusNode.dispose);
-    addTearDown(endFocusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
