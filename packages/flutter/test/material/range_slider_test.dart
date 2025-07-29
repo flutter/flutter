@@ -2561,10 +2561,8 @@ void main() {
                       });
                     },
                     onChangeStart: (RangeValues newValues) {
-                      onChangeStartCalled = true;
                     },
                     onChangeEnd: (RangeValues newValues) {
-                      onChangeEndCalled = true;
                     },
                     startFocusNode: startFocusNode,
                     endFocusNode: endFocusNode,
