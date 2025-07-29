@@ -44,7 +44,10 @@ class GetDiagnosticsTree extends CommandWithTarget {
     : subtreeDepth = json.containsKey('subtreeDepth') ? int.parse(json['subtreeDepth']!) : 0,
       includeProperties = json['includeProperties'] != 'false',
       diagnosticsType = json.containsKey('diagnosticsType')
-          ? _diagnosticsTypeIndex.lookupBySimpleName(json['diagnosticsType']!)
+          ? _diagnosticsTypeIndex.lookupBySimpleName(
+              json['diagnosticsType']!,
+              path: path == null ? 'diagnosticsType' : '$path.diagnosticsType',
+            )
           : throw ArgumentError.notNull(path == null ? 'diagnosticsType' : '$path.diagnosticsType'),
       super.deserialize();
 
