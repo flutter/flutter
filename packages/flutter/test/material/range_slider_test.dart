@@ -2560,10 +2560,8 @@ void main() {
                         values = newValues;
                       });
                     },
-                    onChangeStart: (RangeValues newValues) {
-                    },
-                    onChangeEnd: (RangeValues newValues) {
-                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
                     startFocusNode: startFocusNode,
                     endFocusNode: endFocusNode,
                   ),
