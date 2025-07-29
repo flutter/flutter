@@ -379,6 +379,12 @@ abstract class RegularWindowController extends BaseWindowController {
   /// would like to be fullscreened. This might not be honored by the
   /// platform. The [display] argument is ignored if [fullscreen] is `false`.
   ///
+  /// When [fullscreen] is set to false, it is up to the platform as to
+  /// which display the window will be restored to. The platform might
+  /// restore the window to the display on which it was previously fullscreened,
+  /// or it might restore the window to the display on which it was last
+  /// active.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setFullscreen(bool fullscreen, {Display? display});
