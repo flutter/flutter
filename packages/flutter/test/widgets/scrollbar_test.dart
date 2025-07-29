@@ -17,7 +17,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 ScrollbarPainter _buildPainter({
   TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
+  EdgeInsetsGeometry padding = EdgeInsets.zero,
   Color color = _kScrollbarColor,
   double thickness = _kThickness,
   double mainAxisMargin = 0.0,
@@ -3567,4 +3567,68 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  test('with EdgeInsetsDirectional', () {
+    const Size size = Size(60, 80);
+    final ScrollMetrics metrics = defaultMetrics.copyWith(
+      minScrollExtent: -100,
+      maxScrollExtent: 240,
+      axisDirection: AxisDirection.down,
+    );
+
+    final ScrollbarPainter ltrPainter = _buildPainter(
+      padding: const EdgeInsetsDirectional.fromSTEB(1, 2, 3, 4),
+      scrollMetrics: metrics,
+    );
+
+    ltrPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.negativeInfinity),
+      AxisDirection.down,
+    );
+
+    // Top overscroll.
+    ltrPainter.paint(testCanvas, size);
+    final Rect ltrRect0 = captureRect();
+    expect(ltrRect0.top, 2);
+    expect(size.width - ltrRect0.right, 3);
+
+    // Bottom overscroll.
+    ltrPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.infinity),
+      AxisDirection.down,
+    );
+
+    ltrPainter.paint(testCanvas, size);
+    final Rect ltrRect1 = captureRect();
+    expect(size.height - ltrRect1.bottom, 4);
+    expect(size.width - ltrRect1.right, 3);
+
+    final ScrollbarPainter rtlPainter = _buildPainter(
+      padding: const EdgeInsetsDirectional.fromSTEB(1, 2, 3, 4),
+      scrollMetrics: metrics,
+      textDirection: TextDirection.rtl,
+    );
+
+    rtlPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.negativeInfinity),
+      AxisDirection.down,
+    );
+
+    // Top overscroll.
+    rtlPainter.paint(testCanvas, size);
+    final Rect rtlRect0 = captureRect();
+    expect(rtlRect0.top, 2);
+    expect(rtlRect0.left, 3);
+
+    // Bottom overscroll.
+    rtlPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.infinity),
+      AxisDirection.down,
+    );
+
+    rtlPainter.paint(testCanvas, size);
+    final Rect rtlRect1 = captureRect();
+    expect(size.height - rtlRect1.bottom, 4);
+    expect(rtlRect1.left, 3);
+  });
 }
