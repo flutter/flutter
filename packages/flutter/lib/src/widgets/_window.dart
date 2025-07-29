@@ -24,7 +24,7 @@ import 'binding.dart';
 import 'framework.dart';
 import 'view.dart';
 
-const String _windowingDisabledErrorMessage = '''
+const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
 
 Windowing APIs are currently experimental. Do not use windowing APIs in
@@ -70,11 +70,15 @@ enum WindowType {
 class WindowSizing {
   /// Creates a new [WindowSizing] object.
   ///
+  /// Users may pass a [preferredSize] that does not satisfy the
+  /// [preferredConstraints]. In this case, the platform will use an initial
+  /// size that does satisfy the [preferredConstraints] instead.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   WindowSizing({this.preferredSize, this.preferredConstraints}) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
   }
 
@@ -82,11 +86,11 @@ class WindowSizing {
   ///
   /// This might not be honored by the platform.
   ///
-  /// This is the size that the platform will try to  apply to the window
+  /// This is the size that the platform will try to apply to the window
   /// when it is created. In contrast, the [preferredConstraints] field enforces
-  /// the minimum and maximum size of the window. If the preferred size
-  /// does not satisfy the constraints or the preferred size is null, then
-  /// the platform will use an initial size that does satisfy the constraints
+  /// the minimum and maximum size of the window. If the [preferredSize]
+  /// does not satisfy the [preferredConstraints] or the [preferredSize] is null, then
+  /// the platform will use an initial size that does satisfy the [preferredConstraints]
   /// instead.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -97,8 +101,20 @@ class WindowSizing {
   ///
   /// This might not be honored by the platform.
   ///
-  /// This field enforces a minimum and maximum size on the window.
+  /// This field enforces a minimum and maximum size on the window. If the
+  /// user attempts to resize the window beyond these constraints, the platform
+  /// will enforce the constraints according to its own policy. For example, the
+  /// platform might clip the content to fit within the resized window, or it might
+  /// prevent the window from being resized altogether.
+  ///
   /// If null, the window will be unconstrained.
+  ///
+  /// If the [preferredSize] is null, then the platform will use an
+  /// initial size that satisfies the [preferredConstraints].
+  ///
+  /// If the [preferredSize] is not null and it does  not satisfy the
+  /// [preferredConstraints], then the platform will use an
+  /// initial size that does satisfy the [preferredConstraints] instead.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -107,16 +123,7 @@ class WindowSizing {
 
 /// Base class for window controllers.
 ///
-/// A window controller must provide a [future] that resolves to a
-/// a [WindowCreationResult] object. This object contains the view
-/// associated with the window, the type of the window, the size
-/// of the window, and the state of the window.
-///
-/// The caller might also provide a callback to be called when the window
-/// is destroyed, and a callback to be called when an error is encountered
-/// during the creation of the window.
-///
-/// Each [BaseWindowController] is associated with exactly one root [FlutterView].
+/// A [BaseWindowController] is associated with exactly one root [FlutterView].
 ///
 /// When the window is destroyed for any reason (either by the caller or by the
 /// platform), the content of the controller will thereafter be invalid.
@@ -128,7 +135,7 @@ class WindowSizing {
 ///
 /// See also:
 ///
-///  * [RegularWindowController], the controller for regular top-level windows
+///  * [RegularWindowController], the controller for regular top-level windows.
 @internal
 abstract class BaseWindowController with ChangeNotifier {
   /// The type of the window.
@@ -137,7 +144,7 @@ abstract class BaseWindowController with ChangeNotifier {
   @internal
   WindowType get type;
 
-  /// The current size of the window.
+  /// The current size of the drawable area of the window.
   ///
   /// This might differ from the requested size.
   ///
@@ -164,6 +171,8 @@ abstract class BaseWindowController with ChangeNotifier {
   late final FlutterView _view;
 
   /// Sets the view associated with this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   @protected
   set rootView(FlutterView view) {
     _view = view;
@@ -185,23 +194,30 @@ mixin class RegularWindowControllerDelegate {
   /// The default implementation destroys the window. Subclasses
   /// can override the behavior to delay or prevent the window from closing.
   ///
+  /// See also:
+  /// * [onWindowDestroyed], which is invoked after the window is closed.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void onWindowCloseRequested(RegularWindowController controller) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
     controller.destroy();
   }
 
-  /// Invoked when the window is closed.
+  /// Invoked after the window is closed.
+  ///
+  /// See also:
+  ///
+  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
@@ -248,7 +264,7 @@ mixin class RegularWindowControllerDelegate {
 abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] with the provided properties.
   ///
-  /// Upon construction, the window is created for the platform.
+  /// Upon construction, the window is created by the platform.
   ///
   /// The [preferredContentSize] argument sets the window's initial size preference.
   /// This might not be honored by the platform.
@@ -268,10 +284,9 @@ abstract class RegularWindowController extends BaseWindowController {
     RegularWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final RegularWindowController controller = owner.createRegularWindowController(
       preferredContentSize: preferredContentSize,
@@ -296,18 +311,18 @@ abstract class RegularWindowController extends BaseWindowController {
   @override
   WindowType get type => WindowType.regular;
 
-  /// Request change for the window content size.
+  /// Request change to the content sizing of the window.
   ///
-  /// [contentSize] describes the new requested window size. The properties
+  /// [sizing] describes the new requested window size. The properties
   /// of this object are applied independently of each other. For example,
-  /// setting [WindowSizing.preferredSize] does not affect the [WindowSizing.preferredConstraints]
-  /// set previously.
+  /// setting [WindowSizing.preferredSize] does not affect the
+  /// [WindowSizing.preferredConstraints] set previously.
   ///
   /// The platform is free to ignore the request.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void updateContentSize(WindowSizing sizing);
+  void updateContentSizing(WindowSizing sizing);
 
   /// Request change for the window title.
   ///
@@ -317,7 +332,7 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// Requests that the window be displayed in its current size and position.
   ///
-  /// If the window is minimized, the window returns to the size  and position
+  /// If the window is minimized, the window returns to the size and position
   /// that it had before that state was applied. The window will also be
   /// brought to the top of the window stack.
   ///
@@ -409,7 +424,7 @@ abstract class WindowingOwner {
   @internal
   static WindowingOwner createDefaultOwner() {
     if (!isWindowingEnabled) {
-      return _WindowingOwnerUnsupported(errorMessaage: _windowingDisabledErrorMessage);
+      return _WindowingOwnerUnsupported(errorMessaage: _kWindowingDisabledErrorMessage);
     }
 
     // TODO(mattkae): Implement windowing owners for desktop platforms.
@@ -481,7 +496,7 @@ class RegularWindow extends StatefulWidget {
   @internal
   RegularWindow({super.key, required this.controller, required this.child}) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
   }
 
@@ -543,7 +558,7 @@ class WindowControllerContext extends InheritedWidget {
   @internal
   WindowControllerContext({super.key, required this.controller, required super.child}) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
   }
 
@@ -590,14 +605,14 @@ class WindowControllerContext extends InheritedWidget {
   @internal
   static BaseWindowController? maybeOf(BuildContext context) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>()?.controller;
   }
 
   static bool _debugCheckHasWindowController(BuildContext context) {
     if (!isWindowingEnabled) {
-      throw UnsupportedError(_windowingDisabledErrorMessage);
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
     assert(() {
