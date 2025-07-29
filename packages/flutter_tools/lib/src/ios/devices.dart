@@ -38,7 +38,6 @@ import 'iproxy.dart';
 import 'mac.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
-import 'xcodeproj.dart';
 
 const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';

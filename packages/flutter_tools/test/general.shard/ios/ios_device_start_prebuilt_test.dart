@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -1296,6 +1297,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     String deviceBundlePath, {
     required TemplateRenderer templateRenderer,
     Directory? projectDestination,
+    required IosProject project,
     bool verboseLogging = false,
   }) async {
     if (expectedBundlePath != null) {
