@@ -242,23 +242,23 @@ SKWASM_EXPORT void canvas_drawImage(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawImageRect(DisplayListBuilder* canvas,
-                                        DlImage* image,
+                                        SkImage* image,
                                         DlRect* sourceRect,
                                         DlRect* destRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageRect(sk_ref_sp(image), *sourceRect, *destRect,
+  canvas->DrawImageRect(DlImage::Make(image), *sourceRect, *destRect,
                         samplingOptionsForQuality(quality), paint,
                         DlSrcRectConstraint::kFast);
 }
 
 SKWASM_EXPORT void canvas_drawImageNine(DisplayListBuilder* canvas,
-                                        DlImage* image,
+                                        SkImage* image,
                                         DlIRect* centerRect,
                                         DlRect* destinationRect,
                                         DlPaint* paint,
                                         FilterQuality quality) {
-  canvas->DrawImageNine(sk_ref_sp(image), *centerRect, *destinationRect,
+  canvas->DrawImageNine(DlImage::Make(image), *centerRect, *destinationRect,
                         filterModeForQuality(quality), paint);
 }
 
@@ -278,7 +278,7 @@ SKWASM_EXPORT void canvas_drawPoints(DisplayListBuilder* canvas,
 }
 
 SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
-                                    DlImage* atlas,
+                                    SkImage* atlas,
                                     DlRSTransform* transforms,
                                     DlRect* rects,
                                     uint32_t* colors,
@@ -292,8 +292,8 @@ SKWASM_EXPORT void canvas_drawAtlas(DisplayListBuilder* canvas,
   }
   // TODO(jacksongardner): Check on the sampling quality. Is this passed in?
   canvas->DrawAtlas(
-      sk_ref_sp(atlas), transforms, rects, dlColors.data(), spriteCount, mode,
-      samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
+      DlImage::Make(atlas), transforms, rects, dlColors.data(), spriteCount,
+      mode, samplingOptionsForQuality(FilterQuality::medium), cullRect, paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(DisplayListBuilder* canvas,

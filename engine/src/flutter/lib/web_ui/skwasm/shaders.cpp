@@ -170,7 +170,7 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createRuntimeEffectShader(
 }
 
 SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
-    DlImage* image,
+    SkImage* image,
     DlTileMode tileModeX,
     DlTileMode tileModeY,
     FilterQuality quality,
@@ -179,11 +179,11 @@ SKWASM_EXPORT sp_wrapper<DlColorSource>* shader_createFromImage(
   if (matrix33) {
     auto localMatrix = createDlMatrixFrom3x3(matrix33);
     return new sp_wrapper<DlColorSource>(DlColorSource::MakeImage(
-        sk_ref_sp(image), tileModeX, tileModeY,
+        DlImage::Make(image), tileModeX, tileModeY,
         samplingOptionsForQuality(quality), &localMatrix));
   } else {
     return new sp_wrapper<DlColorSource>(
-        DlColorSource::MakeImage(sk_ref_sp(image), tileModeX, tileModeY,
+        DlColorSource::MakeImage(DlImage::Make(image), tileModeX, tileModeY,
                                  samplingOptionsForQuality(quality)));
   }
 }
