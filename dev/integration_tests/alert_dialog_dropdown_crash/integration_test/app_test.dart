@@ -33,7 +33,7 @@ void main() {
 
       // The fact that we reach this point without crashing means our fix works!
       print('SUCCESS: DropdownButton in AlertDialog opened without crash!');
-      print('The computeDryBaseline implementation in RenderShiftedBox has fixed the issue 169214.');
+      print('The computeDryBaseline implementation in RenderAligningShiftedBox has fixed the issue 169214.');
     });
   });
 }
