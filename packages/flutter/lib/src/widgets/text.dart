@@ -389,7 +389,11 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// Container(
 ///   width: 100,
 ///   decoration: BoxDecoration(border: Border.all()),
-///   child: Text(overflow: TextOverflow.ellipsis, 'Hello $_name, how are you?'))
+///   child: Text(
+///     'Hello, how are you?',
+///     overflow: TextOverflow.ellipsis,
+///   ),
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -403,9 +407,10 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///
 /// ```dart
 /// Text(
+///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   maxLines: 1,
-///   'Hello $_name, how are you?')
+/// )
 /// ```
 ///
 /// Here soft wrapping is enabled and the [Text] widget tries to wrap the words
@@ -417,9 +422,10 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///
 /// ```dart
 /// Text(
+///   'Hello $_name, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   softWrap: false,
-///   'Hello $_name, how are you?')
+/// )
 /// ```
 ///
 /// Here soft wrapping is disabled with `softWrap: false` and the [Text] widget
