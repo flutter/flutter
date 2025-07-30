@@ -537,7 +537,7 @@ void main() {
   });
 
   group('optionsViewOpenDirection', () {
-    testWidgets('default (down)', (WidgetTester tester) async {
+    testWidgets('default (auto)', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -550,7 +550,7 @@ void main() {
       final OptionsViewOpenDirection actual = tester
           .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
           .optionsViewOpenDirection;
-      expect(actual, equals(OptionsViewOpenDirection.down));
+      expect(actual, equals(OptionsViewOpenDirection.auto));
     });
 
     testWidgets('down', (WidgetTester tester) async {
@@ -558,8 +558,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection:
-                  OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection: OptionsViewOpenDirection.down,
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
             ),
           ),
