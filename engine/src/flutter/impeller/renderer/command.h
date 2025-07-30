@@ -118,7 +118,7 @@ struct Command {
   /// scissor rect must lie entirely within the render target.
   /// If unset, no scissor is applied.
   ///
-  std::optional<IRect> scissor;
+  std::optional<IRect32> scissor;
   //----------------------------------------------------------------------------
   /// The number of instances of the given set of vertices to render. Not all
   /// backends support rendering more than one instance at a time.
