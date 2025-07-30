@@ -448,6 +448,16 @@ void main() {
             tester.getTopLeft(find.byKey(optionsKey)),
             Offset(padding, bottomOfField - optionsSize.height),
           );
+        case OptionsViewOpenDirection.auto:
+          // Behaves like OptionsViewOpenDirection.up.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double topOfField = tester.getTopLeft(find.byKey(fieldKey)).dy;
+          expect(
+            tester.getTopLeft(find.byType(InkWell).first),
+            Offset(padding, topOfField - 3 * optionHeight),
+          );
+          expect(tester.getBottomLeft(find.byType(InkWell).at(2)), Offset(padding, topOfField));
       }
 
       setState(() {
@@ -470,6 +480,16 @@ void main() {
           expect(tester.getBottomLeft(find.byKey(optionsKey)), Offset(padding, optionsSize.height));
         case OptionsViewOpenDirection.down:
           // Options are positioned and sized like normal.
+          expect(find.byType(InkWell), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
+          expect(tester.getTopLeft(find.byType(InkWell).first), Offset(padding, bottomOfField));
+          expect(
+            tester.getBottomLeft(find.byType(InkWell).at(2)),
+            Offset(padding, bottomOfField + 3 * optionHeight),
+          );
+        case OptionsViewOpenDirection.auto:
+          // Behaves like OptionsViewOpenDirection.down.
           expect(find.byType(InkWell), findsNWidgets(3));
           final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
           final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
@@ -610,6 +630,8 @@ void main() {
           tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
         OptionsViewOpenDirection.up =>
           tester.getTopLeft(find.byKey(fieldKey)).dy - optionsBox.size.height,
+        OptionsViewOpenDirection.auto =>
+          tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
       });
     });
   }
@@ -913,8 +935,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
-                optionsViewOpenDirection:
-                    OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                optionsViewOpenDirection: OptionsViewOpenDirection.down,
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                 fieldViewBuilder:
                     (
@@ -1002,8 +1023,7 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
-                    optionsViewOpenDirection:
-                        OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+                    optionsViewOpenDirection: OptionsViewOpenDirection.down,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                     optionsViewBuilder:
                         (
