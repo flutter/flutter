@@ -66,6 +66,7 @@
 (?i)^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
 ^third_party/vulkan-deps/spirv-headers/.*
 ^third_party/vulkan-deps/vulkan-loader/.*
+^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*
