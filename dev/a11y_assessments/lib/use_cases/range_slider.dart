@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class SliderUseCase extends UseCase {
-  SliderUseCase() : super(useCaseCategory: UseCaseCategory.core);
+class RangeSliderUseCase extends UseCase {
+  RangeSliderUseCase() : super(useCaseCategory: UseCaseCategory.additional);
 
   @override
-  String get name => 'Slider';
+  String get name => 'RangeSlider';
 
   @override
-  String get route => '/slider';
+  String get route => '/range-slider';
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -27,32 +27,31 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  double currentSliderValue = 20;
-  static const String accessibilityLabel = 'Accessibility Test Slider';
+  RangeValues _currentRangeValues = const RangeValues(20, 60);
 
-  String pageTitle = getUseCaseName(SliderUseCase());
+  String pageTitle = getUseCaseName(RangeSliderUseCase());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Center(
-        child: Semantics(
-          label: accessibilityLabel,
-          child: Slider(
-            value: currentSliderValue,
-            max: 100,
-            divisions: 5,
-            label: currentSliderValue.round().toString(),
-            onChanged: (double value) {
-              setState(() {
-                currentSliderValue = value;
-              });
-            },
+        child: RangeSlider(
+          values: _currentRangeValues,
+          max: 100,
+          divisions: 5,
+          labels: RangeLabels(
+            _currentRangeValues.start.round().toString(),
+            _currentRangeValues.end.round().toString(),
           ),
+          onChanged: (RangeValues values) {
+            setState(() {
+              _currentRangeValues = values;
+            });
+          },
         ),
       ),
     );
