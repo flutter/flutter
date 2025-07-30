@@ -593,6 +593,80 @@ void main() {
       await tester.pump();
       expect(find.text('aa').hitTestable(), findsOneWidget);
     });
+
+    testWidgets('auto: open in the direction with more space', (WidgetTester tester) async {
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late StateSetter setState;
+      Alignment alignment = Alignment.topCenter;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Align(
+                  alignment: alignment,
+                  child: Autocomplete<String>(
+                    optionsViewOpenDirection: OptionsViewOpenDirection.auto,
+                    // ignore: avoid_redundant_argument_values
+                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
+                        ) {
+                          return TextField(
+                            key: fieldKey,
+                            controller: controller,
+                            focusNode: focusNode,
+                          );
+                        },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Show the options. It should open downwards since there is more space.
+      await tester.tap(find.byKey(fieldKey));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the bottom.
+      setState(() {
+        alignment = Alignment.bottomCenter;
+      });
+      await tester.pumpAndSettle();
+
+      // The options should now open upwards, since there is more space above.
+      expect(
+        tester.getTopLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
+      );
+    });
   });
 
   testWidgets('can jump to options that are not yet built', (WidgetTester tester) async {
