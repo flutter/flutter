@@ -1501,7 +1501,7 @@ class _RenderTheater extends RenderBox
     while (child != null) {
       visitor(child);
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-      print('child run time type: ${child.runtimeType}}');
+
       childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
@@ -2005,10 +2005,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
     return _OverlayPortal(
       overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
       overlayChild: _DeferredLayout(
-        child: Semantics(
-          identifier: childIdentifier,
-          child: Builder(builder: widget.overlayChildBuilder),
-        ),
+        childIdentifier: childIdentifier,
+        child: Builder(builder: widget.overlayChildBuilder),
       ),
       child: Semantics(identifier: parentIdentifier, child: widget.child),
     );
@@ -2373,7 +2371,10 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
     required Widget child,
+    this.childIdentifier,
   }) : super(child: child);
+
+  final String? childIdentifier;
 
   _RenderLayoutSurrogateProxyBox getLayoutParent(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderLayoutSurrogateProxyBox>()!;
@@ -2382,7 +2383,7 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   @override
   _RenderDeferredLayoutBox createRenderObject(BuildContext context) {
     final _RenderLayoutSurrogateProxyBox parent = getLayoutParent(context);
-    final _RenderDeferredLayoutBox renderObject = _RenderDeferredLayoutBox(parent);
+    final _RenderDeferredLayoutBox renderObject = _RenderDeferredLayoutBox(parent, childIdentifier);
     parent._deferredLayoutChild = renderObject;
     return renderObject;
   }
@@ -2391,6 +2392,7 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDeferredLayoutBox renderObject) {
     assert(renderObject._layoutSurrogate == getLayoutParent(context));
     assert(getLayoutParent(context)._deferredLayoutChild == renderObject);
+    renderObject.childIdentifier = childIdentifier;
   }
 }
 
@@ -2416,10 +2418,20 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //  like an `Overlay` that has only one entry.
 final class _RenderDeferredLayoutBox extends RenderProxyBox
     with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
-  _RenderDeferredLayoutBox(this._layoutSurrogate);
+  _RenderDeferredLayoutBox(this._layoutSurrogate, String? childIdentifier)
+    : _childIdentifier = childIdentifier;
 
   StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
+
+  String? get childIdentifier => _childIdentifier;
+  String? _childIdentifier;
+  set childIdentifier(String? value) {
+    if (_childIdentifier == childIdentifier) {
+      return;
+    }
+    _childIdentifier = value;
+  }
 
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
@@ -2552,6 +2564,14 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       return true;
     }());
     _needsLayout = false;
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    if (childIdentifier != null) {
+      config.identifier = childIdentifier!;
+    }
   }
 
   @override
