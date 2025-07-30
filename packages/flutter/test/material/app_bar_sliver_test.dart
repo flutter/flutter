@@ -112,6 +112,70 @@ void main() {
     expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
 
+  testWidgets(
+    'SliverAppBar does not draw menu for end drawer if automaticallyImplyActions is false and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(automaticallyImplyActions: false),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'SliverAppBar draws menu for end drawer if automaticallyImplyActions is true (default) and actions is null',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'SliverAppBar does not draw menu for end drawer if automaticallyImplyActions is true (default) but actions are explicitly provided',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            endDrawer: const Drawer(),
+            body: CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                const SliverAppBar(actions: <Widget>[Icon(Icons.settings)]),
+                SliverToBoxAdapter(child: Container(height: 1200, color: Colors.orange[400])),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    },
+  );
+
   testWidgets('SliverAppBar.medium with bottom widget', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/115091
     const double collapsedAppBarHeight = 64;

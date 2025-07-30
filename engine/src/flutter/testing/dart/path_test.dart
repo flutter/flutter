@@ -256,7 +256,7 @@ void main() {
     );
   });
 
-  test('RSuperellipse path is correct for a slim diagnal shape', () {
+  test('RSuperellipse path is correct for a slim diagonal shape', () {
     // This test mirrors a similar test from "geometry_test.dart" and serves as
     // a smoke test.
     final RSuperellipse rsuperellipse = RSuperellipse.fromLTRBAndCorners(
@@ -284,18 +284,18 @@ void main() {
     checkPointWithOffset(path, const Offset(49.70, 49.70), const Offset(0.02, 0.02));
 
     // Checks two points symmetrical to the origin.
-    void checkDiagnalPoints(Offset p) {
+    void checkDiagonalPoints(Offset p) {
       checkPointWithOffset(path, p, const Offset(0.02, -0.02));
       checkPointWithOffset(path, Offset(-p.dx, -p.dy), const Offset(-0.02, 0.02));
     }
 
     // A few other points along the edge
-    checkDiagnalPoints(const Offset(-40.0, -49.59));
-    checkDiagnalPoints(const Offset(-20.0, -45.64));
-    checkDiagnalPoints(const Offset(0.0, -37.01));
-    checkDiagnalPoints(const Offset(20.0, -21.96));
-    checkDiagnalPoints(const Offset(21.05, -20.92));
-    checkDiagnalPoints(const Offset(40.0, 5.68));
+    checkDiagonalPoints(const Offset(-40.0, -49.59));
+    checkDiagonalPoints(const Offset(-20.0, -45.64));
+    checkDiagonalPoints(const Offset(0.0, -37.01));
+    checkDiagonalPoints(const Offset(20.0, -21.96));
+    checkDiagonalPoints(const Offset(21.05, -20.92));
+    checkDiagonalPoints(const Offset(40.0, 5.68));
   });
 }
 

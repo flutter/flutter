@@ -12,16 +12,15 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 
-const String _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
-const String _chooseOneMessage = 'Please choose one (or "q" to quit)';
-const String _connectedDevicesMessage = 'Connected devices:';
-const String _foundButUnsupportedDevicesMessage =
+const _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
+const _chooseOneMessage = 'Please choose one (or "q" to quit)';
+const _connectedDevicesMessage = 'Connected devices:';
+const _foundButUnsupportedDevicesMessage =
     'The following devices were found, but are not supported by this project:';
-const String _noAttachedCheckForWirelessMessage =
-    'No devices found yet. Checking for wireless devices...';
-const String _noDevicesFoundMessage = 'No devices found.';
-const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
-const String _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
+const _noAttachedCheckForWirelessMessage = 'No devices found yet. Checking for wireless devices...';
+const _noDevicesFoundMessage = 'No devices found.';
+const _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
+const _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
 
 String _chooseDeviceOptionMessage(int option, String name, String deviceId) =>
     '[$option]: $name ($deviceId)';
@@ -253,8 +252,8 @@ class TargetDevices {
     List<Device> attachedDevices,
     List<Device> wirelessDevices,
   ) async {
-    List<Device> supportedAttachedDevices = attachedDevices;
-    List<Device> supportedWirelessDevices = wirelessDevices;
+    var supportedAttachedDevices = attachedDevices;
+    var supportedWirelessDevices = wirelessDevices;
     if (_deviceManager.hasSpecifiedDeviceId) {
       final int allDeviceLength = supportedAttachedDevices.length + supportedWirelessDevices.length;
       _logger.printStatus(
@@ -323,7 +322,7 @@ class TargetDevices {
 
   Future<void> _printUnsupportedDevice(List<Device> unsupportedDevices) async {
     if (unsupportedDevices.isNotEmpty) {
-      final StringBuffer result = StringBuffer();
+      final result = StringBuffer();
       result.writeln();
       result.writeln(_foundButUnsupportedDevicesMessage);
       result.writeAll(
@@ -350,8 +349,8 @@ class TargetDevices {
   }
 
   void _displayDeviceOptions(List<Device> devices) {
-    int count = 1;
-    for (final Device device in devices) {
+    var count = 1;
+    for (final device in devices) {
       _logger.printStatus(_chooseDeviceOptionMessage(count, device.displayName, device.id));
       count++;
     }
@@ -380,10 +379,10 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   Future<void>? _wirelessDevicesRefresh;
 
   @visibleForTesting
-  bool waitForWirelessBeforeInput = false;
+  var waitForWirelessBeforeInput = false;
 
   @visibleForTesting
-  late final TargetDeviceSelection deviceSelection = TargetDeviceSelection(_logger);
+  late final deviceSelection = TargetDeviceSelection(_logger);
 
   @override
   void startExtendedWirelessDeviceDiscovery({Duration? deviceDiscoveryTimeout}) {
@@ -745,9 +744,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 class TargetDeviceSelection {
   TargetDeviceSelection(this._logger);
 
-  List<Device> devices = <Device>[];
+  var devices = <Device>[];
   final Logger _logger;
-  int invalidAttempts = 0;
+  var invalidAttempts = 0;
 
   /// Prompt user to select a device and wait until they select a valid device.
   ///
@@ -776,7 +775,7 @@ class TargetDeviceSelection {
   /// Only allow input of a number or `q`.
   @visibleForTesting
   Future<String> readUserInput() async {
-    final RegExp pattern = RegExp(r'\d+$|q', caseSensitive: false);
+    final pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
     globals.terminal.singleCharMode = true;
     while (choice == null || choice.length > 1 || !pattern.hasMatch(choice)) {

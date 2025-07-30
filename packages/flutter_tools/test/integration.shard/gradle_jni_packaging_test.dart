@@ -57,7 +57,7 @@ void main() {
       (Match match) {
         final String before = match.group(1)!;
         final String body = match.group(2)!;
-        const String ndkBlock = '''
+        const ndkBlock = '''
                 ndk {
                     abiFilters.clear()
                     abiFilters.addAll(listOf("arm64-v8a"))
@@ -125,7 +125,7 @@ bool _checkLibIsInApk(
   }
 
   final String fileContent = localPropertiesFile.readAsStringSync();
-  final RegExp regex = RegExp(r'sdk\.dir=(.+)');
+  final regex = RegExp(r'sdk\.dir=(.+)');
   final Match? match = regex.firstMatch(fileContent);
   final String sdkPath = match?.group(1) ?? '';
 

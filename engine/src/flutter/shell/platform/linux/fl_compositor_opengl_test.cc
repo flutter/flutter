@@ -34,14 +34,13 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};
@@ -63,8 +62,6 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   }).detach();
 
   g_main_loop_run(loop);
-
-  fl_compositor_opengl_render(compositor, kWidth, kHeight);
 
   GLuint texture_2d_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
@@ -95,14 +92,13 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};
@@ -121,8 +117,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   }).detach();
 
   g_main_loop_run(loop);
-
-  fl_compositor_opengl_render(compositor, kWidth, kHeight);
 
   latch.Wait();
 }
@@ -151,14 +145,13 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};
@@ -178,7 +171,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   g_main_loop_run(loop);
 
-  fl_compositor_opengl_render(compositor, kWidth, kHeight);
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
@@ -201,14 +193,13 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};
@@ -227,8 +218,6 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   }).detach();
 
   g_main_loop_run(loop);
-
-  fl_compositor_opengl_render(compositor, kWidth, kHeight);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
@@ -253,14 +242,13 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};
@@ -279,8 +267,6 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   }).detach();
 
   g_main_loop_run(loop);
-
-  fl_compositor_opengl_render(compositor, kWidth, kHeight);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
@@ -306,16 +292,15 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, nullptr);
+      fl_compositor_opengl_new(engine, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
                      1.0, nullptr, nullptr, nullptr);
-  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   fml::AutoResetWaitableEvent latch;
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, kWidth, kHeight);
+      fl_framebuffer_new(GL_RGB, kWidth, kHeight, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {.framebuffer = {.user_data = framebuffer}}};

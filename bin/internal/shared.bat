@@ -13,6 +13,12 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
+REM Ensure we are runnng on 64-bit windows (32-bit is not supported)
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
+  ECHO Flutter requires 64-bit versions of Windows
+  EXIT 1
+)
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot

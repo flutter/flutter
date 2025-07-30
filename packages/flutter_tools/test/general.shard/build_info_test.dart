@@ -222,7 +222,7 @@ void main() {
   });
 
   testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: true,
@@ -260,7 +260,7 @@ void main() {
   });
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       'strawberry',
       treeShakeIcons: true,
@@ -293,7 +293,7 @@ void main() {
   });
 
   testWithoutContext('toGradleConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(
+    const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
       treeShakeIcons: true,

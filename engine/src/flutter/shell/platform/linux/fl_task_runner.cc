@@ -28,12 +28,6 @@ typedef struct _FlTaskRunnerTask {
   // flutter task to execute if schedule through
   // fl_task_runner_post_flutter_task.
   FlutterTask task;
-
-  // callback to execute if scheduled through fl_task_runner_post_callback.
-  void (*callback)(gpointer data);
-
-  // data for the callback.
-  gpointer callback_data;
 } FlTaskRunnerTask;
 
 G_DEFINE_TYPE(FlTaskRunner, fl_task_runner, G_TYPE_OBJECT)
@@ -65,11 +59,7 @@ static void fl_task_runner_process_expired_tasks_locked(FlTaskRunner* self) {
     l = expired_tasks;
     while (l != nullptr) {
       FlTaskRunnerTask* task = static_cast<FlTaskRunnerTask*>(l->data);
-      if (task->callback != nullptr) {
-        task->callback(task->callback_data);
-      } else {
-        fl_engine_execute_task(engine, &task->task);
-      }
+      fl_engine_execute_task(engine, &task->task);
       l = l->next;
     }
   }
@@ -181,20 +171,6 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* self,
   runner_task->task = task;
   runner_task->task_time_micros =
       target_time_nanos / kMicrosecondsPerNanosecond;
-
-  self->pending_tasks = g_list_append(self->pending_tasks, runner_task);
-  fl_task_runner_tasks_did_change_locked(self);
-}
-
-void fl_task_runner_post_callback(FlTaskRunner* self,
-                                  void (*callback)(gpointer data),
-                                  gpointer data) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
-  (void)locker;  // unused variable
-
-  FlTaskRunnerTask* runner_task = g_new0(FlTaskRunnerTask, 1);
-  runner_task->callback = callback;
-  runner_task->callback_data = data;
 
   self->pending_tasks = g_list_append(self->pending_tasks, runner_task);
   fl_task_runner_tasks_did_change_locked(self);

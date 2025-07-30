@@ -36,7 +36,7 @@ class ProtocolDiscovery {
     required bool ipv6,
     required Logger logger,
   }) {
-    const String kVmServiceService = 'VM Service';
+    const kVmServiceService = 'VM Service';
     return ProtocolDiscovery._(
       logReader,
       kVmServiceService,
@@ -61,7 +61,7 @@ class ProtocolDiscovery {
   final Duration throttleDuration;
 
   StreamSubscription<String>? _deviceLogSubscription;
-  final _BufferedStreamController<Uri> _uriStreamController = _BufferedStreamController<Uri>();
+  final _uriStreamController = _BufferedStreamController<Uri>();
 
   /// The discovered service URL.
   ///
@@ -130,7 +130,7 @@ class ProtocolDiscovery {
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
     _logger.printTrace('$serviceName URL on device: $deviceUri');
-    Uri hostUri = deviceUri;
+    var hostUri = deviceUri;
 
     final DevicePortForwarder? forwarder = portForwarder;
     if (forwarder != null) {
@@ -161,7 +161,7 @@ class _BufferedStreamController<T extends Object> {
   }
 
   late final StreamController<T> _streamController = () {
-    final StreamController<T> streamControllerInstance = StreamController<T>.broadcast();
+    final streamControllerInstance = StreamController<T>.broadcast();
     streamControllerInstance.onListen = () {
       for (final Object event in _events) {
         if (event is T) {
@@ -214,13 +214,13 @@ StreamTransformer<S, S> _throttle<S>({required Duration waitDuration}) {
   S latestLine;
   int? lastExecution;
   Future<void>? throttleFuture;
-  bool done = false;
+  var done = false;
 
   return StreamTransformer<S, S>.fromHandlers(
     handleData: (S value, EventSink<S> sink) {
       latestLine = value;
 
-      final bool isFirstMessage = lastExecution == null;
+      final isFirstMessage = lastExecution == null;
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
       lastExecution ??= currentTime;
       final int remainingTime = currentTime - lastExecution!;

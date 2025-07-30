@@ -17,7 +17,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
-import 'dtd_services.dart';
+import 'dtd/dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
@@ -726,7 +726,6 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     // actually located in the parent project, meaning their paths did not need
     // to be modified.
     if (key == 'AssetManifest.bin' ||
-        key == 'AssetManifest.json' ||
         key == 'FontManifest.json' ||
         key.startsWith(_kPackagesPrefix) ||
         packageName == null) {

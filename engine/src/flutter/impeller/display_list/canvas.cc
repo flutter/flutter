@@ -1204,20 +1204,26 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
     return std::nullopt;
   }
 
-  auto maybe_current_clip_coverage = clip_coverage_stack_.CurrentClipCoverage();
+  std::optional<Rect> maybe_current_clip_coverage =
+      clip_coverage_stack_.CurrentClipCoverage();
   if (!maybe_current_clip_coverage.has_value()) {
     return std::nullopt;
   }
 
-  auto current_clip_coverage = maybe_current_clip_coverage.value();
+  Rect current_clip_coverage = maybe_current_clip_coverage.value();
+
+  FML_CHECK(!render_passes_.empty());
+  const LazyRenderingConfig& back_render_pass = render_passes_.back();
+  std::shared_ptr<Texture> back_texture =
+      back_render_pass.inline_pass_context->GetTexture();
+  FML_CHECK(back_texture) << "Context is valid:"
+                          << back_render_pass.inline_pass_context->IsValid();
 
   // The maximum coverage of the subpass. Subpasses textures should never
   // extend outside the parent pass texture or the current clip coverage.
   std::optional<Rect> maybe_coverage_limit =
       Rect::MakeOriginSize(GetGlobalPassPosition(),
-                           Size(render_passes_.back()
-                                    .inline_pass_context->GetTexture()
-                                    ->GetSize()))
+                           Size(back_texture->GetSize()))
           .Intersection(current_clip_coverage);
 
   if (!maybe_coverage_limit.has_value() || maybe_coverage_limit->IsEmpty()) {

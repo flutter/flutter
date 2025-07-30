@@ -29,7 +29,7 @@ Analytics getAnalytics({
   FakeAnalytics? analyticsOverride,
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
-  final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
   if ( // Ignore local user branches.
   version.startsWith('[user-branch]') ||

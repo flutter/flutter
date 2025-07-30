@@ -53,7 +53,7 @@ environement:
   testUsingContext(
     'WebBuilder sets environment on success',
     () async {
-      final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+      final buildSystem = TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
       ) {
@@ -72,7 +72,7 @@ environement:
         expect(environment.generateDartPluginRegistry, isFalse);
       });
 
-      final WebBuilder webBuilder = WebBuilder(
+      final webBuilder = WebBuilder(
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
@@ -129,7 +129,7 @@ environement:
   testUsingContext(
     'WebBuilder throws tool exit on failure',
     () async {
-      final TestBuildSystem buildSystem = TestBuildSystem.all(
+      final buildSystem = TestBuildSystem.all(
         BuildResult(
           success: false,
           exceptions: <String, ExceptionMeasurement>{
@@ -142,7 +142,7 @@ environement:
         ),
       );
 
-      final WebBuilder webBuilder = WebBuilder(
+      final webBuilder = WebBuilder(
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
@@ -183,10 +183,7 @@ environement:
     testUsingContext(
       'WebRendererMode.${webRenderer.name} can be initialized from dart defines',
       () {
-        final WebRendererMode computed = WebRendererMode.fromDartDefines(
-          webRenderer.dartDefines,
-          useWasm: true,
-        );
+        final computed = WebRendererMode.fromDartDefines(webRenderer.dartDefines, useWasm: true);
 
         expect(computed, webRenderer);
       },
@@ -199,7 +196,7 @@ environement:
   testUsingContext(
     'WebRendererMode.fromDartDefines sets a wasm-aware default for unknown dart defines.',
     () async {
-      WebRendererMode computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: false);
+      var computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: false);
       expect(computed, WebRendererMode.getDefault(useWasm: false));
 
       computed = WebRendererMode.fromDartDefines(<String>{}, useWasm: true);

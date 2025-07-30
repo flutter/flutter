@@ -86,7 +86,7 @@ Future<T> asyncGuard<T>(Future<T> Function() fn, {Function? onError}) {
       'StackTrace. onError must return a T',
     );
   }
-  final Completer<T> completer = Completer<T>();
+  final completer = Completer<T>();
 
   void handleError(Object e, StackTrace s) {
     if (completer.isCompleted) {

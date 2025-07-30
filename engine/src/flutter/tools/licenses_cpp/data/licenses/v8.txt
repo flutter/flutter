@@ -1,6 +1,6 @@
 v8
-^Copyright .*, the V8 project authors
-Copyright \d+(?:-\d+)?, the V8 project authors. All rights reserved.
+^Copyright .*,? the V8 project authors.*
+Copyright \d+(?:-\d+)?,? the V8 project authors.*
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:

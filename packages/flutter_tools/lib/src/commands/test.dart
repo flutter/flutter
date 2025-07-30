@@ -31,7 +31,7 @@ import '../web/web_constants.dart';
 /// When there are test files specified for the test command that are part of
 /// this directory, *relative to the package root*, the files will be executed
 /// as Integration Tests.
-const String _kIntegrationTestDirectory = 'integration_test';
+const _kIntegrationTestDirectory = 'integration_test';
 
 /// A command to run tests.
 ///
@@ -303,9 +303,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   @visibleForTesting
   bool get isIntegrationTest => _isIntegrationTest;
-  bool _isIntegrationTest = false;
+  var _isIntegrationTest = false;
 
-  final Set<Uri> _testFileUris = <Uri>{};
+  final _testFileUris = <Uri>{};
 
   bool get isWeb => stringArg('platform') == 'chrome';
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
@@ -349,7 +349,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         );
       }
     } else {
-      for (final Uri uri in testUris) {
+      for (final uri in testUris) {
         // Test files may have query strings to support name/line/col:
         //     flutter test test/foo.dart?name=a&line=1
         String testPath = uri.replace(query: '').toFilePath();
@@ -450,7 +450,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+    final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
       disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
@@ -721,7 +721,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final Set<String> packagesToInclude = <String>{};
+    final packagesToInclude = <String>{};
     if (packagesRegExps.isEmpty) {
       void addProject(FlutterProject project) {
         packagesToInclude.add(project.manifest.appName);
@@ -731,8 +731,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       addProject(flutterProject);
     }
     try {
-      for (final String regExpStr in packagesRegExps) {
-        final RegExp regExp = RegExp(regExpStr);
+      for (final regExpStr in packagesRegExps) {
+        final regExp = RegExp(regExpStr);
         packagesToInclude.addAll(
           packageConfig.packages.map((Package e) => e.name).where((String e) => regExp.hasMatch(e)),
         );
@@ -820,7 +820,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final Iterable<DevFSFileContent> files = entries.values
         .map((AssetBundleEntry asset) => asset.content)
         .whereType<DevFSFileContent>();
-    for (final DevFSFileContent entry in files) {
+    for (final entry in files) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

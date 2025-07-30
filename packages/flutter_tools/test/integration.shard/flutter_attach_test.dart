@@ -15,7 +15,7 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 Future<int> getFreePort() async {
-  int port = 0;
+  var port = 0;
   final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
   port = serverSocket.port;
   await serverSocket.close();
@@ -23,7 +23,7 @@ Future<int> getFreePort() async {
 }
 
 void main() {
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
   late Directory tempDir;
 
   setUp(() async {
@@ -100,7 +100,7 @@ void main() {
       final Response response = await flutterRun.callServiceExtension(
         'ext.flutter.connectedVmServiceUri',
       );
-      final String vmServiceUri = response.json!['value'] as String;
+      final vmServiceUri = response.json!['value'] as String;
 
       // Attach with a different DevTools server address.
       await flutterAttach.attach(
@@ -146,7 +146,7 @@ void main() {
       final Response response = await flutterAttach.callServiceExtension(
         'ext.flutter.connectedVmServiceUri',
       );
-      final String vmServiceUriString = response.json!['value'] as String;
+      final vmServiceUriString = response.json!['value'] as String;
       final Uri vmServiceUri = Uri.parse(vmServiceUriString);
       expect(vmServiceUri.port, equals(ddsPort));
     });

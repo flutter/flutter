@@ -164,9 +164,9 @@ If you need to pin a particular version, edit the table at the top of the `updat
 To allow the tool to be used with a locally-built engine, the `flutter` tool accepts three
 global parameters:
 
-* `local-engine`, which specifies which build of the engine to run
-* `local-engine-host`, which specifies which build of the engine to use for host artifacts like the dart compiler
-* `local-engine-src-path` (optional), which specifies the path to your engine sources
+- `local-engine`, which specifies which build of the engine to run
+- `local-engine-host`, which specifies which build of the engine to use for host artifacts like the dart compiler
+- `local-engine-src-path` (optional), which specifies the path to your engine sources
 
 A typical invocation would be: `--local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
 
@@ -197,7 +197,7 @@ If you do this, you can omit `--local-engine-src-path` and not bother to set `$F
 the `flutter` tool will use these paths to determine the engine also! The tool tries really hard to
 figure out where your local build of the engine is if you specify `--local-engine`.
 
-Similar to the [dwds debugging workflow](https://github.com/dart-lang/webdev/blob/master/dwds/CONTRIBUTING.md#with-flutter-tools-recommended), the Flutter tool can also be debugged with DevTools by invoking the tool with `flutter/bin/dart --observe flutter/packages/flutter_tools/bin/flutter_tools.dart` and then using the **first** DevTools URL that is printed to the console.
+Similar to the [dwds debugging workflow](https://github.com/dart-lang/webdev/blob/main/dwds/CONTRIBUTING.md#with-flutter-tools-recommended), the Flutter tool can also be debugged with DevTools by invoking the tool with `flutter/bin/dart --observe flutter/packages/flutter_tools/bin/flutter_tools.dart` and then using the **first** DevTools URL that is printed to the console.
 
 ## Adding dependencies to the Flutter Tool
 

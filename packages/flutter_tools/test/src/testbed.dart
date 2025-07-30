@@ -30,7 +30,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 // A default value should be provided if the vast majority of tests should use
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
-final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
+final _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(
     style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
@@ -101,7 +101,7 @@ class TestBed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
-    final Map<Type, Generator> testOverrides = <Type, Generator>{
+    final testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
       ...?_overrides,
@@ -114,7 +114,7 @@ class TestBed {
     // Cache the original flutter root to restore after the test case.
     final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
-    final Map<Timer, StackTrace> timers = <Timer, StackTrace>{};
+    final timers = <Timer, StackTrace>{};
 
     return HttpOverrides.runZoned(() {
       return runInContext<T?>(() {

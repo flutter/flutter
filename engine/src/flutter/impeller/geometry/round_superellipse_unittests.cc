@@ -698,9 +698,9 @@ TEST(RoundSuperellipseTest, UniformRectangularContains) {
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest, SlimDiagnalContains) {
-  // This shape has large radii on one diagnal and tiny radii on the other,
-  // resulting in a almond-like shape placed diagnally (NW to SE).
+TEST(RoundSuperellipseTest, SlimDiagonalContains) {
+  // This shape has large radii on one diagonal and tiny radii on the other,
+  // resulting in a almond-like shape placed diagonally (NW to SE).
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, {
@@ -721,17 +721,17 @@ TEST(RoundSuperellipseTest, SlimDiagnalContains) {
   CHECK_POINT_WITH_OFFSET(rr, Point(49.70, 49.70), Point(0.02, 0.02));
 
 // Checks two points symmetrical to the origin.
-#define CHECK_DIAGNAL_POINTS(p)                         \
+#define CHECK_DIAGONAL_POINTS(p)                        \
   CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, -0.02)); \
   CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, 0.02));
 
   // A few other points along the edge
-  CHECK_DIAGNAL_POINTS(Point(-40.0, -49.59));
-  CHECK_DIAGNAL_POINTS(Point(-20.0, -45.64));
-  CHECK_DIAGNAL_POINTS(Point(0.0, -37.01));
-  CHECK_DIAGNAL_POINTS(Point(20.0, -21.96));
-  CHECK_DIAGNAL_POINTS(Point(21.05, -20.92));
-  CHECK_DIAGNAL_POINTS(Point(40.0, 5.68));
+  CHECK_DIAGONAL_POINTS(Point(-40.0, -49.59));
+  CHECK_DIAGONAL_POINTS(Point(-20.0, -45.64));
+  CHECK_DIAGONAL_POINTS(Point(0.0, -37.01));
+  CHECK_DIAGONAL_POINTS(Point(20.0, -21.96));
+  CHECK_DIAGONAL_POINTS(Point(21.05, -20.92));
+  CHECK_DIAGONAL_POINTS(Point(40.0, 5.68));
 #undef CHECK_POINT_AND_MIRRORS
 }
 

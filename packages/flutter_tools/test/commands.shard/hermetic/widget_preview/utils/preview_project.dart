@@ -14,7 +14,7 @@ import '../../../../src/common.dart';
 
 typedef WidgetPreviewSourceFile = ({String path, String source});
 
-const String _kPubspec = 'pubspec.yaml';
+const _kPubspec = 'pubspec.yaml';
 
 class WidgetPreviewWorkspace {
   WidgetPreviewWorkspace({required this.workspaceRoot})
@@ -25,7 +25,7 @@ class WidgetPreviewWorkspace {
   final Directory _packagesRoot;
   final File _pubspecYaml;
 
-  final Map<String, WidgetPreviewProject> _packages = <String, WidgetPreviewProject>{};
+  final _packages = <String, WidgetPreviewProject>{};
 
   /// The absolute path to the workspace's pubspec.yaml.
   String get pubspecAbsolutePath => _pubspecYaml.absolute.path;
@@ -39,7 +39,7 @@ class WidgetPreviewWorkspace {
     if (_packages.containsKey(name)) {
       throw StateError('Project with name "$name" already exists.');
     }
-    final WidgetPreviewProject project = WidgetPreviewProject(
+    final project = WidgetPreviewProject(
       projectRoot: _packagesRoot.childDirectory(name)..createSync(),
       inWorkspace: true,
     );
@@ -58,7 +58,7 @@ class WidgetPreviewWorkspace {
   }
 
   void _updatePubspec() {
-    final StringBuffer pubspec = StringBuffer('workspace:\n');
+    final pubspec = StringBuffer('workspace:\n');
     for (final String package in _packages.keys) {
       pubspec.writeln('  - packages/$package');
     }
@@ -104,7 +104,7 @@ dependencies:
   final bool inWorkspace;
 
   Set<WidgetPreviewSourceFile> get currentSources => _currentSources.values.toSet();
-  final Map<String, WidgetPreviewSourceFile> _currentSources = <String, WidgetPreviewSourceFile>{};
+  final _currentSources = <String, WidgetPreviewSourceFile>{};
 
   Set<PreviewPath> get paths => _currentSources.keys.map(toPreviewPath).toSet();
 

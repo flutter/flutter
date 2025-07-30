@@ -15,17 +15,17 @@ import '../test_utils.dart' show flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
-const String packageName = 'package_with_native_assets';
+const packageName = 'package_with_native_assets';
 
 /// The AGP versions to run these tests against.
-final List<String> agpVersions = <String>['8.4.0'];
+final agpVersions = <String>['8.4.0'];
 
 /// The build modes to target for each flutter command that supports passing
 /// a build mode.
 ///
 /// The flow of compiling kernel as well as bundling dylibs can differ based on
 /// build mode, so we should cover this.
-const List<String> buildModes = <String>['debug', 'profile', 'release'];
+const buildModes = <String>['debug', 'profile', 'release'];
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -63,7 +63,7 @@ void main() {
             // Use expected AGP version.
             final String settingsGradle = settingsGradleFile.readAsStringSync();
 
-            final RegExp androidPluginRegExp = RegExp(
+            final androidPluginRegExp = RegExp(
               r'id\("com\.android\.application"\)\s+version\s+"([^"]+)"\s+apply\s+false',
             );
             expect(androidPluginRegExp.firstMatch(settingsGradle), isNotNull);
@@ -79,11 +79,11 @@ void main() {
               '\r\n',
               '\n',
             );
-            final RegExp buildTypesBlockRegExp = RegExp(
+            final buildTypesBlockRegExp = RegExp(
               r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}',
             );
             final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)![0]!;
-            final String appBuildGradleSegmentDefiningFlavors =
+            final appBuildGradleSegmentDefiningFlavors =
                 '''
     $buildTypesBlock
 

@@ -76,7 +76,7 @@ FakeCommand _eglinfoPresentCommand({
   bool core = true,
   bool es = true,
 }) {
-  String stdout = '''
+  var stdout = '''
 EGL client extensions string:
     EGL_EXT_client_extensions
 ''';
@@ -361,7 +361,7 @@ void main() {
   });
 
   testWithoutContext('Missing validation when pkg-config is missing', () async {
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),
@@ -393,7 +393,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -428,7 +428,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -463,7 +463,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -498,7 +498,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -533,7 +533,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -568,7 +568,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -603,7 +603,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -628,7 +628,7 @@ void main() {
       ..._gtkLibrariesPresentCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -653,7 +653,7 @@ void main() {
       ..._gtkLibrariesMissingCommands(),
       _eglinfoPresentCommand(),
     ]);
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
       processManager: processManager,
       userMessages: userMessages,
@@ -699,7 +699,7 @@ void main() {
   });
 
   testWithoutContext('Warning when eglinfo not available', () async {
-    final UserMessages userMessages = UserMessages();
+    final userMessages = UserMessages();
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       _clangPresentCommand('4.0.1'),
       _cmakePresentCommand('3.16.3'),

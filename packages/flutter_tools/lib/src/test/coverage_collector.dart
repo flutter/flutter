@@ -41,8 +41,8 @@ class CoverageCollector extends TestWatcher {
   Set<String>? libraryNames;
 
   final coverage.Resolver? resolver;
-  final Map<String, List<List<int>>?> _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
-  final Map<String, Set<int>> _coverableLineCache = <String, Set<int>>{};
+  final _ignoredLinesInFilesCache = <String, List<List<int>>?>{};
+  final _coverableLineCache = <String, Set<int>>{};
 
   final TestTimeRecorder? testTimeRecorder;
 
@@ -243,7 +243,7 @@ class CoverageCollector extends TestWatcher {
       ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    const String baseCoverageData = 'coverage/lcov.base.info';
+    const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
@@ -251,7 +251,7 @@ class CoverageCollector extends TestWatcher {
       }
 
       if (globals.os.which('lcov') == null) {
-        String installMessage = 'Please install lcov.';
+        var installMessage = 'Please install lcov.';
         if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
         } else if (globals.platform.isMacOS) {

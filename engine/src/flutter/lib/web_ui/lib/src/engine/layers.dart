@@ -324,8 +324,8 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
     return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
   }
 
@@ -338,7 +338,7 @@ class ClipRSuperellipseOperation implements LayerOperation {
   @override
   Map<String, Object> get debugJsonDescription {
     return <String, Object>{
-      'type': 'clipRSuperEllipse',
+      'type': 'clipRSuperellipse',
       'rsuperellipse': {
         'left': rsuperellipse.left,
         'top': rsuperellipse.top,

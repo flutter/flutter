@@ -344,6 +344,13 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   // This is registered as a global PointerRoute while the render object is attached.
   void _handleGlobalPointerEvent(PointerEvent event) {
+    // Don't receive pointer events if not laid out. For example, a RenderBox
+    // that is offscreen could be attached but not laid out, and in that case it
+    // should not be interactive with a pointer.
+    // See https://github.com/flutter/flutter/issues/83481.
+    if (!hasSize) {
+      return;
+    }
     if (event is! PointerDownEvent) {
       return;
     }

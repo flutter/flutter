@@ -10,7 +10,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 
 /// Placeholder for base href
-const String kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -157,7 +157,7 @@ String stripTrailingSlash(String path) {
   return path;
 }
 
-const String _kBasePathExample = '''
+const _kBasePathExample = '''
 For example, to serve from the root use:
 
     <base href="/">

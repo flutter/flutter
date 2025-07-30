@@ -672,6 +672,7 @@ class HtmlViewEmbedder {
       }
     }
     _svgClipDefs.clear();
+    _clipPathCount = 0;
   }
 
   static void removeElement(DomElement element) {
@@ -813,6 +814,12 @@ class MutatorsStack extends Iterable<Mutator> {
 
   void pushClipRRect(ui.RRect rrect) {
     _mutators.add(Mutator.clipRRect(rrect));
+  }
+
+  void pushClipRSuperellipse(ui.RSuperellipse rsuperellipse) {
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
+    pushClipRRect(rsuperellipse.toApproximateRRect());
   }
 
   void pushClipPath(ui.Path path) {

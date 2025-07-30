@@ -574,7 +574,7 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
   Directory get location => cache.getArtifactDirectory('fuchsia');
 
   Future<void> _doUpdate(ArtifactUpdater artifactUpdater) {
-    final String url = '${cache.cipdBaseUrl}/$_path/+/$version';
+    final url = '${cache.cipdBaseUrl}/$_path/+/$version';
     return artifactUpdater.downloadZipArchive(
       'Downloading package fuchsia SDK...',
       Uri.parse(url),
@@ -606,7 +606,10 @@ class FlutterRunnerSDKArtifacts extends CachedArtifact {
     if (!_platform.isLinux && !_platform.isMacOS) {
       return;
     }
-    final String url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
+    // Keep in sync with
+    //   engine/src/flutter/tools/fuchsia/build_fuchsia_artifacts.py
+    //   engine/src/flutter/tools/fuchsia/merge_and_upload_debug_symbols.py
+    final url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/content_aware_hash:$version';
     await artifactUpdater.downloadZipArchive(
       'Downloading package flutter runner...',
       Uri.parse(url),
@@ -633,7 +636,10 @@ class CipdArchiveResolver extends VersionedPackageResolver {
 
   @override
   String resolveUrl(String packageName, String version) {
-    return '${cache.cipdBaseUrl}/flutter/$packageName/+/git_revision:$version';
+    // Keep in sync with
+    //   engine/src/flutter/tools/fuchsia/build_fuchsia_artifacts.py
+    //   engine/src/flutter/tools/fuchsia/merge_and_upload_debug_symbols.py
+    return '${cache.cipdBaseUrl}/flutter/$packageName/+/content_aware_hash:$version';
   }
 }
 
@@ -657,7 +663,7 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
   String? get version => cache.engineRevision;
 
   Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
-    final String packageName = 'fuchsia-debug-symbols-$targetArch';
+    final packageName = 'fuchsia-debug-symbols-$targetArch';
     final String url = packageResolver.resolveUrl(packageName, version!);
     await artifactUpdater.downloadZipArchive(
       'Downloading debug symbols for flutter runner - arch:$targetArch...',
@@ -730,13 +736,13 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
   final Platform _platform;
 
-  static const String artifactName = 'font-subset';
+  static const artifactName = 'font-subset';
 
   @override
   List<List<String>> getBinaryDirs() {
     // Linux and Windows both support arm64 and x64.
     final String arch = cache.getHostPlatformArchName();
-    final Map<String, List<String>> artifacts = <String, List<String>>{
+    final artifacts = <String, List<String>>{
       'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
       'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
       'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],
@@ -767,7 +773,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   final Platform _platform;
 
-  static const List<String> artifactNames = <String>[
+  static const artifactNames = <String>[
     'libimobiledevice',
     'libusbmuxd',
     'libplist',
@@ -780,7 +786,7 @@ class IosUsbArtifacts extends CachedArtifact {
   // downloaded but some executables are missing from the zip. The names here are
   // used for additional download checks below, so we can re-download if they are
   // missing.
-  static const Map<String, List<String>> _kExecutables = <String, List<String>>{
+  static const _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>['idevicescreenshot', 'idevicesyslog'],
     'libusbmuxd': <String>['iproxy'],
   };
@@ -840,7 +846,7 @@ List<List<String>> _getWindowsDesktopBinaryDirs(String arch) {
   ];
 }
 
-const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
+const _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64', 'darwin-x64/framework.zip'],
   <String>['darwin-x64', 'darwin-x64/gen_snapshot.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/framework.zip'],
@@ -851,7 +857,7 @@ const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64-release', 'darwin-x64-release/gen_snapshot.zip'],
 ];
 
-const List<List<String>> _osxBinaryDirs = <List<String>>[
+const _osxBinaryDirs = <List<String>>[
   <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
   <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
@@ -860,7 +866,7 @@ const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-x64-release/darwin-x64', 'android-x64-release/darwin-x64.zip'],
 ];
 
-const List<List<String>> _linuxBinaryDirs = <List<String>>[
+const _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
@@ -869,7 +875,7 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
-const List<List<String>> _windowsBinaryDirs = <List<String>>[
+const _windowsBinaryDirs = <List<String>>[
   <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
   <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
@@ -878,13 +884,13 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-x64-release/windows-x64', 'android-x64-release/windows-x64.zip'],
 ];
 
-const List<List<String>> _iosBinaryDirs = <List<String>>[
+const _iosBinaryDirs = <List<String>>[
   <String>['ios', 'ios/artifacts.zip'],
   <String>['ios-profile', 'ios-profile/artifacts.zip'],
   <String>['ios-release', 'ios-release/artifacts.zip'],
 ];
 
-const List<List<String>> _androidBinaryDirs = <List<String>>[
+const _androidBinaryDirs = <List<String>>[
   <String>['android-x86', 'android-x86/artifacts.zip'],
   <String>['android-x64', 'android-x64/artifacts.zip'],
   <String>['android-arm', 'android-arm/artifacts.zip'],
@@ -897,7 +903,7 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-x64-release', 'android-x64-release/artifacts.zip'],
 ];
 
-const List<List<String>> _dartSdks = <List<String>>[
+const _dartSdks = <List<String>>[
   <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
   <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
   <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
