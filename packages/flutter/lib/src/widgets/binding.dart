@@ -461,7 +461,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = createWindowingOwner();
+    _windowingOwner = WindowingOwner.createDefaultOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1446,9 +1446,9 @@ mixin WidgetsBinding
   ///
   /// The default [WindowingOwner] supports macOS, Linux, and Windows.
   ///
-  /// A custom [WindowingOwner] can be provided by overriding [createWindowingOwner].
+  /// A custom [WindowingOwner] can be provided by the setter.
   ///
-  /// {@template flutter.widgets.windowing.experimental}
+  /// {@template flutter.widgets.binding.window.experimental}
   /// Do not use this API in production applications or packages published to
   /// pub.dev. Flutter will make breaking changes to this API, even in patch
   /// versions.
@@ -1477,16 +1477,33 @@ See: https://github.com/flutter/flutter/issues/30701.
     return _windowingOwner;
   }
 
-  late WindowingOwner _windowingOwner;
-
-  /// Creates the [WindowingOwner] instance available via [windowingOwner].
+  /// Sets the [WindowingOwner].
   ///
-  /// Can be overriden in subclasses to create embedder-specific [WindowingOwner]
-  /// implementation.
-  @protected
-  WindowingOwner createWindowingOwner() {
-    return WindowingOwner.createDefaultOwner();
+  /// The default [WindowingOwner] supports macOS, Linux, and Windows.
+  ///
+  /// This setter can be used to provide a custom [WindowingOwner].
+  ///
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
+  set windowingOwner(WindowingOwner owner) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError('''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''');
+    }
+    _windowingOwner = owner;
   }
+
+  late WindowingOwner _windowingOwner;
 }
 
 /// Inflate the given widget and attach it to the view.
