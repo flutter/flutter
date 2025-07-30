@@ -29,7 +29,7 @@ const firstLaunchMessagesWeb = <String>[
 const firstLaunchMessagesWebServer = <String>[
   'Creating widget preview scaffolding at:',
   'Launching the Widget Preview Scaffold...',
-  'lib/main.dart is being served at',
+  'main.dart is being served at',
   'Done loading previews.',
 ];
 
