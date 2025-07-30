@@ -472,30 +472,35 @@ plugins {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
     });
 
-
-    testWithoutContext('returns the AGP version when set in Groovy build file as plugin with comment', () async {
-      const expectedVersion = '6.8';
-      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      androidDirectory.childFile('build.gradle').writeAsStringSync('''
+    testWithoutContext(
+      'returns the AGP version when set in Groovy build file as plugin with comment',
+      () async {
+        const expectedVersion = '6.8';
+        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+        androidDirectory.childFile('build.gradle').writeAsStringSync('''
 plugins {
     // id 'com.android.application' version '0.1' apply false // Decoy comment
     id 'com.android.application' version '$expectedVersion' apply false
 }
       ''');
-      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-    });
+        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+      },
+    );
 
-    testWithoutContext('returns the AGP version when set in Kotlin build file as plugin with comment', () async {
-      const expectedVersion = '7.2.0';
-      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+    testWithoutContext(
+      'returns the AGP version when set in Kotlin build file as plugin with comment',
+      () async {
+        const expectedVersion = '7.2.0';
+        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+        androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 plugins {
     // id("com.android.application") version "0.1.0" apply false // Decoy comment
     id("com.android.application") version "$expectedVersion" apply false
 }
       ''');
-      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
-    });
+        expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+      },
+    );
 
     testWithoutContext('prefers the AGP version when set in Groovy, ignores Kotlin', () async {
       const versionInGroovy = '7.3.0';
