@@ -1056,7 +1056,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             final DomNode node = record.removedNodes!.elementAt(index);
             if (_addedStyleNodes.remove(node)) {
               _updateTypographySettings(const ui.TypographySettings());
-              // _updateTypographySettings(null); // TODO(Renzo-Olivares): this should work.
+              // TODO(Renzo-Olivares): This doesn't work because of `copyWith`,
+              // setting `typographySettings` to `null` causes the old `typographySettings`
+              // to remain with regards to the `PlatformConfiguration` sent to the framework.
+              // _updateTypographySettings(null);
             }
           }
         }
