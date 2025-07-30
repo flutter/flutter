@@ -45,7 +45,6 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   FunctionDeclaration? _currentFunction;
   ConstructorDeclaration? _currentConstructor;
   MethodDeclaration? _currentMethod;
-  PreviewDetails? _currentPreview;
 
   /// Handles previews defined on top-level functions.
   @override
@@ -92,40 +91,38 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
       assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
       if (_currentFunction != null) {
         final returnType = _currentFunction!.returnType! as NamedType;
-        _currentPreview = PreviewDetails(
-          packageName: packageName,
-          functionName: _currentFunction!.name.toString(),
-          isBuilder: returnType.name2.isWidgetBuilder,
-          previewAnnotation: preview,
+        previewEntries.add(
+          PreviewDetails(
+            packageName: packageName,
+            functionName: _currentFunction!.name.toString(),
+            isBuilder: returnType.name2.isWidgetBuilder,
+            previewAnnotation: preview,
+          ),
         );
       } else if (_currentConstructor != null) {
         final returnType = _currentConstructor!.returnType as SimpleIdentifier;
         final Token? name = _currentConstructor!.name;
-        _currentPreview = PreviewDetails(
-          packageName: packageName,
-          functionName: '$returnType${name == null ? '' : '.$name'}',
-          isBuilder: false,
-          previewAnnotation: preview,
+        previewEntries.add(
+          PreviewDetails(
+            packageName: packageName,
+            functionName: '$returnType${name == null ? '' : '.$name'}',
+            isBuilder: false,
+            previewAnnotation: preview,
+          ),
         );
       } else if (_currentMethod != null) {
         final returnType = _currentMethod!.returnType! as NamedType;
         final parentClass = _currentMethod!.parent! as ClassDeclaration;
-        _currentPreview = PreviewDetails(
-          packageName: packageName,
-          functionName: '${parentClass.name}.${_currentMethod!.name}',
-          isBuilder: returnType.name2.isWidgetBuilder,
-          previewAnnotation: preview,
+        previewEntries.add(
+          PreviewDetails(
+            packageName: packageName,
+            functionName: '${parentClass.name}.${_currentMethod!.name}',
+            isBuilder: returnType.name2.isWidgetBuilder,
+            previewAnnotation: preview,
+          ),
         );
       }
-      previewEntries.add(_currentPreview!);
-      _currentPreview = null;
     }
-  }
-
-  @override
-  void visitNamedExpression(NamedExpression node) {
-    // Extracts named properties from the @Preview annotation.
-    //_currentPreview?.setField(node: node);
   }
 
   void _scopedVisitChildren<T extends AstNode>(T node, void Function(T?) setter) {
