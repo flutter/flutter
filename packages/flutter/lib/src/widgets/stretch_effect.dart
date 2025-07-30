@@ -13,8 +13,8 @@ import 'image_filter.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
-/// When shader-based effects are supported, they are used for better performance
-/// and visual quality. Otherwise, a matrix transform is applied as a fallback.
+/// When shader-based effects are supported, this effect replicates the native Android stretch overscroll effect.
+/// Otherwise, a matrix transform provides an approximation.
 ///
 /// Used by [StretchingOverscrollIndicator] widget.
 class StretchEffect extends StatelessWidget {
