@@ -1192,7 +1192,6 @@ targets:
   - name: Linux linux_feature_flags_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     presubmit: false
     properties:
       xvfb: "1"
