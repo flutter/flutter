@@ -62,6 +62,36 @@ void main() {
     );
   });
 
+  testWidgets('Text respects media query typographySettings', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          typographySettings: ui.TypographySettings(
+            lineHeight: 2.0,
+            letterSpacing: 2.0,
+            wordSpacing: 2.0,
+            paragraphSpacing: 2.0,
+          ),
+        ),
+        child: Center(child: Text('Hello', textDirection: TextDirection.ltr)),
+      ),
+    );
+
+    RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.text.style?.height, 2.0);
+    expect(text.text.style?.letterSpacing, 2.0);
+    expect(text.text.style?.wordSpacing, 2.0);
+
+    await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
+
+    text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.text.style?.height, isNot(2.0));
+    expect(text.text.style?.letterSpacing, isNot(2.0));
+    expect(text.text.style?.wordSpacing, isNot(2.0));
+  });
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery.withClampedTextScaling(
