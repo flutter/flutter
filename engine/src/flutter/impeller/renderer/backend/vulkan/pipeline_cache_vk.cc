@@ -107,7 +107,8 @@ vk::UniquePipeline PipelineCacheVK::CreatePipeline(
   return std::move(pipeline);
 }
 
-void PipelineCacheVK::PersistCacheToDisk() const {
+void PipelineCacheVK::PersistCacheToDisk() {
+  Lock persist_lock(persist_mutex_);
   if (!is_valid_) {
     return;
   }
