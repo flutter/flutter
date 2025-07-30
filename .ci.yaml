@@ -1587,6 +1587,7 @@ targets:
       - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux android_java17_dependency_smoke_tests
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/172956
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
