@@ -388,7 +388,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// Container(
 ///   width: 100,
 ///   decoration: BoxDecoration(border: Border.all()),
-///   child: Text(
+///   child: const Text(
 ///     'Hello, how are you?',
 ///     overflow: TextOverflow.ellipsis,
 ///   ),
@@ -405,7 +405,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ![If a second line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_max_lines.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   maxLines: 1,
@@ -420,7 +420,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// ![If a single line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_soft_wrap.png)
 ///
 /// ```dart
-/// Text(
+/// const Text(
 ///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   softWrap: false,
