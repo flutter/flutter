@@ -369,9 +369,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     try {
       final List<Device> devices;
       if (boolArg(kWebServer)) {
-        // The web-server device is hidden by default, make it visible before trying to look it up.
-        WebServerDevice.showWebServerDevice = true;
-        devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+        try {
+          // The web-server device is hidden by default, make it visible before trying to look it up.
+          WebServerDevice.showWebServerDevice = true;
+          devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+        } finally {
+          // Reset the flag to false to avoid affecting other commands.
+          WebServerDevice.showWebServerDevice = false;
+        }
       } else {
         // Since the only target supported by the widget preview scaffold is the web
         // device, only a single web device should be returned.
