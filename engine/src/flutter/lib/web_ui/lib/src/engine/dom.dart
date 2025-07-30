@@ -2446,7 +2446,7 @@ extension type DomSegments._(JSObject _) implements JSObject {
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
 @JS('Intl.Locale')
-extension type DomLocale._primary(JSObject _) implements JSObject {
+extension type DomLocale._(JSObject _) implements JSObject {
   external DomLocale(String tag, [DomLocaleOptions? options]);
 
   external String get language;
@@ -2464,7 +2464,7 @@ extension type DomLocale._primary(JSObject _) implements JSObject {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
-extension type DomLocaleOptions._primary(JSObject _) implements JSObject {
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
   external DomLocaleOptions({
     String? language,
     String? script,
@@ -2480,7 +2480,6 @@ extension type DomLocaleOptions._primary(JSObject _) implements JSObject {
   external String? get language;
   external String? get script;
   external String? get region;
-  external String? get variants;
   external String? get calendar;
   external String? get caseFirst;
   external String? get collation;
