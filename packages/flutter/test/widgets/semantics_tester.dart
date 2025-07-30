@@ -307,6 +307,7 @@ class TestSemantics {
     bool ignoreRect = false,
     bool ignoreTransform = false,
     bool ignoreId = false,
+    bool ignoreIdentifier = false,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
@@ -460,7 +461,7 @@ class TestSemantics {
         'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
-    if (identifier != node.identifier) {
+    if (!ignoreIdentifier && identifier != node.identifier) {
       return fail(
         'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
       );
@@ -484,6 +485,7 @@ class TestSemantics {
         ignoreRect: ignoreRect,
         ignoreTransform: ignoreTransform,
         ignoreId: ignoreId,
+        ignoreIdentifier: ignoreIdentifier,
         childOrder: childOrder,
       );
       if (!childMatches) {
@@ -946,6 +948,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreRect,
     required this.ignoreTransform,
     required this.ignoreId,
+    required this.ignoreIdentifier,
     required this.childOrder,
   });
 
@@ -953,6 +956,7 @@ class _HasSemantics extends Matcher {
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final bool ignoreIdentifier;
   final DebugSemanticsDumpOrder childOrder;
 
   @override
@@ -963,6 +967,7 @@ class _HasSemantics extends Matcher {
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
       ignoreId: ignoreId,
+      ignoreIdentifier: ignoreIdentifier,
       childOrder: childOrder,
     );
     if (!doesMatch) {
@@ -1024,6 +1029,7 @@ Matcher hasSemantics(
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
+  bool ignoreIdentifier = false,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
@@ -1031,6 +1037,7 @@ Matcher hasSemantics(
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
     ignoreId: ignoreId,
+    ignoreIdentifier: ignoreIdentifier,
     childOrder: childOrder,
   );
 }
