@@ -100,12 +100,15 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Whether the button is enabled.
   ///
-  /// If this boolean is null and [onPressed] and [onLongPress] are null, then
-  /// the button will be disabled.
+  /// If this is non-null, this value is used to determine if the button is
+  /// enabled.
+  ///
+  /// If this is null, the button is enabled if [onPressed] or [onLongPress]
+  /// is non-null.
   ///
   /// See also:
   ///
-  /// * [enabled], which is true if the button is enabled
+  /// * [enabled], which is true if the button is enabled.
   final bool? isEnabled;
 
   /// Called when the button is tapped or otherwise activated.
