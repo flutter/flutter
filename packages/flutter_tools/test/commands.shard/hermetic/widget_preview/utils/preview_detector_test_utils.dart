@@ -121,7 +121,7 @@ Future<String> waitForPubspecChangeDetected({required void Function() changeOper
 /// Invokes [onChangeDetected] when a change is detected before the returned future is completed.
 Future<void> waitForChangeDetected({
   required void Function(PreviewDependencyGraph) onChangeDetected,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   final completer = Completer<void>();
   _onChangeDetectedImpl = (PreviewDependencyGraph updated) {
@@ -131,7 +131,7 @@ Future<void> waitForChangeDetected({
     onChangeDetected(updated);
     completer.complete();
   };
-  changeOperation();
+  await changeOperation();
   await completer.future;
 }
 

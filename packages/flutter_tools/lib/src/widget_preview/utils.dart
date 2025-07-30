@@ -5,10 +5,13 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/source/source.dart';
 
 import 'dependency_graph.dart';
@@ -22,8 +25,39 @@ extension TokenExtension on Token {
 }
 
 extension AnnotationExtension on Annotation {
+  static final Uri widgetPreviewsLibraryUri = Uri.parse(
+    'package:flutter/src/widget_previews/widget_previews.dart',
+  );
+
   /// Convenience getter to identify `@Preview` annotations
-  bool get isPreview => name.name == 'Preview';
+  bool get isPreview =>
+      name.name == 'Preview' &&
+      elementAnnotation!.element2?.library2!.uri == widgetPreviewsLibraryUri;
+
+  bool get isMultiPreview {
+    final Element2? element = elementAnnotation!.element2;
+    if (element is ConstructorElement2) {
+      final InterfaceType type = element.enclosingElement2.supertype!;
+      return type.getDisplayString() == 'MultiPreview' &&
+          type.element3.library2.uri == widgetPreviewsLibraryUri;
+    }
+    return false;
+  }
+
+  List<DartObject> findMultiPreviewPreviewNodes({required AnalysisContext context}) {
+    final DartObject evaluatedAnnotation = elementAnnotation!.computeConstantValue()!;
+    final Element2 element = evaluatedAnnotation.type!.element3!;
+    if (element is ClassElement2) {
+      final InterfaceType type = element.supertype!;
+      if (type.getDisplayString() != 'MultiPreview') {
+        throw StateError('$element is not a MultiPreview!');
+      }
+      final DartObject? previewsField = evaluatedAnnotation.getField('previews');
+      return previewsField?.toListValue() ?? <DartObject>[];
+    }
+    // Invalid preview.
+    return <DartObject>[];
+  }
 }
 
 /// Convenience getters for examining [String] paths.

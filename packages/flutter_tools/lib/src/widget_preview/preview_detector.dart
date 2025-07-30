@@ -8,6 +8,7 @@ import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
@@ -108,13 +109,22 @@ class PreviewDetector {
       final AnalysisContext context = collection.contextFor(eventPath);
       final File file = fs.file(eventPath);
       context.changeFile(file.path);
-      await context.applyPendingFileChanges();
+      final List<String> potentiallyAffectedFiles = await context.applyPendingFileChanges();
 
       logger.printStatus('Detected change in $eventPath.');
       if (event.type == ChangeType.REMOVE) {
-        await _fileRemoved(context: context, eventPath: eventPath);
-      } else {
-        await _fileAddedOrUpdated(context: context, eventPath: eventPath);
+        potentiallyAffectedFiles.remove(eventPath);
+      } else if (event.type == ChangeType.ADD) {
+        potentiallyAffectedFiles.add(eventPath);
+      }
+
+      for (final filePath in potentiallyAffectedFiles) {
+        await _fileAddedOrUpdated(context: context, filePath: filePath);
+      }
+
+      // TODO(bkonyi): If _fileAddedOrUpdated is called after _fileRemoved, it'll add the removed file back...
+      if (event.type == ChangeType.REMOVE) {
+        await _fileRemoved(context: context, filePath: eventPath);
       }
       // Determine which files have transitive dependencies with compile time errors.
       _propagateErrors();
@@ -128,10 +138,10 @@ class PreviewDetector {
 
   Future<void> _fileAddedOrUpdated({
     required AnalysisContext context,
-    required String eventPath,
+    required String filePath,
   }) async {
     final PreviewDependencyGraph filePreviewsMapping = await _findPreviewFunctions(
-      fs.file(eventPath),
+      fs.file(filePath),
     );
     if (filePreviewsMapping.length > 1) {
       logger.printWarning('Previews from more than one file were detected!');
@@ -148,11 +158,16 @@ class PreviewDetector {
       _dependencyGraph[location] = libraryDetails;
     } else {
       // Why is this working with an empty file system on Linux?
-      final PreviewPath removedLibraryPath = _dependencyGraph.values
-          .firstWhere((LibraryPreviewNode element) => element.files.contains(eventPath))
-          .path;
+      final PreviewPath? removedLibraryPath = _dependencyGraph.values
+          .firstWhereOrNull((LibraryPreviewNode element) => element.files.contains(filePath))
+          ?.path;
+      if (removedLibraryPath == null) {
+        // The node was already removed from the graph as a result of updating nodes after the
+        // removal of another node. This can happen when a directory is deleted.
+        return;
+      }
       // The library previously had previews that were removed.
-      logger.printStatus('Previews removed from $eventPath');
+      logger.printStatus('Previews removed from $filePath');
       _dependencyGraph.remove(removedLibraryPath);
     }
   }
@@ -216,11 +231,17 @@ class PreviewDetector {
   /// This involves removing the relevant [LibraryPreviewNode] from the dependency graph as well
   /// as checking for newly introduced errors in files which had a transitive dependency on the
   /// removed file.
-  Future<void> _fileRemoved({required AnalysisContext context, required String eventPath}) async {
-    final File file = fs.file(eventPath);
-    final LibraryPreviewNode node = _dependencyGraph.values.firstWhere(
+  Future<void> _fileRemoved({required AnalysisContext context, required String filePath}) async {
+    final File file = fs.file(filePath);
+    final LibraryPreviewNode? node = _dependencyGraph.values.firstWhereOrNull(
       (LibraryPreviewNode e) => e.files.contains(file.path),
     );
+
+    if (node == null) {
+      // The node was already removed from the graph as a result of updating nodes after the
+      // removal of another node. This can happen when a directory is deleted.
+      return;
+    }
 
     final visitedNodes = <LibraryPreviewNode>{};
     Future<void> populateErrorsDownstream({required LibraryPreviewNode node}) async {
@@ -233,7 +254,7 @@ class PreviewDetector {
       }
     }
 
-    node.files.remove(eventPath);
+    node.files.remove(filePath);
 
     // If the library node contains no files, the library has been completely deleted.
     if (node.files.isEmpty) {
