@@ -2580,6 +2580,11 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   late _PointerEventContext context;
   late PointerBinding binding;
 
+  Future<void> waitForDebouncingToStart() {
+    // The ClickDebouncer waits until the end of the event loop to start the debouncing.
+    return Future.delayed(const Duration(milliseconds: 1));
+  }
+
   void testWithSemantics(
     String description,
     Future<void> Function() body, {
@@ -2646,6 +2651,31 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
+  testWithSemantics('Starts debouncing after event loop', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    // ClickDebouncer does not start debouncing right awat.
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    // Instead, it waits until the end of the event loop.
+    await waitForDebouncingToStart();
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+  });
+
   testWithSemantics('Accumulates pointer events starting from pointerdown', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
@@ -2655,6 +2685,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
+    await waitForDebouncingToStart();
     expect(
       reason: 'Should start debouncing at first pointerdown',
       PointerBinding.clickDebouncer.isDebouncing,
@@ -2703,6 +2734,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
+    await waitForDebouncingToStart();
     expect(
       reason: 'Should start debouncing at first pointerdown',
       PointerBinding.clickDebouncer.isDebouncing,
@@ -2757,6 +2789,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
     testElement.dispatchEvent(context.primaryDown());
+    await waitForDebouncingToStart();
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
@@ -2776,6 +2809,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
     testElement.dispatchEvent(context.primaryDown());
+    await waitForDebouncingToStart();
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
