@@ -10,7 +10,6 @@
 
 #include "flutter/third_party/abseil-cpp/absl/log/log.h"
 
-
 namespace fs = std::filesystem;
 
 namespace {
