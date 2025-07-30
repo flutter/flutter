@@ -88,7 +88,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
 
-  FlutterViewController* view_controller_;
+  __weak FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
   // If the this id is kSemanticObjectIdInvalid, it means either nothing has
