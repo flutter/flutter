@@ -26273,9 +26273,9 @@ misrepresented as being the original software.
 3. This notice may not be removed or altered from any source
 distribution.
 --------------------------------------------------------------------------------
-
 accessibility
 dart
+flutter
 icu
 skia
 
@@ -31626,7 +31626,6 @@ Copyright 2013 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-
 accessibility
 cross_file
 engine
@@ -31637,6 +31636,7 @@ file_selector_macos
 file_selector_platform_interface
 file_selector_web
 file_selector_windows
+flutter
 flutter_lints
 flutter_markdown
 plugin_platform_interface
@@ -31685,9 +31685,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-
 accessibility
 dart
+flutter
 spring_animation
 tonic
 web_test_fonts
@@ -31697,7 +31697,7 @@ Copyright 2013 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2013 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -31923,7 +31923,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -33580,7 +33580,7 @@ Copyright 2019 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file 
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2019 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -34435,7 +34435,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-
+flutter
 skia
 
 Copyright 2022 Google LLC
