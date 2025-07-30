@@ -42,6 +42,7 @@ Future<void> buildLinux(
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
   required Logger logger,
+  bool configOnly = false,
 }) async {
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
@@ -93,6 +94,9 @@ Future<void> buildLinux(
       targetPlatform,
       targetSysroot,
     );
+    if (configOnly) {
+      return;
+    }
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
