@@ -2653,6 +2653,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
     assert(!_debugDisposed);
+    if (parent == null) {
+      print("im the root bitch");
+      print("$this.semanticBounds");
+    }
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Map<String, String>? debugTimelineArguments;
       assert(() {

@@ -420,8 +420,6 @@ class FlutterView {
       size?.width ?? _viewConfiguration.viewConstraints.maxWidth,
       size?.height ?? _viewConfiguration.viewConstraints.maxHeight,
     );
-    // size?.width ?? physicalConstraints.maxWidth,
-    // size?.height ?? physicalConstraints.maxHeight,
   }
 
   @Native<Void Function(Int64, Pointer<Void>, Double, Double)>(
