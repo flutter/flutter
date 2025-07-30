@@ -21,7 +21,7 @@ import '../../src/fakes.dart';
 
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -61,9 +61,9 @@ void main() {
   );
 
   testWithoutContext('GoogleChromeDevice defaults', () async {
-    final TestChromiumLauncher launcher = TestChromiumLauncher();
+    final launcher = TestChromiumLauncher();
 
-    final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
+    final chromeDevice = GoogleChromeDevice(
       chromiumLauncher: launcher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -90,9 +90,9 @@ void main() {
   });
 
   testWithoutContext('MicrosoftEdge defaults', () async {
-    final TestChromiumLauncher launcher = TestChromiumLauncher();
+    final launcher = TestChromiumLauncher();
 
-    final MicrosoftEdgeDevice chromeDevice = MicrosoftEdgeDevice(
+    final chromeDevice = MicrosoftEdgeDevice(
       chromiumLauncher: launcher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -118,7 +118,7 @@ void main() {
   });
 
   testWithoutContext('Server defaults', () async {
-    final WebServerDevice device = WebServerDevice(logger: BufferLogger.test());
+    final device = WebServerDevice(logger: BufferLogger.test());
 
     expect(device.name, 'Web Server');
     expect(device.id, 'web-server');
@@ -139,11 +139,11 @@ void main() {
   });
 
   testWithoutContext('ChromiumDevice accepts null package', () async {
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final FakePlatform platform = FakePlatform();
-    final FakeProcessManager pm = FakeProcessManager.any();
-    final BufferLogger logger = BufferLogger.test();
-    final GoogleChromeDevice device = GoogleChromeDevice(
+    final fs = MemoryFileSystem.test();
+    final platform = FakePlatform();
+    final pm = FakeProcessManager.any();
+    final logger = BufferLogger.test();
+    final device = GoogleChromeDevice(
       fileSystem: fs,
       processManager: pm,
       platform: platform,
@@ -170,7 +170,7 @@ void main() {
   });
 
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -182,7 +182,7 @@ void main() {
   });
 
   testWithoutContext('Has well known device ids chrome, edge, and web-server', () async {
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -194,9 +194,9 @@ void main() {
   });
 
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
-    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -209,7 +209,7 @@ void main() {
 
   testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
     WebServerDevice.showWebServerDevice = true;
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -224,7 +224,7 @@ void main() {
     'Web Server device is not listed if disabled via showWebServerDevice',
     () async {
       WebServerDevice.showWebServerDevice = false;
-      final WebDevices webDevices = WebDevices(
+      final webDevices = WebDevices(
         featureFlags: TestFeatureFlags(isWebEnabled: true),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -237,10 +237,10 @@ void main() {
   );
 
   testWithoutContext('Chrome invokes version command on non-Windows platforms', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[kLinuxExecutable, '--version'], stdout: 'ABC'),
     ]);
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -248,10 +248,11 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
 
     // Verify caching works correctly.
@@ -260,7 +261,7 @@ void main() {
   });
 
   testWithoutContext('Chrome and Edge version check invokes registry query on windows.', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'reg',
@@ -282,7 +283,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A',
       ),
     ]);
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -290,10 +291,11 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
 
     // Verify caching works correctly.
@@ -302,14 +304,14 @@ void main() {
   });
 
   testWithoutContext('Chrome and Edge version check handles missing registry on Windows', () async {
-    final FakeProcessManager processManager = FakeProcessManager.empty();
+    final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables.add('reg');
 
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
       environment: <String, String>{},
     );
-    final ChromiumLauncher chromeLauncher = ChromiumLauncher(
+    final chromeLauncher = ChromiumLauncher(
       fileSystem: MemoryFileSystem.test(),
       platform: platform,
       processManager: processManager,
@@ -317,17 +319,17 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
-    final MicrosoftEdgeDevice edgeDevice = MicrosoftEdgeDevice(
+    final edgeDevice = MicrosoftEdgeDevice(
       chromiumLauncher: chromeLauncher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: processManager,
     );
 
-    expect(edgeDevice.isSupported(), true);
+    expect(await edgeDevice.isSupported(), true);
     expect(await edgeDevice.sdkNameAndVersion, '');
 
-    final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
+    final chromeDevice = GoogleChromeDevice(
       chromiumLauncher: chromeLauncher,
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -335,12 +337,12 @@ void main() {
       platform: platform,
     );
 
-    expect(chromeDevice.isSupported(), true);
+    expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'unknown');
   });
 
   testWithoutContext('Edge is not supported on versions less than 73', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'reg',
@@ -352,7 +354,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon\ version REG_SZ 72.0.478.44 ',
       ),
     ]);
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -364,7 +366,7 @@ void main() {
   });
 
   testWithoutContext('Edge is not support on non-windows platform', () async {
-    final WebDevices webDevices = WebDevices(
+    final webDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -374,7 +376,7 @@ void main() {
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
 
-    final WebDevices macosWebDevices = WebDevices(
+    final macosWebDevices = WebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -430,7 +432,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   late Chromium Function() _launcher;
 
   @override
-  Completer<Chromium> currentCompleter = Completer<Chromium>();
+  var currentCompleter = Completer<Chromium>();
 
   @override
   bool canFindExecutable() {
@@ -482,7 +484,7 @@ class _FakeChromiumDevice extends ChromiumDevice {
 }
 
 class _OnceClosableChromium extends Fake implements Chromium {
-  bool _closed = false;
+  var _closed = false;
 
   @override
   Future<void> close() async {

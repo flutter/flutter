@@ -587,10 +587,9 @@ void main() {
           final DateTime updatedDate = DateTime(1976, 2, 23);
           final DateTime firstDate = DateTime(1970);
           final DateTime lastDate = DateTime(2099, 31, 12);
-          final Color selectedColor =
-              useMaterial3
-                  ? const Color(0xff6750a4)
-                  : const Color(0xff2196f3); // default primary color
+          final Color selectedColor = useMaterial3
+              ? const Color(0xff6750a4)
+              : const Color(0xff2196f3); // default primary color
 
           await tester.pumpWidget(
             calendarDatePicker(
@@ -1527,7 +1526,6 @@ void main() {
     testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: CalendarDatePicker(
               initialDate: DateTime(2025, DateTime.february, 26),
@@ -1556,7 +1554,6 @@ void main() {
     testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Material(
             child: CalendarDatePicker(
               initialDate: DateTime(2025, DateTime.february, 26),

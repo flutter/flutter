@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
-import 'widget_preview_scaffold_test_utils.dart';
+import 'utils/widget_preview_scaffold_test_utils.dart';
 
 void main() {
   testWidgets(

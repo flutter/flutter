@@ -300,9 +300,7 @@ class SemanticsFlags {
     this.hasRequiredState = false,
     this.isRequired = false,
   });
-
-  static const SemanticsFlags kNone = SemanticsFlags();
-
+  static const SemanticsFlags none = SemanticsFlags();
   final bool hasCheckedState;
   final bool isChecked;
   final bool isSelected;
@@ -612,6 +610,11 @@ enum SemanticsRole {
   radioGroup,
   status,
   alert,
+  complementary,
+  contentInfo,
+  main,
+  navigation,
+  region,
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart
@@ -671,7 +674,7 @@ class SemanticsUpdateBuilder {
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
   void updateNode({
     required int id,
-    required int flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -683,8 +686,6 @@ class SemanticsUpdateBuilder {
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -709,6 +710,7 @@ class SemanticsUpdateBuilder {
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required Locale? locale,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -742,8 +744,6 @@ class SemanticsUpdateBuilder {
         tooltip: tooltip,
         textDirection: textDirection,
         transform: engine.toMatrix32(transform),
-        elevation: elevation,
-        thickness: thickness,
         childrenInTraversalOrder: childrenInTraversalOrder,
         childrenInHitTestOrder: childrenInHitTestOrder,
         additionalActions: additionalActions,
@@ -754,6 +754,7 @@ class SemanticsUpdateBuilder {
         controlsNodes: controlsNodes,
         validationResult: validationResult,
         inputType: inputType,
+        locale: locale,
       ),
     );
   }

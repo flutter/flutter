@@ -11,6 +11,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [BorderRadius] that allows for text-direction aware resolution.
 ///
@@ -785,7 +786,7 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$BorderRadiusDirectional'));
     switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(
@@ -914,7 +915,7 @@ class _MixedBorderRadius extends BorderRadiusGeometry {
 
   @override
   BorderRadius resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedBorderRadius'));
     switch (direction!) {
       case TextDirection.rtl:
         return BorderRadius.only(

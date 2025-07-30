@@ -76,15 +76,14 @@ void main() {
   testUsingContext(
     'NativeAssetsBuildRunnerImpl.cCompilerConfig',
     overrides: <Type, Generator>{
-      ProcessManager:
-          () => FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['which', 'clang++'],
-              stdout: '''
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['which', 'clang++'],
+          stdout: '''
 /some/path/to/clang++
 ''', // Newline at the end of the string.
-            ),
-          ]),
+        ),
+      ]),
       FileSystem: () => fileSystem,
     },
     () async {
@@ -116,6 +115,7 @@ name: my_app
         fileSystem,
         logger,
         runPackageName,
+        includeDevDependencies: false,
         pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;

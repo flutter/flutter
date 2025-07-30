@@ -11,15 +11,15 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String xcodeBackendPath = 'bin/xcode_backend.sh';
-const String xcodeBackendErrorHeader =
+const xcodeBackendPath = 'bin/xcode_backend.sh';
+const xcodeBackendErrorHeader =
     '========================================================================';
 
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
-const Map<String, String> unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
+const unknownConfiguration = <String, String>{'CONFIGURATION': 'Custom'};
 
 // $FLUTTER_BUILD_MODE will override $CONFIGURATION
-const Map<String, String> unknownFlutterBuildMode = <String, String>{
+const unknownFlutterBuildMode = <String, String>{
   'FLUTTER_BUILD_MODE': 'Custom',
   'CONFIGURATION': 'Debug',
 };
@@ -58,7 +58,11 @@ void main() {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,
       <String>['build'],
-      environment: <String, String>{'CONFIGURATION': 'Debug', 'ACTION': 'install'},
+      environment: <String, String>{
+        'CONFIGURATION': 'Debug',
+        'ACTION': 'install',
+        'FLUTTER_CLI_BUILD_MODE': 'debug',
+      },
     );
     expect(result.stderr, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
@@ -98,7 +102,7 @@ void main() {
       expect(result, const ProcessResultMatcher(stdoutPattern: 'Info.plist does not exist.'));
     });
 
-    const String emptyPlist = '''
+    const emptyPlist = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -127,7 +131,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
     });
 
-    for (final String buildConfiguration in <String>['Debug', 'Profile']) {
+    for (final buildConfiguration in <String>['Debug', 'Profile']) {
       test('add keys in $buildConfiguration', () async {
         infoPlist.writeAsStringSync(emptyPlist);
 

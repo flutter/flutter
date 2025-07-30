@@ -1135,7 +1135,7 @@ class SliverPhysicalParentData extends ParentData {
   /// [SliverPhysicalParentData].
   void applyPaintTransform(Matrix4 transform) {
     // Hit test logic relies on this always providing an invertible matrix.
-    transform.translate(paintOffset.dx, paintOffset.dy);
+    transform.translateByDouble(paintOffset.dx, paintOffset.dy, 0, 1);
   }
 
   @override
@@ -1411,10 +1411,9 @@ abstract class RenderSliver extends RenderObject {
   void debugAssertDoesMeetConstraints() {
     assert(
       geometry!.debugAssertIsValid(
-        informationCollector:
-            () => <DiagnosticsNode>[
-              describeForError('The RenderSliver that returned the offending geometry was'),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          describeForError('The RenderSliver that returned the offending geometry was'),
+        ],
       ),
     );
     assert(() {
@@ -1778,12 +1777,11 @@ abstract class RenderSliver extends RenderObject {
     assert(() {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry!.paintExtent / 30.0);
-        final Paint paint =
-            Paint()
-              ..color = const Color(0xFF33CC33)
-              ..strokeWidth = strokeWidth
-              ..style = PaintingStyle.stroke
-              ..maskFilter = MaskFilter.blur(BlurStyle.solid, strokeWidth);
+        final Paint paint = Paint()
+          ..color = const Color(0xFF33CC33)
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..maskFilter = MaskFilter.blur(BlurStyle.solid, strokeWidth);
         final double arrowExtent = geometry!.paintExtent;
         final double padding = math.max(2.0, strokeWidth);
         final Canvas canvas = context.canvas;
@@ -1913,12 +1911,12 @@ mixin RenderSliverHelpers implements RenderSliver {
         if (!rightWayUp) {
           delta = geometry!.paintExtent - child.size.width - delta;
         }
-        transform.translate(delta, crossAxisDelta);
+        transform.translateByDouble(delta, crossAxisDelta, 0, 1);
       case Axis.vertical:
         if (!rightWayUp) {
           delta = geometry!.paintExtent - child.size.height - delta;
         }
-        transform.translate(crossAxisDelta, delta);
+        transform.translateByDouble(crossAxisDelta, delta, 0, 1);
     }
   }
 }

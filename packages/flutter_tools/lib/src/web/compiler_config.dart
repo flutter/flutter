@@ -16,10 +16,10 @@ sealed class WebCompilerConfig {
   });
 
   /// Build environment flag for [optimizationLevel].
-  static const String kOptimizationLevel = 'OptimizationLevel';
+  static const kOptimizationLevel = 'OptimizationLevel';
 
   /// Build environment flag for [sourceMaps].
-  static const String kSourceMapsEnabled = 'SourceMaps';
+  static const kSourceMapsEnabled = 'SourceMaps';
 
   /// Calculates the optimization level for the compiler for the given
   /// build mode.
@@ -38,6 +38,7 @@ sealed class WebCompilerConfig {
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
+  List<String> toCommandOptions(BuildMode buildMode);
 
   String get buildKey;
 
@@ -92,10 +93,16 @@ class JsCompilerConfig extends WebCompilerConfig {
   CompileTarget get compileTarget => CompileTarget.js;
 
   /// Arguments to use in both phases: full JS compile and CFE-only.
+  ///
+  /// NOTE: MOST args should be passed here!
   List<String> toSharedCommandOptions(BuildMode buildMode) => <String>[
     if (nativeNullAssertions) '--native-null-assertions',
     if (!sourceMaps) '--no-source-maps',
     if (buildMode == BuildMode.debug) '--enable-asserts',
+    '-O${optimizationLevelForBuildMode(buildMode)}',
+    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
+    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (csp) '--csp',
   ];
 
   @override
@@ -111,26 +118,24 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   /// Arguments to use in the full JS compile, but not CFE-only.
   ///
-  /// Includes the contents of [toSharedCommandOptions].
+  /// Includes the contents of [toSharedCommandOptions]. That is where MOST
+  /// JS compiler flags should be passed!
+  @override
   List<String> toCommandOptions(BuildMode buildMode) => <String>[
-    if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     ...toSharedCommandOptions(buildMode),
-    '-O${optimizationLevelForBuildMode(buildMode)}',
     if (dumpInfo) '--stage=dump-info-all',
-    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
-    if (csp) '--csp',
   ];
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
       'noFrequencyBasedMinification': noFrequencyBasedMinification,
       'minify': minify,
-      'sourceMaps': sourceMaps,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
@@ -141,15 +146,21 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel,
     this.stripWasm = true,
+    this.minify,
+    this.dryRun = false,
     super.sourceMaps = true,
     super.renderer = WebRendererMode.defaultForWasm,
   });
 
   /// Build environment for [stripWasm].
-  static const String kStripWasm = 'StripWasm';
+  static const kStripWasm = 'StripWasm';
 
   /// Whether to strip the wasm file of static symbols.
   final bool stripWasm;
+
+  final bool? minify;
+
+  final bool dryRun;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -167,23 +178,34 @@ class WasmCompilerConfig extends WebCompilerConfig {
         BuildMode.jitRelease => throw ArgumentError('Invalid build mode for web'),
       };
 
+  @override
   List<String> toCommandOptions(BuildMode buildMode) {
     final bool stripSymbols = buildMode == BuildMode.release && stripWasm;
     return <String>[
       '-O${optimizationLevelForBuildMode(buildMode)}',
       '--${stripSymbols ? '' : 'no-'}strip-wasm',
       if (!sourceMaps) '--no-source-maps',
+      if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
+      if (dryRun) '--extra-compiler-option=--dry-run',
     ];
   }
 
   @override
   String get buildKey {
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       ...super._buildKeyMap,
-      'stripWasm': stripWasm,
-      'sourceMaps': sourceMaps,
+      kStripWasm: stripWasm,
+      'minify': minify,
+      'dryRun': dryRun,
+      WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
   }
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    'dryRun': dryRun,
+  };
 }

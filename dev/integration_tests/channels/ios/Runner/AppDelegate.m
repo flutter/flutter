@@ -86,6 +86,9 @@ const UInt8 PAIR = 129;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
+  // This integration test still uses the old way of registering platform
+  // channels to test backwards compatibility after the UISceneDelegate
+  // migration.
   id<FlutterPluginRegistrar> registrar = [self registrarForPlugin:@"platform-channel-test"];
   ExtendedReaderWriter* extendedReaderWriter = [ExtendedReaderWriter new];
   [self setupMessagingHandshakeOnChannel:

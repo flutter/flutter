@@ -153,6 +153,8 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 
         .se_a = a,
         .se_n = 0,
+
+        .circle_start = {a, a},
     };
   }
 
@@ -309,6 +311,10 @@ class RoundSuperellipseBuilder {
   // If `reverse` is false, the resulting arc spans from 0 to pi/2, moving
   // clockwise starting from the positive Y-axis. Otherwise it moves from pi/2
   // to 0.
+  //
+  // The `scale_sign` is an additional scaling transformation that potentially
+  // flips the result. This is useful for uniform radii where the same quadrant
+  // parameter set should be drawn to 4 quadrants.
   void AddQuadrant(const RoundSuperellipseParam::Quadrant& param,
                    bool reverse,
                    Point scale_sign = Point(1, 1)) {
@@ -319,7 +325,7 @@ class RoundSuperellipseBuilder {
                                     Point(param.top.se_a, param.top.se_a)));
       if (!reverse) {
         receiver_.LineTo(transform *
-                         (param.top.offset + Point(param.top.se_a, 0)));
+                         (param.right.offset + Point(param.right.se_a, 0)));
       } else {
         receiver_.LineTo(transform *
                          (param.top.offset + Point(0, param.top.se_a)));
@@ -468,6 +474,16 @@ class RoundSuperellipseBuilder {
 
 }  // namespace
 
+RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
+    const Rect& bounds,
+    Scalar radius) {
+  return RoundSuperellipseParam{
+      .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                   {radius, radius}, {-1, 1}),
+      .all_corners_same = true,
+  };
+}
+
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds,
     const RoundingRadii& radii) {
@@ -507,7 +523,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
   };
 }
 
-void RoundSuperellipseParam::AddToPath(PathReceiver& path_receiver) const {
+void RoundSuperellipseParam::Dispatch(PathReceiver& path_receiver) const {
   RoundSuperellipseBuilder builder(path_receiver);
 
   Point start = top_right.offset +

@@ -20,16 +20,21 @@ enum MyFlutterErrorCode {
 }
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
+@objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler, FlutterPluginRegistrant {
   private var eventSink: FlutterEventSink?
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-    let registry = self.registrar(forPlugin: "battery")
+    pluginRegistrant = self
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func register(with registry: FlutterPluginRegistry) {
+    GeneratedPluginRegistrant.register(with: registry)
+    let registrar = registry.registrar(forPlugin: "battery")
     let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
-                                              binaryMessenger: registry!.messenger())
+                                              binaryMessenger: registrar!.messenger())
     batteryChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       guard call.method == "getBatteryLevel" else {
@@ -40,9 +45,8 @@ enum MyFlutterErrorCode {
     })
 
     let chargingChannel = FlutterEventChannel(name: ChannelName.charging,
-                                              binaryMessenger: registry!.messenger())
+                                              binaryMessenger: registrar!.messenger())
     chargingChannel.setStreamHandler(self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   private func receiveBatteryLevel(result: FlutterResult) {

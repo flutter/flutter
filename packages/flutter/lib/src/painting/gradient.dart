@@ -53,10 +53,9 @@ _ColorsAndStops _interpolateColorsAndStops(
   assert(bColors.length >= 2);
   assert(aStops.length == aColors.length);
   assert(bStops.length == bColors.length);
-  final SplayTreeSet<double> stops =
-      SplayTreeSet<double>()
-        ..addAll(aStops)
-        ..addAll(bStops);
+  final SplayTreeSet<double> stops = SplayTreeSet<double>()
+    ..addAll(aStops)
+    ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops
       .map<Color>(
@@ -121,7 +120,7 @@ class GradientRotation extends GradientTransform {
     final double originY = -sinRadians * center.dx + oneMinusCosRadians * center.dy;
 
     return Matrix4.identity()
-      ..translate(originX, originY)
+      ..translateByDouble(originX, originY, 0, 1)
       ..rotateZ(radians);
   }
 

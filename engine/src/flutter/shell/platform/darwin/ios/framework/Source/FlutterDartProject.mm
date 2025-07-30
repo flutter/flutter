@@ -183,6 +183,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     settings.trace_systrace = enableTraceSystrace.boolValue;
   }
 
+  NSNumber* profileMicrotasks = [mainBundle objectForInfoDictionaryKey:@"FLTProfileMicrotasks"];
+  // Change the default only if the option is present.
+  if (profileMicrotasks != nil) {
+    settings.profile_microtasks = profileMicrotasks.boolValue;
+  }
+
   NSNumber* enableDartAsserts = [mainBundle objectForInfoDictionaryKey:@"FLTEnableDartAsserts"];
   if (enableDartAsserts != nil) {
     settings.dart_flags.push_back("--enable-asserts");
@@ -192,6 +198,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   // Change the default only if the option is present.
   if (enableDartProfiling != nil) {
     settings.enable_dart_profiling = enableDartProfiling.boolValue;
+  }
+
+  NSNumber* profileStartup = [mainBundle objectForInfoDictionaryKey:@"FLTProfileStartup"];
+  // Change the default only if the option is present.
+  if (profileStartup != nil) {
+    settings.profile_startup = profileStartup.boolValue;
   }
 
   // Leak Dart VM settings, set whether leave or clean up the VM after the last shell shuts down.

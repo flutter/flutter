@@ -584,8 +584,12 @@ Shell::~Shell() {
       fml::MakeCopyable([io_manager = std::move(io_manager_),
                          platform_view = platform_view_.get(),
                          &io_latch]() mutable {
+        std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
-        if (platform_view) {
+
+        // If the IO manager is not being used by any other spawned shells,
+        // then detach the resource context from the IO thread.
+        if (platform_view && weak_io_manager.expired()) {
           platform_view->ReleaseResourceContext();
         }
         io_latch.Signal();
@@ -998,15 +1002,6 @@ void Shell::OnPlatformViewDestroyed() {
   //
   // This incorrect assumption can lead to deadlock.
   rasterizer_->DisableThreadMergerIfNeeded();
-
-  // Notify the Dart VM that the PlatformView has been destroyed and some
-  // cleanup activity can be done (e.g: garbage collect the Dart heap).
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
-                                    [engine = engine_->GetWeakPtr()]() {
-                                      if (engine) {
-                                        engine->NotifyDestroyed();
-                                      }
-                                    });
 
   // Note:
   // This is a synchronous operation because certain platforms depend on

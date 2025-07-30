@@ -2,7 +2,7 @@
 
 ## Goal
 
-With branching and branch testability being supported for Flutter & Dart releases, cherry-picking fixes is the preferred method to address issues for released software (beta and stable channels.)  Stability of the release will be the overarching goal, so only highly impactful and critical cherrypicks will be allowed across Dart and Flutter.  This document outlines the process for requesting and approval of cherrypicks.
+With branching and branch testability being supported for Flutter & Dart releases, cherry-picking fixes is the preferred method to address issues for released software (beta and stable channels).  Stability of the release will be the overarching goal, so only highly impactful and critical cherry-picks will be allowed across Dart and Flutter.  This document outlines the process for requesting and approval of cherry-picks.
 
 **Note: This process applies to regressions from the previous release or serious bugs otherwise introduced by the current release.  Feature work is not considered for cherry-picking and will need to wait for the next release.**
 
@@ -10,9 +10,8 @@ With branching and branch testability being supported for Flutter & Dart release
 
 1. Add the `cp: beta` or `cp: stable` label to the pull request on flutter/flutter master. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links)
 2. Wait about 30 seconds.
-3. If automatic cherry pick succeeds (no merge conflict), a new pull requested will be created and you will receive an email. Edit the cherry-pick details in the PR description of the generated pull request, and a release engineer will follow up on the request.
-4. If automatic cherry pick fails, a comment will be left on the original PR. In this case you will need to follow instructions in the manual cherry-pick section below to manually create a cherry pick PR.
-5. [STABLE ONLY] Update CHANGELOG.md following our [best practices](Hotfix-Documentation-Best-Practices.md).
+3. If automatic cherry-pick succeeds (no merge conflict), a new pull requested will be created and you will receive an email. Edit the cherry-pick details in the PR description of the generated pull request, and a release engineer will follow up on the request.
+4. If automatic cherry-pick fails, a comment will be left on the original PR. In this case you will need to follow instructions in the manual cherry-pick section below to manually create a cherry-pick PR.
 
 If for some reason, an automated cherry-pick can not be applied, please follow the manual cherry-pick instructions.
 
@@ -29,7 +28,6 @@ If the automated cherry-pick process fails, you will have to create the cherry-p
   - Risk (What is the risk level of this cherry-pick?)
   - Test Coverage (Are you confident that your fix is well-tested by automated tests?)
   - Validation Steps (What are the steps to validate that this fix works?)
-4. [STABLE ONLY] Ensure that your cherry-pick PR updates CHANGELOG.md.
 
 ## Frequently asked questions
 
@@ -37,7 +35,7 @@ If the automated cherry-pick process fails, you will have to create the cherry-p
 
 Anyone can request a cherry-pick.
 
-### When do I request a cherry pick?
+### When do I request a cherry-pick?
 
 - Whenever you have identified a commit on the main/master that fixes an issue that is present on the beta or stable branch.
 - Whenever you need to update a pub dependency that fixes an issue that is present on the beta or stable branch (see [Updating dependencies](../infra/Updating-dependencies-in-Flutter.md#to-update-a-single-dependency-for-cherrypicks)

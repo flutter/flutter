@@ -55,7 +55,7 @@ typedef MoveExitWidgetSelectionButtonBuilder =
       BuildContext context, {
       required VoidCallback onPressed,
       required String semanticsLabel,
-      bool isLeftAligned,
+      bool usesDefaultAlignment,
     });
 
 /// Signature for the builder callback used by
@@ -1006,25 +1006,23 @@ mixin WidgetInspectorService {
   int _errorsSinceReload = 0;
 
   void _reportStructuredError(FlutterErrorDetails details) {
-    final Map<String, Object?> errorJson =
-        _nodeToJson(
-          details.toDiagnosticsNode(),
-          InspectorSerializationDelegate(
-            groupName: _consoleObjectGroup,
-            subtreeDepth: 5,
-            includeProperties: true,
-            maxDescendantsTruncatableNode: 5,
-            service: this,
-          ),
-        )!;
+    final Map<String, Object?> errorJson = _nodeToJson(
+      details.toDiagnosticsNode(),
+      InspectorSerializationDelegate(
+        groupName: _consoleObjectGroup,
+        subtreeDepth: 5,
+        includeProperties: true,
+        maxDescendantsTruncatableNode: 5,
+        service: this,
+      ),
+    )!;
 
     errorJson['errorsSinceReload'] = _errorsSinceReload;
     if (_errorsSinceReload == 0) {
-      errorJson['renderedErrorText'] =
-          TextTreeRenderer(
-            wrapWidthProperties: FlutterError.wrapWidth,
-            maxDescendentsTruncatableNode: 5,
-          ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
+      errorJson['renderedErrorText'] = TextTreeRenderer(
+        wrapWidthProperties: FlutterError.wrapWidth,
+        maxDescendentsTruncatableNode: 5,
+      ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight();
     } else {
       errorJson['renderedErrorText'] = 'Another exception was thrown: ${details.summary}';
     }
@@ -1321,10 +1319,9 @@ mixin WidgetInspectorService {
           width: double.parse(parameters['width']!),
           height: double.parse(parameters['height']!),
           margin: parameters.containsKey('margin') ? double.parse(parameters['margin']!) : 0.0,
-          maxPixelRatio:
-              parameters.containsKey('maxPixelRatio')
-                  ? double.parse(parameters['maxPixelRatio']!)
-                  : 1.0,
+          maxPixelRatio: parameters.containsKey('maxPixelRatio')
+              ? double.parse(parameters['maxPixelRatio']!)
+              : 1.0,
           debugPaint: parameters['debugPaint'] == 'true',
         );
         if (image == null) {
@@ -1547,10 +1544,11 @@ mixin WidgetInspectorService {
   /// or other packages.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
-    pubRootDirectories =
-        pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+    pubRootDirectories = pubRootDirectories
+        .map<String>((String directory) => Uri.parse(directory).path)
+        .toList();
 
-    final Set<String> directorySet = Set<String>.from(pubRootDirectories);
+    final Set<String> directorySet = Set<String>.of(pubRootDirectories);
     if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
@@ -1570,10 +1568,11 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
-    pubRootDirectories =
-        pubRootDirectories.map<String>((String directory) => Uri.parse(directory).path).toList();
+    pubRootDirectories = pubRootDirectories
+        .map<String>((String directory) => Uri.parse(directory).path)
+        .toList();
 
-    final Set<String> directorySet = Set<String>.from(_pubRootDirectories!);
+    final Set<String> directorySet = Set<String>.of(_pubRootDirectories!);
     directorySet.removeAll(pubRootDirectories);
 
     _pubRootDirectories = directorySet.toList();
@@ -1706,10 +1705,9 @@ mixin WidgetInspectorService {
     final List<_DiagnosticsPathNode> path = switch (value) {
       RenderObject() => _getRenderObjectParentChain(value, groupName)!,
       Element() => _getElementParentChain(value, groupName),
-      _ =>
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}'),
-        ]),
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}'),
+      ]),
     };
 
     InspectorSerializationDelegate createDelegate() =>
@@ -1820,7 +1818,7 @@ mixin WidgetInspectorService {
   /// Wrapper around `json.encode` that uses a ring of cached values to prevent
   /// the Dart garbage collector from collecting objects between when
   /// the value is returned over the VM service protocol and when the
-  /// separate observatory protocol command has to be used to retrieve its full
+  /// separate VM service protocol command has to be used to retrieve its full
   /// contents.
   //
   // TODO(jacobr): Replace this with a better solution once
@@ -1837,8 +1835,9 @@ mixin WidgetInspectorService {
     int maxDescendentsTruncatableNode,
   ) {
     if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
-      final List<DiagnosticsNode> localNodes =
-          nodes.where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value)).toList();
+      final List<DiagnosticsNode> localNodes = nodes
+          .where((DiagnosticsNode node) => _isValueCreatedByLocalProject(node.value))
+          .toList();
       if (localNodes.isNotEmpty) {
         return localNodes;
       }
@@ -2141,8 +2140,9 @@ mixin WidgetInspectorService {
         subtreeDepth: 1000000,
         summaryTree: isSummaryTree,
         service: this,
-        addAdditionalPropertiesCallback:
-            shouldAddAdditionalProperties ? combinedAddAdditionalPropertiesCallback : null,
+        addAdditionalPropertiesCallback: shouldAddAdditionalProperties
+            ? combinedAddAdditionalPropertiesCallback
+            : null,
       ),
       fullDetails: fullDetails,
     );
@@ -2217,8 +2217,9 @@ mixin WidgetInspectorService {
     if (object is! Element && object is! RenderObject) {
       return null;
     }
-    final RenderObject? renderObject =
-        object is Element ? _renderObjectOrNull(object) : (object as RenderObject?);
+    final RenderObject? renderObject = object is Element
+        ? _renderObjectOrNull(object)
+        : (object as RenderObject?);
     if (renderObject == null || !renderObject.attached) {
       return null;
     }
@@ -2277,10 +2278,7 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: (
-          DiagnosticsNode node,
-          InspectorSerializationDelegate delegate,
-        ) {
+        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
           final Object? value = node.value;
           final RenderObject? renderObject = value is Element ? _renderObjectOrNull(value) : null;
           if (renderObject == null) {
@@ -2804,8 +2802,7 @@ class _WidgetForTypeTests extends Widget {
 /// Select a location on your device or emulator and view what widgets and
 /// render object that best matches the location. An outline of the selected
 /// widget and terse summary information is shown on device with detailed
-/// information is shown in the observatory or in IntelliJ when using the
-/// Flutter Plugin.
+/// information is shown in Flutter DevTools.
 ///
 /// The inspector has a select mode and a view mode.
 ///
@@ -3558,16 +3555,14 @@ class _InspectorOverlayLayer extends Layer {
     // not take all the screen.
     canvas.translate(state.overlayRect.left, state.overlayRect.top);
 
-    final Paint fillPaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = _kHighlightedRenderObjectFillColor;
+    final Paint fillPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _kHighlightedRenderObjectFillColor;
 
-    final Paint borderPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0
-          ..color = _kHighlightedRenderObjectBorderColor;
+    final Paint borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = _kHighlightedRenderObjectBorderColor;
 
     // Highlight the selected renderObject.
     final Rect selectedPaintRect = state.selected.rect.deflate(0.5);
@@ -3628,13 +3623,12 @@ class _InspectorOverlayLayer extends Layer {
     if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
       _textPainter?.dispose();
-      _textPainter =
-          TextPainter()
-            ..maxLines = _kMaxTooltipLines
-            ..ellipsis = '...'
-            ..text = TextSpan(style: _messageStyle, text: message)
-            ..textDirection = textDirection
-            ..layout(maxWidth: maxWidth);
+      _textPainter = TextPainter()
+        ..maxLines = _kMaxTooltipLines
+        ..ellipsis = '...'
+        ..text = TextSpan(style: _messageStyle, text: message)
+        ..textDirection = textDirection
+        ..layout(maxWidth: maxWidth);
     }
 
     final Size tooltipSize =
@@ -3647,10 +3641,9 @@ class _InspectorOverlayLayer extends Layer {
       preferBelow: false,
     );
 
-    final Paint tooltipBackground =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = _kTooltipBackgroundColor;
+    final Paint tooltipBackground = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _kTooltipBackgroundColor;
     canvas.drawRect(
       Rect.fromPoints(tipOffset, tipOffset.translate(tooltipSize.width, tooltipSize.height)),
       tooltipBackground,
@@ -3738,7 +3731,11 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   String? _tooltipMessage;
 
-  bool _leftAligned = true;
+  /// Indicates whether the button is using the default alignment based on text direction.
+  ///
+  /// For LTR, the default alignment is on the left.
+  /// For RTL, the default alignment is on the right.
+  bool _usesDefaultAlignment = true;
 
   ValueNotifier<bool> get _selectionOnTapEnabled =>
       WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabled;
@@ -3750,7 +3747,11 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       return null;
     }
 
-    final String buttonLabel = 'Move to the ${_leftAligned ? 'right' : 'left'}';
+    final TextDirection textDirection = Directionality.of(context);
+
+    final String buttonLabel =
+        'Move to the ${_usesDefaultAlignment == (textDirection == TextDirection.ltr) ? 'right' : 'left'}';
+
     return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
@@ -3759,7 +3760,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           _onTooltipHidden();
         },
         semanticsLabel: buttonLabel,
-        isLeftAligned: _leftAligned,
+        usesDefaultAlignment: _usesDefaultAlignment,
       ),
       onTooltipVisible: () {
         _changeTooltipMessage(buttonLabel);
@@ -3820,24 +3821,25 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           painter: _ExitWidgetSelectionTooltipPainter(
             tooltipMessage: _tooltipMessage,
             buttonKey: _exitWidgetSelectionButtonKey,
-            isLeftAligned: _leftAligned,
+            usesDefaultAlignment: _usesDefaultAlignment,
           ),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (_leftAligned) selectionModeButtons,
+            if (_usesDefaultAlignment) selectionModeButtons,
             if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
-            if (!_leftAligned) selectionModeButtons,
+            if (!_usesDefaultAlignment) selectionModeButtons,
           ],
         ),
       ],
     );
 
-    return Positioned(
-      left: _leftAligned ? _kExitWidgetSelectionButtonMargin : null,
-      right: _leftAligned ? null : _kExitWidgetSelectionButtonMargin,
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
+      end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
       bottom: _kExitWidgetSelectionButtonMargin,
       child: buttonGroup,
     );
@@ -3869,7 +3871,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   void _changeButtonGroupAlignment() {
     if (mounted) {
       setState(() {
-        _leftAligned = !_leftAligned;
+        _usesDefaultAlignment = !_usesDefaultAlignment;
       });
     }
   }
@@ -3975,12 +3977,12 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
   _ExitWidgetSelectionTooltipPainter({
     required this.tooltipMessage,
     required this.buttonKey,
-    required this.isLeftAligned,
+    required this.usesDefaultAlignment,
   });
 
   final String? tooltipMessage;
   final GlobalKey buttonKey;
-  final bool isLeftAligned;
+  final bool usesDefaultAlignment;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -4000,18 +4002,16 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     const double tooltipPadding = 4.0;
     const double tooltipSpacing = 6.0;
 
-    final TextPainter tooltipTextPainter =
-        TextPainter()
-          ..maxLines = 1
-          ..ellipsis = '...'
-          ..text = TextSpan(text: tooltipMessage, style: _messageStyle)
-          ..textDirection = TextDirection.ltr
-          ..layout();
+    final TextPainter tooltipTextPainter = TextPainter()
+      ..maxLines = 1
+      ..ellipsis = '...'
+      ..text = TextSpan(text: tooltipMessage, style: _messageStyle)
+      ..textDirection = TextDirection.ltr
+      ..layout();
 
-    final Paint tooltipPaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = _kTooltipBackgroundColor;
+    final Paint tooltipPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _kTooltipBackgroundColor;
 
     // Determine tooltip position.
     final double buttonWidth = buttonRenderObject.paintBounds.width;
@@ -4021,8 +4021,9 @@ class _ExitWidgetSelectionTooltipPainter extends CustomPainter {
     final double tooltipWidth = textWidth + (tooltipPadding * 2);
     final double tooltipHeight = textHeight + (tooltipPadding * 2);
 
-    final double tooltipXOffset =
-        isLeftAligned ? 0 - buttonWidth : 0 - (tooltipWidth - buttonWidth);
+    final double tooltipXOffset = usesDefaultAlignment
+        ? 0 - buttonWidth
+        : 0 - (tooltipWidth - buttonWidth);
     final double tooltipYOffset = 0 - tooltipHeight - tooltipSpacing;
 
     // Draw tooltip background.
@@ -4144,12 +4145,11 @@ Iterable<DiagnosticsNode> _parseDiagnosticsNode(DiagnosticsNode node, ErrorSumma
           exception: error,
           stack: stack,
           library: 'widget inspector',
-          informationCollector:
-              () => <DiagnosticsNode>[
-                DiagnosticsNode.message(
-                  'This exception was caught while trying to describe the user-relevant code of another error.',
-                ),
-              ],
+          informationCollector: () => <DiagnosticsNode>[
+            DiagnosticsNode.message(
+              'This exception was caught while trying to describe the user-relevant code of another error.',
+            ),
+          ],
         ),
       );
     });

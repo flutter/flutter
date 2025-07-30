@@ -258,12 +258,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -282,12 +288,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
@@ -409,12 +421,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -441,12 +459,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
@@ -513,9 +537,8 @@ void main() {
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 300)),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) =>
-                      SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
+              builder: (BuildContext context, SliverConstraints constraint) =>
+                  SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
             ),
             SliverToBoxAdapter(child: SizedBox(key: childKey2, height: 100)),
           ],
@@ -566,13 +589,9 @@ void main() {
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[0]++)),
               ),
               SliverLayoutBuilder(
-                builder:
-                    (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: GestureDetector(onTap: () => hitCounts[1]++),
-                      ),
-                    ),
+                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                  child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[1]++)),
+                ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -647,13 +666,9 @@ void main() {
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[0]++)),
             ),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 100,
-                      child: GestureDetector(onTap: () => hitCounts[1]++),
-                    ),
-                  ),
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[1]++)),
+              ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -840,10 +855,9 @@ void main() {
     (WidgetTester tester) async {
       final OverlayEntry overlayEntry1 = OverlayEntry(
         maintainState: true,
-        builder:
-            (BuildContext context) => LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
-            ),
+        builder: (BuildContext context) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+        ),
       );
       // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
       final OverlayEntry overlayEntry2 = OverlayEntry(
@@ -852,16 +866,14 @@ void main() {
         builder: (BuildContext context) => Container(),
       );
       addTearDown(
-        () =>
-            overlayEntry1
-              ..remove()
-              ..dispose(),
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
       );
       addTearDown(
-        () =>
-            overlayEntry2
-              ..remove()
-              ..dispose(),
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         Directionality(
@@ -901,16 +913,14 @@ void main() {
         builder: (BuildContext context) => Container(),
       );
       addTearDown(
-        () =>
-            overlayEntry1
-              ..remove()
-              ..dispose(),
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
       );
       addTearDown(
-        () =>
-            overlayEntry2
-              ..remove()
-              ..dispose(),
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         Directionality(
@@ -954,16 +964,14 @@ void main() {
       builder: (BuildContext context) => const Placeholder(),
     );
     addTearDown(
-      () =>
-          overlayEntry1
-            ..remove()
-            ..dispose(),
+      () => overlayEntry1
+        ..remove()
+        ..dispose(),
     );
     addTearDown(
-      () =>
-          overlayEntry2
-            ..remove()
-            ..dispose(),
+      () => overlayEntry2
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(
       Directionality(
@@ -983,6 +991,60 @@ void main() {
     expect(rebuilt, isFalse);
     await tester.pump();
     expect(rebuilt, isTrue);
+  });
+
+  testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode();
+    final TextEditingController controller = TextEditingController();
+    addTearDown(focusNode.dispose);
+    addTearDown(controller.dispose);
+    final Widget layoutBuilderWithParent = SizedBox(
+      key: GlobalKey(),
+      child: LayoutBuilder(
+        builder: (BuildContext _, BoxConstraints _) {
+          // The text field keeps the widget alive in the SliverList.
+          return EditableText(
+            focusNode: focusNode,
+            backgroundCursorColor: const Color(0xFFFFFFFF),
+            cursorColor: const Color(0xFFFFFFFF),
+            style: const TextStyle(),
+            controller: controller,
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 60), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 6000), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
   });
 }
 

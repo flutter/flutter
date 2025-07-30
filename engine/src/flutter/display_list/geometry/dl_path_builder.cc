@@ -115,7 +115,7 @@ DlPathBuilder& DlPathBuilder::AddRoundSuperellipse(
   BuilderReceiver receiver(*this);
   impeller::RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(),
                                                     rse.GetRadii())
-      .AddToPath(receiver);
+      .Dispatch(receiver);
   return *this;
 }
 

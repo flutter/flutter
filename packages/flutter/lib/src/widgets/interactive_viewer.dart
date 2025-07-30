@@ -12,7 +12,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
+import 'package:flutter/rendering.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -564,8 +565,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation = translation;
     }
 
-    final Matrix4 nextMatrix =
-        matrix.clone()..translate(alignedTranslation.dx, alignedTranslation.dy);
+    final Matrix4 nextMatrix = matrix.clone()
+      ..translateByDouble(alignedTranslation.dx, alignedTranslation.dy, 0, 1);
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -605,10 +606,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix =
-        matrix.clone()..setTranslation(
-          Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0),
-        );
+    final Matrix4 correctedMatrix = matrix.clone()
+      ..setTranslation(Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0));
 
     // Double check that the corrected translation fits.
     final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
@@ -658,7 +657,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
     final double clampedTotalScale = clampDouble(totalScale, widget.minScale, widget.maxScale);
     final double clampedScale = clampedTotalScale / currentScale;
-    return matrix.clone()..scale(clampedScale);
+    return matrix.clone()..scaleByDouble(clampedScale, clampedScale, clampedScale, 1);
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -669,9 +668,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
     final Offset focalPointScene = _transformer.toScene(focalPoint);
     return matrix.clone()
-      ..translate(focalPointScene.dx, focalPointScene.dy)
+      ..translateByDouble(focalPointScene.dx, focalPointScene.dy, 0, 1)
       ..rotateZ(-rotation)
-      ..translate(-focalPointScene.dx, -focalPointScene.dy);
+      ..translateByDouble(-focalPointScene.dx, -focalPointScene.dy, 0, 1);
   }
 
   // Returns true iff the given _GestureType is enabled.
@@ -1234,11 +1233,10 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // Find the axis aligned bounding box for the rect rotated about its center by
 // the given amount.
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-  final Matrix4 rotationMatrix =
-      Matrix4.identity()
-        ..translate(rect.size.width / 2, rect.size.height / 2)
-        ..rotateZ(rotation)
-        ..translate(-rect.size.width / 2, -rect.size.height / 2);
+  final Matrix4 rotationMatrix = Matrix4.identity()
+    ..translateByDouble(rect.size.width / 2, rect.size.height / 2, 0, 1)
+    ..rotateZ(rotation)
+    ..translateByDouble(-rect.size.width / 2, -rect.size.height / 2, 0, 1);
   final Quad boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),

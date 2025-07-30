@@ -209,6 +209,7 @@ class ContentContext {
   PipelineRef GetRadialGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const;
+  PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const;
@@ -321,8 +322,8 @@ class ContentContext {
     };
 
     struct Equal {
-      constexpr bool operator()(const RuntimeEffectPipelineKey& lhs,
-                                const RuntimeEffectPipelineKey& rhs) const {
+      inline bool operator()(const RuntimeEffectPipelineKey& lhs,
+                             const RuntimeEffectPipelineKey& rhs) const {
         return lhs.unique_entrypoint_name == rhs.unique_entrypoint_name &&
                lhs.options.ToKey() == rhs.options.ToKey();
       }

@@ -501,7 +501,6 @@ static void TestPathDispatchOneOfEachVerb(const DlPath& path) {
     // Closing LineTo added implicitly to return to first point
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -551,7 +550,6 @@ static void TestPathDispatchConicToQuads(
                 QuadTo(PointEq(quad_points[0]), PointEq(quad_points[1])));
     EXPECT_CALL(mock_receiver,
                 QuadTo(PointEq(quad_points[2]), PointEq(quad_points[3])));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -658,7 +656,6 @@ static void TestPathDispatchUnclosedTriangle(const DlPath& path) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10), false));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(20, 10)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 20)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -693,7 +690,6 @@ static void TestPathDispatchClosedTriangle(const DlPath& path) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 20)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, 10)));
     EXPECT_CALL(mock_receiver, Close());
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -736,7 +732,6 @@ static void TestPathDispatchMixedCloseTriangles(const DlPath& path) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(210, 10), false));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(220, 10)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(210, 20)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
@@ -788,7 +783,6 @@ static void TestPathDispatchImplicitMoveAfterClose(const DlPath& path) {
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10), false));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(-20, 10)));
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(10, -20)));
-    EXPECT_CALL(mock_receiver, PathEnd());
   }
 
   path.Dispatch(mock_receiver);
