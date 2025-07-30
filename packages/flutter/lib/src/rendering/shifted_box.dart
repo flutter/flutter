@@ -74,31 +74,6 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return null;
-    }
-    final double? result = child.getDryBaseline(constraints, baseline);
-    if (result == null) {
-      return null;
-    }
-    // Get the child's dry layout to calculate the offset
-    final Size childSize = child.getDryLayout(constraints);
-    final Size size = computeDryLayout(constraints);
-    // Calculate the offset similar to how computeDistanceToActualBaseline works
-    // but using dry layout. We need to account for the child's position within
-    // the parent's coordinate space.
-    final Offset childOffset = switch (this) {
-      final RenderAligningShiftedBox aligningBox => aligningBox.resolvedAlignment.alongOffset(
-        size - childSize as Offset,
-      ),
-      _ => Offset.zero, // For other shifted box types, assume no offset
-    };
-    return result + childOffset.dy;
-  }
-
-  @override
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = this.child;
     if (child != null) {
@@ -387,6 +362,27 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    // Get the child's dry layout to calculate the offset
+    final Size childSize = child.getDryLayout(constraints);
+    final Size size = computeDryLayout(constraints);
+    // Calculate the offset similar to how computeDistanceToActualBaseline works
+    // but using dry layout. We need to account for the child's position within
+    // the parent's coordinate space.
+    final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
+
+    return result + childOffset.dy;
   }
 }
 
