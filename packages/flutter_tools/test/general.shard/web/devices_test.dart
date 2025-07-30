@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -384,25 +385,40 @@ void main() {
     expect((await macosWebDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
   });
 
-  testWithoutContext('HTTP web launch url is not invalid', () async {
-    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+  @isTest
+  void testWebLaunchUrl(String description, {required String url, required dynamic matcher}) {
+    // ignore: unnecessary_parenthesis – Prevent IDEs from showing a run button.
+    (testWithoutContext)(description, () async {
+      final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
 
-    expect(chromiumDevice.isLaunchUrlValid('http://localhost:3000'), true);
-    expect(chromiumDevice.isLaunchUrlValid('http://127.0.0.1:3000/'), true);
-  });
+      await expectLater(
+        () => chromiumDevice.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webLaunchUrl: url),
+          platformArgs: <String, Object?>{'uri': url},
+        ),
+        matcher,
+      );
+    });
+  }
 
-  testWithoutContext('HTTPS web launch url is not invalid', () async {
-    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
+  testWebLaunchUrl(
+    'HTTP web launch url is not invalid',
+    url: 'http://localhost:3000',
+    matcher: returnsNormally,
+  );
 
-    expect(chromiumDevice.isLaunchUrlValid('https://localhost:3000'), true);
-    expect(chromiumDevice.isLaunchUrlValid('https://google.com'), true);
-  });
+  testWebLaunchUrl(
+    'HTTPS web launch url is not invalid',
+    url: 'https://localhost:3000',
+    matcher: returnsNormally,
+  );
 
-  testWithoutContext('Non-HTTP web launch url scheme is invalid', () async {
-    final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
-
-    expect(chromiumDevice.isLaunchUrlValid('file://path'), false);
-  });
+  testWebLaunchUrl(
+    'Non-HTTP web launch url scheme is invalid',
+    url: 'file://path',
+    matcher: throwsToolExit(message: '"file://path" is not a valid HTTP URL.'),
+  );
 }
 
 /// A test implementation of the [ChromiumLauncher] that launches a fixed instance.
