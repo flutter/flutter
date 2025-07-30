@@ -64,8 +64,8 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 Set-Content -Path $flutterRoot/bin/cache/engine.stamp -Value $engineVersion -Encoding Ascii
 
 # The realm on CI is passed in.
-if ($Env:FLUTTER_REALM) {
-    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value $Env:FLUTTER_REALM -Encoding Ascii
+if ($env:FLUTTER_REALM) {
+    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value $env:FLUTTER_REALM -Encoding Ascii
 } else {
     Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value "" -Encoding Ascii
 }
