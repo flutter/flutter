@@ -4650,14 +4650,14 @@ base class Shader extends NativeFieldWrapperClass1 {
 ///
 /// ## For Gradients
 ///
-/// Gradients are defined within specific bounds, and `TileMode` controls how colors
+/// Gradients are defined with some specific bounds creating an inner area and an outer area, and `TileMode` controls how colors
 /// are determined for areas outside these bounds:
 ///
 /// - **Linear gradients**: The bounds is the line segment connecting two points
 ///   (typically referred to as `start` and `end` in the gradient API). Colors
 ///   outside this line are determined by the `TileMode`.
 ///
-/// - **Radial gradients**: The bounds is the disc defined by a center and radius.
+/// - **Radial gradients**: The inner area is the disc defined by a center and radius.
 ///   Colors outside this disc are determined by the `TileMode`.
 ///
 /// - **Sweep gradients**: The bounds is the angular sector between `startAngle`
