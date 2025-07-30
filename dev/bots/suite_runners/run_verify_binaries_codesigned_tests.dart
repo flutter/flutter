@@ -75,8 +75,8 @@ List<String> binariesWithEntitlements(String flutterRoot) {
     'artifacts/engine/ios-release/gen_snapshot_arm64',
     'artifacts/engine/ios/gen_snapshot_arm64',
     'dart-sdk/bin/dart',
-    'dart-sdk/bin/dartvm',
     'dart-sdk/bin/dartaotruntime',
+    'dart-sdk/bin/dartvm',
     'dart-sdk/bin/utils/gen_snapshot',
     'dart-sdk/bin/utils/wasm-opt',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
