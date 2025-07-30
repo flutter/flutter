@@ -36,8 +36,18 @@ class StretchEffect extends StatelessWidget {
   /// The overscroll strength applied for the stretching effect.
   ///
   /// The value should be between -1.0 and 1.0 inclusive.
-  /// For horizontal axis, Positive values apply a pull from
-  /// left to right, while negative values pull from right to left.
+  ///
+  /// For the horizontal axis:
+  /// - Positive values apply a pull/stretch from left to right,
+  ///   where 1.0 represents the maximum stretch to the right.
+  /// - Negative values apply a pull/stretch from right to left,
+  ///   where -1.0 represents the maximum stretch to the left.
+  ///
+  /// For the vertical axis:
+  /// - Positive values apply a pull/stretch from top to bottom,
+  ///   where 1.0 represents the maximum stretch downward.
+  /// - Negative values apply a pull/stretch from bottom to top,
+  ///   where -1.0 represents the maximum stretch upward.
   ///
   /// {@tool snippet}
   /// This example shows how to set the horizontal stretch strength to pull right.

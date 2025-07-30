@@ -126,31 +126,27 @@ void main() {
   const float norm_stretch_affected_dist = 1.0;
   const float norm_inverse_stretch_affected_dist = 1.0;
 
-  if (isVertical) {
-    out_u_norm = in_u_norm;
-    out_v_norm = compute_streched_effect(
-      in_v_norm,
-      overscroll,
-      norm_stretch_affected_dist,
-      norm_inverse_stretch_affected_dist,
-      norm_distance_stretched,
-      norm_dist_diff,
-      u_interpolation_strength,
-      norm_viewport
-    );
-  } else {
-    out_v_norm = in_v_norm;
-    out_u_norm = compute_streched_effect(
-      in_u_norm,
-      overscroll,
-      norm_stretch_affected_dist,
-      norm_inverse_stretch_affected_dist,
-      norm_distance_stretched,
-      norm_dist_diff,
-      u_interpolation_strength,
-      norm_viewport
-    );
-  }
+  out_u_norm = isVertical ? in_u_norm : compute_streched_effect(
+    in_u_norm,
+    overscroll,
+    norm_stretch_affected_dist,
+    norm_inverse_stretch_affected_dist,
+    norm_distance_stretched,
+    norm_dist_diff,
+    u_interpolation_strength,
+    norm_viewport
+  );
+
+  out_v_norm = isVertical ? compute_streched_effect(
+    in_v_norm,
+    overscroll,
+    norm_stretch_affected_dist,
+    norm_inverse_stretch_affected_dist,
+    norm_distance_stretched,
+    norm_dist_diff,
+    u_interpolation_strength,
+    norm_viewport
+  ) : in_v_norm;
 
   uv.x = out_u_norm;
   #ifdef IMPELLER_TARGET_OPENGLES
