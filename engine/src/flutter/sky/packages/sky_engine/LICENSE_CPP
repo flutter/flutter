@@ -4263,6 +4263,178 @@ perfetto
    See the License for the specific language governing permissions and
    limitations under the License.
 --------------------------------------------------------------------------------
+freetype2
+
+                    The FreeType Project LICENSE
+                    ----------------------------
+
+                            2006-Jan-27
+
+                    Copyright 1996-2002, 2006 by
+          David Turner, Robert Wilhelm, and Werner Lemberg
+
+
+
+Introduction
+============
+
+  The FreeType  Project is distributed in  several archive packages;
+  some of them may contain, in addition to the FreeType font engine,
+  various tools and  contributions which rely on, or  relate to, the
+  FreeType Project.
+
+  This  license applies  to all  files found  in such  packages, and
+  which do not  fall under their own explicit  license.  The license
+  affects  thus  the  FreeType   font  engine,  the  test  programs,
+  documentation and makefiles, at the very least.
+
+  This  license   was  inspired  by  the  BSD,   Artistic,  and  IJG
+  (Independent JPEG  Group) licenses, which  all encourage inclusion
+  and  use of  free  software in  commercial  and freeware  products
+  alike.  As a consequence, its main points are that:
+
+    o We don't promise that this software works. However, we will be
+      interested in any kind of bug reports. (`as is' distribution)
+
+    o You can  use this software for whatever you  want, in parts or
+      full form, without having to pay us. (`royalty-free' usage)
+
+    o You may not pretend that  you wrote this software.  If you use
+      it, or  only parts of it,  in a program,  you must acknowledge
+      somewhere  in  your  documentation  that  you  have  used  the
+      FreeType code. (`credits')
+
+  We  specifically  permit  and  encourage  the  inclusion  of  this
+  software, with  or without modifications,  in commercial products.
+  We  disclaim  all warranties  covering  The  FreeType Project  and
+  assume no liability related to The FreeType Project.
+
+
+  Finally,  many  people  asked  us  for  a  preferred  form  for  a
+  credit/disclaimer to use in compliance with this license.  We thus
+  encourage you to use the following text:
+
+   """
+    Portions of this software are copyright © <year> The FreeType
+    Project (www.freetype.org).  All rights reserved.
+   """
+
+  Please replace <year> with the value from the FreeType version you
+  actually use.
+
+
+Legal Terms
+===========
+
+0. Definitions
+--------------
+
+  Throughout this license,  the terms `package', `FreeType Project',
+  and  `FreeType  archive' refer  to  the  set  of files  originally
+  distributed  by the  authors  (David Turner,  Robert Wilhelm,  and
+  Werner Lemberg) as the `FreeType Project', be they named as alpha,
+  beta or final release.
+
+  `You' refers to  the licensee, or person using  the project, where
+  `using' is a generic term including compiling the project's source
+  code as  well as linking it  to form a  `program' or `executable'.
+  This  program is  referred to  as  `a program  using the  FreeType
+  engine'.
+
+  This  license applies  to all  files distributed  in  the original
+  FreeType  Project,   including  all  source   code,  binaries  and
+  documentation,  unless  otherwise  stated   in  the  file  in  its
+  original, unmodified form as  distributed in the original archive.
+  If you are  unsure whether or not a particular  file is covered by
+  this license, you must contact us to verify this.
+
+  The FreeType  Project is copyright (C) 1996-2000  by David Turner,
+  Robert Wilhelm, and Werner Lemberg.  All rights reserved except as
+  specified below.
+
+1. No Warranty
+--------------
+
+  THE FREETYPE PROJECT  IS PROVIDED `AS IS' WITHOUT  WARRANTY OF ANY
+  KIND, EITHER  EXPRESS OR IMPLIED,  INCLUDING, BUT NOT  LIMITED TO,
+  WARRANTIES  OF  MERCHANTABILITY   AND  FITNESS  FOR  A  PARTICULAR
+  PURPOSE.  IN NO EVENT WILL ANY OF THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE  FOR ANY DAMAGES CAUSED  BY THE USE OR  THE INABILITY TO
+  USE, OF THE FREETYPE PROJECT.
+
+2. Redistribution
+-----------------
+
+  This  license  grants  a  worldwide, royalty-free,  perpetual  and
+  irrevocable right  and license to use,  execute, perform, compile,
+  display,  copy,   create  derivative  works   of,  distribute  and
+  sublicense the  FreeType Project (in  both source and  object code
+  forms)  and  derivative works  thereof  for  any  purpose; and  to
+  authorize others  to exercise  some or all  of the  rights granted
+  herein, subject to the following conditions:
+
+    o Redistribution of  source code  must retain this  license file
+      (`FTL.TXT') unaltered; any  additions, deletions or changes to
+      the original  files must be clearly  indicated in accompanying
+      documentation.   The  copyright   notices  of  the  unaltered,
+      original  files must  be  preserved in  all  copies of  source
+      files.
+
+    o Redistribution in binary form must provide a  disclaimer  that
+      states  that  the software is based in part of the work of the
+      FreeType Team,  in  the  distribution  documentation.  We also
+      encourage you to put an URL to the FreeType web page  in  your
+      documentation, though this isn't mandatory.
+
+  These conditions  apply to any  software derived from or  based on
+  the FreeType Project,  not just the unmodified files.   If you use
+  our work, you  must acknowledge us.  However, no  fee need be paid
+  to us.
+
+3. Advertising
+--------------
+
+  Neither the  FreeType authors and  contributors nor you  shall use
+  the name of the  other for commercial, advertising, or promotional
+  purposes without specific prior written permission.
+
+  We suggest,  but do not require, that  you use one or  more of the
+  following phrases to refer  to this software in your documentation
+  or advertising  materials: `FreeType Project',  `FreeType Engine',
+  `FreeType library', or `FreeType Distribution'.
+
+  As  you have  not signed  this license,  you are  not  required to
+  accept  it.   However,  as  the FreeType  Project  is  copyrighted
+  material, only  this license, or  another one contracted  with the
+  authors, grants you  the right to use, distribute,  and modify it.
+  Therefore,  by  using,  distributing,  or modifying  the  FreeType
+  Project, you indicate that you understand and accept all the terms
+  of this license.
+
+4. Contacts
+-----------
+
+  There are two mailing lists related to FreeType:
+
+    o freetype@nongnu.org
+
+      Discusses general use and applications of FreeType, as well as
+      future and  wanted additions to the  library and distribution.
+      If  you are looking  for support,  start in  this list  if you
+      haven't found anything to help you in the documentation.
+
+    o freetype-devel@nongnu.org
+
+      Discusses bugs,  as well  as engine internals,  design issues,
+      specific licenses, porting, etc.
+
+  Our home page can be found at
+
+    https://www.freetype.org
+
+
+--- end of FTL.TXT ---
+--------------------------------------------------------------------------------
 etc_decoder
 
  * Copyright (c) 2020-2022 Hans-Kristian Arntzen
@@ -5121,20 +5293,6 @@ angle
 // LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
---------------------------------------------------------------------------------
-vulkan-deps
-
-<!--
-Copyright 2023 The Khronos Group Inc.
-Copyright 2023 Valve Corporation
-Copyright 2023 LunarG, Inc.
-
-SPDX-License-Identifier: Apache-2.0
--->
-
-Files in this repository fall under the `Apache-2.0` license.
-
-Full license text of these licenses is available at https://opensource.org/licenses/Apache-2.0
 --------------------------------------------------------------------------------
 libcxx
 libcxxabi
@@ -7867,75 +8025,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used
-modified and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-Copyright 2003 Huw D M Davies for Codeweavers
-Copyright 2007 Dmitry Timoshkov for Codeweavers
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-Copyright 2007 Dmitry Timoshkov for Codeweavers
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 1996-2022 by
-Just van Rossum, David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 icu
 
@@ -11105,17 +11194,6 @@ authorization of the copyright holder.
 --------------------------------------------------------------------------------
 freetype2
 
-Copyright (C) 2000-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
 Copyright (C) 2001, 2002 by
 Francesco Zappa Nardelli
 
@@ -12241,28 +12319,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2001-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used
-modified and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2001-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 icu
 
@@ -14287,39 +14343,6 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2002-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2002-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2002-2022 by
-Roberto Alameda.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 icu
 
 Copyright (C) 2003 - 2008, International Business Machines Corporation and
@@ -15208,29 +15231,6 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2003-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2003-2022 by
-Masatake YAMATO, Redhat K.K.,
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 icu
 
 Copyright (C) 2004 - 2008, International Business Machines Corporation and
@@ -15647,113 +15647,6 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-Albert Chin-A-Young.
-
-based on code in `src/gzip/ftgzip.c'
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-David Turner, Robert Wilhelm, Werner Lemberg and George Williams.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-David Turner, Robert Wilhelm, Werner Lemberg, and George Williams.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-Masatake YAMATO and Redhat K.K.
-
-FT_Raccess_Get_HeaderInfo() and raccess_guess_darwin_hfsplus() are
-derived from ftobjs.c.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-Masatake YAMATO and Redhat K.K.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-Masatake YAMATO, Red Hat K.K.,
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-Masatake YAMATO, Redhat K.K,
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2004-2022 by
-suzuki toshiya, Masatake YAMATO, Red Hat K.K.,
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 icu
 
 Copyright (C) 2005, International Business Machines
@@ -16086,65 +15979,6 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2005-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-Copyright 2013 by Google, Inc.
-Google Author(s): Behdad Esfahbod.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2005-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used
-modified and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2005-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2005-2022 by
-David Turner.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2005-2022 by
-suzuki toshiya, Masatake YAMATO, Red Hat K.K.,
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 icu
 
 Copyright (C) 2006 International Business Machines Corporation        *
@@ -16329,17 +16163,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2006-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 icu
 
@@ -16893,74 +16716,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-Written by George Williams.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-David Turner.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-Dereg Clegg and Michael Toftdal.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-Derek Clegg and Michael Toftdal.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2007-2022 by
-Rahul Bhalerao <rahul.bhalerao@redhat.com>, <b.rahul.pm@gmail.com>.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 swiftshader
 
@@ -17676,28 +17431,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2008-2022 by
-David Turner, Robert Wilhelm, Werner Lemberg, and suzuki toshiya.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2008-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 icu
 
@@ -18660,17 +18393,6 @@ not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2009-2022 by
-Oran Agra and Mickey Gabel.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 icu
 
 Copyright (C) 2010 , Yahoo! Inc.
@@ -19385,41 +19107,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2010-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2010-2022 by
-Joel Klinghed.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2010-2022 by
-Joel Klinghed.
-
-based on `src/gzip/ftgzip.c'
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 harfbuzz
 
@@ -20234,17 +19921,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2012-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 harfbuzz
 
 Copyright (C) 2013  Google, Inc.
@@ -20837,29 +20513,6 @@ Except as contained in this notice, the name of a copyright holder shall
 not be used in advertising or otherwise to promote the sale, use or other
 dealings in these Data Files or Software without prior written
 authorization of the copyright holder.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2013-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2013-2022 by
-Google, Inc.
-Written by Stuart Gill and Behdad Esfahbod.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 skia
 
@@ -22690,17 +22343,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2016-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 zlib
 
 Copyright (C) 2017 ARM, Inc.
@@ -22851,17 +22493,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2017-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 glslang
 vulkan-deps
 
@@ -22933,54 +22564,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2018-2022 by
-Armin Hasitzka, David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2018-2022 by
-David Turner, Robert Wilhelm, Dominik Röttsches, and Werner Lemberg.
-
-Originally written by Shao Yu Zhang <shaozhang@fb.com>.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2018-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-Originally written by Shao Yu Zhang <shaozhang@fb.com>.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2018-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 vulkan-deps
 
 Copyright (C) 2019 Google Inc.
@@ -23031,17 +22614,6 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2019-2022 by
-Nikhil Ramakrishnan, David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 shaderc
 
@@ -23145,30 +22717,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2020-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2020-2022 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-Written by Anuj Verma.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 dart
 perfetto
 
@@ -23185,17 +22733,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---------------------------------------------------------------------------------
-freetype2
-
-Copyright (C) 2022 by
-David Turner, Robert Wilhelm, Werner Lemberg, and Moazin Khatti.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
 --------------------------------------------------------------------------------
 glslang
 vulkan-deps
@@ -26736,9 +26273,9 @@ misrepresented as being the original software.
 3. This notice may not be removed or altered from any source
 distribution.
 --------------------------------------------------------------------------------
-
 accessibility
 dart
+flutter
 icu
 skia
 
@@ -31324,17 +30861,6 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
 OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --------------------------------------------------------------------------------
-freetype2
-
-Copyright 2001, 2012 by
-David Turner, Robert Wilhelm, and Werner Lemberg.
-
-This file is part of the FreeType project, and may only be used,
-modified, and distributed under the terms of the FreeType project
-license, LICENSE.TXT.  By continuing to use, modify, or distribute
-this file you indicate that you have read the license and
-understand and accept it fully.
---------------------------------------------------------------------------------
 angle
 
 Copyright 2002 The ANGLE Project Authors. All rights reserved.
@@ -32100,7 +31626,6 @@ Copyright 2013 The Chromium Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-
 accessibility
 cross_file
 engine
@@ -32111,6 +31636,7 @@ file_selector_macos
 file_selector_platform_interface
 file_selector_web
 file_selector_windows
+flutter
 flutter_lints
 flutter_markdown
 plugin_platform_interface
@@ -32159,9 +31685,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-
 accessibility
 dart
+flutter
 spring_animation
 tonic
 web_test_fonts
@@ -32171,7 +31697,7 @@ Copyright 2013 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2013 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -32397,7 +31923,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -32788,28 +32314,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
---------------------------------------------------------------------------------
-vulkan-deps
-
-Copyright 2015-2023 The Khronos Group Inc.
-
-Files in this repository fall under one of these licenses:
-
-- `Apache-2.0`
-- `MIT`
-
-Note: With the exception of `parse_dependency.py` the files using `MIT` license
-also fall under `Apache-2.0`. Example:
-
-```
-SPDX-License-Identifier: Apache-2.0 OR MIT
-```
-
-Full license text of these licenses is available at:
-
-  * Apache-2.0: https://opensource.org/licenses/Apache-2.0
-  * MIT: https://opensource.org/licenses/MIT
-
 --------------------------------------------------------------------------------
 skia
 
@@ -34054,7 +33558,7 @@ Copyright 2019 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file 
 --------------------------------------------------------------------------------
-
+flutter
 
 Copyright 2019 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
@@ -34909,7 +34413,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-
+flutter
 skia
 
 Copyright 2022 Google LLC
@@ -45013,40 +44517,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 
-File: aclocal.m4 (only for ICU4C)
-Section: pkg.m4 - Macros to locate and utilise pkg-config.
-
-
-Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
-Copyright © 2012-2015 Dan Nicholson <dbn.lists@gmail.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.
-
-As a special exception to the GNU General Public License, if you
-distribute this file as part of a program that contains a
-configuration script generated by Autoconf, you may include it under
-the same distribution terms that you use for the rest of that
-program.
-
-
-(The condition for the exception is fulfilled because
-ICU4C includes a configuration script generated by Autoconf,
-namely the `configure` script.)
-
-----------------------------------------------------------------------
 
 File: install-sh (only for ICU4C)
 
@@ -46083,64 +45553,6 @@ Copyright (c) 2023      Owain Davies <owaind@bath.edu>
 Copyright (c) 2023-2024 Sony Corporation / Snild Dolkow <snild@sony.com>
 Copyright (c) 2024-2025 Berkay Eren Ürün <berkay.ueruen@siemens.com>
 Copyright (c) 2024      Hanno Böck <hanno@gentoo.org>
-Licensed under the MIT license:
-
-Permission is  hereby granted,  free of charge,  to any  person obtaining
-a  copy  of  this  software   and  associated  documentation  files  (the
-"Software"),  to  deal in  the  Software  without restriction,  including
-without  limitation the  rights  to use,  copy,  modify, merge,  publish,
-distribute, sublicense, and/or sell copies of the Software, and to permit
-persons  to whom  the Software  is  furnished to  do so,  subject to  the
-following conditions:
-
-The above copyright  notice and this permission notice  shall be included
-in all copies or substantial portions of the Software.
-
-THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY  OF  ANY  KIND,
-EXPRESS  OR IMPLIED,  INCLUDING  BUT  NOT LIMITED  TO  THE WARRANTIES  OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-NO EVENT SHALL THE AUTHORS OR  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-USE OR OTHER DEALINGS IN THE SOFTWARE.
---------------------------------------------------------------------------------
-expat
-
-internal.h
-
-Internal definitions used by Expat.  This is not needed to compile
-client code.
-
-The following calling convention macros are defined for frequently
-called functions:
-
-FASTCALL    - Used for those internal functions that have a simple
-body and a low number of arguments and local variables.
-
-PTRCALL     - Used for functions called though function pointers.
-
-PTRFASTCALL - Like PTRCALL, but for low number of arguments.
-
-inline      - Used for selected internal functions for which inlining
-may improve performance on some platforms.
-
-Note: Use of these macros is based on judgement, not hard rules,
-and therefore subject to change.
-__  __            _
-___\ \/ /_ __   __ _| |_
-/ _ \\  /| '_ \ / _` | __|
-|  __//  \| |_) | (_| | |_
-\___/_/\_\ .__/ \__,_|\__|
-|_| XML parser
-
-Copyright (c) 2002-2003 Fred L. Drake, Jr. <fdrake@users.sourceforge.net>
-Copyright (c) 2002-2006 Karl Waclawek <karl@waclawek.net>
-Copyright (c) 2003      Greg Stein <gstein@users.sourceforge.net>
-Copyright (c) 2016-2025 Sebastian Pipping <sebastian@pipping.org>
-Copyright (c) 2018      Yury Gribov <tetra2005@gmail.com>
-Copyright (c) 2019      David Loffredo <loffredo@steptools.com>
-Copyright (c) 2023-2024 Sony Corporation / Snild Dolkow <snild@sony.com>
-Copyright (c) 2024      Taichi Haradaguchi <20001722@ymail.ne.jp>
 Licensed under the MIT license:
 
 Permission is  hereby granted,  free of charge,  to any  person obtaining

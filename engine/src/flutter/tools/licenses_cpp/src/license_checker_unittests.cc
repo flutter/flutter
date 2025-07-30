@@ -791,3 +791,35 @@ v2.0
 
 )notices");
 }
+
+TEST_F(LicenseCheckerTest, WorkingDirectoryTrailingSlash) {
+  absl::StatusOr<fs::path> temp_path = MakeTempDir();
+  ASSERT_TRUE(temp_path.ok());
+
+  absl::StatusOr<Data> data = MakeTestData();
+  ASSERT_TRUE(data.ok());
+
+  fs::current_path(*temp_path);
+  ASSERT_TRUE(WriteFile(kHeader, *temp_path / "main.cc").ok());
+  ASSERT_TRUE(WriteFile(kLicense, *temp_path / "LICENSE").ok());
+  Repo repo;
+  repo.Add("main.cc");
+  repo.Add("LICENSE");
+  ASSERT_TRUE(repo.Commit().ok());
+
+  std::stringstream ss;
+  std::string working_dir = temp_path->string() + "/";
+  std::vector<absl::Status> errors =
+      LicenseChecker::Run(working_dir, ss, *data);
+  EXPECT_EQ(errors.size(), 0u) << (errors.empty() ? "" : errors[0].message());
+
+  EXPECT_EQ(ss.str(), R"output(engine
+
+Copyright Test
+--------------------------------------------------------------------------------
+engine
+
+Test License
+v2.0
+)output");
+}

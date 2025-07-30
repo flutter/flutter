@@ -26,9 +26,9 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-const std::array<std::string_view, 7> kLicenseFileNames = {
+const std::array<std::string_view, 8> kLicenseFileNames = {
     "LICENSE",     "LICENSE.TXT", "LICENSE.txt", "LICENSE.md",
-    "LICENSE.MIT", "COPYING",     "License.txt"};
+    "LICENSE.MIT", "COPYING",     "License.txt", "docs/FTL.TXT"};
 
 RE2 kHeaderLicense(LicenseChecker::kHeaderLicenseRegex);
 
@@ -139,11 +139,22 @@ struct Package {
   bool is_root_package;
 };
 
+/// This makes sure trailing slashes on paths are treated the same.
+/// Example:
+///   f("/foo/") == f("/foo") == "foo"
+std::string GetDirFilename(const fs::path& working_dir) {
+  std::string result = working_dir.filename();
+  if (result.empty()) {
+    result = working_dir.parent_path().filename();
+  }
+  return result;
+}
+
 Package GetPackage(const Data& data,
                    const fs::path& working_dir,
                    const fs::path& relative_path) {
   Package result = {
-      .name = working_dir.filename(),
+      .name = GetDirFilename(working_dir),
       .license_file = FindLicense(data, working_dir, "."),
       .is_root_package = true,
   };
@@ -367,7 +378,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
 
   bool did_find_copyright = false;
   fs::path relative_path = fs::relative(full_path, working_dir_path);
-  VLOG(2) << relative_path;
+  VLOG(2) << "Process: " << relative_path;
   if (!data.include_filter.Matches(relative_path.string()) ||
       data.exclude_filter.Matches(relative_path.string())) {
     VLOG(1) << "EXCLUDE: " << relative_path.lexically_normal();
@@ -385,6 +396,8 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
         errors->emplace_back(std::move(match_status));
       }
     }
+  } else {
+    VLOG(3) << "No license file: " << relative_path.lexically_normal();
   }
 
   absl::StatusOr<MMapFile> file = MMapFile::Make(full_path.string());
