@@ -117,7 +117,7 @@ const _versionGroupName = 'version';
 // Kotlin DSL - ("com.android.tools.build.gradle:{{agpVersion}}")
 // ?<version> is used to name the version group which helps with extraction.
 final _androidGradlePluginRegExpFromDependencies = RegExp(
-  r"""[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
+  r"""^\s*[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -129,7 +129,7 @@ final _androidGradlePluginRegExpFromDependencies = RegExp(
 // Kotlin DSL - id("com.android.application") version "{{agpVersion}}"
 // ?<version> is used to name the version group which helps with extraction.
 final _androidGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""^\s*[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -140,7 +140,7 @@ final _androidGradlePluginRegExpFromId = RegExp(
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
 // ?<version> is used to name the version group which helps with extraction.
 final _kotlinGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""^\s*[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 

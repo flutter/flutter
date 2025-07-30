@@ -427,6 +427,7 @@ allprojects {
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 dependencies {
+    // compileOnly "com.android.tools.build:gradle:0.1.0" // Decoy version
     compileOnly "com.android.tools.build:gradle:$expectedVersion"
 }
 ''');
@@ -441,6 +442,7 @@ dependencies {
         final Directory androidDirectory = fileSystem.directory('/android')..createSync();
         androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 dependencies {
+    // compileOnly("com.android.tools.build:gradle:0.0.1") // Decoy version
     compileOnly("com.android.tools.build:gradle:$expectedVersion")
 }
 ''');
@@ -464,6 +466,31 @@ plugins {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
 plugins {
+    id("com.android.application") version "$expectedVersion" apply false
+}
+      ''');
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
+
+
+    testWithoutContext('returns the AGP version when set in Groovy build file as plugin with comment', () async {
+      const expectedVersion = '6.8';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle').writeAsStringSync('''
+plugins {
+    // id 'com.android.application' version '0.1' apply false // Decoy comment
+    id 'com.android.application' version '$expectedVersion' apply false
+}
+      ''');
+      expect(getAgpVersion(androidDirectory, BufferLogger.test()), expectedVersion);
+    });
+
+    testWithoutContext('returns the AGP version when set in Kotlin build file as plugin with comment', () async {
+      const expectedVersion = '7.2.0';
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
+plugins {
+    // id("com.android.application") version "0.1.0" apply false // Decoy comment
     id("com.android.application") version "$expectedVersion" apply false
 }
       ''');
@@ -592,7 +619,7 @@ pluginManagement {
   plugins {
       id("dev.flutter.flutter-plugin-loader") version "1.0.0"
       // Decoy value to ensure we ignore commented out lines.
-      // id("com.android.application") version "6.1.0" apply false
+      // id("com.android.application") version "6.1.0" apply false /
       id("com.android.application") version "7.5.0" apply false
   }
 }
@@ -601,6 +628,26 @@ pluginManagement {
       expect(getAgpVersion(androidDirectory, BufferLogger.test()), '7.5.0');
     });
 
+    testWithoutContext(
+      'returns the AGP version when in Kotlin settings as plugin adversarial commenting',
+      () async {
+        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+        // File must exist and cannot have agp defined.
+        androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+        androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+pluginManagement {
+  plugins {
+      id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+      // Decoy value to ensure we ignore commented out lines.
+      // id("com.android.application") version "6.1.0" apply false /
+      id("com.android.application") version "7.5.0" apply false // id("com.android.application") version "6.2.0" apply false
+  }
+}
+''');
+
+        expect(getAgpVersion(androidDirectory, BufferLogger.test()), '7.5.0');
+      },
+    );
     testWithoutContext('returns null when agp version is misconfigured', () async {
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       androidDirectory.childFile('build.gradle.kts').writeAsStringSync('''
@@ -753,7 +800,7 @@ pluginManagement {
   plugins {
       id("dev.flutter.flutter-plugin-loader") version "1.0.0"
       // Decoy value to ensure we ignore commented out lines.
-      // id("org.jetbrains.kotlin.android") version "6.1.0" apply false
+      // id("org.jetbrains.kotlin.android") version "6.1.0" apply false // Decoy comment
       id("org.jetbrains.kotlin.android") version "1.8.22" apply false
   }
 }
