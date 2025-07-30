@@ -62,11 +62,17 @@ num? parseStyleProperty(DomElement element, String attributeName) {
   num? styleProperty;
 
   if (element.has('computedStyleMap')) {
-    styleProperty = element
+    final JSAny? rawStyleProperty = element
         .computedStyleMap()
         .get(attributeName)
-        ?.getProperty<JSNumber>('value'.toJS)
-        .toDartDouble;
+        ?.getProperty<JSAny>('value'.toJS);
+    // If the captured rawStyleProperty is not a JSNumber we should fallback
+    // to `getComputedStyle`. This covers cases when the style property
+    // maybe be set to keywords like 'normal', the `computedStyleMap` does
+    // not capture these as absolute values.
+    if (rawStyleProperty != null && rawStyleProperty.isA<JSNumber>()) {
+      styleProperty = (rawStyleProperty as JSNumber).toDartDouble;
+    }
   }
 
   // Fallback to `getComputedStyle` if the first attempt fails.
