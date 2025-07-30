@@ -5670,6 +5670,7 @@ void updateNode(
   int platformViewId = -1, // -1 means not a platform view
   int scrollChildren = 0,
   int scrollIndex = 0,
+  int overlayPortalParent = 0,
   double scrollPosition = 0.0,
   double scrollExtentMax = 0.0,
   double scrollExtentMin = 0.0,
@@ -5688,6 +5689,7 @@ void updateNode(
   String tooltip = '',
   ui.TextDirection textDirection = ui.TextDirection.ltr,
   Float64List? transform,
+  Float64List? hitTestTransform,
   Int32List? childrenInTraversalOrder,
   Int32List? childrenInHitTestOrder,
   Int32List? additionalActions,
@@ -5699,6 +5701,7 @@ void updateNode(
   ui.Locale? locale,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
+  hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
   childrenInHitTestOrder ??= Int32List(0);
   additionalActions ??= Int32List(0);
@@ -5714,6 +5717,7 @@ void updateNode(
     platformViewId: platformViewId,
     scrollChildren: scrollChildren,
     scrollIndex: scrollIndex,
+    overlayPortalParent: overlayPortalParent,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,
@@ -5732,6 +5736,7 @@ void updateNode(
     tooltip: tooltip,
     textDirection: textDirection,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
