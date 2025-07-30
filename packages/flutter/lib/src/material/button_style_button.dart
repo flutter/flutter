@@ -561,13 +561,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
-    // If there are no callbacks when isEnabled is true, we need to provide a
-    // default `onTap` callback to satisfy the underlying InkWell.
+    // If both `onPressed` and `onLongPress` are null, but `isEnabled` is true,
+    // we need to provide a default `onTap` callback to satisfy the underlying InkWell.
     final bool hasAnyCallback = widget.onPressed != null || widget.onLongPress != null;
-    final bool isEnabled = widget.isEnabled ?? true;
-    final VoidCallback? onLongPress = isEnabled ? widget.onLongPress : null;
-    VoidCallback? onTap = isEnabled ? widget.onPressed : null;
-    if (!hasAnyCallback && isEnabled) {
+    final bool? isEnabled = widget.isEnabled;
+    final VoidCallback? onLongPress = isEnabled ?? true ? widget.onLongPress : null;
+    VoidCallback? onTap = isEnabled ?? true ? widget.onPressed : null;
+    if (!hasAnyCallback && (isEnabled ?? false)) {
       onTap = () {};
     }
 
