@@ -92,6 +92,7 @@ class TextButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     super.isSemanticButton,
+    super.isEnabled,
     required Widget super.child,
   });
 

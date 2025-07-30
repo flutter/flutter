@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2606,5 +2607,27 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets('ElevatedButton isEnabled', (WidgetTester tester) async {
+    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
+    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: ElevatedButton(isEnabled: true, onPressed: () {}, child: const Text('button')),
+      ),
+    );
+
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: ElevatedButton(isEnabled: false, onPressed: () {}, child: const Text('button')),
+      ),
+    );
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isFalse);
   });
 }

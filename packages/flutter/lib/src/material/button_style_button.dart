@@ -85,6 +85,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.focusNode,
     required this.autofocus,
     required this.clipBehavior,
+    this.isEnabled,
     this.statesController,
     this.isSemanticButton = true,
     @Deprecated(
@@ -96,6 +97,16 @@ abstract class ButtonStyleButton extends StatefulWidget {
     this.tooltip,
     required this.child,
   });
+
+  /// Whether the button is enabled.
+  ///
+  /// If this boolean is null and [onPressed] and [onLongPress] are null, then
+  /// the button will be disabled.
+  ///
+  /// See also:
+  ///
+  /// * [enabled], which is true if the button is enabled
+  final bool? isEnabled;
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -239,7 +250,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
   /// or [onLongPress] properties to a non-null value.
-  bool get enabled => onPressed != null || onLongPress != null;
+  bool get enabled => isEnabled ?? (onPressed != null || onLongPress != null);
 
   @override
   State<ButtonStyleButton> createState() => _ButtonStyleState();
