@@ -191,9 +191,9 @@ class NavigationDrawer extends StatelessWidget {
         bottom: false,
         child: Column(
           children: <Widget>[
-            if (header != null) header!,
+            ?header,
             Expanded(child: ListView(children: wrappedChildren)),
-            if (footer != null) footer!,
+            ?footer,
           ],
         ),
       ),

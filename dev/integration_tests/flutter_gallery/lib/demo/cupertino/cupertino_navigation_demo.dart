@@ -687,7 +687,7 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null) avatar!,
+          ?avatar,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(

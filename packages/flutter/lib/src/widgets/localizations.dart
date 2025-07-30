@@ -803,7 +803,7 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
     // localizationsDelegate parameter can be used to override
     // WidgetsLocalizations.delegate.
     return <LocalizationsDelegate<Object?>>[
-      if (_localizationsDelegates != null) ..._localizationsDelegates!,
+      ...?_localizationsDelegates,
       DefaultWidgetsLocalizations.delegate,
     ];
   }
