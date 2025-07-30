@@ -294,6 +294,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
 
+  settings.profile_startup =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileStartup));
+
   settings.enable_software_rendering =
       command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
 

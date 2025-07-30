@@ -122,6 +122,23 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
+TEST(SwitchesTest, ProfileStartup) {
+  {
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command", "--profile-startup"});
+    EXPECT_TRUE(command_line.HasOption("profile-startup"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_startup, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.profile_startup, false);
+  }
+}
+
 #if !FLUTTER_RELEASE
 TEST(SwitchesTest, EnableAsserts) {
   fml::CommandLine command_line = fml::CommandLineFromInitializerList(
