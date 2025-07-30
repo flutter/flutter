@@ -27,7 +27,6 @@ import 'selectable_region.dart';
 import 'selection_container.dart';
 
 // Examples can assume:
-// late String _name;
 // late BuildContext context;
 
 /// The text style to apply to descendant [Text] widgets which don't have an
@@ -422,7 +421,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 ///
 /// ```dart
 /// Text(
-///   'Hello $_name, how are you?',
+///   'Hello, how are you?',
 ///   overflow: TextOverflow.fade,
 ///   softWrap: false,
 /// )
