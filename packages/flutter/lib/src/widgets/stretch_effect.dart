@@ -70,15 +70,19 @@ class StretchEffect extends StatelessWidget {
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
-  AlignmentGeometry _getAlignment() {
+  AlignmentGeometry _getAlignment(TextDirection direction) {
     final bool isForward = stretchStrength > 0;
 
-    return switch (axis) {
-      Axis.vertical =>
-        isForward ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter,
-      Axis.horizontal =>
-        isForward ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
-    };
+    if (axis == Axis.vertical) {
+      return isForward ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter;
+    }
+
+    // RTL horizontal.
+    if (direction == TextDirection.rtl) {
+      return isForward ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
+    } else {
+      return isForward ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
+    }
   }
 
   @override
@@ -87,6 +91,7 @@ class StretchEffect extends StatelessWidget {
       return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
     }
 
+    final TextDirection textDirection = Directionality.of(context);
     double x = 1.0;
     double y = 1.0;
 
@@ -98,7 +103,7 @@ class StretchEffect extends StatelessWidget {
     }
 
     return Transform(
-      alignment: _getAlignment(),
+      alignment: _getAlignment(textDirection),
       transform: Matrix4.diagonal3Values(x, y, 1.0),
       filterQuality: stretchStrength == 0 ? null : FilterQuality.medium,
       child: child,
