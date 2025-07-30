@@ -2610,24 +2610,31 @@ void main() {
   });
 
   testWidgets('ElevatedButton isEnabled', (WidgetTester tester) async {
-    final ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: Colors.red);
-    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    Widget buildButton({required bool? isEnabled, required VoidCallback? onPressed}) {
+      return MaterialApp(
+        home: Material(
+          child: ElevatedButton(
+            onPressed: onPressed,
+            isEnabled: isEnabled,
+            child: const Text('button'),
+          ),
+        ),
+      );
+    }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: ElevatedButton(isEnabled: true, onPressed: () {}, child: const Text('button')),
-      ),
-    );
-
+    // isEnabled: true takes precedence over onPressed: null
+    await tester.pumpWidget(buildButton(isEnabled: true, onPressed: null));
     expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isTrue);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: ElevatedButton(isEnabled: false, onPressed: () {}, child: const Text('button')),
-      ),
-    );
+    // isEnabled: false takes precedence over onPressed: () {}
+    await tester.pumpWidget(buildButton(isEnabled: false, onPressed: () {}));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isFalse);
+
+    // Fallback behavior when isEnabled is null
+    await tester.pumpWidget(buildButton(isEnabled: null, onPressed: () {}));
+    expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isTrue);
+
+    await tester.pumpWidget(buildButton(isEnabled: null, onPressed: null));
     expect(tester.widget<ElevatedButton>(find.byType(ElevatedButton)).enabled, isFalse);
   });
 }

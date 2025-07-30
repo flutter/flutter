@@ -561,14 +561,24 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
+    // If there are no callbacks when isEnabled is true, we need to provide a
+    // default `onTap` callback to satisfy the underlying InkWell.
+    final bool hasAnyCallback = widget.onPressed != null || widget.onLongPress != null;
+    final bool isEnabled = widget.isEnabled ?? true;
+    final VoidCallback? onLongPress = isEnabled ? widget.onLongPress : null;
+    VoidCallback? onTap = isEnabled ? widget.onPressed : null;
+    if (!hasAnyCallback && isEnabled) {
+      onTap = () {};
+    }
+
     result = AnimatedTheme(
       duration: resolvedAnimationDuration,
       data: theme.copyWith(
         iconTheme: iconTheme.merge(IconThemeData(color: resolvedIconColor, size: resolvedIconSize)),
       ),
       child: InkWell(
-        onTap: widget.onPressed,
-        onLongPress: widget.onLongPress,
+        onTap: onTap,
+        onLongPress: onLongPress,
         onHover: widget.onHover,
         mouseCursor: mouseCursor,
         enableFeedback: resolvedEnableFeedback,
