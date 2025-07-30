@@ -1026,6 +1026,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Watches for typography settings changes.
   DomMutationObserver? _typographySettingsObserver;
+  final Set<DomNode> _addedStyleNodes = <DomNode>{};
 
   /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [typographySettings] changed.
@@ -1048,10 +1049,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ) {
       for (final JSAny? mutation in mutations.toDart) {
         final DomMutationRecord record = mutation! as DomMutationRecord;
-        if (record.addedNodes != null && record.addedNodes!.isEmpty) {
-          _updateTypographySettings(const ui.TypographySettings());
-          // _updateTypographySettings(null); // TODO(Renzo-Olivares): this should work.
-          return;
+        if (record.type == 'childList' &&
+            record.removedNodes != null &&
+            record.removedNodes!.isNotEmpty) {
+          for (int index = 0; index < record.removedNodes!.length; index += 1) {
+            final DomNode node = record.removedNodes!.elementAt(index);
+            if (_addedStyleNodes.remove(node)) {
+              _updateTypographySettings(const ui.TypographySettings());
+              // _updateTypographySettings(null); // TODO(Renzo-Olivares): this should work.
+            }
+          }
         }
         if (record.type == 'childList' &&
             record.addedNodes != null &&
@@ -1060,6 +1067,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             final DomNode node = record.addedNodes!.elementAt(index);
             final String? nodeName = node.nodeName;
             if (nodeName != null && nodeName == 'STYLE') {
+              _addedStyleNodes.add(node);
               final double? lineHeight = parseStyleProperty(
                 domDocument.documentElement!,
                 'line-height',
@@ -1087,8 +1095,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     _typographySettingsObserver!.observe(
       domDocument.documentElement!,
-      subtree: true,
-      childList: true,
+      subtree: true, // Extends monitoring to target node subtree.
+      childList: true, // Monitors the addition/removal of child nodes on target node.
       attributes: true,
       attributeFilter: <String>[styleAttribute],
     );
