@@ -408,12 +408,9 @@ class FlutterView {
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
   void render(Scene scene, {Size? size}) {
-    _render(
-      viewId,
-      scene as _NativeScene,
-      600,
-      600
-    );
+    _render(viewId, scene as _NativeScene, size?.width ?? physicalConstraints.maxWidth, size?.height ?? physicalConstraints.maxHeight);
+    // size?.width ?? physicalConstraints.maxWidth,
+    // size?.height ?? physicalConstraints.maxHeight,
   }
 
   @Native<Void Function(Int64, Pointer<Void>, Double, Double)>(

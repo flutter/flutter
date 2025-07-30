@@ -810,13 +810,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                    (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
-//
-//  self.flutterView.bounds = CGRectMake(0, 0, frameSize.width, frameSize.height);
-//  // TODO: Setting the bounds above will trigger [FlutterViewController viewDidLayoutSubviews], but
-//  // does it do it immediately and not after any kind of frame delay? If we find that
-//  // adjusting the bounds does this immediately, then we can remove this line.
-//  [self.flutterViewController viewDidLayoutSubviews];
-
   [CATransaction begin];
 
   // Configure Flutter overlay views.

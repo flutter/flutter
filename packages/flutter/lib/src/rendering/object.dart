@@ -22,6 +22,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import '../../rendering.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
@@ -2652,6 +2653,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void layout(Constraints constraints, {bool parentUsesSize = false}) {
     assert(!_debugDisposed);
+    if (parent == null) {
+      print("im the root bitch");
+      print("$this.semanticBounds");
+    }
     if (!kReleaseMode && debugProfileLayoutsEnabled) {
       Map<String, String>? debugTimelineArguments;
       assert(() {

@@ -13,6 +13,7 @@ import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../rendering.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
@@ -290,11 +291,51 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    final bool sizedByChild = !constraints.isTight;
-    child?.layout(constraints, parentUsesSize: sizedByChild);
-    _size = sizedByChild && child != null ? child!.size : constraints.smallest;
+    _size = constraints.biggest;
+    if (child != null) {
+      assert(() {
+        RenderBox? findFirstSizedChild(RenderObject? node) {
+          if (node == null) {
+            return null;
+          }
+          RenderBox? result;
+          void visit(RenderObject currentNode) {
+            if (result != null) return; // Stop once we've found it.
+
+            if (currentNode is RenderBox) {
+              final double w = currentNode.getMaxIntrinsicWidth(double.infinity);
+              final double h = currentNode.getMaxIntrinsicHeight(double.infinity);
+              if (w > 0.0 && h > 0.0) {
+                result = currentNode;
+                return;
+              }
+            }
+            currentNode.visitChildren(visit);
+          }
+          visit(node);
+          return result;
+        }
+
+        final RenderBox? contentBox = findFirstSizedChild(child);
+
+        if (contentBox != null) {
+          final double maxIntrinsicWidth = contentBox.getMaxIntrinsicWidth(double.infinity);
+          final double maxIntrinsicHeight = contentBox.getMaxIntrinsicHeight(double.infinity);
+
+          debugPrint('--- RenderView Pre-Layout Debug ---');
+          debugPrint('Found First Sized Object: ${contentBox.runtimeType}');
+          debugPrint('Max Intrinsic (Natural) Size: ${Size(maxIntrinsicWidth, maxIntrinsicHeight)}');
+          debugPrint('------------------------------------');
+        } else {
+          debugPrint('--- RenderView Pre-Layout Debug ---');
+          debugPrint('Could not find any child with a non-zero intrinsic size.');
+          debugPrint('------------------------------------');
+        }
+        return true;
+      }());
+      child!.layout(constraints);
+    }
     assert(size.isFinite);
-    assert(constraints.isSatisfiedBy(size));
   }
 
   /// Determines the set of render objects located at the given position.
