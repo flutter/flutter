@@ -286,4 +286,16 @@ void main() {
     // The custom callback is called, setting customCallbackWasCalled to true.
     expect(customCallbackWasCalled, true);
   });
+
+  testWidgets('DrawerButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: DrawerButton())),
+        ),
+      ),
+    );
+    final Finder drawerButtonIcon = find.byType(DrawerButtonIcon);
+    expect(tester.getSize(drawerButtonIcon).isEmpty, isTrue);
+  });
 }
