@@ -2077,13 +2077,36 @@ The findRenderObject() method was called for the following element:
       ),
     );
   });
+
+  testWidgets('dependents', (WidgetTester tester) async {
+    final _TestInheritedElement ancestor = _TestInheritedElement(
+      const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
+    );
+    final _TestInheritedElement child = _TestInheritedElement(
+      const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
+    );
+    expect(ancestor.dependents, isEmpty);
+    child.dependOnInheritedElement(ancestor);
+    expect(ancestor.dependents, unorderedEquals(<Element>[child]));
+    ancestor.removeDependent(child);
+    expect(ancestor.dependents, isEmpty);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
   _TestInheritedElement(super.widget);
+
+  @override
+  Iterable<Element> get dependents => super.dependents;
+
   @override
   bool doesDependOnInheritedElement(InheritedElement element) {
     return super.doesDependOnInheritedElement(element);
+  }
+
+  @override
+  void removeDependent(Element dependent) {
+    super.removeDependent(dependent);
   }
 }
 
