@@ -11,16 +11,19 @@ import 'basic.dart';
 import 'framework.dart';
 import 'image_filter.dart';
 
-/// A widget that replicates the native Android stretch overscroll effect.
+/// A widget that applies a stretching visual effect to its child.
 ///
-/// This widget is used in the [StretchingOverscrollIndicator] widget and creates
-/// a stretch visual feedback when the user overscrolls at the edges.
+/// When shader-based effects are supported, they are used for better performance
+/// and visual quality. Otherwise, a matrix transform is applied as a fallback.
 ///
-/// Only supported when using the Impeller rendering engine.
-class StretchOverscrollEffect extends StatefulWidget {
-  /// Creates a StretchOverscrollEffect widget that applies a stretch
-  /// effect when the user overscrolls horizontally or vertically.
-  const StretchOverscrollEffect({
+/// Used by [StretchingOverscrollIndicator] widget.
+class StretchEffect extends StatelessWidget {
+  /// Creates a [StretchEffect] widget that applies a stretch effect
+  /// when the user overscrolls horizontally or vertically.
+  ///
+  /// The [stretchStrength] controls the intensity of the stretch effect
+  /// and must be between -1.0 and 1.0.
+  const StretchEffect({
     super.key,
     this.stretchStrength = 0.0,
     required this.axis,
@@ -40,7 +43,7 @@ class StretchOverscrollEffect extends StatefulWidget {
   /// This example shows how to set the horizontal stretch strength to pull right.
   ///
   /// ```dart
-  /// const StretchOverscrollEffect(
+  /// const StretchEffect(
   ///   stretchStrength: 0.5,
   ///   axis: Axis.horizontal,
   ///   child: Text('Hello, World!'),
@@ -57,11 +60,80 @@ class StretchOverscrollEffect extends StatefulWidget {
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
+  AlignmentGeometry _getAlignment() {
+    final bool isForward = stretchStrength > 0;
+
+    return switch (axis) {
+      Axis.vertical =>
+        isForward ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter,
+      Axis.horizontal =>
+        isForward ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
+    };
+  }
+
   @override
-  State<StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
+  Widget build(BuildContext context) {
+    if (ui.ImageFilter.isShaderFilterSupported) {
+      return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
+    }
+
+    double x = 1.0;
+    double y = 1.0;
+
+    switch (axis) {
+      case Axis.horizontal:
+        x += stretchStrength.abs();
+      case Axis.vertical:
+        y += stretchStrength.abs();
+    }
+
+    return Transform(
+      alignment: _getAlignment(),
+      transform: Matrix4.diagonal3Values(x, y, 1.0),
+      filterQuality: stretchStrength == 0 ? null : FilterQuality.medium,
+      child: child,
+    );
+  }
 }
 
-class _StretchOverscrollEffectState extends State<StretchOverscrollEffect> {
+/// A widget that replicates the native Android stretch overscroll effect.
+///
+/// This widget is used in the [StretchingOverscrollIndicator] widget and creates
+/// a stretch visual feedback when the user overscrolls at the edges.
+///
+/// Only supported when using the Impeller rendering engine.
+class _StretchOverscrollEffect extends StatefulWidget {
+  /// Creates a [_StretchOverscrollEffect] widget that applies a stretch
+  /// effect when the user overscrolls horizontally or vertically.
+  const _StretchOverscrollEffect({
+    this.stretchStrength = 0.0,
+    required this.axis,
+    required this.child,
+  }) : assert(
+         stretchStrength >= -1.0 && stretchStrength <= 1.0,
+         'stretchStrength must be between -1.0 and 1.0',
+       );
+
+  /// The overscroll strength applied for the stretching effect.
+  ///
+  /// The value should be between -1.0 and 1.0 inclusive.
+  /// For horizontal axis, Positive values apply a pull from
+  /// left to right, while negative values pull from right to left.
+  final double stretchStrength;
+
+  /// The axis along which the stretching overscroll effect is applied.
+  ///
+  /// Determines the direction of the stretch, either horizontal or vertical.
+  final Axis axis;
+
+  /// The child widget that the stretching overscroll effect applies to.
+  final Widget child;
+
+  @override
+  State<_StretchOverscrollEffect> createState() => _StretchOverscrollEffectState();
+}
+
+class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
   /// The maximum scale multiplier applied during a stretch effect.
