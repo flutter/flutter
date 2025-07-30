@@ -441,6 +441,7 @@ void testMain() {
       test('returns locales list parsed from browser languages', () {
         EnginePlatformDispatcher.debugOverrideBrowserLanguages([
           'uk-UA',
+          'en',
           'ar-Arab-SA',
           'zh-Hant-HK',
           'de-DE',
@@ -449,6 +450,7 @@ void testMain() {
 
         expect(EnginePlatformDispatcher.parseBrowserLanguages(), const [
           ui.Locale('uk', 'UA'),
+          ui.Locale('en'),
           ui.Locale.fromSubtags(languageCode: 'ar', scriptCode: 'Arab', countryCode: 'SA'),
           ui.Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
           ui.Locale('de', 'DE'),
