@@ -386,7 +386,7 @@ void main() {
   });
 
   @isTest
-  void testWebLaunchUrl(String description, {required String url, required dynamic matcher}) {
+  void testWebLaunchUrl(String description, {required String url, required Matcher matcher}) {
     // ignore: unnecessary_parenthesis – Prevent IDEs from showing a run button.
     (testWithoutContext)(description, () async {
       final _FakeChromiumDevice chromiumDevice = getFakeChromiumDevice();
