@@ -4661,7 +4661,7 @@ base class Shader extends NativeFieldWrapperClass1 {
 /// - **Radial gradients**: The inner area is the disc defined by a center and radius.
 ///   Colors outside this disc are determined by the `TileMode`.
 ///
-/// - **Sweep gradients**: The bounds is the angular sector between `startAngle`
+/// - **Sweep gradients**: The inner area is the angular sector between `startAngle`
 ///   and `endAngle`. Colors outside this sector are determined by the `TileMode`.
 ///
 /// ## For Image Filters
@@ -4970,8 +4970,8 @@ base class Gradient extends Shader {
   /// and `endAngle`. The `tileMode` determines how the gradient behaves outside
   /// this sector.
   ///
-  /// The [tileMode] argument specifies how the gradient should handle areas
-  /// outside the angular sector defined by [startAngle] and [endAngle]:
+  /// The `tileMode` argument specifies how the gradient should handle areas
+  /// outside the angular sector defined by `startAngle` and `endAngle`:
   ///
   /// The behavior before `startAngle` and after `endAngle` is described by the
   /// `tileMode` argument. For details, see the [TileMode] enum.
