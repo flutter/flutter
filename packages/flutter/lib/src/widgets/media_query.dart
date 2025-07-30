@@ -319,7 +319,8 @@ class MediaQueryData {
       supportsShowingSystemContextMenu =
           platformData?.supportsShowingSystemContextMenu ??
           view.platformDispatcher.supportsShowingSystemContextMenu,
-      typographySettings = platformData?.typographySettings ?? view.platformDispatcher.typographySettings;
+      typographySettings =
+          platformData?.typographySettings ?? view.platformDispatcher.typographySettings;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
