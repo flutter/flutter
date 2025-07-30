@@ -63,64 +63,6 @@ enum WindowType {
   regular,
 }
 
-/// Defines sizing request for a window.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-class WindowSizing {
-  /// Creates a new [WindowSizing] object.
-  ///
-  /// Users may pass a [preferredSize] that does not satisfy the
-  /// [preferredConstraints]. In this case, the platform will use an initial
-  /// size that does satisfy the [preferredConstraints] instead.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  WindowSizing({this.preferredSize, this.preferredConstraints}) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-  }
-
-  /// Preferred size of the window.
-  ///
-  /// This might not be honored by the platform.
-  ///
-  /// This is the size that the platform will try to apply to the window
-  /// when it is created. In contrast, the [preferredConstraints] field enforces
-  /// the minimum and maximum size of the window. If the [preferredSize]
-  /// does not satisfy the [preferredConstraints] or the [preferredSize] is null, then
-  /// the platform will use an initial size that does satisfy the [preferredConstraints]
-  /// instead.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Size? preferredSize;
-
-  /// Constraints for the window.
-  ///
-  /// This might not be honored by the platform.
-  ///
-  /// This field enforces a minimum and maximum size on the window. If the
-  /// user attempts to resize the window beyond these constraints, the platform
-  /// will enforce the constraints according to its own policy. For example, the
-  /// platform might clip the content to fit within the resized window, or it might
-  /// prevent the window from being resized altogether.
-  ///
-  /// If null, the window will be unconstrained.
-  ///
-  /// If the [preferredSize] is null, then the platform will use an
-  /// initial size that satisfies the [preferredConstraints].
-  ///
-  /// If the [preferredSize] is not null and it does  not satisfy the
-  /// [preferredConstraints], then the platform will use an
-  /// initial size that does satisfy the [preferredConstraints] instead.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final BoxConstraints? preferredConstraints;
-}
-
 /// Base class for window controllers.
 ///
 /// A [BaseWindowController] is associated with exactly one root [FlutterView].
@@ -241,10 +183,8 @@ mixin class RegularWindowControllerDelegate {
 /// An example usage might look like:
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
-///   contentSize: const WindowSizing(
-///     preferredSize: Size(800, 600),
-///     preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
-///   ),
+///   preferredSize: Size(800, 600),
+///   preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
 ///   title: "Example Window",
 /// );
 /// runWidget(
@@ -266,8 +206,32 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// Upon construction, the window is created by the platform.
   ///
-  /// The [preferredContentSize] argument sets the window's initial size preference.
-  /// This might not be honored by the platform.
+  /// The [preferredSize] is the preferred content size of the window.
+  /// This might not be honored by the platform. This is the size that
+  /// the platform will try to apply to the window when it is created. In contrast,
+  /// the [preferredConstraints] field enforces the minimum and maximum size of
+  /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
+  /// or the [preferredSize] is null, then the platform will use an initial size
+  /// that does satisfy the [preferredConstraints] instead.
+  ///
+  /// The [preferredConstraints] are the constraints placed upon the size
+  /// of the window. This might not be honored by the platform.
+  /// This field enforces a minimum and maximum size on the window. If the
+  /// user attempts to resize the window beyond these constraints, the platform
+  /// will enforce the constraints according to its own policy. For example, the
+  /// platform might clip the content to fit within the resized window, or it might
+  /// prevent the window from being resized altogether. If null, the window wil
+  /// be unconstrained.
+  ///
+  /// If the [preferredSize] is null, then the platform will use an
+  /// initial size that satisfies the [preferredConstraints].
+  ///
+  /// If the [preferredSize] is not null and it does  not satisfy the
+  /// [preferredConstraints], then the platform will use an
+  /// initial size that does satisfy the [preferredConstraints] instead.
+  ///
+  /// If both [preferredSize] and [preferredConstraints] are null,
+  /// then the platform will use its own default size for the window.
   ///
   /// The [title] argument configures the window's initial title.
   /// If omitted, some platforms might fall back to the app's name.
@@ -279,7 +243,8 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   factory RegularWindowController({
-    required WindowSizing preferredContentSize,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
     String? title,
     RegularWindowControllerDelegate? delegate,
   }) {
@@ -289,8 +254,9 @@ abstract class RegularWindowController extends BaseWindowController {
 
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final RegularWindowController controller = owner.createRegularWindowController(
-      preferredContentSize: preferredContentSize,
       delegate: delegate ?? RegularWindowControllerDelegate(),
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
     );
     if (title != null) {
       controller.setTitle(title);
@@ -311,18 +277,29 @@ abstract class RegularWindowController extends BaseWindowController {
   @override
   WindowType get type => WindowType.regular;
 
-  /// Request change to the content sizing of the window.
+  /// Request change to the content size of the window.
   ///
-  /// [sizing] describes the new requested window size. The properties
-  /// of this object are applied independently of each other. For example,
-  /// setting [WindowSizing.preferredSize] does not affect the
-  /// [WindowSizing.preferredConstraints] set previously.
+  /// The [size] describes the new requested window size. If the size disagrees
+  /// with the current constraints placed upon the window, the platform might
+  /// clamp the size within the constraiints.
   ///
-  /// The platform is free to ignore the request.
+  /// The platform is free to ignore this request.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  void updateContentSizing(WindowSizing sizing);
+  void setSize(Size size);
+
+  /// Request change to the constraints of the window.
+  ///
+  /// The [constraints] describes the new constraints that the window should
+  /// satisfy. If the constraints disagree with the current size of the window,
+  /// the platform might resize the window to satisfy the new constraints.
+  ///
+  /// The platform is free to ignore this request.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setConstraints(BoxConstraints constraints);
 
   /// Request change for the window title.
   ///
@@ -413,8 +390,9 @@ abstract class WindowingOwner {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   RegularWindowController createRegularWindowController({
-    required WindowSizing preferredContentSize,
     required RegularWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
   });
 
   /// Returns whether the application has any top level windows created by this
@@ -446,8 +424,9 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 
   @override
   RegularWindowController createRegularWindowController({
-    required WindowSizing preferredContentSize,
     required RegularWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
   }) {
     throw UnsupportedError(errorMessaage);
   }
@@ -471,10 +450,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// An example usage might look like:
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
-///   contentSize: const WindowSizing(
-///     size: Size(800, 600),
-///     constraints: BoxConstraints(minWidth: 640, minHeight: 480),
-///   ),
+///   preferredSize: Size(800, 600),
+///   preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
 ///   title: "Example Window",
 /// );
 /// runWidget(
