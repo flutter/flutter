@@ -667,10 +667,7 @@ class FakeStopwatch implements Stopwatch {
 
 class FakeStopwatchFactory implements StopwatchFactory {
   FakeStopwatchFactory({Stopwatch? stopwatch, Map<String, Stopwatch>? stopwatches})
-    : stopwatches = <String, Stopwatch>{
-        if (stopwatches != null) ...stopwatches,
-        if (stopwatch != null) '': stopwatch,
-      };
+    : stopwatches = <String, Stopwatch>{...?stopwatches, '': ?stopwatch};
 
   Map<String, Stopwatch> stopwatches;
 

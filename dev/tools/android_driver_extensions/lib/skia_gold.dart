@@ -158,6 +158,6 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
       'Golden files in the Flutter framework must end with the file extension '
       '.png.',
     );
-    return Uri.parse(<String>[if (namePrefix != null) namePrefix!, golden.toString()].join('.'));
+    return Uri.parse(<String>[?namePrefix, golden.toString()].join('.'));
   }
 }

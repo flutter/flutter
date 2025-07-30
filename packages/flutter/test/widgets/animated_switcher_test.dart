@@ -174,9 +174,7 @@ void main() {
 
   testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
     Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-      return Column(
-        children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
-      );
+      return Column(children: <Widget>[...previousChildren, ?currentChild]);
     }
 
     await tester.pumpWidget(
@@ -193,7 +191,7 @@ void main() {
   testWidgets('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
     late List<Widget> foundChildren;
     Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-      foundChildren = <Widget>[if (currentChild != null) currentChild, ...previousChildren];
+      foundChildren = <Widget>[?currentChild, ...previousChildren];
       return Column(children: foundChildren);
     }
 
@@ -327,7 +325,7 @@ void main() {
 
       late List<Widget> foundChildren;
       Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
-        foundChildren = <Widget>[if (currentChild != null) currentChild, ...previousChildren];
+        foundChildren = <Widget>[?currentChild, ...previousChildren];
         return Column(children: foundChildren);
       }
 

@@ -2825,7 +2825,7 @@ class _MenuItemLabel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              if (leadingIcon != null) leadingIcon!,
+              ?leadingIcon,
               if (child != null)
                 Expanded(
                   child: ClipRect(
@@ -2845,7 +2845,7 @@ class _MenuItemLabel extends StatelessWidget {
       leadings = Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (leadingIcon != null) leadingIcon!,
+          ?leadingIcon,
           if (child != null)
             Padding(
               padding: leadingIcon != null

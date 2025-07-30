@@ -879,7 +879,7 @@ class _MultiChildComponentElement extends Element {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
-      if (_childElement != null) _childElement!.toDiagnosticsNode(),
+      ?_childElement?.toDiagnosticsNode(),
       for (int i = 0; i < _viewElements.length; i++)
         _viewElements[i].toDiagnosticsNode(
           name: 'view ${i + 1}',
