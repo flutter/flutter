@@ -32315,28 +32315,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
-vulkan-deps
-
-Copyright 2015-2023 The Khronos Group Inc.
-
-Files in this repository fall under one of these licenses:
-
-- `Apache-2.0`
-- `MIT`
-
-Note: With the exception of `parse_dependency.py` the files using `MIT` license
-also fall under `Apache-2.0`. Example:
-
-```
-SPDX-License-Identifier: Apache-2.0 OR MIT
-```
-
-Full license text of these licenses is available at:
-
-  * Apache-2.0: https://opensource.org/licenses/Apache-2.0
-  * MIT: https://opensource.org/licenses/MIT
-
---------------------------------------------------------------------------------
 skia
 
 Copyright 2016 Google Inc.
