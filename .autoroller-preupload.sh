@@ -21,10 +21,10 @@ LICENSES_PATH="$REPO_PATH/engine/src/flutter/sky/packages/sky_engine/LICENSE"
 DATA_PATH="$REPO_PATH/engine/src/flutter/tools/licenses_cpp/data"
 
 # This calls `gn gen`.
-$GN --runtime-mode profile
-$ET build --no-rbe -c host_profile //flutter/tools/licenses_cpp
-$LICENSE_CPP \
-  --working_dir=$WORKING_DIR \
-  --licenses_path=$LICENSES_PATH \
-  --data_dir=$DATA_PATH \
+"$GN" --runtime-mode profile
+"$ET" build --no-rbe -c host_profile //flutter/tools/licenses_cpp
+"$LICENSE_CPP" \
+  --working_dir="$WORKING_DIR" \
+  --licenses_path="$LICENSES_PATH" \
+  --data_dir="$DATA_PATH" \
   --v=1
