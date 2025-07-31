@@ -377,7 +377,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
       &state->seen_license_files;
 
   bool did_find_copyright = false;
-  fs::path relative_path = fs::relative(full_path, working_dir_path);
+  fs::path relative_path = full_path.lexically_relative(working_dir_path);
   VLOG(2) << "Process: " << relative_path;
   if (!data.include_filter.Matches(relative_path.string()) ||
       data.exclude_filter.Matches(relative_path.string())) {
@@ -427,7 +427,7 @@ absl::Status ProcessFile(const fs::path& working_dir_path,
                                 relative_path.lexically_normal().string()));
       } else {
         fs::path relative_license_path =
-            fs::relative(*package.license_file, working_dir_path);
+            package.license_file->lexically_relative(working_dir_path);
         VLOG(1) << "OK: " << relative_path.lexically_normal()
                 << " : dir license(" << relative_license_path.lexically_normal()
                 << ")";
@@ -470,9 +470,9 @@ std::vector<absl::Status> LicenseChecker::Run(
     std::ostream& licenses,
     const Data& data,
     const LicenseChecker::Flags& flags) {
-  std::vector<fs::path> git_repos = GetGitRepos(working_dir);
   fs::path working_dir_path =
       fs::absolute(fs::path(working_dir)).lexically_normal();
+  std::vector<fs::path> git_repos = GetGitRepos(working_dir_path.string());
 
   size_t count = 0;
   ProcessState state;
@@ -600,8 +600,12 @@ int LicenseChecker::FileRun(std::string_view working_dir,
   }
 
   ProcessState state;
-  absl::Status process_result = ProcessFile(working_dir, licenses, data.value(),
-                                            full_path, flags, &state);
+  fs::path working_dir_path =
+      fs::absolute(fs::path(working_dir)).lexically_normal();
+  fs::path absolute_full_path = fs::absolute(fs::path(full_path));
+  absl::Status process_result =
+      ProcessFile(working_dir_path, licenses, data.value(), absolute_full_path,
+                  flags, &state);
 
   if (!process_result.ok()) {
     std::cerr << process_result << std::endl;
