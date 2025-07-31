@@ -223,24 +223,48 @@ class RenderSliverMainAxisGroup extends RenderSliver
   @override
   double? childScrollOffset(RenderObject child) {
     assert(child.parent == this);
+    assert(child is RenderSliver);
+    final double extentOfPinnedSlivers = _maxScrollObstructionExtentBefore(child as RenderSliver);
     final GrowthDirection growthDirection = constraints.growthDirection;
     switch (growthDirection) {
       case GrowthDirection.forward:
         double childScrollOffset = 0.0;
-        RenderSliver? current = childBefore(child as RenderSliver);
+        RenderSliver? current = childBefore(child);
         while (current != null) {
           childScrollOffset += current.geometry!.scrollExtent;
           current = childBefore(current);
         }
-        return childScrollOffset;
+        return childScrollOffset - extentOfPinnedSlivers;
       case GrowthDirection.reverse:
         double childScrollOffset = 0.0;
-        RenderSliver? current = childAfter(child as RenderSliver);
+        RenderSliver? current = childAfter(child);
         while (current != null) {
           childScrollOffset -= current.geometry!.scrollExtent;
           current = childAfter(current);
         }
-        return childScrollOffset;
+        return childScrollOffset - extentOfPinnedSlivers;
+    }
+  }
+
+  double _maxScrollObstructionExtentBefore(RenderSliver child) {
+    final GrowthDirection growthDirection = child.constraints.growthDirection;
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        double pinnedExtent = 0.0;
+        RenderSliver? current = firstChild;
+        while (current != child) {
+          pinnedExtent += current!.geometry!.maxScrollObstructionExtent;
+          current = childAfter(current);
+        }
+        return pinnedExtent;
+      case GrowthDirection.reverse:
+        double pinnedExtent = 0.0;
+        RenderSliver? current = lastChild;
+        while (current != child) {
+          pinnedExtent += current!.geometry!.maxScrollObstructionExtent;
+          current = childBefore(current);
+        }
+        return pinnedExtent;
     }
   }
 
