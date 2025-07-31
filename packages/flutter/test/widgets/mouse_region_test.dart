@@ -2093,7 +2093,7 @@ class _Scaffold extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: Stack(
         children: <Widget>[
-          if (background != null) background!,
+          ?background,
           Align(alignment: Alignment.topLeft, child: topLeft),
         ],
       ),
