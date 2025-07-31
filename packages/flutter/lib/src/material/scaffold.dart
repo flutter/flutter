@@ -626,7 +626,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       if (route == null || route.isCurrent) {
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
-          print('is Snackbar dismissible: ${snackBar.dismissible}');
           if (snackBar.dismissible) {
             _snackBarTimer = Timer(snackBar.duration, () {
               assert(_snackBarController!.isForwardOrCompleted);
