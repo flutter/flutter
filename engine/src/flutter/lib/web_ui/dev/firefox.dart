@@ -23,6 +23,7 @@ class FirefoxEnvironment implements BrowserEnvironment {
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
+    await Firefox.printActualVersion(_installation);
     return Firefox(url, _installation, debug: debug);
   }
 
@@ -120,6 +121,13 @@ user_pref("browser.aboutwelcome.enabled", false);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static Future<void> printActualVersion(BrowserInstallation installation) async {
+    final result = await Process.run(installation.executable, ['--version']);
+    // Example:
+    // "Browser: Mozilla Firefox 141.0"
+    print('Browser: ${result.stdout}');
+  }
 
   final BrowserProcess _process;
 
