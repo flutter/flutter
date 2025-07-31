@@ -68,9 +68,6 @@ user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
 user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
-user_pref("app.update.auto", false);
-user_pref("app.update.enabled", false);
-user_pref("app.update.silent", true);
 ''';
 
         final Directory temporaryProfileDirectory = Directory(
@@ -84,7 +81,7 @@ user_pref("app.update.silent", true);
           temporaryProfileDirectory.deleteSync(recursive: true);
         }
         temporaryProfileDirectory.createSync(recursive: true);
-        File(path.join(temporaryProfileDirectory.path, 'user.js')).writeAsStringSync(profile);
+        File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
         final List<String> args = <String>[
           url.toString(),
