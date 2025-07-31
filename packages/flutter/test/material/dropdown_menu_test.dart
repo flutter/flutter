@@ -4557,6 +4557,23 @@ void main() {
     await tester.pump();
     expect(buttonFocusNode.hasFocus, isTrue);
   });
+
+  testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
+    const double cursorHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            cursorHeight: cursorHeight,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorHeight, cursorHeight);
+  });
 }
 
 enum TestMenu {
