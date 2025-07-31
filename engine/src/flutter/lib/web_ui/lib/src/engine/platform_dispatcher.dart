@@ -1029,7 +1029,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///
   /// Updates [typographySettings] with the new value.
   DomResizeObserver? _typographySettingsObserver;
-  DomElement? _typographyProbeElement;
+  DomElement? _typographyMeasurementElement;
 
   /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [typographySettings] changed.
@@ -1044,11 +1044,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Set the callback function for updating [typographySettings] based on
   /// the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
-    _typographyProbeElement = createDomHTMLDivElement();
-    _typographyProbeElement!.text = 'flutter engine';
+    _typographyMeasurementElement = createDomHTMLDivElement();
+    _typographyMeasurementElement!.text = 'flutter engine';
     // The element should be hidden from screen readers.
-    _typographyProbeElement!.setAttribute('aria-hidden', 'true');
-    final DomCSSStyleDeclaration style = _typographyProbeElement!.style;
+    _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
+    final DomCSSStyleDeclaration style = _typographyMeasurementElement!.style;
     style.position = 'absolute';
     // The element should be off-screen and not visible.
     style.top = '-9999px';
@@ -1059,7 +1059,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     style.width = 'auto';
     style.height = 'auto';
     style.whiteSpace = 'nowrap';
-    domDocument.body!.append(_typographyProbeElement!);
+    domDocument.body!.append(_typographyMeasurementElement!);
 
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
@@ -1086,16 +1086,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       );
     });
 
-    _typographySettingsObserver!.observe(_typographyProbeElement!);
+    _typographySettingsObserver!.observe(_typographyMeasurementElement!);
   }
 
   /// Remove the observer for typography changes on the off-screen
-  /// typography probe element.
+  /// typography measurement element.
   void _disconnectTypographySettingsObserver() {
     _typographySettingsObserver?.disconnect();
     _typographySettingsObserver = null;
-    _typographyProbeElement?.remove();
-    _typographyProbeElement = null;
+    _typographyMeasurementElement?.remove();
+    _typographyMeasurementElement = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
