@@ -26,6 +26,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
@@ -138,6 +139,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     addPubOptions();
     argParser
       ..addFlag(
+        kWebServer,
+        help:
+            'Serve the widget preview environment using the web-server device instead of the '
+            'browser.',
+      )
+      ..addFlag(
         kLaunchPreviewer,
         defaultsTo: true,
         help: 'Launches the widget preview environment.',
@@ -150,12 +157,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         help:
             'Generated the widget preview environment scaffolding at a given location '
             'for testing purposes.',
+        hide: !verbose,
       );
   }
 
   static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const kLaunchPreviewer = 'launch-previewer';
   static const kHeadless = 'headless';
+  static const kWebServer = 'web-server';
   static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
@@ -358,16 +367,28 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
-      // Since the only target supported by the widget preview scaffold is the web
-      // device, only a single web device should be returned.
-      final List<Device> devices = await deviceManager!.getDevices(
-        filter: DeviceDiscoveryFilter(
-          supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
-            flutterProject: widgetPreviewScaffoldProject,
+      final List<Device> devices;
+      if (boolArg(kWebServer)) {
+        try {
+          // The web-server device is hidden by default, make it visible before trying to look it up.
+          WebServerDevice.showWebServerDevice = true;
+          devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+        } finally {
+          // Reset the flag to false to avoid affecting other commands.
+          WebServerDevice.showWebServerDevice = false;
+        }
+      } else {
+        // Since the only target supported by the widget preview scaffold is the web
+        // device, only a single web device should be returned.
+        devices = await deviceManager!.getDevices(
+          filter: DeviceDiscoveryFilter(
+            supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+              flutterProject: widgetPreviewScaffoldProject,
+            ),
+            deviceConnectionInterface: DeviceConnectionInterface.attached,
           ),
-          deviceConnectionInterface: DeviceConnectionInterface.attached,
-        ),
-      );
+        );
+      }
       assert(devices.length == 1);
       final Device device = devices.first;
 
