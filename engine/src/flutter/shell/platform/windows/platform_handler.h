@@ -108,6 +108,8 @@ class PlatformHandler {
   static constexpr char kSoundTypeTick[] = "SystemSoundType.tick";
 
  private:
+  WNDCLASS RegisterWindowClass();
+
   // Called when a method is called on |channel_|;
   void HandleMethodCall(
       const MethodCall<rapidjson::Document>& method_call,
@@ -118,6 +120,9 @@ class PlatformHandler {
 
   // A reference to the Flutter engine.
   FlutterWindowsEngine* engine_;
+
+  HWND window_handle_;
+  std::wstring window_class_name_;
 
   // A scoped clipboard provider that can be passed in for mocking in tests.
   // Use this to acquire clipboard in each operation to avoid blocking clipboard
