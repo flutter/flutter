@@ -648,7 +648,7 @@ Future<void> testMain() async {
     });
 
     test(
-      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome but not Safari',
+      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
       () async {
         final PlatformMessagesSpy spy = PlatformMessagesSpy();
         spy.setUp();
@@ -693,7 +693,14 @@ Future<void> testMain() async {
           // call <input>.focus() the browser doesn't move focus to the target
           // element. This only happens in the test harness. When testing
           // manually, Firefox happily moves focus to the input element.
-          expect(domDocument.activeElement, flutterView.dom.rootElement);
+          //
+          // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
+          // element). But when running locally, we are seeing the wrong behavior explained in the
+          // comment above. To work around this, the test will accept both behaviors for now.
+          expect(
+            domDocument.activeElement,
+            anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
+          );
         } else {
           expect(domDocument.activeElement, textEditing.strategy.domElement);
         }
