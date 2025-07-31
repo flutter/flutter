@@ -314,6 +314,7 @@ class SliderThemeData with Diagnosticable {
       'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.year2023,
+    this.valueIndicatorMultilineConfig,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -655,6 +656,16 @@ class SliderThemeData with Diagnosticable {
   )
   final bool? year2023;
 
+  /// Configuration for value indicator multiline behavior.
+  ///
+  /// Controls how multiline text is handled in slider value indicators.
+  /// When null, multiline support is enabled with default settings.
+  ///
+  /// See also:
+  ///
+  ///  * [ValueIndicatorMultilineConfig], which defines the configuration options.
+  final ValueIndicatorMultilineConfig? valueIndicatorMultilineConfig;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -694,6 +705,7 @@ class SliderThemeData with Diagnosticable {
     WidgetStateProperty<Size?>? thumbSize,
     double? trackGap,
     bool? year2023,
+    ValueIndicatorMultilineConfig? valueIndicatorMultilineConfig,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -734,6 +746,8 @@ class SliderThemeData with Diagnosticable {
       thumbSize: thumbSize ?? this.thumbSize,
       trackGap: trackGap ?? this.trackGap,
       year2023: year2023 ?? this.year2023,
+      valueIndicatorMultilineConfig:
+          valueIndicatorMultilineConfig ?? this.valueIndicatorMultilineConfig,
     );
   }
 
@@ -817,6 +831,11 @@ class SliderThemeData with Diagnosticable {
       thumbSize: WidgetStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
       trackGap: lerpDouble(a.trackGap, b.trackGap, t),
       year2023: t < 0.5 ? a.year2023 : b.year2023,
+      valueIndicatorMultilineConfig: ValueIndicatorMultilineConfig.lerp(
+        a.valueIndicatorMultilineConfig,
+        b.valueIndicatorMultilineConfig,
+        t,
+      ),
     );
   }
 
@@ -858,6 +877,7 @@ class SliderThemeData with Diagnosticable {
       thumbSize,
       trackGap,
       year2023,
+      valueIndicatorMultilineConfig,
     ),
   );
 
@@ -905,7 +925,8 @@ class SliderThemeData with Diagnosticable {
         other.padding == padding &&
         other.thumbSize == thumbSize &&
         other.trackGap == trackGap &&
-        other.year2023 == year2023;
+        other.year2023 == year2023 &&
+        other.valueIndicatorMultilineConfig == valueIndicatorMultilineConfig;
   }
 
   @override
@@ -1140,6 +1161,113 @@ class SliderThemeData with Diagnosticable {
     properties.add(
       DiagnosticsProperty<bool>('year2023', year2023, defaultValue: defaultData.year2023),
     );
+    properties.add(
+      DiagnosticsProperty<ValueIndicatorMultilineConfig?>(
+        'valueIndicatorMultilineConfig',
+        valueIndicatorMultilineConfig,
+        defaultValue: defaultData.valueIndicatorMultilineConfig,
+      ),
+    );
+  }
+}
+
+/// Configuration for value indicator multiline behavior.
+///
+/// Used with [SliderThemeData.valueIndicatorMultilineConfig] to control
+/// how multiline text is handled in slider value indicators.
+///
+/// See also:
+///
+///  * [SliderThemeData], which uses this to configure multiline behavior.
+///  * [Slider.label], which can contain newline characters for multiline text.
+@immutable
+class ValueIndicatorMultilineConfig with Diagnosticable {
+  /// Creates a configuration for multiline value indicators.
+  const ValueIndicatorMultilineConfig({this.enabled = true, this.maxLines, this.cornerPadding});
+
+  /// Whether multiline value indicators are enabled.
+  ///
+  /// When true, value indicators will dynamically size to accommodate
+  /// multiline text (text containing '\n' characters). When false,
+  /// all text will be treated as single-line for backward compatibility.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
+  /// Maximum number of lines to display in the value indicator.
+  ///
+  /// If null, there is no limit on the number of lines.
+  /// If specified, text beyond this limit will be truncated.
+  final int? maxLines;
+
+  /// Additional padding for rounded corners in multiline mode.
+  ///
+  /// This padding is added beyond the standard label padding to prevent
+  /// text from appearing to "spill out" of rounded corners when using
+  /// [RoundedRectSliderValueIndicatorShape] (Material 3, when [ThemeData.useMaterial3]
+  /// is true or [SliderThemeData.valueIndicatorShape] is explicitly set).
+  ///
+  /// This property is ignored by [DropSliderValueIndicatorShape] (Material 2)
+  /// as it uses a different geometry that doesn't require corner padding.
+  ///
+  /// If null, uses a default padding of 8.0 logical pixels for rounded rect shapes.
+  final double? cornerPadding;
+
+  /// Creates a copy of this configuration with the given fields replaced
+  /// with new values.
+  ValueIndicatorMultilineConfig copyWith({bool? enabled, int? maxLines, double? cornerPadding}) {
+    return ValueIndicatorMultilineConfig(
+      enabled: enabled ?? this.enabled,
+      maxLines: maxLines ?? this.maxLines,
+      cornerPadding: cornerPadding ?? this.cornerPadding,
+    );
+  }
+
+  /// Linearly interpolate between two multiline configurations.
+  static ValueIndicatorMultilineConfig? lerp(
+    ValueIndicatorMultilineConfig? a,
+    ValueIndicatorMultilineConfig? b,
+    double t,
+  ) {
+    if (identical(a, b)) {
+      return a;
+    }
+    if (a == null) {
+      return b;
+    }
+    if (b == null) {
+      return a;
+    }
+    return ValueIndicatorMultilineConfig(
+      enabled: t < 0.5 ? a.enabled : b.enabled,
+      maxLines: t < 0.5 ? a.maxLines : b.maxLines,
+      cornerPadding: lerpDouble(a.cornerPadding, b.cornerPadding, t),
+    );
+  }
+
+  @override
+  int get hashCode => Object.hash(enabled, maxLines, cornerPadding);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ValueIndicatorMultilineConfig &&
+        other.enabled == enabled &&
+        other.maxLines == maxLines &&
+        other.cornerPadding == cornerPadding;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled));
+    properties.add(IntProperty('maxLines', maxLines));
+    properties.add(DoubleProperty('cornerPadding', cornerPadding));
   }
 }
 
