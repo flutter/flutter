@@ -71,16 +71,13 @@ enum WindowType {
 /// When the window is destroyed for any reason (either by the caller or by the
 /// platform), the content of the controller will thereafter be invalid.
 ///
-/// This class implements the [Listenable] interface, so callers can listen
-/// for changes to the window's properties.
-///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
 ///
 ///  * [RegularWindowController], the controller for regular top-level windows.
 @internal
-abstract class BaseWindowController with ChangeNotifier {
+abstract class BaseWindowController {
   /// The type of the window.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
