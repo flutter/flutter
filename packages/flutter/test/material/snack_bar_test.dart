@@ -4233,6 +4233,49 @@ void main() {
       expect(completer.isCompleted, true);
     },
   );
+
+  testWidgets('Setting dismissible to false prevents timeout', (WidgetTester tester) async {
+    const String buttonText = 'Show snackbar';
+    const String snackbarContent = 'Snackbar';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      dismissible: false,
+                      showCloseIcon: true,
+                      content: Text(snackbarContent),
+                    ),
+                  );
+                },
+                child: const Text(buttonText),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(buttonText));
+    await tester.pump(const Duration(milliseconds: 750));
+    // The snackbar shows up before the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1500));
+    // The snackbar is still there after the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    // The snackbar is dismissed.
+    expect(find.text(snackbarContent), findsNothing);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
