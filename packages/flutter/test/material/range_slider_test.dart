@@ -2570,8 +2570,8 @@ void main() {
     final Finder rangeSliderFinder = find.byType(RangeSlider);
     expect(rangeSliderFinder, findsOneWidget);
     final dynamic rangeSliderState = tester.firstState(find.byType(RangeSlider));
-    final FocusNode startFocusNode = rangeSliderState.startFocusNode;
-    final FocusNode endFocusNode = rangeSliderState.endFocusNode;
+    final FocusNode startFocusNode = rangeSliderState.startFocusNode as FocusNode;
+    final FocusNode endFocusNode = rangeSliderState.endFocusNode as FocusNode;
 
     startFocusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -2604,9 +2604,8 @@ void main() {
 
     await tester.pumpAndSettle();
     final dynamic rangeSliderState = tester.firstState(find.byType(RangeSlider));
-    final FocusNode startFocusNode = rangeSliderState.startFocusNode;
-    final FocusNode endFocusNode = rangeSliderState.endFocusNode;
-
+    final FocusNode startFocusNode = rangeSliderState.startFocusNode as FocusNode;
+    final FocusNode endFocusNode = rangeSliderState.endFocusNode as FocusNode;
     // Focus on the start thumb
     startFocusNode.requestFocus();
     await tester.pumpAndSettle();
