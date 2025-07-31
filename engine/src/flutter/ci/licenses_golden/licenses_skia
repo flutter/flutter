@@ -1,4 +1,4 @@
-Signature: 7d836339a15c3f8f56626015b96ef849
+Signature: ea888700af69bea00fe4e03e99a5fc91
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9897,8 +9897,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/src/core/SkPathPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/vk/VulkanPreferredFeatures.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google Inc.
@@ -10042,11 +10044,15 @@ LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRaw.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/tools.go + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkPathRaw.h
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkPathRawShapes.h
 FILE: ../../../flutter/third_party/skia/tools.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2025 Google LLC.
