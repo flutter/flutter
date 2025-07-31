@@ -107,7 +107,7 @@ TEST(PipelineCacheDataVKTest, WritesIncompleteCacheData) {
   ASSERT_TRUE(mapping);
   PipelineCacheHeaderVK header;
   ASSERT_GE(mapping->GetSize(), sizeof(header));
-  memcpy(&header, mapping->GetMapping(), sizeof(header));
+  std::memcpy(&header, mapping->GetMapping(), sizeof(header));
   ASSERT_EQ(mapping->GetSize(), sizeof(header) + header.data_size);
 }
 

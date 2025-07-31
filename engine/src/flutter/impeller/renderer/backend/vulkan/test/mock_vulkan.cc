@@ -772,7 +772,7 @@ VkResult vkGetPipelineCacheData(VkDevice device,
     const std::array<uint8_t, 5> cache_data{1, 2, 3, 4, 5};
     size_t dst_buffer_size = *pDataSize;
     size_t length = std::min(dst_buffer_size, cache_data.size());
-    memcpy(pData, cache_data.data(), length);
+    std::memcpy(pData, cache_data.data(), length);
     *pDataSize = length;
     return (dst_buffer_size >= length) ? VK_SUCCESS : VK_INCOMPLETE;
   } else {
