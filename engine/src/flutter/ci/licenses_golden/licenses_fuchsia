@@ -1,4 +1,4 @@
-Signature: 3cae2c6e2834d97ac7e4885e9d2c627f
+Signature: d77a503fab03931ef5a8e330279cfc00
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14884,6 +14884,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/overview.fidl + ../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/vendor.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/epskc.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14921,6 +14922,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.uwb/vendor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/epskc.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.pkg.resolution/resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
