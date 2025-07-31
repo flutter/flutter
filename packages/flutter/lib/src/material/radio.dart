@@ -444,7 +444,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   ///
-  /// If null, then it defaults to a border using the fill color.
+  /// If null, then [RadioThemeData.side] of [ThemeData.radioTheme] is used. If
+  /// that is also null, the default value is a border using the fill color.
   /// {@endtemplate}
   final BorderSide? side;
 

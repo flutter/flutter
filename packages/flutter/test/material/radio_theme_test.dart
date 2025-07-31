@@ -212,7 +212,6 @@ void main() {
 
     // Radio.
     await tester.pumpWidget(buildRadio());
-    await tester.pumpAndSettle();
     expect(
       _getRadioMaterial(tester),
       paints
