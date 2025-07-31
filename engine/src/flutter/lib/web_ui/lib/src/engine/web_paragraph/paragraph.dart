@@ -13,7 +13,6 @@ import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
-import 'painter.dart';
 
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
@@ -781,7 +780,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this, CanvasKitPainter());
+  late final TextPaint _paint = TextPaint(this);
 }
 
 class WebLineMetrics implements ui.LineMetrics {

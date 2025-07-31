@@ -28,10 +28,10 @@ typedef PaintCluster =
 ///
 /// It uses a [DomCanvasElement] to get text information
 class TextPaint {
-  TextPaint(this.paragraph, this.painter);
+  TextPaint(this.paragraph);
 
   final WebParagraph paragraph;
-  final Painter painter;
+  final Painter painter = CanvasKitPainter();
 
   // TODO(jlavrova): painting the entire block could require a really big canvas
   // Answer: we only do blocks for background and decorations which we do not draw on canvas
@@ -255,36 +255,5 @@ class TextPaint {
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
-  }
-}
-
-extension on DomTextMetrics {
-  static double epsilon = 0.001;
-
-  bool nextToEachOtherHorizontally(ui.Rect rect1, ui.Rect rect2) {
-    if ((rect1.right - rect2.left).abs() < epsilon) {
-      return true;
-    }
-    if ((rect1.left - rect2.right).abs() < epsilon) {
-      return true;
-    }
-    return false;
-  }
-
-  ui.Rect getAdvance(TextRange textRange) {
-    final List<DomRectReadOnly> rects = getSelectionRects(textRange.start, textRange.end);
-    ui.Rect union = ui.Rect.fromLTWH(
-      rects.first.left,
-      rects.first.top,
-      rects.first.width,
-      rects.first.height,
-    );
-    for (final rect in rects.skip(1)) {
-      final r = ui.Rect.fromLTWH(rect.left, rect.top, rect.width, rect.height);
-      // Assert that this is a continuous set of rectangles
-      assert(nextToEachOtherHorizontally(union, r));
-      union = union.expandToInclude(r);
-    }
-    return union;
   }
 }

@@ -1155,7 +1155,7 @@ class TextLine {
   List<LineBlock> visualBlocks = <LineBlock>[];
 }
 
-extension on DomTextMetrics {
+extension DomTextMetricsExtension on DomTextMetrics {
   static double epsilon = 0.001;
 
   bool nextToEachOtherHorizontally(ui.Rect rect1, ui.Rect rect2) {
