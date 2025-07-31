@@ -174,8 +174,6 @@ class RangeSlider extends StatefulWidget {
       'This feature was deprecated after v3.30.0-0.1.pre.',
     )
     this.year2023,
-    this.startFocusNode,
-    this.endFocusNode,
   }) : assert(min <= max),
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
@@ -425,23 +423,6 @@ class RangeSlider extends StatefulWidget {
   )
   final bool? year2023;
 
-  /// An optional focus node for the start thumb.
-  ///
-  /// If provided, this [FocusNode] can be used by a parent widget to
-  /// programmatically control the focus of the start thumb.
-  ///
-  /// If null, a default [FocusNode] will be created and managed internally.
-  final FocusNode? startFocusNode;
-
-  /// An optional focus node for the end thumb.
-  ///
-  /// If provided, this [FocusNode] can be used by a parent widget to
-  /// programmatically control the focus of the start end.
-  ///
-  /// If null, a default [FocusNode] will be created and managed internally.
-
-  final FocusNode? endFocusNode;
-
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
@@ -479,8 +460,8 @@ class RangeSlider extends StatefulWidget {
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
-  late FocusNode startFocusNode;
-  late FocusNode endFocusNode;
+  final FocusNode startFocusNode = FocusNode();
+  final FocusNode endFocusNode = FocusNode();
 
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // changes visibility in response to user interaction.
@@ -544,8 +525,6 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       vsync: this,
       value: _unlerp(widget.values.end),
     );
-    startFocusNode = widget.startFocusNode ?? FocusNode();
-    endFocusNode = widget.endFocusNode ?? FocusNode();
   }
 
   @override
@@ -562,11 +541,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       } else {
         enableController.reverse();
       }
-      setState(() {
-        if (_showHoverHighlight != (_hovering && isEnabled)) {
-          _showHoverHighlight = _hovering && isEnabled;
-        }
-      });
+      _showHoverHighlight = _hovering && isEnabled;
     }
   }
 

@@ -2540,8 +2540,6 @@ void main() {
 
   testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
     RangeValues values = const RangeValues(20, 80);
-    final FocusNode startFocusNode = FocusNode();
-    final FocusNode endFocusNode = FocusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2560,8 +2558,6 @@ void main() {
                     },
                     onChangeStart: (RangeValues newValues) {},
                     onChangeEnd: (RangeValues newValues) {},
-                    startFocusNode: startFocusNode,
-                    endFocusNode: endFocusNode,
                   ),
                 );
               },
@@ -2573,6 +2569,10 @@ void main() {
     // Focus on the start thumb
     final Finder rangeSliderFinder = find.byType(RangeSlider);
     expect(rangeSliderFinder, findsOneWidget);
+    final dynamic rangeSliderState = tester.firstState(find.byType(RangeSlider));
+    final FocusNode startFocusNode = rangeSliderState.startFocusNode;
+    final FocusNode endFocusNode = rangeSliderState.endFocusNode;
+
     startFocusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(FocusManager.instance.primaryFocus, startFocusNode);
@@ -2584,8 +2584,6 @@ void main() {
   });
 
   testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
-    final FocusNode startFocusNode = FocusNode();
-    final FocusNode endFocusNode = FocusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -2597,8 +2595,6 @@ void main() {
                 values: const RangeValues(10.0, 30.0),
                 max: 100.0,
                 onChanged: (RangeValues v) {},
-                startFocusNode: startFocusNode,
-                endFocusNode: endFocusNode,
               ),
             ),
           ),
@@ -2607,6 +2603,9 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+    final dynamic rangeSliderState = tester.firstState(find.byType(RangeSlider));
+    final FocusNode startFocusNode = rangeSliderState.startFocusNode;
+    final FocusNode endFocusNode = rangeSliderState.endFocusNode;
 
     // Focus on the start thumb
     startFocusNode.requestFocus();
