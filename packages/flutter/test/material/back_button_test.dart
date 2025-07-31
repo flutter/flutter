@@ -342,4 +342,16 @@ void main() {
       expect(customCallbackWasCalled, true);
     });
   });
+
+  testWidgets('EndDrawerButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: EndDrawerButton())),
+        ),
+      ),
+    );
+    final Finder endDrawerButtonIcon = find.byType(EndDrawerButtonIcon);
+    expect(tester.getSize(endDrawerButtonIcon).isEmpty, isTrue);
+  });
 }
