@@ -43,7 +43,7 @@ flutter/flutter repository. It is based on the more comprehensive official
 - **Answer your own questions**: If you have a question, find the answer, and then document it where you first looked.
 - **Avoid useless documentation**: If the documentation just repeats the member's name, it's useless. Explain the *why* and the *how*.
 - **Introduce terms**: Don't assume the reader knows everything. Link to definitions.
-- **Provide sample code**: Use `{@tool dartpad}` for runnable examples. 
+- **Provide sample code**: Use `{@tool dartpad}` for runnable examples.
   - Inline code samples are contained within `{@tool dartpad}` and `{@end-tool}`, and use the format of the following example to insert the code sample:
     - `/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **`
     - Do not confuse this format with `/// See also:` sections of the documentation, which provide helpful breadcrumbs to developers.
