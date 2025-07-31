@@ -1316,7 +1316,7 @@ abstract class _AndroidViewControllerInternals {
       'height': ?size?.height,
       if (hybridFallback) 'hybridFallback': hybridFallback,
       'left': ?position?.dx,
-      'top': position?.dy,
+      'top': ?position?.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;
