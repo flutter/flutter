@@ -27,6 +27,14 @@ namespace {
 using ::testing::AnyNumber;
 using ::testing::Return;
 
+void MockGetIntegerv(GLenum name, int* value) {
+  if (name == GL_NUM_EXTENSIONS) {
+    *value = 1;
+  } else {
+    *value = 0;
+  }
+}
+
 const unsigned char* MockGetString(GLenum name) {
   switch (name) {
     case GL_VERSION:
@@ -37,8 +45,12 @@ const unsigned char* MockGetString(GLenum name) {
   }
 }
 
-void MockGetIntegerv(GLenum name, int* value) {
-  *value = 0;
+const unsigned char* MockGetStringi(GLenum name, int index) {
+  if (name == GL_EXTENSIONS) {
+    return reinterpret_cast<const unsigned char*>("GL_ANGLE_framebuffer_blit");
+  } else {
+    return reinterpret_cast<const unsigned char*>("");
+  }
 }
 
 GLenum MockGetError() {
@@ -52,6 +64,8 @@ const impeller::ProcTableGLES::Resolver kMockResolver = [](const char* name) {
 
   if (function_name == "glGetString") {
     return reinterpret_cast<void*>(&MockGetString);
+  } else if (function_name == "glGetStringi") {
+    return reinterpret_cast<void*>(&MockGetStringi);
   } else if (function_name == "glGetIntegerv") {
     return reinterpret_cast<void*>(&MockGetIntegerv);
   } else if (function_name == "glGetError") {
@@ -163,6 +177,30 @@ TEST_F(CompositorOpenGLTest, InitializationFailure) {
   EXPECT_FALSE(compositor.CreateBackingStore(config, &backing_store));
 }
 
+TEST_F(CompositorOpenGLTest, InitializationRequiresBlit) {
+  UseHeadlessEngine();
+
+  const impeller::ProcTableGLES::Resolver resolver = [](const char* name) {
+    std::string function_name{name};
+
+    if (function_name == "glBlitFramebuffer" ||
+        function_name == "glBlitFramebufferANGLE") {
+      return (void*)nullptr;
+    }
+
+    return kMockResolver(name);
+  };
+
+  auto compositor =
+      CompositorOpenGL{engine(), resolver, /*enable_impeller=*/false};
+
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_FALSE(compositor.CreateBackingStore(config, &backing_store));
+}
+
 TEST_F(CompositorOpenGLTest, Present) {
   UseEngineWithView();
 
@@ -221,6 +259,47 @@ TEST_F(CompositorOpenGLTest, NoSurfaceIgnored) {
   const FlutterLayer* layer_ptr = &layer;
 
   EXPECT_FALSE(compositor.Present(view(), &layer_ptr, 1));
+
+  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
+}
+
+TEST_F(CompositorOpenGLTest, PresentUsingANGLEBlitExtension) {
+  UseEngineWithView();
+
+  bool resolved_ANGLE_blit = false;
+  const impeller::ProcTableGLES::Resolver resolver =
+      [&resolved_ANGLE_blit](const char* name) {
+        std::string function_name{name};
+
+        if (function_name == "glBlitFramebuffer") {
+          return (void*)nullptr;
+        } else if (function_name == "glBlitFramebufferANGLE") {
+          resolved_ANGLE_blit = true;
+          return reinterpret_cast<void*>(&DoNothing);
+        }
+
+        return kMockResolver(name);
+      };
+
+  auto compositor =
+      CompositorOpenGL{engine(), resolver, /*enable_impeller=*/false};
+
+  FlutterBackingStoreConfig config = {};
+  FlutterBackingStore backing_store = {};
+
+  EXPECT_CALL(*render_context(), MakeCurrent).WillOnce(Return(true));
+  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
+
+  FlutterLayer layer = {};
+  layer.type = kFlutterLayerContentTypeBackingStore;
+  layer.backing_store = &backing_store;
+  const FlutterLayer* layer_ptr = &layer;
+
+  EXPECT_CALL(*surface(), IsValid).WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface(), MakeCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*surface(), SwapBuffers).WillOnce(Return(true));
+  EXPECT_TRUE(compositor.Present(view(), &layer_ptr, 1));
+  EXPECT_TRUE(resolved_ANGLE_blit);
 
   ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
 }

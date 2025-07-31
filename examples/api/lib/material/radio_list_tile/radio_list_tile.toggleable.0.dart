@@ -42,21 +42,23 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return RadioListTile<int>(
-            value: index,
-            groupValue: groupValue,
-            toggleable: true,
-            title: Text(selections[index]),
-            onChanged: (int? value) {
-              setState(() {
-                groupValue = value;
-              });
-            },
-          );
+      body: RadioGroup<int>(
+        groupValue: groupValue,
+        onChanged: (int? value) {
+          setState(() {
+            groupValue = value;
+          });
         },
-        itemCount: selections.length,
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return RadioListTile<int>(
+              value: index,
+              toggleable: true,
+              title: Text(selections[index]),
+            );
+          },
+          itemCount: selections.length,
+        ),
       ),
     );
   }

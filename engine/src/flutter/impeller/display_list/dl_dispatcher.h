@@ -272,7 +272,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
-                     IRect cull_rect);
+                     IRect32 cull_rect);
 
   ~CanvasDlDispatcher() = default;
 
@@ -412,7 +412,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
 /// submitted via Context::SubmitOnscreen.
 bool RenderToTarget(ContentContext& context, RenderTarget render_target,
                          const sk_sp<flutter::DisplayList>& display_list,
-                         SkIRect cull_rect,
+                         Rect cull_rect,
                          bool reset_host_buffer,
                          bool is_onscreen = true);
 

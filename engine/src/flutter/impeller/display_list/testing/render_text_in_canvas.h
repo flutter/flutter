@@ -17,7 +17,7 @@ namespace testing {
 
 struct TextRenderOptions {
   bool stroke = false;
-  SkScalar font_size = 50;
+  DlScalar font_size = 50;
   DlColor color = DlColor::kYellow();
   std::shared_ptr<DlMaskFilter> mask_filter;
   bool is_subpixel = false;

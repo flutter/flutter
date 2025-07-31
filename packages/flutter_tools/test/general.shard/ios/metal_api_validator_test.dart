@@ -16,10 +16,9 @@ void main() {
   testWithoutContext('Adds Metal API setting to matching file', () {
     final FileSystem fs = MemoryFileSystem.test();
 
-    final File file =
-        fs.file('test_file')
-          ..createSync()
-          ..writeAsStringSync('''
+    final File file = fs.file('test_file')
+      ..createSync()
+      ..writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
   <LaunchAction
     buildConfiguration = "Debug"
@@ -32,11 +31,8 @@ void main() {
     debugServiceExtension = "internal"
     allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
-      project,
-      BufferLogger.test(),
-    );
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -52,10 +48,9 @@ void main() {
   testWithoutContext('Adds Metal API setting to matching file and crazy indentation', () {
     final FileSystem fs = MemoryFileSystem.test();
 
-    final File file =
-        fs.file('test_file')
-          ..createSync()
-          ..writeAsStringSync('''
+    final File file = fs.file('test_file')
+      ..createSync()
+      ..writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
       <LaunchAction
         buildConfiguration = "Debug"
@@ -68,11 +63,8 @@ void main() {
         debugServiceExtension = "internal"
         allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
-      project,
-      BufferLogger.test(),
-    );
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -88,10 +80,9 @@ void main() {
   testWithoutContext('Skips modifying file that already references Metal API setting', () {
     final FileSystem fs = MemoryFileSystem.test();
 
-    final File file =
-        fs.file('test_file')
-          ..createSync()
-          ..writeAsStringSync('''
+    final File file = fs.file('test_file')
+      ..createSync()
+      ..writeAsStringSync('''
 <?xml version="1.0" encoding="UTF-8"?>
   <LaunchAction
     buildConfiguration = "Debug"
@@ -105,11 +96,8 @@ void main() {
     enableGPUValidationMode = "1"
     allowLocationSimulation = "YES">
 ''');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
-      project,
-      BufferLogger.test(),
-    );
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     final String initialContents = file.readAsStringSync();
 
@@ -120,15 +108,11 @@ void main() {
   testWithoutContext('No-op on file with no match', () {
     final FileSystem fs = MemoryFileSystem.test();
 
-    final File file =
-        fs.file('does_not_exist')
-          ..createSync()
-          ..writeAsStringSync('NO_OP');
-    final FakeIosProject project = FakeIosProject(file);
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
-      project,
-      BufferLogger.test(),
-    );
+    final File file = fs.file('does_not_exist')
+      ..createSync()
+      ..writeAsStringSync('NO_OP');
+    final project = FakeIosProject(file);
+    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
 
@@ -137,11 +121,8 @@ void main() {
 
   testWithoutContext('No-op on missing file', () async {
     final FileSystem fs = MemoryFileSystem.test();
-    final FakeIosProject project = FakeIosProject(fs.file('does_not_exist'));
-    final MetalAPIValidationMigrator validator = MetalAPIValidationMigrator.ios(
-      project,
-      BufferLogger.test(),
-    );
+    final project = FakeIosProject(fs.file('does_not_exist'));
+    final validator = MetalAPIValidationMigrator.ios(project, BufferLogger.test());
 
     expect(() async => validator.migrate(), returnsNormally);
   });

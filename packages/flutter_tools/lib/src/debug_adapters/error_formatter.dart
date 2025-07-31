@@ -20,20 +20,20 @@ typedef _OutputSender =
 /// code faint) if the client indicated support.
 ///
 /// Lines that look like stack frames will be marked so they can be parsed by
-/// the base adapter and attached as [Source]s to allow them to be clickable
+/// the base adapter and attached as `Source`s to allow them to be clickable
 /// in the client.
 class FlutterErrorFormatter {
-  final List<_BatchedOutput> batchedOutput = <_BatchedOutput>[];
+  final batchedOutput = <_BatchedOutput>[];
 
   /// Formats a Flutter error.
   ///
   /// If this is not the first error since the reload, only a summary will be
   /// included.
   void formatError(Map<String, Object?> errorData) {
-    final _ErrorData data = _ErrorData(errorData);
+    final data = _ErrorData(errorData);
 
-    const int assumedTerminalSize = 80;
-    const String barChar = '═';
+    const assumedTerminalSize = 80;
+    const barChar = '═';
     final String headerPrefix = barChar * 8;
     final String headerSuffix =
         barChar *
@@ -41,7 +41,7 @@ class FlutterErrorFormatter {
           assumedTerminalSize - (data.description?.length ?? 0) - 2 - headerPrefix.length,
           0,
         );
-    final String header = '$headerPrefix ${data.description} $headerSuffix';
+    final header = '$headerPrefix ${data.description} $headerSuffix';
     _write('');
     _write(header, isError: true);
 
@@ -74,7 +74,7 @@ class FlutterErrorFormatter {
   void _write(String? text, {int indent = 0, bool isError = false, bool parseStackFrames = false}) {
     if (text != null) {
       final String indentString = '    ' * indent;
-      final String message = '$indentString${text.trim()}';
+      final message = '$indentString${text.trim()}';
 
       _BatchedOutput? output = batchedOutput.lastOrNull;
       if (output == null ||
@@ -117,7 +117,7 @@ class FlutterErrorFormatter {
 
   /// Writes [nodes] to the output.
   void _writeNodes(List<_ErrorNode> nodes, {int indent = 0, bool recursive = true}) {
-    for (final _ErrorNode child in nodes) {
+    for (final child in nodes) {
       _writeNode(child, indent: indent, recursive: recursive);
     }
   }
@@ -149,7 +149,7 @@ class _BatchedOutput {
 
   final bool isError;
   final bool parseStackFrames;
-  final StringBuffer _buffer = StringBuffer();
+  final _buffer = StringBuffer();
 
   String get output => _buffer.toString();
 

@@ -599,13 +599,6 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notifies the engine that the attached flutter view has been
-  ///             destroyed.
-  ///             This enables the engine to notify the Dart VM so it can do
-  ///             some cleanp activities.
-  void NotifyDestroyed();
-
-  //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a
   ///             specific frame to be rendered. This is because Dart code only
   ///             runs on the UI task runner. That is only a small part of the

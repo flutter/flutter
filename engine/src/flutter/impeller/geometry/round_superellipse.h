@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_H_
 #define FLUTTER_IMPELLER_GEOMETRY_ROUND_SUPERELLIPSE_H_
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/rounding_radii.h"
@@ -17,28 +18,28 @@ struct RoundRect;
 struct RoundSuperellipse {
   RoundSuperellipse() = default;
 
-  constexpr static RoundSuperellipse MakeRect(const Rect& rect) {
+  inline static RoundSuperellipse MakeRect(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii());
   }
 
-  constexpr static RoundSuperellipse MakeOval(const Rect& rect) {
+  inline static RoundSuperellipse MakeOval(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
   }
 
-  constexpr static RoundSuperellipse MakeRectRadius(const Rect& rect,
-                                                    Scalar radius) {
+  inline static RoundSuperellipse MakeRectRadius(const Rect& rect,
+                                                 Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
   }
 
-  constexpr static RoundSuperellipse MakeRectXY(const Rect& rect,
-                                                Scalar x_radius,
-                                                Scalar y_radius) {
+  inline static RoundSuperellipse MakeRectXY(const Rect& rect,
+                                             Scalar x_radius,
+                                             Scalar y_radius) {
     return MakeRectRadii(rect,
                          RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
   }
 
-  constexpr static RoundSuperellipse MakeRectXY(const Rect& rect,
-                                                Size corner_radii) {
+  inline static RoundSuperellipse MakeRectXY(const Rect& rect,
+                                             Size corner_radii) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
@@ -80,7 +81,7 @@ struct RoundSuperellipse {
   [[nodiscard]] bool Contains(const Point& p) const;
 
   /// @brief  Returns a new round rectangle translated by the given offset.
-  [[nodiscard]] constexpr RoundSuperellipse Shift(Scalar dx, Scalar dy) const {
+  [[nodiscard]] inline RoundSuperellipse Shift(Scalar dx, Scalar dy) const {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
@@ -89,10 +90,10 @@ struct RoundSuperellipse {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundSuperellipse Expand(Scalar left,
-                                                   Scalar top,
-                                                   Scalar right,
-                                                   Scalar bottom) const {
+  [[nodiscard]] inline RoundSuperellipse Expand(Scalar left,
+                                                Scalar top,
+                                                Scalar right,
+                                                Scalar bottom) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -101,8 +102,8 @@ struct RoundSuperellipse {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundSuperellipse Expand(Scalar horizontal,
-                                                   Scalar vertical) const {
+  [[nodiscard]] inline RoundSuperellipse Expand(Scalar horizontal,
+                                                Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -111,7 +112,7 @@ struct RoundSuperellipse {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundSuperellipse Expand(Scalar amount) const {
+  [[nodiscard]] inline RoundSuperellipse Expand(Scalar amount) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
@@ -140,6 +141,33 @@ struct RoundSuperellipse {
 
   Rect bounds_;
   RoundingRadii radii_;
+};
+
+class RoundSuperellipsePathSource : public PathSource {
+ public:
+  explicit RoundSuperellipsePathSource(
+      const RoundSuperellipse& round_superellipse);
+
+  ~RoundSuperellipsePathSource();
+
+  const RoundSuperellipse& GetRoundSuperellipse() const {
+    return round_superellipse_;
+  }
+
+  // |PathSource|
+  FillType GetFillType() const override;
+
+  // |PathSource|
+  Rect GetBounds() const override;
+
+  // |PathSource|
+  bool IsConvex() const override;
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override;
+
+ private:
+  const RoundSuperellipse round_superellipse_;
 };
 
 }  // namespace impeller

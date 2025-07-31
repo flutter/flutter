@@ -119,7 +119,9 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding,
             ),
-            child: Center(child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))),
+            child: Center(
+              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0)),
+            ),
           );
         },
       ),
@@ -368,13 +370,12 @@ class _RecipePageState extends State<RecipePage> {
                 actions: <Widget>[
                   PopupMenuButton<String>(
                     onSelected: (String item) {},
-                    itemBuilder:
-                        (BuildContext context) => <PopupMenuItem<String>>[
-                          _buildMenuItem(Icons.share, 'Tweet recipe'),
-                          _buildMenuItem(Icons.email, 'Email recipe'),
-                          _buildMenuItem(Icons.message, 'Message recipe'),
-                          _buildMenuItem(Icons.people, 'Share on Facebook'),
-                        ],
+                    itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                      _buildMenuItem(Icons.share, 'Tweet recipe'),
+                      _buildMenuItem(Icons.email, 'Email recipe'),
+                      _buildMenuItem(Icons.message, 'Message recipe'),
+                      _buildMenuItem(Icons.people, 'Share on Facebook'),
+                    ],
                   ),
                 ],
                 flexibleSpace: const FlexibleSpaceBar(

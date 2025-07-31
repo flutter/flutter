@@ -38,14 +38,15 @@ Widget get _radioPanelExpandIcon => _expandIcons.evaluate().toList()[1].widget;
 
 bool _isRadioSelected(int index) => _radios[index].value == _radios[index].groupValue;
 
-List<Radio<Location>> get _radios =>
-    List<Radio<Location>>.from(_radioFinder.evaluate().map<Widget>((Element e) => e.widget));
+List<RadioListTile<Location>> get _radios => List<RadioListTile<Location>>.from(
+  _radioFinder.evaluate().map<Widget>((Element e) => e.widget),
+);
 
 // [find.byType] and [find.widgetWithText] do not match subclasses; `Radio` is
 // not sufficient to find a `Radio<_Location>`. Another approach is to grab the
 // `runtimeType` of a dummy instance; see
 // packages/flutter/test/material/radio_list_tile_test.dart.
-Finder get _radioFinder => find.byWidgetPredicate((Widget w) => w is Radio<Location>);
+Finder get _radioFinder => find.byWidgetPredicate((Widget w) => w is RadioListTile<Location>);
 
 List<RadioListTile<Location>> get _radioListTiles => List<RadioListTile<Location>>.from(
   _radioListTilesFinder.evaluate().map<Widget>((Element e) => e.widget),

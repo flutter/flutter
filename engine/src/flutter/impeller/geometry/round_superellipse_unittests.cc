@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 #include "flutter/impeller/geometry/round_superellipse.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 
@@ -13,6 +14,48 @@
   EXPECT_FALSE(rr.Contains(p + outward_offset));
 
 namespace impeller {
+
+namespace {
+
+// A `PathReceiver` that allows setting callbacks for each kind of path
+// segments.
+class SpyPathReceiver : public PathReceiver {
+ public:
+  // For now not all segment types are defined since they're not all used.
+  using LineSegment = std::function<void(const Point&)>;
+  using CubicSegment =
+      std::function<void(const Point&, const Point&, const Point&)>;
+
+  void SpyLineTo(LineSegment line_to) { line_to_ = std::move(line_to); }
+
+  void SpyCubicTo(CubicSegment cubic_to) { cubic_to_ = std::move(cubic_to); }
+
+  // |PathReceiver|
+  void MoveTo(const Point& p2, bool will_be_closed) override {}
+  // |PathReceiver|
+  void LineTo(const Point& p2) override {
+    if (line_to_) {
+      line_to_(p2);
+    }
+  }
+  // |PathReceiver|
+  void QuadTo(const Point& cp, const Point& p2) override {}
+  // |PathReceiver|
+  void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) override {
+    if (cubic_to_) {
+      cubic_to_(cp1, cp2, p2);
+    }
+  }
+  // |PathReceiver|
+  void Close() override {}
+
+ private:
+  LineSegment line_to_;
+  CubicSegment cubic_to_;
+};
+
+}  // namespace
+
 namespace testing {
 
 TEST(RoundSuperellipseTest, EmptyDeclaration) {
@@ -655,9 +698,9 @@ TEST(RoundSuperellipseTest, UniformRectangularContains) {
 #undef CHECK_POINT_AND_MIRRORS
 }
 
-TEST(RoundSuperellipseTest, SlimDiagnalContains) {
-  // This shape has large radii on one diagnal and tiny radii on the other,
-  // resulting in a almond-like shape placed diagnally (NW to SE).
+TEST(RoundSuperellipseTest, SlimDiagonalContains) {
+  // This shape has large radii on one diagonal and tiny radii on the other,
+  // resulting in a almond-like shape placed diagonally (NW to SE).
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto rr = RoundSuperellipse::MakeRectRadii(
       bounds, {
@@ -678,18 +721,62 @@ TEST(RoundSuperellipseTest, SlimDiagnalContains) {
   CHECK_POINT_WITH_OFFSET(rr, Point(49.70, 49.70), Point(0.02, 0.02));
 
 // Checks two points symmetrical to the origin.
-#define CHECK_DIAGNAL_POINTS(p)                         \
+#define CHECK_DIAGONAL_POINTS(p)                        \
   CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, -0.02)); \
   CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, 0.02));
 
   // A few other points along the edge
-  CHECK_DIAGNAL_POINTS(Point(-40.0, -49.59));
-  CHECK_DIAGNAL_POINTS(Point(-20.0, -45.64));
-  CHECK_DIAGNAL_POINTS(Point(0.0, -37.01));
-  CHECK_DIAGNAL_POINTS(Point(20.0, -21.96));
-  CHECK_DIAGNAL_POINTS(Point(21.05, -20.92));
-  CHECK_DIAGNAL_POINTS(Point(40.0, 5.68));
+  CHECK_DIAGONAL_POINTS(Point(-40.0, -49.59));
+  CHECK_DIAGONAL_POINTS(Point(-20.0, -45.64));
+  CHECK_DIAGONAL_POINTS(Point(0.0, -37.01));
+  CHECK_DIAGONAL_POINTS(Point(20.0, -21.96));
+  CHECK_DIAGONAL_POINTS(Point(21.05, -20.92));
+  CHECK_DIAGONAL_POINTS(Point(40.0, 5.68));
 #undef CHECK_POINT_AND_MIRRORS
+}
+
+TEST(RoundSuperellipseTest, PointsOutsideOfSharpCorner) {
+  Rect bounds = Rect::MakeLTRB(196.0f, 0.0f, 294.0f, 28.0f);
+  // Regression test for a case where RoundSuperellipseParam::Contains
+  // previously failed. Although the bounding rect filter of
+  // `RoundSuperellipse::Contains` would reject this point, this test ensures
+  // the internal logic of RoundSuperellipseParam::Contains is now correct.
+  auto rr = RoundSuperellipseParam::MakeBoundsRadii(
+      bounds, {
+                  .top_left = Size(0.0, 0.0),
+                  .top_right = Size(3.0, 3.0),
+                  .bottom_left = Size(0.0, 0.0),
+                  .bottom_right = Size(3.0, 3.0),
+              });
+
+  EXPECT_FALSE(rr.Contains(Point{147.0, 14.0}));
+}
+
+TEST(RoundSuperellipseTest,
+     PathForRectangularRseWithShapeCornersShouldBeWithinBounds) {
+  Rect bounds = Rect::MakeLTRB(34.0f, 242.0f, 766.0f, 358.0f);
+  // Regression test for https://github.com/flutter/flutter/issues/170593.
+  // The issue was caused by incorrect calculation when building paths for
+  // rounded superellipses with sharp corners and unequal width and height.
+  // Since the most obvious symptom of the issue is some points being
+  // incorrectly placed out of bounds, this test case simply verifies that all
+  // points are within the bounds.
+
+  auto rr = RoundSuperellipseParam::MakeBoundsRadii(
+      bounds, {
+                  .top_left = Size(14.0, 14.0),
+                  .top_right = Size(14.0, 14.0),
+                  .bottom_left = Size(0.0, 0.0),
+                  .bottom_right = Size(0.0, 0.0),
+              });
+  SpyPathReceiver receiver;
+  receiver.SpyLineTo(
+      [&](const Point& p2) { EXPECT_TRUE(bounds.ContainsInclusive(p2)); });
+  receiver.SpyCubicTo([&](const Point& cp1, const Point& cp2, const Point& p2) {
+    EXPECT_TRUE(bounds.ContainsInclusive(p2));
+  });
+
+  rr.Dispatch(receiver);
 }
 
 }  // namespace testing

@@ -15,7 +15,7 @@ library widgets;
 export 'package:characters/characters.dart';
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
-export 'foundation.dart' show UniqueKey;
+export 'foundation.dart' show Brightness, UniqueKey;
 export 'rendering.dart' show TextSelectionHandleType;
 export 'src/widgets/actions.dart';
 export 'src/widgets/adapter.dart';
@@ -104,6 +104,7 @@ export 'src/widgets/platform_view.dart';
 export 'src/widgets/pop_scope.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
+export 'src/widgets/radio_group.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/raw_menu_anchor.dart';
 export 'src/widgets/raw_radio.dart';

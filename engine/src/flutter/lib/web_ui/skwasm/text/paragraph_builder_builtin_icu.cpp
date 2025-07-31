@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "../wrappers.h"
 #include "modules/skunicode/include/SkUnicode_icu.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
@@ -17,12 +18,14 @@ SKWASM_EXPORT bool skwasm_isHeavy() {
 SKWASM_EXPORT ParagraphBuilder* paragraphBuilder_create(
     ParagraphStyle* style,
     FlutterFontCollection* collection) {
+  liveParagraphBuilderCount++;
   return ParagraphBuilder::make(*style, collection->collection,
                                 SkUnicodes::ICU::Make())
       .release();
 }
 
 SKWASM_EXPORT Paragraph* paragraphBuilder_build(ParagraphBuilder* builder) {
+  liveParagraphCount++;
   return builder->Build().release();
 }
 

@@ -10,8 +10,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -58,16 +58,14 @@ void testMain() {
       disposedImage = image;
     };
 
-    final ui.Image image1 =
-        await _createImage()
-          ..dispose();
+    final ui.Image image1 = await _createImage()
+      ..dispose();
 
     expect(onDisposeInvokedCount, 1);
     expect(disposedImage, image1);
 
-    final ui.Image image2 =
-        await _createImage()
-          ..dispose();
+    final ui.Image image2 = await _createImage()
+      ..dispose();
 
     expect(onDisposeInvokedCount, 2);
     expect(disposedImage, image2);
@@ -111,6 +109,51 @@ void testMain() {
     expect(size?.height, 300);
   });
 
+  test('instantiateImageCodecFromBuffer dispose buffer', () async {
+    final ui.Image image = await _createImage();
+    final ByteData? imageData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final ui.ImmutableBuffer imageBuffer = await ui.ImmutableBuffer.fromUint8List(
+      imageData!.buffer.asUint8List(),
+    );
+
+    final ui.Codec codec = await ui.instantiateImageCodecFromBuffer(imageBuffer);
+    codec.dispose();
+    image.dispose();
+
+    expect(imageBuffer.debugDisposed, isTrue);
+  });
+
+  test('instantiateImageCodecWithSize dispose buffer', () async {
+    // getTargetSize is null, so the image is not scaled.
+    final ui.Image image = await _createImage();
+    final ByteData? imageData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final ui.ImmutableBuffer nullTargetSizeImageBuffer = await ui.ImmutableBuffer.fromUint8List(
+      imageData!.buffer.asUint8List(),
+    );
+
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(nullTargetSizeImageBuffer);
+    codec.dispose();
+    image.dispose();
+
+    expect(nullTargetSizeImageBuffer.debugDisposed, isTrue);
+
+    // getTargetSize is not null, so the image is scaled.
+    final ui.Image scaledImage = await _createImage();
+    final ByteData? scaledImageData = await scaledImage.toByteData(format: ui.ImageByteFormat.png);
+    final ui.ImmutableBuffer scaledImageBuffer = await ui.ImmutableBuffer.fromUint8List(
+      scaledImageData!.buffer.asUint8List(),
+    );
+
+    final ui.Codec scaledCodec = await ui.instantiateImageCodecWithSize(
+      scaledImageBuffer,
+      getTargetSize: (w, h) => ui.TargetImageSize(width: w ~/ 2, height: h ~/ 2),
+    );
+    scaledCodec.dispose();
+    scaledImage.dispose();
+
+    expect(scaledImageBuffer.debugDisposed, isTrue);
+  });
+
   test('instantiateImageCodecWithSize disposes temporary image', () async {
     final Set<ui.Image> activeImages = <ui.Image>{};
     ui.Image.onCreate = activeImages.add;
@@ -142,12 +185,14 @@ void testMain() {
       await domWindow.createImageBitmap(createBlankDomImageData(4, 4)),
     );
 
-    final SkImage skImage1 =
-        canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(
+      k4x4PngImage,
+    )!.makeImageAtCurrentFrame();
     final CkImage image1 = CkImage(skImage1, imageSource: imageSource);
 
-    final SkImage skImage2 =
-        canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final SkImage skImage2 = canvasKit.MakeAnimatedImageFromEncoded(
+      k4x4PngImage,
+    )!.makeImageAtCurrentFrame();
     final CkImage image2 = CkImage(skImage2, imageSource: imageSource);
 
     final CkImage image3 = image1.clone();

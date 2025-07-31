@@ -550,12 +550,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticsLabel,
-    bool isLeftAligned = true,
+    bool usesDefaultAlignment = true,
   }) {
     return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+      icon: usesDefaultAlignment ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
     );
   }
 
@@ -568,9 +568,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
     return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      // This icon is also used for the Material-styled button and for DevTools.
-      // It should be updated in all 3 places if changed.
-      icon: CupertinoIcons.cursor_rays,
+      // This unicode icon is also used for the Material-styled button and for
+      // DevTools. It should be updated in all 3 places if changed.
+      icon: const IconData(0x1F74A),
       toggledOn: selectionOnTapEnabled,
     );
   }
@@ -717,21 +717,20 @@ class _CupertinoInspectorButton extends InspectorButton {
       padding: const EdgeInsets.all(
         (kMinInteractiveDimensionCupertino - InspectorButton.buttonSize) / 2,
       ),
-      child:
-          variant == InspectorButtonVariant.toggle && !toggledOn!
-              ? CupertinoButton.tinted(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                child: buttonIcon,
-              )
-              : CupertinoButton(
-                minSize: InspectorButton.buttonSize,
-                onPressed: onPressed,
-                padding: EdgeInsets.zero,
-                color: backgroundColor(context),
-                child: buttonIcon,
-              ),
+      child: variant == InspectorButtonVariant.toggle && !toggledOn!
+          ? CupertinoButton.tinted(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              child: buttonIcon,
+            )
+          : CupertinoButton(
+              minSize: InspectorButton.buttonSize,
+              onPressed: onPressed,
+              padding: EdgeInsets.zero,
+              color: backgroundColor(context),
+              child: buttonIcon,
+            ),
     );
   }
 

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'flutter_cache.dart';
+/// @docImport 'runner/flutter_command.dart';
+/// @docImport 'runner/flutter_command_runner.dart';
+library;
+
 import 'dart:async';
 
 import 'package:crypto/crypto.dart';
@@ -29,14 +34,14 @@ import 'base/user_messages.dart';
 import 'convert.dart';
 import 'features.dart';
 
-const String kFlutterRootEnvironmentVariableName =
+const kFlutterRootEnvironmentVariableName =
     'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
-const String kFlutterEngineEnvironmentVariableName =
+const kFlutterEngineEnvironmentVariableName =
     'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
-const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
-const String kFlutterToolsScriptFileName =
+const kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/cache/
+const kFlutterToolsScriptFileName =
     'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
-const String kFlutterEnginePackageName = 'sky_engine';
+const kFlutterEnginePackageName = 'sky_engine';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
@@ -51,53 +56,41 @@ class DevelopmentArtifact {
   final Feature? feature;
 
   /// Artifacts required for Android development.
-  static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._(
+  static const androidGenSnapshot = DevelopmentArtifact._(
     'android_gen_snapshot',
     feature: flutterAndroidFeature,
   );
-  static const DevelopmentArtifact androidMaven = DevelopmentArtifact._(
+  static const androidMaven = DevelopmentArtifact._(
     'android_maven',
     feature: flutterAndroidFeature,
   );
 
   // Artifacts used for internal builds.
-  static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._(
+  static const androidInternalBuild = DevelopmentArtifact._(
     'android_internal_build',
     feature: flutterAndroidFeature,
   );
 
   /// Artifacts required for iOS development.
-  static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios', feature: flutterIOSFeature);
+  static const iOS = DevelopmentArtifact._('ios', feature: flutterIOSFeature);
 
   /// Artifacts required for web development.
-  static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
+  static const web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
-  static const DevelopmentArtifact macOS = DevelopmentArtifact._(
-    'macos',
-    feature: flutterMacOSDesktopFeature,
-  );
+  static const macOS = DevelopmentArtifact._('macos', feature: flutterMacOSDesktopFeature);
 
   /// Artifacts required for desktop Windows.
-  static const DevelopmentArtifact windows = DevelopmentArtifact._(
-    'windows',
-    feature: flutterWindowsDesktopFeature,
-  );
+  static const windows = DevelopmentArtifact._('windows', feature: flutterWindowsDesktopFeature);
 
   /// Artifacts required for desktop Linux.
-  static const DevelopmentArtifact linux = DevelopmentArtifact._(
-    'linux',
-    feature: flutterLinuxDesktopFeature,
-  );
+  static const linux = DevelopmentArtifact._('linux', feature: flutterLinuxDesktopFeature);
 
   /// Artifacts required for Fuchsia.
-  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._(
-    'fuchsia',
-    feature: flutterFuchsiaFeature,
-  );
+  static const fuchsia = DevelopmentArtifact._('fuchsia', feature: flutterFuchsiaFeature);
 
   /// Artifacts required for the Flutter Runner.
-  static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._(
+  static const flutterRunner = DevelopmentArtifact._(
     'flutter_runner',
     feature: flutterFuchsiaFeature,
   );
@@ -106,10 +99,13 @@ class DevelopmentArtifact {
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
   /// it will always be downloaded.
-  static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
+  static const universal = DevelopmentArtifact._('universal');
+
+  /// Artifacts which contain build information for the flutter tool.
+  static const informative = DevelopmentArtifact._('informative');
 
   /// The values of DevelopmentArtifacts.
-  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
+  static final values = <DevelopmentArtifact>[
     androidGenSnapshot,
     androidMaven,
     androidInternalBuild,
@@ -121,6 +117,7 @@ class DevelopmentArtifact {
     fuchsia,
     universal,
     flutterRunner,
+    informative,
   ];
 
   @override
@@ -234,7 +231,7 @@ class Cache {
     );
   }
 
-  static const List<String> _hostsBlockedInChina = <String>[
+  static const _hostsBlockedInChina = <String>[
     'storage.googleapis.com',
     'chrome-infra-packages.appspot.com',
   ];
@@ -308,20 +305,20 @@ class Cache {
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
-  bool includeAllPlatforms = false;
+  var includeAllPlatforms = false;
 
   // Names of artifacts which should be cached even if they would normally
   // be filtered out for the current platform.
   Set<String>? platformOverrideArtifacts;
 
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
-  bool useUnsignedMacBinaries = false;
+  var useUnsignedMacBinaries = false;
 
   // Whether the warning printed when a custom artifact URL is used is fatal.
-  bool fatalStorageWarning = true;
+  var fatalStorageWarning = true;
 
   static RandomAccessFile? _lock;
-  static bool _lockEnabled = true;
+  static var _lockEnabled = true;
 
   /// Turn off the [lock]/[releaseLock] mechanism.
   ///
@@ -369,8 +366,8 @@ class Cache {
       _logger.printError('Please ensure you have permissions to create or open ${lockFile.path}');
       throwToolExit('Failed to open or create the lockfile');
     }
-    bool locked = false;
-    bool printed = false;
+    var locked = false;
+    var printed = false;
     while (!locked) {
       try {
         _lock!.lockSync();
@@ -423,12 +420,12 @@ class Cache {
 
   String get devToolsVersion {
     if (_devToolsVersion == null) {
-      const String devToolsDirPath = 'dart-sdk/bin/resources/devtools';
+      const devToolsDirPath = 'dart-sdk/bin/resources/devtools';
       final Directory devToolsDir = getCacheDir(devToolsDirPath, shouldCreate: false);
       if (!devToolsDir.existsSync()) {
         throw Exception('Could not find directory at ${devToolsDir.path}');
       }
-      final String versionFilePath = '${devToolsDir.path}/version.json';
+      final versionFilePath = '${devToolsDir.path}/version.json';
       final File versionFile = _fileSystem.file(versionFilePath);
       if (!versionFile.existsSync()) {
         throw Exception('Could not find file at $versionFilePath');
@@ -582,16 +579,13 @@ class Cache {
       throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
 
-    final String cipdOverride =
-        original
-            .replace(
-              pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'],
-            )
-            .toString();
+    final cipdOverride = original
+        .replace(pathSegments: <String>[...original.pathSegments, 'flutter_infra_release', 'cipd'])
+        .toString();
     return cipdOverride;
   }
 
-  bool _hasWarnedAboutStorageOverride = false;
+  var _hasWarnedAboutStorageOverride = false;
 
   void _maybeWarnAboutStorageOverride(String overrideUrl) {
     if (_hasWarnedAboutStorageOverride) {
@@ -648,7 +642,7 @@ class Cache {
     if (_dyLdLibEntry != null) {
       return _dyLdLibEntry!;
     }
-    final List<String> paths = <String>[];
+    final paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
       if (!env.containsKey('DYLD_LIBRARY_PATH')) {
@@ -784,7 +778,7 @@ class Cache {
     bool includeAllPlatforms = true,
   }) async {
     final bool includeAllPlatformsState = this.includeAllPlatforms;
-    bool allAvailable = true;
+    var allAvailable = true;
     this.includeAllPlatforms = includeAllPlatforms;
     for (final ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
@@ -814,7 +808,7 @@ abstract class ArtifactSet {
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;
 
-  /// [true] if the artifact is up to date.
+  /// Whether the artifact is up to date.
   Future<bool> isUpToDate(FileSystem fileSystem);
 
   /// The environment variables (if any) required to consume the artifacts.
@@ -834,8 +828,9 @@ abstract class ArtifactSet {
   /// The canonical name of the artifact.
   String get name;
 
-  // The name of the stamp file. Defaults to the same as the
-  // artifact name.
+  /// The name of the stamp file.
+  ///
+  /// Defaults to the same as the artifact name.
   String get stampName => name;
 }
 
@@ -976,7 +971,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
+    final url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
@@ -1016,9 +1011,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String? engineVersion) async {
     engineVersion ??= version;
-    final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
+    final url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$engineVersion/';
 
-    bool exists = false;
+    var exists = false;
     for (final String pkgName in getPackageDirs()) {
       exists = await cache.doesRemoteExist(
         'Checking package $pkgName is available...',
@@ -1047,7 +1042,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     operatingSystemUtils.chmod(dir, 'a+r,a+x');
     for (final File file in dir.listSync(recursive: true).whereType<File>()) {
       final FileStat stat = file.statSync();
-      final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
+      final isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
       if (file.basename == 'flutter_tester' || isUserExecutable) {
         // Make the file readable and executable by all users.
         operatingSystemUtils.chmod(file, 'a+r,a+x');
@@ -1076,7 +1071,7 @@ class ArtifactUpdater {
        _allowedBaseUrls = allowedBaseUrls;
 
   /// The number of times the artifact updater will repeat the artifact download loop.
-  static const int _kRetryCount = 2;
+  static const _kRetryCount = 2;
 
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
@@ -1094,13 +1089,13 @@ class ArtifactUpdater {
 
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
-  /// extraction in case [update] is interrupted, so we can restart without
-  /// starting from scratch.
+  /// extraction in case [ArtifactSet.update] is interrupted, so we can
+  /// restart without starting from scratch.
   @visibleForTesting
-  final List<File> downloadedFiles = <File>[];
+  final downloadedFiles = <File>[];
 
   /// These filenames, should they exist after extracting an archive, should be deleted.
-  static const Set<String> _denylistedBasenames = <String>{
+  static const _denylistedBasenames = <String>{
     'entitlements.txt',
     'without_entitlements.txt',
     'unsigned_binaries.txt',
@@ -1124,6 +1119,13 @@ class ArtifactUpdater {
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
   Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, _operatingSystemUtils.unpack);
+  }
+
+  /// Download a file from the given [url] and copy it to [location].
+  Future<void> downloadFile(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, (File file, Directory dir) {
+      file.copySync(dir.childFile(file.basename).path);
+    });
   }
 
   /// Download an archive from the given [url] and unzip it to [location].
@@ -1189,7 +1191,7 @@ class ArtifactUpdater {
         // Error that indicates another program has this file open and that it
         // cannot be deleted. For the cache, this is either the analyzer reading
         // the sky_engine package or a running flutter_tester device.
-        const int kSharingViolation = 32;
+        const kSharingViolation = 32;
         if (_platform.isWindows && error.osError?.errorCode == kSharingViolation) {
           throwToolExit(
             'Failed to delete ${destination.path} because the local file/directory is in use '
@@ -1310,8 +1312,7 @@ class ArtifactUpdater {
     return md5Hash;
   }
 
-  /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [downloadedFiles].
+  /// Create a temporary file and add it to the [downloadedFiles].
   File _createDownloadFile(String name) {
     final File tempFile = _fileSystem.file(_fileSystem.path.join(_tempStorage.path, name));
     downloadedFiles.add(tempFile);
@@ -1368,7 +1369,7 @@ class ArtifactUpdater {
 
 @visibleForTesting
 String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
-  final List<String> pieces = <String>[url.host, ...url.pathSegments];
+  final pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);
 }
@@ -1376,7 +1377,7 @@ String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
 String _flattenNameNoSubdirs(String fileName) {
-  final List<int> replacedCodeUnits = <int>[
+  final replacedCodeUnits = <int>[
     for (final int codeUnit in fileName.codeUnits)
       ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
   ];
@@ -1384,7 +1385,7 @@ String _flattenNameNoSubdirs(String fileName) {
 }
 
 // Many characters are problematic in filenames, especially on Windows.
-final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
+final _flattenNameSubstitutions = <int, List<int>>{
   r'@'.codeUnitAt(0): '@@'.codeUnits,
   r'/'.codeUnitAt(0): '@s@'.codeUnits,
   r'\'.codeUnitAt(0): '@bs@'.codeUnits,
