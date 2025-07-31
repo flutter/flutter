@@ -785,7 +785,7 @@ class TestPlatformLocation implements PlatformLocation {
   /// event with value `state`
   void debugTriggerPopState(Object? state) {
     final DomEvent event = createDomPopStateEvent('popstate', <Object, Object>{
-      if (state != null) 'state': state,
+      'state': ?state,
     });
     for (final EventListener listener in popStateListeners) {
       listener(event);
