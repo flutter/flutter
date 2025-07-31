@@ -19,6 +19,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
+import 'scroll_details.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -207,12 +208,32 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void pointerScroll(double delta) {
+  void pointerScroll(double delta, PointerSignalEvent event) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
-    if (delta == 0.0) {
+    if (event is PointerScrollInertiaCancelEvent) {
       goBallistic(0.0);
+      return;
+    }
+
+    if (event is! PointerScrollEvent) {
+      return;
+    }
+
+    final ScrollDetails details = PointerScrollDetails(
+      metrics: this,
+      delta: delta,
+      kind: event.kind,
+    );
+    final bool didRetarget = retargetActivity(details);
+    if (didRetarget) {
+      return;
+    }
+
+    final ScrollActivity? newActivity = physics.createScrollActivity(this, details, context.vsync);
+    if (newActivity != null) {
+      beginActivity(newActivity);
       return;
     }
 
