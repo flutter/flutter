@@ -333,9 +333,7 @@ class DriveCommand extends RunCommandBase {
       logger: _logger,
       throwOnError: false,
     );
-    final DriverService driverService = _flutterDriverFactory!.createDriverService(
-      devConfig != null,
-    );
+    final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
@@ -357,7 +355,7 @@ class DriveCommand extends RunCommandBase {
           mainPath: targetFile,
           platformArgs: <String, Object>{
             if (traceStartup) 'trace-startup': traceStartup,
-            if (devConfig != null) '--no-launch-chrome': true,
+            if (web) '--no-launch-chrome': true,
           },
         );
       } else {
