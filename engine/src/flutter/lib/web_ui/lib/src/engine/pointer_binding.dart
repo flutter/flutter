@@ -313,6 +313,15 @@ class ClickDebouncer {
     reset();
   }
 
+  /// Starts debouncing pointer events if the [event] is a `pointerdown` on a
+  /// tappable element.
+  ///
+  /// To work around an issue in iOS Safari, the debouncing does not start
+  /// immediately, but at the end of the event loop.
+  ///
+  /// See also:
+  ///
+  ///  * [_doStartDebouncing], which actually starts the debouncing.
   void _maybeStartDebouncing(DomEvent event, List<ui.PointerData> data) {
     assert(_state == null, 'Cannot start debouncing. Already debouncing.');
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
@@ -335,6 +344,9 @@ class ClickDebouncer {
     }
   }
 
+  /// The core logic for starting to debounce pointer events.
+  ///
+  /// This method is called asynchronously from [_maybeStartDebouncing].
   void _doStartDebouncing(DomEvent event, List<ui.PointerData> data) {
     _state = (
       target: event.target!,
