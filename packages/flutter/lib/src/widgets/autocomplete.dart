@@ -542,7 +542,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final double optionsViewMaxHeight = switch (optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => -overlayRectInField.top,
       OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
-      OptionsViewOpenDirection.auto => 0.0, // Should be unreachable.
+      OptionsViewOpenDirection.auto => 0.0,
     };
 
     final Size optionsViewBoundingBox = Size(
