@@ -62,7 +62,7 @@
                     "include_paths": [
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/artifacts.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/impeller_sdk.zip",
-                        "out/ci/linux_debug_arm64/zip_archives/linux-arm64/linux-arm64-embedder.zip"
+                        "out/ci/linux_debug_arm64/zip_archives/linux-arm64/linux-arm64-embedder.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64/font-subset.zip",
                         "out/ci/linux_debug_arm64/zip_archives/linux-arm64-debug/linux-arm64-flutter-gtk.zip",
                         "out/ci/linux_debug_arm64/zip_archives/dart-sdk-linux-arm64.zip"
