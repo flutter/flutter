@@ -1066,15 +1066,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       DomResizeObserver observer,
     ) {
       final double? lineHeight = parseStyleProperty(
-        domDocument.documentElement!,
+        _typographyMeasurementElement!,
         'line-height',
       )?.toDouble();
       final double? wordSpacing = parseStyleProperty(
-        domDocument.documentElement!,
+        _typographyMeasurementElement!,
         'word-spacing',
       )?.toDouble();
       final double? letterSpacing = parseStyleProperty(
-        domDocument.documentElement!,
+        _typographyMeasurementElement!,
         'letter-spacing',
       )?.toDouble();
       _updateTypographySettings(
