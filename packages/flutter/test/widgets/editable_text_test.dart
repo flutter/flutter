@@ -16623,7 +16623,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData(
+          data: const MediaQueryData(
             typographySettings: TypographySettings(
               lineHeight: 2.0,
               letterSpacing: 2.0,
