@@ -221,7 +221,8 @@ class ClickDebouncer {
   /// This value is normally false, and it flips to true when the first
   /// pointerdown is observed that lands on a tappable semantics node, denoted
   /// by the presence of the `flt-tappable` attribute.
-  bool get isDebouncing => _state != null;
+  bool get isDebouncing => _isDebouncing;
+  bool _isDebouncing = false;
 
   /// Processes a pointer event.
   ///
@@ -323,7 +324,7 @@ class ClickDebouncer {
   ///
   ///  * [_doStartDebouncing], which actually starts the debouncing.
   void _maybeStartDebouncing(DomEvent event, List<ui.PointerData> data) {
-    assert(_state == null, 'Cannot start debouncing. Already debouncing.');
+    assert(!isDebouncing, 'Cannot start debouncing. Already debouncing.');
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
 
     final DomEventTarget? target = event.target;
@@ -336,6 +337,7 @@ class ClickDebouncer {
       // loop.
       //
       // See: https://github.com/flutter/flutter/issues/172180
+      _isDebouncing = true;
       Timer.run(() => _doStartDebouncing(event, data));
     } else {
       // The event landed on an non-tappable target. Assume this won't lead to
@@ -373,7 +375,7 @@ class ClickDebouncer {
 
   void _debounce(DomEvent event, List<ui.PointerData> data) {
     assert(
-      _state != null,
+      isDebouncing,
       'Cannot debounce event. Debouncing state not established by _startDebouncing.',
     );
 
@@ -418,7 +420,7 @@ class ClickDebouncer {
   }
 
   void _flush() {
-    assert(_state != null);
+    assert(isDebouncing);
 
     final DebounceState state = _state!;
     state.timer.cancel();
@@ -433,6 +435,7 @@ class ClickDebouncer {
 
     _sendToFramework(null, aggregateData);
     _state = null;
+    _isDebouncing = false;
   }
 
   void _sendToFramework(DomEvent? event, List<ui.PointerData> data) {
@@ -452,6 +455,7 @@ class ClickDebouncer {
   void reset() {
     _state?.timer.cancel();
     _state = null;
+    _isDebouncing = false;
     _lastSentPointerUpTimeStamp = null;
   }
 }
