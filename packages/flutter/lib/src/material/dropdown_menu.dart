@@ -194,6 +194,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.closeBehavior = DropdownMenuCloseBehavior.all,
     this.maxLines = 1,
     this.textInputAction,
+    this.cursorHeight,
     this.restorationId,
   }) : assert(filterCallback == null || enableFilter),
        assert(
@@ -557,6 +558,9 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;
+
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double? cursorHeight;
 
   /// {@macro flutter.material.textfield.restorationId}
   final String? restorationId;
@@ -1112,6 +1116,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           textAlignVertical: TextAlignVertical.center,
           maxLines: widget.maxLines,
           textInputAction: widget.textInputAction,
+          cursorHeight: widget.cursorHeight,
           style: effectiveTextStyle,
           controller: _effectiveTextEditingController,
           onEditingComplete: _handleEditingComplete,
