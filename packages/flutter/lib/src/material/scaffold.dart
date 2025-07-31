@@ -626,16 +626,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       if (route == null || route.isCurrent) {
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
-          if (snackBar.dismissible) {
-            _snackBarTimer = Timer(snackBar.duration, () {
-              assert(_snackBarController!.isForwardOrCompleted);
-              // Look up MediaQuery again in case the setting changed.
-              if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
-                return;
-              }
-              hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-            });
-          }
+
+          _snackBarTimer = Timer(snackBar.duration, () {
+            assert(_snackBarController!.isForwardOrCompleted);
+            // Look up MediaQuery again in case the setting changed.
+            if (!snackBar.dismissible ||
+                snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
+              return;
+            }
+            hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+          });
         }
       }
     }
