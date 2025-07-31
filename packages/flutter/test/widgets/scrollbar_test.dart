@@ -2728,7 +2728,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                   slivers: <Widget>[
                     SliverList.builder(
                       itemCount: 100,
-                      builder: (BuildContext context, int index) {
+                      itemBuilder: (BuildContext context, int index) {
                         final double height;
                         if (index < 10) {
                           height = 100;

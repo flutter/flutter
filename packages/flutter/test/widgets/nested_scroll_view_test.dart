@@ -2769,7 +2769,7 @@ void main() {
                 slivers: <Widget>[
                   SliverPadding(
                     padding: const EdgeInsets.all(8.0),
-                    sliver: SliverFixedExtentListbuilder(
+                    sliver: SliverFixedExtentList.builder(
                       itemExtent: 48.0,
                       itemCount: 30,
                       itemBuilder: (BuildContext context, int index) {

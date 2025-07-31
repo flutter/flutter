@@ -450,18 +450,18 @@ void main() {
             height: 4,
             child: CustomScrollView(
               slivers: <Widget>[
-                SliverGrid.list(
+                SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  children: <Widget>[
+                  delegate: SliverChildListDelegate(<Widget>[
                     const Center(child: Text('A')),
                     const Center(child: Text('B')),
                     const Center(child: Text('C')),
                     const Center(child: Text('D')),
-                  ],
+                  ]),
                 ),
               ],
             ),
