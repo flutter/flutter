@@ -501,7 +501,7 @@ class CupertinoListSection extends StatelessWidget {
                 child: headerWidget,
               ),
             ),
-          if (decoratedChildrenGroup != null) decoratedChildrenGroup,
+          ?decoratedChildrenGroup,
           if (footerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,
