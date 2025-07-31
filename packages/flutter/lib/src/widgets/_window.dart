@@ -215,6 +215,10 @@ mixin class RegularWindowControllerDelegate {
 /// provided to the [RegularWindow] widget, who does the work of rendering the
 /// content inside of this window.
 ///
+/// The user of this class is responsible for managing the lifecycle of the window.
+/// When the window is no longer needed, the user should call [destroy] on this
+/// controller to release the resources associated with the window.
+///
 /// An example usage might look like:
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
@@ -460,9 +464,12 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// The provided [controller] creates the native window that backs
 /// the widget. The [child] widget is rendered into this newly created window.
 ///
-/// While the window is being created, the [RegularWindow] widget will render
-/// an empty [ViewCollection] widget. Once the window is created, the [child]
-/// widget will be rendered into the window inside of a [View].
+/// When a [RegularWindow] widget is removed from the tree, the window that was created
+/// by the [controller] remains valid until the caller destroys it by calling
+/// [RegularWindowController.destroy].
+///
+/// Widgets in the same tree as the [child] widget will have access to the
+/// [RegularWindowController] via the [WindowControllerScope] widget.
 ///
 /// An example usage might look like:
 /// ```dart
@@ -479,18 +486,16 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// );
 /// ```
 ///
-/// When a [RegularWindow] widget is removed from the tree, the window that was created
-/// by the [controller] is automatically destroyed if it has not yet been destroyed.
-///
-/// Widgets in the same tree as the [child] widget will have access to the
-/// [RegularWindowController] via the [WindowControllerScope] widget.
-///
 /// {@macro flutter.widgets.windowing.experimental}
-class RegularWindow extends StatefulWidget {
+@internal
+class RegularWindow extends StatelessWidget {
   /// Creates a regular window widget.
   ///
   /// The [controller] creates the native backing window into which the
   /// [child] widget is rendered.
+  ///
+  /// It is up to the caller to destroy the window by calling
+  /// [RegularWindowController.destroy] when the window is no longer needed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -515,21 +520,10 @@ class RegularWindow extends StatefulWidget {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  State<RegularWindow> createState() => _RegularWindowState();
-}
-
-class _RegularWindowState extends State<RegularWindow> {
-  @override
-  void dispose() {
-    widget.controller.destroy();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return View(
-      view: widget.controller.rootView,
-      child: WindowControllerScope(controller: widget.controller, child: widget.child),
+      view: controller.rootView,
+      child: WindowControllerScope(controller: controller, child: child),
     );
   }
 }
