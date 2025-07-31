@@ -600,7 +600,7 @@ int LicenseChecker::FileRun(std::string_view working_dir,
   }
 
   ProcessState state;
-  fs::path working_dir_path = fs::absolute(fs::path(working_dir));
+fs::path working_dir_path = fs::absolute(fs::path(working_dir)).lexically_normal();
   fs::path absolute_full_path = fs::absolute(fs::path(full_path));
   absl::Status process_result =
       ProcessFile(working_dir_path, licenses, data.value(), absolute_full_path,
