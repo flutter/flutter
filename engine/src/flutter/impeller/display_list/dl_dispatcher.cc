@@ -950,7 +950,7 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool is_onscreen,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
-                                       IRect cull_rect)
+                                       IRect32 cull_rect)
     : canvas_(renderer,
               render_target,
               is_onscreen,
@@ -1270,7 +1270,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
       /*is_onscreen=*/false,                     //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      impeller::IRect::MakeSize(size)            //
+      impeller::IRect32::MakeSize(size)          //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
@@ -1305,7 +1305,7 @@ bool RenderToTarget(ContentContext& context,
       /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      IRect::RoundOut(cull_rect)                 //
+      IRect32::RoundOut(cull_rect)               //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);

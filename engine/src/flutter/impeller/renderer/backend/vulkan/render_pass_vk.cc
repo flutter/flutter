@@ -249,7 +249,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setViewport(0, 1, &viewport);
 
   // Set the initial scissor.
-  const auto sc = IRect::MakeSize(target_size);
+  const auto sc = IRect32::MakeSize(target_size);
   vk::Rect2D scissor =
       vk::Rect2D()
           .setOffset(vk::Offset2D(sc.GetX(), sc.GetY()))
@@ -396,7 +396,7 @@ void RenderPassVK::SetViewport(Viewport viewport) {
 }
 
 // |RenderPass|
-void RenderPassVK::SetScissor(IRect scissor) {
+void RenderPassVK::SetScissor(IRect32 scissor) {
   vk::Rect2D scissor_vk =
       vk::Rect2D()
           .setOffset(vk::Offset2D(scissor.GetX(), scissor.GetY()))
