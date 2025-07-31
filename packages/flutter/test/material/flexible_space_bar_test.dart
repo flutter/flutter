@@ -894,9 +894,9 @@ void main() {
                   ),
                 ),
                 SliverList.builder(
-                  itemCount: 50,
+                  itemCount: 3,
                   itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                    return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                   },
                 ),
               ],
@@ -964,9 +964,9 @@ void main() {
                   ),
                 ),
                 SliverList.builder(
-                  itemCount: 50,
+                  itemCount: 3,
                   itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                    return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                   },
                 ),
               ],
@@ -1025,9 +1025,9 @@ void main() {
                 ),
               ),
               SliverList.builder(
-                itemCount: 50,
+                itemCount: 3,
                 itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                 },
               ),
             ],
@@ -1080,9 +1080,9 @@ void main() {
                 ),
               ),
               SliverList.builder(
-                itemCount: 50,
+                itemCount: 3,
                 itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                 },
               ),
             ],
@@ -1138,9 +1138,9 @@ void main() {
                 ),
               ),
               SliverList.builder(
-                itemCount: 50,
+                itemCount: 3,
                 itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                 },
               ),
             ],
@@ -1198,9 +1198,9 @@ void main() {
                 ),
               ),
               SliverList.builder(
-                itemCount: 50,
+                itemCount: 3,
                 itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: 200, child: Center(child: Text('Item $index')));
+                  return SizedBox(height: 200.0, child: Center(child: Text('Item $index')));
                 },
               ),
             ],
