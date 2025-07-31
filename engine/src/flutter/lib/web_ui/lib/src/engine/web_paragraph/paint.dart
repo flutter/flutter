@@ -28,10 +28,10 @@ typedef PaintCluster =
 ///
 /// It uses a [DomCanvasElement] to get text information
 class TextPaint {
-  TextPaint(this.paragraph);
+  TextPaint(this.paragraph, this.painter);
 
   final WebParagraph paragraph;
-  final Painter painter = CanvasKitPainter();
+  final Painter painter;
 
   // TODO(jlavrova): painting the entire block could require a really big canvas
   // Answer: we only do blocks for background and decorations which we do not draw on canvas
