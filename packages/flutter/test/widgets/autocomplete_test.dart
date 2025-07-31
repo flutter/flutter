@@ -1021,30 +1021,31 @@ void main() {
                   alignment: alignment,
                   child: RawAutocomplete<String>(
                     key: fieldKey,
+                    // ignore: avoid_redundant_argument_values
                     optionsViewOpenDirection: OptionsViewOpenDirection.auto,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
                         (
-                        BuildContext context,
-                        TextEditingController controller,
-                        FocusNode focusNode,
-                        VoidCallback onFieldSubmitted,
+                          BuildContext context,
+                          TextEditingController controller,
+                          FocusNode focusNode,
+                          VoidCallback onFieldSubmitted,
                         ) {
-                      return TextField(controller: controller, focusNode: focusNode);
-                    },
+                          return TextField(controller: controller, focusNode: focusNode);
+                        },
                     optionsViewBuilder:
                         (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
                         ) {
-                      return Material(
-                        child: ListView(
-                          key: optionsKey,
-                          children: options.map((String option) => Text(option)).toList(),
-                        ),
-                      );
-                    },
+                          return Material(
+                            child: ListView(
+                              key: optionsKey,
+                              children: options.map((String option) => Text(option)).toList(),
+                            ),
+                          );
+                        },
                   ),
                 );
               },
