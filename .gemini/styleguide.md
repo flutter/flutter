@@ -41,8 +41,8 @@ flutter/flutter repository. It is based on the more comprehensive official
 
 - All public members should have documentation.
 - **Answer your own questions**: If you have a question, find the answer, and then document it where you first looked.
-- **Avoid useless documentation**: If the documentation just repeats the member's name, it's useless. Explain the *why* and the *how*.
-- **Introduce terms**: Don't assume the reader knows everything. Link to definitions.
+- **Documentation should be useful**: Explain the *why* and the *how*.
+- **Introduce terms**: Assume the reader does not know everything. Link to definitions.
 - **Provide sample code**: Use `{@tool dartpad}` for runnable examples.
 - **Provide illustrations or screenshots** for widgets.
 - Use `///` for public-quality documentation, even on private members.
