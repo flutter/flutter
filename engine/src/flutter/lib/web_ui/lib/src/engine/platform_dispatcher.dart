@@ -1024,9 +1024,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _fontSizeObserver = null;
   }
 
-  /// Watches for typography settings changes.
-  DomMutationObserver? _typographySettingsObserver;
-  final Set<DomNode> _addedStyleNodes = <DomNode>{};
+  /// Watches for resize changes on an off-screen invisible element to
+  /// recalculate [typographySettings].
+  ///
+  /// Updates [typographySettings] with the new value.
+  DomResizeObserver? _typographySettingsObserver;
+  DomElement? _typographyProbeElement;
 
   /// Updates [typographySettings] and invokes [onPlatformConfigurationChanged] and
   /// [onMetricsChanged] callbacks if [typographySettings] changed.
@@ -1039,76 +1042,60 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// Set the callback function for updating [typographySettings] based on
-  /// letter-spacing, word-spacing, and line-height changes in the browser's <html> element.
+  /// the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
-    const String styleAttribute = 'style';
+    _typographyProbeElement = createDomHTMLDivElement();
+    _typographyProbeElement!.text = 'flutter engine';
+    // The element should be hidden from screen readers.
+    _typographyProbeElement!.setAttribute('aria-hidden', 'true');
+    final DomCSSStyleDeclaration style = _typographyProbeElement!.style;
+    style.position = 'absolute';
+    // The element should be off-screen and not visible.
+    style.top = '-9999px';
+    style.left = '-9999px';
+    style.visibility = 'hidden';
+    // The element should be sensitive to letter-spacing, word-spacing,
+    // and line-height changes.
+    style.width = 'auto';
+    style.height = 'auto';
+    style.whiteSpace = 'nowrap';
+    domDocument.body!.append(_typographyProbeElement!);
 
-    _typographySettingsObserver = createDomMutationObserver((
-      JSArray<JSAny?> mutations,
-      DomMutationObserver _,
+    _typographySettingsObserver = createDomResizeObserver((
+      List<DomResizeObserverEntry> entries,
+      DomResizeObserver observer,
     ) {
-      for (final JSAny? mutation in mutations.toDart) {
-        final DomMutationRecord record = mutation! as DomMutationRecord;
-        if (record.type == 'childList' &&
-            record.removedNodes != null &&
-            record.removedNodes!.isNotEmpty) {
-          for (int index = 0; index < record.removedNodes!.length; index += 1) {
-            final DomNode node = record.removedNodes!.elementAt(index);
-            if (_addedStyleNodes.remove(node)) {
-              _updateTypographySettings(const ui.TypographySettings());
-              // TODO(Renzo-Olivares): This doesn't work because of `copyWith`,
-              // setting `typographySettings` to `null` causes the old `typographySettings`
-              // to remain with regards to the `PlatformConfiguration` sent to the framework.
-              // _updateTypographySettings(null);
-            }
-          }
-        }
-        if (record.type == 'childList' &&
-            record.addedNodes != null &&
-            record.addedNodes!.isNotEmpty) {
-          for (int index = 0; index < record.addedNodes!.length; index += 1) {
-            final DomNode node = record.addedNodes!.elementAt(index);
-            final String? nodeName = node.nodeName;
-            if (nodeName != null && nodeName == 'STYLE') {
-              _addedStyleNodes.add(node);
-              final double? lineHeight = parseStyleProperty(
-                domDocument.documentElement!,
-                'line-height',
-              )?.toDouble();
-              final double? wordSpacing = parseStyleProperty(
-                domDocument.documentElement!,
-                'word-spacing',
-              )?.toDouble();
-              final double? letterSpacing = parseStyleProperty(
-                domDocument.documentElement!,
-                'letter-spacing',
-              )?.toDouble();
-              _updateTypographySettings(
-                ui.TypographySettings(
-                  lineHeight: lineHeight,
-                  letterSpacing: letterSpacing,
-                  wordSpacing: wordSpacing,
-                ),
-              );
-            }
-          }
-        }
-      }
+      final double? lineHeight = parseStyleProperty(
+        domDocument.documentElement!,
+        'line-height',
+      )?.toDouble();
+      final double? wordSpacing = parseStyleProperty(
+        domDocument.documentElement!,
+        'word-spacing',
+      )?.toDouble();
+      final double? letterSpacing = parseStyleProperty(
+        domDocument.documentElement!,
+        'letter-spacing',
+      )?.toDouble();
+      _updateTypographySettings(
+        ui.TypographySettings(
+          lineHeight: lineHeight,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+        ),
+      );
     });
 
-    _typographySettingsObserver!.observe(
-      domDocument.documentElement!,
-      subtree: true, // Extends monitoring to target node subtree.
-      childList: true, // Monitors the addition/removal of child nodes on target node.
-      attributes: true,
-      attributeFilter: <String>[styleAttribute],
-    );
+    _typographySettingsObserver!.observe(_typographyProbeElement!);
   }
 
-  /// Remove the observer for typography changes in the browser's <html> element.
+  /// Remove the observer for typography changes on the off-screen
+  /// typography probe element.
   void _disconnectTypographySettingsObserver() {
     _typographySettingsObserver?.disconnect();
     _typographySettingsObserver = null;
+    _typographyProbeElement?.remove();
+    _typographyProbeElement = null;
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
