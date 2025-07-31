@@ -331,11 +331,11 @@ void main() {
     test('toString provides useful debug information', () {
       expect(
         ruleNoReplacement.toString(),
-        '{prefix: /assets/, target: http://cdn.example.com, replacement: null}',
+        '{prefix: /assets/, target: http://cdn.example.com, replace: null}',
       );
       expect(
         ruleWithReplacement.toString(),
-        '{prefix: /old-assets/, target: http://cdn.example.com, replacement: /new-assets/}',
+        '{prefix: /old-assets/, target: http://cdn.example.com, replace: /new-assets/}',
       );
     });
   });

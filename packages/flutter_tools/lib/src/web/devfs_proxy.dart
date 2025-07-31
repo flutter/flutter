@@ -27,7 +27,7 @@ abstract class ProxyRule {
       return null;
     }
     if (prefix != null && prefix.isNotEmpty) {
-      return PrefixProxyRule(prefix: prefix, target: target, replacement: replace?.trim());
+      return PrefixProxyRule(prefix: prefix, target: target, replacement: replacement?.trim());
     } else if (regex != null && regex.isNotEmpty) {
       RegExp? regexPattern;
       try {
@@ -38,7 +38,11 @@ abstract class ProxyRule {
           "Invalid regex pattern in replace 'regex': '$regex'. Treating $regex as string. Error: $e",
         );
       }
-      return RegexProxyRule(pattern: regexPattern, target: target, replacement: replace?.trim());
+      return RegexProxyRule(
+        pattern: regexPattern,
+        target: target,
+        replacement: replacement?.trim(),
+      );
     } else {
       effectiveLogger.printError("'prefix' or 'regex' field must be provided");
       return null;
@@ -90,6 +94,6 @@ class PrefixProxyRule extends ProxyRule {
 
   @override
   String toString() {
-    return '{prefix: $prefix, target: $target, replacement: ${replacement ?? 'null'}}';
+    return '{prefix: $prefix, target: $target, replace: ${replacement ?? 'null'}}';
   }
 }
