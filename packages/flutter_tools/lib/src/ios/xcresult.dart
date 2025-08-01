@@ -85,23 +85,23 @@ class XCResult {
   }) {
     final issues = <XCResultIssue>[];
 
-    /// Detect which xcresult JSON format is being used to ensure backwards compatibility.
-    ///
-    /// Xcode 16 introduced a new `get build-results` command with a flatter JSON structure.
-    /// Older versions use the original `get` command with a deeply nested structure.
-    /// We differentiate them by checking for the presence of top-level 'errors' or 'warnings'
-    /// keys, which are unique to the modern format.
+    // Detect which xcresult JSON format is being used to ensure backwards compatibility.
+    //
+    // Xcode 16 introduced a new `get build-results` command with a flatter JSON structure.
+    // Older versions use the original `get` command with a deeply nested structure.
+    // We differentiate them by checking for the presence of top-level 'errors' or 'warnings'
+    // keys, which are unique to the modern format.
 
     if (resultJson.containsKey('errors') || resultJson.containsKey('warnings')) {
       issues.addAll(
-        _parseIssuesFromNewFormat(
+        _parseIssuesFromXcode16Format(
           type: XCResultIssueType.error,
           jsonList: resultJson['errors'],
           issueDiscarders: issueDiscarders,
         ),
       );
       issues.addAll(
-        _parseIssuesFromNewFormat(
+        _parseIssuesFromXcode16Format(
           type: XCResultIssueType.warning,
           jsonList: resultJson['warnings'],
           issueDiscarders: issueDiscarders,
@@ -416,7 +416,7 @@ bool _shouldDiscardIssue({
 }
 
 /// Helper to parse issues from the new (Xcode 16+) flat list format.
-List<XCResultIssue> _parseIssuesFromNewFormat({
+List<XCResultIssue> _parseIssuesFromXcode16Format({
   required XCResultIssueType type,
   required Object? jsonList,
   required List<XCResultIssueDiscarder> issueDiscarders,
