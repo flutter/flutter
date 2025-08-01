@@ -529,9 +529,16 @@ WNDCLASS PlatformHandler::RegisterWindowClass() {
   window_class.hIcon = nullptr;
   window_class.hbrBackground = 0;
   window_class.lpszMenuName = nullptr;
-  window_class.lpfnWndProc = nullptr;
+  window_class.lpfnWndProc = WndProc;
   RegisterClass(&window_class);
   return window_class;
+}
+
+LRESULT PlatformHandler::WndProc(HWND const window,
+                                 UINT const message,
+                                 WPARAM const wparam,
+                                 LPARAM const lparam) noexcept {
+  return DefWindowProc(window, message, wparam, lparam);
 }
 
 }  // namespace flutter

@@ -115,6 +115,11 @@ class PlatformHandler {
       const MethodCall<rapidjson::Document>& method_call,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
+  static LRESULT CALLBACK WndProc(HWND const window,
+                                  UINT const message,
+                                  WPARAM const wparam,
+                                  LPARAM const lparam) noexcept;
+
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<MethodChannel<rapidjson::Document>> channel_;
 
@@ -136,7 +141,7 @@ class PlatformHandler {
 // PlatformHandler.
 class ScopedClipboardInterface {
  public:
-  virtual ~ScopedClipboardInterface(){};
+  virtual ~ScopedClipboardInterface() {};
 
   // Attempts to open the clipboard for the given window, returning the error
   // code in the case of failure and 0 otherwise.
