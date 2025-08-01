@@ -23,9 +23,9 @@ unset GIT_WORK_TREE
 # DEPS: tracks third party dependencies related to building the engine
 # engine: all the code in the engine folder
 # bin/internal/release-candidate-branch.version: release marker
-TRACKEDFILES="DEPS engine bin/internal/release-candidate-branch.version"
+TRACKEDFILES=(DEPS engine bin/internal/release-candidate-branch.version)
 BASEREF="HEAD"
-CURRENT_BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
+CURRENT_BRANCH="$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)"
 
 # By default, the content hash is based on HEAD.
 # For local development branches, we want to base the hash on the merge-base
@@ -62,8 +62,8 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   set -e
 
   if [[ -n "$MERGEBASE" ]]; then
-    BASEREF="$MERGEBASE";
+    BASEREF="$MERGEBASE"
   fi
 fi
 
-git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" $BASEREF -- $TRACKEDFILES | git hash-object --stdin
+git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
