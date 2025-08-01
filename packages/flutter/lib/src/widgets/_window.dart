@@ -97,7 +97,7 @@ sealed class BaseWindowController {
 ///  * [RegularWindow], the widget for a regular window.
 @internal
 mixin class RegularWindowControllerDelegate {
-  /// Invoked when user attempts to close the window.
+  /// Invoked when the user attempts to close the window.
   ///
   /// The default implementation destroys the window. Subclasses
   /// can override the behavior to delay or prevent the window from closing.
@@ -182,8 +182,8 @@ abstract class RegularWindowController extends BaseWindowController {
   /// the platform will try to apply to the window when it is created. In contrast,
   /// the [preferredConstraints] field enforces the minimum and maximum size of
   /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
-  /// or the [preferredSize] is null, then the platform will use an initial size
-  /// that does satisfy the [preferredConstraints] instead.
+  /// or the [preferredSize] is null, then the platform will attempt to use an
+  /// initial size that does satisfy the [preferredConstraints] instead.
   ///
   /// The [preferredConstraints] are the constraints placed upon the size
   /// of the window. This might not be honored by the platform.
@@ -191,15 +191,8 @@ abstract class RegularWindowController extends BaseWindowController {
   /// user attempts to resize the window beyond these constraints, the platform
   /// will enforce the constraints according to its own policy. For example, the
   /// platform might clip the content to fit within the resized window, or it might
-  /// prevent the window from being resized altogether. If null, the window wil
+  /// prevent the window from being resized altogether. If null, the window will
   /// be unconstrained.
-  ///
-  /// If the [preferredSize] is null, then the platform will use an
-  /// initial size that satisfies the [preferredConstraints].
-  ///
-  /// If the [preferredSize] is not null and it does not satisfy the
-  /// [preferredConstraints], then the platform will use an
-  /// initial size that does satisfy the [preferredConstraints] instead.
   ///
   /// If both [preferredSize] and [preferredConstraints] are null,
   /// then the platform will use its own default size for the window.
@@ -223,14 +216,17 @@ abstract class RegularWindowController extends BaseWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
+    if (preferredSize != null && preferredConstraints != null) {
+      assert(preferredConstraints.isSatisfiedBy(preferredSize));
+    }
+
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
-    final RegularWindowController controller = owner.createRegularWindowController(
+    return owner.createRegularWindowController(
       delegate: delegate ?? RegularWindowControllerDelegate(),
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
     );
-    return controller;
   }
 
   /// Creates an empty [RegularWindowController] for testing purposes.
