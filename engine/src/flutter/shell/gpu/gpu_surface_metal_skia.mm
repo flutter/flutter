@@ -89,13 +89,13 @@ void GPUSurfaceMetalSkia::PrecompileKnownSkSLsIfNecessary() {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const SkISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const DlISize& frame_size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Metal surface was invalid.";
     return nullptr;
   }
 
-  if (frame_size.isEmpty()) {
+  if (frame_size.IsEmpty()) {
     FML_LOG(ERROR) << "Metal surface was asked for an empty frame.";
     return nullptr;
   }
@@ -125,7 +125,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrame(const SkISize& f
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
-    const SkISize& frame_info) {
+    const DlISize& frame_info) {
   CAMetalLayer* layer = (__bridge CAMetalLayer*)delegate_->GetCAMetalLayer(frame_info);
   if (!layer) {
     FML_LOG(ERROR) << "Invalid CAMetalLayer given by the embedder.";
@@ -173,12 +173,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
         if (entry.first != texture) {
           // Accumulate damage for other framebuffers
           if (surface_frame.submit_info().frame_damage) {
-            entry.second.join(*surface_frame.submit_info().frame_damage);
+            entry.second = entry.second.Union(*surface_frame.submit_info().frame_damage);
           }
         }
       }
       // Reset accumulated damage for current framebuffer
-      damage_[texture] = SkIRect::MakeEmpty();
+      damage_[texture] = DlIRect();
     }
 
     return true;
@@ -210,7 +210,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
-    const SkISize& frame_info) {
+    const DlISize& frame_info) {
   GPUMTLTextureInfo texture = delegate_->GetMTLTexture(frame_info);
   id<MTLTexture> mtl_texture = (__bridge id<MTLTexture>)texture.texture;
 
@@ -256,7 +256,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceMetalSkia::GetRootTransformation() const {
+DlMatrix GPUSurfaceMetalSkia::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

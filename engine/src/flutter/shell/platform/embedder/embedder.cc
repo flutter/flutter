@@ -263,11 +263,11 @@ static void* DefaultGLProcResolver(const char* name) {
 #ifdef SHELL_ENABLE_GL
 // Auxiliary function used to translate rectangles of type SkIRect to
 // FlutterRect.
-static FlutterRect SkIRectToFlutterRect(const SkIRect sk_rect) {
-  FlutterRect flutter_rect = {static_cast<double>(sk_rect.fLeft),
-                              static_cast<double>(sk_rect.fTop),
-                              static_cast<double>(sk_rect.fRight),
-                              static_cast<double>(sk_rect.fBottom)};
+static FlutterRect DlIRectToFlutterRect(const DlIRect& dl_rect) {
+  FlutterRect flutter_rect = {static_cast<double>(dl_rect.GetLeft()),
+                              static_cast<double>(dl_rect.GetTop()),
+                              static_cast<double>(dl_rect.GetRight()),
+                              static_cast<double>(dl_rect.GetBottom())};
   return flutter_rect;
 }
 
@@ -339,12 +339,12 @@ InferOpenGLPlatformViewCreationCallback(
       std::optional<FlutterRect> frame_damage_rect;
       if (gl_present_info.frame_damage) {
         frame_damage_rect =
-            SkIRectToFlutterRect(*(gl_present_info.frame_damage));
+            DlIRectToFlutterRect(*(gl_present_info.frame_damage));
       }
       std::optional<FlutterRect> buffer_damage_rect;
       if (gl_present_info.buffer_damage) {
         buffer_damage_rect =
-            SkIRectToFlutterRect(*(gl_present_info.buffer_damage));
+            DlIRectToFlutterRect(*(gl_present_info.buffer_damage));
       }
 
       FlutterDamage frame_damage{
@@ -540,12 +540,12 @@ InferMetalPlatformViewCreationCallback(
         return ptr(user_data, &embedder_texture);
       };
   auto metal_get_texture =
-      [ptr = config->metal.get_next_drawable_callback,
-       user_data](const SkISize& frame_size) -> flutter::GPUMTLTextureInfo {
+      [ptr = config->metal.get_next_drawable_callback, user_data](
+          const flutter::DlISize& frame_size) -> flutter::GPUMTLTextureInfo {
     FlutterFrameInfo frame_info = {};
     frame_info.struct_size = sizeof(FlutterFrameInfo);
-    frame_info.size = {static_cast<uint32_t>(frame_size.width()),
-                       static_cast<uint32_t>(frame_size.height())};
+    frame_info.size = {static_cast<uint32_t>(frame_size.width),
+                       static_cast<uint32_t>(frame_size.height)};
     flutter::GPUMTLTextureInfo texture_info;
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);

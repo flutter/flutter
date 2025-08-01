@@ -74,7 +74,7 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     GrDirectContext* gr_context,
     DlCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
-    const SkMatrix& root_surface_transformation,
+    const DlMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
     fml::RefPtr<fml::RasterThreadMerger>
@@ -91,7 +91,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
     GrDirectContext* gr_context,
     DlCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
-    const SkMatrix& root_surface_transformation,
+    const DlMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
