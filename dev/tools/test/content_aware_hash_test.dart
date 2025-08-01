@@ -30,8 +30,7 @@ void main() {
   // linux: https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux
   //
   // Then, set this variable to true:
-  final bool usePowershellOnPosix =
-      io.Platform.environment['FORCE_POWERSHELL'] == 'true';
+  final bool usePowershellOnPosix = io.Platform.environment['FORCE_POWERSHELL'] == 'true';
 
   print('env: ${io.Platform.environment}');
 
@@ -50,14 +49,8 @@ void main() {
     }
   }
 
-  io.ProcessResult run(
-    String executable,
-    List<String> args, {
-    String? workingPath,
-  }) {
-    print(
-      'Running "$executable ${args.join(" ")}"${workingPath != null ? ' $workingPath' : ''}',
-    );
+  io.ProcessResult run(String executable, List<String> args, {String? workingPath}) {
+    print('Running "$executable ${args.join(" ")}"${workingPath != null ? ' $workingPath' : ''}');
     final io.ProcessResult result = io.Process.runSync(
       executable,
       args,
@@ -79,30 +72,20 @@ void main() {
 
   setUpAll(() async {
     if (usePowershellOnPosix) {
-      final io.ProcessResult result = io.Process.runSync('pwsh', <String>[
-        '--version',
-      ]);
-      print(
-        'Using Powershell (${result.stdout}) on POSIX for local debugging and testing',
-      );
+      final io.ProcessResult result = io.Process.runSync('pwsh', <String>['--version']);
+      print('Using Powershell (${result.stdout}) on POSIX for local debugging and testing');
     }
   });
 
   setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('content_aware_hash.');
-    testRoot = _FlutterRootUnderTest.fromPath(
-      tmpDir.childDirectory('flutter').path,
-    );
+    testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
 
     environment = <String, String>{};
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const List<String> powerShellVariables = <String>[
-        'SystemRoot',
-        'PATH',
-        'PATHEXT',
-      ];
+      const List<String> powerShellVariables = <String>['SystemRoot', 'PATH', 'PATHEXT'];
       for (final String key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
@@ -142,7 +125,9 @@ void main() {
     final List<String> args;
     if (const LocalPlatform().isWindows) {
       executable = 'powershell';
-      args = <String>[testRoot.contentAwareHashPs1.path];
+      // ExecutionPolicy required to execute scripts from temp files on
+      // Windows 11.
+      args = <String>['-ExecutionPolicy', 'Bypass', '-File', testRoot.contentAwareHashPs1.path];
     } else if (usePowershellOnPosix) {
       executable = 'pwsh';
       args = <String>[testRoot.contentAwareHashPs1.path];
@@ -172,29 +157,16 @@ void main() {
     String branch = 'master',
     String remote = 'upstream',
   }) {
-    run('git', <String>[
-      'init',
-      '--initial-branch',
-      branch,
-    ], workingPath: workingPath);
+    run('git', <String>['init', '--initial-branch', branch], workingPath: workingPath);
     // autocrlf is very important for tests to work on windows.
-    run(
-      'git',
-      'config --local core.autocrlf true'.split(' '),
-      workingPath: workingPath,
-    );
+    run('git', 'config --local core.autocrlf true'.split(' '), workingPath: workingPath);
     run('git', <String>[
       'config',
       '--local',
       'user.email',
       'test@example.com',
     ], workingPath: workingPath);
-    run('git', <String>[
-      'config',
-      '--local',
-      'user.name',
-      'Test User',
-    ], workingPath: workingPath);
+    run('git', <String>['config', '--local', 'user.name', 'Test User'], workingPath: workingPath);
     run('git', <String>['add', '.'], workingPath: workingPath);
     run('git', <String>[
       'commit',
@@ -207,22 +179,13 @@ void main() {
   }
 
   String gitShaFor(String ref, {String? workingPath}) {
-    return run('git', <String>[
-          'rev-parse',
-          ref,
-        ], workingPath: workingPath).stdout
-        as String;
+    return run('git', <String>['rev-parse', ref], workingPath: workingPath).stdout as String;
   }
 
   void writeFileAndCommit(File file, String contents) {
     file.writeAsStringSync(contents);
     run('git', <String>['add', '--all']);
-    run('git', <String>[
-      'commit',
-      '--all',
-      '-m',
-      'changed ${file.basename} to $contents',
-    ]);
+    run('git', <String>['commit', '--all', '-m', 'changed ${file.basename} to $contents']);
   }
 
   void gitSwitchBranch(String branch, {bool create = true}) {
@@ -234,44 +197,29 @@ void main() {
 
   test('generates a hash or upstream/master', () async {
     initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'master');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-    );
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   test('generates a hash for origin/master', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'master');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-    );
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   test('generates a hash for origin/main', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'main');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-    );
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   test('generates a hash for upstream/main', () {
     initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-    );
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   group('stable branches calculate hash locally', () {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
       gitSwitchBranch('stable');
-      expect(
-        runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-      );
+      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
@@ -279,10 +227,7 @@ void main() {
       gitSwitchBranch('stable');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(
-        runContentAwareHash(),
-        processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-      );
+      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
     });
   });
 
@@ -290,10 +235,7 @@ void main() {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
       gitSwitchBranch('beta');
-      expect(
-        runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-      );
+      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
@@ -301,10 +243,7 @@ void main() {
       gitSwitchBranch('beta');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(
-        runContentAwareHash(),
-        processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-      );
+      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
     });
   });
 
@@ -312,10 +251,7 @@ void main() {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
       gitSwitchBranch('flutter-4.35-candidate.2');
-      expect(
-        runContentAwareHash(),
-        processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-      );
+      expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
@@ -323,10 +259,7 @@ void main() {
       gitSwitchBranch('flutter-4.35-candidate.2');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
-      expect(
-        runContentAwareHash(),
-        processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-      );
+      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
     });
   });
 
@@ -337,10 +270,7 @@ void main() {
     );
     writeFileAndCommit(testRoot.deps, 'deps changed');
 
-    expect(
-      runContentAwareHash(),
-      processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-    );
+    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
   }); //gh-readonly-queue/master/pr
 
   test('generates a hash for shallow clones', () {
@@ -350,10 +280,7 @@ void main() {
         .childFile(localFs.path.joinAll('.git/shallow'.split('/')))
         .writeAsStringSync(headSha);
     writeFileAndCommit(testRoot.deps, 'deps changed');
-    expect(
-      runContentAwareHash(),
-      processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-    );
+    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
   });
 
   group('ignores local engine for', () {
@@ -401,23 +328,17 @@ void main() {
 
     test('DEPS is changed', () async {
       writeFileAndCommit(testRoot.deps, 'deps changed');
-      expect(
-        runContentAwareHash(),
-        processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
-      );
+      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
     });
 
     test('an engine file changes', () async {
       writeFileAndCommit(testRoot.engineReadMe, 'engine file changed');
-      expect(
-        runContentAwareHash(),
-        processStdout('49e58f425cb039e745614d7ea10c369387c43681'),
-      );
+      expect(runContentAwareHash(), processStdout('49e58f425cb039e745614d7ea10c369387c43681'));
     });
 
     test('a new engine file is added', () async {
-      final List<String> gibberish =
-          ('_abcdefghijklmnopqrstuvqxyz0123456789' * 20).split('')..shuffle();
+      final List<String> gibberish = ('_abcdefghijklmnopqrstuvqxyz0123456789' * 20).split('')
+        ..shuffle();
       final String newFileName = gibberish.take(20).join();
 
       writeFileAndCommit(
@@ -433,25 +354,17 @@ void main() {
 
     test('bin/internal/release-candidate-branch.version is present', () {
       writeFileAndCommit(
-        testRoot.contentAwareHashPs1.parent.childFile(
-          'release-candidate-branch.version',
-        ),
+        testRoot.contentAwareHashPs1.parent.childFile('release-candidate-branch.version'),
         'sup',
       );
-      expect(
-        runContentAwareHash(),
-        processStdout('3b81cd2164f26a8db3271d46c7022c159193417d'),
-      );
+      expect(runContentAwareHash(), processStdout('3b81cd2164f26a8db3271d46c7022c159193417d'));
     });
   });
 
   test('does not hash non-engine files', () async {
     initGitRepoWithBlankInitialCommit();
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
-    expect(
-      runContentAwareHash(),
-      processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'),
-    );
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 }
 
@@ -471,18 +384,12 @@ final class _FlutterRootUnderTest {
     return _FlutterRootUnderTest._(
       root,
       contentAwareHashPs1: root.childFile(
-        fileSystem.path.joinAll(
-          'bin/internal/content_aware_hash.ps1'.split('/'),
-        ),
+        fileSystem.path.joinAll('bin/internal/content_aware_hash.ps1'.split('/')),
       ),
       contentAwareHashSh: root.childFile(
-        fileSystem.path.joinAll(
-          'bin/internal/content_aware_hash.sh'.split('/'),
-        ),
+        fileSystem.path.joinAll('bin/internal/content_aware_hash.sh'.split('/')),
       ),
-      engineReadMe: root.childFile(
-        fileSystem.path.joinAll('engine/README.md'.split('/')),
-      ),
+      engineReadMe: root.childFile(fileSystem.path.joinAll('engine/README.md'.split('/'))),
       deps: root.childFile(fileSystem.path.join('DEPS')),
       flutterReadMe: root.childFile(
         fileSystem.path.joinAll('packages/flutter/README.md'.split('/')),
@@ -498,11 +405,7 @@ final class _FlutterRootUnderTest {
     Directory current = fileSystem.directory(path);
     while (!current.childFile('DEPS').existsSync()) {
       if (current.path == current.parent.path) {
-        throw ArgumentError.value(
-          path,
-          'path',
-          'Could not resolve flutter root',
-        );
+        throw ArgumentError.value(path, 'path', 'Could not resolve flutter root');
       }
       current = current.parent;
     }
@@ -529,18 +432,13 @@ final class _FlutterRootUnderTest {
   /// Copies files under test to the [testRoot].
   void copyTo(_FlutterRootUnderTest testRoot) {
     contentAwareHashPs1.copySyncRecursive(testRoot.contentAwareHashPs1.path);
-    print(
-      'copyed: ${testRoot.contentAwareHashPs1}, ${testRoot.contentAwareHashPs1.existsSync()}',
-    );
     contentAwareHashSh.copySyncRecursive(testRoot.contentAwareHashSh.path);
   }
 }
 
 extension on File {
   void copySyncRecursive(String newPath) {
-    fileSystem
-        .directory(fileSystem.path.dirname(newPath))
-        .createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.dirname(newPath)).createSync(recursive: true);
     copySync(newPath);
   }
 }
@@ -556,16 +454,13 @@ Matcher processStdout(String stdout) {
 }
 
 final class _ProcessSucceedsAndOutputs extends Matcher {
-  _ProcessSucceedsAndOutputs(String stdout)
-    : _expected = collapseWhitespace(stdout);
+  _ProcessSucceedsAndOutputs(String stdout) : _expected = collapseWhitespace(stdout);
 
   final String _expected;
 
   @override
   bool matches(Object? item, _) {
-    if (item is! io.ProcessResult ||
-        item.exitCode != 0 ||
-        item.stdout is! String) {
+    if (item is! io.ProcessResult || item.exitCode != 0 || item.stdout is! String) {
       return false;
     }
     final String actual = item.stdout as String;

@@ -50,10 +50,12 @@ if (($currentBranch -ne "main") -and
     # This is a development branch. Find the merge-base.
     # We will fallback to origin if upstream is not detected.
     $remote = "origin"
+    $ErrorActionPreference = 'SilentlyContinue'
     git -C "$flutterRoot" remote get-url upstream *> $null
     if ($LASTEXITCODE -eq 0) {
         $remote = "upstream"
     }
+    $ErrorActionPreference = "Stop"
 
     # Try to find the merge-base with master, then main.
     $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/master" 2>$null).Trim()
