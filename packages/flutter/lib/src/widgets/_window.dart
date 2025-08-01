@@ -168,7 +168,7 @@ mixin class RegularWindowControllerDelegate {
 ///
 /// When provided to a [RegularWindow] widget, widgets inside of the [child]
 /// parameter will have access to the [RegularWindowController] via the
-/// [WindowControllerScope] widget.
+/// [WindowScope] widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -434,7 +434,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// [RegularWindowController.destroy].
 ///
 /// Widgets in the same tree as the [child] widget will have access to the
-/// [RegularWindowController] via the [WindowControllerScope] widget.
+/// [RegularWindowController] via the [WindowScope] widget.
 ///
 /// An example usage might look like:
 /// ```dart
@@ -488,7 +488,7 @@ class RegularWindow extends StatelessWidget {
   Widget build(BuildContext context) {
     return View(
       view: controller.rootView,
-      child: WindowControllerScope(controller: controller, child: child),
+      child: WindowScope(controller: controller, child: child),
     );
   }
 }
@@ -504,8 +504,8 @@ enum _WindowControllerAspect { contentSize, title, activated, maximized, minimiz
 ///
 ///  * [RegularWindow], the widget to create a regular window.
 @internal
-class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
-  /// Creates a new [WindowControllerScope].
+class WindowScope extends InheritedModel<_WindowControllerAspect> {
+  /// Creates a new [WindowScope].
   ///
   /// This widget is used by the window widgets to provide
   /// widgets in a window's subtree with access to information about
@@ -517,7 +517,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  WindowControllerScope({super.key, required this.controller, required super.child}) {
+  WindowScope({super.key, required this.controller, required super.child}) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
@@ -531,8 +531,8 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
 
   /// Returns the [BaseWindowController] for the window that hosts the given context.
   ///
-  /// {@template flutter.widgets.windowing.windowControllerScope.of}
-  /// If there is no [WindowControllerScope] in scope, this method
+  /// {@template flutter.widgets.windowing.WindowScope.of}
+  /// If there is no [WindowScope] in scope, this method
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
   /// {@endtemplate}
@@ -544,7 +544,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
-  ///   [WindowControllerScope] ancestor. It returns null instead.
+  ///   [WindowScope] ancestor. It returns null instead.
   @internal
   static BaseWindowController of(BuildContext context) {
     return _of(context);
@@ -558,16 +558,16 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   ///
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
-  /// * [of], which will throw if it doesn't find a [WindowControllerScope] ancestor,
+  /// * [of], which will throw if it doesn't find a [WindowScope] ancestor,
   ///   instead of returning null.
   @internal
   static BaseWindowController? maybeOf(BuildContext context) {
     return _maybeOf(context);
   }
 
-  /// Returns [BaseWindowController.contentSize] of the nearest [WindowControllerScope].
+  /// Returns [BaseWindowController.contentSize] of the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -579,7 +579,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   static Size contentSizeOf(BuildContext context) =>
       _of(context, _WindowControllerAspect.contentSize).contentSize;
 
-  /// Returns [BaseWindowController.contentSize] of the nearest [WindowControllerScope],
+  /// Returns [BaseWindowController.contentSize] of the nearest [WindowScope],
   /// or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -592,9 +592,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   static Size? maybeContentSizeOf(BuildContext context) =>
       _maybeOf(context, _WindowControllerAspect.contentSize)?.contentSize;
 
-  /// Returns the title of the controller in the nearest [WindowControllerScope].
+  /// Returns the title of the controller in the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// If the window associated with the controller does not support titles,
   /// this method will throw an [UnsupportedError].
@@ -613,7 +613,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns title of the nearest [WindowControllerScope], or null if not found.
+  /// Returns title of the nearest [WindowScope], or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -633,9 +633,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the activation status of the nearest [WindowControllerScope].
+  /// Returns the activation status of the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// If the window associated with the controller does not support activation,
   /// this method will throw an [UnsupportedError].
@@ -654,7 +654,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the activation status of the nearest [WindowControllerScope],
+  /// Returns the activation status of the nearest [WindowScope],
   /// or null if not found
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -675,9 +675,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the minimization status of the nearest [WindowControllerScope].
+  /// Returns the minimization status of the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// If the window associated with the controller does not support minimization,
   /// this method will throw an [UnsupportedError].
@@ -696,7 +696,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the minimization status of the nearest [WindowControllerScope],
+  /// Returns the minimization status of the nearest [WindowScope],
   /// or null if not found
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -717,9 +717,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the maximization status of the nearest [WindowControllerScope].
+  /// Returns the maximization status of the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// If the window associated with the controller does not support maximization,
   /// this method will throw an [UnsupportedError].
@@ -738,7 +738,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the maximization status of the nearest [WindowControllerScope],
+  /// Returns the maximization status of the nearest [WindowScope],
   /// or null if not found
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -759,9 +759,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the fullscreen status of the nearest [WindowControllerScope].
+  /// Returns the fullscreen status of the nearest [WindowScope].
   ///
-  /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  /// {@macro flutter.widgets.windowing.windowScope.of}
   ///
   /// If the window associated with the controller does not support fullscreen,
   /// this method will throw an [UnsupportedError].
@@ -781,7 +781,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns the fullscreen status of the nearest [WindowControllerScope],
+  /// Returns the fullscreen status of the nearest [WindowScope],
   /// or null if not found
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -807,33 +807,33 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     assert(_debugCheckHasWindowController(context));
-    return InheritedModel.inheritFrom<WindowControllerScope>(context, aspect: aspect)!.controller;
+    return InheritedModel.inheritFrom<WindowScope>(context, aspect: aspect)!.controller;
   }
 
   static BaseWindowController? _maybeOf(BuildContext context, [_WindowControllerAspect? aspect]) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    return InheritedModel.inheritFrom<WindowControllerScope>(context, aspect: aspect)?.controller;
+    return InheritedModel.inheritFrom<WindowScope>(context, aspect: aspect)?.controller;
   }
 
   static bool _debugCheckHasWindowController(BuildContext context) {
     assert(() {
-      if (context.dependOnInheritedWidgetOfExactType<WindowControllerScope>() == null) {
+      if (context.dependOnInheritedWidgetOfExactType<WindowScope>() == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No WindowControllerScope found in context.'),
+          ErrorSummary('No WindowScope found in context.'),
           ErrorDescription(
-            '${context.widget.runtimeType} widgets require a WindowControllerScope widget ancestor.',
+            '${context.widget.runtimeType} widgets require a WindowScope widget ancestor.',
           ),
           context.describeWidget(
-            'The specific widget that could not find a WindowControllerScope ancestor was',
+            'The specific widget that could not find a WindowScope ancestor was',
           ),
           context.describeOwnershipChain('The ownership chain for the affected widget is'),
           ErrorHint(
-            'No WindowControllerScope ancestor could be found starting from the context '
-            'that was passed to WindowControllerScope.of(). This can happen because the '
+            'No WindowScope ancestor could be found starting from the context '
+            'that was passed to WindowScope.of(). This can happen because the '
             'context used is not a descendant of a RegularWindow widget, which introduces '
-            'a WindowControllerScope.',
+            'a WindowScope.',
           ),
         ]);
       }
@@ -845,12 +845,12 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  bool updateShouldNotify(WindowControllerScope oldWidget) => controller != oldWidget.controller;
+  bool updateShouldNotify(WindowScope oldWidget) => controller != oldWidget.controller;
 
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   @override
-  bool updateShouldNotifyDependent(WindowControllerScope oldWidget, Set<Object> dependencies) {
+  bool updateShouldNotifyDependent(WindowScope oldWidget, Set<Object> dependencies) {
     return dependencies.any(
       (Object dependency) =>
           dependency is _WindowControllerAspect &&
