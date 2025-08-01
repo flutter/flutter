@@ -190,6 +190,7 @@ class RadioThemeData with Diagnosticable {
     visualDensity,
     backgroundColor,
     side,
+    innerRadius,
   );
 
   @override
@@ -208,7 +209,8 @@ class RadioThemeData with Diagnosticable {
         other.materialTapTargetSize == materialTapTargetSize &&
         other.visualDensity == visualDensity &&
         other.backgroundColor == backgroundColor &&
-        other.side == side;
+        other.side == side &&
+        other.innerRadius == innerRadius;
   }
 
   @override
