@@ -29,7 +29,7 @@ dependencies:
   multicast_dns: 0.3.3
   mustache_template: 2.0.0
   package_config: 2.2.0
-  process: 5.0.4
+  process: 5.0.5
   fake_async: 1.3.3
   stack_trace: 1.12.1
   usage: 4.1.1
@@ -115,7 +115,6 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.2
-  mockito: ^5.4.6
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -129,4 +128,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: o6rt85
+# PUBSPEC CHECKSUM: sgrg83
