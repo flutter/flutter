@@ -176,7 +176,7 @@ group("flutter") {
 
   # Build the standalone Embedder API SDK for platforms that don't vend all
   # their engine artifacts (via `build_engine_artifacts`).
-  if (current_os == "android" && flutter_runtime_mode == "debug") {
+  if (is_android && flutter_runtime_mode == "debug") {
     public_deps += [ "//flutter/shell/platform/embedder:embedder-archive" ]
   }
 }
