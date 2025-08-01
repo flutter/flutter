@@ -108,11 +108,11 @@ void main() {
     // Git adds a lot of files, we don't want to test for them.
     final Directory gitDir = testRoot.root.childDirectory('.git');
     if (gitDir.existsSync()) {
-      // gitDir.deleteSync(recursive: true);
+      gitDir.deleteSync(recursive: true);
     }
 
     // Now do cleanup so even if the next step fails, we still deleted tmp.
-    // tmpDir.deleteSync(recursive: true);
+    tmpDir.deleteSync(recursive: true);
   });
 
   /// Runs `bin/internal/content_aware_hash.{sh|ps1}` and returns the process result.

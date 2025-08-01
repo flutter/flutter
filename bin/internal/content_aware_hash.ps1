@@ -55,13 +55,13 @@ if (($currentBranch -ne "main") -and
     if ($LASTEXITCODE -eq 0) {
         $remote = "upstream"
     }
-    $ErrorActionPreference = "Stop"
 
     # Try to find the merge-base with master, then main.
     $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/master" 2>$null).Trim()
     if ([string]::IsNullOrEmpty($mergeBase)) {
         $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/main" 2>$null).Trim()
     }
+    $ErrorActionPreference = "Stop"
 
     $baseRef = $mergeBase
 }
