@@ -192,7 +192,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     if (value != null && effectiveTrackGap > 0) {
       trackRect = switch (textDirection) {
         TextDirection.ltr => Rect.fromLTRB(
-          clampDouble(value!, 0.0, 1.0) * size.width + effectiveTrackGap,
+          math.min(clampDouble(value!, 0.0, 1.0) * size.width + effectiveTrackGap, size.width),
           0,
           size.width,
           size.height,
@@ -200,7 +200,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         TextDirection.rtl => Rect.fromLTRB(
           0,
           0,
-          size.width - clampDouble(value!, 0.0, 1.0) * size.width - effectiveTrackGap,
+          math.max(size.width - clampDouble(value!, 0.0, 1.0) * size.width - effectiveTrackGap, 0),
           size.height,
         ),
       };
@@ -209,12 +209,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     // Draw the track.
-    final Paint trackPaint = Paint()..color = trackColor;
-    if (indicatorBorderRadius != null) {
-      final RRect trackRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(trackRect);
-      canvas.drawRRect(trackRRect, trackPaint);
-    } else {
-      canvas.drawRect(trackRect, trackPaint);
+    if (trackRect.width > 0) {
+      final Paint trackPaint = Paint()..color = trackColor;
+      if (indicatorBorderRadius != null) {
+        final RRect trackRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(trackRect);
+        canvas.drawRRect(trackRRect, trackPaint);
+      } else {
+        canvas.drawRect(trackRect, trackPaint);
+      }
     }
 
     void drawStopIndicator() {
