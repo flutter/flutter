@@ -15,7 +15,6 @@
 /dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart @jesswrd @flutter/android
 /dev/devicelab/bin/tasks/android_lifecycles_test.dart @reidbaker @flutter/engine
-/dev/devicelab/bin/tasks/android_obfuscate_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_picture_cache_complexity_scoring_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/android_stack_size_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart @jtmcdole @flutter/engine
