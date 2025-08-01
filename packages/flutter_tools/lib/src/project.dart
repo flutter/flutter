@@ -406,6 +406,10 @@ class FlutterProject {
     }
   }
 
+  String? getBuildName() {
+    return manifest.buildName;
+  }
+
   /// A JSON encoded string containing the [FlutterManifest.appName],
   /// [FlutterManifest.buildName] (version), and [FlutterManifest.buildNumber]
   /// that are used to generate `version.json`.

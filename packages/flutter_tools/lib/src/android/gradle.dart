@@ -222,7 +222,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       }).toSet(),
       androidPackage: project.manifest.androidPackage,
       repoDirectory: getRepoDirectory(outputDirectory),
-      buildNumber: buildNumber,
+      buildNumber: buildNumber.isEmpty? project.getBuildName() : buildNumber,
       logger: _logger,
       fileSystem: _fileSystem,
     );
@@ -802,8 +802,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '-Pflutter-root=$flutterRoot',
       '-Poutput-dir=${outputDirectory.path}',
       '-Pis-plugin=${manifest.isPlugin}',
-      '-PbuildNumber=$buildNumber',
     ];
+    command.add(
+        '-PbuildNumber=${buildNumber.isNotEmpty ? buildNumber : project.getBuildName()}');
     if (_logger.isVerbose) {
       command.add('--full-stacktrace');
       command.add('--info');
