@@ -4819,7 +4819,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext('suggests cd ... after creating a directory', () async {
     final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
     await runner.run(['create', '--no-pub', projectDir.path]);
-    RegExp cdLine = RegExp(r'^  \$ cd .*flutter_project$', multiLine: true);
+    final cdLine = RegExp(r'^  \$ cd .*flutter_project$', multiLine: true);
     expect(cdLine.hasMatch(logger.statusText), isTrue);
   }, overrides: {Logger: () => logger});
 
