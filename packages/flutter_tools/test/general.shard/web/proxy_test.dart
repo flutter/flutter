@@ -3,340 +3,297 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../src/testbed.dart';
-
 void main() {
-  late TestBed testbed;
+  late BufferLogger logger;
   setUp(() {
-    testbed = TestBed();
+    logger = BufferLogger.test();
   });
 
-  group('ProxyRule.fromYaml', () {
-    test(
-      'should create PrefixProxyRule with prefix and no replacement',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml('''
-          target: http://localhost:8080
-          prefix: /api
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml);
+  group('ProxyRule', () {
+    test('fromYaml returns null for invalid YAML', () {
+      final yaml = YamlMap.wrap(<String, String>{'unknown': 'rule'});
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      expect(rule, isNull);
+      expect(logger.errorText, contains('Invalid proxy rule in YAML'));
+    });
 
-        expect(rule, isA<PrefixProxyRule>());
-        expect((rule! as PrefixProxyRule).prefix, '/api');
-        expect(rule.target, 'http://localhost:8080');
-      }),
-    );
+    test('fromYaml returns PrefixProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'prefix': '/api',
+        'target': 'http://localhost:8080',
+      });
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      expect(rule, isA<PrefixProxyRule>());
+    });
 
-    test(
-      'should create PrefixProxyRule with prefix and replacement',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml('''
-          target: http://localhost:8080
-          prefix: /api
-          replace: /new_api
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml);
-
-        expect(rule, isA<PrefixProxyRule>());
-        expect((rule! as PrefixProxyRule).prefix, '/api');
-        expect(rule.target, 'http://localhost:8080');
-        expect(rule.replace('/api/users'), '/new_api/users');
-        expect(rule.replace('/api/'), '/new_api/');
-        expect(rule.replace('/other'), '/other');
-      }),
-    );
-
-    test(
-      'should create RegexProxyRule with regex and no replacement',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml(r'''
-          target: http://localhost:8081
-          regex: ^/users/(\d+)
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml);
-
-        expect(rule, isA<RegexProxyRule>());
-        expect((rule! as RegexProxyRule).pattern.pattern, r'^/users/(\d+)');
-        expect(rule.target, 'http://localhost:8081');
-      }),
-    );
-
-    test(
-      'should create RegexProxyRule with regex and replacement using capturing groups',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml(r'''
-          target: http://localhost:8081/user-service
-          regex: ^/users/(\d+)/profile(.*)
-          replace: /user-info/$1/details$2
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml);
-        expect(rule, isA<RegexProxyRule>());
-        expect(rule!.replace('/users/456/profile/summary'), '/user-info/456/details/summary');
-        expect(rule.replace('/users/789/profile'), '/user-info/789/details');
-        expect(rule.replace('/other/path'), '/other/path');
-      }),
-    );
-
-    test(
-      'should create RegexProxyRule with regex and empty replacement',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml(r'''
-          target: http://localhost:8081/user-service
-          regex: ^/users/\d+/profile
-          replace: ''
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml);
-        expect(rule, isA<RegexProxyRule>());
-        expect(rule!.replace('/users/456/profile'), '');
-        expect(rule.replace('/users/789/profile/summary'), '/summary');
-      }),
-    );
-
-    test(
-      'should handle invalid regex key gracefully and fall back to RegexProxyRule using escaped string',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml('''
-          target: http://localhost:8082
-          regex: ^/invalid(
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: globals.logger);
-
-        expect(rule, isA<RegexProxyRule>());
-        expect((rule! as RegexProxyRule).pattern.pattern, r'\^/invalid\(');
-        expect(rule.target, 'http://localhost:8082');
-      }),
-    );
-
-    test(
-      'should return null if target is missing',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml('''
-          prefix: /api
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: globals.logger);
-
-        expect(rule, isNull);
-      }),
-    );
-
-    test(
-      'should return null if neither prefix nor regex is provided',
-      () => testbed.run(() {
-        final yaml =
-            loadYaml('''
-          target: http://localhost:8080
-        ''')
-                as YamlMap;
-        final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: globals.logger);
-
-        expect(rule, isNull);
-      }),
-    );
+    test('fromYaml returns RegexProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'regex': '/api/(.*)',
+        'target': 'http://localhost:8080',
+      });
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      expect(rule, isA<RegexProxyRule>());
+    });
   });
 
   group('RegexProxyRule', () {
-    final ruleNoReplacement = RegexProxyRule(
-      pattern: RegExp(r'^/users/(\d+)'),
-      target: 'http://example.com',
-    );
+    test('canHandle returns true for valid regex', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'regex': '/api/(.*)',
+        'target': 'http://localhost:8080',
+      });
+      expect(RegexProxyRule.canHandle(yaml), isTrue);
+    });
 
-    final ruleWithCapturingGroupReplacement = RegexProxyRule(
-      pattern: RegExp(r'^/api/v1/users/(\d+)(.*)'),
-      target: 'http://backend.com',
-      replacement: r'/$1/profile$2',
-    );
+    test('canHandle returns false for missing regex', () {
+      final yaml = YamlMap.wrap(<String, String>{'target': 'http://localhost:8080'});
+      expect(RegexProxyRule.canHandle(yaml), isFalse);
+    });
 
-    final rulePrefixRemovalReplacement = RegexProxyRule(
-      pattern: RegExp(r'^/old_path'),
-      target: 'http://legacy.com',
-      replacement: '/new_path',
-    );
-    final ruleMiddlePattern = RegexProxyRule(
-      pattern: RegExp(r'/test_static'),
-      target: 'http://static.com',
-      replacement: '/assets',
-    );
+    test('canHandle returns false for empty regex', () {
+      final yaml = YamlMap.wrap(<String, String>{'regex': '', 'target': 'http://localhost:8080'});
+      expect(RegexProxyRule.canHandle(yaml), isFalse);
+    });
 
-    final ruleExactMatch = RegexProxyRule(
-      pattern: RegExp(r'^/exact_match_only$'),
-      target: 'http://exact.com',
-      replacement: '/found',
-    );
-    final ruleZeroGroup = RegexProxyRule(
-      pattern: RegExp(r'^/prefix/(.*)'),
-      target: 'http://test.com',
-      replacement: r'/all$0',
-    );
-
-    test('matches should return true for matching regex', () {
-      expect(ruleNoReplacement.matches('/users/123'), isTrue);
+    test('fromYaml creates a RegexProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'regex': '^/api/(.*)',
+        'target': 'http://localhost:8080',
+        'replace': r'/$1',
+      });
+      final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
       expect(
-        ruleWithCapturingGroupReplacement.matches('/api/v1/users/456/profile/details'),
-        isTrue,
+        rule.toString(),
+        r'{pattern: ^/api/(.*), target: http://localhost:8080, replace: /$1}',
       );
-      expect(rulePrefixRemovalReplacement.matches('/old_path/resource'), isTrue);
-      expect(ruleMiddlePattern.matches('hello/test_static/image.png'), isTrue);
-      expect(ruleExactMatch.matches('/exact_match_only'), isTrue);
-      expect(ruleZeroGroup.matches('/prefix/prefix'), isTrue);
     });
 
-    test('matches should return false for non-matching regex', () {
-      expect(ruleWithCapturingGroupReplacement.matches('/api/v2/users/123'), isFalse);
-      expect(rulePrefixRemovalReplacement.matches('/hello/old_path/resource'), isFalse);
-      expect(ruleExactMatch.matches('/exact_match_only/suffix'), isFalse);
-    });
-
-    test('replace should apply replacement with capturing groups correctly', () {
+    test('fromYaml logs warning for invalid regex format', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'regex': '[invalid',
+        'target': 'http://localhost:8080',
+      });
+      final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(logger.warningText, contains('Invalid regex pattern'));
       expect(
-        ruleWithCapturingGroupReplacement.replace('/api/v1/users/789/profile/summary'),
-        '/789/profile/profile/summary',
+        rule.toString(),
+        r'{pattern: \[invalid, target: http://localhost:8080, replace: null}',
       );
-      expect(ruleWithCapturingGroupReplacement.replace('/api/v1/users/100'), '/100/profile');
     });
 
-    test('replace should apply prefix removal replacement', () {
-      expect(
-        rulePrefixRemovalReplacement.replace('/old_path/resource/data'),
-        '/new_path/resource/data',
-      );
-      expect(rulePrefixRemovalReplacement.replace('/old_path'), '/new_path');
+    test('fromYaml returns null if target is missing', () {
+      final yaml = YamlMap.wrap(<String, String>{'regex': '/api/(.*)'});
+      final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNull);
+      expect(logger.errorText, contains("Invalid 'target' for 'regex'"));
     });
 
-    test('replace should match exactly', () {
+    test('matches returns true when regex matches path', () {
       final rule = RegexProxyRule(
-        pattern: RegExp(r'/temp1'),
-        target: 'http://legacy.com',
-        replacement: '/temp2/',
+        pattern: RegExp(r'^/api/v1/users/(.*)'),
+        target: 'http://localhost:8080',
       );
-      expect(rule.replace('/temp1/careful/double/slashes'), '/temp2//careful/double/slashes');
-      expect(
-        rulePrefixRemovalReplacement.replace('/old_pathname/resource/data'),
-        '/new_pathname/resource/data',
+      expect(rule.matches('/api/v1/users/123'), isTrue);
+      expect(rule.matches('/api/v1/users/'), isTrue);
+    });
+
+    test('matches returns false when regex does not match path', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'^/api/v1/users/(.*)'),
+        target: 'http://localhost:8080',
       );
+      expect(rule.matches('/auth/login'), isFalse);
+    });
+
+    test('replace correctly replaces with capture groups', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'/users/(\d+)/profile'),
+        target: 'http://localhost:8080',
+        replacement: r'/api/v1/user/$1',
+      );
+      expect(rule.replace('/users/123/profile'), '/api/v1/user/123');
+    });
+
+    test('replace correctly replaces without capture groups', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'/oldpath'),
+        target: 'http://localhost:8080',
+        replacement: '/newpath',
+      );
+      expect(rule.replace('/oldpath/resource'), '/newpath/resource');
+    });
+
+    test('replace returns original path for no replacement', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'/users/(\d+)'),
+        target: 'http://localhost:8080',
+      );
+      expect(rule.replace('/users/123'), '/users/123');
     });
 
     test('replace should replace all occurences', () {
-      expect(ruleMiddlePattern.replace('/test_static/test_static/data'), '/assets/assets/data');
-    });
-
-    test('replace should handle regex with no capturing groups in pattern', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'/users/(\d+)/profile'),
+        target: 'http://localhost:8080',
+        replacement: r'/api/v1/user/$1',
+      );
       expect(
-        ruleMiddlePattern.replace('hello/test_static/document.pdf'),
-        'hello/assets/document.pdf',
+        rule.replace('/users/456/profile/users/123/profile'),
+        '/api/v1/user/456/api/v1/user/123',
       );
     });
 
     test(r'replace should handle $0 (entire match)', () {
-      expect(ruleZeroGroup.replace('/prefix/something/else'), '/all/prefix/something/else');
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'^/prefix/(.*)'),
+        target: 'http://localhost:8080',
+        replacement: r'/all$0',
+      );
+      expect(rule.replace('/prefix/something/else'), '/all/prefix/something/else');
     });
 
     test('replace should handle non-matching path gracefully', () {
-      expect(ruleWithCapturingGroupReplacement.replace('/non/matching/path'), '/non/matching/path');
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'^/api/v1/users/(\d+)(.*)'),
+        target: 'http://localhost:8080',
+        replacement: r'/$1/profile$2',
+      );
+      expect(rule.replace('/non/matching/path'), '/non/matching/path');
     });
 
-    test('toString provides useful debug information', () {
-      expect(
-        ruleNoReplacement.toString(),
-        r'{pattern: ^/users/(\d+), target: http://example.com, replace: null}',
+    test('getTargetUri returns correct Uri', () {
+      final rule = RegexProxyRule(
+        pattern: RegExp(r'^/api/v1/users/(.*)'),
+        target: 'http://localhost:8080/users/',
+        replacement: r'$1',
       );
-      expect(
-        rulePrefixRemovalReplacement.toString(),
-        '{pattern: ^/old_path, target: http://legacy.com, replace: /new_path}',
-      );
+      final Uri targetUri = rule.getTargetUri();
+      expect(targetUri.toString(), 'http://localhost:8080/users/');
+      expect(targetUri.scheme, 'http');
+      expect(targetUri.host, 'localhost');
+      expect(targetUri.port, 8080);
+      expect(targetUri.path, '/users/');
     });
   });
 
   group('PrefixProxyRule', () {
-    final ruleNoReplacement = PrefixProxyRule(prefix: '/assets/', target: 'http://cdn.example.com');
-
-    final ruleWithReplacement = PrefixProxyRule(
-      prefix: '/old-assets/',
-      target: 'http://cdn.example.com',
-      replacement: '/new-assets/',
-    );
-
-    final ruleEmptyReplacement = PrefixProxyRule(
-      prefix: '/remove-me/',
-      target: 'http://cdn.example.com',
-      replacement: '',
-    );
-    final ruleSlashReplacement = PrefixProxyRule(
-      prefix: '/remove-me-too',
-      target: 'http://cdn.example.com',
-      replacement: '/',
-    );
-
-    test('matches should return true for matching prefix', () {
-      expect(ruleNoReplacement.matches('/assets/image.png'), isTrue);
-      expect(ruleWithReplacement.matches('/old-assets/script.js'), isTrue);
-      expect(ruleEmptyReplacement.matches('/remove-me/now'), isTrue);
-      expect(ruleSlashReplacement.matches('/remove-me-too-please'), isTrue);
-      expect(ruleSlashReplacement.matches('/remove-me-too/please'), isTrue);
+    test('canHandle returns true for valid prefix', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'prefix': '/api',
+        'target': 'http://localhost:8080',
+      });
+      expect(PrefixProxyRule.canHandle(yaml), isTrue);
     });
 
-    test('matches should return false for non-matching prefix', () {
-      expect(ruleNoReplacement.matches('/data/assets/image.png'), isFalse);
-      expect(ruleWithReplacement.matches('/old/assets/script.js'), isFalse);
-      expect(ruleWithReplacement.matches('/old-assets-prefix/script.js'), isFalse);
-      expect(ruleSlashReplacement.matches('remove-me-too/please'), isFalse);
+    test('canHandle returns false for missing prefix', () {
+      final yaml = YamlMap.wrap(<String, String>{'target': 'http://localhost:8080'});
+      expect(PrefixProxyRule.canHandle(yaml), isFalse);
     });
 
-    test('replace should apply replacement for matching prefix', () {
-      expect(ruleWithReplacement.replace('/old-assets/style.css'), '/new-assets/style.css');
-      expect(ruleWithReplacement.replace('/old-assets/'), '/new-assets/');
+    test('canHandle returns false for empty prefix', () {
+      final yaml = YamlMap.wrap(<String, String>{'prefix': '', 'target': 'http://localhost:8080'});
+      expect(PrefixProxyRule.canHandle(yaml), isFalse);
     });
 
-    test('replace should handle empty replacement string', () {
-      expect(ruleEmptyReplacement.replace('/remove-me/file.txt'), 'file.txt');
-      expect(ruleEmptyReplacement.replace('/remove-me/'), '');
-    });
-
-    test('replace should handle slash replacement string', () {
-      expect(ruleSlashReplacement.replace('/remove-me-too'), '/');
-    });
-
-    test('replace should only replace first occurence', () {
+    test('fromYaml creates a PrefixProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'prefix': '/old_path',
+        'target': 'http://localhost:8080/new_path',
+        'replace': '/new_prefix',
+      });
+      final PrefixProxyRule? rule = PrefixProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
       expect(
-        ruleWithReplacement.replace('/old-assets/old-assets/style.css'),
-        '/new-assets/old-assets/style.css',
+        rule.toString(),
+        '{prefix: /old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
       );
-      expect(ruleSlashReplacement.replace('/remove-me-too/remove-me-too/'), '//remove-me-too/');
     });
 
-    test('replace should return original path for non-matching prefix', () {
-      expect(ruleWithReplacement.replace('/other-path/file.txt'), '/other-path/file.txt');
+    test('fromYaml returns null if target is missing', () {
+      final yaml = YamlMap.wrap(<String, String>{'prefix': '/api'});
+      final PrefixProxyRule? rule = PrefixProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNull);
+      expect(logger.errorText, contains("Invalid 'target' for 'prefix'"));
     });
-    test('toString provides useful debug information', () {
-      expect(
-        ruleNoReplacement.toString(),
-        '{prefix: /assets/, target: http://cdn.example.com, replace: null}',
+
+    test('matches returns true when path starts with prefix', () {
+      final rule = PrefixProxyRule(pattern: '/api/v1', target: 'http://localhost:8080');
+      expect(rule.matches('/api/v1/users'), isTrue);
+      expect(rule.matches('/api/v1'), isTrue);
+    });
+
+    test('matches returns false when path does not start with prefix', () {
+      final rule = PrefixProxyRule(pattern: '/api/v1', target: 'http://localhost:8080');
+      expect(rule.matches('/auth/login/api/v1'), isFalse);
+      expect(rule.matches('/api'), isFalse);
+    });
+
+    test('replace correctly replaces the prefix', () {
+      final rule = PrefixProxyRule(
+        pattern: '/api/',
+        target: 'http://localhost:8080',
+        replacement: '/',
       );
-      expect(
-        ruleWithReplacement.toString(),
-        '{prefix: /old-assets/, target: http://cdn.example.com, replace: /new-assets/}',
+      expect(rule.replace('/api/users/123'), '/users/123');
+    });
+
+    test('replace returns original path if no replacement', () {
+      final rule = PrefixProxyRule(pattern: '/api/', target: 'http://localhost:8080');
+      expect(rule.replace('/api/users/123'), '/api/users/123');
+    });
+
+    test('replace matches exactly', () {
+      final rule = PrefixProxyRule(
+        pattern: '/api',
+        target: 'http://localhost:8080',
+        replacement: '/',
       );
+      expect(rule.replace('/api/users/123'), '//users/123');
+    });
+
+    test('replace removes pattern if empty string', () {
+      final rule = PrefixProxyRule(
+        pattern: '/api/users',
+        target: 'http://localhost:8080',
+        replacement: '',
+      );
+      expect(rule.replace('/api/users/123'), '/123');
+    });
+
+    test('replace replaces first occurence', () {
+      final rule = PrefixProxyRule(
+        pattern: '/api/users',
+        target: 'http://localhost:8080',
+        replacement: '/product',
+      );
+      expect(rule.replace('/api/users/api/users/123'), '/product/api/users/123');
+    });
+
+    test('replace returns original path for non-matching pattern', () {
+      final rule = PrefixProxyRule(
+        pattern: '/api/users',
+        target: 'http://localhost:8080',
+        replacement: '/product',
+      );
+      expect(rule.replace('/source/123'), '/source/123');
+    });
+
+    test('getTargetUri returns correct Uri', () {
+      final rule = PrefixProxyRule(pattern: '/api/users', target: 'http://localhost:8080');
+      final Uri targetUri = rule.getTargetUri();
+      expect(targetUri.toString(), 'http://localhost:8080');
+      expect(targetUri.scheme, 'http');
+      expect(targetUri.host, 'localhost');
+      expect(targetUri.port, 8080);
     });
   });
 
