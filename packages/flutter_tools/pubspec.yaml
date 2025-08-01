@@ -13,7 +13,6 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
-  build_runner: ^2.5.4
   dwds: 24.4.1
   code_builder: 4.10.1
   collection: 1.19.1
