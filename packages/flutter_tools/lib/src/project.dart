@@ -268,6 +268,9 @@ class FlutterProject {
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => manifest.usesAndroidX;
 
+  /// The build name of this project.
+  String?? get buildName => manifest.buildName;
+
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
