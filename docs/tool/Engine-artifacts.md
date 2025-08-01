@@ -77,6 +77,30 @@ On Cocoon (Flutter's internal CI/CD) we _often_ set
 [^2]: I.e. experimental branches that do not fall into one of the above.
 [^3]: Only updated through `flutter-x.x-candidate.x` branches.
 
+## Content Hashing
+
+The content hash is a fingerprint of the assets used in producing engine artifacts.
+These include:
+
+- `DEPS`: Used to pull third_party dependencies.
+- `engine/`: The entire engine subfolder[^4].
+- `bin/internal/release-candidate-branch.version`: A signal for release builds, keeping builds hermetic.
+
+The Flutter project has a plethora of users: engineers working from local branches, release branches, GitHub merge queues, and downstream shallow consumers to name the known ones. The following table shows where the content hash is calculated from:
+
+| Branch                  | Hashed From                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| `main`                  | HEAD                                                                 |
+| `master`                | HEAD                                                                 |
+| `stable`                | HEAD                                                                 |
+| `beta`                  | HEAD                                                                 |
+| GitHub Merge Queue      | HEAD                                                                 |
+| `flutter-*-candidate.x` | HEAD                                                                 |
+| Shallow Clones          | HEAD                                                                 |
+| **Everything Else**.    | `merge-base` between `HEAD` and`(origin or upstream)/(main or master)` |
+
+[^4]: This is suboptimal from an artifact building perspective, but optimal for the speed of each `dart` and `flutter` call. Flutter is called more often than it is built.
+
 ## References
 
 The script(s) that compute (and test the computation of) the engine version:
