@@ -26,6 +26,7 @@ import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
@@ -138,6 +139,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     addPubOptions();
     argParser
       ..addFlag(
+        kWebServer,
+        help:
+            'Serve the widget preview environment using the web-server device instead of the '
+            'browser.',
+      )
+      ..addFlag(
         kLaunchPreviewer,
         defaultsTo: true,
         help: 'Launches the widget preview environment.',
@@ -150,16 +157,18 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         help:
             'Generated the widget preview environment scaffolding at a given location '
             'for testing purposes.',
+        hide: !verbose,
       );
   }
 
-  static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
-  static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kHeadless = 'headless';
-  static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
+  static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
+  static const kLaunchPreviewer = 'launch-previewer';
+  static const kHeadless = 'headless';
+  static const kWebServer = 'web-server';
+  static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   /// Environment variable used to pass the DTD URI to the widget preview scaffold.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
+  static const kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -196,11 +205,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final Artifacts artifacts;
 
-  late final WidgetPreviewAnalytics previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
+  late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
   late final FlutterProject rootProject = getRootProject();
 
-  late final PreviewPubspecBuilder _previewPubspecBuilder = PreviewPubspecBuilder(
+  late final _previewPubspecBuilder = PreviewPubspecBuilder(
     logger: logger,
     verbose: verbose,
     offline: offline,
@@ -208,7 +217,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewManifest: _previewManifest,
   );
 
-  late final PreviewDetector _previewDetector = PreviewDetector(
+  late final _previewDetector = PreviewDetector(
     previewAnalytics: previewAnalytics,
     projectRoot: rootProject.directory,
     logger: logger,
@@ -218,14 +227,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final PreviewCodeGenerator _previewCodeGenerator;
-  late final PreviewManifest _previewManifest = PreviewManifest(
+  late final _previewManifest = PreviewManifest(
     logger: logger,
     rootProject: rootProject,
     fs: fs,
     cache: cache,
   );
 
-  late WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
+  late var _dtdService = WidgetPreviewDtdServices(
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
@@ -358,23 +367,35 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
     try {
-      // Since the only target supported by the widget preview scaffold is the web
-      // device, only a single web device should be returned.
-      final List<Device> devices = await deviceManager!.getDevices(
-        filter: DeviceDiscoveryFilter(
-          supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
-            flutterProject: widgetPreviewScaffoldProject,
+      final List<Device> devices;
+      if (boolArg(kWebServer)) {
+        try {
+          // The web-server device is hidden by default, make it visible before trying to look it up.
+          WebServerDevice.showWebServerDevice = true;
+          devices = await deviceManager!.getDevicesById(WebServerDevice.kWebServerDeviceId);
+        } finally {
+          // Reset the flag to false to avoid affecting other commands.
+          WebServerDevice.showWebServerDevice = false;
+        }
+      } else {
+        // Since the only target supported by the widget preview scaffold is the web
+        // device, only a single web device should be returned.
+        devices = await deviceManager!.getDevices(
+          filter: DeviceDiscoveryFilter(
+            supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject(
+              flutterProject: widgetPreviewScaffoldProject,
+            ),
+            deviceConnectionInterface: DeviceConnectionInterface.attached,
           ),
-          deviceConnectionInterface: DeviceConnectionInterface.attached,
-        ),
-      );
+        );
+      }
       assert(devices.length == 1);
       final Device device = devices.first;
 
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
       logger.printStatus('Launching the Widget Preview Scaffold...');
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
+      final debuggingOptions = DebuggingOptions.enabled(
         BuildInfo(
           BuildMode.debug,
           null,
@@ -406,7 +427,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
 
       if (boolArg(kLaunchPreviewer)) {
-        final Completer<void> appStarted = Completer<void>();
+        final appStarted = Completer<void>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,

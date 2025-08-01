@@ -53,7 +53,7 @@ void main() {
     );
 
     // See: https://regexr.com/6q0ft
-    final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+    final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
     expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
   });
@@ -66,7 +66,7 @@ void main() {
     );
 
     // See: https://regexr.com/6q0kp
-    final RegExp regex = RegExp(
+    final regex = RegExp(
       r'(?:require\.config\(\{)(?:.|\s(?!\}\);))*'
       r'(?:waitSeconds\:\s*0[,]?)'
       r'(?:(?!\}\);).|\s)*\}\);',
@@ -146,7 +146,7 @@ void main() {
   });
 
   test('generateMainModule sets rootDirectories', () {
-    const String root = 'http://localhost:12345';
+    const root = 'http://localhost:12345';
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nativeNullAssertions: false,
@@ -254,7 +254,7 @@ void main() {
       );
 
       // See: https://regexr.com/6q0ft
-      final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+      final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
       expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
     });

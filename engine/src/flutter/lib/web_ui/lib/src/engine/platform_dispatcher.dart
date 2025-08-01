@@ -549,10 +549,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final String? text = arguments['text'] as String?;
+            ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            ClipboardMessageHandler().getDataMethodCall(callback);
+            final String? format = decoded.arguments as String?;
+            ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
             ClipboardMessageHandler().hasStringsMethodCall(callback);
@@ -742,10 +745,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // by checking if the `_viewsRenderedInCurrentFrame` is non-null and this
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
-    // TODO(harryterkelsen): HTML renderer needs to violate the render rule in
-    // order to perform golden tests in Flutter framework because on the HTML
-    // renderer, golden tests render to DOM and then take a browser screenshot,
-    // https://github.com/flutter/flutter/issues/137073.
     if (shouldRender) {
       await renderer.renderScene(scene, target);
     }
