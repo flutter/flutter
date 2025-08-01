@@ -890,8 +890,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
     } else {
       if (insertIndex == 0) {
         // Inserting before all items (no previous item to position after)
-        return _itemOffsetAt(0) -
-            _extentOffset(draggedItemExtent, _scrollDirection);
+        return _itemOffsetAt(0) - _extentOffset(draggedItemExtent, _scrollDirection);
       } else {
         // Normal case: gap is after the previous item
         return _itemOffsetAt(insertIndex - 1) +
@@ -902,11 +901,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dragEnd(_DragInfo item) {
     setState(() {
-      _finalDropPosition = _getProxyAnimationTarget(
-        item.index,
-        _insertIndex!,
-        item.itemExtent,
-      );
+      _finalDropPosition = _getProxyAnimationTarget(item.index, _insertIndex!, item.itemExtent);
     });
     widget.onReorderEnd?.call(_insertIndex!);
   }
