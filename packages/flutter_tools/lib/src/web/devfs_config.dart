@@ -81,8 +81,8 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: yaml['host'] as String,
-      port: yaml['port'] as int,
+      host: yaml['host'] as String? ?? 'any',
+      port: yaml['port'] as int? ?? 0,
       https: yaml['https'] == null ? null : HttpsConfig.fromYaml(yaml['https'] as YamlMap),
       proxy: proxyRules,
     );
