@@ -1278,7 +1278,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _state.startPositionController.addListener(markNeedsPaint);
     _state.endPositionController.addListener(markNeedsPaint);
     _state.startFocusNode.addListener(markNeedsPaint);
+    _state.startFocusNode.addListener(markNeedsSemanticsUpdate);
     _state.endFocusNode.addListener(markNeedsPaint);
+    _state.endFocusNode.addListener(markNeedsSemanticsUpdate);
   }
 
   @override
@@ -1288,8 +1290,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _enableAnimation.removeListener(markNeedsPaint);
     _state.startPositionController.removeListener(markNeedsPaint);
     _state.endPositionController.removeListener(markNeedsPaint);
-    _state.startFocusNode.addListener(markNeedsPaint);
+    _state.startFocusNode.removeListener(markNeedsPaint);
+    _state.startFocusNode.removeListener(markNeedsSemanticsUpdate);
     _state.endFocusNode.removeListener(markNeedsPaint);
+    _state.endFocusNode.removeListener(markNeedsSemanticsUpdate);
     super.detach();
   }
 
