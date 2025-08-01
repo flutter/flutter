@@ -460,6 +460,8 @@ class RangeSlider extends StatefulWidget {
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
+  final FocusNode startFocusNode = FocusNode();
+  final FocusNode endFocusNode = FocusNode();
 
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // changes visibility in response to user interaction.
@@ -485,10 +487,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   bool _dragging = false;
 
   bool _hovering = false;
+  bool _showHoverHighlight = false;
   void _handleHoverChanged(bool hovering) {
     if (hovering != _hovering) {
       setState(() {
         _hovering = hovering;
+        _showHoverHighlight = hovering && _enabled;
       });
     }
   }
@@ -537,6 +541,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       } else {
         enableController.reverse();
       }
+      _showHoverHighlight = _hovering && isEnabled;
     }
   }
 
@@ -548,6 +553,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController.dispose();
     startPositionController.dispose();
     endPositionController.dispose();
+    startFocusNode.dispose();
+    endFocusNode.dispose();
     super.dispose();
   }
 
@@ -759,7 +766,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
           state: this,
           semanticFormatterCallback: widget.semanticFormatterCallback,
-          hovering: _hovering,
+          hovering: _showHoverHighlight,
         ),
       ),
     );
@@ -769,12 +776,26 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       result = Padding(padding: padding, child: result);
     }
 
-    return FocusableActionDetector(
-      enabled: _enabled,
-      onShowHoverHighlight: _handleHoverChanged,
-      includeFocusSemantics: false,
-      mouseCursor: effectiveMouseCursor,
-      child: result,
+    return Stack(
+      children: <Widget>[
+        // Adds two invisible focus nodes to the range slider for its two thumbs.
+        Row(
+          children: <Widget>[
+            Focus(
+              focusNode: startFocusNode,
+              includeSemantics: false,
+              child: const SizedBox.shrink(),
+            ),
+            Focus(focusNode: endFocusNode, includeSemantics: false, child: const SizedBox.shrink()),
+          ],
+        ),
+        MouseRegion(
+          onEnter: (_) => _handleHoverChanged(true),
+          onExit: (_) => _handleHoverChanged(false),
+          cursor: effectiveMouseCursor,
+          child: result,
+        ),
+      ],
     );
   }
 
@@ -1256,6 +1277,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _enableAnimation.addListener(markNeedsPaint);
     _state.startPositionController.addListener(markNeedsPaint);
     _state.endPositionController.addListener(markNeedsPaint);
+    _state.startFocusNode.addListener(markNeedsPaint);
+    _state.startFocusNode.addListener(markNeedsSemanticsUpdate);
+    _state.endFocusNode.addListener(markNeedsPaint);
+    _state.endFocusNode.addListener(markNeedsSemanticsUpdate);
   }
 
   @override
@@ -1265,6 +1290,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _enableAnimation.removeListener(markNeedsPaint);
     _state.startPositionController.removeListener(markNeedsPaint);
     _state.endPositionController.removeListener(markNeedsPaint);
+    _state.startFocusNode.removeListener(markNeedsPaint);
+    _state.startFocusNode.removeListener(markNeedsSemanticsUpdate);
+    _state.endFocusNode.removeListener(markNeedsPaint);
+    _state.endFocusNode.removeListener(markNeedsSemanticsUpdate);
     super.detach();
   }
 
@@ -1575,6 +1604,40 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
+    if (_state.startFocusNode.hasFocus) {
+      _sliderTheme.overlayShape!.paint(
+        context,
+        _startThumbCenter,
+        activationAnimation: const AlwaysStoppedAnimation<double>(1.0),
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        labelPainter: _startLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        value: startValue,
+        textScaleFactor: _textScaleFactor,
+        sizeWithOverflow: resolvedscreenSize,
+      );
+    }
+
+    if (_state.endFocusNode.hasFocus) {
+      _sliderTheme.overlayShape!.paint(
+        context,
+        _endThumbCenter,
+        activationAnimation: const AlwaysStoppedAnimation<double>(1.0),
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        labelPainter: _endLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        value: endValue,
+        textScaleFactor: _textScaleFactor,
+        sizeWithOverflow: resolvedscreenSize,
+      );
+    }
+
     if (!_overlayAnimation.isDismissed) {
       if (startThumbSelected || hoveringStartThumb) {
         _sliderTheme.overlayShape!.paint(
@@ -1803,12 +1866,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     double increasedValue,
     double decreasedValue,
     VoidCallback increaseAction,
-    VoidCallback decreaseAction,
-  ) {
+    VoidCallback decreaseAction, {
+    required bool focused,
+  }) {
     final SemanticsConfiguration config = SemanticsConfiguration();
     config.isEnabled = isEnabled;
     config.textDirection = textDirection;
     config.isSlider = true;
+    config.isFocusable = true;
+    config.isFocused = focused;
     if (isEnabled) {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
@@ -1841,6 +1907,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       _decreasedStartValue,
       _increaseStartAction,
       _decreaseStartAction,
+      focused: _state.startFocusNode.hasFocus,
     );
     final SemanticsConfiguration endSemanticsConfiguration = _createSemanticsConfiguration(
       values.end,
@@ -1848,6 +1915,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       _decreasedEndValue,
       _increaseEndAction,
       _decreaseEndAction,
+      focused: _state.endFocusNode.hasFocus,
     );
 
     // Split the semantics node area between the start and end nodes.

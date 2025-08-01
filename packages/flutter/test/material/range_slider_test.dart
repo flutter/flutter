@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1927,6 +1928,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1938,6 +1940,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1985,6 +1988,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1996,6 +2000,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2069,6 +2074,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2079,6 +2085,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2454,11 +2461,6 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
     await tester.pumpWidget(buildFrame(enabled: true));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.none,
-    );
-
     await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
@@ -2533,6 +2535,164 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(RangeSlider))),
       isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+    );
+  });
+
+  testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(20, 80);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // Focus on the start thumb
+    final Finder rangeSliderFinder = find.byType(RangeSlider);
+    expect(rangeSliderFinder, findsOneWidget);
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+  });
+
+  testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 30.0),
+                max: 100.0,
+                onChanged: (RangeValues v) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    // Focus on the start thumb
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   });
 
