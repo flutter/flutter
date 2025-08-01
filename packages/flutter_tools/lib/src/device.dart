@@ -1089,7 +1089,6 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
-    // ignore: unused_element_parameter
     this.webDevServerConfig,
   });
 
