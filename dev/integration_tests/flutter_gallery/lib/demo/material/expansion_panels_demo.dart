@@ -346,14 +346,13 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   _demoItems[index].isExpanded = isExpanded;
                 });
               },
-              children:
-                  _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {
-                    return ExpansionPanel(
-                      isExpanded: item.isExpanded,
-                      headerBuilder: item.headerBuilder,
-                      body: item.build(),
-                    );
-                  }).toList(),
+              children: _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {
+                return ExpansionPanel(
+                  isExpanded: item.isExpanded,
+                  headerBuilder: item.headerBuilder,
+                  body: item.build(),
+                );
+              }).toList(),
             ),
           ),
         ),

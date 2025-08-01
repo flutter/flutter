@@ -48,8 +48,8 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
 
   @override
   String? migrateLine(String line) {
-    const String originalReadLinkLine = r'source="$(readlink "${source}")"';
-    const String replacementReadLinkLine = r'source="$(readlink -f "${source}")"';
+    const originalReadLinkLine = r'source="$(readlink "${source}")"';
+    const replacementReadLinkLine = r'source="$(readlink -f "${source}")"';
 
     return line.replaceAll(originalReadLinkLine, replacementReadLinkLine);
   }

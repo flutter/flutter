@@ -38,7 +38,8 @@ class SegmentedButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   _${blockName}DefaultsM3(this.context);
   final BuildContext context;
@@ -46,79 +47,79 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
   late final ColorScheme _colors = _theme.colorScheme;
   @override ButtonStyle? get style {
     return ButtonStyle(
-      textStyle: MaterialStatePropertyAll<TextStyle?>(${textStyle('$tokenGroup.label-text')}),
-      backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      textStyle: WidgetStatePropertyAll<TextStyle?>(${textStyle('$tokenGroup.label-text')}),
+      backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return ${componentColor('$tokenGroup.disabled')};
         }
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return ${componentColor('$tokenGroup.selected.container')};
         }
         return ${componentColor('$tokenGroup.unselected.container')};
       }),
-      foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return ${componentColor('$tokenGroup.disabled.label-text')};
         }
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return ${componentColor('$tokenGroup.selected.pressed.label-text')};
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return ${componentColor('$tokenGroup.selected.hover.label-text')};
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return ${componentColor('$tokenGroup.selected.focus.label-text')};
           }
           return ${componentColor('$tokenGroup.selected.label-text')};
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return ${componentColor('$tokenGroup.unselected.pressed.label-text')};
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return ${componentColor('$tokenGroup.unselected.hover.label-text')};
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return ${componentColor('$tokenGroup.unselected.focus.label-text')};
           }
           return ${componentColor('$tokenGroup.unselected.label-text')};
         }
       }),
-      overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          if (states.contains(MaterialState.pressed)) {
+      overlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          if (states.contains(WidgetState.pressed)) {
             return ${_stateColor(tokenGroup, 'selected', 'pressed')};
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return ${_stateColor(tokenGroup, 'selected', 'hover')};
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return ${_stateColor(tokenGroup, 'selected', 'focus')};
           }
         } else {
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return ${_stateColor(tokenGroup, 'unselected', 'pressed')};
           }
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return ${_stateColor(tokenGroup, 'unselected', 'hover')};
           }
-          if (states.contains(MaterialState.focused)) {
+          if (states.contains(WidgetState.focused)) {
             return ${_stateColor(tokenGroup, 'unselected', 'focus')};
           }
         }
         return null;
       }),
-      surfaceTintColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-      elevation: const MaterialStatePropertyAll<double>(0),
-      iconSize: const MaterialStatePropertyAll<double?>(${getToken('$tokenGroup.with-icon.icon.size')}),
-      side: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.disabled)) {
+      surfaceTintColor: const WidgetStatePropertyAll<Color>(Colors.transparent),
+      elevation: const WidgetStatePropertyAll<double>(0),
+      iconSize: const WidgetStatePropertyAll<double?>(${getToken('$tokenGroup.with-icon.icon.size')}),
+      side: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
           return ${border("$tokenGroup.disabled.outline")};
         }
         return ${border("$tokenGroup.outline")};
       }),
-      shape: const MaterialStatePropertyAll<OutlinedBorder>(${shape(tokenGroup, '')}),
-      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(${getToken('$tokenGroup.container.height')})),
+      shape: const WidgetStatePropertyAll<OutlinedBorder>(${shape(tokenGroup, '')}),
+      minimumSize: const WidgetStatePropertyAll<Size?>(Size.fromHeight(${getToken('$tokenGroup.container.height')})),
     );
   }
   @override

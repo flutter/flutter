@@ -1,0 +1,18 @@
+libjpeg-turbo
+^libjpeg-turbo Licenses
+(?s)libjpeg-turbo Licenses
+.*
+libjpeg-turbo is covered by three compatible BSD-style open source licenses:
+.*
+- The IJG \(Independent JPEG Group\) License.*
+- The Modified \(3-clause\) BSD License.*
+- The zlib License.*
+Complying with the libjpeg-turbo Licenses
+.*You cannot alter or remove any existing copyright or license notices
+.*You must add your own copyright notice to the header of each source
+.*You must include the IJG README file, and you must not alter any of the
+.*Your product documentation must include a message stating:
+.*your product documentation must include the text of the Modified BSD
+.*You cannot use the name of the IJG or The libjpeg-turbo Project or the
+.*The IJG and The libjpeg-turbo Project do not warrant libjpeg-turbo to be
+.*

@@ -1,0 +1,3 @@
+icu unicode header 2
+(?s)^© \d\d\d\d.*Unicode, Inc\. and others\..*Copyright.*International Business Machines
+(?s)(?:[^\n]*)Copyright \([Cc]\) [\d-]+, International Business Machines.*All Rights Reserved\.

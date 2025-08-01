@@ -78,6 +78,11 @@ AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
+  if (android_context_->IsDynamicSelection()) {
+    auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
+        android_context_);
+    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+  }
   switch (android_context_->RenderingApi()) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:

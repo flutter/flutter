@@ -721,11 +721,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
     final bool easing =
         (overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0);
 
-    final double friction =
-        easing
-            // Apply less resistance when easing the overscroll vs tensioning.
-            ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
-            : frictionFactor(overscrollPast / position.viewportDimension);
+    final double friction = easing
+        // Apply less resistance when easing the overscroll vs tensioning.
+        ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
+        : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
     if (easing && decelerationRate == ScrollDecelerationRate.fast) {

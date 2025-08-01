@@ -445,32 +445,31 @@ void _defineTests() {
               onCopy: () => performedActions.add(SemanticsAction.copy),
               onCut: () => performedActions.add(SemanticsAction.cut),
               onPaste: () => performedActions.add(SemanticsAction.paste),
-              onMoveCursorForwardByCharacter:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-              onMoveCursorBackwardByCharacter:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
-              onMoveCursorForwardByWord:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
-              onMoveCursorBackwardByWord:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
-              onSetSelection:
-                  (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+              onMoveCursorForwardByCharacter: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+              onMoveCursorBackwardByCharacter: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+              onMoveCursorForwardByWord: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorForwardByWord),
+              onMoveCursorBackwardByWord: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorBackwardByWord),
+              onSetSelection: (TextSelection _) =>
+                  performedActions.add(SemanticsAction.setSelection),
               onSetText: (String text) => performedActions.add(SemanticsAction.setText),
-              onDidGainAccessibilityFocus:
-                  () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
-              onDidLoseAccessibilityFocus:
-                  () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+              onDidGainAccessibilityFocus: () =>
+                  performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+              onDidLoseAccessibilityFocus: () =>
+                  performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
               onFocus: () => performedActions.add(SemanticsAction.focus),
             ),
           ),
         ),
       ),
     );
-    final Set<SemanticsAction> allActions =
-        SemanticsAction.values.toSet()
-          ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
+      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(

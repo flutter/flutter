@@ -47,10 +47,10 @@ abstract class DeferredComponentsValidator {
 
   /// The name of the golden file that tracks the latest loading units
   /// generated.
-  static const String kLoadingUnitsCacheFileName = 'deferred_components_loading_units.yaml';
+  static const kLoadingUnitsCacheFileName = 'deferred_components_loading_units.yaml';
 
   /// The directory in the build folder to generate missing/modified files into.
-  static const String kDeferredComponentsTempDirectory = 'android_deferred_components_setup_files';
+  static const kDeferredComponentsTempDirectory = 'android_deferred_components_setup_files';
 
   /// The title printed at the top of the results of [displayResults]
   final String title;
@@ -108,9 +108,9 @@ abstract class DeferredComponentsValidator {
     attemptToolExit();
   }
 
-  static const String _thickDivider =
+  static const _thickDivider =
       '=================================================================================';
-  static const String _thinDivider =
+  static const _thinDivider =
       '---------------------------------------------------------------------------------';
 
   /// Displays the results of this validator's executed checks and tasks in a
@@ -184,16 +184,14 @@ The recommended changes can be quickly applied by running:
       if (loadingUnitComparisonResults != null) {
         if ((loadingUnitComparisonResults!['new'] as List<LoadingUnit>).isNotEmpty) {
           logger.printStatus('New loading units were found:', emphasis: true);
-          for (final LoadingUnit unit
-              in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
+          for (final unit in loadingUnitComparisonResults!['new'] as List<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');
         }
         if ((loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>).isNotEmpty) {
           logger.printStatus('Previously existing loading units no longer exist:', emphasis: true);
-          for (final LoadingUnit unit
-              in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
+          for (final unit in loadingUnitComparisonResults!['missing'] as Set<LoadingUnit>) {
             logger.printStatus(unit.toString(), color: TerminalColor.grey, indent: 2);
           }
           logger.printStatus('');

@@ -13,7 +13,6 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
-#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter {

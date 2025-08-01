@@ -76,8 +76,9 @@ class ActionIconThemeData with Diagnosticable {
       backButtonIconBuilder: t < 0.5 ? a?.backButtonIconBuilder : b?.backButtonIconBuilder,
       closeButtonIconBuilder: t < 0.5 ? a?.closeButtonIconBuilder : b?.closeButtonIconBuilder,
       drawerButtonIconBuilder: t < 0.5 ? a?.drawerButtonIconBuilder : b?.drawerButtonIconBuilder,
-      endDrawerButtonIconBuilder:
-          t < 0.5 ? a?.endDrawerButtonIconBuilder : b?.endDrawerButtonIconBuilder,
+      endDrawerButtonIconBuilder: t < 0.5
+          ? a?.endDrawerButtonIconBuilder
+          : b?.endDrawerButtonIconBuilder,
     );
   }
 
@@ -161,7 +162,8 @@ class ActionIconTheme extends InheritedTheme {
   /// [CloseButtonIcon], [DrawerButtonIcon], and [EndDrawerButtonIcon] widgets.
   final ActionIconThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ActionIconThemeData] from the closest ancestor [ActionIconTheme]
+  /// widget.
   ///
   /// If there is no enclosing [ActionIconTheme] widget, then
   /// [ThemeData.actionIconTheme] is used.
@@ -172,8 +174,8 @@ class ActionIconTheme extends InheritedTheme {
   /// ActionIconThemeData? theme = ActionIconTheme.of(context);
   /// ```
   static ActionIconThemeData? of(BuildContext context) {
-    final ActionIconTheme? actionIconTheme =
-        context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
+    final ActionIconTheme? actionIconTheme = context
+        .dependOnInheritedWidgetOfExactType<ActionIconTheme>();
     return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 

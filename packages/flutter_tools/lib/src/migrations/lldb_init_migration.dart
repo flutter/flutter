@@ -36,8 +36,8 @@ class LLDBInitMigration extends ProjectMigrator {
   String get _initPath =>
       _xcodeProject.lldbInitFile.path.replaceFirst(_xcodeProject.hostAppRoot.path, r'$(SRCROOT)');
 
-  static const String _launchActionIdentifier = 'LaunchAction';
-  static const String _testActionIdentifier = 'TestAction';
+  static const _launchActionIdentifier = 'LaunchAction';
+  static const _testActionIdentifier = 'TestAction';
 
   @override
   Future<void> migrate() async {
@@ -89,7 +89,7 @@ class LLDBInitMigration extends ProjectMigrator {
     final String? lldbInitFileTestPath;
     try {
       // Check that both the LaunchAction and TestAction have the customLLDBInitFile set to flutter_lldbinit.
-      final XmlDocument document = XmlDocument.parse(schemeInfo.schemeContent);
+      final document = XmlDocument.parse(schemeInfo.schemeContent);
 
       lldbInitFileLaunchPath = _parseLLDBInitFileFromScheme(
         action: _launchActionIdentifier,
@@ -193,7 +193,7 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       customLLDBInitFile = "$_initPath"''',
     );
     try {
-      final XmlDocument document = XmlDocument.parse(newScheme);
+      final document = XmlDocument.parse(newScheme);
       _validateSchemeAction(
         action: _launchActionIdentifier,
         document: document,
@@ -242,10 +242,9 @@ selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       throw Exception('Failed to find $action for the Scheme in ${schemeFile.path}.');
     }
     final XmlNode actionNode = nodes.first;
-    final XmlAttribute? lldbInitFile =
-        actionNode.attributes
-            .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
-            .firstOrNull;
+    final XmlAttribute? lldbInitFile = actionNode.attributes
+        .where((XmlAttribute attribute) => attribute.localName == 'customLLDBInitFile')
+        .firstOrNull;
     return lldbInitFile?.value;
   }
 

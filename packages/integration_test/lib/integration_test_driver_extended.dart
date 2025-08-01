@@ -101,8 +101,8 @@ Future<void> integrationDriver({
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
       final String screenshotName = response.data!['screenshot_name']! as String;
-      final Map<String, Object?>? args =
-          (response.data!['args'] as Map<String, Object?>?)?.cast<String, Object?>();
+      final Map<String, Object?>? args = (response.data!['args'] as Map<String, Object?>?)
+          ?.cast<String, Object?>();
 
       final bool screenshotSuccess = await onScreenshot!(screenshotName, screenshotImage, args);
       onScreenshotResults[screenshotName] = screenshotSuccess;

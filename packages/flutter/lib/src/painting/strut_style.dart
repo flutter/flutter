@@ -349,10 +349,9 @@ class StrutStyle with Diagnosticable {
   }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || fontFamily != null || fontFamilyFallback != null),
-       fontFamily =
-           fontFamily != null
-               ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
-               : textStyle.fontFamily,
+       fontFamily = fontFamily != null
+           ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
+           : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
        leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
@@ -560,8 +559,9 @@ class StrutStyle with Diagnosticable {
       fontStyle: fontStyle ?? other.fontStyle,
       forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
       debugLabel: debugLabel ?? other.debugLabel,
-      leadingDistribution:
-          effectiveHeight != null ? (leadingDistribution ?? other.leadingDistribution) : null,
+      leadingDistribution: effectiveHeight != null
+          ? (leadingDistribution ?? other.leadingDistribution)
+          : null,
       // Package is embedded within the getters for fontFamilyFallback.
     );
   }

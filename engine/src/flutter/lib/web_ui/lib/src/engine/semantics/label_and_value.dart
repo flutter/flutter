@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../browser_detection.dart';
 import '../dom.dart';
 import 'semantics.dart';
 
@@ -172,28 +174,26 @@ final class DomTextRepresentation extends LabelRepresentationBehavior {
 }
 
 /// A span queue for a size update.
-typedef _QueuedSizeUpdate =
-    ({
-      // The span to be sized.
-      SizedSpanRepresentation representation,
+typedef _QueuedSizeUpdate = ({
+  // The span to be sized.
+  SizedSpanRepresentation representation,
 
-      // The desired size.
-      ui.Size targetSize,
-    });
+  // The desired size.
+  ui.Size targetSize,
+});
 
 /// The size of a span as measured in the DOM.
-typedef _Measurement =
-    ({
-      // The span that was measured.
-      SizedSpanRepresentation representation,
+typedef _Measurement = ({
+  // The span that was measured.
+  SizedSpanRepresentation representation,
 
-      // The measured size of the DOM element before the size adjustment.
-      ui.Size domSize,
+  // The measured size of the DOM element before the size adjustment.
+  ui.Size domSize,
 
-      // The size of the element that the screen reader should observe after the
-      // size adjustment.
-      ui.Size targetSize,
-    });
+  // The size of the element that the screen reader should observe after the
+  // size adjustment.
+  ui.Size targetSize,
+});
 
 /// Sets the label as the text of a `<span>` child element.
 ///
@@ -432,6 +432,10 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
 /// Renders the label for a [SemanticsObject] that can be scanned by screen
 /// readers, web crawlers, and other automated agents.
 ///
+/// The hint property from the semantics object is translated to `aria-description`
+/// (when supported by the browser) or `aria-describedby` (as a fallback) to provide
+/// additional accessibility information to screen readers.
+///
 /// See [computeDomSemanticsLabel] for the exact logic that constructs the label
 /// of a semantic node.
 class LabelAndValue extends SemanticBehavior {
@@ -446,6 +450,9 @@ class LabelAndValue extends SemanticBehavior {
   /// instead.
   LabelRepresentation preferredRepresentation;
 
+  DomElement? _describedBySpan;
+  String? get _describedById => _describedBySpan?.id;
+
   @override
   void update() {
     final String? computedLabel = _computeLabel();
@@ -456,6 +463,7 @@ class LabelAndValue extends SemanticBehavior {
     }
 
     _getEffectiveRepresentation().update(computedLabel);
+    _updateHintDescription(semanticsObject.hint);
   }
 
   LabelRepresentationBehavior? _representation;
@@ -468,8 +476,9 @@ class LabelAndValue extends SemanticBehavior {
   /// screen reader. If the are no children, use the representation preferred
   /// by the role.
   LabelRepresentationBehavior _getEffectiveRepresentation() {
-    final LabelRepresentation effectiveRepresentation =
-        semanticsObject.hasChildren ? LabelRepresentation.ariaLabel : preferredRepresentation;
+    final LabelRepresentation effectiveRepresentation = semanticsObject.hasChildren
+        ? LabelRepresentation.ariaLabel
+        : preferredRepresentation;
 
     LabelRepresentationBehavior? representation = _representation;
     if (representation == null || representation.kind != effectiveRepresentation) {
@@ -481,7 +490,7 @@ class LabelAndValue extends SemanticBehavior {
 
   /// Computes the final label to be assigned to the node.
   ///
-  /// The label is a concatenation of tooltip, label, hint, and value, whichever
+  /// The label is a concatenation of tooltip, label, and value, whichever
   /// combination is present.
   String? _computeLabel() {
     // If the node is incrementable the value is reported to the browser via
@@ -491,12 +500,89 @@ class LabelAndValue extends SemanticBehavior {
     return computeDomSemanticsLabel(
       tooltip: semanticsObject.hasTooltip ? semanticsObject.tooltip : null,
       label: semanticsObject.hasLabel ? semanticsObject.label : null,
-      hint: semanticsObject.hint,
       value: shouldDisplayValue ? semanticsObject.value : null,
     );
   }
 
+  void _updateHintDescription(String? hint) {
+    if (hint != null && hint.trim().isNotEmpty) {
+      _setAriaDescriptionOrDescribedBy(hint);
+    } else {
+      _cleanUpDescriptionOrDescribedBy();
+    }
+  }
+
+  void _setAriaDescriptionOrDescribedBy(String hint) {
+    if (supportsAriaDescription) {
+      owner.setAttribute('aria-description', hint);
+      owner.removeAttribute('aria-describedby');
+    } else {
+      final String id = _ensureDescribedBy(hint);
+      owner.setAttribute('aria-describedby', id);
+      owner.removeAttribute('aria-description');
+    }
+  }
+
+  String _ensureDescribedBy(String hint) {
+    _describedBySpan ??= domDocument.createElement('span');
+    _describedBySpan!.id = 'flt-hint-${semanticsObject.id}';
+    _describedBySpan!.setAttribute('hidden', '');
+    _describedBySpan!.text = hint;
+    if (!(_describedBySpan?.isConnected ?? false)) {
+      // Append the describedby span as a sibling to the semantics element,
+      // not as a child. This is crucial because if the span were a child,
+      // element.text would read both the label and hint text concatenated
+      // together (e.g., "LabelHint" instead of just "Label").
+      //
+      // DOM structure we want:
+      //   <parent>
+      //     <flt-semantics>Label</flt-semantics>
+      //     <span hidden aria-hidden="true">Hint</span>
+      //   </parent>
+      //
+      // This ensures element.text on the semantics element returns only "Label"
+      // while aria-describedby still works correctly since it references by ID.
+      final DomElement? parent = owner.element.parentElement;
+      if (parent != null && parent.tagName.toLowerCase() != 'flt-semantics-host') {
+        // Only append to parent if it's not the semantics host to avoid
+        // breaking test expectations that expect semanticsHost.children.single
+        parent.append(_describedBySpan!);
+      } else {
+        // Fallback: append to document.body if no suitable parent is available
+        // or if the parent is the semantics host.
+        // This can happen during DOM construction or if the element is detached.
+        // aria-describedby will still work since it references the span by ID.
+        domDocument.body!.append(_describedBySpan!);
+      }
+    }
+    return _describedById!;
+  }
+
+  static bool? _supportsAriaDescription;
+
+  static bool get supportsAriaDescription {
+    _supportsAriaDescription ??= _checkAriaDescriptionSupport();
+    return _supportsAriaDescription!;
+  }
+
+  @visibleForTesting
+  static set supportsAriaDescriptionForTest(bool? value) {
+    _supportsAriaDescription = value;
+  }
+
+  static bool _checkAriaDescriptionSupport() {
+    return isChromium || isEdge || isSafari174OrNewer || isFirefox119OrNewer;
+  }
+
+  void _cleanUpDescriptionOrDescribedBy() {
+    owner.removeAttribute('aria-description');
+    owner.removeAttribute('aria-describedby');
+    _describedBySpan?.remove();
+    _describedBySpan = null;
+  }
+
   void _cleanUpDom() {
+    _cleanUpDescriptionOrDescribedBy();
     _representation?.cleanUp();
   }
 
@@ -519,10 +605,10 @@ class LabelAndValue extends SemanticBehavior {
   }
 }
 
-String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, String? value}) {
-  final String? labelHintValue = _computeLabelHintValue(label: label, hint: hint, value: value);
+String? computeDomSemanticsLabel({String? tooltip, String? label, String? value}) {
+  final String? labelValue = _computeLabelValue(label: label, value: value);
 
-  if (tooltip == null && labelHintValue == null) {
+  if (tooltip == null && labelValue == null) {
     return null;
   }
 
@@ -531,20 +617,20 @@ String? computeDomSemanticsLabel({String? tooltip, String? label, String? hint, 
     combinedValue.write(tooltip);
 
     // Separate the tooltip from the rest via a line-break (if the rest exists).
-    if (labelHintValue != null) {
+    if (labelValue != null) {
       combinedValue.writeln();
     }
   }
 
-  if (labelHintValue != null) {
-    combinedValue.write(labelHintValue);
+  if (labelValue != null) {
+    combinedValue.write(labelValue);
   }
 
   return combinedValue.isNotEmpty ? combinedValue.toString() : null;
 }
 
-String? _computeLabelHintValue({String? label, String? hint, String? value}) {
-  final String combinedValue = <String?>[label, hint, value]
+String? _computeLabelValue({String? label, String? value}) {
+  final String combinedValue = <String?>[label, value]
       .whereType<String>() // poor man's null filter
       .where((String element) => element.trim().isNotEmpty)
       .join(' ');

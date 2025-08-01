@@ -14,8 +14,8 @@ import 'theme.dart';
 
 /// Defines a theme for [Dialog] widgets.
 ///
-/// Descendant widgets obtain the current [DialogTheme] object using
-/// `DialogTheme.of(context)`. Instances of [DialogTheme] can be customized with
+/// Descendant widgets obtain the current [DialogThemeData] object using
+/// [DialogTheme.of]. Instances of [DialogTheme] can be customized with
 /// [DialogTheme.copyWith].
 ///
 /// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s and [SimpleDialog]s.
@@ -302,7 +302,7 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
 /// Defines default property values for descendant [Dialog] widgets.
 ///
 /// Descendant widgets obtain the current [DialogThemeData] object using
-/// `CardTheme.of(context).data`. Instances of [DialogThemeData] can be
+/// [DialogTheme.of]. Instances of [DialogThemeData] can be
 /// customized with [DialogThemeData.copyWith].
 ///
 /// Typically a [DialogThemeData] is specified as part of the overall [Theme]

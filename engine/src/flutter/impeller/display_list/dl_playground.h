@@ -31,7 +31,7 @@ class DlPlayground : public PlaygroundTest {
   std::unique_ptr<testing::Screenshot> MakeScreenshot(
       const sk_sp<flutter::DisplayList>& list);
 
-  SkFont CreateTestFontOfSize(SkScalar scalar);
+  SkFont CreateTestFontOfSize(Scalar scalar);
 
   SkFont CreateTestFont();
 

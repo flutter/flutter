@@ -123,7 +123,8 @@ class ButtonTheme extends InheritedTheme {
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ButtonThemeData] from the closest ancestor [ButtonTheme]
+  /// widget.
   ///
   /// Typical usage is as follows:
   ///
@@ -131,8 +132,8 @@ class ButtonTheme extends InheritedTheme {
   /// ButtonThemeData theme = ButtonTheme.of(context);
   /// ```
   static ButtonThemeData of(BuildContext context) {
-    final ButtonTheme? inheritedButtonTheme =
-        context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
+    final ButtonTheme? inheritedButtonTheme = context
+        .dependOnInheritedWidgetOfExactType<ButtonTheme>();
     ButtonThemeData? buttonTheme = inheritedButtonTheme?.data;
     if (buttonTheme?.colorScheme == null) {
       // if buttonTheme or buttonTheme.colorScheme is null
@@ -499,10 +500,9 @@ class ButtonThemeData with Diagnosticable {
 
       case ButtonTextTheme.primary:
         final Color? fillColor = getFillColor(button);
-        final bool fillIsDark =
-            fillColor != null
-                ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
-                : getBrightness(button) == Brightness.dark;
+        final bool fillIsDark = fillColor != null
+            ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
+            : getBrightness(button) == Brightness.dark;
         return fillIsDark ? Colors.white : Colors.black;
     }
   }

@@ -49,7 +49,7 @@ TestVulkanContext::TestVulkanContext() {
 
   application_ = std::make_unique<vulkan::VulkanApplication>(
       *vk_, "Flutter Unittests", std::vector<std::string>{},
-      VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), true);
+      VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 1, 0), true);
   if (!application_->IsValid()) {
     FML_LOG(ERROR) << "Failed to initialize basic Vulkan state.";
     return;
@@ -85,7 +85,7 @@ TestVulkanContext::TestVulkanContext() {
 
   sk_sp<skgpu::VulkanMemoryAllocator> allocator =
       flutter::FlutterSkiaVulkanMemoryAllocator::Make(
-          VK_MAKE_VERSION(1, 0, 0), application_->GetInstance(),
+          VK_MAKE_VERSION(1, 1, 0), application_->GetInstance(),
           device_->GetPhysicalDeviceHandle(), device_->GetHandle(), vk_, true);
 
   skgpu::VulkanExtensions extensions;
@@ -96,7 +96,7 @@ TestVulkanContext::TestVulkanContext() {
   backend_context.fDevice = device_->GetHandle();
   backend_context.fQueue = device_->GetQueueHandle();
   backend_context.fGraphicsQueueIndex = device_->GetGraphicsQueueIndex();
-  backend_context.fMaxAPIVersion = VK_MAKE_VERSION(1, 0, 0);
+  backend_context.fMaxAPIVersion = VK_MAKE_VERSION(1, 1, 0);
   backend_context.fDeviceFeatures = &features;
   backend_context.fVkExtensions = &extensions;
   backend_context.fGetProc = get_proc;

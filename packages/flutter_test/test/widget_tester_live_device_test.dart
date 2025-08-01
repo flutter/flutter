@@ -54,7 +54,9 @@ void main() {
       '''
 Some possible finders for the widgets at Offset(400.0, 300.0):
   find.text('Test')
-'''.trim().split('\n'),
+'''
+          .trim()
+          .split('\n'),
     );
     printedMessages.clear();
 
@@ -66,7 +68,9 @@ Some possible finders for the widgets at Offset(400.0, 300.0):
       equals(
         '''
 No widgets found at Offset(1.0, 1.0).
-'''.trim().split('\n'),
+'''
+            .trim()
+            .split('\n'),
       ),
     );
   });
@@ -111,7 +115,9 @@ No widgets found at Offset(1.0, 1.0).
         '''
 Some possible finders for the widgets at Offset(1000.0, 900.0):
   find.text('Test')
-'''.trim().split('\n'),
+'''
+            .trim()
+            .split('\n'),
       );
       printedMessages.clear();
 
@@ -123,7 +129,9 @@ Some possible finders for the widgets at Offset(1000.0, 900.0):
         equals(
           '''
 No widgets found at Offset(1.0, 1.0).
-'''.trim().split('\n'),
+'''
+              .trim()
+              .split('\n'),
         ),
       );
     } finally {

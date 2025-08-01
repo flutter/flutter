@@ -113,7 +113,7 @@ function build_snippets_tool() (
   echo "Building snippets tool executable."
   command cd "$snippets_dir"
   mkdir -p "$output_dir"
-  dart pub get
+  "$FLUTTER" pub get
   dart compile exe -o "$output_dir/snippets" bin/snippets.dart
 )
 

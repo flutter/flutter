@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "export.h"
+#include "live_objects.h"
 #include "skwasm_support.h"
 
 #include "third_party/skia/include/android/SkAnimatedImage.h"
@@ -28,6 +29,7 @@ std::unique_ptr<SkCodec> getCodecForData(SkData* data) {
 SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
                                                     int targetWidth,
                                                     int targetHeight) {
+  liveAnimatedImageCount++;
   auto codec = getCodecForData(data);
   if (!codec) {
     printf("Failed to create codec for animated image.\n");
@@ -52,6 +54,7 @@ SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
 }
 
 SKWASM_EXPORT void animatedImage_dispose(SkAnimatedImage* image) {
+  liveAnimatedImageCount--;
   image->unref();
 }
 
@@ -73,5 +76,6 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
 }
 
 SKWASM_EXPORT SkImage* animatedImage_getCurrentFrame(SkAnimatedImage* image) {
+  liveImageCount++;
   return image->getCurrentFrame().release();
 }

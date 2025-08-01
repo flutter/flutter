@@ -64,12 +64,15 @@ class PageViewAppState extends State<PageViewApp> {
       ),
     );
 
-    final BoxConstraints constraints =
-        (scrollDirection == Axis.vertical)
-            ? BoxConstraints.tightFor(height: pageSize.height)
-            : BoxConstraints.tightFor(width: pageSize.width);
+    final BoxConstraints constraints = (scrollDirection == Axis.vertical)
+        ? BoxConstraints.tightFor(height: pageSize.height)
+        : BoxConstraints.tightFor(width: pageSize.width);
 
-    return Container(key: cardModel.key, constraints: constraints, child: Center(child: card));
+    return Container(
+      key: cardModel.key,
+      constraints: constraints,
+      child: Center(child: card),
+    );
   }
 
   void switchScrollDirection() {

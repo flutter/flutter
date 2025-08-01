@@ -39,13 +39,10 @@ class TestApp {
 
   void run() {
     // Set up window callbacks
-    window.onPlatformMessage = (
-      String name,
-      ByteData? data,
-      PlatformMessageResponseCallback? callback,
-    ) {
-      this.decodeAndReportPlatformMessage(name, data!);
-    };
+    window.onPlatformMessage =
+        (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
+          this.decodeAndReportPlatformMessage(name, data!);
+        };
     window.onMetricsChanged = () {
       window.scheduleFrame();
     };
@@ -71,11 +68,10 @@ class TestApp {
     canvas.drawRect(windowBounds, paint);
     // Build the scene
     final picture = recorder.endRecording();
-    final sceneBuilder =
-        SceneBuilder()
-          ..pushClipRect(physicalBounds)
-          ..addPicture(Offset.zero, picture)
-          ..pop();
+    final sceneBuilder = SceneBuilder()
+      ..pushClipRect(physicalBounds)
+      ..addPicture(Offset.zero, picture)
+      ..pop();
     window.render(sceneBuilder.build());
   }
 
@@ -98,11 +94,10 @@ class TestApp {
   void _reportTextInput(String text) {
     print('text-input-view reporting keyboard input to KeyboardInputListener');
 
-    final message =
-        utf8
-            .encode(json.encode({'method': 'KeyboardInputListener.ReportTextInput', 'text': text}))
-            .buffer
-            .asByteData();
+    final message = utf8
+        .encode(json.encode({'method': 'KeyboardInputListener.ReportTextInput', 'text': text}))
+        .buffer
+        .asByteData();
     PlatformDispatcher.instance.sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }

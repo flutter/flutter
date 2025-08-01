@@ -157,8 +157,9 @@ class CustomerTest {
     required List<String> directiveValues,
     bool platformAgnostic = true,
   }) {
-    final List<_PlatformType> platforms =
-        platformAgnostic ? <_PlatformType>[_PlatformType.all] : _PlatformType.values;
+    final List<_PlatformType> platforms = platformAgnostic
+        ? <_PlatformType>[_PlatformType.all]
+        : _PlatformType.values;
     for (final _PlatformType platform in platforms) {
       final String directiveName = _directive(directive, platform: platform);
       if (line.startsWith(directiveName) && platform.conditionMet) {

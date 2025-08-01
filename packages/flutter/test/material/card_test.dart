@@ -11,7 +11,12 @@ void main() {
   testWidgets('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -34,7 +39,12 @@ void main() {
   testWidgets('Material3 - Card.filled defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card.filled())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card.filled()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -54,7 +64,12 @@ void main() {
   testWidgets('Material3 - Card.outlined defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colors = theme.colorScheme;
-    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Card.outlined())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Scaffold(body: Card.outlined()),
+      ),
+    );
 
     final Padding padding = _getCardPadding(tester);
     final Material material = _getCardMaterial(tester);
@@ -101,25 +116,18 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
+            TestSemantics(id: 1, label: 'I am text!', textDirection: TextDirection.ltr),
+            TestSemantics(id: 2, label: 'Moar text!!1', textDirection: TextDirection.ltr),
             TestSemantics(
-              id: 1,
-              elevation: 1.0,
-              thickness: 0.0,
-              children: <TestSemantics>[
-                TestSemantics(id: 2, label: 'I am text!', textDirection: TextDirection.ltr),
-                TestSemantics(id: 3, label: 'Moar text!!1', textDirection: TextDirection.ltr),
-                TestSemantics(
-                  id: 4,
-                  label: 'Button',
-                  textDirection: TextDirection.ltr,
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isButton,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
-                  ],
-                ),
+              id: 3,
+              label: 'Button',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isButton,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
               ],
             ),
           ],
@@ -266,6 +274,20 @@ void main() {
 
     expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
     expect(getCardMaterial(tester).shadowColor, Colors.red);
+  });
+
+  testWidgets('Card renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: Card(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 

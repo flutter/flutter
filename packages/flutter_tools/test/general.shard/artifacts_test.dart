@@ -271,7 +271,7 @@ void main() {
     testWithoutContext(
       'CachedLocalWebSdkArtifacts wrapping a versioned engine sets usesLocalArtifacts',
       () {
-        final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+        final webArtifacts = CachedLocalWebSdkArtifacts(
           parent: artifacts,
           webSdkPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'wasm_release'),
           fileSystem: fileSystem,
@@ -552,7 +552,7 @@ void main() {
     );
 
     testWithoutContext('uses prebuilt dart sdk for web platform', () {
-      final CachedLocalWebSdkArtifacts webArtifacts = CachedLocalWebSdkArtifacts(
+      final webArtifacts = CachedLocalWebSdkArtifacts(
         parent: CachedArtifacts(
           fileSystem: fileSystem,
           cache: cache,
@@ -565,7 +565,7 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
-      final String failureMessage =
+      final failureMessage =
           'Unable to find a prebuilt dart sdk at:'
           ' "${fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk')}"';
 
@@ -645,7 +645,7 @@ void main() {
     });
 
     testWithoutContext('uses local dart sdk for web platform wrapping a local engine', () {
-      final String failureMessage =
+      final failureMessage =
           'Unable to find a built dart sdk at:'
           ' "${fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk')}"'
           ' or a prebuilt dart sdk at:'

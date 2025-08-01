@@ -40,10 +40,7 @@ void main() {
         'returns DevicesCommandOutputWithExtendedWirelessDeviceDiscovery on MacOS',
         () async {
           final Platform platform = FakePlatform(operatingSystem: 'macos');
-          final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
-            platform: platform,
-            logger: fakeLogger,
-          );
+          final devicesCommandOutput = DevicesCommandOutput(platform: platform, logger: fakeLogger);
 
           expect(
             devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,
@@ -54,10 +51,7 @@ void main() {
 
       testWithoutContext('returns default when not on MacOS', () async {
         final Platform platform = FakePlatform();
-        final DevicesCommandOutput devicesCommandOutput = DevicesCommandOutput(
-          platform: platform,
-          logger: fakeLogger,
-        );
+        final devicesCommandOutput = DevicesCommandOutput(platform: platform, logger: fakeLogger);
 
         expect(
           devicesCommandOutput is DevicesCommandOutputWithExtendedWirelessDeviceDiscovery,
@@ -75,7 +69,7 @@ void main() {
       testUsingContext(
         'returns 0 when called',
         () async {
-          final DevicesCommand command = DevicesCommand();
+          final command = DevicesCommand();
           await createTestCommandRunner(command).run(<String>['devices']);
         },
         overrides: <Type, Generator>{Cache: () => cache, Artifacts: () => Artifacts.test()},
@@ -84,7 +78,7 @@ void main() {
       testUsingContext(
         'no error when no connected devices',
         () async {
-          final DevicesCommand command = DevicesCommand();
+          final command = DevicesCommand();
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(
             testLogger.statusText,
@@ -134,7 +128,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testUsingContext(
             'Outputs parsable JSON',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices', '--machine']);
               expect(json.decode(testLogger.statusText), <Map<String, Object>>[
                 fakeDevices[0].json,
@@ -155,7 +149,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testUsingContext(
               'filtered to attached',
               () async {
-                final DevicesCommand command = DevicesCommand();
+                final command = DevicesCommand();
                 await createTestCommandRunner(
                   command,
                 ).run(<String>['devices', '--machine', '--device-connection', 'attached']);
@@ -176,7 +170,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testUsingContext(
               'filtered to wireless',
               () async {
-                final DevicesCommand command = DevicesCommand();
+                final command = DevicesCommand();
                 await createTestCommandRunner(
                   command,
                 ).run(<String>['devices', '--machine', '--device-connection', 'wireless']);
@@ -198,7 +192,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 Found 2 connected devices:
@@ -226,7 +220,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'filtered to attached',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(
                 command,
               ).run(<String>['devices', '--device-connection', 'attached']);
@@ -252,7 +246,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'filtered to wireless',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(
                 command,
               ).run(<String>['devices', '--device-connection', 'wireless']);
@@ -285,7 +279,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 Found 2 connected devices:
@@ -316,7 +310,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 Found 1 wirelessly connected device:
@@ -347,7 +341,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
       testUsingContext(
         'returns 0 when called',
         () async {
-          final DevicesCommand command = DevicesCommand();
+          final command = DevicesCommand();
           await createTestCommandRunner(command).run(<String>['devices']);
         },
         overrides: <Type, Generator>{
@@ -361,7 +355,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testUsingContext(
           'no error',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(
               testLogger.statusText,
@@ -390,7 +384,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testUsingContext(
             'filtered to attached',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(
                 command,
               ).run(<String>['devices', '--device-connection', 'attached']);
@@ -412,7 +406,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testUsingContext(
             'filtered to wireless',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(
                 command,
               ).run(<String>['devices', '--device-connection', 'wireless']);
@@ -467,7 +461,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testUsingContext(
             'Outputs parsable JSON',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices', '--machine']);
               expect(json.decode(testLogger.statusText), <Map<String, Object>>[
                 fakeDevices[0].json,
@@ -489,7 +483,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testUsingContext(
               'filtered to attached',
               () async {
-                final DevicesCommand command = DevicesCommand();
+                final command = DevicesCommand();
                 await createTestCommandRunner(
                   command,
                 ).run(<String>['devices', '--machine', '--device-connection', 'attached']);
@@ -510,7 +504,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testUsingContext(
               'filtered to wireless',
               () async {
-                final DevicesCommand command = DevicesCommand();
+                final command = DevicesCommand();
                 await createTestCommandRunner(
                   command,
                 ).run(<String>['devices', '--machine', '--device-connection', 'wireless']);
@@ -533,7 +527,7 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 Found 2 connected devices:
@@ -579,7 +573,7 @@ Checking for wireless devices...
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -618,7 +612,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -654,7 +648,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'when deviceConnectionInterface filtered to wireless',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(
                 command,
               ).run(<String>['devices', '--device-connection', 'wireless']);
@@ -690,7 +684,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 Found 2 connected devices:
@@ -734,7 +728,7 @@ Checking for wireless devices...
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -771,7 +765,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -813,7 +807,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testUsingContext(
           'available devices and diagnostics',
           () async {
-            final DevicesCommand command = DevicesCommand();
+            final command = DevicesCommand();
             await createTestCommandRunner(command).run(<String>['devices']);
             expect(testLogger.statusText, '''
 No devices found yet. Checking for wireless devices...
@@ -851,7 +845,7 @@ No devices found yet. Checking for wireless devices...
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -886,7 +880,7 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testUsingContext(
             'available devices and diagnostics',
             () async {
-              final DevicesCommand command = DevicesCommand();
+              final command = DevicesCommand();
               await createTestCommandRunner(command).run(<String>['devices']);
 
               expect(fakeLogger.statusText, '''
@@ -921,7 +915,7 @@ class _FakeDeviceManager extends DeviceManager {
     : fakeDevices = devices ?? <FakeDeviceJsonData>[],
       super(logger: logger ?? testLogger);
 
-  List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[];
+  var fakeDevices = <FakeDeviceJsonData>[];
 
   @override
   Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async {
@@ -967,7 +961,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool get isCliAnimationEnabled => supportsColor;
 
   @override
-  bool singleCharMode = false;
+  var singleCharMode = false;
 
   @override
   String clearLines(int numberOfLines) {
@@ -978,7 +972,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class FakeBufferLogger extends BufferLogger {
   FakeBufferLogger({super.terminal, super.outputPreferences, super.verbose}) : super.test();
 
-  String originalStatusText = '';
+  var originalStatusText = '';
 
   @override
   void printStatus(
@@ -996,7 +990,7 @@ class FakeBufferLogger extends BufferLogger {
       final List<String> lines = LineSplitter.split(statusText).toList();
       // Clear string buffer and re-add lines not removed
       clear();
-      for (int lineNumber = 0; lineNumber < lines.length - numberOfLinesToRemove; lineNumber++) {
+      for (var lineNumber = 0; lineNumber < lines.length - numberOfLinesToRemove; lineNumber++) {
         super.printStatus(lines[lineNumber]);
       }
     } else {

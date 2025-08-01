@@ -657,8 +657,9 @@ class _AndroidMotionEventConverter {
       eventTime: event.timeStamp.inMilliseconds,
       action: action,
       pointerCount: pointerPositions.length,
-      pointerProperties:
-          pointers.map<AndroidPointerProperties>((int i) => pointerProperties[i]!).toList(),
+      pointerProperties: pointers
+          .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
+          .toList(),
       pointerCoords: pointers.map<AndroidPointerCoords>((int i) => pointerPositions[i]!).toList(),
       metaState: 0,
       buttonState: 0,
@@ -721,8 +722,9 @@ abstract class AndroidViewController extends PlatformViewController {
   }) : assert(creationParams == null || creationParamsCodec != null),
        _viewType = viewType,
        _layoutDirection = layoutDirection,
-       _creationParams =
-           creationParams == null ? null : _CreationParams(creationParams, creationParamsCodec!);
+       _creationParams = creationParams == null
+           ? null
+           : _CreationParams(creationParams, creationParamsCodec!);
 
   /// Action code for when a primary pointer touched the screen.
   ///

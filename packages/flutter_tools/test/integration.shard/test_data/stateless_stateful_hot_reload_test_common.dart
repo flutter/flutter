@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
 import '../test_data/stateless_stateful_project.dart';
@@ -17,7 +19,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadProject project = HotReloadProject();
+    final project = HotReloadProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -32,26 +34,29 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('Can switch from stateless to stateful', () async {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {
           completer.complete();
         }
       });
-      await flutter.run(chrome: chrome, additionalCommandArgs: additionalCommandArgs);
+      await flutter.run(
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
+        additionalCommandArgs: additionalCommandArgs,
+      );
       // Wait for run to finish.
       await completer.future;
       await subscription.cancel();
 
       await flutter.hotReload();
-      final StringBuffer stdout = StringBuffer();
+      final stdout = StringBuffer();
       subscription = flutter.stdout.listen(stdout.writeln);
 
       // switch to stateful.
       project.toggleState();
       await flutter.hotReload();
 
-      final String logs = stdout.toString();
+      final logs = stdout.toString();
 
       expect(logs, contains('STATEFUL'));
       await subscription.cancel();

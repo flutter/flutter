@@ -222,16 +222,14 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // before glow disappears, so the current pixels is -190.0,
     // in this case, we should move the glow up 10.0 pixels and should not
     // overflow the scrollable widget's edge. https://github.com/flutter/flutter/issues/64149.
-    _leadingController!._paintOffsetScrollPixels =
-        -math.min(
-          notification.metrics.pixels - notification.metrics.minScrollExtent,
-          _leadingController!._paintOffset,
-        );
-    _trailingController!._paintOffsetScrollPixels =
-        -math.min(
-          notification.metrics.maxScrollExtent - notification.metrics.pixels,
-          _trailingController!._paintOffset,
-        );
+    _leadingController!._paintOffsetScrollPixels = -math.min(
+      notification.metrics.pixels - notification.metrics.minScrollExtent,
+      _leadingController!._paintOffset,
+    );
+    _trailingController!._paintOffsetScrollPixels = -math.min(
+      notification.metrics.maxScrollExtent - notification.metrics.pixels,
+      _trailingController!._paintOffset,
+    );
 
     if (notification is OverscrollNotification) {
       _GlowController? controller;
@@ -521,8 +519,8 @@ class _GlowController extends ChangeNotifier {
 
   void _tickDisplacement(Duration elapsed) {
     if (_displacementTickerLastElapsed != null) {
-      final double t =
-          (elapsed.inMicroseconds - _displacementTickerLastElapsed!.inMicroseconds).toDouble();
+      final double t = (elapsed.inMicroseconds - _displacementTickerLastElapsed!.inMicroseconds)
+          .toDouble();
       _displacement =
           _displacementTarget -
           (_displacementTarget - _displacement) *
@@ -834,10 +832,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           // screen size in the main axis. If the viewport takes up the whole
           // screen, overflow from transforming the viewport is irrelevant.
           return ClipRect(
-            clipBehavior:
-                stretch != 0.0 && viewportDimension != mainAxisSize
-                    ? widget.clipBehavior
-                    : Clip.none,
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+                ? widget.clipBehavior
+                : Clip.none,
             child: transform,
           );
         },
@@ -897,8 +894,9 @@ class _StretchController extends ChangeNotifier {
     );
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
-    _stretchDirection =
-        totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
+    _stretchDirection = totalOverscroll > 0
+        ? _StretchDirection.trailing
+        : _StretchDirection.leading;
   }
 
   /// Handle a user-driven overscroll.
@@ -909,8 +907,9 @@ class _StretchController extends ChangeNotifier {
   void pull(double normalizedOverscroll, double totalOverscroll) {
     assert(normalizedOverscroll >= 0.0);
 
-    final _StretchDirection newStretchDirection =
-        totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
+    final _StretchDirection newStretchDirection = totalOverscroll > 0
+        ? _StretchDirection.trailing
+        : _StretchDirection.leading;
     if (_stretchDirection != newStretchDirection && _state == _StretchState.recede) {
       // When the stretch direction changes while we are in the recede state, we need to ignore the change.
       // If we don't, the stretch will instantly jump to the new direction with the recede animation still playing, which causes

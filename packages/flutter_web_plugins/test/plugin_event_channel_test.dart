@@ -13,8 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
-  // Disabling tester emulation because this test relies on real message channel communication.
-  ui_web.debugEmulateFlutterTesterEnvironment = false;
+  setUp(() {
+    // Disabling tester emulation because this test relies on real message channel communication.
+    ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.production());
+  });
 
   group('Plugin Event Channel', () {
     setUp(() {

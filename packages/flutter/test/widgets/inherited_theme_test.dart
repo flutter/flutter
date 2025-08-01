@@ -17,7 +17,12 @@ class IconTextBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      child: Row(children: <Widget>[const Icon(IconData(0x41, fontFamily: 'Roboto')), Text(text)]),
+      child: Row(
+        children: <Widget>[
+          const Icon(IconData(0x41, fontFamily: 'Roboto')),
+          Text(text),
+        ],
+      ),
     );
   }
 }

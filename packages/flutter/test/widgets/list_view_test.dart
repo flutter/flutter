@@ -91,8 +91,8 @@ void main() {
             stateSetter = setState;
             return ListView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -125,8 +125,8 @@ void main() {
             stateSetter = setState;
             return ListView.separated(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -1131,9 +1131,8 @@ void main() {
   testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (
     WidgetTester tester,
   ) async {
-    Object? error;
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         ListView.builder(
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return 100.0;
@@ -1143,15 +1142,12 @@ void main() {
             return Text('Item $index');
           },
         ),
-      );
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
+      ),
+      throwsAssertionError,
+    );
 
-    error = null;
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         ListView.builder(
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return 100.0;
@@ -1161,15 +1157,12 @@ void main() {
             return Text('Item $index');
           },
         ),
-      );
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
+      ),
+      throwsAssertionError,
+    );
 
-    error = null;
-    try {
-      await tester.pumpWidget(
+    await expectLater(
+      () => tester.pumpWidget(
         ListView.builder(
           itemExtent: 100.0,
           prototypeItem: Container(),
@@ -1177,10 +1170,8 @@ void main() {
             return Text('Item $index');
           },
         ),
-      );
-    } catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
+      ),
+      throwsAssertionError,
+    );
   });
 }

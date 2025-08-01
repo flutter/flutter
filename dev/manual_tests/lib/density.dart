@@ -111,7 +111,10 @@ class LabeledCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[Checkbox(onChanged: onChanged, value: value), Text(label)],
+      children: <Widget>[
+        Checkbox(onChanged: onChanged, value: value),
+        Text(label),
+      ],
     );
   }
 }
@@ -398,10 +401,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final ThemeData theme = ThemeData(primarySwatch: m2Swatch);
     final Widget label = Text(_model.rtl ? 'اضغط علي' : 'Press Me');
-    textController.text =
-        _model.rtl
-            ? 'يعتمد القرار الجيد على المعرفة وليس على الأرقام.'
-            : 'A good decision is based on knowledge and not on numbers.';
+    textController.text = _model.rtl
+        ? 'يعتمد القرار الجيد على المعرفة وليس على الأرقام.'
+        : 'A good decision is based on knowledge and not on numbers.';
 
     final List<Widget> tiles = <Widget>[
       _ControlTile(
@@ -532,14 +534,13 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List<Widget>.generate(checkboxValues.length, (int index) {
             return Checkbox(
-              onChanged:
-                  _model.enable
-                      ? (bool? value) {
-                        setState(() {
-                          checkboxValues[index] = value ?? false;
-                        });
-                      }
-                      : null,
+              onChanged: _model.enable
+                  ? (bool? value) {
+                      setState(() {
+                        checkboxValues[index] = value ?? false;
+                      });
+                    }
+                  : null,
               value: checkboxValues[index],
             );
           }),
@@ -551,14 +552,13 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List<Widget>.generate(4, (int index) {
             return Radio<int>(
-              onChanged:
-                  _model.enable
-                      ? (int? value) {
-                        setState(() {
-                          radioValue = value!;
-                        });
-                      }
-                      : null,
+              onChanged: _model.enable
+                  ? (int? value) {
+                      setState(() {
+                        radioValue = value!;
+                      });
+                    }
+                  : null,
               groupValue: radioValue,
               value: index,
             );

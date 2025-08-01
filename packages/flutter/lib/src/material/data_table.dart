@@ -1039,10 +1039,9 @@ class DataTable extends StatelessWidget {
     });
     final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
-    final Iterable<DataRow> rowsWithCheckbox =
-        displayCheckboxColumn
-            ? rows.where((DataRow row) => row.onSelectChanged != null)
-            : <DataRow>[];
+    final Iterable<DataRow> rowsWithCheckbox = displayCheckboxColumn
+        ? rows.where((DataRow row) => row.onSelectChanged != null)
+        : <DataRow>[];
     final Iterable<DataRow> rowsChecked = rowsWithCheckbox.where((DataRow row) => row.selected);
     final bool allChecked = displayCheckboxColumn && rowsChecked.length == rowsWithCheckbox.length;
     final bool anyChecked = displayCheckboxColumn && rowsChecked.isNotEmpty;
@@ -1082,8 +1081,9 @@ class DataTable extends StatelessWidget {
           if (isSelected) MaterialState.selected,
           if (isDisabled) MaterialState.disabled,
         };
-        final Color? resolvedDataRowColor =
-            index > 0 ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states) : null;
+        final Color? resolvedDataRowColor = index > 0
+            ? (rows[index - 1].color ?? effectiveDataRowColor)?.resolve(states)
+            : null;
         final Color? resolvedHeadingRowColor = effectiveHeadingRowColor?.resolve(<MaterialState>{});
         final Color? rowColor = index > 0 ? resolvedDataRowColor : resolvedHeadingRowColor;
         final BorderSide borderSide = Divider.createBorderSide(
@@ -1094,12 +1094,11 @@ class DataTable extends StatelessWidget {
               theme.dataTableTheme.dividerThickness ??
               _dividerThickness,
         );
-        final Border? border =
-            showBottomBorder
-                ? Border(bottom: borderSide)
-                : index == 0
-                ? null
-                : Border(top: borderSide);
+        final Border? border = showBottomBorder
+            ? Border(bottom: borderSide)
+            : index == 0
+            ? null
+            : Border(top: borderSide);
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: BoxDecoration(
@@ -1134,8 +1133,9 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           context: context,
           checked: row.selected,
-          onRowTap:
-              row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
+          onRowTap: row.onSelectChanged == null
+              ? null
+              : () => row.onSelectChanged?.call(!row.selected),
           onCheckboxChanged: row.onSelectChanged,
           overlayColor: row.color ?? effectiveDataRowColor,
           rowMouseCursor:
@@ -1185,13 +1185,12 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort:
-            column.onSort != null
-                ? () => column.onSort!(
-                  dataColumnIndex,
-                  sortColumnIndex != dataColumnIndex || !sortAscending,
-                )
-                : null,
+        onSort: column.onSort != null
+            ? () => column.onSort!(
+                dataColumnIndex,
+                sortColumnIndex != dataColumnIndex || !sortAscending,
+              )
+            : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
@@ -1219,8 +1218,9 @@ class DataTable extends StatelessWidget {
           onLongPress: cell.onLongPress,
           onTapCancel: cell.onTapCancel,
           onTapDown: cell.onTapDown,
-          onSelectChanged:
-              row.onSelectChanged == null ? null : () => row.onSelectChanged?.call(!row.selected),
+          onSelectChanged: row.onSelectChanged == null
+              ? null
+              : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
           mouseCursor:
@@ -1355,10 +1355,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     )..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;
     _orientationController = AnimationController(duration: widget.duration, vsync: this);
-    _orientationAnimation =
-        _orientationController.drive(_turnTween)
-          ..addListener(_rebuild)
-          ..addStatusListener(_resetOrientationAnimation);
+    _orientationAnimation = _orientationController.drive(_turnTween)
+      ..addListener(_rebuild)
+      ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible) {
       _orientationOffset = widget.up! ? 0.0 : math.pi;
     }

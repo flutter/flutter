@@ -40,10 +40,9 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child:
-                  index.isEven
-                      ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
-                      : const DummyPlatformView(),
+              child: index.isEven
+                  ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
+                  : const DummyPlatformView(),
             ),
           );
         },

@@ -283,13 +283,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => false,
     };
     final Widget title = DefaultTextStyle(
-      style:
-          baseType || widget.subtitle == null
-              ? textStyle
-              : textStyle.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-              ),
+      style: baseType || widget.subtitle == null
+          ? textStyle
+          : textStyle.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
+            ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       child: widget.title,
@@ -330,7 +329,10 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
           child: Row(
             children: <Widget>[
               if (widget.leading case final Widget leading) ...<Widget>[
-                SizedBox.square(dimension: widget.leadingSize, child: Center(child: leading)),
+                SizedBox.square(
+                  dimension: widget.leadingSize,
+                  child: Center(child: leading),
+                ),
                 SizedBox(width: widget.leadingToTitle),
               ] else
                 SizedBox(height: widget.leadingSize),
@@ -370,14 +372,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     return GestureDetector(
-      onTapDown:
-          (_) => setState(() {
-            _tapped = true;
-          }),
-      onTapCancel:
-          () => setState(() {
-            _tapped = false;
-          }),
+      onTapDown: (_) => setState(() {
+        _tapped = true;
+      }),
+      onTapCancel: () => setState(() {
+        _tapped = false;
+      }),
       onTap: () async {
         await widget.onTap!();
         if (mounted) {

@@ -38,7 +38,7 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
   std::shared_ptr<ContextMTL> context_;
   std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
   std::shared_ptr<SwapchainTransientsMTL> swapchain_transients_;
-  std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
+  std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
@@ -49,6 +49,9 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
   // |PlaygroundImpl|
   std::unique_ptr<Surface> AcquireSurfaceFrame(
       std::shared_ptr<Context> context) override;
+
+  // |PlaygroundImpl|
+  void SetGPUDisabled(bool disabled) const override;
 
   PlaygroundImplMTL(const PlaygroundImplMTL&) = delete;
 

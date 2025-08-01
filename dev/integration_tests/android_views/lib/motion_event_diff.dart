@@ -100,8 +100,8 @@ void diffPointerCoordsList(
   Map<String, dynamic> originalEvent,
   Map<String, dynamic> synthesizedEvent,
 ) {
-  final List<Map<dynamic, dynamic>> expectedList =
-      (originalEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+  final List<Map<dynamic, dynamic>> expectedList = (originalEvent['pointerCoords'] as List<dynamic>)
+      .cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
       (synthesizedEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
 

@@ -17,6 +17,8 @@ template("skwasm_variant") {
       "fonts.cpp",
       "helpers.h",
       "image.cpp",
+      "live_objects.cpp",
+      "live_objects.h",
       "paint.cpp",
       "path.cpp",
       "picture.cpp",

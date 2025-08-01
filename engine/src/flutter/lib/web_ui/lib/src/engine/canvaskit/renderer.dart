@@ -328,15 +328,17 @@ class CanvasKitRenderer implements Renderer {
     ui.FilterQuality? filterQuality,
   ) => CkImageShader(image, tmx, tmy, matrix4, filterQuality);
 
-  @override
-  ui.Path createPath() => CkPath();
+  CkPathConstructors pathConstructors = CkPathConstructors();
 
   @override
-  ui.Path copyPath(ui.Path src) => CkPath.from(src as CkPath);
+  ui.Path createPath() => LazyPath(pathConstructors);
+
+  @override
+  ui.Path copyPath(ui.Path src) => LazyPath.fromLazyPath(src as LazyPath);
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) =>
-      CkPath.combine(op, path1, path2);
+      LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
 
   @override
   ui.TextStyle createTextStyle({
@@ -361,29 +363,31 @@ class CanvasKitRenderer implements Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => CkTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background as CkPaint?,
-    foreground: foreground as CkPaint?,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
+  }) => isExperimentalWebParagraph
+      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      : CkTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background as CkPaint?,
+          foreground: foreground as CkPaint?,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        );
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -399,23 +403,27 @@ class CanvasKitRenderer implements Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebParagraphStyle()
-          : CkParagraphStyle(
-            textAlign: textAlign,
-            textDirection: textDirection,
-            maxLines: maxLines,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            height: height,
-            textHeightBehavior: textHeightBehavior,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            strutStyle: strutStyle,
-            ellipsis: ellipsis,
-            locale: locale,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebParagraphStyle(
+          textDirection: textDirection,
+          textAlign: textAlign,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+        )
+      : CkParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle,
+          ellipsis: ellipsis,
+          locale: locale,
+        );
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -428,24 +436,23 @@ class CanvasKitRenderer implements Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) =>
-      isExperimentalWebParagraph
-          ? WebStrutStyle()
-          : CkStrutStyle(
-            fontFamily: fontFamily,
-            fontFamilyFallback: fontFamilyFallback,
-            fontSize: fontSize,
-            height: height,
-            leadingDistribution: leadingDistribution,
-            leading: leading,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            forceStrutHeight: forceStrutHeight,
-          );
+  }) => isExperimentalWebParagraph
+      ? WebStrutStyle()
+      : CkStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        );
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isExperimentalWebParagraph ? WebParagraphBuilder() : CkParagraphBuilder(style);
+      isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
@@ -457,8 +464,9 @@ class CanvasKitRenderer implements Renderer {
     );
     final ViewRasterizer rasterizer = _rasterizers[view.viewId]!;
     final RenderQueue renderQueue = rasterizer.queue;
-    final FrameTimingRecorder? recorder =
-        FrameTimingRecorder.frameTimingsEnabled ? FrameTimingRecorder() : null;
+    final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
+        ? FrameTimingRecorder()
+        : null;
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
@@ -542,7 +550,7 @@ class CanvasKitRenderer implements Renderer {
     _rasterizers.clear();
   }
 
-  /// Clears the state of this renderer. Used in tests.
+  @override
   void debugClear() {
     for (final ViewRasterizer rasterizer in _rasterizers.values) {
       rasterizer.debugClear();

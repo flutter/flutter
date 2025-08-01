@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:file/memory.dart';
+library;
+
 import 'dart:io' as io show Directory, File, IOOverrides, Link;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 
-/// An [IOOverrides] that can delegate to [FileSystem] implementation if provided.
+/// An [io.IOOverrides] that can delegate to [FileSystem] implementation if provided.
 ///
 /// Does not override any of the socket facilities.
 ///
@@ -16,7 +19,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 ///
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].
-class FlutterIOOverrides extends io.IOOverrides {
+final class FlutterIOOverrides extends io.IOOverrides {
   FlutterIOOverrides({FileSystem? fileSystem}) : _fileSystemDelegate = fileSystem;
 
   final FileSystem? _fileSystemDelegate;

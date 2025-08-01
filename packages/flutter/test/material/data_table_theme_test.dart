@@ -72,11 +72,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DataTableThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -105,11 +104,10 @@ void main() {
       headingRowAlignment: MainAxisAlignment.center,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: ${const Color(0xfffffff0)})');
     expect(description[1], "dataRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
@@ -193,8 +191,10 @@ void main() {
     );
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
 
-    final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -203,8 +203,10 @@ void main() {
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
@@ -365,8 +367,10 @@ void main() {
     );
     expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
-    final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -375,8 +379,10 @@ void main() {
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,
@@ -547,8 +553,10 @@ void main() {
       localThemeDecoration,
     );
 
-    final TextStyle dataRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('Data'))
+        .text
+        .style!;
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 1).color,
@@ -560,8 +568,10 @@ void main() {
     );
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxLocalThemeDataRowHeight);
 
-    final TextStyle headingRowTextStyle =
-        tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester
+        .renderObject<RenderParagraph>(find.text('A'))
+        .text
+        .style!;
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
     expect(
       _tableRowBoxDecoration(tester: tester, index: 0).color,

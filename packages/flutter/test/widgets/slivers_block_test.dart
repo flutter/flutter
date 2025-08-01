@@ -55,11 +55,10 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
   expect(testAnswers, equals(answerKey));
   final String foundText = tester
       .widgetList<Text>(find.byType(Text))

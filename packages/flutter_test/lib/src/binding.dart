@@ -1022,15 +1022,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
 
     final ZoneSpecification errorHandlingZoneSpecification = ZoneSpecification(
-      handleUncaughtError: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone,
-        Object exception,
-        StackTrace stack,
-      ) {
-        handleUncaughtError(exception, stack);
-      },
+      handleUncaughtError:
+          (Zone self, ZoneDelegate parent, Zone zone, Object exception, StackTrace stack) {
+            handleUncaughtError(exception, stack);
+          },
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone!.fork(specification: errorHandlingZoneSpecification);
@@ -1363,24 +1358,20 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void Function() f) {
           _rootDelegate.scheduleMicrotask(zone, f);
         },
-        createTimer: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Duration duration,
-          void Function() f,
-        ) {
-          return _rootDelegate.createTimer(zone, duration, f);
-        },
-        createPeriodicTimer: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Duration period,
-          void Function(Timer timer) f,
-        ) {
-          return _rootDelegate.createPeriodicTimer(zone, period, f);
-        },
+        createTimer:
+            (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
+              return _rootDelegate.createTimer(zone, duration, f);
+            },
+        createPeriodicTimer:
+            (
+              Zone self,
+              ZoneDelegate parent,
+              Zone zone,
+              Duration period,
+              void Function(Timer timer) f,
+            ) {
+              return _rootDelegate.createPeriodicTimer(zone, period, f);
+            },
       ),
     );
 
@@ -1910,10 +1901,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   void _markViewsNeedPaint([int? viewId]) {
     _viewNeedsPaint = true;
-    final Iterable<RenderView> toMark =
-        viewId == null
-            ? renderViews
-            : renderViews.where((RenderView renderView) => renderView.flutterView.viewId == viewId);
+    final Iterable<RenderView> toMark = viewId == null
+        ? renderViews
+        : renderViews.where((RenderView renderView) => renderView.flutterView.viewId == viewId);
     for (final RenderView renderView in toMark) {
       renderView.markNeedsPaint();
     }
@@ -1950,18 +1940,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _renderViewToPointerIdToPointerRecord[renderView];
     if (pointerIdToRecord != null && pointerIdToRecord.isNotEmpty) {
       final double radius = renderView.size.shortestSide * 0.05;
-      final Path path =
-          Path()
-            ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
-            ..moveTo(0.0, -radius * 2.0)
-            ..lineTo(0.0, radius * 2.0)
-            ..moveTo(-radius * 2.0, 0.0)
-            ..lineTo(radius * 2.0, 0.0);
+      final Path path = Path()
+        ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
+        ..moveTo(0.0, -radius * 2.0)
+        ..lineTo(0.0, radius * 2.0)
+        ..moveTo(-radius * 2.0, 0.0)
+        ..lineTo(radius * 2.0, 0.0);
       final Canvas canvas = context.canvas;
-      final Paint paint =
-          Paint()
-            ..strokeWidth = radius / 10.0
-            ..style = PaintingStyle.stroke;
+      final Paint paint = Paint()
+        ..strokeWidth = radius / 10.0
+        ..style = PaintingStyle.stroke;
       bool dirty = false;
       for (final _LiveTestPointerRecord record in pointerIdToRecord.values) {
         paint.color = record.color.withOpacity(

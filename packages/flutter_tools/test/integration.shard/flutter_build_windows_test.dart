@@ -133,7 +133,7 @@ String _getFileVersion(File file) {
   expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
-  final String output = result.stdout as String;
+  final output = result.stdout as String;
   return output.trim();
 }
 
@@ -146,6 +146,6 @@ String _getProductVersion(File file) {
   expect(result, const ProcessResultMatcher());
 
   // Trim trailing new line.
-  final String output = result.stdout as String;
+  final output = result.stdout as String;
   return output.trim();
 }

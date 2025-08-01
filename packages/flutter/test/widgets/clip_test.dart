@@ -817,7 +817,10 @@ void main() {
     addTearDown(clip.dispose);
 
     await tester.pumpWidget(
-      ClipRect(clipper: NotifyClipper<Rect>(clip: clip), child: const Placeholder()),
+      ClipRect(
+        clipper: NotifyClipper<Rect>(clip: clip),
+        child: const Placeholder(),
+      ),
     );
 
     expect(

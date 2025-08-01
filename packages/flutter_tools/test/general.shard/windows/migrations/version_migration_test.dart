@@ -34,10 +34,10 @@ void main() {
     });
 
     testWithoutContext('skipped if CMake file is missing', () async {
-      const String resourceFileContents = 'Hello world';
+      const resourceFileContents = 'Hello world';
 
       resourceFile.writeAsStringSync(resourceFileContents);
-      final VersionMigration migration = VersionMigration(mockProject, testLogger);
+      final migration = VersionMigration(mockProject, testLogger);
       await migration.migrate();
       expect(cmakeFile.existsSync(), isFalse);
       expect(resourceFile.existsSync(), isTrue);
@@ -50,10 +50,10 @@ void main() {
     });
 
     testWithoutContext('skipped if resource file is missing', () async {
-      const String cmakeFileContents = 'Hello world';
+      const cmakeFileContents = 'Hello world';
 
       cmakeFile.writeAsStringSync(cmakeFileContents);
-      final VersionMigration migration = VersionMigration(mockProject, testLogger);
+      final migration = VersionMigration(mockProject, testLogger);
       await migration.migrate();
       expect(cmakeFile.existsSync(), isTrue);
       expect(resourceFile.existsSync(), isFalse);
@@ -66,8 +66,8 @@ void main() {
     });
 
     testWithoutContext('skipped if nothing to migrate', () async {
-      const String cmakeFileContents = 'Nothing to migrate';
-      const String resourceFileContents = 'Nothing to migrate';
+      const cmakeFileContents = 'Nothing to migrate';
+      const resourceFileContents = 'Nothing to migrate';
 
       cmakeFile.writeAsStringSync(cmakeFileContents);
       resourceFile.writeAsStringSync(resourceFileContents);
@@ -75,7 +75,7 @@ void main() {
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
       final DateTime resourceUpdatedAt = resourceFile.lastModifiedSync();
 
-      final VersionMigration versionMigration = VersionMigration(mockProject, testLogger);
+      final versionMigration = VersionMigration(mockProject, testLogger);
       await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
@@ -87,7 +87,7 @@ void main() {
     });
 
     testWithoutContext('skipped if already migrated', () async {
-      const String cmakeFileContents =
+      const cmakeFileContents =
           '# Apply the standard set of build settings. This can be removed for applications\n'
           '# that need different build settings.\n'
           'apply_standard_settings(\${BINARY_NAME})\n'
@@ -101,7 +101,7 @@ void main() {
           '\n'
           '# Disable Windows macros that collide with C++ standard library functions.\n'
           'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\n';
-      const String resourceFileContents =
+      const resourceFileContents =
           '#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)\n'
           '#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD\n'
           '#else\n'
@@ -120,7 +120,7 @@ void main() {
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
       final DateTime resourceUpdatedAt = resourceFile.lastModifiedSync();
 
-      final VersionMigration versionMigration = VersionMigration(mockProject, testLogger);
+      final versionMigration = VersionMigration(mockProject, testLogger);
       await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
@@ -132,7 +132,7 @@ void main() {
     });
 
     testWithoutContext('skipped if already migrated (CRLF)', () async {
-      const String cmakeFileContents =
+      const cmakeFileContents =
           '# Apply the standard set of build settings. This can be removed for applications\r\n'
           '# that need different build settings.\r\n'
           'apply_standard_settings(\${BINARY_NAME})\r\n'
@@ -146,7 +146,7 @@ void main() {
           '\r\n'
           '# Disable Windows macros that collide with C++ standard library functions.\r\n'
           'target_compile_definitions(\${BINARY_NAME} PRIVATE "NOMINMAX")\r\n';
-      const String resourceFileContents =
+      const resourceFileContents =
           '#if defined(FLUTTER_VERSION_MAJOR) && defined(FLUTTER_VERSION_MINOR) && defined(FLUTTER_VERSION_PATCH) && defined(FLUTTER_VERSION_BUILD)\r\n'
           '#define VERSION_AS_NUMBER FLUTTER_VERSION_MAJOR,FLUTTER_VERSION_MINOR,FLUTTER_VERSION_PATCH,FLUTTER_VERSION_BUILD\r\n'
           '#else\r\n'
@@ -165,7 +165,7 @@ void main() {
       final DateTime cmakeUpdatedAt = cmakeFile.lastModifiedSync();
       final DateTime resourceUpdatedAt = resourceFile.lastModifiedSync();
 
-      final VersionMigration versionMigration = VersionMigration(mockProject, testLogger);
+      final versionMigration = VersionMigration(mockProject, testLogger);
       await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
@@ -199,7 +199,7 @@ void main() {
         '#endif\n',
       );
 
-      final VersionMigration versionMigration = VersionMigration(mockProject, testLogger);
+      final versionMigration = VersionMigration(mockProject, testLogger);
       await versionMigration.migrate();
 
       expect(
@@ -266,7 +266,7 @@ void main() {
         '#endif\r\n',
       );
 
-      final VersionMigration versionMigration = VersionMigration(mockProject, testLogger);
+      final versionMigration = VersionMigration(mockProject, testLogger);
       await versionMigration.migrate();
 
       expect(

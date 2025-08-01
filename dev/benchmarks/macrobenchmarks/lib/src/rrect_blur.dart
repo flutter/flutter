@@ -74,11 +74,10 @@ class PointsPainter extends CustomPainter {
     const int circleCount = 40;
     for (int i = 0; i < circleCount; ++i) {
       final double radius = 25 * cos(i + (1.0 * 2.0 * 3.1415 * tick) / 60.0) + 25;
-      final Paint paint =
-          Paint()
-            ..style = PaintingStyle.fill
-            ..filterQuality = FilterQuality.low
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius);
+      final Paint paint = Paint()
+        ..style = PaintingStyle.fill
+        ..filterQuality = FilterQuality.low
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius);
       final double yval = halfHeight * sin(i + (freq * 2.0 * 3.1415 * tick) / 60.0) + halfHeight;
       final double xval = (i.toDouble() / circleCount) * size.width;
       canvas.drawCircle(Offset(xval, yval), 50, paint..color = kColors[i % kColors.length]);

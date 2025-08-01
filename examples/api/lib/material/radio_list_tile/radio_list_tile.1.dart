@@ -33,47 +33,37 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('RadioListTile Sample')),
-      body: Column(
-        children: <Widget>[
-          RadioListTile<Groceries>(
-            value: Groceries.pickles,
-            groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
-              setState(() {
-                _groceryItem = value;
-              });
-            },
-            title: const Text('Pickles'),
-            subtitle: const Text('Supporting text'),
-          ),
-          RadioListTile<Groceries>(
-            value: Groceries.tomato,
-            groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
-              setState(() {
-                _groceryItem = value;
-              });
-            },
-            title: const Text('Tomato'),
-            subtitle: const Text(
-              'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.',
+      body: RadioGroup<Groceries>(
+        groupValue: _groceryItem,
+        onChanged: (Groceries? value) {
+          setState(() {
+            _groceryItem = value;
+          });
+        },
+        child: const Column(
+          children: <Widget>[
+            RadioListTile<Groceries>(
+              value: Groceries.pickles,
+              title: Text('Pickles'),
+              subtitle: Text('Supporting text'),
             ),
-          ),
-          RadioListTile<Groceries>(
-            value: Groceries.lettuce,
-            groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
-              setState(() {
-                _groceryItem = value;
-              });
-            },
-            title: const Text('Lettuce'),
-            subtitle: const Text(
-              "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text.",
+            RadioListTile<Groceries>(
+              value: Groceries.tomato,
+              title: Text('Tomato'),
+              subtitle: Text(
+                'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.',
+              ),
             ),
-            isThreeLine: true,
-          ),
-        ],
+            RadioListTile<Groceries>(
+              value: Groceries.lettuce,
+              title: Text('Lettuce'),
+              subtitle: Text(
+                "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text.",
+              ),
+              isThreeLine: true,
+            ),
+          ],
+        ),
       ),
     );
   }

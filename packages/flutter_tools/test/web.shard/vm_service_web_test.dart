@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
@@ -20,7 +21,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   group('Clients of flutter run on web with DDS enabled', () {
@@ -38,8 +39,8 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -51,8 +52,8 @@ void main() {
     testWithoutContext('can validate flutter version in parallel', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -83,8 +84,8 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true,
-        chrome: true,
-        additionalCommandArgs: <String>['--verbose'],
+        device: GoogleChromeDevice.kChromeDeviceId,
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);

@@ -169,11 +169,13 @@ void main() {
     final SemanticsNode node = tester.getSemantics(find.text('item 0'));
     final SemanticsData data = node.getSemanticsData();
     expect(data.customSemanticsActionIds!.length, 2);
-    final CustomSemanticsAction action1 =
-        CustomSemanticsAction.getAction(data.customSemanticsActionIds![0])!;
+    final CustomSemanticsAction action1 = CustomSemanticsAction.getAction(
+      data.customSemanticsActionIds![0],
+    )!;
     expect(action1.label, 'Move down');
-    final CustomSemanticsAction action2 =
-        CustomSemanticsAction.getAction(data.customSemanticsActionIds![1])!;
+    final CustomSemanticsAction action2 = CustomSemanticsAction.getAction(
+      data.customSemanticsActionIds![1],
+    )!;
     expect(action2.label, 'Move to the end');
   });
 
@@ -194,8 +196,8 @@ void main() {
               slivers: <Widget>[
                 SliverReorderableList(
                   itemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext _, int index) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   findChildIndexCallback: (Key key) {
                     finderCalled = true;
                     return null;
@@ -431,7 +433,7 @@ void main() {
 
     // This SliverReorderableList has just one item: "item 0".
     await tester.pumpWidget(
-      TestList(items: List<int>.from(<int>[0]), textColor: textColor, iconColor: iconColor),
+      TestList(items: List<int>.of(<int>[0]), textColor: textColor, iconColor: iconColor),
     );
     expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
     expect(getIconStyle().color, iconColor);
@@ -461,7 +463,7 @@ void main() {
 
     await tester.pumpWidget(
       TestList(
-        items: List<int>.from(<int>[0, 1, 2, 3]),
+        items: List<int>.of(<int>[0, 1, 2, 3]),
         proxyDecorator: (Widget child, int index, Animation<double> animation) {
           return AnimatedBuilder(
             animation: animation,
@@ -969,9 +971,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ReorderableList(
-          itemBuilder:
-              (BuildContext context, int index) =>
-                  SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index')),
           itemCount: itemCount,
           onReorder: handleReorder,
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
@@ -1584,14 +1585,12 @@ void main() {
                           child: Builder(
                             builder: (BuildContext context) {
                               return SizedBox(
-                                height:
-                                    scrollDirection == Axis.vertical
-                                        ? itemSizes[index]
-                                        : double.infinity,
-                                width:
-                                    scrollDirection == Axis.horizontal
-                                        ? itemSizes[index]
-                                        : double.infinity,
+                                height: scrollDirection == Axis.vertical
+                                    ? itemSizes[index]
+                                    : double.infinity,
+                                width: scrollDirection == Axis.horizontal
+                                    ? itemSizes[index]
+                                    : double.infinity,
                                 child: Text('$index'),
                               );
                             },
@@ -1618,14 +1617,11 @@ void main() {
     }) async {
       await pumpFor(reverse, scrollDirection);
       final double targetOffset = (List<double>.of(itemSizes)..removeAt(from)).sublist(0, to).sum;
-      final Offset targetPosition =
-          reverse
-              ? (scrollDirection == Axis.vertical
-                  ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
-                  : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
-              : (scrollDirection == Axis.vertical
-                  ? Offset(0, targetOffset)
-                  : Offset(targetOffset, 0));
+      final Offset targetPosition = reverse
+          ? (scrollDirection == Axis.vertical
+                ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
+                : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
+          : (scrollDirection == Axis.vertical ? Offset(0, targetOffset) : Offset(targetOffset, 0));
       final Offset moveOffset = targetPosition - tester.getTopLeft(find.text('$from'));
       await tester.timedDrag(find.text('$from'), moveOffset, const Duration(seconds: 1));
       // Before the drop animation starts

@@ -491,8 +491,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         (style == null) != (textSpan.style == null)) {
       return RenderComparison.layout;
     }
-    RenderComparison result =
-        recognizer == textSpan.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    RenderComparison result = recognizer == textSpan.recognizer
+        ? RenderComparison.identical
+        : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
       if (candidate.index > result.index) {

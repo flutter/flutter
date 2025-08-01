@@ -7,14 +7,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-final Directory _editedFlutterGalleryDir = dir(
-  path.join(Directory.systemTemp.path, 'edited_flutter_gallery'),
+final Directory _editedFlutterGalleryWorkspaceDir = dir(
+  path.join(Directory.systemTemp.path, 'gallery_workspace'),
 );
+
+final Directory _editedFlutterGalleryDir = dir(
+  path.join(_editedFlutterGalleryWorkspaceDir.path, 'edited_flutter_gallery'),
+);
+
 final Directory flutterGalleryDir = dir(
   path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'),
 );
@@ -41,13 +47,24 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
       '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
-    final String expectedMessage =
-        webDevice == WebDevice.webServer ? 'Recompile complete' : 'Reloaded application';
+    final String expectedMessage = webDevice == WebDevice.webServer
+        ? 'Recompile complete'
+        : 'Reloaded application';
     final Map<String, int> measurements = <String, int>{};
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
+
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
+      final YamlEditor yamlEditor = YamlEditor(rootPubspec);
+      yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
+      File(
+        path.join(_editedFlutterGalleryDir.parent.path, 'pubspec.yaml'),
+      ).writeAsStringSync(yamlEditor.toString());
+
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
         {
           await flutter('packages', options: <String>['get']);

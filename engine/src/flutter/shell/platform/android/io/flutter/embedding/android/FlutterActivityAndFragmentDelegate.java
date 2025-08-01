@@ -63,9 +63,9 @@ import java.util.List;
  * <p>Any time that a "delegate" is created with the purpose of encapsulating the internal behaviors
  * of another object, that delegate is highly susceptible to degeneration. It is easy to tack new
  * responsibilities on to the delegate which would not otherwise be added to the original object. It
- * is also easy to begin hanging listeners and callbacks on a delegate object that likewise would
- * not be added to the original object. A delegate can quickly become a complex web of dependencies
- * and optional references that are very difficult to track.
+ * is also easy to begin hanging listeners and callbacks objectn a delegate object that likewise
+ * would not be added to the original object. A delegate can quickly become a complex web of
+ * dependencies and optional references that are very difficult to track.
  *
  * <p>Maintainers of this class should take care to only place code in this delegate that would
  * otherwise be placed in either {@link FlutterActivity} or {@link FlutterFragment}, and in exactly
@@ -369,6 +369,7 @@ import java.util.List;
    * </ol>
    */
   @NonNull
+  @RequiresApi(API_LEVELS.API_24)
   View onCreateView(
       LayoutInflater inflater,
       @Nullable ViewGroup container,
@@ -666,6 +667,7 @@ import java.util.List;
    *
    * <p>This method removes this delegate's {@link FlutterView}'s {@link FlutterUiDisplayListener}.
    */
+  @RequiresApi(API_LEVELS.API_24)
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();

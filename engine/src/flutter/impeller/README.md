@@ -176,25 +176,20 @@ Flutter tool, follow the platform specific steps below.
 
 ### iOS
 
-Flutter enables Impeller by **default** on iOS.
+Impeller is the only rendering engine available on iOS. The legacy renderer has been removed.
+
+### Android
+
+Impeller is the **default** on Android. Impeller will attempt to use Vulkan first and then
+fall back to OpenGL rendering depending on device capabilities.
+
+To explicitly opt out of using Impeller, add the following to your `AndroidManifest.xml`
+under the `<application>` tag.
 
 > [!CAUTION]
 > The ability to disable Impeller is going to go away in a future release. Please [file
 > an issue](https://github.com/flutter/flutter/issues/new/choose) if you need to do this
-> in your application. A warning will be displayed on application launch if you opt-out.
-
-To **disable** Impeller on iOS, update your `Info.plist` file to add the following
-under the top-level `<dict>` tag:
-
-```xml
-  <key>FLTEnableImpeller</key>
-  <false/>
-```
-
-### Android
-
-Impeller will use Vulkan on Android by **default**. To explicitly opt out of using Impeller,
-add the following to your `AndroidManifest.xml` under the `<application>` tag.
+> in your application.
 
 ```xml
   <meta-data
@@ -202,11 +197,8 @@ add the following to your `AndroidManifest.xml` under the `<application>` tag.
     android:value="false" />
 ```
 
-Where Vulkan is unavailable, Impeller will fallback to Skia. 
-
-However, Impellers OpenGL backend is well under construction. To try Impeller with OpenGL
-in your application, add the following to your `AndroidManifest.xml` file under the
-`<application>` tag:
+During development, to try Impeller with OpenGL in your application, add the following
+to your `AndroidManifest.xml` file under the `<application>` tag:
 
 > [!Warning]
 > Selecting the Impeller backend this way will only work in `debug` and `profile`
@@ -228,6 +220,17 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
   <key>FLTEnableImpeller</key>
   <true/>
 ```
+
+### Custom Embedders
+
+Impeller is in preview on [custom embedders](https://docs.flutter.dev/embedded). It is **not**
+enabled by default.
+
+To enable it Impeller in your application, pass the `--enable-impeller=true` command line
+argument to [`FlutterProjectArgs.command_line_argv`](https://github.com/flutter/flutter/blob/63980cb25ba5b70122f2814406989eb5fa8ef5a1/engine/src/flutter/shell/platform/embedder/embedder.h#L2388)
+during application initialization.
+
+Impeller does not require any other modifications in the embedder.
 
 ## Embedding Standalone Impeller
 

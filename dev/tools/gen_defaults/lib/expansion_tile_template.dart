@@ -13,7 +13,8 @@ class ExpansionTileTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ExpansionTileThemeData {
   _${blockName}DefaultsM3(this.context);
 

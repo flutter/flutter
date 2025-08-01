@@ -382,28 +382,16 @@ void main() {
 
   test('Can remove listener on a disposed ChangeNotifier', () {
     final TestNotifier source = TestNotifier();
-    FlutterError? error;
-    try {
-      source.dispose();
-      source.removeListener(() {});
-    } on FlutterError catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    source.dispose();
+    source.removeListener(() {});
   });
 
   test('Can check hasListener on a disposed ChangeNotifier', () {
     final HasListenersTester<int> source = HasListenersTester<int>(0);
     source.addListener(() {});
     expect(source.testHasListeners, isTrue);
-    FlutterError? error;
-    try {
-      source.dispose();
-      expect(source.testHasListeners, isFalse);
-    } on FlutterError catch (e) {
-      error = e;
-    }
-    expect(error, isNull);
+    source.dispose();
+    expect(source.testHasListeners, isFalse);
   });
 
   test('Value notifier', () {

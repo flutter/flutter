@@ -98,7 +98,8 @@ class CommandBufferVK final
   bool IsValid() const override;
 
   // |CommandBuffer|
-  bool OnSubmitCommands(CompletionCallback callback) override;
+  bool OnSubmitCommands(bool block_on_schedule,
+                        CompletionCallback callback) override;
 
   // |CommandBuffer|
   void OnWaitUntilCompleted() override;

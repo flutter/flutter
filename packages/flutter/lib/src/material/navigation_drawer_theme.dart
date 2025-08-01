@@ -22,9 +22,8 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationDrawerThemeData] object
-/// using `NavigationDrawerTheme.of(context)`. Instances of
-/// [NavigationDrawerThemeData] can be customized with
-/// [NavigationDrawerThemeData.copyWith].
+/// using [NavigationDrawerTheme.of]. Instances of [NavigationDrawerThemeData]
+/// can be customized with [NavigationDrawerThemeData.copyWith].
 ///
 /// Typically a [NavigationDrawerThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.navigationDrawerTheme]. Alternatively, a
@@ -243,13 +242,20 @@ class NavigationDrawerTheme extends InheritedTheme {
   /// type values for descendant [NavigationDrawer] widgets.
   final NavigationDrawerThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [NavigationDrawerThemeData] from the closest
+  /// ancestor [NavigationDrawerTheme].
   ///
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// NavigationDrawerThemeData theme = NavigationDrawerTheme.of(context);
+  /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
-    final NavigationDrawerTheme? navigationDrawerTheme =
-        context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
+    final NavigationDrawerTheme? navigationDrawerTheme = context
+        .dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
     return navigationDrawerTheme?.data ?? Theme.of(context).navigationDrawerTheme;
   }
 

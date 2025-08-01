@@ -7,19 +7,18 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
-final ArgParser argParser =
-    ArgParser()
-      ..addOption('output-dir')
-      ..addOption('input-dir')
-      ..addFlag('ui')
-      ..addFlag('public')
-      ..addOption('library-name')
-      ..addOption('api-file')
-      ..addMultiOption('source-file')
-      ..addOption('stamp')
-      ..addOption('depfile')
-      ..addOption('exclude-pattern')
-      ..addOption('build-dir');
+final ArgParser argParser = ArgParser()
+  ..addOption('output-dir')
+  ..addOption('input-dir')
+  ..addFlag('ui')
+  ..addFlag('public')
+  ..addOption('library-name')
+  ..addOption('api-file')
+  ..addMultiOption('source-file')
+  ..addOption('stamp')
+  ..addOption('depfile')
+  ..addOption('exclude-pattern')
+  ..addOption('build-dir');
 
 final List<Replacer> uiPatterns = <Replacer>[
   AllReplacer(RegExp(r'library\s+ui;'), 'library dart.ui;'),
@@ -74,7 +73,8 @@ ${extraImports.join('\n')}
       RegExp('''
 export\\s*'$libraryName/(.*)';
 '''),
-      (Match match) => '''
+      (Match match) =>
+          '''
 part '$libraryName/${match.group(1)}';
 ''',
     ),

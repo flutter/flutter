@@ -43,10 +43,13 @@ class StubPictureRenderer implements PictureRenderer {
   @override
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
     clipRequests[picture] = clip;
-    return picture;
+    final clippedRect = clip.intersect(picture.cullRect);
+    final clippedPicture = StubPicture(clippedRect);
+    return clippedPicture;
   }
 
   List<ScenePicture> renderedPictures = <ScenePicture>[];
+  List<StubPicture> clippedPictures = <StubPicture>[];
   Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
@@ -279,6 +282,13 @@ void testMain() {
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView());
   });
 
+  tearDown(() {
+    expect(
+      stubPictureRenderer.clippedPictures.every((StubPicture picture) => picture.debugDisposed),
+      true,
+    );
+  });
+
   test('SceneView places canvas according to device-pixel ratio', () async {
     debugOverrideDevicePixelRatio(2.0);
 
@@ -386,11 +396,10 @@ void testMain() {
     const int expectedPlatformViewId = 1234;
 
     int? injectedViewId;
-    final DomManager stubDomManager =
-        StubDomManager()
-          ..injectPlatformViewOverride = (int viewId) {
-            injectedViewId = viewId;
-          };
+    final DomManager stubDomManager = StubDomManager()
+      ..injectPlatformViewOverride = (int viewId) {
+        injectedViewId = viewId;
+      };
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView()..dom = stubDomManager);
 
     final PlatformView platformView = PlatformView(
