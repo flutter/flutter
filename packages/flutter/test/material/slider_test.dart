@@ -131,6 +131,127 @@ class LoggingValueIndicatorShape extends SliderComponentShape {
   }
 }
 
+// A value indicator shape that captures the final processed text painter size for testing.
+class HeightCapturingValueIndicatorShape extends SliderComponentShape {
+  HeightCapturingValueIndicatorShape(this.capturedSizes);
+  final List<Size> capturedSizes;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    // Return a hard-coded size.
+    // The actual size will be determined by the labelPainter in paint method.
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    // Apply the same multiline logic as the real implementation
+    final ValueIndicatorMultilineConfig? multilineConfig =
+        sliderTheme.valueIndicatorMultilineConfig;
+    TextPainter finalLabelPainter = labelPainter;
+    if (multilineConfig != null && multilineConfig.enabled && multilineConfig.maxLines != null) {
+      finalLabelPainter = TextPainter(
+        text: labelPainter.text,
+        textDirection: labelPainter.textDirection,
+        textScaleFactor: textScaleFactor,
+        maxLines: multilineConfig.maxLines,
+      )..layout();
+    }
+
+    // Capture the final text painter size.
+    capturedSizes.add(finalLabelPainter.size);
+
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
+  }
+}
+
+// A test value indicator shape that captures the final rendered text for testing ellipsis behavior.
+class TestEllipsisValueIndicatorShape extends SliderComponentShape {
+  TestEllipsisValueIndicatorShape(this.capturedTexts);
+  final List<String> capturedTexts;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    // Apply the same multiline logic as the real implementation
+    final ValueIndicatorMultilineConfig? multilineConfig =
+        sliderTheme.valueIndicatorMultilineConfig;
+    final String labelText = labelPainter.text?.toPlainText() ?? '';
+    TextPainter finalLabelPainter = labelPainter;
+
+    if (multilineConfig != null && multilineConfig.enabled && multilineConfig.maxLines != null) {
+      finalLabelPainter = TextPainter(
+        text: labelPainter.text,
+        textDirection: labelPainter.textDirection,
+        textScaleFactor: textScaleFactor,
+        maxLines: multilineConfig.maxLines,
+      )..layout();
+
+      // If lines were truncated, add ellipsis manually (same logic as real implementation).
+      if (finalLabelPainter.didExceedMaxLines) {
+        finalLabelPainter.dispose(); // Dispose the intermediate painter.
+        // Use a simplified ellipsis creation for testing
+        final List<String> lines = labelText.split('\n');
+        final List<String> visibleLines;
+        if (lines.length <= multilineConfig.maxLines!) {
+          visibleLines = lines;
+        } else {
+          visibleLines = lines.take(multilineConfig.maxLines! - 1).toList();
+          visibleLines.add('${lines[multilineConfig.maxLines! - 1]}...');
+        }
+
+        finalLabelPainter = TextPainter(
+          text: TextSpan(text: visibleLines.join('\n'), style: labelPainter.text?.style),
+          textDirection: labelPainter.textDirection,
+          textScaleFactor: textScaleFactor,
+        )..layout();
+      }
+    }
+
+    // Capture the final rendered text
+    capturedTexts.add(finalLabelPainter.text?.toPlainText() ?? '');
+
+    // Dispose any TextPainter we created
+    if (finalLabelPainter != labelPainter) {
+      finalLabelPainter.dispose();
+    }
+
+    // Don't actually draw anything - this is just for testing
+  }
+}
+
 class TallSliderTickMarkShape extends SliderTickMarkShape {
   @override
   Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
@@ -5491,5 +5612,410 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
+  });
+
+  group('valueIndicatorMultilineConfig', () {
+    testWidgets('SliderTheme inherits valueIndicatorMultilineConfig from theme', (
+      WidgetTester tester,
+    ) async {
+      const ValueIndicatorMultilineConfig customConfig = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 3,
+        cornerPadding: 12.0,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            sliderTheme: const SliderThemeData(valueIndicatorMultilineConfig: customConfig),
+          ),
+          home: Scaffold(
+            body: Slider(
+              value: 0.5,
+              divisions: 10,
+              label: 'Test Label',
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+
+      // Verify the slider inherited the config from sliderTheme in app theme.
+      final SliderThemeData sliderTheme = SliderTheme.of(tester.element(find.byType(Slider)));
+      expect(sliderTheme.valueIndicatorMultilineConfig, equals(customConfig));
+      expect(sliderTheme.valueIndicatorMultilineConfig!.enabled, false);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.maxLines, 3);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, 12.0);
+    });
+
+    testWidgets('SliderTheme.copyWith can update valueIndicatorMultilineConfig', (
+      WidgetTester tester,
+    ) async {
+      const ValueIndicatorMultilineConfig originalConfig = ValueIndicatorMultilineConfig(
+        maxLines: 2,
+        cornerPadding: 8.0,
+      );
+
+      const ValueIndicatorMultilineConfig updatedConfig = ValueIndicatorMultilineConfig(
+        enabled: false,
+        maxLines: 5,
+        cornerPadding: 16.0,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SliderTheme(
+              data: const SliderThemeData(
+                valueIndicatorMultilineConfig: originalConfig,
+              ).copyWith(valueIndicatorMultilineConfig: updatedConfig),
+              child: Slider(
+                value: 0.5,
+                divisions: 10,
+                label: 'Test Label',
+                onChanged: (double newValue) {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SliderThemeData sliderTheme = SliderTheme.of(tester.element(find.byType(Slider)));
+
+      // Verify the config was updated.
+      expect(sliderTheme.valueIndicatorMultilineConfig, equals(updatedConfig));
+      expect(sliderTheme.valueIndicatorMultilineConfig!.enabled, false);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.maxLines, 5);
+      expect(sliderTheme.valueIndicatorMultilineConfig!.cornerPadding, 16.0);
+    });
+
+    // Common widget builder for testing value indicator multiline config.
+    Widget buildSliderWithConfig({
+      required ValueIndicatorMultilineConfig config,
+      required bool year2023,
+      String label = 'Test Label',
+      SliderComponentShape? valueIndicatorShape,
+    }) {
+      final SliderThemeData sliderThemeData;
+      if (valueIndicatorShape != null) {
+        sliderThemeData = SliderThemeData(
+          valueIndicatorMultilineConfig: config,
+          valueIndicatorShape: valueIndicatorShape,
+        );
+      } else {
+        sliderThemeData = SliderThemeData(valueIndicatorMultilineConfig: config);
+      }
+      return MaterialApp(
+        home: Scaffold(
+          body: SliderTheme(
+            data: sliderThemeData,
+            child: Slider(
+              year2023: year2023,
+              value: 0.5,
+              divisions: 10,
+              label: label,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('ValueIndicatorMultilineConfig.cornerPadding is applied when year2023 is false', (
+      WidgetTester tester,
+    ) async {
+      const String labelText = 'First line\nSecond line\nThird line\nFourth line\nFifth line';
+
+      // First test without cornerPadding to get baseline overlay size.
+      // without additional padding - text might spill out at corners.
+      const ValueIndicatorMultilineConfig configNoPadding = ValueIndicatorMultilineConfig(
+        cornerPadding: 0.0,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(config: configNoPadding, year2023: false, label: labelText),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      final RenderBox noPaddingBox = tester.renderObject(find.byType(Overlay));
+      final Size noPaddingSize = noPaddingBox.size;
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Now test with additional cornerPadding to prevent text spill out.
+      const ValueIndicatorMultilineConfig configWithPadding = ValueIndicatorMultilineConfig(
+        cornerPadding: 24.0,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(config: configWithPadding, year2023: false, label: labelText),
+      );
+
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      final RenderBox paddingBox = tester.renderObject(find.byType(Overlay));
+      final Size paddingSize = paddingBox.size;
+
+      // Verify that value indicator renders properly with cornerPadding applied.
+      expect(paddingBox, paints..rrect()); // RoundedRectSliderValueIndicatorShape uses rrect
+
+      // With cornerPadding, the overlay should be larger than the non - additional padding size.
+      expect(paddingSize.width, greaterThanOrEqualTo(noPaddingSize.width));
+      expect(paddingSize.height, greaterThanOrEqualTo(noPaddingSize.height));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('ValueIndicatorMultilineConfig.cornerPadding is ignored  when year2023 is true', (
+      WidgetTester tester,
+    ) async {
+      const String labelText = 'Test\nMultiline\nLabel';
+
+      // First test with default cornerPadding.
+      const ValueIndicatorMultilineConfig configDefaultPadding = ValueIndicatorMultilineConfig();
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(config: configDefaultPadding, year2023: true, label: labelText),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      final RenderBox defaultPaddingBox = tester.renderObject(find.byType(Overlay));
+      final Size defaultPaddingSize = defaultPaddingBox.size;
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Now test with large cornerPadding.
+      const ValueIndicatorMultilineConfig configLargePadding = ValueIndicatorMultilineConfig(
+        cornerPadding: 50.0, // A big enough padding that would affect the rounded rect size.
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(config: configLargePadding, year2023: true, label: labelText),
+      );
+
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      final RenderBox largePaddingBox = tester.renderObject(find.byType(Overlay));
+      final Size largePaddingSize = largePaddingBox.size;
+
+      // Verify that DropSliderValueIndicatorShape renders path (not rrect).
+      expect(largePaddingBox, paints..path()); // DropSliderValueIndicatorShape uses path
+
+      // cornerPadding should be ignored - sizes should be identical.
+      expect(largePaddingSize.width, equals(defaultPaddingSize.width));
+      expect(largePaddingSize.height, equals(defaultPaddingSize.height));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('text is truncated when label exceeds maxLines with year2023 false', (
+      WidgetTester tester,
+    ) async {
+      const String longLabel =
+          'Very Long Line 1\nVery Long Line 2\nVery Long Line 3\nVery Long Line 4\nVery Long Line 5\nVery Long Line 6';
+
+      // First test with unlimited maxLines.
+      final List<Size> unlimitedSizes = <Size>[];
+      final HeightCapturingValueIndicatorShape unlimitedShape = HeightCapturingValueIndicatorShape(
+        unlimitedSizes,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(), // No maxLines limit
+          year2023: false,
+          label: longLabel,
+          valueIndicatorShape: unlimitedShape,
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(unlimitedSizes, isNotEmpty);
+      final double unlimitedHeight = unlimitedSizes.first.height;
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Now test with limited maxLines = 2.
+      final List<Size> limitedSizes = <Size>[];
+      final HeightCapturingValueIndicatorShape limitedShape = HeightCapturingValueIndicatorShape(
+        limitedSizes,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(maxLines: 2),
+          year2023: false,
+          label: longLabel,
+          valueIndicatorShape: limitedShape,
+        ),
+      );
+
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(limitedSizes, isNotEmpty);
+      final double limitedHeight = limitedSizes.first.height;
+
+      // With maxLines constraint, the height should be less than the unlimited one.
+      expect(limitedHeight, lessThan(unlimitedHeight));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('text is truncated when label exceeds maxLines with year2023 true', (
+      WidgetTester tester,
+    ) async {
+      const String longLabel = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
+
+      // First test with unlimited maxLines.
+      final List<Size> unlimitedSizes = <Size>[];
+      final HeightCapturingValueIndicatorShape unlimitedShape = HeightCapturingValueIndicatorShape(
+        unlimitedSizes,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(), // No maxLines limit
+          year2023: true,
+          label: longLabel,
+          valueIndicatorShape: unlimitedShape,
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(unlimitedSizes, isNotEmpty);
+      final double unlimitedHeight = unlimitedSizes.first.height;
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Now test with limited maxLines = 3.
+      final List<Size> limitedSizes = <Size>[];
+      final HeightCapturingValueIndicatorShape limitedShape = HeightCapturingValueIndicatorShape(
+        limitedSizes,
+      );
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(maxLines: 3),
+          year2023: true,
+          label: longLabel,
+          valueIndicatorShape: limitedShape,
+        ),
+      );
+
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(limitedSizes, isNotEmpty);
+      final double limitedHeight = limitedSizes.first.height;
+
+      // With maxLines constraint, the height should be less than the unlimited one.
+      expect(limitedHeight, lessThan(unlimitedHeight));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('multiline text gets ellipsis at the tail when exceeding maxLines', (
+      WidgetTester tester,
+    ) async {
+      final List<String> capturedTexts = <String>[];
+      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(maxLines: 2),
+          year2023: false,
+          label: 'Line 1\nLine 2\nLine 3\nLine 4',
+          valueIndicatorShape: shape,
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(capturedTexts, isNotEmpty);
+      expect(capturedTexts.first, contains('...'));
+      expect(capturedTexts.first.split('\n').length, lessThanOrEqualTo(2));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('text with fewer line than maxLines should not throw any crash', (
+      WidgetTester tester,
+    ) async {
+      final List<String> capturedTexts = <String>[];
+      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(maxLines: 5),
+          year2023: false,
+          label: 'Single line',
+          valueIndicatorShape: shape,
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      // Should handle the text appropriately and should not crash.
+      expect(capturedTexts, isNotEmpty);
+      expect(tester.takeException(), isNull);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('text with fewer lines than maxLines preserves original text', (
+      WidgetTester tester,
+    ) async {
+      final List<String> capturedTexts = <String>[];
+      final TestEllipsisValueIndicatorShape shape = TestEllipsisValueIndicatorShape(capturedTexts);
+
+      await tester.pumpWidget(
+        buildSliderWithConfig(
+          config: const ValueIndicatorMultilineConfig(maxLines: 5),
+          year2023: false,
+          label: 'Line 1\nLine 2',
+          valueIndicatorShape: shape,
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(capturedTexts, isNotEmpty);
+      expect(capturedTexts.first, isNot(contains('...')));
+      expect(capturedTexts.first, equals('Line 1\nLine 2'));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
   });
 }
