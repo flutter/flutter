@@ -1604,10 +1604,7 @@ void main() {
                 onTap: () {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(
-                        const SnackBar(
-                          content: Text('snack'),
-                          duration: Duration(seconds: 2),
-                        ),
+                        const SnackBar(content: Text('snack'), duration: Duration(seconds: 2)),
                       )
                       .closed
                       .then<void>((SnackBarClosedReason reason) {

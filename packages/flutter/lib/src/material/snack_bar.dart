@@ -612,6 +612,7 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -796,7 +797,7 @@ class _SnackBarState extends State<SnackBar> {
       clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
-        child: theme.useMaterial3
+        child: accessibleNavigation || theme.useMaterial3
             ? snackBar
             : FadeTransition(opacity: _fadeOutAnimation!, child: snackBar),
       ),
@@ -838,7 +839,9 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     final Widget snackBarTransition;
-    if (isFloatingSnackBar && !theme.useMaterial3) {
+    if (accessibleNavigation) {
+      snackBarTransition = snackBar;
+    } else if (isFloatingSnackBar && !theme.useMaterial3) {
       snackBarTransition = FadeTransition(opacity: _fadeInAnimation!, child: snackBar);
       // Is Material 3 Floating Snack Bar.
     } else if (isFloatingSnackBar && theme.useMaterial3) {
