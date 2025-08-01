@@ -4,7 +4,6 @@
 
 #include "flutter/display_list/testing/dl_test_surface_gl.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 

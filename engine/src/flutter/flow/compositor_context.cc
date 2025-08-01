@@ -7,7 +7,6 @@
 #include <optional>
 #include <utility>
 #include "flutter/flow/layers/layer_tree.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flutter {
 
