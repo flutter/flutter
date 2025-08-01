@@ -972,6 +972,7 @@ class DebuggingOptions {
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
@@ -1006,6 +1007,7 @@ class DebuggingOptions {
     this.enableVulkanValidation = false,
     this.uninstallFirst = false,
     this.enableDartProfiling = true,
+    this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
@@ -1091,6 +1093,7 @@ class DebuggingOptions {
     required this.enableVulkanValidation,
     required this.uninstallFirst,
     required this.enableDartProfiling,
+    required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
@@ -1138,6 +1141,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
+  final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
@@ -1198,6 +1202,7 @@ class DebuggingOptions {
   }) {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
+      if (profileStartup) '--profile-startup',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
@@ -1291,6 +1296,7 @@ class DebuggingOptions {
     'enableFlutterGpu': enableFlutterGpu,
     'enableVulkanValidation': enableVulkanValidation,
     'enableDartProfiling': enableDartProfiling,
+    'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
@@ -1361,6 +1367,7 @@ class DebuggingOptions {
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
         debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
