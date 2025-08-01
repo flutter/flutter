@@ -61,13 +61,7 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
   set -e
 
-  # If we found a merge-base, check for changes to the engine.
-  # If there are changes, use the merge-base as the base for the hash.
-  if [[ -n "$MERGEBASE" ]]; then
-    if ! git -C "$FLUTTER_ROOT" diff --quiet "$MERGEBASE" -- $TRACKEDFILES; then
-      BASEREF="$MERGEBASE"
-    fi
-  fi
+  BASEREF="$MERGEBASE"
 fi
 
 git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" $BASEREF -- $TRACKEDFILES | git hash-object --stdin

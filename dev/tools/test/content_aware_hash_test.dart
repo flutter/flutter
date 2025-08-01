@@ -125,8 +125,8 @@ void main() {
     final List<String> args;
     if (const LocalPlatform().isWindows) {
       executable = 'powershell';
-      // ExecutionPolicy required to execute scripts from temp files on
-      // Windows 11.
+      // "ExecutionPolicy Bypass" is required to execute scripts from temp
+      // folders on Windows 11 machines.
       args = <String>['-ExecutionPolicy', 'Bypass', '-File', testRoot.contentAwareHashPs1.path];
     } else if (usePowershellOnPosix) {
       executable = 'pwsh';

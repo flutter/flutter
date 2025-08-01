@@ -63,14 +63,7 @@ if (($currentBranch -ne "main") -and
         $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/main" 2>$null).Trim()
     }
 
-    # If we found a merge-base, check for changes to the engine.
-    # If there are changes, use the merge-base as the base for the hash.
-    if (-not [string]::IsNullOrEmpty($mergeBase)) {
-        git -C "$flutterRoot" diff --quiet "$mergeBase" -- $trackedFiles
-        if ($LASTEXITCODE -ne 0) {
-            $baseRef = $mergeBase
-        }
-    }
+    $baseRef = $mergeBase
 }
 
 # Removing the "cmd" requirement enables powershell usage on other hosts
