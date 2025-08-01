@@ -38,32 +38,6 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
-/// Defines the possible types for a window.
-///
-/// {@template flutter.widgets.windowing.experimental}
-/// Do not use this API in production applications or packages published to
-/// pub.dev. Flutter will make breaking changes to this API, even in patch
-/// versions.
-///
-/// This API throws an [UnsupportedError] error unless Flutter’s windowing
-/// feature is enabled by [isWindowingEnabled].
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
-/// {@endtemplate}
-@internal
-enum WindowType {
-  /// Defines a traditional window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  ///  * [RegularWindow], the widget for a regular window.
-  ///  * [RegularWindowController], the controller that creates and manages regular windows.
-  @internal
-  regular,
-}
-
 /// Base class for window controllers.
 ///
 /// A [BaseWindowController] is associated with exactly one root [FlutterView].
@@ -77,13 +51,7 @@ enum WindowType {
 ///
 ///  * [RegularWindowController], the controller for regular top-level windows.
 @internal
-abstract class BaseWindowController {
-  /// The type of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  WindowType get type;
-
+sealed class BaseWindowController {
   /// The current size of the drawable area of the window.
   ///
   /// This might differ from the requested size.
@@ -94,43 +62,6 @@ abstract class BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   Size get contentSize;
-
-  /// The current title of the window.
-  ///
-  /// This may be null for windows without a title.
-  ///
-  /// This might differ from the requested title.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  String? get title;
-
-  /// Whether the window is currently activated.
-  ///
-  /// This means that the window is currently focused and
-  /// can receive user input.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isActivated;
-
-  /// Whether or now the window is currently maximized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMaximized;
-
-  /// Whether or not window is currently minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isMinimized;
-
-  /// Whether or not the window is currently in fullscreen mode.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isFullscreen;
 
   /// Destroys this window.
   ///
@@ -311,10 +242,42 @@ abstract class RegularWindowController extends BaseWindowController {
   @protected
   RegularWindowController.empty();
 
+  /// The current title of the window.
+  ///
+  /// This may be null for windows without a title.
+  ///
+  /// This might differ from the requested title.
+  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  @override
-  WindowType get type => WindowType.regular;
+  String get title;
+
+  /// Whether the window is currently activated.
+  ///
+  /// This means that the window is currently focused and
+  /// can receive user input.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated;
+
+  /// Whether or now the window is currently maximized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMaximized;
+
+  /// Whether or not window is currently minimized.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isMinimized;
+
+  /// Whether or not the window is currently in fullscreen mode.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isFullscreen;
 
   /// Request change to the content size of the window.
   ///
@@ -632,22 +595,27 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   static Size? maybeContentSizeOf(BuildContext context) =>
       _maybeOf(context, _WindowControllerAspect.contentSize)?.contentSize;
 
-  /// Returns [BaseWindowController.title] of the nearest [WindowControllerScope].
+  /// Returns the title of the controller in the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  ///
+  /// If the window associated with the controller does not support titles,
+  /// this method will throw an [UnsupportedError].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.title], which returns the current title of the window.
+  /// * [RegularWindowController.title], which returns the current title of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
-  static String? titleOf(BuildContext context) {
-    return _of(context, _WindowControllerAspect.title).title;
+  static String titleOf(BuildContext context) {
+    final BaseWindowController controller = _of(context, _WindowControllerAspect.title);
+    return switch (controller) {
+      RegularWindowController() => controller.title,
+    };
   }
 
-  /// Returns [BaseWindowController.title] of the nearest [WindowControllerScope],
-  /// or null if not found.
+  /// Returns title of the nearest [WindowControllerScope], or null if not found.
   ///
   /// If [isWindowingEnabled] is `false`, this method will throw an
   /// [UnsupportedError].
@@ -659,12 +627,22 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static String? maybeTitleOf(BuildContext context) {
-    return _maybeOf(context, _WindowControllerAspect.title)?.title;
+    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.title);
+    if (controller == null) {
+      return null;
+    }
+
+    return switch (controller) {
+      RegularWindowController() => controller.title,
+    };
   }
 
   /// Returns [BaseWindowController.isActivated] of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  ///
+  /// If the window associated with the controller does not support activation,
+  /// this method will throw an [UnsupportedError].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -673,7 +651,10 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isActivatedOf(BuildContext context) {
-    return _of(context, _WindowControllerAspect.activated).isActivated;
+    final BaseWindowController controller = _of(context, _WindowControllerAspect.activated);
+    return switch (controller) {
+      RegularWindowController() => controller.isActivated,
+    };
   }
 
   /// Returns [BaseWindowController.isActivated] of the nearest [WindowControllerScope],
@@ -689,12 +670,22 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsActivatedOf(BuildContext context) {
-    return _maybeOf(context, _WindowControllerAspect.activated)?.isActivated;
+    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.activated);
+    if (controller == null) {
+      return null;
+    }
+
+    return switch (controller) {
+      RegularWindowController() => controller.isActivated,
+    };
   }
 
   /// Returns [BaseWindowController.isMinimized] of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  ///
+  /// If the window associated with the controller does not support minimization,
+  /// this method will throw an [UnsupportedError].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -703,7 +694,10 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMinimizedOf(BuildContext context) {
-    return _of(context, _WindowControllerAspect.minimized).isMinimized;
+    final BaseWindowController controller = _of(context, _WindowControllerAspect.minimized);
+    return switch (controller) {
+      RegularWindowController() => controller.isMinimized,
+    };
   }
 
   /// Returns [BaseWindowController.isMinimized] of the nearest [WindowControllerScope],
@@ -719,12 +713,22 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMinimizedOf(BuildContext context) {
-    return _maybeOf(context, _WindowControllerAspect.minimized)?.isMinimized;
+    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.minimized);
+    if (controller == null) {
+      return null;
+    }
+
+    return switch (controller) {
+      RegularWindowController() => controller.isMinimized,
+    };
   }
 
   /// Returns [BaseWindowController.isMaximized] of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  ///
+  /// If the window associated with the controller does not support maximization,
+  /// this method will throw an [UnsupportedError].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -733,7 +737,10 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMaximizedOf(BuildContext context) {
-    return _of(context, _WindowControllerAspect.maximized).isMaximized;
+    final BaseWindowController controller = _of(context, _WindowControllerAspect.maximized);
+    return switch (controller) {
+      RegularWindowController() => controller.isMaximized,
+    };
   }
 
   /// Returns [BaseWindowController.isMaximized] of the nearest [WindowControllerScope],
@@ -749,12 +756,22 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMaximizedOf(BuildContext context) {
-    return _maybeOf(context, _WindowControllerAspect.maximized)?.isMaximized;
+    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.maximized);
+    if (controller == null) {
+      return null;
+    }
+
+    return switch (controller) {
+      RegularWindowController() => controller.isMaximized,
+    };
   }
 
   /// Returns [BaseWindowController.isFullscreen] of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
+  ///
+  /// If the window associated with the controller does not support fullscreen,
+  /// this method will throw an [UnsupportedError].
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -764,7 +781,11 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isFullscreenOf(BuildContext context) {
-    return _of(context, _WindowControllerAspect.fullscreen).isFullscreen;
+    final BaseWindowController controller = _of(context, _WindowControllerAspect.fullscreen);
+
+    return switch (controller) {
+      RegularWindowController() => controller.isFullscreen,
+    };
   }
 
   /// Returns [BaseWindowController.isFullscreen] of the nearest [WindowControllerScope],
@@ -781,7 +802,14 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsFullscreenOf(BuildContext context) {
-    return _maybeOf(context, _WindowControllerAspect.fullscreen)?.isFullscreen;
+    final BaseWindowController? controller = _maybeOf(context, _WindowControllerAspect.fullscreen);
+    if (controller == null) {
+      return null;
+    }
+
+    return switch (controller) {
+      RegularWindowController() => controller.isFullscreen,
+    };
   }
 
   static BaseWindowController _of(BuildContext context, [_WindowControllerAspect? aspect]) {
@@ -840,15 +868,30 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
           switch (dependency) {
             _WindowControllerAspect.contentSize =>
               controller.contentSize != oldWidget.controller.contentSize,
-            _WindowControllerAspect.title => controller.title != oldWidget.controller.title,
-            _WindowControllerAspect.activated =>
-              controller.isActivated != oldWidget.controller.isActivated,
-            _WindowControllerAspect.maximized =>
-              controller.isMaximized != oldWidget.controller.isMaximized,
-            _WindowControllerAspect.minimized =>
-              controller.isMinimized != oldWidget.controller.isMinimized,
-            _WindowControllerAspect.fullscreen =>
-              controller.isFullscreen != oldWidget.controller.isFullscreen,
+            _WindowControllerAspect.title => switch (controller) {
+              final RegularWindowController regular =>
+                regular.title != (oldWidget.controller as RegularWindowController).title,
+            },
+            _WindowControllerAspect.activated => switch (controller) {
+              final RegularWindowController regular =>
+                regular.isActivated !=
+                    (oldWidget.controller as RegularWindowController).isActivated,
+            },
+            _WindowControllerAspect.maximized => switch (controller) {
+              final RegularWindowController regular =>
+                regular.isMaximized !=
+                    (oldWidget.controller as RegularWindowController).isMaximized,
+            },
+            _WindowControllerAspect.minimized => switch (controller) {
+              final RegularWindowController regular =>
+                regular.isMinimized !=
+                    (oldWidget.controller as RegularWindowController).isMinimized,
+            },
+            _WindowControllerAspect.fullscreen => switch (controller) {
+              final RegularWindowController regular =>
+                regular.isFullscreen !=
+                    (oldWidget.controller as RegularWindowController).isFullscreen,
+            },
           },
     );
   }
