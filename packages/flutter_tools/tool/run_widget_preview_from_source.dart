@@ -21,7 +21,7 @@ import 'package:path/path.dart' as path;
 /// NOTE: this script does not update the template_manifest.json, which must be done manually.
 Future<void> main(List<String> args) async {
   final String flutterDev = Platform.script
-      .resolve('../bin/flutter-dev${Platform.isWindows ? '.bat' : ''}')
+      .resolve('../../../bin/flutter-dev${Platform.isWindows ? '.bat' : ''}')
       .toFilePath();
   final ProcessResult result = Process.runSync(flutterDev, <String>['widget-preview', 'clean']);
   if (result.exitCode != 0) {

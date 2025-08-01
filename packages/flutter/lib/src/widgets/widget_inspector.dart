@@ -3808,10 +3808,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
   @override
   Widget build(BuildContext context) {
     final Widget selectionModeButtons = Column(
-      children: <Widget>[
-        if (_tapBehaviorButton != null) _tapBehaviorButton!,
-        _exitWidgetSelectionButton,
-      ],
+      children: <Widget>[?_tapBehaviorButton, _exitWidgetSelectionButton],
     );
 
     final Widget buttonGroup = Stack(
@@ -3829,7 +3826,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (_usesDefaultAlignment) selectionModeButtons,
-            if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
+            ?_moveExitWidgetSelectionButton,
             if (!_usesDefaultAlignment) selectionModeButtons,
           ],
         ),
@@ -4086,7 +4083,7 @@ class _Location {
   }
 
   @override
-  String toString() => <String>[if (name != null) name!, file, '$line', '$column'].join(':');
+  String toString() => <String>[?name, file, '$line', '$column'].join(':');
 }
 
 bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;

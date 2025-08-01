@@ -8,9 +8,9 @@
 
 namespace flutter {
 
-EmbedderLayers::EmbedderLayers(SkISize frame_size,
+EmbedderLayers::EmbedderLayers(DlISize frame_size,
                                double device_pixel_ratio,
-                               SkMatrix root_surface_transformation,
+                               DlMatrix root_surface_transformation,
                                uint64_t presentation_time)
     : frame_size_(frame_size),
       device_pixel_ratio_(device_pixel_ratio),
@@ -28,28 +28,27 @@ void EmbedderLayers::PushBackingStoreLayer(
   layer.type = kFlutterLayerContentTypeBackingStore;
   layer.backing_store = store;
 
-  const auto layer_bounds =
-      SkRect::MakeWH(frame_size_.width(), frame_size_.height());
+  const auto layer_bounds = DlRect::MakeSize(frame_size_);
 
   const auto transformed_layer_bounds =
-      root_surface_transformation_.mapRect(layer_bounds);
+      layer_bounds.TransformAndClipBounds(root_surface_transformation_);
 
-  layer.offset.x = transformed_layer_bounds.x();
-  layer.offset.y = transformed_layer_bounds.y();
-  layer.size.width = transformed_layer_bounds.width();
-  layer.size.height = transformed_layer_bounds.height();
+  layer.offset.x = transformed_layer_bounds.GetX();
+  layer.offset.y = transformed_layer_bounds.GetY();
+  layer.size.width = transformed_layer_bounds.GetWidth();
+  layer.size.height = transformed_layer_bounds.GetHeight();
 
   auto paint_region_rects = std::make_unique<std::vector<FlutterRect>>();
   paint_region_rects->reserve(paint_region_vec.size());
 
   for (const auto& rect : paint_region_vec) {
     auto transformed_rect =
-        root_surface_transformation_.mapRect(SkRect::Make(ToSkIRect(rect)));
+        DlRect::Make(rect).TransformAndClipBounds(root_surface_transformation_);
     paint_region_rects->push_back(FlutterRect{
-        transformed_rect.x(),
-        transformed_rect.y(),
-        transformed_rect.right(),
-        transformed_rect.bottom(),
+        .left = transformed_rect.GetLeft(),
+        .top = transformed_rect.GetTop(),
+        .right = transformed_rect.GetRight(),
+        .bottom = transformed_rect.GetBottom(),
     });
   }
 
@@ -194,10 +193,11 @@ void EmbedderLayers::PushPlatformViewLayer(
     if (!mutations_array.empty()) {
       // If there are going to be any mutations, they must first take into
       // account the root surface transformation.
-      if (!root_surface_transformation_.isIdentity()) {
-        auto matrix = ToDlMatrix(root_surface_transformation_);
+      if (!root_surface_transformation_.IsIdentity()) {
         mutations_array.push_back(
-            mutations_referenced_.emplace_back(ConvertMutation(matrix)).get());
+            mutations_referenced_
+                .emplace_back(ConvertMutation(root_surface_transformation_))
+                .get());
       }
 
       auto mutations =
@@ -220,19 +220,19 @@ void EmbedderLayers::PushPlatformViewLayer(
   layer.platform_view = platform_views_referenced_.back().get();
 
   const auto layer_bounds =
-      SkRect::MakeXYWH(params.finalBoundingRect().x(),                     //
-                       params.finalBoundingRect().y(),                     //
-                       params.sizePoints().width() * device_pixel_ratio_,  //
-                       params.sizePoints().height() * device_pixel_ratio_  //
+      DlRect::MakeXYWH(params.finalBoundingRect().GetX(),                //
+                       params.finalBoundingRect().GetY(),                //
+                       params.sizePoints().width * device_pixel_ratio_,  //
+                       params.sizePoints().height * device_pixel_ratio_  //
       );
 
   const auto transformed_layer_bounds =
-      root_surface_transformation_.mapRect(layer_bounds);
+      layer_bounds.TransformAndClipBounds(root_surface_transformation_);
 
-  layer.offset.x = transformed_layer_bounds.x();
-  layer.offset.y = transformed_layer_bounds.y();
-  layer.size.width = transformed_layer_bounds.width();
-  layer.size.height = transformed_layer_bounds.height();
+  layer.offset.x = transformed_layer_bounds.GetX();
+  layer.offset.y = transformed_layer_bounds.GetY();
+  layer.size.width = transformed_layer_bounds.GetWidth();
+  layer.size.height = transformed_layer_bounds.GetHeight();
 
   layer.presentation_time = presentation_time_;
 
