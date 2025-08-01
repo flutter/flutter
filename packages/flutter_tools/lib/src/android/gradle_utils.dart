@@ -160,7 +160,7 @@ final distributionUrlRegex = RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiL
 // gradle.org urls so that we can guarantee any modifications to the url
 // still points to a hosted zip.
 final gradleOrgVersionMatch = RegExp(
-  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-([\d.]+)-(.*)\.zip',
   multiLine: true,
 );
 
