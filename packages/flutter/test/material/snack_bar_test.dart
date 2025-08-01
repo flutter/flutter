@@ -1607,12 +1607,6 @@ void main() {
                         const SnackBar(
                           content: Text('snack'),
                           duration: Duration(seconds: 2),
-                          // action: SnackBarAction(
-                          //   label: 'ACTION',
-                          //   onPressed: () {
-                          //     actionPressed = true;
-                          //   },
-                          // ),
                         ),
                       )
                       .closed
