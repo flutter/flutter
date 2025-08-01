@@ -589,8 +589,6 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_master", "deploy"]
       docs: >
         {"build": "master", "deploy": "main-docs-flutter-prod"}
       validation: docs
@@ -619,8 +617,6 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_stable"]
       docs: >
         {"build": "stable"}
       validation: docs
@@ -655,8 +651,6 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["post_process", "deploy"]
       docs: >
         {"post_process": "stable", "deploy": "docs-flutter-dev"}
       validation: docs_deploy
