@@ -1592,6 +1592,77 @@ void main() {
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
         GlobalKey<ScaffoldMessengerState>();
+    SnackBarClosedReason? closedReason;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+                        const SnackBar(
+                          content: Text('snack'),
+                          duration: Duration(seconds: 2),
+                          // action: SnackBarAction(
+                          //   label: 'ACTION',
+                          //   onPressed: () {
+                          //     actionPressed = true;
+                          //   },
+                          // ),
+                        ),
+                      )
+                      .closed
+                      .then<void>((SnackBarClosedReason reason) {
+                        closedReason = reason;
+                      });
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pop up the snack bar and then swipe downwards to dismiss it.
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('snack'), const Offset(0.0, 50.0));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.swipe));
+
+    // Pop up the snack bar and then remove it.
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 750));
+    scaffoldMessengerKey.currentState!.removeCurrentSnackBar();
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.remove));
+
+    // Pop up the snack bar and then hide it.
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 750));
+    scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.hide));
+
+    // Pop up the snack bar and then let it time out.
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pump(); // begin animation
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.timeout));
+  });
+
+  testWidgets('SnackBarClosedReason - snack bar with action', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+        GlobalKey<ScaffoldMessengerState>();
     bool actionPressed = false;
     SnackBarClosedReason? closedReason;
 
@@ -1642,37 +1713,6 @@ void main() {
     // Wait for animation to complete.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.action));
-
-    // Pop up the snack bar and then swipe downwards to dismiss it.
-    await tester.tap(find.text('X'));
-    await tester.pump(const Duration(milliseconds: 750));
-    await tester.pump(const Duration(milliseconds: 750));
-    await tester.drag(find.text('snack'), const Offset(0.0, 50.0));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(closedReason, equals(SnackBarClosedReason.swipe));
-
-    // Pop up the snack bar and then remove it.
-    await tester.tap(find.text('X'));
-    await tester.pump(const Duration(milliseconds: 750));
-    scaffoldMessengerKey.currentState!.removeCurrentSnackBar();
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(closedReason, equals(SnackBarClosedReason.remove));
-
-    // Pop up the snack bar and then hide it.
-    await tester.tap(find.text('X'));
-    await tester.pump(const Duration(milliseconds: 750));
-    scaffoldMessengerKey.currentState!.hideCurrentSnackBar();
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(closedReason, equals(SnackBarClosedReason.hide));
-
-    // Pop up the snack bar and then let it time out.
-    await tester.tap(find.text('X'));
-    await tester.pump(const Duration(milliseconds: 750));
-    await tester.pump(const Duration(milliseconds: 750));
-    await tester.pump(const Duration(milliseconds: 1500));
-    await tester.pump(); // begin animation
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
@@ -1821,36 +1861,33 @@ void main() {
     expect(find.text(helloSnackBar), findsNothing);
   });
 
-  testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
-    Future<void> boilerplate({required bool accessibleNavigation}) {
+  testWidgets('SnackBar with action does not time out', (WidgetTester tester) async {
+    Future<void> boilerplate() {
       return tester.pumpWidget(
         MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
-            child: Scaffold(
-              body: Builder(
-                builder: (BuildContext context) {
-                  return GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('test'),
-                          action: SnackBarAction(label: 'foo', onPressed: () {}),
-                        ),
-                      );
-                    },
-                    behavior: HitTestBehavior.opaque,
-                    child: const Text('X'),
-                  );
-                },
-              ),
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('test'),
+                        action: SnackBarAction(label: 'foo', onPressed: () {}),
+                      ),
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: const Text('X'),
+                );
+              },
             ),
           ),
         ),
       );
     }
 
-    await boilerplate(accessibleNavigation: false);
+    await boilerplate();
     expect(find.text('test'), findsNothing);
     await tester.tap(find.text('X'));
     await tester.pump(); // schedule animation
@@ -1859,18 +1896,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 4750)); // 4.75s
     expect(find.text('test'), findsOneWidget);
 
-    // Enabled accessible navigation
-    await boilerplate(accessibleNavigation: true);
+    await boilerplate();
 
     await tester.pump(const Duration(milliseconds: 4000)); // 8.75s
     await tester.pump();
     expect(find.text('test'), findsOneWidget);
 
-    // disable accessible navigation
-    await boilerplate(accessibleNavigation: false);
+    await boilerplate();
     await tester.pumpAndSettle(const Duration(milliseconds: 5750));
 
-    expect(find.text('test'), findsNothing);
+    expect(find.text('test'), findsOneWidget);
   });
 
   testWidgets('Snackbar calls onVisible once', (WidgetTester tester) async {
