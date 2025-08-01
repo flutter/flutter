@@ -152,6 +152,7 @@ mixin class RegularWindowControllerDelegate {
 /// controller to release the resources associated with the window.
 ///
 /// An example usage might look like:
+///
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
 ///   preferredSize: Size(800, 600),
@@ -166,9 +167,8 @@ mixin class RegularWindowControllerDelegate {
 /// );
 /// ```
 ///
-/// When provided to a [RegularWindow] widget, widgets inside of the [child]
-/// parameter will have access to the [RegularWindowController] via the
-/// [WindowScope] widget.
+/// Children of a [RegularWindow] widget can access the [RegularWindowController]
+/// via the [WindowControllerScope] inherited widget.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -197,7 +197,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// If the [preferredSize] is null, then the platform will use an
   /// initial size that satisfies the [preferredConstraints].
   ///
-  /// If the [preferredSize] is not null and it does  not satisfy the
+  /// If the [preferredSize] is not null and it does not satisfy the
   /// [preferredConstraints], then the platform will use an
   /// initial size that does satisfy the [preferredConstraints] instead.
   ///
@@ -251,7 +251,7 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// Whether the window is currently activated.
   ///
-  /// This means that the window is currently focused and
+  /// If `true` this means that the window is currently focused and
   /// can receive user input.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -359,8 +359,7 @@ abstract class RegularWindowController extends BaseWindowController {
 
 /// [WindowingOwner] is responsible for creating and managing window controllers.
 ///
-/// Custom subclass can be provided by subclassing [WidgetsBinding] and
-/// overriding the [createWindowingOwner] method.
+/// A custom implementation can be provided by setting [WidgetsBinding.windowingOwner].
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
@@ -437,6 +436,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// [RegularWindowController] via the [WindowScope] widget.
 ///
 /// An example usage might look like:
+///
 /// ```dart
 /// final RegularWindowController controller = RegularWindowController(
 ///   preferredSize: Size(800, 600),
@@ -486,9 +486,9 @@ class RegularWindow extends StatelessWidget {
   @internal
   @override
   Widget build(BuildContext context) {
-    return View(
-      view: controller.rootView,
-      child: WindowScope(controller: controller, child: child),
+    return WindowScope(
+      controller: controller,
+      child: View(view: controller.rootView, child: child),
     );
   }
 }
@@ -497,6 +497,10 @@ enum _WindowControllerAspect { contentSize, title, activated, maximized, minimiz
 
 /// Provides descendants with access to the [BaseWindowController] associated with
 /// the window that is being rendered.
+///
+/// Windows created using native APIs do not have a `WindowScope`.
+/// This includes the initial window created by the native entrypoint
+/// that [runApp] attaches to.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
@@ -531,10 +535,14 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 
   /// Returns the [BaseWindowController] for the window that hosts the given context.
   ///
-  /// {@template flutter.widgets.windowing.WindowScope.of}
-  /// If there is no [WindowScope] in scope, this method
+  /// {@template flutter.widgets.windowing.windowControllerScope.of}
+  /// If there is no [WindowControllerScope] in scope, this method
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
+  ///
+  /// Windows creating using native APIs do not have a `WindowScope`.
+  /// This includes the initial window created by the native entrypoint
+  /// that [runApp] attaches to.
   /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
@@ -655,7 +663,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   /// Returns the activation status of the nearest [WindowScope],
-  /// or null if not found
+  /// or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -697,7 +705,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   /// Returns the minimization status of the nearest [WindowScope],
-  /// or null if not found
+  /// or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -739,7 +747,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   /// Returns the maximization status of the nearest [WindowScope],
-  /// or null if not found
+  /// or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -782,7 +790,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   /// Returns the fullscreen status of the nearest [WindowScope],
-  /// or null if not found
+  /// or null if not found.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
