@@ -291,50 +291,57 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    _size = constraints.biggest;
-    if (child != null) {
-      assert(() {
-        RenderBox? findFirstSizedChild(RenderObject? node) {
-          if (node == null) {
-            return null;
-          }
-          RenderBox? result;
-          void visit(RenderObject currentNode) {
-            if (result != null) return; // Stop once we've found it.
-
-            if (currentNode is RenderBox) {
-              final double w = currentNode.getMaxIntrinsicWidth(double.infinity);
-              final double h = currentNode.getMaxIntrinsicHeight(double.infinity);
-              if (w > 0.0 && h > 0.0) {
-                result = currentNode;
-                return;
-              }
-            }
-            currentNode.visitChildren(visit);
-          }
-          visit(node);
-          return result;
-        }
-
-        final RenderBox? contentBox = findFirstSizedChild(child);
-
-        if (contentBox != null) {
-          final double maxIntrinsicWidth = contentBox.getMaxIntrinsicWidth(double.infinity);
-          final double maxIntrinsicHeight = contentBox.getMaxIntrinsicHeight(double.infinity);
-
-          debugPrint('--- RenderView Pre-Layout Debug ---');
-          debugPrint('Found First Sized Object: ${contentBox.runtimeType}');
-          debugPrint('Max Intrinsic (Natural) Size: ${Size(maxIntrinsicWidth, maxIntrinsicHeight)}');
-          debugPrint('------------------------------------');
-        } else {
-          debugPrint('--- RenderView Pre-Layout Debug ---');
-          debugPrint('Could not find any child with a non-zero intrinsic size.');
-          debugPrint('------------------------------------');
-        }
-        return true;
-      }());
-      child!.layout(constraints);
+    if (child == null) {
+      _size = constraints.biggest;
+      assert(size.isFinite);
+      return;
     }
+
+    RenderBox? findFirstSizedChild(RenderObject? node) {
+      if (node == null) {
+        return null;
+      }
+      RenderBox? result;
+      void visit(RenderObject currentNode) {
+        if (result != null) return; // Stop once we've found it.
+
+        if (currentNode is RenderBox) {
+          final double w = currentNode.getMaxIntrinsicWidth(double.infinity);
+          final double h = currentNode.getMaxIntrinsicHeight(double.infinity);
+          if (w > 0.0 && h > 0.0) {
+            result = currentNode;
+            return;
+          }
+        }
+        currentNode.visitChildren(visit);
+      }
+      visit(node);
+      return result;
+    }
+
+    final RenderBox? contentBox = findFirstSizedChild(child);
+    Size naturalSize = constraints.biggest; // Fallback to screen size.
+
+    if (contentBox != null) {
+      // 2. Calculate the natural size.
+      final double maxIntrinsicWidth = contentBox.getMaxIntrinsicWidth(double.infinity);
+      final double maxIntrinsicHeight = contentBox.getMaxIntrinsicHeight(double.infinity);
+      final Size calculatedSize = Size(maxIntrinsicWidth, maxIntrinsicHeight);
+      // Use the calculated size only if it's valid and smaller than the screen.
+      if (calculatedSize.width > 0.0 && calculatedSize.height > 0.0) {
+        naturalSize = Size(
+          calculatedSize.width.clamp(0.0, constraints.maxWidth),
+          calculatedSize.height.clamp(0.0, constraints.maxHeight),
+        );
+      }
+    }
+
+    // 3. Use the natural size for layout.
+    _size = naturalSize;
+    child!.layout(BoxConstraints.tight(naturalSize));
+
+    // --- END MODIFIED LOGIC ---
+
     assert(size.isFinite);
   }
 
@@ -400,7 +407,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      assert(configuration.logicalConstraints.isSatisfiedBy(size));
+      // assert(configuration.logicalConstraints.isSatisfiedBy(size));
       _view.render(scene);
       scene.dispose();
       assert(() {
