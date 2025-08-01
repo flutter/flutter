@@ -44,6 +44,9 @@ flutter/flutter repository. It is based on the more comprehensive official
 - **Documentation should be useful**: Explain the *why* and the *how*.
 - **Introduce terms**: Assume the reader does not know everything. Link to definitions.
 - **Provide sample code**: Use `{@tool dartpad}` for runnable examples.
+  - Inline code samples are contained within `{@tool dartpad}` and `{@end-tool}`, and use the format of the following example to insert the code sample:
+    - `/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **`
+    - Do not confuse this format with `/// See also:` sections of the documentation, which provide helpful breadcrumbs to developers.
 - **Provide illustrations or screenshots** for widgets.
 - Use `///` for public-quality documentation, even on private members.
 
