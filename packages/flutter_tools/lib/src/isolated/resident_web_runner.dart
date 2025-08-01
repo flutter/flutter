@@ -823,7 +823,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       _wipConnection = await chromeTab.connect();
     }
     Uri? websocketUri;
-    appStartedCompleter?.complete();
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
       _connectionResult = await connectDebug;
@@ -925,6 +924,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       }
       _logger.printStatus('Debug service listening on $websocketUri');
     }
+    appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
     if (stayResident) {
       await waitForAppToFinish();
