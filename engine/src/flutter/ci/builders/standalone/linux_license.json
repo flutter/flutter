@@ -12,7 +12,8 @@
         "--runtime-mode",
         "release",
         "--no-rbe",
-        "--no-goma"
+        "--no-goma",
+        "--enable-minimal-linux"
     ],
     "ninja": {
         "config": "ci/host_release_licenses",
