@@ -80,13 +80,14 @@ static void SetClipScissor(std::optional<Rect> clip_coverage,
                            Point global_pass_position) {
   // Set the scissor to the clip coverage area. We do this prior to rendering
   // the clip itself and all its contents.
-  IRect scissor;
+  IRect32 scissor;
   if (clip_coverage.has_value()) {
     clip_coverage = clip_coverage->Shift(-global_pass_position);
-    scissor = IRect::RoundOut(clip_coverage.value());
+    scissor = IRect32::RoundOut(clip_coverage.value());
     // The scissor rect must not exceed the size of the render target.
-    scissor = scissor.Intersection(IRect::MakeSize(pass.GetRenderTargetSize()))
-                  .value_or(IRect());
+    scissor =
+        scissor.Intersection(IRect32::MakeSize(pass.GetRenderTargetSize()))
+            .value_or(IRect32());
   }
   pass.SetScissor(scissor);
 }
@@ -227,7 +228,7 @@ Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
                bool is_onscreen,
                bool requires_readback,
-               IRect cull_rect)
+               IRect32 cull_rect)
     : renderer_(renderer),
       render_target_(render_target),
       is_onscreen_(is_onscreen),

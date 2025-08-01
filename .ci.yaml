@@ -1192,7 +1192,6 @@ targets:
   - name: Linux linux_feature_flags_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     presubmit: false
     properties:
       xvfb: "1"
@@ -2347,15 +2346,6 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
-
-  - name: Linux_pixel_7pro android_obfuscate_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: android_obfuscate_test
 
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
