@@ -61,7 +61,9 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
   set -e
 
-  BASEREF="$MERGEBASE"
+  if [[ -n "$MERGEBASE" ]]; then
+    BASEREF="$MERGEBASE";
+  fi
 fi
 
 git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" $BASEREF -- $TRACKEDFILES | git hash-object --stdin

@@ -22,4 +22,3 @@ jobs:
           echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
           # test summary writing
           echo "{\"engine_content_hash\": \"${engine_content_hash}\"" >> $GITHUB_STEP_SUMMARY
-

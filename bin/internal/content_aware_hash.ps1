@@ -63,7 +63,9 @@ if (($currentBranch -ne "main") -and
     }
     $ErrorActionPreference = "Stop"
 
-    $baseRef = $mergeBase
+    if ($mergeBase) {
+        $baseRef = $mergeBase
+    }
 }
 
 # Removing the "cmd" requirement enables powershell usage on other hosts

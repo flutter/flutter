@@ -179,7 +179,8 @@ void main() {
   }
 
   String gitShaFor(String ref, {String? workingPath}) {
-    return run('git', <String>['rev-parse', ref], workingPath: workingPath).stdout as String;
+    return (run('git', <String>['rev-parse', ref], workingPath: workingPath).stdout as String)
+        .trim();
   }
 
   void writeFileAndCommit(File file, String contents) {
@@ -196,12 +197,12 @@ void main() {
   // beta should work.
 
   test('generates a hash or upstream/master', () async {
-    initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'master');
+    initGitRepoWithBlankInitialCommit();
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   test('generates a hash for origin/master', () {
-    initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'master');
+    initGitRepoWithBlankInitialCommit(remote: 'origin');
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
@@ -211,19 +212,19 @@ void main() {
   });
 
   test('generates a hash for upstream/main', () {
-    initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+    initGitRepoWithBlankInitialCommit(branch: 'main');
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   group('stable branches calculate hash locally', () {
     test('with no changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('stable');
       expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('stable');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
@@ -233,13 +234,13 @@ void main() {
 
   group('beta branches calculate hash locally', () {
     test('with no changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('beta');
       expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('beta');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
@@ -249,13 +250,13 @@ void main() {
 
   group('release branches calculate hash locally', () {
     test('with no changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('flutter-4.35-candidate.2');
       expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
     });
 
     test('with engine changes', () {
-      initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+      initGitRepoWithBlankInitialCommit(branch: 'main');
       gitSwitchBranch('flutter-4.35-candidate.2');
       writeFileAndCommit(testRoot.deps, 'deps changed');
 
@@ -275,7 +276,7 @@ void main() {
 
   test('generates a hash for shallow clones', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'blip');
-    final headSha = gitShaFor('HEAD');
+    final String headSha = gitShaFor('HEAD');
     testRoot.root
         .childFile(localFs.path.joinAll('.git/shallow'.split('/')))
         .writeAsStringSync(headSha);
@@ -365,6 +366,20 @@ void main() {
     initGitRepoWithBlankInitialCommit();
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
+  });
+
+  test('missing merge-base defaults to HEAD', () {
+    initGitRepoWithBlankInitialCommit();
+
+    run('git', <String>['branch', '-m', 'no-merge-base'], workingPath: testRoot.root.path);
+    run('git', <String>['remote', 'remove', 'upstream'], workingPath: testRoot.root.path);
+
+    writeFileAndCommit(testRoot.deps, 'deps changed');
+    expect(
+      runContentAwareHash(),
+      processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'),
+      reason: 'content hash from HEAD when no merge-base',
+    );
   });
 }
 
