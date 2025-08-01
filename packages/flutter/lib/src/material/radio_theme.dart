@@ -50,6 +50,7 @@ class RadioThemeData with Diagnosticable {
     this.materialTapTargetSize,
     this.visualDensity,
     this.backgroundColor,
+    this.side,
   });
 
   /// {@macro flutter.widget.RawRadio.mouseCursor}
@@ -90,6 +91,9 @@ class RadioThemeData with Diagnosticable {
   /// {@macro flutter.material.Radio.backgroundColor}
   final WidgetStateProperty<Color?>? backgroundColor;
 
+  /// {@macro flutter.material.Radio.side}
+  final BorderSide? side;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
@@ -100,6 +104,7 @@ class RadioThemeData with Diagnosticable {
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,
     WidgetStateProperty<Color?>? backgroundColor,
+    BorderSide? side,
   }) {
     return RadioThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -109,7 +114,25 @@ class RadioThemeData with Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       visualDensity: visualDensity ?? this.visualDensity,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      side: side ?? this.side,
     );
+  }
+
+  // Special case because BorderSide.lerp() doesn't support null arguments.
+  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a is WidgetStateBorderSide) {
+      a = a.resolve(const <WidgetState>{});
+    }
+    if (b is WidgetStateBorderSide) {
+      b = b.resolve(const <WidgetState>{});
+    }
+    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
+    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
+
+    return BorderSide.lerp(a, b, t);
   }
 
   /// Linearly interpolate between two [RadioThemeData]s.
@@ -137,6 +160,7 @@ class RadioThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
+      side: _lerpSides(a?.side, b?.side, t),
     );
   }
 
@@ -149,6 +173,7 @@ class RadioThemeData with Diagnosticable {
     materialTapTargetSize,
     visualDensity,
     backgroundColor,
+    side,
   );
 
   @override
@@ -166,7 +191,8 @@ class RadioThemeData with Diagnosticable {
         other.splashRadius == splashRadius &&
         other.materialTapTargetSize == materialTapTargetSize &&
         other.visualDensity == visualDensity &&
-        other.backgroundColor == backgroundColor;
+        other.backgroundColor == backgroundColor &&
+        other.side == side;
   }
 
   @override
@@ -211,6 +237,7 @@ class RadioThemeData with Diagnosticable {
         defaultValue: null,
       ),
     );
+    properties.add(DiagnosticsProperty<BorderSide>('side', side, defaultValue: null));
   }
 }
 
