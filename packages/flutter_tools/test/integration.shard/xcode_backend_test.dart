@@ -150,7 +150,7 @@ void main() {
         expect(actualInfoPlist, contains('dartVmService'));
         expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
-        expect(result.stderr, isNot(startsWith("error:")));
+        expect(result.stderr, isNot(startsWith('error:')));
         expect(result, const ProcessResultMatcher());
       });
     }
@@ -198,7 +198,7 @@ void main() {
 </plist>
 ''');
 
-        expect(result.stderr, isNot(startsWith("error:")));
+        expect(result.stderr, isNot(startsWith('error:')));
         expect(result, const ProcessResultMatcher());
       },
     );
