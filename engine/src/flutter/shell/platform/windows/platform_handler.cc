@@ -52,6 +52,8 @@ namespace flutter {
 
 namespace {
 
+static const std::wstring kWindowClassName = L"FlutterPlatformHandler";
+
 // A scoped wrapper for GlobalAlloc/GlobalFree.
 class ScopedGlobalMemory {
  public:
@@ -268,7 +270,7 @@ PlatformHandler::~PlatformHandler() {
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
   }
-  UnregisterClass(window_class_name_.c_str(), nullptr);
+  UnregisterClass(kWindowClassName.c_str(), nullptr);
 }
 
 void PlatformHandler::GetPlainText(
@@ -517,11 +519,9 @@ void PlatformHandler::HandleMethodCall(
 }
 
 WNDCLASS PlatformHandler::RegisterWindowClass() {
-  window_class_name_ = L"FlutterPlatformHandler";
-
   WNDCLASS window_class{};
   window_class.hCursor = nullptr;
-  window_class.lpszClassName = window_class_name_.c_str();
+  window_class.lpszClassName = kWindowClassName.c_str();
   window_class.style = 0;
   window_class.cbClsExtra = 0;
   window_class.cbWndExtra = 0;

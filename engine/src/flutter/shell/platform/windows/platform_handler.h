@@ -121,8 +121,7 @@ class PlatformHandler {
   // A reference to the Flutter engine.
   FlutterWindowsEngine* engine_;
 
-  HWND window_handle_;
-  std::wstring window_class_name_;
+  HWND window_handle_ = nullptr;
 
   // A scoped clipboard provider that can be passed in for mocking in tests.
   // Use this to acquire clipboard in each operation to avoid blocking clipboard
@@ -137,7 +136,7 @@ class PlatformHandler {
 // PlatformHandler.
 class ScopedClipboardInterface {
  public:
-  virtual ~ScopedClipboardInterface(){};
+  virtual ~ScopedClipboardInterface() {};
 
   // Attempts to open the clipboard for the given window, returning the error
   // code in the case of failure and 0 otherwise.
