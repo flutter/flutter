@@ -127,7 +127,7 @@ class BuildAarCommand extends BuildSubCommand {
             buildNumberArg != null &&
             buildNumberArg.isNotEmpty
         ? buildNumberArg
-        : '1.0';
+        : (project.buildName ?? '1.0');
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final buildMode in const <String>['debug', 'profile', 'release']) {
