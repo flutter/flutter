@@ -141,7 +141,7 @@ class Canvas {
                   const RenderTarget& render_target,
                   bool is_onscreen,
                   bool requires_readback,
-                  IRect cull_rect);
+                  IRect32 cull_rect);
 
   ~Canvas() = default;
 
