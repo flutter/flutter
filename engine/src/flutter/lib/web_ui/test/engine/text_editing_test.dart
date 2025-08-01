@@ -4063,7 +4063,7 @@ Map<String, dynamic> createFlutterConfig(
       if (decimal) 'decimal': true,
       if (isMultiline) 'isMultiline': true,
     },
-    if (viewId != null) 'viewId': viewId,
+    'viewId': ?viewId,
     'readOnly': readOnly,
     'obscureText': obscureText,
     'autocorrect': autocorrect,
@@ -4086,7 +4086,7 @@ Map<String, dynamic> createAutofillInfo(String? hint, String uniqueId, {String? 
     <String, dynamic>{
       'uniqueIdentifier': uniqueId,
       if (hint != null) 'hints': <String>[hint],
-      if (placeholder != null) 'hintText': placeholder,
+      'hintText': ?placeholder,
       'editingValue': <String, dynamic>{
         'text': 'Test',
         'selectionBase': 0,
