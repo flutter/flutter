@@ -415,7 +415,7 @@ bool _shouldDiscardIssue({
   return false;
 }
 
-/// Helper to parse issues from the new (Xcode 16+) flat list format.
+/// Helper to parse issues from the (Xcode 16+) flat list format.
 List<XCResultIssue> _parseIssuesFromXcode16Format({
   required XCResultIssueType type,
   required Object? jsonList,
