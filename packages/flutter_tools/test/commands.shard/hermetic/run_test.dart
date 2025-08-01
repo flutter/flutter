@@ -1268,6 +1268,7 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--profile-microtasks',
+          '--profile-startup',
           '--verbose-system-logs',
           '--native-null-assertions',
           '--enable-impeller',
@@ -1292,6 +1293,7 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.profileMicrotasks, true);
+      expect(options.profileStartup, true);
       expect(options.verboseSystemLogs, true);
       expect(options.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
