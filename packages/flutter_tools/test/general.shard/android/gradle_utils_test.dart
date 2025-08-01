@@ -374,7 +374,7 @@ buildscript {
 
     dependencies {
         // Decoy value to ensure we ignore commented out lines.
-        // classpath 'com.android.application' version '6.1.0' apply false
+        // classpath 'com.android.tools.build:gradle:1.1.1'
         classpath 'com.android.tools.build:gradle:$expectedVersion'
     }
 }
