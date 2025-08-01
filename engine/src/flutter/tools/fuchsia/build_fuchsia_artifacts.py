@@ -279,7 +279,7 @@ def ProcessCIPDPackage(upload, engine_version, content_hash):
   already_exists = CheckCIPDPackageExists('flutter/fuchsia', content_tag)
   if already_exists:
     print('CIPD package flutter/fuchsia tag %s already exists!' % content_tag)
-    # do not return; content hash can match multiple PRs (reverts, framework only)
+    # content hash can match multiple PRs and we cannot tag multiple times.
     return
 
   # Tag the new content hash for the git_revision. This is done separately due
