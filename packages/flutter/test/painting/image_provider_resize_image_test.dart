@@ -21,6 +21,44 @@ void main() {
   });
 
   group('ResizeImage', () {
+    group('equality and hashCode', () {
+      test('Two identical instances should be equal and have same hashCode', () {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final ResizeImage resizeImage1 = ResizeImage(
+          MemoryImage(bytes),
+          width: 100,
+          height: 200,
+          policy: ResizeImagePolicy.fit,
+          allowUpscaling: true,
+        );
+        final ResizeImage resizeImage2 = ResizeImage(
+          MemoryImage(bytes),
+          width: 100,
+          height: 200,
+          policy: ResizeImagePolicy.fit,
+          allowUpscaling: true,
+        );
+
+        expect(resizeImage1 == resizeImage2, isTrue);
+        expect(resizeImage1.hashCode, equals(resizeImage2.hashCode));
+      });
+
+      test('Different ResizeImage instances should not be equal', () {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final ResizeImage resizeImage1 = ResizeImage(MemoryImage(bytes), width: 100, height: 200);
+        final ResizeImage resizeImage2 = ResizeImage(MemoryImage(bytes), width: 150, height: 200);
+
+        expect(resizeImage1 == resizeImage2, isFalse);
+      });
+
+      test('Reflexivity: instance should be equal to itself', () {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final ResizeImage resizeImage = ResizeImage(MemoryImage(bytes), width: 100, height: 200);
+
+        expect(resizeImage == resizeImage, isTrue);
+      });
+    });
+
     group('resizing', () {
       test('upscales to the correct dimensions', () async {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
