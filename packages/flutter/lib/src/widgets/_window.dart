@@ -102,10 +102,11 @@ mixin class RegularWindowControllerDelegate {
   /// The default implementation destroys the window. Subclasses
   /// can override the behavior to delay or prevent the window from closing.
   ///
-  /// See also:
-  /// * [onWindowDestroyed], which is invoked after the window is closed.
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  /// * [onWindowDestroyed], which is invoked after the window is closed.
   @internal
   void onWindowCloseRequested(RegularWindowController controller) {
     if (!isWindowingEnabled) {
@@ -117,11 +118,11 @@ mixin class RegularWindowControllerDelegate {
 
   /// Invoked after the window is closed.
   ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
   /// See also:
   ///
   /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
@@ -227,24 +228,20 @@ abstract class RegularWindowController extends BaseWindowController {
       delegate: delegate ?? RegularWindowControllerDelegate(),
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
+      title: title,
     );
-    if (title != null) {
-      controller.setTitle(title);
-    }
     return controller;
   }
 
-  /// Creates an empty [RegularWindowController].
+  /// Creates an empty [RegularWindowController] for testing purposes.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  // TODO(mattkae): Replace @internal with @visibleForTesting when this API is non-experimental
   @internal
   @protected
+  @visibleForTesting
   RegularWindowController.empty();
 
   /// The current title of the window.
-  ///
-  /// This may be null for windows without a title.
   ///
   /// This might differ from the requested title.
   ///
@@ -261,7 +258,7 @@ abstract class RegularWindowController extends BaseWindowController {
   @internal
   bool get isActivated;
 
-  /// Whether or now the window is currently maximized.
+  /// Whether or not the window is currently maximized.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -283,7 +280,7 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// The [size] describes the new requested window size. If the size disagrees
   /// with the current constraints placed upon the window, the platform might
-  /// clamp the size within the constraiints.
+  /// clamp the size within the constraints.
   ///
   /// The platform is free to ignore this request.
   ///
@@ -310,6 +307,9 @@ abstract class RegularWindowController extends BaseWindowController {
   void setTitle(String title);
 
   /// Requests that the window be displayed in its current size and position.
+  ///
+  /// The platform may also give the window input focus and bring it to the
+  /// top of the window stack. However, this behavior is platform-dependent.
   ///
   /// If the window is minimized, the window returns to the size and position
   /// that it had before that state was applied. The window will also be
@@ -377,6 +377,7 @@ abstract class WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    String? title,
   });
 
   /// Returns whether the application has any top level windows created by this
@@ -392,32 +393,33 @@ abstract class WindowingOwner {
   @internal
   static WindowingOwner createDefaultOwner() {
     if (!isWindowingEnabled) {
-      return _WindowingOwnerUnsupported(errorMessaage: _kWindowingDisabledErrorMessage);
+      return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
     }
 
     // TODO(mattkae): Implement windowing owners for desktop platforms.
-    return _WindowingOwnerUnsupported(errorMessaage: 'Windowing is unsupported on this platform.');
+    return _WindowingOwnerUnsupported(errorMessage: 'Windowing is unsupported on this platform.');
   }
 }
 
 /// Windowing delegate used on platforms that do not support windowing.
 class _WindowingOwnerUnsupported extends WindowingOwner {
-  _WindowingOwnerUnsupported({required this.errorMessaage});
+  _WindowingOwnerUnsupported({required this.errorMessage});
 
-  final String errorMessaage;
+  final String errorMessage;
 
   @override
   RegularWindowController createRegularWindowController({
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    String? title,
   }) {
-    throw UnsupportedError(errorMessaage);
+    throw UnsupportedError(errorMessage);
   }
 
   @override
   bool hasTopLevelWindows() {
-    throw UnsupportedError(errorMessaage);
+    throw UnsupportedError(errorMessage);
   }
 }
 
@@ -527,20 +529,18 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   @internal
   final BaseWindowController controller;
 
-  /// Returns the [WindowControllerScope].
+  /// Returns the [BaseWindowController] for the window that hosts the given context.
   ///
   /// {@template flutter.widgets.windowing.windowControllerScope.of}
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].
-  ///
   /// If there is no [WindowControllerScope] in scope, this method
-  /// will throw a [TypeError] exception in release builds, and thrown
+  /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
   /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
+  ///
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
   /// * [maybeOf], which doesn't throw or assert if it doesn't find a
@@ -550,14 +550,12 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     return _of(context);
   }
 
-  /// Returns the [WindowControllerScope] if one exists, otherwise null.
-  ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].
+  /// Returns the [BaseWindowController] if one exists, otherwise null.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
+  ///
   /// * [RegularWindowController], the controller for regular top-level windows.
   /// * [RegularWindow], the widget for a regular window.
   /// * [of], which will throw if it doesn't find a [WindowControllerScope] ancestor,
@@ -574,6 +572,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
+  ///
   /// * [BaseWindowController.contentSize], which returns the current content size of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
@@ -583,12 +582,10 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// Returns [BaseWindowController.contentSize] of the nearest [WindowControllerScope],
   /// or null if not found.
   ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
+  ///
   /// * [BaseWindowController.contentSize], which returns the current content size of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
@@ -605,6 +602,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
+  ///
   /// * [RegularWindowController.title], which returns the current title of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
@@ -617,13 +615,11 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
 
   /// Returns title of the nearest [WindowControllerScope], or null if not found.
   ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.title], which returns the current title of the window.
+  ///
+  /// * [RegularWindowController.title], which returns the current title of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static String? maybeTitleOf(BuildContext context) {
@@ -637,7 +633,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isActivated] of the nearest [WindowControllerScope].
+  /// Returns the activation status of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
@@ -647,7 +643,8 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isActivated], which returns the current activation status of the window.
+  ///
+  /// * [RegularWindowController.isActivated], which returns the current activation status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isActivatedOf(BuildContext context) {
@@ -657,16 +654,14 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isActivated] of the nearest [WindowControllerScope],
+  /// Returns the activation status of the nearest [WindowControllerScope],
   /// or null if not found
-  ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].{@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isActivated], which returns the current activation status of the window.
+  ///
+  /// * [RegularWindowController.isActivated], which returns the current activation status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsActivatedOf(BuildContext context) {
@@ -680,7 +675,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isMinimized] of the nearest [WindowControllerScope].
+  /// Returns the minimization status of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
@@ -690,7 +685,8 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isMinimized], which returns the current minimized status of the window.
+  ///
+  /// * [RegularWindowController.isMinimized], which returns the current minimized status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMinimizedOf(BuildContext context) {
@@ -700,16 +696,14 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isMinimized] of the nearest [WindowControllerScope],
+  /// Returns the minimization status of the nearest [WindowControllerScope],
   /// or null if not found
-  ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].{@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isMinimized], which returns the current minimized status of the window.
+  ///
+  /// * [RegularWindowController.isMinimized], which returns the current minimized status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMinimizedOf(BuildContext context) {
@@ -723,7 +717,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isMaximized] of the nearest [WindowControllerScope].
+  /// Returns the maximization status of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
@@ -733,7 +727,8 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isMaximized], which returns the current maximized status of the window.
+  ///
+  /// * [RegularWindowController.isMaximized], which returns the current maximized status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isMaximizedOf(BuildContext context) {
@@ -743,16 +738,14 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isMaximized] of the nearest [WindowControllerScope],
+  /// Returns the maximization status of the nearest [WindowControllerScope],
   /// or null if not found
-  ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].{@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController.isMaximized], which returns the current maximized status of the window.
+  ///
+  /// * [RegularWindowController.isMaximized], which returns the current maximized status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsMaximizedOf(BuildContext context) {
@@ -766,7 +759,7 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isFullscreen] of the nearest [WindowControllerScope].
+  /// Returns the fullscreen status of the nearest [WindowControllerScope].
   ///
   /// {@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
@@ -776,8 +769,8 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController], the controller for regular top-level windows.
-  /// * [BaseWindowController.isFullscreen], which returns the current fullscreen status of the window.
+  ///
+  /// * [RegularWindowController.isFullscreen], which returns the current fullscreen status of the window.
   /// * [of], which returns the [BaseWindowController] associated with the window.
   @internal
   static bool isFullscreenOf(BuildContext context) {
@@ -788,17 +781,14 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
     };
   }
 
-  /// Returns [BaseWindowController.isFullscreen] of the nearest [WindowControllerScope],
+  /// Returns the fullscreen status of the nearest [WindowControllerScope],
   /// or null if not found
-  ///
-  /// If [isWindowingEnabled] is `false`, this method will throw an
-  /// [UnsupportedError].{@macro flutter.widgets.windowing.windowControllerScope.of}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
   /// See also:
-  /// * [BaseWindowController], the controller for regular top-level windows.
-  /// * [BaseWindowController.isFullscreen], which returns the current fullscreen status of the window.
+  ///
+  /// * [RegularWindowController.isFullscreen], which returns the current fullscreen status of the window.
   /// * [maybeOf], which returns the [BaseWindowController] associated with the window, or null if not found.
   @internal
   static bool? maybeIsFullscreenOf(BuildContext context) {
@@ -813,6 +803,9 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   static BaseWindowController _of(BuildContext context, [_WindowControllerAspect? aspect]) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
     assert(_debugCheckHasWindowController(context));
     return InheritedModel.inheritFrom<WindowControllerScope>(context, aspect: aspect)!.controller;
   }
@@ -825,10 +818,6 @@ class WindowControllerScope extends InheritedModel<_WindowControllerAspect> {
   }
 
   static bool _debugCheckHasWindowController(BuildContext context) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-
     assert(() {
       if (context.dependOnInheritedWidgetOfExactType<WindowControllerScope>() == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
