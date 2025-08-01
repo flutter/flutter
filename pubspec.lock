@@ -310,10 +310,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_fonts
-      sha256: df9763500dadba0155373e9cb44e202ce21bd9ed5de6bdbd05c5854e86839cb8
+      sha256: b1ac0fe2832c9cc95e5e88b57d627c5e68c223b9657f4b96e1487aa9098c7b82
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.2.1"
   google_identity_services_web:
     dependency: "direct main"
     description:
@@ -638,10 +638,10 @@ packages:
     dependency: "direct main"
     description:
       name: process
-      sha256: c6248e4526673988586e8c00bb22a49210c258dc91df5227d5da9748ecf79744
+      sha256: "44b4226c0afd4bc3b7c7e67d44c4801abd97103cf0c84609e2654b664ca2798c"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.5"
+    version: "5.0.4"
   process_runner:
     dependency: "direct main"
     description:
@@ -939,18 +939,18 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: "0fabf59eea728a6a887f29f2818eafbefb4b37c727dbb62dccef56c9287a692f"
+      sha256: "4a5135754a62dbc827a64a42ef1f8ed72c962e191c97e2d48744225c2b9ebb73"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.10"
+    version: "2.8.7"
   video_player_avfoundation:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: "509ef9cfe7a3379783ccf306d45f5b5fc9db747401f956ce31c963417019e48e"
+      sha256: "9fedd55023249f3a02738c195c906b4e530956191febf0838e37d0dac912f953"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.2"
+    version: "2.8.0"
   video_player_platform_interface:
     dependency: "direct main"
     description:
@@ -1051,10 +1051,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_platform_interface
-      sha256: "63d26ee3aca7256a83ccb576a50272edd7cfc80573a4305caa98985feb493ee0"
+      sha256: f0dc2dc3a2b1e3a6abdd6801b9355ebfeb3b8f6cde6b9dc7c9235909c4a1f147
       url: "https://pub.dev"
     source: hosted
-    version: "2.14.0"
+    version: "2.13.1"
   webview_flutter_wkwebview:
     dependency: "direct main"
     description:
