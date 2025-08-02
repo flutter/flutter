@@ -13,8 +13,10 @@
 
 TEST(FlCompositorSoftwareTest, Render) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  g_autoptr(FlCompositorSoftware) compositor = fl_compositor_software_new();
+  g_autoptr(FlCompositorSoftware) compositor =
+      fl_compositor_software_new(engine);
 
   unsigned char image_data[1024 * 1024 * 4];
   cairo_surface_t* surface = cairo_image_surface_create_for_data(

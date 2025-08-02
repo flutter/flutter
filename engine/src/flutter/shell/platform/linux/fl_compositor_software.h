@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
 
@@ -28,12 +29,13 @@ G_DECLARE_FINAL_TYPE(FlCompositorSoftware,
 
 /**
  * fl_compositor_software_new:
+ * @engine: an #FlEngine.
  *
  * Creates a new software rendering compositor.
  *
  * Returns: a new #FlCompositorSoftware.
  */
-FlCompositorSoftware* fl_compositor_software_new();
+FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine);
 
 G_END_DECLS
 
