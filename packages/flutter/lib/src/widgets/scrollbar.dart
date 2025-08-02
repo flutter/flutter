@@ -1453,11 +1453,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       assert(_fadeoutOpacityAnimation.value == 0.0);
       // We do not check for a valid scroll position if the scrollbar is not
       // visible, because it cannot be interacted with.
-    } else if (_effectiveScrollController != null && enableGestures) {
-      // Interactive scrollbars need to be properly configured. If it is visible
-      // for interaction, ensure we are set up properly.
-      assert(_debugCheckHasValidScrollPosition());
     }
+    // Validation is performed only when the user interacts with the scrollbar,
+    // not when it becomes visible. This prevents assertion failures when the
+    // ScrollController is dynamically assigned but hasn't attached to its
+    // ScrollPosition yet.
   }
 
   bool _debugCheckHasValidScrollPosition() {
