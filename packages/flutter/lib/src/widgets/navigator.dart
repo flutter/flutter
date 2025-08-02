@@ -2784,7 +2784,12 @@ class Navigator extends StatefulWidget {
   /// To pop until a route with a certain name, use the [RoutePredicate]
   /// returned from [ModalRoute.withName].
   ///
-  /// The routes are closed with null as their `return` value.
+  /// If `result` is not specified, then all routes are closed
+  /// with null as their `return` value.
+  /// If `result` is specified, then the last popped route will be closed with
+  /// `result` as its return value.
+  ///
+  /// The `T` type argument is the type of the return value of the last popped route.
   ///
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
@@ -2799,8 +2804,13 @@ class Navigator extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  static void popUntil(BuildContext context, RoutePredicate predicate) {
-    Navigator.of(context).popUntil(predicate);
+  @optionalTypeArgs
+  static void popUntil<T extends Object?>(
+    BuildContext context,
+    RoutePredicate predicate, [
+    T? result,
+  ]) {
+    Navigator.of(context).popUntil<T>(predicate, result);
   }
 
   /// Immediately remove `route` from the navigator that most tightly encloses
@@ -5610,13 +5620,25 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// }
   /// ```
   /// {@end-tool}
-  void popUntil(RoutePredicate predicate) {
+  @optionalTypeArgs
+  void popUntil<T extends Object?>(RoutePredicate predicate, [T? result]) {
     _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+
     while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
-      pop();
+      // Check what would be next if we pop this route.
+      final _RouteEntry? next = _lastRouteEntryWhereOrNull(
+        (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
+      );
+
+      if (next != null && !next.route.willHandlePopInternally && predicate(next.route)) {
+        pop<T>(result);
+      } else {
+        pop();
+      }
+
       candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
