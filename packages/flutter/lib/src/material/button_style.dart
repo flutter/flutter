@@ -776,7 +776,7 @@ class ButtonStyle with Diagnosticable {
       iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       iconAlignment: t < 0.5 ? a?.iconAlignment : b?.iconAlignment,
-      side: _lerpSides(a?.side, b?.side, t),
+      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(
         a?.shape,
         b?.shape,
@@ -795,15 +795,4 @@ class ButtonStyle with Diagnosticable {
     );
   }
 
-  // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(
-    MaterialStateProperty<BorderSide?>? a,
-    MaterialStateProperty<BorderSide?>? b,
-    double t,
-  ) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return MaterialStateBorderSide.lerp(a, b, t);
-  }
 }
