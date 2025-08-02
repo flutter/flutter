@@ -2667,6 +2667,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/checks',
 
   'dev/customer_testing/ci.sh',
+  'dev/tools/format_markdown.py',
 
   'dev/integration_tests/flutter_gallery/tool/run_instrumentation_test.sh',
 
