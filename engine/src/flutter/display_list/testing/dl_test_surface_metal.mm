@@ -7,7 +7,6 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {

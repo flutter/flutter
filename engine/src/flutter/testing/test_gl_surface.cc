@@ -26,7 +26,7 @@ namespace flutter::testing {
 
 TestGLOnscreenOnlySurface::TestGLOnscreenOnlySurface(
     std::shared_ptr<TestEGLContext> context,
-    SkISize size)
+    DlISize size)
     : surface_size_(size), egl_context_(std::move(context)) {
   const EGLint attributes[] = {
       EGL_WIDTH,  size.width(),   //
@@ -49,7 +49,7 @@ TestGLOnscreenOnlySurface::~TestGLOnscreenOnlySurface() {
   FML_CHECK(result == EGL_TRUE) << GetEGLError();
 }
 
-const SkISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
+const DlISize& TestGLOnscreenOnlySurface::GetSurfaceSize() const {
   return surface_size_;
 }
 
@@ -222,11 +222,11 @@ uint32_t TestGLOnscreenOnlySurface::GetWindowFBOId() const {
   return 0u;
 }
 
-TestGLSurface::TestGLSurface(SkISize surface_size)
+TestGLSurface::TestGLSurface(DlISize surface_size)
     : TestGLSurface(std::make_shared<TestEGLContext>(), surface_size) {}
 
 TestGLSurface::TestGLSurface(std::shared_ptr<TestEGLContext> egl_context,
-                             SkISize surface_size)
+                             DlISize surface_size)
     : TestGLOnscreenOnlySurface(std::move(egl_context), surface_size) {
   {
     const EGLint offscreen_surface_attributes[] = {
