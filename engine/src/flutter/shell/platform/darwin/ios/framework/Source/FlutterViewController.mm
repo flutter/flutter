@@ -86,6 +86,13 @@ typedef struct MouseState {
 // Internal state backing override of UIView.prefersStatusBarHidden.
 @property(nonatomic, assign) BOOL flutterPrefersStatusBarHidden;
 
+@property(nonatomic, assign) CGFloat minWidth;
+@property(nonatomic, assign) CGFloat maxWidth;
+@property(nonatomic, assign) CGFloat minHeight;
+@property(nonatomic, assign) CGFloat maxHeight;
+
+@property(nonatomic, assign) BOOL isResizable;
+
 @property(nonatomic, strong) NSMutableSet<NSNumber*>* ongoingTouches;
 // This scroll view is a workaround to accommodate iOS 13 and higher.  There isn't a way to get
 // touches on the status bar to trigger scrolling to the top of a scroll view.  We place a
@@ -197,6 +204,7 @@ typedef struct MouseState {
     _flutterView = [[FlutterView alloc] initWithDelegate:_engine
                                                   opaque:self.isViewOpaque
                                          enableWideGamut:engine.project.isWideGamutEnabled];
+    _flutterView.contentMode = UIViewContentModeCenter;
     _ongoingTouches = [[NSMutableSet alloc] init];
 
     // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
@@ -233,6 +241,23 @@ typedef struct MouseState {
   }
 
   return self;
+}
+
+- (instancetype)initWithEngine:(FlutterEngine*)engine
+                       nibName:(nullable NSString*)nibName
+                        bundle:(nullable NSBundle*)nibBundle
+                      minWidth:(CGFloat)minWidth
+                      maxWidth:(CGFloat)maxWidth
+                     minHeight:(CGFloat)minHeight
+                     maxHeight:(CGFloat)maxHeight {
+  if (self) {
+    _minWidth = minWidth;
+    _maxWidth = maxWidth;
+    _minHeight = minHeight;
+    _maxHeight = maxHeight;
+    _isResizable = true;
+  }
+  return [self initWithEngine:engine nibName:nibName bundle:nibBundle];
 }
 
 - (instancetype)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
@@ -1478,6 +1503,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGFloat scale = screen.scale;
   _viewportMetrics.physical_width = self.view.bounds.size.width * scale;
   _viewportMetrics.physical_height = self.view.bounds.size.height * scale;
+
+  if (_isResizable) {
+    _viewportMetrics.min_width_constraint = self.minWidth;
+    _viewportMetrics.max_width_constraint = self.maxWidth;
+    _viewportMetrics.min_height_constraint = self.minHeight;
+    _viewportMetrics.max_height_constraint = self.maxHeight;
+  }
 }
 
 // Set _viewportMetrics physical paddings.
