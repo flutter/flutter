@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -64,26 +65,6 @@ void main() {
         'succeeds in opening and debugging with launch options, expectedConfigurationBuildDir, and verbose logging',
         () async {
           fakeProcessManager.addCommands(<FakeCommand>[
-            FakeCommand(
-              command: <String>[
-                'xcrun',
-                'osascript',
-                '-l',
-                'JavaScript',
-                pathToXcodeAutomationScript,
-                'check-workspace-opened',
-                '--xcode-path',
-                pathToXcodeApp,
-                '--project-path',
-                project.xcodeProject.path,
-                '--workspace-path',
-                project.xcodeWorkspace.path,
-                '--verbose',
-              ],
-              stdout: '''
-  {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
-  ''',
-            ),
             FakeCommand(
               command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
             ),
@@ -143,7 +124,6 @@ void main() {
           );
 
           expect(logger.errorText, isEmpty);
-          expect(logger.traceText, contains('Error checking if project opened in Xcode'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(xcodeDebug.startDebugActionProcess, isNull);
           expect(status, true);
@@ -154,25 +134,6 @@ void main() {
         'succeeds in opening and debugging without launch options, expectedConfigurationBuildDir, and verbose logging',
         () async {
           fakeProcessManager.addCommands(<FakeCommand>[
-            FakeCommand(
-              command: <String>[
-                'xcrun',
-                'osascript',
-                '-l',
-                'JavaScript',
-                pathToXcodeAutomationScript,
-                'check-workspace-opened',
-                '--xcode-path',
-                pathToXcodeApp,
-                '--project-path',
-                project.xcodeProject.path,
-                '--workspace-path',
-                project.xcodeWorkspace.path,
-              ],
-              stdout: '''
-  {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
-  ''',
-            ),
             FakeCommand(
               command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
             ),
@@ -220,7 +181,6 @@ void main() {
           );
 
           expect(logger.errorText, isEmpty);
-          expect(logger.traceText, contains('Error checking if project opened in Xcode'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(xcodeDebug.startDebugActionProcess, isNull);
           expect(status, true);
@@ -229,25 +189,6 @@ void main() {
 
       testWithoutContext('fails if project fails to open', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
-  {"status":false,"errorMessage":"Xcode is not running","debugResult":null}
-  ''',
-          ),
           FakeCommand(
             command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
             exception: ProcessException('open', <String>[
@@ -285,23 +226,7 @@ void main() {
       testWithoutContext('fails if osascript errors', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
-  {"status":true,"errorMessage":"","debugResult":null}
-  ''',
+            command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
           ),
           FakeCommand(
             command: <String>[
@@ -354,23 +279,7 @@ void main() {
       testWithoutContext('fails if osascript output returns false status', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
-  {"status":true,"errorMessage":null,"debugResult":null}
-  ''',
+            command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
           ),
           FakeCommand(
             command: <String>[
@@ -423,23 +332,7 @@ void main() {
       testWithoutContext('fails if missing debug results', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
-  {"status":true,"errorMessage":null,"debugResult":null}
-  ''',
+            command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
           ),
           FakeCommand(
             command: <String>[
@@ -492,23 +385,7 @@ void main() {
       testWithoutContext('fails if debug results status is not running', () async {
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
-            command: <String>[
-              'xcrun',
-              'osascript',
-              '-l',
-              'JavaScript',
-              pathToXcodeAutomationScript,
-              'check-workspace-opened',
-              '--xcode-path',
-              pathToXcodeApp,
-              '--project-path',
-              project.xcodeProject.path,
-              '--workspace-path',
-              project.xcodeWorkspace.path,
-            ],
-            stdout: '''
-  {"status":true,"errorMessage":null,"debugResult":null}
-  ''',
+            command: <String>['open', '-a', pathToXcodeApp, '-g', '-j', '-F', xcworkspace.path],
           ),
           FakeCommand(
             command: <String>[
@@ -1171,6 +1048,7 @@ void main() {
           '/path/to/bundle',
           templateRenderer: globals.templateRenderer,
           projectDestination: projectDirectory,
+          project: FakeIosProject(fileSystem: fileSystem),
         );
 
         final File schemeFile = projectDirectory
@@ -1187,6 +1065,7 @@ void main() {
         expect(projectDirectory.childDirectory('Runner.xcworkspace').existsSync(), isTrue);
         expect(schemeFile.existsSync(), isTrue);
         expect(schemeFile.readAsStringSync(), contains('FilePath = "/path/to/bundle"'));
+        expect(schemeFile.readAsStringSync(), contains('customLLDBInitFile = "/flutter_lldbinit"'));
       } catch (err) {
         fail(err.toString());
       } finally {
@@ -1233,6 +1112,17 @@ class FakeProcess extends Fake implements Process {
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     killed = true;
     return true;
+  }
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  FakeIosProject({required this.fileSystem});
+
+  FileSystem fileSystem;
+
+  @override
+  File get lldbInitFile {
+    return fileSystem.currentDirectory.childFile('flutter_lldbinit');
   }
 }
 
