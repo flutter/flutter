@@ -20,6 +20,7 @@ static constexpr char kAccessibilityChannelName[] = "flutter/accessibility";
 static constexpr char kTypeKey[] = "type";
 static constexpr char kDataKey[] = "data";
 static constexpr char kMessageKey[] = "message";
+static constexpr char kViewIdKey[] = "viewId";
 static constexpr char kAnnounceValue[] = "announce";
 
 // Handles messages like:
@@ -61,7 +62,16 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
       return;
     }
 
-    plugin->Announce(*message);
+    FlutterViewId view_id = kImplicitViewId;
+    const auto& view_itr = data->find(EncodableValue{kViewIdKey});
+    if (view_itr != data->end()) {
+      const auto* view_id_val = std::get_if<FlutterViewId>(&view_itr->second);
+      if (view_id_val) {
+        view_id = *view_id_val;
+      }
+    }
+
+    plugin->Announce(view_id, *message);
   } else {
     FML_LOG(WARNING) << "Accessibility message type '" << *type
                      << "' is not supported.";
@@ -89,14 +99,13 @@ void AccessibilityPlugin::SetUp(BinaryMessenger* binary_messenger,
       });
 }
 
-void AccessibilityPlugin::Announce(const std::string_view message) {
+void AccessibilityPlugin::Announce(const FlutterViewId view_id,
+                                   const std::string_view message) {
   if (!engine_->semantics_enabled()) {
     return;
   }
 
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  auto view = engine_->view(kImplicitViewId);
+  auto view = engine_->view(view_id);
   if (!view) {
     return;
   }
