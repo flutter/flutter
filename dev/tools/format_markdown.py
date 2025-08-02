@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Markdown formatter for Flutter - Step 1 demonstration"""
+"""A wrapper script to run the mdformat markdown formatter."""
 
 import sys
 import subprocess
