@@ -157,8 +157,17 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
-  /// WebServer device is debuggable when running with --start-paused.
-  bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
+  /// Device is debuggable if not a WebServer device, or if running with
+  /// --start-paused or using DWDS WebSocket connection (WebServer device).
+  bool get deviceIsDebuggable =>
+      device!.device is! WebServerDevice ||
+      debuggingOptions.startPaused ||
+      _useDwdsWebSocketConnection;
+
+  bool get _useDwdsWebSocketConnection {
+    final DevFS? devFS = device?.devFS;
+    return devFS is WebDevFS && devFS.useDwdsWebSocketConnection;
+  }
 
   @override
   // Web uses a different plugin registry.
@@ -318,9 +327,13 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
         // Use Chrome-based connection only if we have a connected ChromiumDevice
         // Otherwise, use DWDS WebSocket connection
+        // Exception: For WebServerDevice in flutter drive context (FLUTTER_WEB_TEST=true),
+        // force disable WebSocket to avoid CI issues where Chrome extension is not available
         final bool useDwdsWebSocketConnection =
             !(_chromiumLauncher != null &&
-                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
+                nonWebServerConnectedDeviceIds.contains(device!.device!.id)) &&
+            !(device!.device is WebServerDevice &&
+                _platform.environment['FLUTTER_WEB_TEST'] == 'true');
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
