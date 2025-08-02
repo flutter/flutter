@@ -534,17 +534,18 @@ inline FlutterSize FlutterSizeMake(const SkVector& vector) {
   return size;
 }
 
-inline FlutterTransformation FlutterTransformationMake(const SkMatrix& matrix) {
+inline FlutterTransformation FlutterTransformationMake(
+    const flutter::DlMatrix& matrix) {
   FlutterTransformation transformation = {};
-  transformation.scaleX = matrix[SkMatrix::kMScaleX];
-  transformation.skewX = matrix[SkMatrix::kMSkewX];
-  transformation.transX = matrix[SkMatrix::kMTransX];
-  transformation.skewY = matrix[SkMatrix::kMSkewY];
-  transformation.scaleY = matrix[SkMatrix::kMScaleY];
-  transformation.transY = matrix[SkMatrix::kMTransY];
-  transformation.pers0 = matrix[SkMatrix::kMPersp0];
-  transformation.pers1 = matrix[SkMatrix::kMPersp1];
-  transformation.pers2 = matrix[SkMatrix::kMPersp2];
+  transformation.scaleX = matrix.m[0];
+  transformation.skewX = matrix.m[4];
+  transformation.transX = matrix.m[12];
+  transformation.skewY = matrix.m[1];
+  transformation.scaleY = matrix.m[5];
+  transformation.transY = matrix.m[13];
+  transformation.pers0 = matrix.m[3];
+  transformation.pers1 = matrix.m[7];
+  transformation.pers2 = matrix.m[15];
   return transformation;
 }
 

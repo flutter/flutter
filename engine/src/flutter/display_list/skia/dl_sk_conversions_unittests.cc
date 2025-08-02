@@ -29,6 +29,29 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
   ASSERT_EQ(ToSk(dl_local_matrix_filter), nullptr);
 }
 
+// This test exists just to confirm how to convert existing SkMatrix code
+// into operations using DlMatrix/impeller::Matrix.
+TEST(DisplayListSkConversions, OpOrderPreMethodsVsMatrixMultiply) {
+  // If you have code like this...
+  const SkMatrix sk_matrix =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  // Convert it to math like this (same order as the pre<Op>() calls)...
+  const DlMatrix dl_matrix = DlMatrix::MakeTranslation({0, 800}) *
+                             DlMatrix::MakeRotationZ(DlDegrees(-90));
+  SkPoint sk_result = sk_matrix.mapPoint({10, 10});
+  DlPoint dl_result = dl_matrix * DlPoint(10, 10);
+  EXPECT_FLOAT_EQ(sk_result.fX, dl_result.x);
+  EXPECT_FLOAT_EQ(sk_result.fY, dl_result.y);
+
+  // Not like this...
+  const DlMatrix dl_matrix_2 = DlMatrix::MakeRotationZ(DlDegrees(-90)) *
+                               DlMatrix::MakeTranslation({0, 800});
+  DlPoint dl_result_2 = dl_matrix_2 * DlPoint(10, 10);
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fX, dl_result_2.x));
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fY, dl_result_2.y));
+}
+
 TEST(DisplayListSkConversions, ToSkColor) {
   // Red
   ASSERT_EQ(ToSkColor(DlColor::kRed()), SK_ColorRED);

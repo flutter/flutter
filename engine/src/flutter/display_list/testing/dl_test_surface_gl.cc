@@ -15,7 +15,7 @@ using PixelFormat = DlSurfaceProvider::PixelFormat;
 bool DlOpenGLSurfaceProvider::InitializeSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) {
-  gl_surface_ = std::make_unique<TestGLSurface>(SkISize::Make(width, height));
+  gl_surface_ = std::make_unique<TestGLSurface>(DlISize(width, height));
   gl_surface_->MakeCurrent();
 
   primary_ = MakeOffscreenSurface(width, height, format);

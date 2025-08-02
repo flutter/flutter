@@ -23,7 +23,7 @@ TestVulkanSurface::TestVulkanSurface(TestVulkanImage&& image)
 
 std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
     const TestVulkanContext& context,
-    const SkISize& surface_size) {
+    const DlISize& surface_size) {
   auto image_result = context.CreateImage(surface_size);
 
   if (!image_result.has_value()) {

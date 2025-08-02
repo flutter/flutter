@@ -15,7 +15,6 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/vulkan/swiftshader_path.h"
-#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
@@ -115,7 +114,7 @@ TestVulkanContext::~TestVulkanContext() {
 }
 
 std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
-    const SkISize& size) const {
+    const DlISize& size) const {
   TestVulkanImage result;
 
   VkImageCreateInfo info = {

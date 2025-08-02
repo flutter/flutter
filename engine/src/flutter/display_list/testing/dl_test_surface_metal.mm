@@ -47,7 +47,7 @@ std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::MakeOffscreenSurface(
     size_t width,
     size_t height,
     PixelFormat format) const {
-  auto surface = TestMetalSurface::Create(*metal_context_, SkISize::Make(width, height));
+  auto surface = TestMetalSurface::Create(*metal_context_, DlISize(width, height));
   surface->GetSurface()->getCanvas()->clear(SK_ColorTRANSPARENT);
   return std::make_shared<DlMetalSurfaceInstance>(std::move(surface));
 }
