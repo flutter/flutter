@@ -13,8 +13,9 @@ namespace fml {
 template <
     class Collection =
         std::unordered_map<class Key, class Value, class Hash, class Equal>>
-void erase_if(Collection& container,
-              std::function<bool(typename Collection::iterator)> predicate) {
+void erase_if(
+    Collection& container,
+    const std::function<bool(typename Collection::iterator)>& predicate) {
   auto it = container.begin();
   while (it != container.end()) {
     if (predicate(it)) {
