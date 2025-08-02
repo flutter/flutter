@@ -28,6 +28,7 @@ void main() {
     expect(themeData.materialTapTargetSize, null);
     expect(themeData.visualDensity, null);
     expect(themeData.backgroundColor, null);
+    expect(themeData.side, null);
 
     const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
     expect(theme.data.mouseCursor, null);
@@ -37,6 +38,7 @@ void main() {
     expect(theme.data.materialTapTargetSize, null);
     expect(theme.data.visualDensity, null);
     expect(theme.data.backgroundColor, null);
+    expect(theme.data.side, null);
   });
 
   testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
@@ -61,6 +63,7 @@ void main() {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.standard,
       backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
+      side: BorderSide(color: Color(0xfffffff3), width: 2),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -78,6 +81,7 @@ void main() {
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
         'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)})',
+        'side: BorderSide(color: ${const Color(0xfffffff3)}, width: 2.0)',
       ]),
     );
   });
@@ -179,6 +183,53 @@ void main() {
     );
   });
 
+  testWidgets('Radio side is themeable', (WidgetTester tester) async {
+    const BorderSide defaultSide = BorderSide(color: Color(0xfffffff0), width: 2.0);
+    const BorderSide selectedSide = BorderSide(color: Color(0xfffffff1), width: 3.0);
+
+    Widget buildRadio({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedSide;
+              }
+              return defaultSide;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            onChanged: (int? int) {},
+            value: selected ? 1 : 0,
+            groupValue: 1,
+            autofocus: autofocus,
+          ),
+        ),
+      );
+    }
+
+    // Radio.
+    await tester.pumpWidget(buildRadio());
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: defaultSide.color, strokeWidth: defaultSide.width),
+    );
+
+    // Selected radio.
+    await tester.pumpWidget(buildRadio(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: selectedSide.color, strokeWidth: selectedSide.width),
+    );
+  });
+
   testWidgets('Radio properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -194,12 +245,12 @@ void main() {
     const VisualDensity themeVisualDensity = VisualDensity.standard;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
-    const Color defaultFillColor = Color(0xfffffff0);
-    const Color selectedFillColor = Color(0xfffffff1);
-    const Color focusColor = Color(0xfffffff2);
-    const Color hoverColor = Color(0xfffffff3);
-    const Color defaultBackgroundColor = Color(0xfffffff4);
-    const Color selectedBackgroundColor = Color(0xfffffff5);
+    const Color defaultFillColor = Color(0xeffffff0);
+    const Color selectedFillColor = Color(0xeffffff1);
+    const Color focusColor = Color(0xeffffff2);
+    const Color hoverColor = Color(0xeffffff3);
+    const Color defaultBackgroundColor = Color(0xeffffff4);
+    const Color selectedBackgroundColor = Color(0xeffffff5);
     const double splashRadius = 2.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
@@ -300,6 +351,65 @@ void main() {
     await tester.pumpWidget(buildRadio(autofocus: true));
     await tester.pumpAndSettle();
     expect(_getRadioMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
+  });
+
+  testWidgets('Radio side property is taken over the theme values', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const BorderSide themeDefaultSide = BorderSide(color: Color(0xfffffff0), width: 2.0);
+    const BorderSide themeSelectedSide = BorderSide(color: Color(0xfffffff1), width: 3.0);
+
+    const BorderSide defaultSide = BorderSide(color: Color(0xeffffff2), width: 4.0);
+    const BorderSide selectedSide = BorderSide(color: Color(0xeffffff3), width: 5.0);
+
+    Widget buildRadio({bool selected = false, bool autofocus = false}) {
+      return MaterialApp(
+        theme: ThemeData(
+          radioTheme: RadioThemeData(
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return themeSelectedSide;
+              }
+              return themeDefaultSide;
+            }),
+          ),
+        ),
+        home: Scaffold(
+          body: Radio<int>(
+            onChanged: (int? int) {},
+            value: selected ? 0 : 1,
+            groupValue: 0,
+            autofocus: autofocus,
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.selected)) {
+                return selectedSide;
+              }
+              return defaultSide;
+            }),
+          ),
+        ),
+      );
+    }
+
+    // Radio.
+    await tester.pumpWidget(buildRadio());
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: defaultSide.color, strokeWidth: defaultSide.width),
+    );
+
+    // Selected radio.
+    await tester.pumpWidget(buildRadio(selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      _getRadioMaterial(tester),
+      paints
+        ..circle(color: Colors.transparent)
+        ..circle(color: selectedSide.color, strokeWidth: selectedSide.width),
+    );
   });
 
   testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
