@@ -939,10 +939,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_android
-      sha256: "4a5135754a62dbc827a64a42ef1f8ed72c962e191c97e2d48744225c2b9ebb73"
+      sha256: "9d5af2d233ba69df803dcf2f31e66d9a4c6206f2d96178df06b09b0ec3056b39"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.7"
+    version: "2.8.9"
   video_player_avfoundation:
     dependency: "direct main"
     description:
