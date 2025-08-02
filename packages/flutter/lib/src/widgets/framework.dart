@@ -6174,6 +6174,16 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
+  /// The elements currently depending on this [InheritedElement].
+  ///
+  /// This is a read-only view. Do not modify dependency relationships while
+  /// iterating over this iterable. This includes adding or removing
+  /// dependents, or setting their dependency object.
+  ///
+  /// Intended for internal framework use.
+  @protected
+  Iterable<Element> get dependents => _dependents.keys;
+
   /// Returns the dependencies value recorded for [dependent]
   /// with [setDependencies].
   ///
