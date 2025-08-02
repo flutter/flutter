@@ -10,14 +10,14 @@ def main():
         sys.exit(1)
     
     files = sys.argv[1:]
-    cmd = ["python3", "-m", "mdformat"] + files
-    
-    try:
-        result = subprocess.run(cmd)
-        sys.exit(result.returncode)
-    except FileNotFoundError:
-        print("Error: mdformat not found. Install with: pip install mdformat")
-        sys.exit(1)
+    cmd = [sys.executable, "-m", "mdformat"] + files
+
+    # The FileNotFoundError handler was removed as it was misleading.
+    # If mdformat is not installed, the subprocess will exit with a non-zero
+    # status code and print an error to stderr. This is propagated.
+    result = subprocess.run(cmd)
+    sys.exit(result.returncode)
+
 
 if __name__ == '__main__':
     main()
