@@ -549,17 +549,15 @@ inline FlutterTransformation FlutterTransformationMake(
   return transformation;
 }
 
-inline SkMatrix SkMatrixMake(const FlutterTransformation& xformation) {
-  return SkMatrix::MakeAll(xformation.scaleX,  //
-                           xformation.skewX,   //
-                           xformation.transX,  //
-                           xformation.skewY,   //
-                           xformation.scaleY,  //
-                           xformation.transY,  //
-                           xformation.pers0,   //
-                           xformation.pers1,   //
-                           xformation.pers2    //
+inline flutter::DlMatrix DlMatrixMake(const FlutterTransformation& xformation) {
+  // clang-format off
+  return flutter::DlMatrix(
+      xformation.scaleX, xformation.skewY,  0.0f, xformation.pers0,
+      xformation.skewX,  xformation.scaleY, 0.0f, xformation.pers1,
+      0.0f,              0.0f,              1.0f, 0.0f,
+      xformation.transX, xformation.transY, 0.0f, xformation.pers2
   );
+  // clang-format on
 }
 
 inline flutter::EmbedderEngine* ToEmbedderEngine(const FlutterEngine& engine) {

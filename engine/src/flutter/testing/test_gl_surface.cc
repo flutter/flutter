@@ -29,8 +29,8 @@ TestGLOnscreenOnlySurface::TestGLOnscreenOnlySurface(
     DlISize size)
     : surface_size_(size), egl_context_(std::move(context)) {
   const EGLint attributes[] = {
-      EGL_WIDTH,  size.width(),   //
-      EGL_HEIGHT, size.height(),  //
+      EGL_WIDTH,  size.width,   //
+      EGL_HEIGHT, size.height,  //
       EGL_NONE,
   };
 
@@ -151,8 +151,8 @@ sk_sp<SkSurface> TestGLOnscreenOnlySurface::GetOnscreenSurface() {
   FML_CHECK(::eglGetCurrentContext() != EGL_NO_CONTEXT);
 
   GrGLFramebufferInfo framebuffer_info = {};
-  const uint32_t width = surface_size_.width();
-  const uint32_t height = surface_size_.height();
+  const uint32_t width = surface_size_.width;
+  const uint32_t height = surface_size_.height;
   framebuffer_info.fFBOID = GetFramebuffer(width, height);
 #if FML_OS_MACOSX
   framebuffer_info.fFormat = 0x8058;  // GL_RGBA8

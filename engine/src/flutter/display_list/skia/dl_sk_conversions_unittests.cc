@@ -29,8 +29,13 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
   ASSERT_EQ(ToSk(dl_local_matrix_filter), nullptr);
 }
 
-// This test exists just to confirm how to convert existing SkMatrix code
-// into operations using DlMatrix/impeller::Matrix.
+// This test exists just to confirm and demonstrate how to convert existing
+// SkMatrix construction code into the same operations using the replacement
+// DlMatrix/impeller::Matrix objects.
+//
+// To be clear, it verifies:
+// SkMatrix.pre<Op>(data) is the same as DlMatrix * DlMatrix::Make<Op>(data).
+// SkMatrix1.preConcat(SkMatrix2) is the same as DlMatrix1 * DlMatrix2.
 TEST(DisplayListSkConversions, OpOrderPreMethodsVsMatrixMultiply) {
   // If you have code like this...
   const SkMatrix sk_matrix =
@@ -50,6 +55,42 @@ TEST(DisplayListSkConversions, OpOrderPreMethodsVsMatrixMultiply) {
   DlPoint dl_result_2 = dl_matrix_2 * DlPoint(10, 10);
   EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fX, dl_result_2.x));
   EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result.fY, dl_result_2.y));
+
+  // -------------------------------------------------------------------
+
+  // And if you have this...
+  SkMatrix sk_matrix_2;
+  sk_matrix_2.preConcat(SkMatrix::Translate(0, 800));
+  sk_matrix_2.preConcat(SkMatrix::RotateDeg(-90));
+
+  // It's really the same as the above case, btw...
+  SkPoint sk_result_2 = sk_matrix_2.mapPoint({10, 10});
+  EXPECT_FLOAT_EQ(sk_result.fX, sk_result_2.fX);
+  EXPECT_FLOAT_EQ(sk_result.fY, sk_result_2.fY);
+
+  // Convert it to math like this (same order as the pre<Op>() calls)...
+  DlMatrix dl_matrix_3;
+  dl_matrix_3 = dl_matrix_3 * DlMatrix::MakeTranslation({0, 800});
+  dl_matrix_3 = dl_matrix_3 * DlMatrix::MakeRotationZ(DlDegrees(-90));
+  DlPoint dl_result_3 = dl_matrix_3 * DlPoint(10, 10);
+  EXPECT_FLOAT_EQ(sk_result_2.fX, dl_result_3.x);
+  EXPECT_FLOAT_EQ(sk_result_2.fY, dl_result_3.y);
+
+  // Which is also the same result as the first case above...
+  EXPECT_FLOAT_EQ(dl_result_3.x, dl_result.x);
+  EXPECT_FLOAT_EQ(dl_result_3.y, dl_result.y);
+
+  // Not like this...
+  DlMatrix dl_matrix_4;
+  dl_matrix_4 = dl_matrix_4 * DlMatrix::MakeRotationZ(DlDegrees(-90));
+  dl_matrix_4 = dl_matrix_4 * DlMatrix::MakeTranslation({0, 800});
+  DlPoint dl_result_4 = dl_matrix_4 * DlPoint(10, 10);
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result_2.fX, dl_result_4.x));
+  EXPECT_FALSE(impeller::ScalarNearlyEqual(sk_result_2.fY, dl_result_4.y));
+
+  // Which is also the same result as the second case above...
+  EXPECT_FLOAT_EQ(dl_result_4.x, dl_result_2.x);
+  EXPECT_FLOAT_EQ(dl_result_4.y, dl_result_2.y);
 }
 
 TEST(DisplayListSkConversions, ToSkColor) {

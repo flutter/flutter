@@ -44,7 +44,7 @@ std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
       .fLevelCount = 1,
   };
   auto backend_texture = GrBackendTextures::MakeVk(
-      surface_size.width(), surface_size.height(), image_info);
+      surface_size.width, surface_size.height, image_info);
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
