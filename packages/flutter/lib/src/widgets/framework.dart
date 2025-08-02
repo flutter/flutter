@@ -2091,23 +2091,30 @@ class _InactiveElements {
 
   static void _deactivateRecursively(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.active);
-    element.deactivate();
-    assert(element._lifecycleState == _ElementLifecycle.inactive);
-    element.visitChildren(_deactivateRecursively);
-    assert(() {
-      element.debugDeactivated();
-      return true;
-    }());
+    try {
+      element.deactivate();
+    } finally {
+      element._deactivate();
+      assert(element._lifecycleState == _ElementLifecycle.inactive);
+      element.visitChildren(_deactivateRecursively);
+      assert(() {
+        element.debugDeactivated();
+        return true;
+      }());
+    }
   }
 
   void add(Element element) {
     assert(!_locked);
     assert(!_elements.contains(element));
     assert(element._parent == null);
-    if (element._lifecycleState == _ElementLifecycle.active) {
-      _deactivateRecursively(element);
+    try {
+      if (element._lifecycleState == _ElementLifecycle.active) {
+        _deactivateRecursively(element);
+      }
+    } finally {
+      _elements.add(element);
     }
-    _elements.add(element);
   }
 
   void remove(Element element) {
@@ -2934,7 +2941,7 @@ class BuildOwner {
     buildScope._scheduleBuildFor(element);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
-        debugPrint("...the build scope's dirty list is now: $buildScope._dirtyElements");
+        debugPrint("...the build scope's dirty list is now: ${buildScope._dirtyElements}");
       }
       return true;
     }());
@@ -4583,6 +4590,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// parent proactively calls the old parent's [deactivateChild], first using
   /// [forgetChild] to cause the old parent to update its child model.
   @protected
+  @mustCallSuper
   void deactivateChild(Element child) {
     assert(child._parent == this);
     child._parent = null;
@@ -4672,6 +4680,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.activate()`.
   @mustCallSuper
+  @visibleForOverriding
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(owner != null);
@@ -4708,9 +4717,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.deactivate()`.
   @mustCallSuper
+  @visibleForOverriding
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
+  }
+
+  /// Removes dependencies and sets the lifecycle state of this [Element] to
+  /// inactive.
+  ///
+  /// This method is immediately called after [Element.deactivate], even if that
+  /// call throws an exception.
+  @pragma('dart2js:tryInline')
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  void _deactivate() {
     if (_dependencies?.isNotEmpty ?? false) {
       for (final InheritedElement dependency in _dependencies!) {
         dependency.removeDependent(this);
@@ -4977,8 +4998,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, {Object? aspect}) {
-    _dependencies ??= HashSet<InheritedElement>();
-    _dependencies!.add(ancestor);
+    (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget as InheritedWidget;
   }
