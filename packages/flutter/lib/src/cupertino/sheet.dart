@@ -496,7 +496,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 /// See also:
 ///   * [showCupertinoSheet], which is a convenience method for pushing a
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
-class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
+class CupertinoSheetRoute<T> extends PageRoute<T> with CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
   CupertinoSheetRoute({super.settings, required this.builder, this.enableDrag = true});
 
@@ -569,13 +569,19 @@ class _CupertinoSheetScope extends InheritedWidget {
   bool updateShouldNotify(_CupertinoSheetScope oldWidget) => false;
 }
 
-/// A mixin that replaces the entire screen with an iOS sheet transition for a
-/// [PageRoute].
+/// A mixin that provides an iOS-style sheet transition for a [PageRoute].
+///
+/// This mixin is used by [CupertinoSheetRoute] to provide its transition. It can
+/// be used to create a custom [PageRoute] that has the same transition as a
+/// [CupertinoSheetRoute].
+///
+/// A class that uses this mixin must extend [PageRoute] and implement the
+/// [buildContent] and [enableDrag] members.
 ///
 /// See also:
 ///
 ///  * [CupertinoSheetRoute], which is a [PageRoute] that leverages this mixin.
-mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
+mixin CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -634,7 +640,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is _CupertinoSheetRouteTransitionMixin;
+    return nextRoute is CupertinoSheetRouteTransitionMixin;
   }
 
   @override
