@@ -23,6 +23,7 @@ class FirefoxEnvironment implements BrowserEnvironment {
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
+    await Firefox.printActualVersion(_installation);
     return Firefox(url, _installation, debug: debug);
   }
 
@@ -61,6 +62,10 @@ class Firefox extends Browser {
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(
       BrowserProcess(() async {
+        if (Platform.isLinux) {
+          _setupFirefoxPolicies(installation);
+        }
+
         // Using a profile on opening will prevent popups related to profiles.
         const String profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
@@ -120,6 +125,36 @@ user_pref("browser.aboutwelcome.enabled", false);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static void _setupFirefoxPolicies(BrowserInstallation installation) {
+    // Setup `distribution/policies.json`
+    const String policies = '''
+{
+  "policies": {
+    "DisableAppUpdate": true,
+    "ManualAppUpdateOnly": true
+  }
+}
+''';
+    final Directory temporaryDistributionDirectory = Directory(
+      path.join(path.dirname(installation.executable), 'distribution'),
+    );
+    temporaryDistributionDirectory.createSync(recursive: true);
+
+    File(
+      path.join(temporaryDistributionDirectory.path, 'policies.json'),
+    ).writeAsStringSync(policies);
+
+    // REMOVE!
+    print(File(path.join(temporaryDistributionDirectory.path, 'policies.json')).absolute.path);
+  }
+
+  static Future<void> printActualVersion(BrowserInstallation installation) async {
+    final result = await Process.run(installation.executable, ['--version']);
+    // Example:
+    // "Browser: Mozilla Firefox 141.0"
+    print('Browser: ${result.stdout}');
+  }
 
   final BrowserProcess _process;
 
