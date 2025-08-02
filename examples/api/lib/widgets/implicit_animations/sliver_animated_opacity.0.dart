@@ -50,11 +50,12 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
           opacity: _visible ? 1.0 : 0.0,
           duration: widget.duration,
           curve: widget.curve,
-          sliver: SliverFixedExtentList(
+          sliver: SliverFixedExtentList.builder(
             itemExtent: 100.0,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
               return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
-            }, childCount: 5),
+            },
           ),
         ),
         SliverToBoxAdapter(
