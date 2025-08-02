@@ -167,6 +167,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.showTrailingIcon = true,
+    this.skipTrailingIconTraversal = false,
     this.label,
     this.hintText,
     this.helperText,
@@ -247,6 +248,11 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool showTrailingIcon;
+
+  /// Specifies if the [DropdownMenu] should skip the trailing icon traversal when navigating with the keyboard.
+  ///
+  /// Defaults to false.
+  final bool skipTrailingIconTraversal;
 
   /// Optional widget that describes the input field.
   ///
@@ -588,6 +594,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? _selectedEntryIndex;
   late final void Function() _clearSelectedEntryIndex;
 
+  late final FocusNode _trailingIconButtonFocusNode;
+
   @override
   void initState() {
     super.initState();
@@ -608,6 +616,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
+    _trailingIconButtonFocusNode = FocusNode(skipTraversal: widget.skipTrailingIconTraversal);
   }
 
   @override
@@ -616,6 +625,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
+    _trailingIconButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -675,6 +685,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
         _selectedEntryIndex = index;
       }
+    }
+
+    if (oldWidget.skipTrailingIconTraversal != widget.skipTrailingIconTraversal) {
+      _trailingIconButtonFocusNode.skipTraversal = widget.skipTrailingIconTraversal;
     }
   }
 
@@ -1084,6 +1098,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             ? Padding(
                 padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
                 child: IconButton(
+                  focusNode: _trailingIconButtonFocusNode,
                   isSelected: controller.isOpen,
                   constraints: widget.inputDecorationTheme?.suffixIconConstraints,
                   padding: isCollapsed ? EdgeInsets.zero : null,
