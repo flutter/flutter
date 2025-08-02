@@ -913,6 +913,35 @@ class SingletonFlutterWindow extends FlutterView {
   void setIsolateDebugName(String name) => PlatformDispatcher.instance.setIsolateDebugName(name);
 }
 
+/// The system-reported typography settings if any.
+//
+// When changes are made to this class, the equivalent APIs in each of the
+// embedders *must* be updated.
+class TypographySettings {
+  /// Creates a new [TypographySettings].
+  const TypographySettings({
+    this.lineHeight,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.paragraphSpacing,
+  });
+
+  /// The height of this text span, as a multiple of the font size.
+  final double? lineHeight;
+
+  /// The amount of space (in logical pixels) to add between each letter.
+  /// A negative value can be used to bring the letters closer.
+  final double? letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word). A negative value can be used to
+  /// bring the words closer.
+  final double? wordSpacing;
+
+  /// The amount of space (in logical pixels) to add between each paragraph.
+  final double? paragraphSpacing;
+}
+
 /// Additional accessibility features that may be enabled by the platform.
 ///
 /// It is not possible to enable these settings from Flutter, instead they are

@@ -107,6 +107,20 @@ abstract class SingletonFlutterWindow extends FlutterView {
   void setIsolateDebugName(String name);
 }
 
+class TypographySettings {
+  const TypographySettings({
+    this.lineHeight,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.paragraphSpacing,
+  });
+
+  final double? lineHeight;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? paragraphSpacing;
+}
+
 abstract class AccessibilityFeatures {
   bool get accessibleNavigation;
   bool get invertColors;

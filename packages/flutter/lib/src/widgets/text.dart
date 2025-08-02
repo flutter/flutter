@@ -13,7 +13,7 @@
 library;
 
 import 'dart:math';
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' as ui show TextHeightBehavior, TypographySettings;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -703,9 +703,15 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    if (MediaQuery.boldTextOf(context)) {
-      effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
-    }
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    effectiveTextStyle = effectiveTextStyle!.merge(
+      TextStyle(
+        height: typographySettings?.lineHeight,
+        letterSpacing: typographySettings?.letterSpacing,
+        wordSpacing: typographySettings?.wordSpacing,
+        fontWeight: MediaQuery.boldTextOf(context) ? FontWeight.bold : null,
+      ),
+    );
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _) => textScaler,
@@ -724,7 +730,7 @@ class Text extends StatelessWidget {
           locale:
               locale, // RichText uses Localizations.localeOf to obtain a default if this is null
           softWrap: softWrap ?? defaultTextStyle.softWrap,
-          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+          overflow: overflow ?? effectiveTextStyle.overflow ?? defaultTextStyle.overflow,
           textScaler: textScaler,
           maxLines: maxLines ?? defaultTextStyle.maxLines,
           strutStyle: strutStyle,
@@ -752,7 +758,7 @@ class Text extends StatelessWidget {
             textDirection, // RichText uses Directionality.of to obtain a default if this is null.
         locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
         softWrap: softWrap ?? defaultTextStyle.softWrap,
-        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        overflow: overflow ?? effectiveTextStyle.overflow ?? defaultTextStyle.overflow,
         textScaler: textScaler,
         maxLines: maxLines ?? defaultTextStyle.maxLines,
         strutStyle: strutStyle,

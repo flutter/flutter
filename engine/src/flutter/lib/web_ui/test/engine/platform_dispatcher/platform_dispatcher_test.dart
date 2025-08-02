@@ -290,6 +290,52 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
 
+    test('calls onMetricsChanged when the typography probe size changes', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+      final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onMetricsChanged;
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final Completer<void> completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+        ui.PlatformDispatcher.instance.onMetricsChanged = oldCallback;
+      });
+
+      bool isCalled = false;
+      ui.PlatformDispatcher.instance.onMetricsChanged = () {
+        isCalled = true;
+      };
+
+      style.text = 'html { line-height: 2; word-spacing: 4px; letter-spacing: 1px; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+
+      isCalled = false;
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(isCalled, isTrue);
+
+      isCalled = false;
+
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(isCalled, isTrue);
+    });
+
     test('disposes all its views', () {
       final EngineFlutterView view1 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
       final EngineFlutterView view2 = EngineFlutterView(dispatcher, createDomHTMLDivElement());
