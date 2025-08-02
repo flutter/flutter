@@ -186,14 +186,25 @@ class WidgetSpan extends PlaceholderSpan {
   @override
   bool visitDirectChildren(InlineSpanVisitor visitor) => true;
 
-  @override
+    @override
   InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
-    if (position.offset == offset.value) {
+    // Record where this WidgetSpan begins in the flat text.
+    final int start = offset.value;
+    // Advance past this one “placeholder” code unit.
+    offset.increment(1);
+
+    // Downstream affinity: cursor exactly at the span start.
+    if (position.offset == start) {
       return this;
     }
-    offset.increment(1);
+    // Upstream affinity: cursor just after the span should still hit it.
+    if (position.affinity == TextAffinity.upstream && position.offset == start + 1) {
+      return this;
+    }
     return null;
   }
+
+
 
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
