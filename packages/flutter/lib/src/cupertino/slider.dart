@@ -84,6 +84,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
   }) : assert(value >= min && value <= max),
@@ -210,6 +211,13 @@ class CupertinoSlider extends StatefulWidget {
   /// If null, the slider is continuous.
   final int? divisions;
 
+	/// Whether to round division to avoid floating-point precision errors.
+	///
+	/// Only takes effect when [divisions] is not null. Has no effect on continuous sliders.
+	///
+	/// Defaults to false.
+  final bool integralDivisions;
+
   /// The color to use for the portion of the slider that has been selected.
   ///
   /// Defaults to the [CupertinoTheme]'s primary color if null.
@@ -235,7 +243,10 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value, bool isFastDrag) {
     assert(widget.onChanged != null);
-    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.integralDivisions && widget.divisions != null) {
+      lerpValue = (lerpValue * widget.divisions!).round() / widget.divisions!;
+    }
     final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
 
     if (lerpValue != widget.value) {
