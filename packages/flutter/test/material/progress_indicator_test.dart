@@ -13,6 +13,8 @@
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1355,6 +1357,61 @@ void main() {
       paints..circle(x: 2.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/173096.
+  testWidgets(
+    'LinearProgressIndicator does not paint track outside the bounds when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({required TextDirection textDirection}) async {
+        final ValueNotifier<double> value = ValueNotifier<double>(0);
+        addTearDown(value.dispose);
+
+        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+          frameSize: const Size(250, 30),
+        );
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(
+                child: ValueListenableBuilder<double>(
+                  valueListenable: value,
+                  builder: (BuildContext context, double value, _) {
+                    return LinearProgressIndicator(
+                      year2023: false,
+                      value: value,
+                      trackGap: 20, // Increase trackGap to make regressions more noticeable.
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        for (int i = 0; i <= 50; i++) {
+          value.value = i * 0.02;
+          await tester.pumpWidget(animationSheet.record(target));
+        }
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.bounds.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.bounds.rtl.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
 
   testWidgets('Indeterminate LinearProgressIndicator does not paint stop indicator', (
     WidgetTester tester,
