@@ -2077,6 +2077,56 @@ The findRenderObject() method was called for the following element:
       ),
     );
   });
+
+  testWidgets('widget is not active if throw in deactivated', (WidgetTester tester) async {
+    final FlutterExceptionHandler? onError = FlutterError.onError;
+    FlutterError.onError = (_) {};
+    const Widget child = Placeholder();
+    await tester.pumpWidget(
+      StatefulWidgetSpy(onDeactivate: (_) => throw StateError('kaboom'), child: child),
+    );
+    final Element element = tester.element(find.byWidget(child));
+    assert(element.debugIsActive);
+
+    await tester.pumpWidget(const SizedBox());
+    FlutterError.onError = onError;
+    expect(element.debugIsDefunct, true);
+  });
+  testWidgets('widget is not active if throw in activated', (WidgetTester tester) async {
+    final FlutterExceptionHandler? onError = FlutterError.onError;
+    FlutterError.onError = (_) {};
+    FlutterError.onError = (_) {};
+    const Widget child = Placeholder();
+    final GlobalKey key = GlobalKey();
+    final Widget widget = StatefulWidgetSpy(
+      key: key,
+      onActivate: (_) => throw StateError('kaboom'),
+      child: child,
+    );
+    await tester.pumpWidget(widget);
+    final Element element = tester.element(find.byWidget(child));
+
+    await tester.pumpWidget(Center(child: widget));
+
+    FlutterError.onError = onError;
+    expect(element.debugIsDefunct, true);
+  });
+
+  testWidgets('widget is unmounted if throw in dispose', (WidgetTester tester) async {
+    final FlutterExceptionHandler? onError = FlutterError.onError;
+    FlutterError.onError = (_) {};
+    const Widget child = Placeholder();
+    final Widget widget = StatefulWidgetSpy(
+      onDispose: (_) => throw StateError('kaboom'),
+      child: child,
+    );
+    await tester.pumpWidget(widget);
+    final Element element = tester.element(find.byWidget(child));
+    await tester.pumpWidget(child);
+
+    FlutterError.onError = onError;
+    expect(element.debugIsDefunct, true);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -2325,6 +2375,7 @@ class StatefulWidgetSpy extends StatefulWidget {
     this.onDeactivate,
     this.onActivate,
     this.onDidUpdateWidget,
+    this.child = const SizedBox(),
   });
 
   final void Function(BuildContext)? onBuild;
@@ -2334,6 +2385,7 @@ class StatefulWidgetSpy extends StatefulWidget {
   final void Function(BuildContext)? onDeactivate;
   final void Function(BuildContext)? onActivate;
   final void Function(BuildContext)? onDidUpdateWidget;
+  final Widget child;
 
   @override
   State<StatefulWidgetSpy> createState() => _StatefulWidgetSpyState();
@@ -2379,7 +2431,7 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
   @override
   Widget build(BuildContext context) {
     widget.onBuild?.call(context);
-    return Container();
+    return widget.child;
   }
 }
 
