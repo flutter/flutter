@@ -46,16 +46,17 @@ Google-internal, see
    cipd set-ref flutter_internal/mac/mobileprovision/mac-amd64 -ref latest -version AMD64_INSTANCE_ID
    ```
 
-12. Set the `version:to_2025` (or appropriate year) tag on the latest arm64 upload via the following command:
+12. Set the new tag on the latest arm64 upload via the following command. Replace `YOUR_NEW_TAG` with
+    `version:to_2025` (or appropriate year).
 
    ```sh
-   cipd set-tag flutter_internal/mac/mobileprovision/mac-arm64 -tag "version:to_2025" -version ARM64_INSTANCE_ID
+   cipd set-tag flutter_internal/mac/mobileprovision/mac-arm64 -tag YOUR_NEW_TAG -version ARM64_INSTANCE_ID
    ```
 
-13. Set the `version:to_2025` (or appropriate year) tag on the latest amd64 upload via the following command:
+13. Do the same for amd64 upload:
 
    ```sh
-   cipd set-tag flutter_internal/mac/mobileprovision/mac-amd64 -tag "version:to_2025" -version AMD64_INSTANCE_ID
+   cipd set-tag flutter_internal/mac/mobileprovision/mac-amd64 -tag YOUR_NEW_TAG -version AMD64_INSTANCE_ID
    ```
 
 14. Update `.ci.yaml` and migrate `apple_signing` steps to the new version tag.  
