@@ -36,10 +36,11 @@ void main() {
         Target target,
         Environment environment,
       ) {
-        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-        environment.outputDir.childFile('isolate_snapshot_data').createSync();
-        environment.outputDir.childFile('vm_snapshot_data').createSync();
-        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+        final Directory assetsOutputDir = environment.outputDir.childDirectory('flutter_assets');
+        assetsOutputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        assetsOutputDir.childFile('isolate_snapshot_data').createSync();
+        assetsOutputDir.childFile('vm_snapshot_data').createSync();
+        assetsOutputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
       await BundleBuilder().build(
@@ -47,15 +48,20 @@ void main() {
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
         mainPath: globals.fs.path.join('lib', 'main.dart'),
-        assetDirPath: 'example',
+        outputDirPath: 'example',
         depfilePath: 'example.d',
         buildSystem: buildSystem,
       );
       expect(
-        globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(),
+        globals.fs
+            .file(globals.fs.path.join('example', 'flutter_assets', 'kernel_blob.bin'))
+            .existsSync(),
         true,
       );
-      expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
+      expect(
+        globals.fs.file(globals.fs.path.join('example', 'flutter_assets', 'LICENSE')).existsSync(),
+        true,
+      );
       expect(globals.fs.file(globals.fs.path.join('example.d')).existsSync(), false);
     },
     overrides: <Type, Generator>{
@@ -288,6 +294,36 @@ void main() {
         buildSystem: buildSystem,
       );
       expect(dependencies, contains('install_code_assets'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Release bundle includes AOT assets',
+    () async {
+      final dependencies = <String>[];
+      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        for (final Target dep in target.dependencies) {
+          dependencies.add(dep.name);
+        }
+      });
+      await BundleBuilder().build(
+        platform: TargetPlatform.linux_x64,
+        buildInfo: BuildInfo.release,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        outputDirPath: 'example',
+        depfilePath: 'example.d',
+        buildAOTAssets: true,
+        buildSystem: buildSystem,
+      );
+      expect(dependencies, contains('linux_aot_bundle'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),

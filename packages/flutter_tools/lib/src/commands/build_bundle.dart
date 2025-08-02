@@ -53,10 +53,22 @@ class BuildBundleCommand extends BuildSubCommand {
       )
       ..addOption(
         'asset-dir',
-        defaultsTo: getAssetBuildDirectory(),
         help:
-            'The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
+            '(deprecated) The output directory for the kernel_blob.bin file, the native snapshot, the assets, etc. '
+            'Can be used to redirect the output when driving the Flutter toolchain from another build system. '
+            'The "--asset-dir" argument is deprecated; use "--output-dir" instead.',
+      )
+      ..addOption(
+        'output-dir',
+        defaultsTo: getBuildDirectory(),
+        help:
+            'The output directory for the Flutter assets, the AOT artifacts, etc. '
             'Can be used to redirect the output when driving the Flutter toolchain from another build system.',
+      )
+      ..addFlag(
+        'build-aot-assets',
+        help:
+            'Build AOT assets when building a profile or release bundle (has no effect for debug builds).',
       )
       ..addFlag(
         'tree-shake-icons',
@@ -102,6 +114,19 @@ class BuildBundleCommand extends BuildSubCommand {
         'The "--tree-shake-icons" flag is deprecated for "build bundle" and will be removed in a future version of Flutter.',
       );
     }
+
+    final dynamic assetDir = argResults?['asset-dir'];
+    if (assetDir != null) {
+      globals.printWarning(
+        '${globals.logger.terminal.warningMark} The "--asset-dir" argument is deprecated; use "--output-dir" instead.',
+      );
+    }
+
+    final dynamic outputDir = argResults?['output-dir'];
+    if (assetDir != null && outputDir != null) {
+      throwToolExit('Either --asset-dir or --output-dir can be provided, not both.');
+    }
+
     return super.validateCommand();
   }
 
@@ -141,12 +166,17 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildInfo buildInfo = await getBuildInfo();
 
+    final String? assetDir = stringArg('asset-dir');
+    final String? outputDir = assetDir == null ? stringArg('output-dir') : null;
+
     await _bundleBuilder.build(
       platform: platform,
       buildInfo: buildInfo,
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
-      assetDirPath: stringArg('asset-dir'),
+      assetDirPath: assetDir,
+      outputDirPath: outputDir,
+      buildAOTAssets: boolArg('build-aot-assets'),
       buildNativeAssets: false,
     );
     return FlutterCommandResult.success();
