@@ -52,11 +52,23 @@ class MockFlutterWindow : public FlutterWindow {
   MOCK_METHOD(void, OnResize, (unsigned int, unsigned int), (override));
   MOCK_METHOD(void,
               OnPointerMove,
-              (double, double, FlutterPointerDeviceKind, int32_t, int),
+              (double,
+               double,
+               FlutterPointerDeviceKind,
+               int32_t,
+               uint32_t,
+               uint32_t,
+               int),
               (override));
   MOCK_METHOD(void,
               OnPointerDown,
-              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (double,
+               double,
+               FlutterPointerDeviceKind,
+               int32_t,
+               UINT,
+               uint32_t,
+               uint32_t),
               (override));
   MOCK_METHOD(void,
               OnPointerUp,
@@ -170,32 +182,32 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   // Move
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0))
       .Times(1);
 
   // Down
-  EXPECT_CALL(
-      delegate,
-      OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                    kDefaultPointerDeviceId, kFlutterPointerButtonMousePrimary))
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
       .Times(1);
-  EXPECT_CALL(
-      delegate,
-      OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                    kDefaultPointerDeviceId, kFlutterPointerButtonMousePrimary))
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
       .Times(1);
-  EXPECT_CALL(
-      delegate,
-      OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                    kDefaultPointerDeviceId, kFlutterPointerButtonMousePrimary))
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
       .Times(1);
 
   // Up
@@ -227,9 +239,9 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
       .Times(1);
 
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
                           kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindMouse,
@@ -237,9 +249,9 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Touch
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindTouch,
                           kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindTouch,
@@ -247,9 +259,9 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Pen
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                           kDefaultPointerDeviceId, WM_LBUTTONDOWN);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindStylus,

@@ -136,6 +136,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
+                     uint32_t rotation,
+                     uint32_t pressure,
                      int modifiers_state) override;
 
   // |WindowBindingHandlerDelegate|
@@ -143,7 +145,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
-                     FlutterPointerMouseButtons button) override;
+                     FlutterPointerMouseButtons button,
+                     uint32_t rotation,
+                     uint32_t pressure) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerUp(double x,
@@ -285,6 +289,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
     // The y position where the last pan/zoom started.
     double pan_zoom_start_y = 0;
+
+    // The clockwise rotation of the current pointer, from 0-359.
+    uint32_t rotation = 0;
+
+    // The pressure of the current pointer from 0-1024.
+    uint32_t pressure = 0;
   };
 
   // States a resize event can be in.
