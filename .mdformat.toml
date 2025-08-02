@@ -1,0 +1,3 @@
+wrap = 80
+number = false
+end_of_line = "lf"
