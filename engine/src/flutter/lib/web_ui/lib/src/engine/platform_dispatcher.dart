@@ -901,9 +901,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     configuration = configuration.copyWith(locales: parseBrowserLanguages());
   }
 
+  /// Overrides the browser languages list.
+  ///
+  /// If [value] is null, resets the browser languages back to the real value.
+  ///
+  /// This is intended for tests only.
+  @visibleForTesting
+  static void debugOverrideBrowserLanguages(List<String>? value) {
+    _browserLanguagesOverride = value;
+  }
+
+  static List<String>? _browserLanguagesOverride;
+
+  @visibleForTesting
   static List<ui.Locale> parseBrowserLanguages() {
     // TODO(yjbanov): find a solution for IE
-    final List<String>? languages = domWindow.navigator.languages;
+    final List<String>? languages = _browserLanguagesOverride ?? domWindow.navigator.languages;
     if (languages == null || languages.isEmpty) {
       // To make it easier for the app code, let's not leave the locales list
       // empty. This way there's fewer corner cases for apps to handle.
@@ -912,12 +925,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final List<ui.Locale> locales = <ui.Locale>[];
     for (final String language in languages) {
-      final List<String> parts = language.split('-');
-      if (parts.length > 1) {
-        locales.add(ui.Locale(parts.first, parts.last));
-      } else {
-        locales.add(ui.Locale(language));
-      }
+      final DomLocale domLocale = DomLocale(language);
+      locales.add(
+        ui.Locale.fromSubtags(
+          languageCode: domLocale.language,
+          scriptCode: domLocale.script,
+          countryCode: domLocale.region,
+        ),
+      );
     }
 
     assert(locales.isNotEmpty);
