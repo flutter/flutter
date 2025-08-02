@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DialogUseCase extends UseCase {
+  DialogUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'Dialog';
 

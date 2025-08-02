@@ -9,6 +9,8 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
+#include <gdk/gdkwayland.h>
+
 TEST(FlCompositorSoftwareTest, Render) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
 
@@ -19,6 +21,6 @@ TEST(FlCompositorSoftwareTest, Render) {
       image_data, CAIRO_FORMAT_ARGB32, 1024, 1024, 1024 * 4);
   cairo_t* cr = cairo_create(surface);
   fl_compositor_present_layers(FL_COMPOSITOR(compositor), nullptr, 0);
-  fl_compositor_software_render(compositor, cr, 1024, 1024, 1);
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr);
   cairo_surface_destroy(surface);
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -322,11 +324,19 @@ void main() {
               ),
             );
             // Verify Info.plist has correct engine version and build mode
-            final File engineStamp = fileSystem.file(
-              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+            final File engineInfo = fileSystem.file(
+              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
             );
-            expect(engineStamp, exists);
-            final String engineVersion = engineStamp.readAsStringSync().trim();
+            expect(engineInfo, exists);
+
+            final String engineVersion;
+            if (json.decode(engineInfo.readAsStringSync().trim()) as Map<String, Object?> case {
+              'git_revision': final String parsedVersion,
+            }) {
+              engineVersion = parsedVersion;
+            } else {
+              fail('engine_stamp.json missing "git_revision" key');
+            }
 
             final File infoPlist = fileSystem.file(
               fileSystem.path.joinAll(<String>[

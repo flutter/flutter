@@ -59,6 +59,13 @@ void main() {
       );
     });
 
+    testUsingContext('prints default values with --help', () async {
+      final configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      await commandRunner.run(<String>['config', '--help']);
+      expect(testLogger.statusText, contains('(defaults to on)'));
+    });
+
     testUsingContext('throws error on excess arguments', () {
       final configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);

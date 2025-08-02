@@ -370,7 +370,7 @@ class KernelCompiler {
           // See: https://github.com/flutter/flutter/issues/103994
           '--verbosity=error',
           ...?extraFrontEndOptions,
-          if (mainUri != null) mainUri else '--native-assets-only',
+          mainUri ?? '--native-assets-only',
         ];
 
     _logger.printTrace(command.join(' '));

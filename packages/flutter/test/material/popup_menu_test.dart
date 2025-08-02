@@ -4703,6 +4703,61 @@ void main() {
     expect(borderRadius.topLeft, const Radius.circular(5));
     expect(borderRadius.topRight, const Radius.circular(5));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/171422.
+  testWidgets('PopupMenuButton should not crash when being hidden immediately', (
+    WidgetTester tester,
+  ) async {
+    bool showPopupMenu = true;
+
+    Widget buildWidget() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              if (showPopupMenu)
+                PopupMenuButton<String>(
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuItem<String>>[
+                      const PopupMenuItem<String>(value: 'add', child: Text('Add')),
+                      const PopupMenuItem<String>(value: 'hide', child: Text('Hide')),
+                      const PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+                    ];
+                  },
+                  onSelected: (String value) {
+                    if (value == 'hide') {
+                      showPopupMenu = false;
+                    }
+                  },
+                ),
+            ],
+          ),
+          body: Text(
+            'PopupMenuButton:${showPopupMenu ? 'PopupMenu is showing' : 'PopupMenu is hidden'}',
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    // Find the PopupMenuButton.
+    final Finder popupMenuButtonFinder = find.byType(PopupMenuButton<String>);
+    expect(popupMenuButtonFinder, findsOneWidget);
+
+    // Tap on PopupMenuButton.
+    await tester.tap(popupMenuButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Tap on "Hide" menu item.
+    await tester.tap(find.text('Hide'));
+
+    // Rebuild the widget tree with the PopupMenuButton removed to trigger the bug.
+    await tester.pumpWidget(buildWidget());
+
+    // Verify no exception is thrown at a brief moment when the PopupMenuButton is hidden.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
