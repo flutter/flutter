@@ -379,8 +379,8 @@ class LogToFileAnalytics extends AnalyticsMock {
     final parameters = <String, String>{
       'variableName': variableName,
       'time': '$time',
-      if (category != null) 'category': category,
-      if (label != null) 'label': label,
+      'category': ?category,
+      'label': ?label,
     };
     _sendController.add(parameters);
     logFile.writeAsStringSync('timing $parameters\n', mode: FileMode.append);

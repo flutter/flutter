@@ -24,7 +24,7 @@ class RequestData extends Command {
 
   @override
   Map<String, String> serialize() =>
-      super.serialize()..addAll(<String, String>{if (message != null) 'message': message!});
+      super.serialize()..addAll(<String, String>{'message': ?message});
 }
 
 /// The result of the [RequestData] command.
