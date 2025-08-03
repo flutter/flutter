@@ -935,6 +935,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: RawAutocomplete<String>(
+                // ignore: avoid_redundant_argument_values
                 optionsViewOpenDirection: OptionsViewOpenDirection.down,
                 optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                 fieldViewBuilder:
@@ -1021,7 +1022,6 @@ void main() {
                   alignment: alignment,
                   child: RawAutocomplete<String>(
                     key: fieldKey,
-                    // ignore: avoid_redundant_argument_values
                     optionsViewOpenDirection: OptionsViewOpenDirection.automatic,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
@@ -1094,6 +1094,7 @@ void main() {
                     key: autocompleteKey,
                     textEditingController: controller,
                     focusNode: focusNode,
+                    // ignore: avoid_redundant_argument_values
                     optionsViewOpenDirection: OptionsViewOpenDirection.down,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
                     optionsViewBuilder:
