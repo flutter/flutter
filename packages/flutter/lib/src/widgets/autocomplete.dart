@@ -108,6 +108,9 @@ enum OptionsViewOpenDirection {
   down,
 
   /// Open in the direction with the most available space.
+  ///
+  /// If both directions have the same available space,
+  /// then `OptionsViewOpenDirection.down` will be selected.
   automatic,
 }
 
