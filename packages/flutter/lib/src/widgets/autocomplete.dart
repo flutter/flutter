@@ -162,7 +162,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
-    this.optionsViewOpenDirection = OptionsViewOpenDirection.automatic,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
