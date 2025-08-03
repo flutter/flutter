@@ -3001,7 +3001,7 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
                 ASSERT_EQ(clip, FlutterRectMake(rect_to_compare));
 
                 // This maps the clip from device space into surface space.
-                ASSERT_EQ(total_xformation.IsAligned2D());
+                ASSERT_TRUE(total_xformation.IsAligned2D());
                 DlRect mapped =
                     rect_to_compare.TransformAndClipBounds(total_xformation);
                 ASSERT_EQ(mapped, DlRect::MakeLTRB(10, 10, 290, 390));
