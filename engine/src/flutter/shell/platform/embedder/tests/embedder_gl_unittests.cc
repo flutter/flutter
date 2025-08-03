@@ -3079,7 +3079,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
           ASSERT_EQ(mutations[2]->type,
                     kFlutterPlatformViewMutationTypeTransformation);
           ASSERT_EQ(DlMatrixMake(mutations[2]->transformation),
-                    DlMatrix::MakeTranslation({512.0, 0.0, 1.0}));
+                    DlMatrix::MakeTranslation({512.0, 0.0}));
 
           ASSERT_EQ(mutations[3]->type,
                     kFlutterPlatformViewMutationTypeClipRect);
@@ -3089,7 +3089,7 @@ TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
           ASSERT_EQ(mutations[4]->type,
                     kFlutterPlatformViewMutationTypeTransformation);
           ASSERT_EQ(DlMatrixMake(mutations[4]->transformation),
-                    DlMatrix::MakeTranslation({-256.0, 0.0, 1.0}));
+                    DlMatrix::MakeTranslation({-256.0, 0.0}));
 
           ASSERT_EQ(mutations[5]->type,
                     kFlutterPlatformViewMutationTypeClipRect);
