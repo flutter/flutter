@@ -211,7 +211,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     final AlignmentDirectional optionsAlignment = switch (openDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
       OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-      // defaults to down
       OptionsViewOpenDirection.auto => AlignmentDirectional.topStart,
     };
 
