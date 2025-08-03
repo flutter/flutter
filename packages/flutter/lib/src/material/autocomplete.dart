@@ -67,7 +67,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.onSelected,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
-    this.optionsViewOpenDirection = OptionsViewOpenDirection.auto,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.automatic,
     this.textEditingController,
     this.initialValue,
   });
@@ -211,7 +211,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     final AlignmentDirectional optionsAlignment = switch (openDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
       OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-      OptionsViewOpenDirection.auto => AlignmentDirectional.topStart,
+      OptionsViewOpenDirection.automatic => AlignmentDirectional.topStart,
     };
 
     return Align(

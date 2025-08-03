@@ -448,7 +448,7 @@ void main() {
             tester.getTopLeft(find.byKey(optionsKey)),
             Offset(padding, bottomOfField - optionsSize.height),
           );
-        case OptionsViewOpenDirection.auto:
+        case OptionsViewOpenDirection.automatic:
           // Behaves like OptionsViewOpenDirection.up.
           expect(find.byType(InkWell), findsNWidgets(3));
           final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
@@ -488,7 +488,7 @@ void main() {
             tester.getBottomLeft(find.byType(InkWell).at(2)),
             Offset(padding, bottomOfField + 3 * optionHeight),
           );
-        case OptionsViewOpenDirection.auto:
+        case OptionsViewOpenDirection.automatic:
           // Behaves like OptionsViewOpenDirection.down.
           expect(find.byType(InkWell), findsNWidgets(3));
           final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
@@ -630,7 +630,7 @@ void main() {
           tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
         OptionsViewOpenDirection.up =>
           tester.getTopLeft(find.byKey(fieldKey)).dy - optionsBox.size.height,
-        OptionsViewOpenDirection.auto =>
+        OptionsViewOpenDirection.automatic =>
           tester.getTopLeft(find.byKey(fieldKey)).dy + fieldBox.size.height,
       });
     });
@@ -1022,7 +1022,7 @@ void main() {
                   child: RawAutocomplete<String>(
                     key: fieldKey,
                     // ignore: avoid_redundant_argument_values
-                    optionsViewOpenDirection: OptionsViewOpenDirection.auto,
+                    optionsViewOpenDirection: OptionsViewOpenDirection.automatic,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
                         (

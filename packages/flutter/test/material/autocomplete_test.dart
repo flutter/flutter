@@ -550,7 +550,7 @@ void main() {
       final OptionsViewOpenDirection actual = tester
           .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
           .optionsViewOpenDirection;
-      expect(actual, equals(OptionsViewOpenDirection.auto));
+      expect(actual, equals(OptionsViewOpenDirection.automatic));
     });
 
     testWidgets('down', (WidgetTester tester) async {
@@ -610,7 +610,7 @@ void main() {
                   alignment: alignment,
                   child: Autocomplete<String>(
                     // ignore: avoid_redundant_argument_values
-                    optionsViewOpenDirection: OptionsViewOpenDirection.auto,
+                    optionsViewOpenDirection: OptionsViewOpenDirection.automatic,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
                         (

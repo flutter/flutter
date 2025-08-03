@@ -108,7 +108,7 @@ enum OptionsViewOpenDirection {
   down,
 
   /// Open in the direction with the most available space.
-  auto,
+  automatic,
 }
 
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
@@ -162,7 +162,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
-    this.optionsViewOpenDirection = OptionsViewOpenDirection.auto,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.automatic,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
@@ -531,7 +531,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
 
     OptionsViewOpenDirection optionsViewOpenDirection = widget.optionsViewOpenDirection;
-    if (optionsViewOpenDirection == OptionsViewOpenDirection.auto) {
+    if (optionsViewOpenDirection == OptionsViewOpenDirection.automatic) {
       final double spaceAbove = -overlayRectInField.top;
       final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
       optionsViewOpenDirection = spaceAbove > spaceBelow
@@ -542,7 +542,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final double optionsViewMaxHeight = switch (optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => -overlayRectInField.top,
       OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
-      OptionsViewOpenDirection.auto => 0.0, // Should be unreachable.
+      OptionsViewOpenDirection.automatic => 0.0, // Should be unreachable.
     };
 
     final Size optionsViewBoundingBox = Size(
@@ -553,7 +553,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final double originY = switch (optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => overlayRectInField.top,
       OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
-      OptionsViewOpenDirection.auto => 0.0,
+      OptionsViewOpenDirection.automatic => 0.0,
     };
 
     final Matrix4 transform = layoutInfo.childPaintTransform.clone()
@@ -571,7 +571,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             alignment: switch (optionsViewOpenDirection) {
               OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
               OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-              OptionsViewOpenDirection.auto => AlignmentDirectional.topStart,
+              OptionsViewOpenDirection.automatic => AlignmentDirectional.topStart,
             },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
