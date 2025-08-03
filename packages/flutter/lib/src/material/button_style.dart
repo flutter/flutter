@@ -776,7 +776,7 @@ class ButtonStyle with Diagnosticable {
       iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       iconAlignment: t < 0.5 ? a?.iconAlignment : b?.iconAlignment,
-      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
+      side: WidgetStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(
         a?.shape,
         b?.shape,
@@ -794,5 +794,4 @@ class ButtonStyle with Diagnosticable {
       foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,
     );
   }
-
 }
