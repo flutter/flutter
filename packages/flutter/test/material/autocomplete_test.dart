@@ -537,7 +537,7 @@ void main() {
   });
 
   group('optionsViewOpenDirection', () {
-    testWidgets('default (auto)', (WidgetTester tester) async {
+    testWidgets('default (down)', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -550,7 +550,7 @@ void main() {
       final OptionsViewOpenDirection actual = tester
           .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
           .optionsViewOpenDirection;
-      expect(actual, equals(OptionsViewOpenDirection.automatic));
+      expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
     testWidgets('down', (WidgetTester tester) async {
@@ -558,6 +558,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
+              // ignore: avoid_redundant_argument_values
               optionsViewOpenDirection: OptionsViewOpenDirection.down,
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
             ),
@@ -594,7 +595,7 @@ void main() {
       expect(find.text('aa').hitTestable(), findsOneWidget);
     });
 
-    testWidgets('auto: open in the direction with more space', (WidgetTester tester) async {
+    testWidgets('automatic: open in the direction with more space', (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
       late StateSetter setState;
@@ -609,7 +610,6 @@ void main() {
                 return Align(
                   alignment: alignment,
                   child: Autocomplete<String>(
-                    // ignore: avoid_redundant_argument_values
                     optionsViewOpenDirection: OptionsViewOpenDirection.automatic,
                     optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
                     fieldViewBuilder:
@@ -665,6 +665,18 @@ void main() {
       expect(
         tester.getTopLeft(find.byKey(fieldKey)),
         offsetMoreOrLessEquals(tester.getBottomLeft(find.byKey(optionsKey))),
+      );
+
+      // Move the field to the center.
+      setState(() {
+        alignment = Alignment.center;
+      });
+      await tester.pumpAndSettle();
+
+      // Show the options. It should open downwards since there is more space.
+      expect(
+        tester.getBottomLeft(find.byKey(fieldKey)),
+        offsetMoreOrLessEquals(tester.getTopLeft(find.byKey(optionsKey))),
       );
     });
   });
