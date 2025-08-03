@@ -573,6 +573,15 @@ inline FlutterRect FlutterRectMake(const SkRect& rect) {
   return r;
 }
 
+inline FlutterRect FlutterRectMake(const flutter::DlRect& rect) {
+  FlutterRect r = {};
+  r.left = rect.GetLeft();
+  r.top = rect.GetTop();
+  r.right = rect.GetRight();
+  r.bottom = rect.GetBottom();
+  return r;
+}
+
 inline FlutterRect FlutterRectMakeLTRB(double l, double t, double r, double b) {
   FlutterRect rect = {};
   rect.left = l;

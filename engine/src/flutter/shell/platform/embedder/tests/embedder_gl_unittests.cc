@@ -2593,7 +2593,7 @@ TEST_P(EmbedderTestMultiBackend, PlatformViewMutatorsAreValid) {
               case kFlutterPlatformViewMutationTypeClipRect:
                 mutation.type = kFlutterPlatformViewMutationTypeClipRect;
                 mutation.clip_rect = FlutterRectMake(
-                    SkRect::MakeXYWH(10.0, 10.0, 800.0 - 20.0, 600.0 - 20.0));
+                    DlRect::MakeXYWH(10.0, 10.0, 800.0 - 20.0, 600.0 - 20.0));
                 break;
               case kFlutterPlatformViewMutationTypeOpacity:
                 mutation.type = kFlutterPlatformViewMutationTypeOpacity;
@@ -2703,7 +2703,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
               case kFlutterPlatformViewMutationTypeClipRect:
                 mutation.type = kFlutterPlatformViewMutationTypeClipRect;
                 mutation.clip_rect = FlutterRectMake(
-                    SkRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
+                    DlRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
                 break;
               case kFlutterPlatformViewMutationTypeOpacity:
                 mutation.type = kFlutterPlatformViewMutationTypeOpacity;
@@ -2821,7 +2821,7 @@ TEST_F(EmbedderTest,
               case kFlutterPlatformViewMutationTypeClipRect:
                 mutation.type = kFlutterPlatformViewMutationTypeClipRect;
                 mutation.clip_rect = FlutterRectMake(
-                    SkRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
+                    DlRect::MakeXYWH(5.0, 5.0, 400.0 - 10.0, 300.0 - 10.0));
                 break;
               case kFlutterPlatformViewMutationTypeOpacity:
                 mutation.type = kFlutterPlatformViewMutationTypeOpacity;
@@ -2997,13 +2997,14 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
                 // The test is only set up to supply one clip. Make sure it is
                 // the one we expect.
                 const auto rect_to_compare =
-                    SkRect::MakeLTRB(10.0, 10.0, 390, 290);
+                    DlRect::MakeLTRB(10.0, 10.0, 390, 290);
                 ASSERT_EQ(clip, FlutterRectMake(rect_to_compare));
 
                 // This maps the clip from device space into surface space.
-                SkRect mapped;
-                ASSERT_TRUE(total_xformation.mapRect(&mapped, rect_to_compare));
-                ASSERT_EQ(mapped, SkRect::MakeLTRB(10, 10, 290, 390));
+                ASSERT_EQ(total_xformation.IsAligned2D());
+                DlRect mapped =
+                    rect_to_compare.TransformAndClipBounds(total_xformation);
+                ASSERT_EQ(mapped, DlRect::MakeLTRB(10, 10, 290, 390));
                 clip_assertions_checked = true;
               });
 
