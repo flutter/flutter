@@ -553,7 +553,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final double originY = switch (optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => overlayRectInField.top,
       OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
-      OptionsViewOpenDirection.automatic => 0.0,
+      OptionsViewOpenDirection.automatic => 0.0, // Should be unreachable.
     };
 
     final Matrix4 transform = layoutInfo.childPaintTransform.clone()
@@ -571,7 +571,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             alignment: switch (optionsViewOpenDirection) {
               OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
               OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-              OptionsViewOpenDirection.automatic => AlignmentDirectional.topStart,
+              OptionsViewOpenDirection.automatic =>
+                AlignmentDirectional.topStart, // Should be unreachable.
             },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
