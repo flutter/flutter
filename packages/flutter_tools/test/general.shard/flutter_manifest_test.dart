@@ -1632,6 +1632,139 @@ name: test
     expect(flutterManifest, isNotNull);
     expect(flutterManifest!.workspace, isEmpty);
   });
+
+  group('scripts', () {
+    testWithoutContext('can parse scripts from pubspec.yaml', () async {
+      const manifest = '''
+name: test
+scripts:
+  test: dart test
+  build: flutter build apk
+  format: dart format .
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: BufferLogger.test(),
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, <String, String>{
+        'test': 'dart test',
+        'build': 'flutter build apk',
+        'format': 'dart format .',
+      });
+    });
+
+    testWithoutContext('returns null when no scripts section', () async {
+      const manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: BufferLogger.test(),
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, isNull);
+    });
+
+    testWithoutContext('returns null for empty scripts section', () async {
+      const manifest = '''
+name: test
+scripts: {}
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: BufferLogger.test(),
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, isNull);
+    });
+
+    testWithoutContext('logs error for invalid scripts section', () async {
+      const manifest = '''
+name: test
+scripts: "not a map"
+''';
+      final testLogger = BufferLogger.test();
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: testLogger,
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, isNull);
+      expect(testLogger.errorText, contains('Expected "scripts" to be a map'));
+    });
+
+    testWithoutContext('logs error for invalid script name', () async {
+      const manifest = '''
+name: test
+scripts:
+  123: dart test
+  test: dart test
+''';
+      final testLogger = BufferLogger.test();
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: testLogger,
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, <String, String>{'test': 'dart test'});
+      expect(testLogger.errorText, contains('Expected script name to be a string'));
+    });
+
+    testWithoutContext('logs error for invalid script command', () async {
+      const manifest = '''
+name: test
+scripts:
+  test: 123
+  build: flutter build apk
+''';
+      final testLogger = BufferLogger.test();
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: testLogger,
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, <String, String>{'build': 'flutter build apk'});
+      expect(testLogger.errorText, contains('Expected script command to be a string'));
+    });
+
+    testWithoutContext('handles complex script commands', () async {
+      const manifest = '''
+name: test
+scripts:
+  build-prod: flutter build apk --release --dart-define-from-file=config/prod.json
+  test-coverage: dart test --coverage && genhtml coverage/lcov.info -o coverage/html
+  deploy: |
+    flutter build web --release &&
+    firebase deploy --only hosting
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: BufferLogger.test(),
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.scripts, isA<Map<String, String>>());
+      expect(
+        flutterManifest.scripts!['build-prod'],
+        'flutter build apk --release --dart-define-from-file=config/prod.json',
+      );
+      expect(
+        flutterManifest.scripts!['test-coverage'],
+        'dart test --coverage && genhtml coverage/lcov.info -o coverage/html',
+      );
+      expect(flutterManifest.scripts!['deploy'], contains('flutter build web --release'));
+    });
+  });
 }
 
 Matcher matchesManifest({String? appVersion, String? buildName, String? buildNumber}) {

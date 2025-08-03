@@ -28,6 +28,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
+import 'src/commands/exec.dart';
 import 'src/commands/generate.dart';
 import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
@@ -245,6 +246,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       RunCommand(verboseHelp: verboseHelp),
       ScreenshotCommand(fs: globals.fs),
+      ExecCommand(),
       ShellCompletionCommand(),
       TestCommand(
         verboseHelp: verboseHelp,

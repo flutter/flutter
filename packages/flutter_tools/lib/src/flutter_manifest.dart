@@ -192,6 +192,36 @@ class FlutterManifest {
     }
   }
 
+  /// Returns the scripts defined in the `pubspec.yaml` file.
+  /// Returns null if no scripts are defined.
+  Map<String, String>? get scripts {
+    final Object? scriptsSection = _descriptor['scripts'];
+    if (scriptsSection == null) {
+      return null;
+    }
+    if (scriptsSection is! YamlMap) {
+      _logger.printError('Expected "scripts" to be a map, but got ${scriptsSection.runtimeType}.');
+      return null;
+    }
+    final scripts = <String, String>{};
+    for (final MapEntry<Object?, Object?> entry in scriptsSection.entries) {
+      if (entry.key is! String) {
+        _logger.printError(
+          'Expected script name to be a string, but got ${entry.key.runtimeType}.',
+        );
+        continue;
+      }
+      if (entry.value is! String) {
+        _logger.printError(
+          'Expected script command to be a string, but got ${entry.value.runtimeType}.',
+        );
+        continue;
+      }
+      scripts[entry.key! as String] = entry.value! as String;
+    }
+    return scripts.isEmpty ? null : scripts;
+  }
+
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] as bool? ?? false;
   }
