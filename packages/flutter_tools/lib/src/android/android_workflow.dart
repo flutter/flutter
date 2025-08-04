@@ -229,7 +229,7 @@ class AndroidValidator extends DoctorValidator {
         messages.add(
           ValidationMessage.error(
             _userMessages.androidSdkBuildToolsOutdated(
-              gradle_utils.minSdkVersionInt,
+              gradle_utils.compileSdkVersionInt,
               gradle_utils.minBuildToolsVersion.toString(),
               _platform,
             ),

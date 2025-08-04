@@ -518,8 +518,8 @@ Review licenses that have not been accepted (y/N)?
       ..emulatorPath = 'path/to/emulator';
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
-      gradle_utils.minSdkVersionInt,
-      kAndroidSdkBuildToolsMinVersion.toString(),
+      gradle_utils.compileSdkVersionInt,
+      gradle_utils.minBuildToolsVersion.toString(),
       FakePlatform(),
     );
 
@@ -532,12 +532,13 @@ Review licenses that have not been accepted (y/N)?
       processManager: processManager,
     );
 
+    // Invalid sdk and tools.
     ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
     expect(errorMessage, validationResult.messages.last.message);
 
     // Test with valid SDK but invalid build tools
-    sdkVersion.sdkLevel = 29;
+    sdkVersion.sdkLevel = gradle_utils.compileSdkVersionInt;
     sdkVersion.buildToolsVersion = Version(28, 0, 2);
 
     validationResult = await androidValidator.validate();
@@ -546,8 +547,8 @@ Review licenses that have not been accepted (y/N)?
 
     // Test with valid SDK and valid build tools
     // Will still be partial because AndroidSdk.findJavaBinary is static :(
-    sdkVersion.sdkLevel = gradle_utils.minSdkVersionInt;
-    sdkVersion.buildToolsVersion = kAndroidSdkBuildToolsMinVersion;
+    sdkVersion.sdkLevel = gradle_utils.compileSdkVersionInt;
+    sdkVersion.buildToolsVersion = gradle_utils.minBuildToolsVersion;
 
     validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.partial); // No Java binary
@@ -601,8 +602,8 @@ Review licenses that have not been accepted (y/N)?
         'PATH': '',
       };
     final sdkVersion = FakeAndroidSdkVersion()
-      ..sdkLevel = 29
-      ..buildToolsVersion = Version(28, 0, 3);
+      ..sdkLevel = gradle_utils.compileSdkVersionInt
+      ..buildToolsVersion = gradle_utils.minBuildToolsVersion;
 
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
