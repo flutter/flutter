@@ -45,7 +45,16 @@ See: https://github.com/flutter/flutter/issues/30701.
 /// When the window is destroyed for any reason (either by the caller or by the
 /// platform), the content of the controller will thereafter be invalid.
 ///
-/// {@macro flutter.widgets.windowing.experimental}
+/// {@template flutter.widgets.windowing.experimental}
+/// Do not use this API in production applications or packages published to
+/// pub.dev. Flutter will make breaking changes to this API, even in patch
+/// versions.
+///
+/// This API throws an [UnsupportedError] error unless Flutter’s windowing
+/// feature is enabled by [isWindowingEnabled].
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -154,17 +163,25 @@ mixin class RegularWindowControllerDelegate {
 /// An example usage might look like:
 ///
 /// ```dart
-/// final RegularWindowController controller = RegularWindowController(
-///   preferredSize: Size(800, 600),
-///   preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
-///   title: "Example Window",
-/// );
-/// runWidget(
-///   RegularWindow(
-///     controller: controller,
-///     child: MaterialApp(home: Container()),
-///   ),
-/// );
+/// // ignore_for_file: invalid_use_of_internal_member
+/// // ignore_for_file: implementation_imports
+///
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+///
+/// void main() {
+///   final RegularWindowController controller = RegularWindowController(
+///     preferredSize: const Size(800, 600),
+///     preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///     title: 'Example Window',
+///   );
+///   runWidget(
+///     RegularWindow(
+///       controller: controller,
+///       child: MaterialApp(home: Container()),
+///     ),
+///   );
+/// }
 /// ```
 ///
 /// Children of a [RegularWindow] widget can access the [RegularWindowController]
@@ -434,17 +451,25 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// An example usage might look like:
 ///
 /// ```dart
-/// final RegularWindowController controller = RegularWindowController(
-///   preferredSize: Size(800, 600),
-///   preferredConstraints: BoxConstraints(minWidth: 640, minHeight: 480),
-///   title: "Example Window",
-/// );
-/// runWidget(
-///   RegularWindow(
-///     controller: controller,
-///     child: MaterialApp(home: Container()),
-///   ),
-/// );
+/// // ignore_for_file: invalid_use_of_internal_member
+/// // ignore_for_file: implementation_imports
+///
+/// import 'package:flutter/material.dart';
+/// import 'package:flutter/src/widgets/_window.dart';
+///
+/// void main() {
+///   final RegularWindowController controller = RegularWindowController(
+///     preferredSize: const Size(800, 600),
+///     preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///     title: 'Example Window',
+///   );
+///   runWidget(
+///     RegularWindow(
+///       controller: controller,
+///       child: MaterialApp(home: Container()),
+///     ),
+///   );
+/// }
 /// ```
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -494,7 +519,7 @@ enum _WindowControllerAspect { contentSize, title, activated, maximized, minimiz
 /// Provides descendants with access to the [BaseWindowController] associated with
 /// the window that is being rendered.
 ///
-/// Windows created using native APIs do not have a `WindowScope`.
+/// Windows created using native APIs do not have a [WindowScope].
 /// This includes the initial window created by the native entrypoint
 /// that [runApp] attaches to.
 ///
@@ -536,7 +561,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
   ///
-  /// Windows creating using native APIs do not have a `WindowScope`.
+  /// Windows creating using native APIs do not have a [WindowScope].
   /// This includes the initial window created by the native entrypoint
   /// that [runApp] attaches to.
   /// {@endtemplate}

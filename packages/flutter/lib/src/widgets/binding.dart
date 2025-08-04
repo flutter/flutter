@@ -1442,7 +1442,7 @@ mixin WidgetsBinding
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
 
-  /// The [WindowingOwner] is responsible for creating and managing [WindowController]s.
+  /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
   ///
   /// The default [WindowingOwner] supports macOS, Linux, and Windows.
   ///
