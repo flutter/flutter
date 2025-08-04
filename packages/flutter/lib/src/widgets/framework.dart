@@ -5734,7 +5734,7 @@ abstract class ComponentElement extends Element {
   @override
   @pragma('vm:notify-debugger-on-exception')
   void performRebuild() {
-    Widget? built;
+    Widget built;
     try {
       assert(() {
         _debugDoingBuild = true;
