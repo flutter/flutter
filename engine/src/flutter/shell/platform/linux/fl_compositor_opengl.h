@@ -51,15 +51,6 @@ void fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
                                  size_t width,
                                  size_t height);
 
-/**
- * fl_compositor_opengl_cleanup:
- * @compositor: an #FlCompositorOpenGL.
- *
- * Removes OpenGL resources used for rendering. Requires an active
- * context.
- */
-void fl_compositor_opengl_cleanup(FlCompositorOpenGL* compositor);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_OPENGL_H_

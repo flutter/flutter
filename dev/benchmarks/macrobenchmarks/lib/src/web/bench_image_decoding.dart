@@ -23,7 +23,7 @@ class BenchImageDecoding extends RawRecorder {
 
   static const String benchmarkName = 'bench_image_decoding';
 
-  // These test images are taken from https://github.com/flutter/flutter_gallery_assets/tree/master/lib/splash_effects
+  // These test images are taken from https://github.com/flutter/flutter_gallery_assets/tree/main/lib/splash_effects
   static const List<String> _imageUrls = <String>[
     'assets/packages/flutter_gallery_assets/splash_effects/splash_effect_1.gif',
     'assets/packages/flutter_gallery_assets/splash_effects/splash_effect_2.gif',

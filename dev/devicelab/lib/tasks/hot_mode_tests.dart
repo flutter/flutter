@@ -58,7 +58,7 @@ TaskFunction createHotModeTest({
       '--no-publish-port',
       '--verbose',
       '--uninstall-first',
-      if (additionalOptions != null) ...additionalOptions,
+      ...?additionalOptions,
     ];
     int hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;

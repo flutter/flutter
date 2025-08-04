@@ -114,6 +114,9 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
         ),
       );
       for (final FileSystemEntity file in mains) {
+        // This statement is attempting to catch all tests inside of the
+        // dev/integration_tests/android_engine_test/lib/hcpp
+        // directory.
         if (!file.path.contains('hcpp')) {
           continue;
         }

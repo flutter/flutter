@@ -62,6 +62,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
 
+  bool _showAdditionalUseCases = false;
+
   @override
   void dispose() {
     scrollController.dispose();
@@ -86,16 +88,34 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
+      return _showAdditionalUseCases || useCase.useCaseCategory == UseCaseCategory.core;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
+        actions: <Widget>[
+          Tooltip(
+            message: 'Show additional use cases',
+            waitDuration: const Duration(milliseconds: 500),
+            child: Switch(
+              value: _showAdditionalUseCases,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _showAdditionalUseCases = newValue;
+                });
+              },
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: ListView(
           controller: scrollController,
           children: List<Widget>.generate(
-            useCases.length,
-            (int index) => _buildUseCaseItem(index, useCases[index]),
+            effectiveUseCases.length,
+            (int index) => _buildUseCaseItem(index, effectiveUseCases[index]),
           ),
         ),
       ),

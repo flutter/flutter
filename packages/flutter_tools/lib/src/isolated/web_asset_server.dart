@@ -122,7 +122,7 @@ class WebAssetServer implements AssetReader {
     }
     if (writeRestartScripts) {
       final srcIdsList = <Map<String, String>>[
-        for (final String src in modules) <String, String>{'src': src, 'id': src},
+        for (final String src in modules) <String, String>{'src': '$baseUri/$src', 'id': src},
       ];
       writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
@@ -161,7 +161,7 @@ class WebAssetServer implements AssetReader {
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final moduleUri = baseUri != null ? '$baseUri/$module' : module;
+      final moduleUri = '$baseUri/$module';
       moduleToLibrary.add(<String, Object>{
         'src': moduleUri,
         'module': metadata.name,
@@ -176,8 +176,8 @@ class WebAssetServer implements AssetReader {
     return _webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
 
-  Uri? get baseUri => _baseUri;
-  Uri? _baseUri;
+  Uri get baseUri => _baseUri;
+  late Uri _baseUri;
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -351,8 +351,8 @@ class WebAssetServer implements AssetReader {
                   ),
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                hotReloadSourcesUri: server._baseUri!.replace(
-                  pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                hotReloadSourcesUri: server._baseUri.replace(
+                  pathSegments: List<String>.from(server._baseUri.pathSegments)
                     ..add(_reloadScriptsFileName),
                 ),
               ).strategy

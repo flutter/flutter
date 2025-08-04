@@ -92,9 +92,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -155,9 +153,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -219,9 +215,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -328,9 +322,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 
@@ -374,9 +366,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[
-        if (annotation != null) annotation,
-      ],
+      annotationFinder: (Offset position) => <TestAnnotationTarget>[?annotation],
       logCursors: logCursors,
     );
 

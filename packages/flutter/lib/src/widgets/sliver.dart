@@ -141,10 +141,19 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
+/// {@tool dartpad}
+///
+/// This example shows a [SliverList] with a dynamic number of items.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://docs.flutter.dev/ui/layout/scrolling/slivers>, a description
 ///    of what slivers are and how to use them.
+///  * [CustomScrollView], which accepts slivers like [SliverList]
+///    to create custom scroll effects.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]

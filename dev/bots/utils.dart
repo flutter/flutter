@@ -62,6 +62,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
+final String engineInfoFile = path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json');
 final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
 final bool runningInDartHHHBot =
     luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');
@@ -457,7 +458,7 @@ Future<void> runDartTest(
     if (coverage != null) '--coverage=$coverage',
     if (perTestTimeout != null) '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (runSkipped) '--run-skipped',
-    if (tags != null) ...tags.map((String t) => '--tags=$t'),
+    ...?tags?.map((String t) => '--tags=$t'),
     if (testPaths != null)
       for (final String testPath in testPaths) testPath,
   ];
@@ -734,22 +735,75 @@ Future<void> _runFromList(
   }
 }
 
-/// Checks the given file's contents to determine if they match the allowed
-/// pattern for version strings.
-///
-/// Returns null if the contents are good. Returns a string if they are bad.
-/// The string is an error message.
-Future<String?> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre([-\.]\d+)?)?$');
-  if (!file.existsSync()) {
-    return 'The version logic failed to create the Flutter version file.';
+/// Provides access to read and parse the `bin/cache/flutter.version.json`.
+sealed class Version {
+  static final RegExp _pattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre([-\.]\d+)?)?$');
+
+  /// Attempts to read and resolve the version stored in the [checkoutPath].
+  ///
+  /// If omitted, defaults the current flutter root using the real file system.
+  static Future<Version> resolveIn([fs.Directory? checkoutPath]) async {
+    checkoutPath ??= const LocalFileSystem().directory(flutterRoot);
+    return resolveFile(
+      checkoutPath.childDirectory('bin').childDirectory('cache').childFile('flutter.version.json'),
+    );
   }
-  final String version = await file.readAsString();
-  if (version == '0.0.0-unknown') {
-    return 'The version logic failed to determine the Flutter version.';
+
+  /// Attempts to read and resolve the version stored in [file].
+  static Future<Version> resolveFile(fs.File file) async {
+    if (!file.existsSync()) {
+      return VersionError._(
+        'The version logic failed to create the Flutter version file: ${file.path}',
+        contents: null,
+      );
+    }
+    final Object? json = jsonDecode(await file.readAsString());
+    if (json is! Map<String, Object?>) {
+      return VersionError._('The version file was in an unexpected format.', contents: '$json');
+    }
+    final String? version = json['flutterVersion'] as String?;
+    if (version == null) {
+      return VersionError._(
+        'The version file was missing the key "flutterVersion".',
+        contents: '$json',
+      );
+    }
+    if (version == '0.0.0-unknown') {
+      return VersionError._(
+        'The version logic failed to determine the Flutter version.',
+        contents: version,
+      );
+    }
+    if (!version.contains(_pattern)) {
+      return VersionError._(
+        'The version logic generated an invalid version string: "$version".',
+        contents: version,
+      );
+    }
+    return VersionOk._(version);
   }
-  if (!version.contains(pattern)) {
-    return 'The version logic generated an invalid version string: "$version".';
+}
+
+/// A failed result of [Version.resolveFile].
+final class VersionError implements Version {
+  const VersionError._(this.error, {required this.contents});
+
+  /// Describes the error state.
+  final String error;
+
+  /// The contents of the version file, if any.
+  final String? contents;
+
+  @override
+  String toString() {
+    return error;
   }
-  return null;
+}
+
+/// A successful result of [Version.resolveFile].
+final class VersionOk implements Version {
+  const VersionOk._(this.version);
+
+  /// The contents of the version file, successfully parsed.
+  final String version;
 }

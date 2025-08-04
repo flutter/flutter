@@ -128,7 +128,7 @@ class TableBorder {
   }
 
   /// Gets the set of distinct visible colors from the exterior border sides.
-  Set<Color> getDistinctVisibleOuterColors() {
+  Set<Color> _getDistinctVisibleOuterColors() {
     return <Color>{
       if (top.style != BorderStyle.none) top.color,
       if (right.style != BorderStyle.none) right.color,
@@ -137,7 +137,7 @@ class TableBorder {
     };
   }
 
-  void _paintTablePerimeter(Canvas canvas, Rect rect) {
+  void _paintTableBorder(Canvas canvas, Rect rect) {
     if (outerBorderIsUniform && borderRadius != BorderRadius.zero) {
       final RRect outer = borderRadius.toRRect(rect);
       final RRect inner = outer.deflate(top.width);
@@ -146,7 +146,7 @@ class TableBorder {
       return;
     }
 
-    final Set<Color> visibleColors = getDistinctVisibleOuterColors();
+    final Set<Color> visibleColors = _getDistinctVisibleOuterColors();
     if (visibleColors.length == 1 && borderRadius != BorderRadius.zero) {
       _paintNonUniformBorderWithRadius(
         canvas,
@@ -371,7 +371,7 @@ class TableBorder {
       }
     }
 
-    _paintTablePerimeter(canvas, rect);
+    _paintTableBorder(canvas, rect);
   }
 
   @override

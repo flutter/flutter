@@ -219,9 +219,6 @@ abstract class Logger {
   });
 
   /// Send an event to be emitted.
-  ///
-  /// Only surfaces a value in machine modes, Loggers may ignore this message in
-  /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic>? args]) {}
 
   /// Clears all output.

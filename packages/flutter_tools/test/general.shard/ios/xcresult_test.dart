@@ -16,25 +16,42 @@ import 'xcresult_test_data.dart';
 void main() {
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXCResultGetCommand({
+  FakeCommand setUpFakeXCResultCommand({
     required String stdout,
     required String tempResultPath,
     required Xcode xcode,
+    required Version? xcodeVersion,
     int exitCode = 0,
     String stderr = '',
-    bool useLegacyFlag = true,
   }) {
-    return FakeCommand(
-      command: <String>[
+    final bool useNewCommand = xcodeVersion != null && xcodeVersion >= Version(16, 0, 0);
+
+    final List<String> command;
+    if (useNewCommand) {
+      command = <String>[
         ...xcode.xcrunCommand(),
         'xcresulttool',
         'get',
-        if (useLegacyFlag) '--legacy',
+        'build-results',
         '--path',
         tempResultPath,
         '--format',
         'json',
-      ],
+      ];
+    } else {
+      command = <String>[
+        ...xcode.xcrunCommand(),
+        'xcresulttool',
+        'get',
+        '--path',
+        tempResultPath,
+        '--format',
+        'json',
+      ];
+    }
+
+    return FakeCommand(
+      command: command,
       stdout: stdout,
       stderr: stderr,
       exitCode: exitCode,
@@ -53,8 +70,10 @@ void main() {
     required String resultJson,
     int exitCode = 0,
     String stderr = '',
-    Version? xcodeVersion = const Version.withText(16, 0, 0, '16.0'),
-    bool useLegacyFlag = true,
+    // Default to an pre-Xcode 16 version of Xcode.
+    // This ensures that tests which don't explicitly set an Xcode version still cover
+    // the logic for pre-Xcode 16 platforms.
+    Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
   }) {
     final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       kWhichSysctlCommand,
@@ -68,13 +87,13 @@ void main() {
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXCResultGetCommand(
+      setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,
         xcode: xcode,
         exitCode: exitCode,
         stderr: stderr,
-        useLegacyFlag: useLegacyFlag,
+        xcodeVersion: xcodeVersion,
       ),
     ]);
     final processUtils = ProcessUtils(
@@ -83,6 +102,45 @@ void main() {
     );
     return XCResultGenerator(resultPath: _tempResultPath, xcode: xcode, processUtils: processUtils);
   }
+
+  testWithoutContext('correctly parses new format (Xcode 16+) JSON with issues', () async {
+    final XCResultGenerator generator = setupGenerator(
+      resultJson: kNewFormatResultJsonWithIssues,
+      xcodeVersion: Version(16, 0, 0),
+    );
+    final XCResult result = await generator.generate();
+
+    expect(result.issues.length, 2);
+    expect(result.parseSuccess, isTrue);
+    expect(result.parsingErrorMessage, isNull);
+
+    final XCResultIssue error = result.issues.firstWhere(
+      (issue) => issue.type == XCResultIssueType.error,
+    );
+    expect(error.subType, 'Swift Compiler Error');
+    expect(error.message, "consecutive statements on a line must be separated by ';'");
+    expect(error.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.swift:11:82');
+
+    final XCResultIssue warning = result.issues.firstWhere(
+      (issue) => issue.type == XCResultIssueType.warning,
+    );
+    expect(warning.subType, 'Deprecation');
+    expect(warning.message, "'openURL' was deprecated in iOS 10.0");
+    expect(warning.location, '/Users/m/Projects/test_create/ios/Runner/AppDelegate.swift:15:20');
+  });
+
+  testWithoutContext('correctly handles new format (Xcode 16+) with invalid sourceURL', () async {
+    final XCResultGenerator generator = setupGenerator(
+      resultJson: kNewFormatResultJsonWithInvalidUrl,
+      xcodeVersion: Version(16, 0, 0),
+    );
+    final XCResult result = await generator.generate();
+
+    expect(result.issues.length, 1);
+    final XCResultIssue error = result.issues.first;
+    expect(error.location, isNull);
+    expect(error.warnings.first, contains('failed to be parsed'));
+  });
 
   testWithoutContext('correctly parse sample result json when there are issues.', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: kSampleResultJsonWithIssues);
@@ -254,7 +312,6 @@ void main() {
     final XCResultGenerator generator = setupGenerator(
       resultJson: kSampleResultJsonNoIssues,
       xcodeVersion: Version(15, 0, 0),
-      useLegacyFlag: false,
     );
     final XCResult result = await generator.generate();
     expect(result.issues.length, 0);

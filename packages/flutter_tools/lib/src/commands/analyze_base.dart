@@ -129,7 +129,7 @@ abstract class AnalyzeBase {
 
 class PackageDependency {
   // This is a map from dependency targets (lib directories) to a list
-  // of places that ask for that target (.packages or pubspec.yaml files)
+  // of places that ask for that target (package_config.json or pubspec.yaml files)
   var values = <String, List<String>>{};
   String? canonicalSource;
   void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
