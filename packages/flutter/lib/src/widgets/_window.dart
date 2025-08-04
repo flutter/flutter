@@ -164,6 +164,8 @@ mixin class RegularWindowControllerDelegate {
 /// An example usage might look like:
 ///
 /// ```dart
+/// import 'package:flutter/src/widgets/_window.dart';
+///
 /// runWidget(
 ///   RegularWindow(
 ///     controller: RegularWindowController(
@@ -445,6 +447,8 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// An example usage might look like:
 ///
 /// ```dart
+/// import 'package:flutter/src/widgets/_window.dart';
+///
 /// runWidget(
 ///   RegularWindow(
 ///     controller: RegularWindowController(
