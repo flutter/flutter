@@ -601,7 +601,7 @@ void ContextVK::Shutdown() {
   // pointers ensures that cleanup happens in a correct order.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_.reset();
+  fence_waiter_->Terminate();
   resource_manager_.reset();
 
   raster_message_loop_->Terminate();
