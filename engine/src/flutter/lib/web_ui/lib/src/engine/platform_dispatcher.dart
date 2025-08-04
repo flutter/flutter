@@ -67,7 +67,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     locales: parseBrowserLanguages(),
     textScaleFactor: findBrowserTextScaleFactor(),
     accessibilityFeatures: computeAccessibilityFeatures(),
-    // typographySettings: computeTypographySettings(),
+    // Initial text spacing values are computed during
+    // the initial resize event that happens during the
+    // initial rendering of the `typographyMeasurementElement`.
+    // typographySettings: null,
   );
 
   /// Compute accessibility features based on the current value of high contrast flag
@@ -1091,14 +1094,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _typographyMeasurementElement!,
         'margin-bottom',
       )?.toDouble();
+      print(
+        'resize entries is empty: ${entries.isEmpty}, length: ${entries.length}, lineHeight: $lineHeight, wordSpacing: $wordSpacing, letterSpacing: $letterSpacing, paragraphSpacing: $paragraphSpacing',
+      );
       if (lineHeight == spacingDefault &&
           wordSpacing == spacingDefault &&
           letterSpacing == spacingDefault &&
           paragraphSpacing == spacingDefault) {
         // Ignore initial resize event if computed values match default ones.
         if (typographySettings == null) {
+          print('ignore initial resize');
           return;
         }
+        print('disable text spacing properties');
         // Disable text spacing properties.
         _updateTypographySettings(const ui.TypographySettings());
         return;
