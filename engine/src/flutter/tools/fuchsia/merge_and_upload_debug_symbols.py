@@ -87,15 +87,6 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
   if already_exists:
     print('CIPD package %s tag %s already exists!' % (package_name, git_tag))
 
-  content_tag = ''
-  if content_hash:
-    content_tag = 'content_aware_hash:%s' % content_hash
-    content_already_exists = CheckCIPDPackageExists(package_name, content_tag)
-    if content_already_exists:
-      print('CIPD package %s tag %s already exists!' % (package_name, content_tag))
-      content_tag = ''
-      # do not return; content hash can match multiple PRs (reverts, framework only)
-
   if upload and IsLinux() and not already_exists:
     command = [
         'cipd',
@@ -109,21 +100,43 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
         '-verification-timeout',
         '10m0s',
     ]
-    if content_tag:
-      command.extend(['-tag', content_tag])
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
         os.path.join(_packaging_dir, 'fuchsia-debug-symbols-%s.cipd' % target_arch)
     ]
 
+  RunCIPDCommandWithRetries(command, _packaging_dir)
+
+  content_tag = 'content_aware_hash:%s' % content_hash
+  already_exists = CheckCIPDPackageExists('flutter/fuchsia', content_tag)
+  if already_exists:
+    print('CIPD package flutter/fuchsia tag %s already exists!' % content_tag)
+    # content hash can match multiple PRs and we cannot tag multiple times.
+    return
+
+  # Tag the new content hash for the git_revision. This is done separately due
+  # to a race condition: https://github.com/flutter/flutter/issues/173137
+  command = [
+      'cipd',
+      'set-tag',
+      'flutter/fuchsia',
+      '-tag',
+      content_tag,
+      '-version',
+      git_tag,
+  ]
+  RunCIPDCommandWithRetries(command, _packaging_dir)
+
+
+def RunCIPDCommandWithRetries(command, working_dir):
   # Retry up to three times.  We've seen CIPD fail on verification in some
   # instances. Normally verification takes slightly more than 1 minute when
   # it succeeds.
   num_tries = 3
   for tries in range(num_tries):
     try:
-      subprocess.check_call(command, cwd=_packaging_dir)
+      subprocess.check_call(command, cwd=working_dir)
       break
     except subprocess.CalledProcessError as error:
       print('Failed %s times.\nError was: %s' % (tries + 1, error))
