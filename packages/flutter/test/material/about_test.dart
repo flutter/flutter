@@ -1902,6 +1902,20 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets('LicensePage renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: LicensePage(applicationName: 'X')),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
