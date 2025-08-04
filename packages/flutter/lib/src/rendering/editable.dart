@@ -1384,6 +1384,7 @@ class RenderEditable extends RenderBox
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true
+      ..isFocusable = true
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.
       // The real value is typically set by EditableText.
