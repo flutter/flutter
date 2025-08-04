@@ -710,7 +710,7 @@ endforeach(ffi_plugin)
 
 const _dartPluginRegisterWith = r'''
       try {
-        {{dartClass}}.registerWith();
+        {{pluginName}}.{{dartClass}}.registerWith();
       } catch (err) {
         print(
           '`{{pluginName}}` threw an error: $err. '
@@ -732,19 +732,19 @@ const _dartPluginRegistryForNonWebTemplate =
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
 {{#android}}
-import 'package:{{pluginName}}/{{dartFileName}}';
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/android}}
 {{#ios}}
-import 'package:{{pluginName}}/{{dartFileName}}';
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/ios}}
 {{#linux}}
-import 'package:{{pluginName}}/{{dartFileName}}';
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/linux}}
 {{#macos}}
-import 'package:{{pluginName}}/{{dartFileName}}';
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/macos}}
 {{#windows}}
-import 'package:{{pluginName}}/{{dartFileName}}';
+import 'package:{{pluginName}}/{{dartFileName}}' as {{pluginName}};
 {{/windows}}
 
 @pragma('vm:entry-point')
@@ -1660,15 +1660,6 @@ bool _hasPluginInlineImpl(
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   final DartPluginClassAndFilePair? platformInfo = plugin.pluginDartClassPlatforms[platformKey];
   if (platformInfo == null) {
-    return false;
-  }
-  if (platformInfo.dartClass == 'none') {
-    // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/57497.
-    globals.printWarning(
-      'Use of `dartPluginClass: none` (${plugin.name}) is deprecated, and will '
-      'be removed in the next stable version. See '
-      'https://github.com/flutter/flutter/issues/57497 for details.',
-    );
     return false;
   }
   return true;

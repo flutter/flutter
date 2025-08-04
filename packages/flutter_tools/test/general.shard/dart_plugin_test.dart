@@ -1172,12 +1172,12 @@ void main() {
             '// @dart = 2.8\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:url_launcher_android/url_launcher_android.dart';\n"
-            "import 'package:url_launcher_ios/url_launcher_ios.dart';\n"
-            "import 'package:url_launcher_linux/url_launcher_linux.dart';\n"
-            "import 'package:awesome_macos/awesome_macos.dart';\n"
-            "import 'package:url_launcher_macos/url_launcher_macos.dart';\n"
-            "import 'package:url_launcher_windows/url_launcher_windows.dart';\n"
+            "import 'package:url_launcher_android/url_launcher_android.dart' as url_launcher_android;\n"
+            "import 'package:url_launcher_ios/url_launcher_ios.dart' as url_launcher_ios;\n"
+            "import 'package:url_launcher_linux/url_launcher_linux.dart' as url_launcher_linux;\n"
+            "import 'package:awesome_macos/awesome_macos.dart' as awesome_macos;\n"
+            "import 'package:url_launcher_macos/url_launcher_macos.dart' as url_launcher_macos;\n"
+            "import 'package:url_launcher_windows/url_launcher_windows.dart' as url_launcher_windows;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -1186,7 +1186,7 @@ void main() {
             '  static void register() {\n'
             '    if (Platform.isAndroid) {\n'
             '      try {\n'
-            '        AndroidPlugin.registerWith();\n'
+            '        url_launcher_android.AndroidPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_android` threw an error: \$err. '\n"
@@ -1196,7 +1196,7 @@ void main() {
             '\n'
             '    } else if (Platform.isIOS) {\n'
             '      try {\n'
-            '        IosPlugin.registerWith();\n'
+            '        url_launcher_ios.IosPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_ios` threw an error: \$err. '\n"
@@ -1206,7 +1206,7 @@ void main() {
             '\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        LinuxPlugin.registerWith();\n'
+            '        url_launcher_linux.LinuxPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_linux` threw an error: \$err. '\n"
@@ -1216,7 +1216,7 @@ void main() {
             '\n'
             '    } else if (Platform.isMacOS) {\n'
             '      try {\n'
-            '        AwesomeMacOS.registerWith();\n'
+            '        awesome_macos.AwesomeMacOS.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`awesome_macos` threw an error: \$err. '\n"
@@ -1225,7 +1225,7 @@ void main() {
             '      }\n'
             '\n'
             '      try {\n'
-            '        MacOSPlugin.registerWith();\n'
+            '        url_launcher_macos.MacOSPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_macos` threw an error: \$err. '\n"
@@ -1235,7 +1235,7 @@ void main() {
             '\n'
             '    } else if (Platform.isWindows) {\n'
             '      try {\n'
-            '        WindowsPlugin.registerWith();\n'
+            '        url_launcher_windows.WindowsPlugin.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`url_launcher_windows` threw an error: \$err. '\n"

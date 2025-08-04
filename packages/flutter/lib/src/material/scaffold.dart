@@ -3039,10 +3039,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final Widget stack = Stack(
         alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          ..._dismissedBottomSheets,
-          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
-        ],
+        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
       );
       _addIfNonNull(
         children,

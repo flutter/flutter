@@ -534,7 +534,7 @@ class SkiaGoldClient {
       if (_isBrowserTest) 'Browser': _browserKey,
       'CI': 'luci',
       'Platform': platform.operatingSystem,
-      if (webRenderer != null) 'WebRenderer': webRenderer,
+      'WebRenderer': ?webRenderer,
       if (_isImpeller) 'impeller': 'swiftshader',
       'name': testName,
       'source_type': 'flutter',

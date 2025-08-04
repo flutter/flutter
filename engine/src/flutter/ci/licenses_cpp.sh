@@ -64,7 +64,7 @@ DATA_DIR="$SCRIPT_DIR/../tools/licenses_cpp/data"
 # in the directory where you *run* the script from (your current working directory).
 LICENSES_OUTPUT_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP.new"
 
-LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE"
+LICENSES_PATH="$SCRIPT_DIR/../sky/packages/sky_engine/LICENSE_CPP"
 
 # --- Validation ---
 

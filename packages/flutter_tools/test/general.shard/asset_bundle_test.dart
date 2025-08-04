@@ -63,16 +63,8 @@ void main() {
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
-        expect(
-          bundle.entries.keys,
-          unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin']),
-        );
-        const expectedJsonAssetManifest = '{}';
+        expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
         const expectedBinAssetManifest = <Object, Object>{};
-        expect(
-          utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-          expectedJsonAssetManifest,
-        );
         expect(
           const StandardMessageCodec().decodeMessage(
             ByteData.sublistView(
@@ -122,7 +114,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -162,7 +153,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -179,7 +169,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -218,7 +207,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -247,7 +235,6 @@ name: my_app''')
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -286,7 +273,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -341,7 +327,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -393,7 +378,6 @@ flutter:
             'assets/foo/bar.txt',
             'assets/bar/barbie.txt',
             'assets/wild/dash.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -452,7 +436,6 @@ flutter:
           bundle.entries.keys,
           unorderedEquals(<String>[
             'assets/foo/bar.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -477,7 +460,6 @@ flutter:
           bundle.entries.keys,
           unorderedEquals(<String>[
             'assets/foo/bar.txt',
-            'AssetManifest.json',
             'AssetManifest.bin',
             'FontManifest.json',
             'NOTICES.Z',
@@ -679,13 +661,8 @@ flutter:
 
         expect(
           bundle.entries.keys,
-          unorderedEquals(<String>[
-            'AssetManifest.json',
-            'AssetManifest.bin',
-            'AssetManifest.bin.json',
-          ]),
+          unorderedEquals(<String>['AssetManifest.bin', 'AssetManifest.bin.json']),
         );
-        expect(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()), '{}');
         expect(
           utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
           '""',
@@ -724,7 +701,6 @@ flutter:
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>[
-            'AssetManifest.json',
             'AssetManifest.bin',
             'AssetManifest.bin.json',
             'FontManifest.json',
@@ -732,11 +708,6 @@ flutter:
             'assets/bar/lizard.png',
           ]),
         );
-        final manifestJson =
-            json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()))
-                as Map<Object?, Object?>;
-        expect(manifestJson, isNotEmpty);
-        expect(manifestJson['assets/bar/lizard.png'], isNotNull);
 
         final Uint8List manifestBinJsonBytes = base64.decode(
           json.decode(
@@ -806,13 +777,11 @@ assets:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
-      final AssetBundleEntry? assetManifest = bundle.entries['AssetManifest.json'];
       final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
       final AssetBundleEntry? license = bundle.entries['NOTICES'];
 
       await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
 
-      expect(assetManifest, bundle.entries['AssetManifest.json']);
       expect(fontManifest, bundle.entries['FontManifest.json']);
       expect(license, bundle.entries['NOTICES']);
     },
@@ -1181,7 +1150,6 @@ flutter:
         bundle.entries.keys,
         unorderedEquals(<String>[
           'packages/foo/bar/fizz.txt',
-          'AssetManifest.json',
           'AssetManifest.bin',
           'FontManifest.json',
           'NOTICES.Z',
@@ -1299,7 +1267,6 @@ flutter:
 
       expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
       expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
-      expect((bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string, '{}');
       expect(testLogger.errorText, contains('package:foo has `uses-material-design: true` set'));
     },
     overrides: <Type, Generator>{
@@ -1339,7 +1306,6 @@ flutter:
         bundle.entries.keys,
         unorderedEquals(<String>[
           'assets/foo.txt',
-          'AssetManifest.json',
           'AssetManifest.bin',
           'FontManifest.json',
           'NOTICES.Z',
@@ -1381,12 +1347,6 @@ flutter:
 
       expect(await bundle.build(packageConfigPath: '.dart_tool/package_config.json'), 0);
       expect((bundle.entries['FontManifest.json']!.content as DevFSStringContent).string, '[]');
-      // The assets from deferred components and regular assets
-      // are both included in alphabetical order
-      expect(
-        (bundle.entries['AssetManifest.json']!.content as DevFSStringContent).string,
-        '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}',
-      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),

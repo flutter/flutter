@@ -53,6 +53,18 @@ GdkDisplay* gdk_display_get_default() {
 
 void gdk_display_beep(GdkDisplay* display) {}
 
+int gdk_window_get_width(GdkWindow* window) {
+  return 100;
+}
+
+int gdk_window_get_height(GdkWindow* window) {
+  return 100;
+}
+
+gint gdk_window_get_scale_factor(GdkWindow* window) {
+  return 1;
+}
+
 GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }

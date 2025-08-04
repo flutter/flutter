@@ -1738,9 +1738,9 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   external void _observe(DomNode target, JSAny options);
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
     final Map<String, dynamic> options = <String, dynamic>{
-      if (childList != null) 'childList': childList,
-      if (attributes != null) 'attributes': attributes,
-      if (attributeFilter != null) 'attributeFilter': attributeFilter,
+      'childList': ?childList,
+      'attributes': ?attributes,
+      'attributeFilter': ?attributeFilter,
     };
     return _observe(target, options.toJSAnyDeep);
   }
@@ -2442,6 +2442,50 @@ extension type DomSegments._(JSObject _) implements JSObject {
     final DomIterator segmentIterator = callMethod<DomIterator>(domSymbol.iterator);
     return DomIteratorWrapper<DomSegment>(segmentIterator);
   }
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
+@JS('Intl.Locale')
+extension type DomLocale._(JSObject _) implements JSObject {
+  external DomLocale(String tag, [DomLocaleOptions? options]);
+
+  external String get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+
+  @JS('toString')
+  external String toJSString();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
+  external DomLocaleOptions({
+    String? language,
+    String? script,
+    String? region,
+    String? calendar,
+    String? caseFirst,
+    String? collation,
+    String? hourCycle,
+    String? numberingSystem,
+    bool? numeric,
+  });
+
+  external String? get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols

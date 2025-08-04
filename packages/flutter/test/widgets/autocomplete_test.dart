@@ -3270,4 +3270,36 @@ void main() {
     expect(lastOptions, altEleOptions);
     expect(find.byKey(optionsKey), findsOneWidget);
   });
+
+  testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: RawAutocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback voidCallBack,
+                    ) => TextField(controller: textEditingController),
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => Container(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }

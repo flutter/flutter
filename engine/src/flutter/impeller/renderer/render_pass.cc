@@ -112,7 +112,7 @@ void RenderPass::SetViewport(Viewport viewport) {
   pending_.viewport = viewport;
 }
 
-void RenderPass::SetScissor(IRect scissor) {
+void RenderPass::SetScissor(IRect32 scissor) {
   pending_.scissor = scissor;
 }
 
