@@ -166,9 +166,6 @@ mixin class RegularWindowControllerDelegate {
 /// // ignore_for_file: invalid_use_of_internal_member
 /// // ignore_for_file: implementation_imports
 ///
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
-///
 /// void main() {
 ///   final RegularWindowController controller = RegularWindowController(
 ///     preferredSize: const Size(800, 600),
@@ -453,9 +450,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// ```dart
 /// // ignore_for_file: invalid_use_of_internal_member
 /// // ignore_for_file: implementation_imports
-///
-/// import 'package:flutter/material.dart';
-/// import 'package:flutter/src/widgets/_window.dart';
 ///
 /// void main() {
 ///   final RegularWindowController controller = RegularWindowController(
