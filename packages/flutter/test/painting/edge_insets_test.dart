@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -472,5 +473,47 @@ void main() {
       const EdgeInsetsDirectional.fromSTEB(10, 20, 20, 40),
     );
     expect(EdgeInsetsGeometry.zero, EdgeInsets.zero);
+  });
+
+  test('EdgeInsetsDirectional.resolve with null TextDirection asserts', () {
+    const EdgeInsetsDirectional edgeInsets = EdgeInsetsDirectional.all(10);
+
+    expect(
+      () => edgeInsets.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
+  test('resolve method of _MixedEdgeInsets throws detailed error when TextDirection is null', () {
+    const EdgeInsets a = EdgeInsets.only(top: 5.0, left: 5.0);
+    const EdgeInsetsDirectional b = EdgeInsetsDirectional.only(top: 15.0, start: 15.0);
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+
+    expect(
+      () => b.subtract(a).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
   });
 }
