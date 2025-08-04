@@ -596,33 +596,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  late final bool enableDds = () {
-    var ddsEnabled = false;
-    if (argResults?.wasParsed('disable-dds') ?? false) {
-      if (argResults?.wasParsed('dds') ?? false) {
-        throwToolExit(
-          'The "--[no-]dds" and "--[no-]disable-dds" arguments are mutually exclusive. Only specify "--[no-]dds".',
-        );
-      }
-      ddsEnabled = !boolArg('disable-dds');
-      // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
-      // ignore: dead_code, literal_only_boolean_expressions
-      if (false) {
-        if (ddsEnabled) {
-          globals.printWarning(
-            '${globals.logger.terminal.warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.',
-          );
-        } else {
-          globals.printWarning(
-            '${globals.logger.terminal.warningMark} The "--disable-dds" argument is deprecated. Use "--no-dds" instead.',
-          );
-        }
-      }
-    } else {
-      ddsEnabled = boolArg('dds');
-    }
-    return ddsEnabled;
-  }();
+  late final bool enableDds = boolArg('dds');
 
   bool get _hostVmServicePortProvided =>
       (argResults?.wasParsed(vmServicePortOption) ?? false) ||
@@ -761,6 +735,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesDartDefineOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefinesOption,
+      abbr: 'D',
       aliases: <String>[kDartDefines], // supported for historical reasons
       help:
           'Additional key-value pairs that will be available as constants '
