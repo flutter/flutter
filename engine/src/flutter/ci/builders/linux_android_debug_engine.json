@@ -21,6 +21,7 @@
                     "base_path": "out/ci/android_debug/zip_archives/",
                     "include_paths": [
                         "out/ci/android_debug/zip_archives/android-arm/artifacts.zip",
+                        "out/ci/android_debug/zip_archives/android-arm/android-arm-embedder.zip",
                         "out/ci/android_debug/zip_archives/android-arm/impeller_sdk.zip",
                         "out/ci/android_debug/zip_archives/android-arm/symbols.zip",
                         "out/ci/android_debug/zip_archives/download.flutter.io",
@@ -57,6 +58,7 @@
                     "flutter/lib/gpu/dist:zip_old_location",
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/embedder:embedder-archive",
                     "flutter/impeller/toolkit/interop:sdk"
                 ]
             }
@@ -69,6 +71,7 @@
                     "base_path": "out/ci/android_debug_arm64/zip_archives/",
                     "include_paths": [
                         "out/ci/android_debug_arm64/zip_archives/android-arm64/artifacts.zip",
+                        "out/ci/android_debug_arm64/zip_archives/android-arm64/android-arm64-embedder.zip",
                         "out/ci/android_debug_arm64/zip_archives/android-arm64/impeller_sdk.zip",
                         "out/ci/android_debug_arm64/zip_archives/android-arm64/symbols.zip",
                         "out/ci/android_debug_arm64/zip_archives/download.flutter.io"
@@ -99,6 +102,7 @@
                 "targets": [
                     "flutter",
                     "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/embedder:embedder-archive",
                     "flutter/impeller/toolkit/interop:sdk"
                 ]
             }
@@ -111,6 +115,7 @@
                     "base_path": "out/ci/android_debug_x86/zip_archives/",
                     "include_paths": [
                         "out/ci/android_debug_x86/zip_archives/android-x86/artifacts.zip",
+                        "out/ci/android_debug_x86/zip_archives/android-x86/android-x86-embedder.zip",
                         "out/ci/android_debug_x86/zip_archives/android-x86/impeller_sdk.zip",
                         "out/ci/android_debug_x86/zip_archives/android-x86/symbols.zip",
                         "out/ci/android_debug_x86/zip_archives/download.flutter.io"
@@ -141,6 +146,7 @@
                 "targets": [
                     "flutter",
                     "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/embedder:embedder-archive",
                     "flutter/impeller/toolkit/interop:sdk"
                 ]
             }
@@ -153,6 +159,7 @@
                     "base_path": "out/ci/android_debug_x64/zip_archives/",
                     "include_paths": [
                         "out/ci/android_debug_x64/zip_archives/android-x64/artifacts.zip",
+                        "out/ci/android_debug_x64/zip_archives/android-x64/android-x64-embedder.zip",
                         "out/ci/android_debug_x64/zip_archives/android-x64/impeller_sdk.zip",
                         "out/ci/android_debug_x64/zip_archives/android-x64/symbols.zip",
                         "out/ci/android_debug_x64/zip_archives/download.flutter.io"
@@ -183,6 +190,7 @@
                 "targets": [
                     "flutter",
                     "flutter/shell/platform/android:abi_jars",
+                    "flutter/shell/platform/embedder:embedder-archive",
                     "flutter/impeller/toolkit/interop:sdk"
                 ]
             }
