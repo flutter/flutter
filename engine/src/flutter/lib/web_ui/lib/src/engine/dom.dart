@@ -2444,6 +2444,50 @@ extension type DomSegments._(JSObject _) implements JSObject {
   }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
+@JS('Intl.Locale')
+extension type DomLocale._(JSObject _) implements JSObject {
+  external DomLocale(String tag, [DomLocaleOptions? options]);
+
+  external String get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+
+  @JS('toString')
+  external String toJSString();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
+  external DomLocaleOptions({
+    String? language,
+    String? script,
+    String? region,
+    String? calendar,
+    String? caseFirst,
+    String? collation,
+    String? hourCycle,
+    String? numberingSystem,
+    bool? numeric,
+  });
+
+  external String? get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 @JS('Iterator')
 extension type DomIterator._(JSObject _) implements JSObject {
