@@ -816,6 +816,9 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isOmitLegacyVersionFileEnabled => _enabled;
 
   @override
+  bool get isWindowingEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override
