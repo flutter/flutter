@@ -8,7 +8,7 @@
 /// @docImport 'text_field.dart';
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, TypographySettings;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -755,51 +755,57 @@ class _SelectableTextState extends State<SelectableText>
           null => null,
           final double textScaleFactor => TextScaler.linear(textScaleFactor),
         };
-    final Widget child = RepaintBoundary(
-      child: EditableText(
-        key: editableTextKey,
-        style: effectiveTextStyle,
-        readOnly: true,
-        toolbarOptions: widget.toolbarOptions,
-        textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
-        textHeightBehavior: widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
-        showSelectionHandles: _showSelectionHandles,
-        showCursor: widget.showCursor,
-        controller: _controller,
-        focusNode: focusNode,
-        strutStyle: widget.strutStyle ?? const StrutStyle(),
-        textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-        textDirection: widget.textDirection,
-        textScaler: effectiveScaler,
-        autofocus: widget.autofocus,
-        forceLine: false,
-        minLines: widget.minLines,
-        maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
-        selectionColor: widget.selectionColor ?? selectionColor,
-        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
-        onSelectionChanged: _handleSelectionChanged,
-        onSelectionHandleTapped: _handleSelectionHandleTapped,
-        rendererIgnoresPointer: true,
-        cursorWidth: widget.cursorWidth,
-        cursorHeight: widget.cursorHeight,
-        cursorRadius: cursorRadius,
-        cursorColor: cursorColor,
-        selectionHeightStyle: widget.selectionHeightStyle,
-        selectionWidthStyle: widget.selectionWidthStyle,
-        cursorOpacityAnimates: cursorOpacityAnimates,
-        cursorOffset: cursorOffset,
-        paintCursorAboveText: paintCursorAboveText,
-        backgroundCursorColor: CupertinoColors.inactiveGray,
-        enableInteractiveSelection: widget.enableInteractiveSelection,
-        magnifierConfiguration:
-            widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
-        dragStartBehavior: widget.dragStartBehavior,
-        scrollPhysics: widget.scrollPhysics,
-        scrollBehavior: widget.scrollBehavior,
-        autofillHints: null,
-        contextMenuBuilder: widget.contextMenuBuilder,
-      ),
+    Widget editable = EditableText(
+      key: editableTextKey,
+      style: effectiveTextStyle,
+      readOnly: true,
+      toolbarOptions: widget.toolbarOptions,
+      textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
+      textHeightBehavior: widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
+      showSelectionHandles: _showSelectionHandles,
+      showCursor: widget.showCursor,
+      controller: _controller,
+      focusNode: focusNode,
+      strutStyle: widget.strutStyle ?? const StrutStyle(),
+      textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      textDirection: widget.textDirection,
+      textScaler: effectiveScaler,
+      autofocus: widget.autofocus,
+      forceLine: false,
+      minLines: widget.minLines,
+      maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
+      selectionColor: widget.selectionColor ?? selectionColor,
+      selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+      onSelectionChanged: _handleSelectionChanged,
+      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      rendererIgnoresPointer: true,
+      cursorWidth: widget.cursorWidth,
+      cursorHeight: widget.cursorHeight,
+      cursorRadius: cursorRadius,
+      cursorColor: cursorColor,
+      selectionHeightStyle: widget.selectionHeightStyle,
+      selectionWidthStyle: widget.selectionWidthStyle,
+      cursorOpacityAnimates: cursorOpacityAnimates,
+      cursorOffset: cursorOffset,
+      paintCursorAboveText: paintCursorAboveText,
+      backgroundCursorColor: CupertinoColors.inactiveGray,
+      enableInteractiveSelection: widget.enableInteractiveSelection,
+      magnifierConfiguration:
+          widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+      dragStartBehavior: widget.dragStartBehavior,
+      scrollPhysics: widget.scrollPhysics,
+      scrollBehavior: widget.scrollBehavior,
+      autofillHints: null,
+      contextMenuBuilder: widget.contextMenuBuilder,
     );
+    final ui.TypographySettings? typographySettings = MediaQuery.maybeTypographySettingsOf(context);
+    if (typographySettings != null && typographySettings!.paragraphSpacing != null) {
+      editable = Padding(
+        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
+        child: editable,
+      );
+    }
+    final Widget child = RepaintBoundary(child: editable);
 
     return Semantics(
       label: widget.semanticsLabel,
