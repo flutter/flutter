@@ -1059,6 +1059,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     style.width = 'auto';
     style.height = 'auto';
     style.whiteSpace = 'nowrap';
+    // Set text spacing properties to some unreasonable defaults.
+    style.lineHeight = '100px';
+    style.letterSpacing = '100px';
+    style.wordSpacing = '100px';
+    style.margin = '100px';
     domDocument.body!.append(_typographyMeasurementElement!);
 
     _typographySettingsObserver = createDomResizeObserver((
@@ -1085,6 +1090,19 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _typographyMeasurementElement!,
         'margin-bottom',
       )?.toDouble();
+      const double spacingDefault = 100.0;
+      if (lineHeight == spacingDefault &&
+          wordSpacing == spacingDefault &&
+          letterSpacing == spacingDefault &&
+          paragraphSpacing == spacingDefault) {
+        // Ignore initial resize event if computed values match default ones.
+        if (typographySettings == null) {
+          return;
+        }
+        // Disable text spacing properties.
+        _updateTypographySettings(const ui.TypographySettings());
+        return;
+      }
       _updateTypographySettings(
         ui.TypographySettings(
           lineHeight: lineHeight,
