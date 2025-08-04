@@ -96,9 +96,7 @@ source_set("flutter_linux_sources") {
              "key_mapping.h",
            ]
 
-  if (!is_minimal_linux) {
-    configs += [ "//flutter/shell/platform/linux/config:gtk" ]
-  }
+  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
 
   sources = [
     "fl_accessible_node.cc",
@@ -184,12 +182,10 @@ source_set("flutter_linux_sources") {
 }
 
 source_set("flutter_linux") {
-  if (!is_minimal_linux) {
-    configs += [
-      "//flutter/shell/platform/linux/config:gtk",
-      "//flutter/shell/platform/linux/config:epoxy",
-    ]
-  }
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:epoxy",
+  ]
 
   defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
 
@@ -275,12 +271,10 @@ executable("flutter_linux_unittests") {
 
   public_configs = [ "//flutter:config" ]
 
-  if (!is_minimal_linux) {
-    configs += [
-      "//flutter/shell/platform/linux/config:gtk",
-      "//flutter/shell/platform/linux/config:epoxy",
-    ]
-  }
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:epoxy",
+  ]
 
   defines = [
     "FLUTTER_ENGINE_NO_PROTOTYPES",
