@@ -21,8 +21,8 @@ import 'android_sdk.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
 
-final Version kAndroidJavaMinVersion = Version(11, 0, 0);
-final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
+final kAndroidJavaMinVersion = Version(11, 0, 0);
+final kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
