@@ -173,6 +173,12 @@ group("flutter") {
       is_ios) {
     public_deps += [ "//flutter/testing/ios_scenario_app" ]
   }
+
+  # Build the standalone Embedder API SDK for platforms that don't vend all
+  # their engine artifacts (via `build_engine_artifacts`).
+  if (is_android && flutter_runtime_mode == "debug") {
+    public_deps += [ "//flutter/shell/platform/embedder:embedder-archive" ]
+  }
 }
 
 group("unittests") {
