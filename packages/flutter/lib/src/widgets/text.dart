@@ -788,7 +788,10 @@ class Text extends StatelessWidget {
       );
     }
     if (typographySettings != null && typographySettings!.paragraphSpacing != null) {
-      result = Padding(padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing));
+      result = Padding(
+        padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing!),
+        child: result,
+      );
     }
     return result;
   }
