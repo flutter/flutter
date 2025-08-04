@@ -95,6 +95,14 @@ DEF_SWITCH(EnableDartProfiling,
            "enable-dart-profiling",
            "Enable Dart profiling. Profiling information can be viewed from "
            "Dart / Flutter DevTools.")
+DEF_SWITCH(
+    ProfileStartup,
+    "profile-startup",
+    "Make the profiler discard new samples once the profiler sample buffer is "
+    "full. When this flag is not set, the profiler sample buffer is used as a "
+    "ring buffer, meaning that once it is full, new samples start overwriting "
+    "the oldest ones. This switch is only meaningful when set in conjunction "
+    "with --enable-dart-profiling.")
 DEF_SWITCH(EndlessTraceBuffer,
            "endless-trace-buffer",
            "Enable an endless trace buffer. The default is a ring buffer. "

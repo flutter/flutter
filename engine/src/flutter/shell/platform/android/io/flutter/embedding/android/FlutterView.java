@@ -68,7 +68,6 @@ import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityBridge;
 import java.lang.reflect.InvocationTargetException;
@@ -1122,7 +1121,9 @@ public class FlutterView extends FrameLayout
             this,
             this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getScribeChannel(),
-            this.flutterEngine.getPlatformViewsController(),
+            this.flutterEngine
+                .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
+            // delegator.
             this.flutterEngine.getPlatformViewsController2());
 
     try {
@@ -1151,9 +1152,7 @@ public class FlutterView extends FrameLayout
             flutterEngine.getAccessibilityChannel(),
             (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
             getContext().getContentResolver(),
-            new PlatformViewsControllerDelegator(
-                this.flutterEngine.getPlatformViewsController(),
-                this.flutterEngine.getPlatformViewsController2()));
+            flutterEngine.getPlatformViewsControllerDelegator());
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),
