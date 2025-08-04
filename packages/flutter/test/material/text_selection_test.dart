@@ -780,19 +780,31 @@ void main() {
   group('getHandleAnchor', () {
     test('returns correct anchor for collapsed handle', () {
       const Offset expected = Offset((22.0 - 2.0) / 2, -4.6);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(TextSelectionHandleType.collapsed, 0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 2.0,
+      );
       expect(actual, equals(expected));
     });
 
     test('returns correct anchor for left handle', () {
       const Offset expected = Offset(22.0, 0);
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(TextSelectionHandleType.left, 0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        0,
+        cursorWidth: 2.0,
+      );
       expect(actual, equals(expected));
     });
 
     test('returns correct anchor for right handle', () {
       const Offset expected = Offset.zero;
-      final Offset actual = materialTextSelectionControls.getHandleAnchor(TextSelectionHandleType.right, 0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.right,
+        0,
+        cursorWidth: 2.0,
+      );
       expect(actual, equals(expected));
     });
   });
