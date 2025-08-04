@@ -787,6 +787,9 @@ class Text extends StatelessWidget {
         child: ExcludeSemantics(excluding: semanticsLabel != null, child: result),
       );
     }
+    if (typographySettings != null && typographySettings!.paragraphSpacing != null) {
+      result = Padding(padding: EdgeInsets.only(bottom: typographySettings!.paragraphSpacing));
+    }
     return result;
   }
 
