@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '81dd6aa516b0ee1fc79968569b15ada2e3cb14cf',
+  'skia_revision': '763bba9c33fd62d949fdb9f5f40ebf23a9cf8568',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -810,7 +810,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'yFLr81lLXmSX7n11Dl7xB8XuK_4xwp26GAfS8zCC53IC'
+        'version': 'ufssK8EgJ_9RpLFguHoMa3sFTz72SY48pduOshbfeiIC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',

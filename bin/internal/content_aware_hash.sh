@@ -37,12 +37,14 @@ CURRENT_BRANCH="$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)"
 # 2. The current branch is a GitHub temporary merge branch.
 # 3. The current branch is a release candidate branch.
 # 4. The current checkout is a shallow clone.
+# 5. There is no current branch. E.g. running on CI/CD.
 if [[ "$CURRENT_BRANCH" != "main" && \
       "$CURRENT_BRANCH" != "master" && \
       "$CURRENT_BRANCH" != "stable" && \
       "$CURRENT_BRANCH" != "beta" && \
       "$CURRENT_BRANCH" != "gh-readonly-queue/master/pr-"* && \
       "$CURRENT_BRANCH" != "flutter-"*"-candidate."* && \
+      "$CURRENT_BRANCH" != "HEAD" && \
       ! -f "$FLUTTER_ROOT/.git/shallow" ]]; then
 
   # This is a development branch. Find the merge-base.

@@ -216,6 +216,23 @@ void main() {
     expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
+  test('generates a hash for CI/CD from HEAD', () {
+    // This test validates the workflow with LUCI recipes in which the git sha
+    // is checked out, not the branch.
+    initGitRepoWithBlankInitialCommit(branch: 'main');
+    writeFileAndCommit(testRoot.deps, 'deps changed');
+
+    final String headSha = gitShaFor('HEAD');
+    run('git', <String>['checkout', '-f', headSha]);
+    run('git', <String>['--no-pager', 'log', '--decorate=short', '--pretty=oneline']);
+    expect(
+      (run('git', <String>['rev-parse', '--abbrev-ref', 'HEAD']).stdout as String).trim(),
+      equals('HEAD'),
+    );
+
+    expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
+  });
+
   group('stable branches calculate hash locally', () {
     test('with no changes', () {
       initGitRepoWithBlankInitialCommit(branch: 'main');
@@ -272,7 +289,7 @@ void main() {
     writeFileAndCommit(testRoot.deps, 'deps changed');
 
     expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
-  }); //gh-readonly-queue/master/pr
+  });
 
   test('generates a hash for shallow clones', () {
     initGitRepoWithBlankInitialCommit(remote: 'origin', branch: 'blip');

@@ -38,11 +38,13 @@ $currentBranch = (git -C "$flutterRoot" rev-parse --abbrev-ref HEAD).Trim()
 # 2. The current branch is a GitHub temporary merge branch.
 # 3. The current branch is a release candidate branch.
 # 4. The current checkout is a shallow clone.
+# 5. There is no current branch. E.g. running on CI/CD.
 $isShallow = Test-Path -Path (Join-Path "$flutterRoot" ".git/shallow")
 if (($currentBranch -ne "main") -and
     ($currentBranch -ne "master") -and
     ($currentBranch -ne "stable") -and
     ($currentBranch -ne "beta") -and
+    ($currentBranch -ne "HEAD") -and
     (-not $currentBranch.StartsWith("gh-readonly-queue/master/pr-")) -and
     (-not ($currentBranch -like "flutter-*-candidate.*")) -and
     (-not $isShallow)) {
