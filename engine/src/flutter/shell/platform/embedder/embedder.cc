@@ -263,22 +263,21 @@ static void* DefaultGLProcResolver(const char* name) {
 #ifdef SHELL_ENABLE_GL
 // Auxiliary function used to translate rectangles of type SkIRect to
 // FlutterRect.
-static FlutterRect SkIRectToFlutterRect(const SkIRect sk_rect) {
-  FlutterRect flutter_rect = {static_cast<double>(sk_rect.fLeft),
-                              static_cast<double>(sk_rect.fTop),
-                              static_cast<double>(sk_rect.fRight),
-                              static_cast<double>(sk_rect.fBottom)};
+static FlutterRect DlIRectToFlutterRect(const flutter::DlIRect& dl_rect) {
+  FlutterRect flutter_rect = {static_cast<double>(dl_rect.GetLeft()),
+                              static_cast<double>(dl_rect.GetTop()),
+                              static_cast<double>(dl_rect.GetRight()),
+                              static_cast<double>(dl_rect.GetBottom())};
   return flutter_rect;
 }
 
 // Auxiliary function used to translate rectangles of type FlutterRect to
 // SkIRect.
-static const SkIRect FlutterRectToSkIRect(FlutterRect flutter_rect) {
-  SkIRect rect = {static_cast<int32_t>(flutter_rect.left),
-                  static_cast<int32_t>(flutter_rect.top),
-                  static_cast<int32_t>(flutter_rect.right),
-                  static_cast<int32_t>(flutter_rect.bottom)};
-  return rect;
+static const flutter::DlIRect FlutterRectToDlIRect(FlutterRect flutter_rect) {
+  return flutter::DlIRect::MakeLTRB(static_cast<int32_t>(flutter_rect.left),
+                                    static_cast<int32_t>(flutter_rect.top),
+                                    static_cast<int32_t>(flutter_rect.right),
+                                    static_cast<int32_t>(flutter_rect.bottom));
 }
 
 // We need GL_BGRA8_EXT for creating SkSurfaces from FlutterOpenGLSurfaces
@@ -339,12 +338,12 @@ InferOpenGLPlatformViewCreationCallback(
       std::optional<FlutterRect> frame_damage_rect;
       if (gl_present_info.frame_damage) {
         frame_damage_rect =
-            SkIRectToFlutterRect(*(gl_present_info.frame_damage));
+            DlIRectToFlutterRect(*(gl_present_info.frame_damage));
       }
       std::optional<FlutterRect> buffer_damage_rect;
       if (gl_present_info.buffer_damage) {
         buffer_damage_rect =
-            SkIRectToFlutterRect(*(gl_present_info.buffer_damage));
+            DlIRectToFlutterRect(*(gl_present_info.buffer_damage));
       }
 
       FlutterDamage frame_damage{
@@ -401,16 +400,16 @@ InferOpenGLPlatformViewCreationCallback(
     FlutterDamage existing_damage;
     populate_existing_damage(user_data, id, &existing_damage);
 
-    std::optional<SkIRect> existing_damage_rect = std::nullopt;
+    std::optional<flutter::DlIRect> existing_damage_rect = std::nullopt;
 
     // Verify that at least one damage rectangle was provided.
     if (existing_damage.num_rects <= 0 || existing_damage.damage == nullptr) {
       FML_LOG(INFO) << "No damage was provided. Forcing full repaint.";
     } else {
-      existing_damage_rect = SkIRect::MakeEmpty();
+      existing_damage_rect = flutter::DlIRect();
       for (size_t i = 0; i < existing_damage.num_rects; i++) {
-        existing_damage_rect->join(
-            FlutterRectToSkIRect(existing_damage.damage[i]));
+        existing_damage_rect = existing_damage_rect->Union(
+            FlutterRectToDlIRect(existing_damage.damage[i]));
       }
     }
 
@@ -540,12 +539,12 @@ InferMetalPlatformViewCreationCallback(
         return ptr(user_data, &embedder_texture);
       };
   auto metal_get_texture =
-      [ptr = config->metal.get_next_drawable_callback,
-       user_data](const SkISize& frame_size) -> flutter::GPUMTLTextureInfo {
+      [ptr = config->metal.get_next_drawable_callback, user_data](
+          const flutter::DlISize& frame_size) -> flutter::GPUMTLTextureInfo {
     FlutterFrameInfo frame_info = {};
     frame_info.struct_size = sizeof(FlutterFrameInfo);
-    frame_info.size = {static_cast<uint32_t>(frame_size.width()),
-                       static_cast<uint32_t>(frame_size.height())};
+    frame_info.size = {static_cast<uint32_t>(frame_size.width),
+                       static_cast<uint32_t>(frame_size.height)};
     flutter::GPUMTLTextureInfo texture_info;
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
@@ -631,11 +630,11 @@ InferVulkanPlatformViewCreationCallback(
 
   auto vulkan_get_next_image =
       [ptr = config->vulkan.get_next_image_callback,
-       user_data](const SkISize& frame_size) -> FlutterVulkanImage {
+       user_data](const flutter::DlISize& frame_size) -> FlutterVulkanImage {
     FlutterFrameInfo frame_info = {
         .struct_size = sizeof(FlutterFrameInfo),
-        .size = {static_cast<uint32_t>(frame_size.width()),
-                 static_cast<uint32_t>(frame_size.height())},
+        .size = {static_cast<uint32_t>(frame_size.width),
+                 static_cast<uint32_t>(frame_size.height)},
     };
 
     return ptr(user_data, &frame_info);

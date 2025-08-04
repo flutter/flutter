@@ -140,7 +140,7 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
       context, android_context_, jni_facade_, surface_factory_);
 
   std::unique_ptr<SurfaceFrame> frame =
-      layer->surface->AcquireFrame(ToSkISize(frame_size_));
+      layer->surface->AcquireFrame(frame_size_);
   // Display the overlay surface. If it's already displayed, then it's
   // just positioned and sized.
   jni_facade_->FlutterViewDisplayOverlaySurface(layer->id,        //
@@ -224,7 +224,7 @@ void AndroidExternalViewEmbedder::PrepareFlutterView(
   if (frame_size_ != frame_size) {
     DestroySurfaces();
   }
-  surface_pool_->SetFrameSize(ToSkISize(frame_size));
+  surface_pool_->SetFrameSize(frame_size);
 
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;

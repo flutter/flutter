@@ -118,7 +118,7 @@ std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::GetUnusedLayers() {
   return results;
 }
 
-void SurfacePool::SetFrameSize(SkISize frame_size) {
+void SurfacePool::SetFrameSize(DlISize frame_size) {
   std::lock_guard lock(mutex_);
   requested_frame_size_ = frame_size;
 }
