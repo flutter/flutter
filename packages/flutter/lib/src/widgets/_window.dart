@@ -166,7 +166,7 @@ mixin class RegularWindowControllerDelegate {
 /// ```dart
 /// runWidget(
 ///   RegularWindow(
-///     controller:  RegularWindowController(
+///     controller: RegularWindowController(
 ///       preferredSize: const Size(800, 600),
 ///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///       title: 'Example Window',
@@ -447,7 +447,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// ```dart
 /// runWidget(
 ///   RegularWindow(
-///     controller:  RegularWindowController(
+///     controller: RegularWindowController(
 ///       preferredSize: const Size(800, 600),
 ///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
 ///       title: 'Example Window',
