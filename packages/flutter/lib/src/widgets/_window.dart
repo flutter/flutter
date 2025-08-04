@@ -163,22 +163,17 @@ mixin class RegularWindowControllerDelegate {
 /// An example usage might look like:
 ///
 /// ```dart
-/// // ignore_for_file: invalid_use_of_internal_member
-/// // ignore_for_file: implementation_imports
-///
-/// void main() {
-///   final RegularWindowController controller = RegularWindowController(
-///     preferredSize: const Size(800, 600),
-///     preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///     title: 'Example Window',
-///   );
-///   runWidget(
-///     RegularWindow(
-///       controller: controller,
-///       child: MaterialApp(home: Container()),
-///     ),
-///   );
-/// }
+/// final RegularWindowController controller = RegularWindowController(
+///   preferredSize: const Size(800, 600),
+///   preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///   title: 'Example Window',
+/// );
+/// runWidget(
+///   RegularWindow(
+///     controller: controller,
+///     child: MaterialApp(home: Container()),
+///   ),
+/// );
 /// ```
 ///
 /// Children of a [RegularWindow] widget can access the [RegularWindowController]
@@ -448,23 +443,17 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// An example usage might look like:
 ///
 /// ```dart
-/// // ignore_for_file: invalid_use_of_internal_member
-/// // ignore_for_file: implementation_imports
-///
-/// void main() {
-///   final RegularWindowController controller = RegularWindowController(
-///     preferredSize: const Size(800, 600),
-///     preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///     title: 'Example Window',
-///   );
-///   runWidget(
-///     RegularWindow(
-///       controller: controller,
-///       child: MaterialApp(home: Container()),
-///     ),
-///   );
-/// }
-/// ```
+/// final RegularWindowController controller = RegularWindowController(
+///   preferredSize: const Size(800, 600),
+///   preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///   title: 'Example Window',
+/// );
+/// runWidget(
+///   RegularWindow(
+///     controller: controller,
+///     child: MaterialApp(home: Container()),
+///   ),
+/// );
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
