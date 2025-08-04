@@ -887,9 +887,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier
       return true;
     }());
 
-    // A null floatingActionButtonScale implies a scale of 1.0. This can happen
-    // when animations are disabled or before they have started.
-    return geometry._scaleFloatingActionButton(floatingActionButtonScale ?? 1.0);
+    return geometry._scaleFloatingActionButton(floatingActionButtonScale!);
   }
 
   void _updateWith({
@@ -1378,6 +1376,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
       widget.currentController.value = 1.0;
+      // A null floatingActionButtonScale implies a scale of 1.0. This can happen
+      // when animations are disabled or before they have started.
+      _updateGeometryScale(1.0);
     } else {
       // If we start without a child we update the geometry object with a
       // floating action button scale of 0, as it is not showing on the screen.
