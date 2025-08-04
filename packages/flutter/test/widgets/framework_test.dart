@@ -2092,6 +2092,7 @@ The findRenderObject() method was called for the following element:
     FlutterError.onError = onError;
     expect(element.debugIsDefunct, true);
   });
+
   testWidgets('widget is not active if throw in activated', (WidgetTester tester) async {
     final FlutterExceptionHandler? onError = FlutterError.onError;
     FlutterError.onError = (_) {};
