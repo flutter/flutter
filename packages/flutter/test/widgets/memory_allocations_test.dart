@@ -80,6 +80,7 @@ class _TestElement extends RenderObjectElement with RootElementMixin {
     final FocusManager newFocusManager = FocusManager();
     assignOwner(BuildOwner(focusManager: newFocusManager));
     mount(null, null);
+    // ignore: invalid_use_of_visible_for_overriding_member
     deactivate();
   }
 
@@ -145,6 +146,7 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   element.makeInactive();
   result.creations +=
       4; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode, 1 for the new _HighlightModeManager
+  // ignore: invalid_use_of_visible_for_overriding_member
   element.unmount();
   result.disposals += 2; // 1 for the old BuildOwner, 1 for the element
   renderObject.dispose();
