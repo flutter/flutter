@@ -512,6 +512,7 @@ void main() {
           '--args',
           <String>[
             '--enable-dart-profiling',
+            '--profile-startup',
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
@@ -581,6 +582,7 @@ void main() {
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         profileMicrotasks: true,
+        profileStartup: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,

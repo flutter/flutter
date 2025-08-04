@@ -589,8 +589,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_master", "deploy"]
+      docs: >
+        {"build": "master", "deploy": "main-docs-flutter-prod"}
       validation: docs
       validation_name: Docs
       firebase_project: main-docs-flutter-prod
@@ -617,8 +617,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_stable"]
+      docs: >
+        {"build": "stable"}
       validation: docs
       validation_name: Docs
       # TODO(matanlurey): Neither of these properties are actually used, since
@@ -651,8 +651,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["post_process", "deploy"]
+      docs: >
+        {"post_process": "stable", "deploy": "docs-flutter-dev"}
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
@@ -2346,15 +2346,6 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
-
-  - name: Linux_pixel_7pro android_obfuscate_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: android_obfuscate_test
 
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
