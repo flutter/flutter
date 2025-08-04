@@ -107,7 +107,11 @@ vk::UniquePipeline PipelineCacheVK::CreatePipeline(
   return std::move(pipeline);
 }
 
-void PipelineCacheVK::PersistCacheToDisk() const {
+void PipelineCacheVK::PersistCacheToDisk() {
+  // PersistCacheToDisk is run on a worker thread pool.  Calls to
+  // PipelineCacheDataPersist should be serialized so that multiple worker
+  // threads do not concurrently write to the cache file.
+  Lock persist_lock(persist_mutex_);
   if (!is_valid_) {
     return;
   }
