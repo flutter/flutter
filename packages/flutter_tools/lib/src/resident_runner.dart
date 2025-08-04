@@ -1481,7 +1481,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         });
 
         if (!isRunningOnWeb) {
-          // "DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile"
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
           commandHelp.v.print();
         }
 
