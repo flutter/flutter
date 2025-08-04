@@ -340,7 +340,7 @@ class AndroidDevice extends Device {
       if (sdkVersionParsed < gradle_utils.minSdkVersionInt) {
         _logger.printError(
           'The Android version ($sdkVersion) on the target device is too old. Please '
-          'use a api ${gradle_utils.minSdkVersion} device or later.',
+          'use a API ${gradle_utils.minSdkVersion} device or later.',
         );
         return false;
       }

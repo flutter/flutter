@@ -94,29 +94,32 @@ void main() {
     expect(await androidDevice.installApp(androidApk), false);
   });
 
-  testWithoutContext('Can install app on API level minSdk or greater', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kAdbVersionCommand,
-      kAdbStartServerCommand,
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.build.version.sdk]: [${gradle_utils.minSdkVersion}]',
-      ),
-      kInstallCommand,
-      kStoreShaCommand,
-    ]);
-    final File apk = fileSystem.file('app-debug.apk')..createSync();
-    final AndroidApk androidApk = AndroidApk(
-      applicationPackage: apk,
-      id: 'app',
-      versionCode: 22,
-      launchActivity: 'Main',
-    );
-    final AndroidDevice androidDevice = setUpAndroidDevice(processManager: processManager);
+  testWithoutContext(
+    'Can install app on API level minSdk ${gradle_utils.minSdkVersion} or greater',
+    () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        kAdbVersionCommand,
+        kAdbStartServerCommand,
+        const FakeCommand(
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          stdout: '[ro.build.version.sdk]: [${gradle_utils.minSdkVersion}]',
+        ),
+        kInstallCommand,
+        kStoreShaCommand,
+      ]);
+      final File apk = fileSystem.file('app-debug.apk')..createSync();
+      final AndroidApk androidApk = AndroidApk(
+        applicationPackage: apk,
+        id: 'app',
+        versionCode: 22,
+        launchActivity: 'Main',
+      );
+      final AndroidDevice androidDevice = setUpAndroidDevice(processManager: processManager);
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
   testWithoutContext('Defaults to API level 16 if adb returns a null response', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
