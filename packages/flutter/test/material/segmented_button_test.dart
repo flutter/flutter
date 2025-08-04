@@ -257,7 +257,7 @@ void main() {
               ButtonSegment<int>(value: 2, label: Text('2')),
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
-            selected: <int>{if (selected != null) selected},
+            selected: <int>{?selected},
             onSelectionChanged: (Set<int> selected) {
               selectedSegment = selected.isEmpty ? null : selected.first;
               callbackCount += 1;

@@ -1,4 +1,4 @@
-Signature: e9f7b90f4d1943ba73bca171bdc624cd
+Signature: a29a7802ab4516caf6803b8b4ac25cef
 
 ====================================================================================================
 LIBRARY: etc1
@@ -436,6 +436,7 @@ FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/graphite_insert_status.md
 FILE: ../../../flutter/third_party/skia/relnotes/image.md
+FILE: ../../../flutter/third_party/skia/relnotes/skfontmgr_android.md
 FILE: ../../../flutter/third_party/skia/relnotes/typeface_virtuals.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
