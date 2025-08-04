@@ -125,7 +125,7 @@ class TestIOManager final : public IOManager {
  public:
   explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
-      : gl_surface_(SkISize::Make(1, 1)),
+      : gl_surface_(DlISize(1, 1)),
         impeller_context_(std::make_shared<impeller::TestImpellerContext>()),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(

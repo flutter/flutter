@@ -12,7 +12,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/testing/testing.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
-#include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 namespace testing {
@@ -92,7 +92,7 @@ FlutterEngineAOTData EmbedderTestContext::GetAOTData() const {
   return aot_data_.get();
 }
 
-void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
+void EmbedderTestContext::SetRootSurfaceTransformation(DlMatrix matrix) {
   root_surface_transformation_ = matrix;
 }
 

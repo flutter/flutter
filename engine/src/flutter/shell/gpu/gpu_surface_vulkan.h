@@ -40,10 +40,10 @@ class GPUSurfaceVulkan : public Surface {
   bool IsValid() override;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const DlISize& size) override;
 
   // |Surface|
-  SkMatrix GetRootTransformation() const override;
+  DlMatrix GetRootTransformation() const override;
 
   // |Surface|
   GrDirectContext* GetContext() override;
@@ -59,7 +59,7 @@ class GPUSurfaceVulkan : public Surface {
 
   sk_sp<SkSurface> CreateSurfaceFromVulkanImage(const VkImage image,
                                                 const VkFormat format,
-                                                const SkISize& size);
+                                                const DlISize& size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceVulkan);
 };
