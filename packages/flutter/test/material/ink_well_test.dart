@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -34,6 +35,9 @@ void main() {
               },
               onLongPress: () {
                 log.add('long-press');
+              },
+              onLongPress: () {
+                log.add('long-press-up');
               },
               onTapDown: (TapDownDetails details) {
                 log.add('tap-down');
@@ -140,6 +144,31 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     expect(log, equals(<String>['tap']));
+  });
+
+  testWidgets('InkWell onLongPressUp callback is triggered', (WidgetTester tester) async {
+    bool wasCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: InkWell(
+            onLongPress: () {},
+            onLongPressUp: () {
+              wasCalled = true;
+            },
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(wasCalled, isTrue);
   });
 
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {

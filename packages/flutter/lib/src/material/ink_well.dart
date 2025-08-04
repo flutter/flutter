@@ -311,6 +311,7 @@ class InkResponse extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressUp,
     this.onSecondaryTap,
     this.onSecondaryTapUp,
     this.onSecondaryTapDown,
@@ -364,6 +365,9 @@ class InkResponse extends StatelessWidget {
   /// Called when the user long-presses on this part of the material.
   final GestureLongPressCallback? onLongPress;
 
+  /// Called when the user releases a long press gesture on the button.
+  final GestureLongPressUpCallback? onLongPressUp;
+
   /// Called when the user taps this part of the material with a secondary button.
   ///
   /// See also:
@@ -404,7 +408,7 @@ class InkResponse extends StatelessWidget {
   /// become highlighted and false if this part of the material has stopped
   /// being highlighted.
   ///
-  /// If all of [onTap], [onDoubleTap], and [onLongPress] become null while a
+  /// If all of [onTap], [onDoubleTap], [onLongPress] and [onLongPressUp] become null while a
   /// gesture is ongoing, then [onTapCancel] will be fired and
   /// [onHighlightChanged] will be fired with the value false _during the
   /// build_. This means, for instance, that in that scenario [State.setState]
@@ -659,6 +663,7 @@ class InkResponse extends StatelessWidget {
       onTapCancel: onTapCancel,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
+      onLongPressUp: onLongPressUp,
       onSecondaryTap: onSecondaryTap,
       onSecondaryTapUp: onSecondaryTapUp,
       onSecondaryTapDown: onSecondaryTapDown,
@@ -716,6 +721,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressUp,
     this.onSecondaryTap,
     this.onSecondaryTapUp,
     this.onSecondaryTapDown,
@@ -754,6 +760,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final GestureTapCallback? onTapCancel;
   final GestureTapCallback? onDoubleTap;
   final GestureLongPressCallback? onLongPress;
+  final GestureLongPressUpCallback? onLongPressUp;
   final GestureTapCallback? onSecondaryTap;
   final GestureTapUpCallback? onSecondaryTapUp;
   final GestureTapDownCallback? onSecondaryTapDown;
@@ -794,6 +801,7 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onTap != null) 'tap',
       if (onDoubleTap != null) 'double tap',
       if (onLongPress != null) 'long press',
+      if (onLongPressUp != null) 'long press up',
       if (onTapDown != null) 'tap down',
       if (onTapUp != null) 'tap up',
       if (onTapCancel != null) 'tap cancel',
@@ -1230,6 +1238,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  void handleLongPressUp() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (widget.onLongPressUp != null) {
+      widget.onLongPressUp!();
+    }
+  }
+
   void handleSecondaryTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
@@ -1271,6 +1287,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return widget.onTap != null ||
         widget.onDoubleTap != null ||
         widget.onLongPress != null ||
+        widget.onLongPressUp != null ||
         widget.onTapUp != null ||
         widget.onTapDown != null;
   }
@@ -1392,6 +1409,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
                   onTapCancel: _primaryEnabled ? handleTapCancel : null,
                   onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
                   onLongPress: widget.onLongPress != null ? handleLongPress : null,
+                  onLongPressUp: widget.onLongPressUp != null ? handleLongPressUp : null,
                   onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
                   onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp : null,
                   onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
@@ -1497,6 +1515,7 @@ class InkWell extends InkResponse {
     super.onTap,
     super.onDoubleTap,
     super.onLongPress,
+    super.onLongPressUp,
     super.onTapDown,
     super.onTapUp,
     super.onTapCancel,
