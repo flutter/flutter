@@ -458,7 +458,7 @@ Future<void> runDartTest(
     if (coverage != null) '--coverage=$coverage',
     if (perTestTimeout != null) '--timeout=${perTestTimeout.inMilliseconds}ms',
     if (runSkipped) '--run-skipped',
-    if (tags != null) ...tags.map((String t) => '--tags=$t'),
+    ...?tags?.map((String t) => '--tags=$t'),
     if (testPaths != null)
       for (final String testPath in testPaths) testPath,
   ];

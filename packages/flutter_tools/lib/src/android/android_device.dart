@@ -624,6 +624,7 @@ class AndroidDevice extends Device {
         'enable-dart-profiling',
         'true',
       ],
+      if (debuggingOptions.profileStartup) ...<String>['--ez', 'profile-startup', 'true'],
       if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null) ...<String>['--es', 'route', route],
       if (debuggingOptions.enableSoftwareRendering) ...<String>[
