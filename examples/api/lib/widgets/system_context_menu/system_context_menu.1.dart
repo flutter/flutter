@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// Flutter code sample for [SystemContextMenu] with custom menu items.
 
@@ -84,13 +83,15 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
                 onPressed: () {
                   final TextSelection selection = _controller.selection;
                   final String text = _controller.text;
-                  _controller.text = text.replaceRange(
-                    selection.start,
-                    selection.end,
-                    '❤️',
-                  );
-                  _controller.selection = TextSelection.collapsed(
-                    offset: selection.start + 2,
+                  _controller.value = TextEditingValue(
+                    text: text.replaceRange(
+                      selection.start,
+                      selection.end,
+                      '❤️',
+                    ),
+                    selection: TextSelection.collapsed(
+                      offset: selection.start + 2,
+                    ),
                   );
                   _showMessage('Heart added');
                 },
