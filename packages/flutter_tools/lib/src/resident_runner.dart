@@ -1744,7 +1744,7 @@ class TerminalHandler {
         });
 
         if (residentRunner.isRunningDebug || !isRunningOnWeb) {
-          // "DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile"
+          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
           return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(
             flutterDevices: residentRunner.flutterDevices,
           );
