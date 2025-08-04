@@ -22,6 +22,7 @@ void main() {
             final List<dynamic> items = arguments['items'] as List<dynamic>;
             itemsReceived.addAll(items.cast<Map<String, dynamic>>());
           }
+          return null;
         },
       );
       addTearDown(() {
@@ -102,7 +103,7 @@ void main() {
       final SystemContextMenu contextMenu = tester.widget<SystemContextMenu>(
         find.byType(SystemContextMenu),
       );
-      final List<IOSSystemContextMenuItem> items = contextMenu.items!;
+      final List<IOSSystemContextMenuItem> items = contextMenu.items;
       final IOSSystemContextMenuItemCustom clearItem = items
           .whereType<IOSSystemContextMenuItemCustom>()
           .firstWhere((IOSSystemContextMenuItemCustom item) => item.title == 'Clear Text');
@@ -113,6 +114,7 @@ void main() {
       expect(controller.text, '');
       expect(find.text('Text cleared'), findsOneWidget);
     },
-    skip: defaultTargetPlatform != TargetPlatform.iOS || kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended]
   );
 }

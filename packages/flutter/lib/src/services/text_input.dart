@@ -2784,9 +2784,14 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     ServicesBinding.systemContextMenuClient = this;
 
     _customActionCallbacks.clear();
-    
     for (final IOSSystemContextMenuItemData item in items) {
       if (item is IOSSystemContextMenuItemDataCustom) {
+        assert(
+          !_customActionCallbacks.containsKey(item.callbackId) ||
+          _customActionCallbacks[item.callbackId] == item.onPressed,
+          'Duplicate callback ID "${item.callbackId}" with different callbacks. '
+          'Each custom menu item must have a unique ID or the same callback.',
+        );
         _customActionCallbacks[item.callbackId] = item.onPressed;
       }
     }
@@ -3117,18 +3122,17 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
   /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
   const IOSSystemContextMenuItemDataCustom({
     required this.title,
-    required this.callbackId,
     required this.onPressed,
   });
 
   @override
   final String title;
 
-  /// The unique identifier for this custom action.
-  final String callbackId;
-  
   /// The callback to be executed when the item is selected.
   final VoidCallback onPressed;
+
+  /// The unique identifier for this custom action.
+  String get callbackId => hashCode.toString();
 
   @override
   String get _jsonType => 'custom';
@@ -3136,10 +3140,9 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
   @override
   Map<String, dynamic> get _json {
     return <String, dynamic>{
-      'callbackId': callbackId,
+      'id': callbackId,
       'title': title,
       'type': _jsonType,
-      'id': callbackId,
     };
   }
 
@@ -3148,10 +3151,11 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title));
     properties.add(StringProperty('callbackId', callbackId));
+    properties.add(DiagnosticsProperty<VoidCallback>('onPressed', onPressed));
   }
 
   @override
-  int get hashCode => Object.hash(title, callbackId);
+  int get hashCode => Object.hash(title, onPressed);
 
   @override
   bool operator ==(Object other) {
@@ -3160,6 +3164,6 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
     }
     return other is IOSSystemContextMenuItemDataCustom &&
         other.title == title &&
-        other.callbackId == callbackId;
+        other.onPressed == onPressed;
   }
 }
