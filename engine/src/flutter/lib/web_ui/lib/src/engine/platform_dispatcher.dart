@@ -1044,7 +1044,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Set the callback function for updating [typographySettings] based on
   /// the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
-    _typographyMeasurementElement = createDomHTMLDivElement();
+    _typographyMeasurementElement = createDomHTMLParagraphElement();
     _typographyMeasurementElement!.text = 'flutter engine';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
@@ -1077,11 +1077,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _typographyMeasurementElement!,
         'letter-spacing',
       )?.toDouble();
+      // There is no direct CSS property for paragraph spacing,
+      // so on the web this feature is usually implemented
+      // by extension authors by leveraging `margin-bottom` on
+      // the `p` element.
+      final double? paragraphSpacing = parseStyleProperty(
+        _typographyMeasurementElement!,
+        'margin-bottom',
+      )?.toDouble();
       _updateTypographySettings(
         ui.TypographySettings(
           lineHeight: lineHeight,
           letterSpacing: letterSpacing,
           wordSpacing: wordSpacing,
+          paragraphSpacing: paragraphSpacing,
         ),
       );
     });
