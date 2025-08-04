@@ -2095,19 +2095,16 @@ The findRenderObject() method was called for the following element:
   testWidgets('widget is not active if throw in activated', (WidgetTester tester) async {
     final FlutterExceptionHandler? onError = FlutterError.onError;
     FlutterError.onError = (_) {};
-    FlutterError.onError = (_) {};
     const Widget child = Placeholder();
-    final GlobalKey key = GlobalKey();
     final Widget widget = StatefulWidgetSpy(
-      key: key,
+      key: GlobalKey(),
       onActivate: (_) => throw StateError('kaboom'),
       child: child,
     );
     await tester.pumpWidget(widget);
     final Element element = tester.element(find.byWidget(child));
 
-    await tester.pumpWidget(Center(child: widget));
-
+    await tester.pumpWidget(MetaData(child: widget));
     FlutterError.onError = onError;
     expect(element.debugIsDefunct, true);
   });

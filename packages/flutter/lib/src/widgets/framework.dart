@@ -5777,6 +5777,10 @@ abstract class ComponentElement extends Element {
           ],
         ),
       );
+      // _Make sure the old child subtree are deactivated and disposed.
+      try {
+        _child?.deactivate();
+      } catch (_) {}
       _child = updateChild(null, built, slot);
     }
   }
