@@ -2093,8 +2093,10 @@ class _InactiveElements {
     assert(element._lifecycleState == _ElementLifecycle.active);
     try {
       element.deactivate();
+    } catch (_) {
+      element._ensureDeactivated();
+      rethrow;
     } finally {
-      element._deactivate();
       assert(element._lifecycleState == _ElementLifecycle.inactive);
       element.visitChildren(_deactivateRecursively);
       assert(() {
@@ -4721,6 +4723,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
+    _ensureDeactivated();
   }
 
   /// Removes dependencies and sets the lifecycle state of this [Element] to
@@ -4728,12 +4731,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// This method is immediately called after [Element.deactivate], even if that
   /// call throws an exception.
-  @pragma('dart2js:tryInline')
-  @pragma('vm:prefer-inline')
-  @pragma('wasm:prefer-inline')
-  void _deactivate() {
-    if (_dependencies?.isNotEmpty ?? false) {
-      for (final InheritedElement dependency in _dependencies!) {
+  void _ensureDeactivated() {
+    if (_dependencies case final Set<InheritedElement> dependencies? when dependencies.isNotEmpty) {
+      for (final InheritedElement dependency in dependencies) {
         dependency.removeDependent(this);
       }
       // For expediency, we don't actually clear the list here, even though it's
@@ -6768,6 +6768,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
+  @visibleForOverriding
   void deactivate() {
     super.deactivate();
     assert(
@@ -6778,6 +6779,7 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
+  @visibleForOverriding
   void unmount() {
     assert(
       !renderObject.debugDisposed!,
