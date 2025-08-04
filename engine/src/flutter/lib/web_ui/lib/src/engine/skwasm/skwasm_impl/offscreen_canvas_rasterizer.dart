@@ -25,7 +25,9 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
-    offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
+    // XXX DO NOT SUBMIT
+    // Do something here.
+    // offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
   }
 
   @override

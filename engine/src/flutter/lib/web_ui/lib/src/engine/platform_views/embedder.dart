@@ -6,8 +6,6 @@ import 'dart:math' as math;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../compositing/composition.dart';
-
 /// Used for clipping and filter svg resources.
 ///
 /// Position needs to be absolute since these svgs are sandwiched between
