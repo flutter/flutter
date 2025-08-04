@@ -684,6 +684,7 @@ class _DayPeriodControl extends StatelessWidget {
           child: SizedBox.fromSize(
             size: dayPeriodSize,
             child: Material(
+              clipBehavior: Clip.antiAlias,
               color: Colors.transparent,
               shape: resolvedShape,
               child: Column(
@@ -724,6 +725,7 @@ class _DayPeriodControl extends StatelessWidget {
           child: SizedBox(
             height: dayPeriodSize.height,
             child: Material(
+              clipBehavior: Clip.antiAlias,
               color: Colors.transparent,
               shape: resolvedShape,
               child: Row(
@@ -872,6 +874,9 @@ class _RenderAmPmSemantics extends RenderProxyBox {
       height: minSemanticHeight,
     );
   }
+
+  @override
+  bool get semanticsBoundsClippedByParent => false;
 }
 
 /// A widget to pad the area around the [_DayPeriodControl]'s inner [Material].
