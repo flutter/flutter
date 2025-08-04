@@ -29,6 +29,7 @@ void main() {
     expect(themeData.visualDensity, null);
     expect(themeData.backgroundColor, null);
     expect(themeData.side, null);
+    expect(themeData.innerRadius, null);
 
     const RadioTheme theme = RadioTheme(data: RadioThemeData(), child: SizedBox());
     expect(theme.data.mouseCursor, null);
@@ -39,6 +40,7 @@ void main() {
     expect(theme.data.visualDensity, null);
     expect(theme.data.backgroundColor, null);
     expect(theme.data.side, null);
+    expect(theme.data.innerRadius, null);
   });
 
   testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
@@ -64,6 +66,7 @@ void main() {
       visualDensity: VisualDensity.standard,
       backgroundColor: WidgetStatePropertyAll<Color>(Color(0xfffffff2)),
       side: BorderSide(color: Color(0xfffffff3), width: 2),
+      innerRadius: WidgetStatePropertyAll<double>(5.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -82,6 +85,7 @@ void main() {
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
         'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)})',
         'side: BorderSide(color: ${const Color(0xfffffff3)}, width: 2.0)',
+        'innerRadius: WidgetStatePropertyAll(5.0)',
       ]),
     );
   });
@@ -99,6 +103,7 @@ void main() {
     const double splashRadius = 1.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const double innerRadius = 5.0;
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
@@ -129,6 +134,7 @@ void main() {
               }
               return defaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(innerRadius),
           ),
         ),
         home: Scaffold(
@@ -161,7 +167,8 @@ void main() {
       _getRadioMaterial(tester),
       paints
         ..circle(color: selectedBackgroundColor)
-        ..circle(color: selectedFillColor),
+        ..circle(color: selectedFillColor)
+        ..circle(color: selectedFillColor, radius: innerRadius),
     );
 
     // Radio with hover.
@@ -243,6 +250,7 @@ void main() {
     const double themeSplashRadius = 1.0;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
     const VisualDensity themeVisualDensity = VisualDensity.standard;
+    const double themeInnerRadius = 5.0;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const Color defaultFillColor = Color(0xeffffff0);
@@ -254,6 +262,7 @@ void main() {
     const double splashRadius = 2.0;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(horizontal: 1, vertical: 1);
+    const double innerRadius = 6.0;
 
     Widget buildRadio({bool selected = false, bool autofocus = false}) {
       return MaterialApp(
@@ -284,6 +293,7 @@ void main() {
               }
               return themeDefaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(themeInnerRadius),
           ),
         ),
         home: Scaffold(
@@ -310,6 +320,7 @@ void main() {
               }
               return defaultBackgroundColor;
             }),
+            innerRadius: const WidgetStatePropertyAll<double>(innerRadius),
           ),
         ),
       );
@@ -334,7 +345,8 @@ void main() {
       _getRadioMaterial(tester),
       paints
         ..circle(color: selectedBackgroundColor)
-        ..circle(color: selectedFillColor),
+        ..circle(color: selectedFillColor)
+        ..circle(color: selectedFillColor, radius: innerRadius),
     );
 
     // Radio with hover.

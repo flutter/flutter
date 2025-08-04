@@ -426,9 +426,11 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
-  ///
-  /// If null, then it is transparent in all states.
   /// {@endtemplate}
+  ///
+  /// If null, then [RadioThemeData.backgroundColor] of [ThemeData.radioTheme]
+  /// is used. If that is also null the default value is transparent in all
+  /// states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
   /// {@template flutter.material.Radio.side}
@@ -443,20 +445,23 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  /// {@endtemplate}
   ///
   /// If null, then [RadioThemeData.side] of [ThemeData.radioTheme] is used. If
   /// that is also null, the default value is a border using the fill color.
-  /// {@endtemplate}
   final BorderSide? side;
 
+  /// {@template flutter.material.Radio.innerRadius}
   /// The radius of the inner circle of the radio button, in all [WidgetState]s.
   ///
   /// Resolves in the following states:
   ///  * [WidgetState.hovered].
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
+  /// {@endtemplate}
   ///
-  /// If null, then it defaults to `4.5` in all states.
+  /// If null, then [RadioThemeData.innerRadius] of [ThemeData.radioTheme] is
+  /// used. If that is also null, the default value is `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
   @override
@@ -761,7 +766,10 @@ class _RadioPaintState extends State<_RadioPaint> {
           strokeAlign: BorderSide.strokeAlignCenter,
         );
 
-    final double innerRadius = widget.innerRadius?.resolve(activeStates) ?? _kInnerRadius;
+    final double innerRadius =
+        widget.innerRadius?.resolve(activeStates) ??
+        radioTheme.innerRadius?.resolve(activeStates) ??
+        _kInnerRadius;
 
     return CustomPaint(
       size: size,
