@@ -575,6 +575,7 @@ void main() {
           '--enable-flutter-gpu',
           '--trace-systrace',
           '--profile-microtasks',
+          '--profile-startup',
           '--enable-software-rendering',
           '--skia-deterministic-rendering',
           '--enable-embedder-api',
@@ -592,6 +593,7 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.profileMicrotasks, true);
+      expect(options.profileStartup, true);
       expect(options.verboseSystemLogs, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
