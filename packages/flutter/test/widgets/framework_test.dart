@@ -1121,9 +1121,7 @@ void main() {
             child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildListDelegate(<Widget>[Text('child', key: GlobalKey())]),
-                ),
+                SliverList.list(children: <Widget>[Text('child', key: GlobalKey())]),
               ],
             ),
           ),

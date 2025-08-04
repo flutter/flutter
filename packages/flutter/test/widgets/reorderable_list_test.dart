@@ -307,9 +307,9 @@ void main() {
           builder: (BuildContext outerContext, StateSetter setState) {
             return CustomScrollView(
               slivers: <Widget>[
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[const Text('before')]),
+                  children: const <Widget>[Text('before')],
                 ),
                 SliverReorderableList(
                   itemCount: 0,
@@ -325,9 +325,9 @@ void main() {
                     return SizedBox(height: 100, child: Text('item ${items[index]}'));
                   },
                 ),
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 50.0,
-                  delegate: SliverChildListDelegate(<Widget>[const Text('after')]),
+                  children: const <Widget>[Text('after')],
                 ),
               ],
             );

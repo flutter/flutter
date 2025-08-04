@@ -2726,8 +2726,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                 child: CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 100,
+                      itemBuilder: (BuildContext context, int index) {
                         final double height;
                         if (index < 10) {
                           height = 100;
@@ -2735,7 +2736,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                           height = 500;
                         }
                         return SizedBox(height: height, child: Text('$index'));
-                      }, childCount: 100),
+                      },
                     ),
                   ],
                 ),
@@ -2794,8 +2795,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  SliverList.builder(
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
                       final double height;
                       if (index < 10) {
                         height = 500;
@@ -2803,7 +2805,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                         height = 100;
                       }
                       return SizedBox(height: height, child: Text('$index'));
-                    }, childCount: 100),
+                    },
                   ),
                 ],
               ),
@@ -2907,14 +2909,15 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                   controller: scrollController,
                   reverse: reverse,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 10,
+                      itemBuilder: (BuildContext context, int index) {
                         return Container(
                           height: 100,
                           alignment: Alignment.center,
                           child: Text('$index'),
                         );
-                      }, childCount: 10),
+                      },
                     ),
                   ],
                 ),
@@ -3055,14 +3058,15 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                   reverse: reverse,
                   scrollDirection: Axis.horizontal,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 10,
+                      itemBuilder: (BuildContext context, int index) {
                         return Container(
                           width: 100,
                           alignment: Alignment.center,
                           child: Text('$index'),
                         );
-                      }, childCount: 10),
+                      },
                     ),
                   ],
                 ),
