@@ -160,21 +160,22 @@ mixin class RegularWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
+/// {@tool snippet}
 /// An example usage might look like:
 ///
 /// ```dart
-/// final RegularWindowController controller = RegularWindowController(
-///   preferredSize: const Size(800, 600),
-///   preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///   title: 'Example Window',
-/// );
 /// runWidget(
 ///   RegularWindow(
-///     controller: controller,
+///     controller:  RegularWindowController(
+///       preferredSize: const Size(800, 600),
+///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///       title: 'Example Window',
+///     ),
 ///     child: MaterialApp(home: Container()),
 ///   ),
 /// );
 /// ```
+/// {@end-tool}
 ///
 /// Children of a [RegularWindow] widget can access the [RegularWindowController]
 /// via the [WindowControllerScope] inherited widget.
@@ -440,20 +441,22 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// Widgets in the same tree as the [child] widget will have access to the
 /// [RegularWindowController] via the [WindowScope] widget.
 ///
+/// {@tool snippet}
 /// An example usage might look like:
 ///
 /// ```dart
-/// final RegularWindowController controller = RegularWindowController(
-///   preferredSize: const Size(800, 600),
-///   preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///   title: 'Example Window',
-/// );
 /// runWidget(
 ///   RegularWindow(
-///     controller: controller,
+///     controller:  RegularWindowController(
+///       preferredSize: const Size(800, 600),
+///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///       title: 'Example Window',
+///     ),
 ///     child: MaterialApp(home: Container()),
 ///   ),
 /// );
+/// ```
+/// {@end-tool}
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
