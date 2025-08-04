@@ -146,7 +146,7 @@ final _androidGradlePluginRegExpFromId = RegExp(
 // `?<version>` is used to name the version group which helps with extraction.
 // `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _kotlinGradlePluginRegExpFromId = RegExp(
-  r"""\b(?:id)\b(?<=^[^/]*)\s*\((?<quote>['"])org\.jetbrains\.kotlin\.android\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])org\.jetbrains\.kotlin\.android\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 

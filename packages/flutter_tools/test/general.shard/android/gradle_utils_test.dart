@@ -796,11 +796,13 @@ dependencies {
       );
     });
 
-    testWithoutContext('returns the KGP version when in Kotlin settings as plugin', () async {
-      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
-      // File must exist and cannot have kgp defined.
-      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
-      androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+    testWithoutContext(
+      'returns the KGP version when in Kotlin DSL Kotlin settings as plugin',
+      () async {
+        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+        // File must exist and cannot have kgp defined.
+        androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+        androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
 pluginManagement {
   plugins {
       id("dev.flutter.flutter-plugin-loader") version "1.0.0"
@@ -810,11 +812,41 @@ pluginManagement {
   }
 }
 ''');
-      final processManager = FakeProcessManager.empty();
-      processManager.excludedExecutables = <String>{'./gradlew'};
+        final processManager = FakeProcessManager.empty();
+        processManager.excludedExecutables = <String>{'./gradlew'};
 
-      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager), '1.8.22');
-    });
+        expect(
+          await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
+          '1.8.22',
+        );
+      },
+    );
+
+    testWithoutContext(
+      'returns the KGP version when in Groovy DSL Kotlin settings as plugin',
+      () async {
+        final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+        // File must exist and cannot have kgp defined.
+        androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+        androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+pluginManagement {
+  plugins {
+      id "dev.flutter.flutter-plugin-loader"  version "1.0.0"
+      // Decoy value to ensure we ignore commented out lines.
+      // id "org.jetbrains.kotlin.android"  version "6.1.0" apply false // Decoy comment
+      id "org.jetbrains.kotlin.android" version "1.8.22" apply false
+  }
+}
+''');
+        final processManager = FakeProcessManager.empty();
+        processManager.excludedExecutables = <String>{'./gradlew'};
+
+        expect(
+          await getKgpVersion(androidDirectory, BufferLogger.test(), processManager),
+          '1.8.22',
+        );
+      },
+    );
 
     group('validates kgp/gradle versions', () {
       final testData = <GradleKgpTestData>[
