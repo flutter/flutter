@@ -8,6 +8,8 @@ source_set("licenses") {
     "src/comments_util.h",
     "src/data.cc",
     "src/data.h",
+    "src/deps_parser.cc",
+    "src/deps_parser.h",
     "src/filter.cc",
     "src/filter.h",
     "src/license_checker.cc",
@@ -52,6 +54,7 @@ executable("licenses_cpp_testrunner") {
   sources = [
     "src/catalog_unittests.cc",
     "src/comments_unittests.cc",
+    "src/deps_parser_unittests.cc",
     "src/filter_unittests.cc",
     "src/license_checker_unittests.cc",
   ]

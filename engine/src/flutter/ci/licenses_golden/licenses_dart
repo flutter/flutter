@@ -1,4 +1,4 @@
-Signature: 829baa84d7d186a42dabeeb0a9b77992
+Signature: db8e503b91c110102cba80e0fd002ad8
 
 ====================================================================================================
 LIBRARY: dart
@@ -3863,7 +3863,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_types.da
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/object_helper.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/record_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd.dart + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_helper.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -3926,7 +3925,6 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/js_types.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/object_helper.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/record_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/simd.dart
-FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_buffer_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_helper.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/string_patch.dart
@@ -4894,7 +4892,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/8d69b07b9d9da1dc80cc4f05ec60489c6164cd42
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/5ede85aff7987feca316732cfce023aa85c1bdb8
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
