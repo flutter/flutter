@@ -502,6 +502,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
+    this.isWindowingEnabled = false,
   });
 
   @override
@@ -541,6 +542,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isOmitLegacyVersionFileEnabled;
 
   @override
+  final bool isWindowingEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -554,6 +558,7 @@ class TestFeatureFlags implements FeatureFlags {
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
+      windowingFeature => isWindowingEnabled,
       _ => false,
     };
   }
@@ -572,6 +577,7 @@ class TestFeatureFlags implements FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    windowingFeature,
   ];
 
   @override
