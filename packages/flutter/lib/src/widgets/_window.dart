@@ -164,18 +164,23 @@ mixin class RegularWindowControllerDelegate {
 /// An example usage might look like:
 ///
 /// ```dart
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
 /// import 'package:flutter/src/widgets/_window.dart';
 ///
-/// runWidget(
-///   RegularWindow(
-///     controller: RegularWindowController(
-///       preferredSize: const Size(800, 600),
-///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///       title: 'Example Window',
+/// void main() {
+///   runWidget(
+///     RegularWindow(
+///       controller: RegularWindowController(
+///         preferredSize: const Size(800, 600),
+///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         title: 'Example Window',
+///       ),
+///       child: MaterialApp(home: Container()),
 ///     ),
-///     child: MaterialApp(home: Container()),
-///   ),
-/// );
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -447,18 +452,23 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
 /// An example usage might look like:
 ///
 /// ```dart
+/// // ignore_for_file: invalid_use_of_internal_member
+/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/material.dart';
 /// import 'package:flutter/src/widgets/_window.dart';
 ///
-/// runWidget(
-///   RegularWindow(
-///     controller: RegularWindowController(
-///       preferredSize: const Size(800, 600),
-///       preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-///       title: 'Example Window',
+/// void main() {
+///   runWidget(
+///     RegularWindow(
+///       controller: RegularWindowController(
+///         preferredSize: const Size(800, 600),
+///         preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+///         title: 'Example Window',
+///       ),
+///       child: MaterialApp(home: Container()),
 ///     ),
-///     child: MaterialApp(home: Container()),
-///   ),
-/// );
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
