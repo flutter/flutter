@@ -38,7 +38,6 @@ import 'iproxy.dart';
 import 'mac.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
-import 'xcodeproj.dart';
 
 const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
@@ -308,6 +307,14 @@ class IOSDevice extends Device {
   final IOSCoreDeviceControl _coreDeviceControl;
   final XcodeDebug _xcodeDebug;
   final IProxy _iproxy;
+
+  late final _coreDeviceLauncher = IOSCoreDeviceLauncher(
+    coreDeviceControl: _coreDeviceControl,
+    logger: _logger,
+    xcodeDebug: _xcodeDebug,
+    fileSystem: _fileSystem,
+    processUtils: globals.processUtils,
+  );
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -893,107 +900,78 @@ class IOSDevice extends Device {
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
+    // When starting the app in release mode, do not launch with a debugger.
     if (!debuggingOptions.debuggingEnabled) {
-      // Release mode
-
-      // Install app to device
-      final bool installSuccess = await _coreDeviceControl.installApp(
+      return _coreDeviceLauncher.launchAppWithoutDebugger(
         deviceId: id,
         bundlePath: package.deviceBundlePath,
+        bundleId: package.id,
+        launchArguments: launchArguments,
       );
-      if (!installSuccess) {
-        return installSuccess;
-      }
+    }
 
-      // Launch app to device
-      final bool launchSuccess = await _coreDeviceControl.launchApp(
+    // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
+    // Use LLDB if available.
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (xcodeVersion != null && xcodeVersion.major >= 16) {
+      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
         deviceId: id,
+        bundlePath: package.deviceBundlePath,
         bundleId: package.id,
         launchArguments: launchArguments,
       );
 
-      return launchSuccess;
-    } else {
-      _logger.printStatus(
-        'You may be prompted to give access to control Xcode. Flutter uses Xcode '
-        'to run your app. If access is not allowed, you can change this through '
-        'your Settings > Privacy & Security > Automation.',
-      );
-      final launchTimeout = isWirelesslyConnected ? 45 : 30;
-      final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
-        _logger.printError(
-          'Xcode is taking longer than expected to start debugging the app. '
-          'Ensure the project is opened in Xcode.',
-        );
-      });
-
-      XcodeDebugProject debugProject;
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      if (package is PrebuiltIOSApp) {
-        debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-          package.deviceBundlePath,
-          templateRenderer: globals.templateRenderer,
-          verboseLogging: _logger.isVerbose,
-        );
-      } else if (package is BuildableIOSApp) {
-        // Before installing/launching/debugging with Xcode, update the build
-        // settings to use a custom configuration build directory so Xcode
-        // knows where to find the app bundle to launch.
-        final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          configurationBuildDir: bundle.parent.absolute.path,
-        );
-
-        final IosProject project = package.project;
-        final XcodeProjectInfo? projectInfo = await project.projectInfo();
-        if (projectInfo == null) {
-          globals.printError('Xcode project not found.');
-          return false;
-        }
-        if (project.xcodeWorkspace == null) {
-          globals.printError('Unable to get Xcode workspace.');
-          return false;
-        }
-        final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-        if (scheme == null) {
-          projectInfo.reportFlavorNotFoundAndExit();
-        }
-
-        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
-
-        debugProject = XcodeDebugProject(
-          scheme: scheme,
-          xcodeProject: project.xcodeProject,
-          xcodeWorkspace: project.xcodeWorkspace!,
-          hostAppProjectName: project.hostAppProjectName,
-          expectedConfigurationBuildDir: bundle.parent.absolute.path,
-          verboseLogging: _logger.isVerbose,
-        );
-      } else {
-        // This should not happen. Currently, only PrebuiltIOSApp and
-        // BuildableIOSApp extend from IOSApp.
-        _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
-        return false;
+      // If it succeeds to launch with LLDB, return, otherwise continue on to try launching with Xcode.
+      if (launchSuccess) {
+        return launchSuccess;
       }
-
-      final bool debugSuccess = await _xcodeDebug.debugApp(
-        project: debugProject,
-        deviceId: id,
-        launchArguments: launchArguments,
-      );
-      timer.cancel();
-
-      // Kill Xcode on shutdown when running from CI
-      if (debuggingOptions.usingCISystem) {
-        shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
-      }
-
-      return debugSuccess;
     }
+
+    // If LLDB is not available or fails, fallback to using Xcode.
+    _logger.printStatus(
+      'You may be prompted to give access to control Xcode. Flutter uses Xcode '
+      'to run your app. If access is not allowed, you can change this through '
+      'your Settings > Privacy & Security > Automation.',
+    );
+    final launchTimeout = isWirelesslyConnected ? 45 : 30;
+    final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+      _logger.printError(
+        'Xcode is taking longer than expected to start debugging the app. '
+        'Ensure the project is opened in Xcode.',
+      );
+    });
+
+    bool launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
+      deviceId: id,
+      debuggingOptions: debuggingOptions,
+      package: package,
+      launchArguments: launchArguments,
+      mainPath: mainPath,
+      shutdownHooks: shutdownHooks,
+    );
+
+    // Kill Xcode on shutdown when running from CI
+    if (debuggingOptions.usingCISystem) {
+      shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+    }
+    if (launchSuccess) {
+      timer.cancel();
+      return launchSuccess;
+    }
+
+    // If Xcode launch fails, try again using a temporary project.
+    launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
+      deviceId: id,
+      debuggingOptions: debuggingOptions,
+      package: package,
+      launchArguments: launchArguments,
+      mainPath: mainPath,
+      shutdownHooks: shutdownHooks,
+      forceTemporaryXcodeProject: true,
+    );
+
+    timer.cancel();
+    return launchSuccess;
   }
 
   @override
@@ -1003,9 +981,7 @@ class IOSDevice extends Device {
     if (deployDebugger != null && deployDebugger.debuggerAttached) {
       return deployDebugger.exit();
     }
-    if (_xcodeDebug.debugStarted) {
-      return _xcodeDebug.exit();
-    }
+    await _coreDeviceLauncher.stopApp(deviceId: id);
     return false;
   }
 
