@@ -431,18 +431,14 @@ void main() {
             center: centerKey,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('First sliver $index'),
-                  childCount: 2,
-                ),
+              SliverList.builder(
+                itemCount: 2,
+                itemBuilder: (BuildContext context, int index) => Text('First sliver $index'),
               ),
-              SliverList(
+              SliverList.builder(
                 key: centerKey,
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Second sliver $index'),
-                  childCount: 5,
-                ),
+                itemCount: 5,
+                itemBuilder: (BuildContext context, int index) => Text('Second sliver $index'),
               ),
             ],
           ),
@@ -486,18 +482,14 @@ void main() {
                 center: centerKey,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) => Text('First sliver $index'),
-                      childCount: 2,
-                    ),
+                  SliverList.builder(
+                    itemCount: 2,
+                    itemBuilder: (BuildContext context, int index) => Text('First sliver $index'),
                   ),
-                  SliverList(
+                  SliverList.builder(
                     key: centerKey,
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) => Text('Second sliver $index'),
-                      childCount: 5,
-                    ),
+                    itemCount: 5,
+                    itemBuilder: (BuildContext context, int index) => Text('Second sliver $index'),
                   ),
                 ],
               ),

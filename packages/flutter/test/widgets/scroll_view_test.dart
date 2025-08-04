@@ -897,22 +897,20 @@ void main() {
         child: CustomScrollView(
           dragStartBehavior: DragStartBehavior.down,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(
-                kStates.map<Widget>((String state) {
-                  return GestureDetector(
-                    dragStartBehavior: DragStartBehavior.down,
-                    onTap: () {
-                      log.add(state);
-                    },
-                    child: Container(
-                      height: 200.0,
-                      color: const Color(0xFF0000FF),
-                      child: Text(state),
-                    ),
-                  );
-                }).toList(),
-              ),
+            SliverList.list(
+              children: kStates.map<Widget>((String state) {
+                return GestureDetector(
+                  dragStartBehavior: DragStartBehavior.down,
+                  onTap: () {
+                    log.add(state);
+                  },
+                  child: Container(
+                    height: 200.0,
+                    color: const Color(0xFF0000FF),
+                    child: Text(state),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -950,19 +948,17 @@ void main() {
           dragStartBehavior: DragStartBehavior.down,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(
-                focusNodes.map((FocusNode focusNode) {
-                  return Container(
-                    height: 50,
-                    color: Colors.green,
-                    child: TextField(
-                      focusNode: focusNode,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  );
-                }).toList(),
-              ),
+            SliverList.list(
+              children: focusNodes.map((FocusNode focusNode) {
+                return Container(
+                  height: 50,
+                  color: Colors.green,
+                  child: TextField(
+                    focusNode: focusNode,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

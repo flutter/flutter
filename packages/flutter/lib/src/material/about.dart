@@ -1129,15 +1129,15 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           ),
           SliverPadding(
             padding: padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Localizations.override(
+            sliver: SliverList.builder(
+              itemCount: listWidgets.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Localizations.override(
                   locale: const Locale('en', 'US'),
                   context: context,
                   child: listWidgets[index],
-                ),
-                childCount: listWidgets.length,
-              ),
+                );
+              },
             ),
           ),
         ],

@@ -2139,18 +2139,16 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
               controller: _controller,
               center: _sliverAfterKey,
               slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => _buildMonthItem(context, index, true),
-                    childCount: _initialMonthIndex,
-                  ),
+                SliverList.builder(
+                  itemCount: _initialMonthIndex,
+                  itemBuilder: (BuildContext context, int index) =>
+                      _buildMonthItem(context, index, true),
                 ),
-                SliverList(
+                SliverList.builder(
                   key: _sliverAfterKey,
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => _buildMonthItem(context, index, false),
-                    childCount: _numberOfMonths - _initialMonthIndex,
-                  ),
+                  itemCount: _numberOfMonths - _initialMonthIndex,
+                  itemBuilder: (BuildContext context, int index) =>
+                      _buildMonthItem(context, index, false),
                 ),
               ],
             ),

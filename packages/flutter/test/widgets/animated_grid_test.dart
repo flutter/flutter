@@ -431,11 +431,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const SizedBox(height: 100),
-                  const SizedBox(height: 100),
-                ]),
+              SliverList.list(
+                children: const <Widget>[SizedBox(height: 100), SizedBox(height: 100)],
               ),
               SliverAnimatedGrid(
                 key: listKey,
