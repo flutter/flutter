@@ -272,10 +272,10 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        _validate(View.of(context).viewId);
+        _validate(View.maybeOf(context)?.viewId);
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
-          _validate(View.of(context).viewId);
+          _validate(View.maybeOf(context)?.viewId);
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
@@ -336,7 +336,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate(View.of(context).viewId);
+    return _validate(View.maybeOf(context)?.viewId);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -353,11 +353,11 @@ class FormState extends State<Form> {
     final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(View.of(context).viewId, invalidFields);
+    _validate(View.maybeOf(context)?.viewId, invalidFields);
     return invalidFields;
   }
 
-  bool _validate(int viewId, [Set<FormFieldState<Object?>>? invalidFields]) {
+  bool _validate(int? viewId, [Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
@@ -384,20 +384,20 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.sendAnnouncement(
-              viewId,
+            SemanticsService.announce(
               errorMessage,
               directionality,
               assertiveness: Assertiveness.assertive,
+              viewId: viewId,
             );
           }),
         );
       } else {
-        SemanticsService.sendAnnouncement(
-          viewId,
+        SemanticsService.announce(
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
+          viewId: viewId,
         );
       }
     }

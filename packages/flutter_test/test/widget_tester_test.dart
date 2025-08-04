@@ -701,14 +701,14 @@ void main() {
         isFalse,
       );
 
-      await SemanticsService.sendAnnouncement(0, 'announcement 1', TextDirection.ltr);
-      await SemanticsService.sendAnnouncement(
-        0,
+      await SemanticsService.announce('announcement 1', TextDirection.ltr, viewId: 0);
+      await SemanticsService.announce(
         'announcement 2',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
+        viewId: 0,
       );
-      await SemanticsService.sendAnnouncement(0, 'announcement 3', TextDirection.rtl);
+      await SemanticsService.announce('announcement 3', TextDirection.rtl, viewId: 0);
 
       final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
       expect(list, hasLength(3));
@@ -741,11 +741,11 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-      await SemanticsService.sendAnnouncement(
-        0,
+      await SemanticsService.announce(
         'announcement 1',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
+        viewId: 0,
       );
       expect(
         log,

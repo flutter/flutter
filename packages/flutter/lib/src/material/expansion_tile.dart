@@ -538,12 +538,12 @@ class _ExpansionTileState extends State<ExpansionTile> {
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.sendAnnouncement(View.of(context).viewId, stateHint, textDirection);
+        SemanticsService.announce(stateHint, textDirection, viewId: View.maybeOf(context)?.viewId);
         _timer?.cancel();
         _timer = null;
       });
     } else {
-      SemanticsService.sendAnnouncement(View.of(context).viewId, stateHint, textDirection);
+      SemanticsService.announce(stateHint, textDirection, viewId: View.maybeOf(context)?.viewId);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }

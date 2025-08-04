@@ -264,10 +264,10 @@ class _SettingsIcon extends AnimatedWidget {
             child: InkWell(
               onTap: () {
                 toggleSettings();
-                SemanticsService.sendAnnouncement(
-                  View.of(context).viewId,
+                SemanticsService.announce(
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
                   GalleryOptions.of(context).resolvedTextDirection()!,
+                  viewId: View.maybeOf(context)?.viewId,
                 );
               },
               child: Padding(
