@@ -533,31 +533,25 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       Offset.zero & layoutInfo.overlaySize,
     );
 
-    OptionsViewOpenDirection optionsViewOpenDirection = widget.optionsViewOpenDirection;
-    if (optionsViewOpenDirection == OptionsViewOpenDirection.automatic) {
+    bool opensUp = widget.optionsViewOpenDirection == OptionsViewOpenDirection.up;
+    if (widget.optionsViewOpenDirection == OptionsViewOpenDirection.automatic) {
       final double spaceAbove = -overlayRectInField.top;
       final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
-      optionsViewOpenDirection = spaceAbove > spaceBelow
-          ? OptionsViewOpenDirection.up
-          : OptionsViewOpenDirection.down;
+      opensUp = spaceAbove > spaceBelow;
     }
 
-    final double optionsViewMaxHeight = switch (optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => -overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - fieldSize.height,
-      OptionsViewOpenDirection.automatic => 0.0, // Should be unreachable.
-    };
+    final double optionsViewMaxHeight = opensUp
+        ? -overlayRectInField.top
+        : overlayRectInField.bottom - fieldSize.height;
 
     final Size optionsViewBoundingBox = Size(
       fieldSize.width,
       math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );
 
-    final double originY = switch (optionsViewOpenDirection) {
-      OptionsViewOpenDirection.up => overlayRectInField.top,
-      OptionsViewOpenDirection.down => overlayRectInField.bottom - optionsViewBoundingBox.height,
-      OptionsViewOpenDirection.automatic => 0.0, // Should be unreachable.
-    };
+    final double originY = opensUp
+        ? overlayRectInField.top
+        : overlayRectInField.bottom - optionsViewBoundingBox.height;
 
     final Matrix4 transform = layoutInfo.childPaintTransform.clone()
       ..translateByDouble(0.0, originY, 0, 1);
@@ -571,12 +565,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: ConstrainedBox(
           constraints: BoxConstraints.tight(optionsViewBoundingBox),
           child: Align(
-            alignment: switch (optionsViewOpenDirection) {
-              OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-              OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-              OptionsViewOpenDirection.automatic =>
-                AlignmentDirectional.topStart, // Should be unreachable.
-            },
+            alignment: opensUp ? AlignmentDirectional.bottomStart : AlignmentDirectional.topStart,
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
