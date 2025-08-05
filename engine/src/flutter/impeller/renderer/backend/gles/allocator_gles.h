@@ -31,8 +31,8 @@ class AllocatorGLES final : public Allocator {
       const DeviceBufferDescriptor& desc) override;
 
   // |Allocator|
-  std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc) override;
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override;
 
   // |Allocator|
   ISize GetMaxTextureSizeSupported() const override;

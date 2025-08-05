@@ -303,10 +303,9 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
       return;
     }
     // Draw the selection highlight.
-    final Paint selectionPaint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = _selectionColor;
+    final Paint selectionPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _selectionColor;
     context.canvas.drawRect(_getSelectionHighlightRect().shift(offset), selectionPaint);
 
     // Push the layer links if any.

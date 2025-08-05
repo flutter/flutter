@@ -143,7 +143,9 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           DecoratedBox(decoration: kBoxDecorationA),
-          DummyWidget(child: DummyWidget(child: DecoratedBox(decoration: kBoxDecorationB))),
+          DummyWidget(
+            child: DummyWidget(child: DecoratedBox(decoration: kBoxDecorationB)),
+          ),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
@@ -155,7 +157,9 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          DummyWidget(child: DummyWidget(child: DecoratedBox(decoration: kBoxDecorationB))),
+          DummyWidget(
+            child: DummyWidget(child: DecoratedBox(decoration: kBoxDecorationB)),
+          ),
           DummyWidget(child: DecoratedBox(decoration: kBoxDecorationA)),
           DecoratedBox(decoration: kBoxDecorationC),
         ],
@@ -181,8 +185,14 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          DummyWidget(key: Key('b'), child: DecoratedBox(decoration: kBoxDecorationB)),
-          DummyWidget(key: Key('a'), child: DecoratedBox(decoration: kBoxDecorationA)),
+          DummyWidget(
+            key: Key('b'),
+            child: DecoratedBox(decoration: kBoxDecorationB),
+          ),
+          DummyWidget(
+            key: Key('a'),
+            child: DecoratedBox(decoration: kBoxDecorationA),
+          ),
         ],
       ),
     );
@@ -193,8 +203,14 @@ void main() {
       const Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          DummyWidget(key: Key('a'), child: DecoratedBox(decoration: kBoxDecorationA)),
-          DummyWidget(key: Key('b'), child: DecoratedBox(decoration: kBoxDecorationB)),
+          DummyWidget(
+            key: Key('a'),
+            child: DecoratedBox(decoration: kBoxDecorationA),
+          ),
+          DummyWidget(
+            key: Key('b'),
+            child: DecoratedBox(decoration: kBoxDecorationB),
+          ),
         ],
       ),
     );

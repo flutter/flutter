@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -13,7 +14,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
-import 'safe_browser_api.dart';
 import 'services.dart';
 import 'vector_math.dart';
 
@@ -379,25 +379,6 @@ String colorComponentsToCssString(int r, int g, int b, int a) {
   }
 }
 
-/// Determines if the (dynamic) exception passed in is a NS_ERROR_FAILURE
-/// (from Firefox).
-///
-/// NS_ERROR_FAILURE (0x80004005) is the most general of all the (Firefox)
-/// errors and occurs for all errors for which a more specific error code does
-/// not apply. (https://developer.mozilla.org/en-US/docs/Mozilla/Errors)
-///
-/// Other browsers do not throw this exception.
-///
-/// In Flutter, this exception happens when we try to perform some operations on
-/// a Canvas when the application is rendered in a display:none iframe.
-///
-/// We need this in [BitmapCanvas] and [RecordingCanvas] to swallow this
-/// Firefox exception without interfering with others (potentially useful
-/// for the programmer).
-bool isNsErrorFailureException(Object e) {
-  return getJsProperty<dynamic>(e, 'name') == 'NS_ERROR_FAILURE';
-}
-
 /// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
 ///
 /// Generic font families are a fallback mechanism, a means of preserving some
@@ -749,10 +730,9 @@ void setThemeColor(ui.Color? color) {
 
   if (color != null) {
     if (theme == null) {
-      theme =
-          createDomHTMLMetaElement()
-            ..id = 'flutterweb-theme'
-            ..name = 'theme-color';
+      theme = createDomHTMLMetaElement()
+        ..id = 'flutterweb-theme'
+        ..name = 'theme-color';
       domDocument.head!.append(theme);
     }
     theme.content = color.toCssString();
@@ -766,10 +746,9 @@ void ensureMetaTag(String name, String content) {
   final DomElement? existingTag = domDocument.querySelector('meta[name=$name][content=$content]');
 
   if (existingTag == null) {
-    final DomHTMLMetaElement meta =
-        createDomHTMLMetaElement()
-          ..name = name
-          ..content = content;
+    final DomHTMLMetaElement meta = createDomHTMLMetaElement()
+      ..name = name
+      ..content = content;
     domDocument.head!.append(meta);
   }
 }
@@ -788,7 +767,7 @@ void drawEllipse(
   double endAngle,
   bool antiClockwise,
 ) {
-  _ellipseFeatureDetected ??= getJsProperty<Object?>(context, 'ellipse') != null;
+  _ellipseFeatureDetected ??= context['ellipse'] != null;
   if (_ellipseFeatureDetected!) {
     context.ellipse(
       centerX,

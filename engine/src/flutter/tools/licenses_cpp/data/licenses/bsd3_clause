@@ -1,0 +1,11 @@
+bsd3_clause
+(?s)(?:^|\s+)Copyright.*\nRedistribution and use in source and binary forms.*\n\s*(?:- )?Redistributions of source code must retain the above copyright.*Neither the name of
+(?s)Copyright.*All [rR]ights [rR]eserved.
+
+Redistribution\s+and\s+use\s+in\s+source\s+and\s+binary\s+forms,\s+with\s+or\s+without\s+modification,\s+are\s+permitted\s+provided\s+that\s+the\s+following\s+conditions\s+are\s+met:
+
+\s*(?:- )?Redistributions\s+of\s+source\s+code\s+must\s+retain\s+the\s+above\s+copyright\s+notice,\s+this\s+list\s+of\s+conditions\s+and\s+the\s+following\s+disclaimer.
+\s*(?:- )?Redistributions\s+in\s+binary\s+form\s+must\s+reproduce\s+the\s+above\s+copyright\s+notice,\s+this\s+list\s+of\s+conditions\s+and\s+the\s+following\s+disclaimer\s+in\s+the\s+documentation\s+and/or\s+other\s+materials\s+provided\s+with\s+the\s+distribution.
+\s*(?:- )?Neither\s+the\s+name\s+of.*nor\s+the\s+names\s+of\s+its\s+contributors\s+may\s+be\s+used\s+to\s+endorse\s+or\s+promote\s+products\s+derived\s+from\s+this\s+software\s+without\s+specific\s+prior\s+written\s+permission.
+
+THIS\s+SOFTWARE\s+IS\s+PROVIDED\s+BY\s+THE\s+COPYRIGHT\s+HOLDERS\s+AND\s+CONTRIBUTORS\s+"AS\s+IS",?\s+AND\s+ANY\s+EXPRESS\s+OR\s+IMPLIED\s+WARRANTIES,\s+INCLUDING,\s+BUT\s+NOT\s+LIMITED\s+TO,\s+THE\s+IMPLIED\s+WARRANTIES\s+OF\s+MERCHANTABILITY\s+AND\s+FITNESS\s+FOR\s+A\s+PARTICULAR\s+PURPOSE\s+ARE\s+DISCLAIMED.\s+IN\s+NO\s+EVENT\s+SHALL\s+THE\s+COPYRIGHT\s+HOLDERS\s+OR\s+CONTRIBUTORS\s+BE\s+LIABLE\s+FOR\s+ANY\s+DIRECT,\s+INDIRECT,\s+INCIDENTAL,\s+SPECIAL,\s+EXEMPLARY,\s+OR\s+CONSEQUENTIAL\s+DAMAGES\s+\(INCLUDING,\s+BUT\s+NOT\s+LIMITED\s+TO,\s+PROCUREMENT\s+OF\s+SUBSTITUTE\s+GOODS\s+OR\s+SERVICES;\s+LOSS\s+OF\s+USE,\s+DATA,\s+OR\s+PROFITS;\s+OR\s+BUSINESS\s+INTERRUPTION\)\s+HOWEVER\s+CAUSED\s+AND\s+ON\s+ANY\s+THEORY\s+OF\s+LIABILITY,\s+WHETHER\s+IN\s+CONTRACT,\s+STRICT\s+LIABILITY,\s+OR\s+TORT\s+\(INCLUDING\s+NEGLIGENCE\s+OR\s+OTHERWISE\)\s+ARISING\s+IN\s+ANY\s+WAY\s+OUT\s+OF\s+THE\s+USE\s+OF\s+THIS\s+SOFTWARE,\s+EVEN\s+IF\s+ADVISED\s+OF\s+THE\s+POSSIBILITY\s+OF\s+SUCH\s+DAMAGE.

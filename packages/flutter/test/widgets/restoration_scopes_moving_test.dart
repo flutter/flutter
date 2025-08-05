@@ -31,8 +31,9 @@ void main() {
     final TestRestorationData dataWithChild = await tester.getRestorationData();
 
     tester
-        .state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild))
-        .restoreChild = false;
+            .state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild))
+            .restoreChild =
+        false;
     await tester.pump();
     expect(
       tester

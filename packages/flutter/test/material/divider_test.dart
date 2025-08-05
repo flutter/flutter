@@ -17,7 +17,10 @@ void main() {
 
   testWidgets('Material2 - Divider control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(useMaterial3: false), home: const Center(child: Divider())),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Center(child: Divider()),
+      ),
     );
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
@@ -85,7 +88,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Divider(indent: customIndent, endIndent: customIndent)),
+        child: Center(
+          child: Divider(indent: customIndent, endIndent: customIndent),
+        ),
       ),
     );
     dividerRect = tester.getRect(find.byType(Divider));
@@ -183,7 +188,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: VerticalDivider(indent: customIndent, endIndent: customIndent)),
+        child: Center(
+          child: VerticalDivider(indent: customIndent, endIndent: customIndent),
+        ),
       ),
     );
     dividerRect = tester.getRect(find.byType(VerticalDivider));

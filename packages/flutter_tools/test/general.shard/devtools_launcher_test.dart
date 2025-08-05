@@ -22,7 +22,7 @@ void main() {
 
   testWithoutContext('DevtoolsLauncher launches DevTools from the SDK and saves the URI', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
@@ -54,7 +54,7 @@ void main() {
   // TODO(bkonyi): this test can be removed when DevTools is served from DDS.
   testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     final DevtoolsLauncher launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
@@ -89,7 +89,7 @@ Serving DevTools at http://127.0.0.1:9100.
     'DevtoolsLauncher does not launch a new DevTools instance if one is already active',
     () async {
       final (BufferLogger logger, Artifacts artifacts) = getTestState();
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       final DevtoolsLauncher launcher = DevtoolsServerLauncher(
         artifacts: artifacts,
         logger: logger,
@@ -121,7 +121,7 @@ Serving DevTools at http://127.0.0.1:9100.
 
   testWithoutContext('DevtoolsLauncher can launch devtools with a memory profile', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'Artifact.engineDartBinary',
@@ -180,8 +180,8 @@ Serving DevTools at http://127.0.0.1:9100.
 
   testWithoutContext('DevtoolsLauncher handles failure of DevTools process on a bot', () async {
     final (BufferLogger logger, Artifacts artifacts) = getTestState();
-    final Completer<void> completer = Completer<void>();
-    final DevtoolsServerLauncher launcher = DevtoolsServerLauncher(
+    final completer = Completer<void>();
+    final launcher = DevtoolsServerLauncher(
       artifacts: artifacts,
       logger: logger,
       botDetector: const FakeBotDetector(true),

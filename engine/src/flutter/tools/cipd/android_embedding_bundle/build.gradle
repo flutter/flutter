@@ -13,7 +13,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.3.0"
+        classpath "com.android.tools.build:gradle:8.9.1"
     }
 }
 
@@ -33,7 +33,7 @@ allprojects {
 apply plugin: "com.android.application"
 
 android {
-  compileSdk 35
+  compileSdk 36
 }
 
 configurations {

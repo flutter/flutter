@@ -68,7 +68,7 @@ void main() {
       ),
     );
 
-    expect((decoratedBox.decoration as BoxDecoration).boxShadow, isNotNull);
+    expect((decoratedBox.decoration as ShapeDecoration).shadows, isNotNull);
   });
 
   testWidgets('is translucent', (WidgetTester tester) async {
@@ -98,7 +98,7 @@ void main() {
         // The second DecoratedBox should be the one with color.
         .elementAt(1);
 
-    expect((decoratedBox.decoration as BoxDecoration).color!.opacity, lessThan(1.0));
+    expect((decoratedBox.decoration as ShapeDecoration).color!.opacity, lessThan(1.0));
   });
 
   testWidgets('positions itself at the anchor', (WidgetTester tester) async {

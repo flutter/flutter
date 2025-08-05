@@ -14,7 +14,6 @@ output-localization-file: stock_strings.dart
 ## `template-arb-file` describes the template arb file that the tool
 ## will use to check and validate the remaining arb files when
 ## generating Flutter's localization files.
-synthetic-package: false
 template-arb-file: stocks_en.arb
 ## setting `nullable-getter` to false generates a non-nullable
 ## StockStrings getter. This removes the need for adding null checks

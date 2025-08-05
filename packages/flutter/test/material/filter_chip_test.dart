@@ -716,7 +716,11 @@ void main() {
     WidgetTester tester,
   ) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) {})));
+    await tester.pumpWidget(
+      wrapForChip(
+        child: FilterChip(label: label, onSelected: (bool b) {}),
+      ),
+    );
     checkChipMaterialClipBehavior(tester, Clip.none);
 
     await tester.pumpWidget(

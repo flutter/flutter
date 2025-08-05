@@ -9,5 +9,8 @@ import '../integration.shard/test_data/hot_reload_with_asset_test_common.dart';
 import '../src/common.dart';
 
 void main() {
-  testAll(chrome: true, additionalCommandArgs: <String>['--web-experimental-hot-reload']);
+  testAll(
+    chrome: true,
+    additionalCommandArgs: <String>['--web-experimental-hot-reload', '--no-web-resources-cdn'],
+  );
 }

@@ -157,10 +157,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    final SnackBarThemeData defaults =
-        Theme.of(context).useMaterial3
-            ? _SnackbarDefaultsM3(context)
-            : _SnackbarDefaultsM2(context);
+    final SnackBarThemeData defaults = Theme.of(context).useMaterial3
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
     MaterialStateColor resolveForegroundColor() {
@@ -542,6 +541,8 @@ class _SnackBarState extends State<SnackBar> {
   CurvedAnimation? _fadeOutAnimation;
   CurvedAnimation? _heightM3Animation;
 
+  final Key _dismissibleKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -617,32 +618,32 @@ class _SnackBarState extends State<SnackBar> {
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
     final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
-    final SnackBarThemeData defaults =
-        theme.useMaterial3 ? _SnackbarDefaultsM3(context) : _SnackbarDefaultsM2(context);
+    final SnackBarThemeData defaults = theme.useMaterial3
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
     final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
 
     // Invert the theme values for Material 2. Material 3 values are tokenized to pre-inverted values.
-    final ThemeData effectiveTheme =
-        theme.useMaterial3
-            ? theme
-            : theme.copyWith(
-              colorScheme: ColorScheme(
-                primary: colorScheme.onPrimary,
-                secondary: buttonColor,
-                surface: colorScheme.onSurface,
-                background: defaults.backgroundColor,
-                error: colorScheme.onError,
-                onPrimary: colorScheme.primary,
-                onSecondary: colorScheme.secondary,
-                onSurface: colorScheme.surface,
-                onBackground: colorScheme.background,
-                onError: colorScheme.error,
-                brightness: brightness,
-              ),
-            );
+    final ThemeData effectiveTheme = theme.useMaterial3
+        ? theme
+        : theme.copyWith(
+            colorScheme: ColorScheme(
+              primary: colorScheme.onPrimary,
+              secondary: buttonColor,
+              surface: colorScheme.onSurface,
+              background: defaults.backgroundColor,
+              error: colorScheme.onError,
+              onPrimary: colorScheme.primary,
+              onSecondary: colorScheme.secondary,
+              onSurface: colorScheme.surface,
+              onBackground: colorScheme.background,
+              onError: colorScheme.error,
+              brightness: brightness,
+            ),
+          );
 
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
     final SnackBarBehavior snackBarBehavior =
@@ -686,21 +687,18 @@ class _SnackBarState extends State<SnackBar> {
     final double iconHorizontalMargin =
         (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
 
-    final IconButton? iconButton =
-        showCloseIcon
-            ? IconButton(
-              key: StandardComponentType.closeButton.key,
-              icon: const Icon(Icons.close),
-              iconSize: 24.0,
-              color:
-                  widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
-              onPressed:
-                  () => ScaffoldMessenger.of(
-                    context,
-                  ).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
-              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-            )
-            : null;
+    final IconButton? iconButton = showCloseIcon
+        ? IconButton(
+            key: StandardComponentType.closeButton.key,
+            icon: const Icon(Icons.close),
+            iconSize: 24.0,
+            color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
+            onPressed: () => ScaffoldMessenger.of(
+              context,
+            ).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          )
+        : null;
 
     // Calculate combined width of Action, Icon, and their padding, if they are present.
     final TextPainter actionTextPainter = TextPainter(
@@ -723,7 +721,7 @@ class _SnackBarState extends State<SnackBar> {
         defaults.insetPadding!;
 
     final double snackBarWidth =
-        widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
+        widget.width ?? MediaQuery.widthOf(context) - (margin.left + margin.right);
     final double actionOverflowThreshold =
         widget.actionOverflowThreshold ??
         snackBarTheme.actionOverflowThreshold ??
@@ -746,7 +744,10 @@ class _SnackBarState extends State<SnackBar> {
           ),
         ),
       if (showCloseIcon)
-        Padding(padding: EdgeInsets.symmetric(horizontal: iconHorizontalMargin), child: iconButton),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: iconHorizontalMargin),
+          child: iconButton,
+        ),
     ];
 
     Widget snackBar = Padding(
@@ -757,10 +758,9 @@ class _SnackBarState extends State<SnackBar> {
             children: <Widget>[
               Expanded(
                 child: Padding(
-                  padding:
-                      widget.padding == null
-                          ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding)
-                          : EdgeInsets.zero,
+                  padding: widget.padding == null
+                      ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding)
+                      : EdgeInsets.zero,
                   child: DefaultTextStyle(style: contentTextStyle!, child: widget.content),
                 ),
               ),
@@ -796,10 +796,9 @@ class _SnackBarState extends State<SnackBar> {
       clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
-        child:
-            accessibleNavigation || theme.useMaterial3
-                ? snackBar
-                : FadeTransition(opacity: _fadeOutAnimation!, child: snackBar),
+        child: accessibleNavigation || theme.useMaterial3
+            ? snackBar
+            : FadeTransition(opacity: _fadeOutAnimation!, child: snackBar),
       ),
     );
 
@@ -823,7 +822,7 @@ class _SnackBarState extends State<SnackBar> {
         ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
-        key: const Key('dismissible'),
+        key: _dismissibleKey,
         direction: dismissDirection,
         resizeDuration: null,
         behavior:
@@ -884,17 +883,15 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   late final ColorScheme _colors;
 
   @override
-  Color get backgroundColor =>
-      _theme.brightness == Brightness.light
-          ? Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface)
-          : _colors.onSurface;
+  Color get backgroundColor => _theme.brightness == Brightness.light
+      ? Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface)
+      : _colors.onSurface;
 
   @override
-  TextStyle? get contentTextStyle =>
-      ThemeData(
-        useMaterial3: _theme.useMaterial3,
-        brightness: _theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
-      ).textTheme.titleMedium;
+  TextStyle? get contentTextStyle => ThemeData(
+    useMaterial3: _theme.useMaterial3,
+    brightness: _theme.brightness == Brightness.light ? Brightness.dark : Brightness.light,
+  ).textTheme.titleMedium;
 
   @override
   SnackBarBehavior get behavior => SnackBarBehavior.fixed;

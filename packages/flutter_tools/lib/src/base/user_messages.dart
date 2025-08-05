@@ -341,16 +341,6 @@ class UserMessages {
       '  current directory: $currentDir\n'
       'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
       "that you're running the expected version (run 'flutter --version' to see which flutter is on your path).\n";
-  String runnerRemovedFlutterRepo(String flutterRoot, String flutterPath) =>
-      'Warning! This package referenced a Flutter repository via the .packages file that is '
-      "no longer available. The repository from which the 'flutter' tool is currently "
-      'executing will be used instead.\n'
-      '  running Flutter tool: $flutterRoot\n'
-      '  previous reference  : $flutterPath\n'
-      'This can happen if you deleted or moved your copy of the Flutter repository, or '
-      'if it was on a volume that is no longer mounted or has been mounted at a '
-      'different location. Please check your system path to verify that you are running '
-      "the expected version (run 'flutter --version' to see which flutter is on your path).\n";
   String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
       "Warning! The 'flutter' tool you are currently running is from a different Flutter "
       'repository than the one last used by this package. The repository from which the '
@@ -370,7 +360,7 @@ class UserMessages {
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 
   String androidSdkInstallUrl(Platform platform) {
-    const String baseUrl = 'https://flutter.dev/to/';
+    const baseUrl = 'https://flutter.dev/to/';
     if (platform.isMacOS) {
       return '${baseUrl}macos-android-setup';
     } else if (platform.isLinux) {

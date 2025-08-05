@@ -169,10 +169,9 @@ void main() {
 
   test('Matrix4Tween', () {
     final Matrix4 a = Matrix4.identity();
-    final Matrix4 b =
-        a.clone()
-          ..translate(6.0, -8.0)
-          ..scale(0.5, 1.0, 5.0);
+    final Matrix4 b = a.clone()
+      ..translate(6.0, -8.0)
+      ..scale(0.5, 1.0, 5.0);
     final Matrix4Tween tween = Matrix4Tween(begin: a, end: b);
     expect(tween.lerp(0.0), equals(a));
     expect(tween.lerp(1.0), equals(b));

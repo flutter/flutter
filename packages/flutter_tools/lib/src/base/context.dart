@@ -63,12 +63,12 @@ class AppContext {
   final AppContext? _parent;
   final Map<Type, Generator> _overrides;
   final Map<Type, Generator> _fallbacks;
-  final Map<Type, dynamic> _values = <Type, dynamic>{};
+  final _values = <Type, dynamic>{};
 
   List<Type>? _reentrantChecks;
 
   /// Bootstrap context.
-  static final AppContext _root = AppContext._(null, 'ROOT');
+  static final _root = AppContext._(null, 'ROOT');
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
@@ -115,7 +115,7 @@ class AppContext {
     });
   }
 
-  /// Gets the value associated with the specified [type], or `null` if no
+  /// Gets the value associated with the specified [T], or `null` if no
   /// such value has been associated.
   T? get<T>() {
     dynamic value = _generateIfNecessary(T, _overrides);
@@ -144,7 +144,7 @@ class AppContext {
     Map<Type, Generator>? fallbacks,
     ZoneSpecification? zoneSpecification,
   }) async {
-    final AppContext child = AppContext._(
+    final child = AppContext._(
       this,
       name,
       Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
@@ -159,8 +159,8 @@ class AppContext {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer();
-    String indent = '';
+    final buf = StringBuffer();
+    var indent = '';
     AppContext? ctx = this;
     while (ctx != null) {
       buf.write('AppContext');
@@ -187,7 +187,7 @@ class AppContext {
 class _Key {
   const _Key();
 
-  static const _Key key = _Key();
+  static const key = _Key();
 
   @override
   String toString() => 'context';
@@ -197,5 +197,5 @@ class _Key {
 class _BoxedNull {
   const _BoxedNull();
 
-  static const _BoxedNull instance = _BoxedNull();
+  static const instance = _BoxedNull();
 }

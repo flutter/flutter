@@ -98,15 +98,14 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     fontSize: _indicatorFontSizePixels,
     fontWeight: FontWeight.w800,
   );
-  static final Paint _indicatorPaint =
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset.zero,
-          const Offset(10.0, 10.0),
-          <Color>[_black, _yellow, _yellow, _black],
-          <double>[0.25, 0.25, 0.75, 0.75],
-          TileMode.repeated,
-        );
+  static final Paint _indicatorPaint = Paint()
+    ..shader = ui.Gradient.linear(
+      Offset.zero,
+      const Offset(10.0, 10.0),
+      <Color>[_black, _yellow, _yellow, _black],
+      <double>[0.25, 0.25, 0.75, 0.75],
+      TileMode.repeated,
+    );
   static final Paint _labelBackgroundPaint = Paint()..color = const Color(0xFFFFFFFF);
 
   final List<TextPainter> _indicatorLabel = List<TextPainter>.generate(
@@ -262,18 +261,17 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
-        informationCollector:
-            () => <DiagnosticsNode>[
-              // debugCreator should only be set in DebugMode, but we want the
-              // treeshaker to know that.
-              if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
-              ...overflowHints!,
-              describeForError('The specific $runtimeType in question is'),
-              // TODO(jacobr): this line is ascii art that it would be nice to
-              // handle a little more generically in GUI debugging clients in the
-              // future.
-              DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false),
-            ],
+        informationCollector: () => <DiagnosticsNode>[
+          // debugCreator should only be set in DebugMode, but we want the
+          // treeshaker to know that.
+          if (kDebugMode && debugCreator != null) DiagnosticsDebugCreator(debugCreator!),
+          ...overflowHints!,
+          describeForError('The specific $runtimeType in question is'),
+          // TODO(jacobr): this line is ascii art that it would be nice to
+          // handle a little more generically in GUI debugging clients in the
+          // future.
+          DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false),
+        ],
       ),
     );
   }

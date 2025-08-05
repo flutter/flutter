@@ -13,11 +13,11 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String _kOut = 'out';
-const String _kType = 'type';
-const String _kVmServiceUrl = 'vm-service-url';
-const String _kDeviceType = 'device';
-const String _kSkiaType = 'skia';
+const _kOut = 'out';
+const _kType = 'type';
+const _kVmServiceUrl = 'vm-service-url';
+const _kDeviceType = 'device';
+const _kSkiaType = 'skia';
 
 class ScreenshotCommand extends FlutterCommand {
   ScreenshotCommand({required this.fs}) {
@@ -29,7 +29,6 @@ class ScreenshotCommand extends FlutterCommand {
     );
     argParser.addOption(
       _kVmServiceUrl,
-      aliases: <String>['observatory-url'], // for historical reasons
       valueHelp: 'URI',
       help:
           'The VM Service URL to which to connect.\n'
@@ -70,7 +69,7 @@ class ScreenshotCommand extends FlutterCommand {
   bool get refreshWirelessDevices => true;
 
   @override
-  final List<String> aliases = <String>['pic'];
+  final aliases = <String>['pic'];
 
   Device? device;
 
@@ -110,7 +109,7 @@ class ScreenshotCommand extends FlutterCommand {
       outputFile = fs.file(stringArg(_kOut));
     }
 
-    bool success = true;
+    var success = true;
     switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);

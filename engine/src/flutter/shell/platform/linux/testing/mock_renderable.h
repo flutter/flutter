@@ -17,8 +17,6 @@ G_DECLARE_FINAL_TYPE(FlMockRenderable,
 
 FlMockRenderable* fl_mock_renderable_new();
 
-size_t fl_mock_renderable_get_redraw_count(FlMockRenderable* renderable);
-
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_MOCK_RENDERABLE_H_

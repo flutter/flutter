@@ -61,11 +61,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -413,4 +412,34 @@ void main() {
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
+
+  testWidgets(
+    'DropdownMenuThemeData.menuStyle.disabledColor is being applied when the menu is disabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            dropdownMenuTheme: const DropdownMenuThemeData(disabledColor: Colors.grey),
+          ),
+          home: const Scaffold(
+            body: Center(
+              child: DropdownMenu<int>(
+                enabled: false,
+                initialSelection: 0,
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+                  DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
+                  DropdownMenuEntry<int>(value: 2, label: 'Item 2'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // make sure the displaying text has grey color
+      final EditableText editableText = tester.widget(find.byType(EditableText));
+      expect(editableText.style.color, Colors.grey);
+    },
+  );
 }

@@ -23,11 +23,9 @@ void main() {
                 maxExtentPrototype: maxPrototype,
                 child: const SizedBox.expand(child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('item $index'),
               ),
             ],
           ),
@@ -42,8 +40,9 @@ void main() {
     {
       await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: false));
       await tester.pumpAndSettle();
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
 
       // The test viewport is width=800 x height=600
       // The height=300 header is at the top of the scroll view and all items are the same height.
@@ -75,8 +74,9 @@ void main() {
     {
       await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: false));
       await tester.pumpAndSettle();
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
 
       // The width=300 header is at the left of the scroll view and all items are the same width.
       expect(getHeaderRect().topLeft, Offset.zero);
@@ -107,8 +107,9 @@ void main() {
     {
       await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: true));
       await tester.pumpAndSettle();
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
 
       // The height=300 header is at the bottom of the scroll view and all items are the same height.
       expect(getHeaderRect().bottomLeft, const Offset(0, 600));
@@ -139,8 +140,9 @@ void main() {
     {
       await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: true));
       await tester.pumpAndSettle();
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
 
       // The width=300 header is on the right of the scroll view and all items are the same width.
       expect(getHeaderRect().topRight, const Offset(800, 0));
@@ -177,11 +179,9 @@ void main() {
                 maxExtentPrototype: SizedBox(height: 300),
                 child: SizedBox.expand(child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('item $index'),
-                  childCount: 100,
-                ),
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) => Text('item $index'),
               ),
             ],
           ),
@@ -215,11 +215,9 @@ void main() {
                   maxExtentPrototype: SizedBox(height: 100),
                   child: SizedBox.expand(child: Text('header')),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Text('item $index'),
-                    childCount: 100,
-                  ),
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('item $index'),
                 ),
               ],
             ),
@@ -230,8 +228,9 @@ void main() {
       expect(tester.getTopLeft(find.text('header')), Offset.zero);
       expect(tester.getSize(find.text('header')), const Size(800, 100));
 
-      final ScrollPosition position =
-          tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
 
       position.moveTo(100);
       await tester.pumpAndSettle();
@@ -363,33 +362,31 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, _) => <Widget>[
-                  SliverOverlapAbsorber(
+            headerSliverBuilder: (BuildContext context, _) => <Widget>[
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: const SliverResizingHeader(
+                  minExtentPrototype: SizedBox(height: 100),
+                  maxExtentPrototype: SizedBox(height: 300),
+                  child: SizedBox.expand(child: Text('header')),
+                ),
+              ),
+            ],
+            body: Builder(
+              builder: (BuildContext context) => CustomScrollView(
+                slivers: <Widget>[
+                  SliverOverlapInjector(
                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                    sliver: const SliverResizingHeader(
-                      minExtentPrototype: SizedBox(height: 100),
-                      maxExtentPrototype: SizedBox(height: 300),
-                      child: SizedBox.expand(child: Text('header')),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          SizedBox(height: 50, child: Text('$index')),
+                      childCount: 100,
                     ),
                   ),
                 ],
-            body: Builder(
-              builder:
-                  (BuildContext context) => CustomScrollView(
-                    slivers: <Widget>[
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) =>
-                              SizedBox(height: 50, child: Text('$index')),
-                          childCount: 100,
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
             ),
           ),
         ),

@@ -110,12 +110,12 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(editableTextState: editableTextState);
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -153,11 +153,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -173,6 +174,7 @@ void main() {
       const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
         IOSSystemContextMenuItemCopy(),
         IOSSystemContextMenuItemShare(title: 'My Share Title'),
+        IOSSystemContextMenuItemLiveText(),
       ];
       final TextEditingController controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
@@ -187,15 +189,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -221,6 +221,7 @@ void main() {
         itemsReceived.last[1],
         equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
       );
+      expect(itemsReceived.last[2], equals(const IOSSystemContextMenuItemDataLiveText()));
 
       state.hideToolbar();
       await tester.pump();
@@ -242,11 +243,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -273,15 +275,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -322,11 +322,12 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
-                  untypedItems.map((dynamic value) {
-                    final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-                    return systemContextMenuItemDataFromJson(itemJson);
-                  }).toList();
+              final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((
+                dynamic value,
+              ) {
+                final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                return systemContextMenuItemDataFromJson(itemJson);
+              }).toList();
               itemsReceived.add(lastItems);
           }
           return;
@@ -358,15 +359,13 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(
-                          editableTextState: editableTextState,
-                          items: items1,
-                        );
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                              items: items1,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -444,12 +443,12 @@ void main() {
                   body: Center(
                     child: TextField(
                       controller: controller,
-                      contextMenuBuilder: (
-                        BuildContext context,
-                        EditableTextState editableTextState,
-                      ) {
-                        return SystemContextMenu.editableText(editableTextState: editableTextState);
-                      },
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
                     ),
                   ),
                 ),
@@ -499,14 +498,12 @@ void main() {
                         setState = localSetState;
                         return TextField(
                           controller: controller,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         );
                       },
                     ),
@@ -557,28 +554,24 @@ void main() {
                         TextField(
                           key: field1Key,
                           controller: controller1,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              key: menu1Key,
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  key: menu1Key,
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         ),
                         TextField(
                           key: field2Key,
                           controller: controller2,
-                          contextMenuBuilder: (
-                            BuildContext context,
-                            EditableTextState editableTextState,
-                          ) {
-                            return SystemContextMenu.editableText(
-                              key: menu2Key,
-                              editableTextState: editableTextState,
-                            );
-                          },
+                          contextMenuBuilder:
+                              (BuildContext context, EditableTextState editableTextState) {
+                                return SystemContextMenu.editableText(
+                                  key: menu2Key,
+                                  editableTextState: editableTextState,
+                                );
+                              },
                         ),
                       ],
                     ),
@@ -697,5 +690,209 @@ void main() {
         IOSSystemContextMenuItemDataShare(title: localizations.shareButtonLabel),
       );
     },
+  );
+
+  test(
+    'can get the IOSSystemContextMenuItemData representation of an IOSSystemContextMenuItemLiveText',
+    () {
+      const IOSSystemContextMenuItemLiveText item = IOSSystemContextMenuItemLiveText();
+      const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      final IOSSystemContextMenuItemData data = item.getData(localizations);
+      expect(data, isA<IOSSystemContextMenuItemDataLiveText>());
+    },
+  );
+
+  test('systemContextMenuItemDataFromJson handles Live Text', () {
+    final Map<String, dynamic> json = <String, dynamic>{'type': 'captureTextFromCamera'};
+    final IOSSystemContextMenuItemData item = systemContextMenuItemDataFromJson(json);
+    expect(item, isA<IOSSystemContextMenuItemDataLiveText>());
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemLookUp debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemLookUp item = IOSSystemContextMenuItemLookUp(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemSearchWeb debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemSearchWeb item = IOSSystemContextMenuItemSearchWeb(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169696.
+  test('IOSSystemContextMenuItemShare debugFillProperties', () {
+    const String title = 'my title';
+    const IOSSystemContextMenuItemShare item = IOSSystemContextMenuItemShare(title: title);
+    final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
+    expect(diagnosticsNodes, hasLength(1));
+    expect(diagnosticsNodes.first.name, 'title');
+    expect(diagnosticsNodes.first.value, title);
+  });
+
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, isSupported is false',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      buildContext = context;
+                      return TextField(
+                        controller: controller,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(SystemContextMenu.isSupported(buildContext), isFalse);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'when supportsShowingSystemContextMenu is true and the platform is iOS, isSupported is true',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      late BuildContext buildContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      buildContext = context;
+                      return TextField(
+                        controller: controller,
+                        contextMenuBuilder:
+                            (BuildContext context, EditableTextState editableTextState) {
+                              return SystemContextMenu.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(SystemContextMenu.isSupported(buildContext), switch (defaultTargetPlatform) {
+        TargetPlatform.iOS => isTrue,
+        _ => isFalse,
+      });
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+    variant: TargetPlatformVariant.all(),
+  );
+
+  for (final bool readOnly in <bool>[true, false]) {
+    testWidgets(
+      'read only fields do not support the system context menu',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Builder(
+            builder: (BuildContext context) {
+              final MediaQueryData mediaQueryData = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+                child: MaterialApp(
+                  home: Scaffold(body: TextField(readOnly: readOnly)),
+                ),
+              );
+            },
+          ),
+        );
+
+        final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+        expect(SystemContextMenu.isSupportedByField(editableTextState), switch (readOnly) {
+          true => isFalse,
+          false => isTrue,
+        });
+      },
+      skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/170521.
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, SystemContextMenu throws',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(tester.takeException(), isAssertionError);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
 }

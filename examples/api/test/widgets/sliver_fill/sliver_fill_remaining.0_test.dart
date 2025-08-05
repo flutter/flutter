@@ -35,21 +35,14 @@ void main() {
     expect(lowerIcon.color, Colors.blue[900]);
 
     final double total = tester.getSize(find.byType(CustomScrollView)).height;
-    final double upperHeight =
-        tester
-            .getSize(
-              find.descendant(
-                of: find.byType(SliverToBoxAdapter),
-                matching: find.byType(Container),
-              ),
-            )
-            .height;
-    final double lowerHeight =
-        tester
-            .getSize(
-              find.descendant(of: find.byType(SliverFillRemaining), matching: find.byType(Icon)),
-            )
-            .height;
+    final double upperHeight = tester
+        .getSize(
+          find.descendant(of: find.byType(SliverToBoxAdapter), matching: find.byType(Container)),
+        )
+        .height;
+    final double lowerHeight = tester
+        .getSize(find.descendant(of: find.byType(SliverFillRemaining), matching: find.byType(Icon)))
+        .height;
     expect(upperHeight + lowerHeight, equals(total));
   });
 }

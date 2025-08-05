@@ -49,13 +49,13 @@ class Scroll extends CommandWithTarget {
   String get kind => 'scroll';
 
   @override
-  Map<String, String> serialize() =>
-      super.serialize()..addAll(<String, String>{
-        'dx': '$dx',
-        'dy': '$dy',
-        'duration': '${duration.inMicroseconds}',
-        'frequency': '$frequency',
-      });
+  Map<String, String> serialize() => super.serialize()
+    ..addAll(<String, String>{
+      'dx': '$dx',
+      'dy': '$dy',
+      'duration': '${duration.inMicroseconds}',
+      'frequency': '$frequency',
+    });
 }
 
 /// A Flutter Driver command that commands the driver to ensure that the element

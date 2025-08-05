@@ -23,11 +23,10 @@ abstract class WidgetPreviewScaffoldChangeDetector {
     for (final FileSystemEntity entity in Directory(
       widgetPreviewScaffoldTemplateDir.absolute.path,
     ).listSync(recursive: true)) {
-      final String scaffoldPath =
-          entity.path
-              .replaceAll('.tmpl', '')
-              .split('widget_preview_scaffold/')
-              .last;
+      final String scaffoldPath = entity.path
+          .replaceAll('.tmpl', '')
+          .split('widget_preview_scaffold/')
+          .last;
       if (_ignoreDiffSet.contains(scaffoldPath)) {
         continue;
       }

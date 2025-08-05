@@ -195,10 +195,9 @@ class _PathFrames {
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
     final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
-    final ui.Paint paint =
-        ui.Paint()
-          ..style = PaintingStyle.fill
-          ..color = color.withOpacity(color.opacity * opacity);
+    final ui.Paint paint = ui.Paint()
+      ..style = PaintingStyle.fill
+      ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
     for (final _PathCommand command in commands) {
       command.apply(path, progress);

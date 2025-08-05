@@ -11,6 +11,7 @@
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/text_frame.h"
 
@@ -37,11 +38,7 @@ class TextContents final : public Contents {
 
   /// Must be set after text frame.
   void SetTextProperties(Color color,
-                         bool stroke,
-                         Scalar stroke_width,
-                         Cap stroke_cap,
-                         Join stroke_join,
-                         Scalar stroke_miter);
+                         const std::optional<StrokeParameters>& stroke);
 
   Color GetColor() const;
 

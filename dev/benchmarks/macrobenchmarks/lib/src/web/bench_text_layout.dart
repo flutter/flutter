@@ -317,17 +317,15 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs:
-                allPalettes
-                    .map<Widget>((Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
-                    .toList(),
+            tabs: allPalettes
+                .map<Widget>((Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
+                .toList(),
           ),
         ),
         body: TabBarView(
-          children:
-              allPalettes.map<Widget>((Palette colors) {
-                return PaletteTabView(colors: colors);
-              }).toList(),
+          children: allPalettes.map<Widget>((Palette colors) {
+            return PaletteTabView(colors: colors);
+          }).toList(),
         ),
       ),
     );

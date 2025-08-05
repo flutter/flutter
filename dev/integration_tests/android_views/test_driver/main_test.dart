@@ -57,8 +57,9 @@ Future<void> main() async {
         await driver?.tap(addWindow);
         final SerializableFinder tapWindow = find.byValueKey('TapWindow');
         await driver?.tap(tapWindow);
-        final String windowClickCount =
-            (await driver?.getText(find.byValueKey('WindowClickCount')))!;
+        final String windowClickCount = (await driver?.getText(
+          find.byValueKey('WindowClickCount'),
+        ))!;
         expect(windowClickCount, 'Click count: 1');
       },
       timeout: Timeout.none,

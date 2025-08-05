@@ -215,13 +215,12 @@ class BrowserPlatform extends PlatformPlugin {
       p.join(env.environment.webTestsArtifactsDir.path, 'test_images'),
     );
 
-    final List<String> testImageFiles =
-        testImageDirectory
-            .listSync(recursive: true)
-            .whereType<File>()
-            .map<String>((File file) => p.relative(file.path, from: testImageDirectory.path))
-            .where((String path) => supportedImageTypes.containsKey(p.extension(path)))
-            .toList();
+    final List<String> testImageFiles = testImageDirectory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map<String>((File file) => p.relative(file.path, from: testImageDirectory.path))
+        .where((String path) => supportedImageTypes.containsKey(p.extension(path)))
+        .toList();
 
     return shelf.Response.ok(
       json.encode(testImageFiles),
@@ -479,6 +478,7 @@ class BrowserPlatform extends PlatformPlugin {
     return switch (suite.runConfig.variant) {
       CanvasKitVariant.full => 'full',
       CanvasKitVariant.chromium => 'chromium',
+      CanvasKitVariant.experimentalWebParagraph => 'experimentalWebParagraph',
       null => 'auto',
     };
   }
@@ -513,7 +513,8 @@ class BrowserPlatform extends PlatformPlugin {
       final String buildConfigsString = suite.testBundle.compileConfigs
           .map((CompileConfiguration config) => _makeBuildConfigString(scriptBase, config))
           .join(',\n');
-      final String bootstrapScript = '''
+      final String bootstrapScript =
+          '''
 <script>
   // Define this before loading flutter.js to test PR flutter/engine#51294
   if (!window._flutter) {
@@ -535,6 +536,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitVariant: "${getCanvasKitVariant()}",
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
+      wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
     },
   });
 </script>

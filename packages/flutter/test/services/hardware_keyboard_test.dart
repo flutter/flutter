@@ -146,13 +146,12 @@ void main() {
       return false;
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
-    final Map<String, dynamic> rawMessage =
-        kIsWeb
-            ? (KeyEventSimulator.getKeyData(LogicalKeyboardKey.keyA, platform: 'web')
-              ..['metaState'] = RawKeyEventDataWeb.modifierShift)
-            : (KeyEventSimulator.getKeyData(LogicalKeyboardKey.keyA, platform: 'android')
-              ..['metaState'] =
-                  RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
+    final Map<String, dynamic> rawMessage = kIsWeb
+        ? (KeyEventSimulator.getKeyData(LogicalKeyboardKey.keyA, platform: 'web')
+            ..['metaState'] = RawKeyEventDataWeb.modifierShift)
+        : (KeyEventSimulator.getKeyData(LogicalKeyboardKey.keyA, platform: 'android')
+            ..['metaState'] =
+                RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift);
     tester.binding.keyEventManager.handleRawKeyMessage(rawMessage);
     expect(events, hasLength(2));
     expect(events[0].physicalKey, PhysicalKeyboardKey.shiftLeft);

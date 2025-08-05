@@ -14,7 +14,8 @@ import '../framework/utils.dart';
 const String _messagePrefix = 'entrypoint:';
 const String _entrypointName = 'entrypoint';
 
-const String _dartCode = '''
+const String _dartCode =
+    '''
 import 'package:flutter/widgets.dart';
 
 @pragma('vm:entry-point')
@@ -30,7 +31,8 @@ void $_entrypointName() {
 }
 ''';
 
-const String _kotlinCode = '''
+const String _kotlinCode =
+    '''
 package com.example.entrypoint_dart_registrant
 
 import io.flutter.embedding.android.FlutterActivity
@@ -72,8 +74,19 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
             completer.complete(line);
           }
         });
-    final String entrypoint = await completer.future;
+    final StreamSubscription<String> stderrSub = process.stderr
+        .transform<String>(const Utf8Decoder())
+        .transform<String>(const LineSplitter())
+        .listen((String line) async {
+          print(line);
+        });
+    final Object result = await Future.any(<Future<Object>>[completer.future, process.exitCode]);
+    if (result is int) {
+      throw Exception('flutter run failed, exitCode=$result');
+    }
+    final String entrypoint = result as String;
     await stdoutSub.cancel();
+    await stderrSub.cancel();
     process.stdin.write('q');
     await process.stdin.flush();
     process.kill(ProcessSignal.sigint);

@@ -262,8 +262,9 @@ class Drawer extends StatelessWidget {
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
-    final DrawerThemeData defaults =
-        useMaterial3 ? _DrawerDefaultsM3(context) : _DrawerDefaultsM2(context);
+    final DrawerThemeData defaults = useMaterial3
+        ? _DrawerDefaultsM3(context)
+        : _DrawerDefaultsM2(context);
     final ShapeBorder? effectiveShape =
         shape ??
         (isDrawerStart
@@ -283,10 +284,9 @@ class Drawer extends StatelessWidget {
           surfaceTintColor:
               surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior:
-              effectiveShape != null
-                  ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
-                  : Clip.none,
+          clipBehavior: effectiveShape != null
+              ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!)
+              : Clip.none,
           child: child,
         ),
       ),

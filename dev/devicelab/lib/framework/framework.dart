@@ -69,10 +69,9 @@ class _TaskRunner {
     final String successResponse = json.encode(const <String, String>{'result': 'success'});
 
     registerExtension('ext.cocoonRunTask', (String method, Map<String, String> parameters) async {
-      final Duration? taskTimeout =
-          parameters.containsKey('timeoutInMinutes')
-              ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
-              : null;
+      final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
+          ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
+          : null;
       final bool runFlutterConfig =
           parameters['runFlutterConfig'] !=
           'false'; // used by tests to avoid changing the configuration
@@ -192,8 +191,9 @@ class _TaskRunner {
       IOSink? sink;
       try {
         if (device != null && device.canStreamLogs && hostAgent.dumpDirectory != null) {
-          sink =
-              File(path.join(hostAgent.dumpDirectory!.path, '${device.deviceId}.log')).openWrite();
+          sink = File(
+            path.join(hostAgent.dumpDirectory!.path, '${device.deviceId}.log'),
+          ).openWrite();
           await device.startLoggingToSink(sink);
         }
 

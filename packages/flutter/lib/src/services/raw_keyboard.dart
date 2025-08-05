@@ -815,18 +815,17 @@ class RawKeyboard {
   RawKeyEventHandler? get keyEventHandler {
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler != _cachedKeyMessageHandler) {
       _cachedKeyMessageHandler = ServicesBinding.instance.keyEventManager.keyMessageHandler;
-      _cachedKeyEventHandler =
-          _cachedKeyMessageHandler == null
-              ? null
-              : (RawKeyEvent event) {
-                assert(
-                  false,
-                  'The RawKeyboard.instance.keyEventHandler assigned by Flutter is a dummy '
-                  'callback kept for compatibility and should not be directly called. Use '
-                  'ServicesBinding.instance!.keyMessageHandler instead.',
-                );
-                return true;
-              };
+      _cachedKeyEventHandler = _cachedKeyMessageHandler == null
+          ? null
+          : (RawKeyEvent event) {
+              assert(
+                false,
+                'The RawKeyboard.instance.keyEventHandler assigned by Flutter is a dummy '
+                'callback kept for compatibility and should not be directly called. Use '
+                'ServicesBinding.instance!.keyMessageHandler instead.',
+              );
+              return true;
+            };
     }
     return _cachedKeyEventHandler;
   }
@@ -835,15 +834,14 @@ class RawKeyboard {
   KeyMessageHandler? _cachedKeyMessageHandler;
   set keyEventHandler(RawKeyEventHandler? handler) {
     _cachedKeyEventHandler = handler;
-    _cachedKeyMessageHandler =
-        handler == null
-            ? null
-            : (KeyMessage message) {
-              if (message.rawEvent != null) {
-                return handler(message.rawEvent!);
-              }
-              return false;
-            };
+    _cachedKeyMessageHandler = handler == null
+        ? null
+        : (KeyMessage message) {
+            if (message.rawEvent != null) {
+              return handler(message.rawEvent!);
+            }
+            return false;
+          };
     ServicesBinding.instance.keyEventManager.keyMessageHandler = _cachedKeyMessageHandler;
   }
 
@@ -912,14 +910,10 @@ class RawKeyboard {
         const _ModifierSidePair(ModifierKey.altModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.altLeft,
         },
-        const _ModifierSidePair(
-          ModifierKey.shiftModifier,
-          KeyboardSide.left,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
-        const _ModifierSidePair(
-          ModifierKey.shiftModifier,
-          KeyboardSide.right,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftRight},
+        const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.left):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftLeft},
+        const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.right):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.shiftRight},
         const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.shiftLeft,
           PhysicalKeyboardKey.shiftRight,
@@ -927,29 +921,24 @@ class RawKeyboard {
         const _ModifierSidePair(ModifierKey.shiftModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.shiftLeft,
         },
-        const _ModifierSidePair(
-          ModifierKey.controlModifier,
-          KeyboardSide.left,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
-        const _ModifierSidePair(
-          ModifierKey.controlModifier,
-          KeyboardSide.right,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlRight},
+        const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.left):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
+        const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.right):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlRight},
         const _ModifierSidePair(
           ModifierKey.controlModifier,
           KeyboardSide.all,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft, PhysicalKeyboardKey.controlRight},
-        const _ModifierSidePair(
-          ModifierKey.controlModifier,
-          KeyboardSide.any,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
+        ): <PhysicalKeyboardKey>{
+          PhysicalKeyboardKey.controlLeft,
+          PhysicalKeyboardKey.controlRight,
+        },
+        const _ModifierSidePair(ModifierKey.controlModifier, KeyboardSide.any):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.controlLeft},
         const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.left): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.metaLeft,
         },
-        const _ModifierSidePair(
-          ModifierKey.metaModifier,
-          KeyboardSide.right,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaRight},
+        const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.right):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.metaRight},
         const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.all): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.metaLeft,
           PhysicalKeyboardKey.metaRight,
@@ -957,22 +946,14 @@ class RawKeyboard {
         const _ModifierSidePair(ModifierKey.metaModifier, KeyboardSide.any): <PhysicalKeyboardKey>{
           PhysicalKeyboardKey.metaLeft,
         },
-        const _ModifierSidePair(
-          ModifierKey.capsLockModifier,
-          KeyboardSide.all,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.capsLock},
-        const _ModifierSidePair(
-          ModifierKey.numLockModifier,
-          KeyboardSide.all,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock},
-        const _ModifierSidePair(
-          ModifierKey.scrollLockModifier,
-          KeyboardSide.all,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.scrollLock},
-        const _ModifierSidePair(
-          ModifierKey.functionModifier,
-          KeyboardSide.all,
-        ): <PhysicalKeyboardKey>{PhysicalKeyboardKey.fn},
+        const _ModifierSidePair(ModifierKey.capsLockModifier, KeyboardSide.all):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.capsLock},
+        const _ModifierSidePair(ModifierKey.numLockModifier, KeyboardSide.all):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock},
+        const _ModifierSidePair(ModifierKey.scrollLockModifier, KeyboardSide.all):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.scrollLock},
+        const _ModifierSidePair(ModifierKey.functionModifier, KeyboardSide.all):
+            <PhysicalKeyboardKey>{PhysicalKeyboardKey.fn},
         // The symbolModifier doesn't have a key representation on any of the
         // platforms, so don't map it here.
       };
@@ -1045,10 +1026,9 @@ class RawKeyboard {
           continue;
         }
       }
-      final Set<PhysicalKeyboardKey>? mappedKeys =
-          modifiersPressed[key] == null
-              ? <PhysicalKeyboardKey>{}
-              : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
+      final Set<PhysicalKeyboardKey>? mappedKeys = modifiersPressed[key] == null
+          ? <PhysicalKeyboardKey>{}
+          : _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(() {
         if (mappedKeys == null) {
           debugPrint(

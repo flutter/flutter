@@ -1,0 +1,4 @@
+rfc
+(?:^|\n)This file was generated from RFC
+This file was generated from RFC[^\n]*
+Copyright \(C\) The Internet Society [\d\(\)-]+\.  All Rights Reserved. 

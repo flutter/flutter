@@ -485,10 +485,9 @@ class _RawViewElement extends RenderTreeRootElement {
         stack: stack,
         library: 'widgets library',
         context: ErrorDescription('building $this'),
-        informationCollector:
-            !kDebugMode
-                ? null
-                : () => <DiagnosticsNode>[DiagnosticsDebugCreator(DebugCreator(this))],
+        informationCollector: !kDebugMode
+            ? null
+            : () => <DiagnosticsNode>[DiagnosticsDebugCreator(DebugCreator(this))],
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);
@@ -880,7 +879,7 @@ class _MultiChildComponentElement extends Element {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
-      if (_childElement != null) _childElement!.toDiagnosticsNode(),
+      ?_childElement?.toDiagnosticsNode(),
       for (int i = 0; i < _viewElements.length; i++)
         _viewElements[i].toDiagnosticsNode(
           name: 'view ${i + 1}',

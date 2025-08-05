@@ -187,7 +187,7 @@ class _DesktopTextSelectionControlsToolbarState
       clampDouble(
         widget.selectionMidpoint.dx - widget.globalEditableRegion.left,
         mediaQueryPadding.left,
-        MediaQuery.sizeOf(context).width - mediaQueryPadding.right,
+        MediaQuery.widthOf(context) - mediaQueryPadding.right,
       ),
       widget.selectionMidpoint.dy - widget.globalEditableRegion.top,
     );

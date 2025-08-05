@@ -628,6 +628,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertTrue([inputView canPerformAction:@selector(selectAll:) withSender:nil]);
 }
 
+- (void)testCanPerformActionCaptureTextFromCamera {
+  if (@available(iOS 15.0, *)) {
+    NSDictionary* config = self.mutableTemplateCopy;
+    [self setClientId:123 configuration:config];
+    NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+    FlutterTextInputView* inputView = inputFields[0];
+
+    [inputView becomeFirstResponder];
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+
+    [inputView insertText:@"test"];
+    [inputView selectAll:nil];
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+  }
+}
+
 - (void)testDeletingBackward {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -2794,27 +2810,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   // the dummy "activeView" we use should never have access to
   // its textInputDelegate.
   XCTAssertNil(textInputPlugin.activeView.textInputDelegate);
-}
-
-- (void)testAutoFillDoesNotTriggerOnHideButTriggersOnCommit {
-  // Regression test for https://github.com/flutter/flutter/issues/145681.
-  NSMutableDictionary* configuration = self.mutableTemplateCopy;
-  [configuration setValue:@{
-    @"uniqueIdentifier" : @"field1",
-    @"hints" : @[ UITextContentTypePassword ],
-    @"editingValue" : @{@"text" : @""}
-  }
-                   forKey:@"autofill"];
-  [configuration setValue:@[ [configuration copy] ] forKey:@"fields"];
-
-  [self setClientId:123 configuration:configuration];
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
-
-  [self setTextInputHide];
-  // Before the fix in https://github.com/flutter/flutter/pull/160653, it was 0ul.
-  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
-
-  [self commitAutofillContextAndVerify];
 }
 
 #pragma mark - Accessibility - Tests

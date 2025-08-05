@@ -45,7 +45,7 @@ void ClipContents::SetClipOperation(Entity::ClipOperation clip_op) {
 ClipCoverage ClipContents::GetClipCoverage(
     const std::optional<Rect>& current_clip_coverage) const {
   if (!current_clip_coverage.has_value()) {
-    return {.coverage = std::nullopt};
+    return ClipCoverage{.coverage = std::nullopt};
   }
   switch (clip_op_) {
     case Entity::ClipOperation::kDifference:
@@ -57,7 +57,7 @@ ClipCoverage ClipContents::GetClipCoverage(
       };
     case Entity::ClipOperation::kIntersect:
       if (coverage_rect_.IsEmpty() || !current_clip_coverage.has_value()) {
-        return {.coverage = std::nullopt};
+        return ClipCoverage{.coverage = std::nullopt};
       }
       return {
           .is_difference_or_non_square = !is_axis_aligned_rect_,            //

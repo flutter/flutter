@@ -34,7 +34,6 @@ import 'search_view_theme.dart';
 import 'text_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 const int _kOpenViewMilliseconds = 600;
 const Duration _kOpenViewDuration = Duration(milliseconds: _kOpenViewMilliseconds);
@@ -758,10 +757,9 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
           );
 
           final Rect viewRect = _rectTween.evaluate(curvedAnimation!)!;
-          final double topPadding =
-              showFullScreenView
-                  ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
-                  : 0.0;
+          final double topPadding = showFullScreenView
+              ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
+              : 0.0;
 
           viewFadeOnIntervalCurve ??= CurvedAnimation(
             parent: animation,
@@ -1028,10 +1026,9 @@ class _ViewContentState extends State<_ViewContent> {
         dividerTheme.color ??
         viewDefaults.dividerColor!;
     final double? effectiveHeaderHeight = widget.viewHeaderHeight ?? viewTheme.headerHeight;
-    final BoxConstraints? headerConstraints =
-        effectiveHeaderHeight == null
-            ? null
-            : BoxConstraints.tightFor(height: effectiveHeaderHeight);
+    final BoxConstraints? headerConstraints = effectiveHeaderHeight == null
+        ? null
+        : BoxConstraints.tightFor(height: effectiveHeaderHeight);
     final TextStyle? effectiveTextStyle =
         widget.viewHeaderTextStyle ?? viewTheme.headerTextStyle ?? viewDefaults.headerTextStyle;
     final TextStyle? effectiveHintStyle =
@@ -1070,8 +1067,9 @@ class _ViewContentState extends State<_ViewContent> {
             maxHeight: _viewRect.height,
           ),
           child: Padding(
-            padding:
-                widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
+            padding: widget.showFullScreenView
+                ? EdgeInsets.zero
+                : (effectivePadding ?? EdgeInsets.zero),
             child: Material(
               clipBehavior: Clip.antiAlias,
               shape: effectiveShape,
@@ -1100,8 +1098,8 @@ class _ViewContentState extends State<_ViewContent> {
                                 headerConstraints ??
                                 (widget.showFullScreenView
                                     ? BoxConstraints(
-                                      minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
-                                    )
+                                        minHeight: _SearchViewDefaultsM3.fullScreenBarHeight,
+                                      )
                                     : null),
                             padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(
                               effectiveBarPadding,
@@ -1134,26 +1132,24 @@ class _ViewContentState extends State<_ViewContent> {
                           result.isNotEmpty) ...<Widget>[
                         FadeTransition(opacity: viewDividerFadeCurve, child: viewDivider),
                         Flexible(
-                          fit:
-                              (effectiveShrinkWrap && !widget.showFullScreenView)
-                                  ? FlexFit.loose
-                                  : FlexFit.tight,
+                          fit: (effectiveShrinkWrap && !widget.showFullScreenView)
+                              ? FlexFit.loose
+                              : FlexFit.tight,
                           child: FadeTransition(
                             opacity: viewListFadeOnIntervalCurve,
-                            child:
-                                widget.viewBuilder == null
-                                    ? MediaQuery.removePadding(
-                                      context: context,
-                                      removeTop: true,
-                                      child: ListView(
-                                        padding: EdgeInsets.only(
-                                          bottom: MediaQuery.viewInsetsOf(context).bottom,
-                                        ),
-                                        shrinkWrap: effectiveShrinkWrap,
-                                        children: result.toList(),
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      padding: EdgeInsets.only(
+                                        bottom: MediaQuery.viewInsetsOf(context).bottom,
                                       ),
-                                    )
-                                    : widget.viewBuilder!(result),
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
                           ),
                         ),
                       ],
@@ -1377,6 +1373,7 @@ class SearchBar extends StatefulWidget {
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.readOnly = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1536,11 +1533,14 @@ class SearchBar extends StatefulWidget {
   ///    be disabled and Flutter-rendered context menus to appear.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// {@macro flutter.widgets.editableText.readOnly}
+  final bool readOnly;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -1661,15 +1661,14 @@ class _SearchBarState extends State<SearchBar> {
       );
     }
 
-    final List<Widget>? trailing =
-        widget.trailing
-            ?.map(
-              (Widget trailing) => IconTheme.merge(
-                data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
-                child: trailing,
-              ),
-            )
-            .toList();
+    final List<Widget>? trailing = widget.trailing
+        ?.map(
+          (Widget trailing) => IconTheme.merge(
+            data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+            child: trailing,
+          ),
+        )
+        .toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
@@ -1698,13 +1697,14 @@ class _SearchBarState extends State<SearchBar> {
                 child: Row(
                   textDirection: textDirection,
                   children: <Widget>[
-                    if (leading != null) leading,
+                    ?leading,
                     Expanded(
                       child: Padding(
                         padding: effectivePadding,
                         child: Semantics(
                           inputType: SemanticsInputType.search,
                           child: TextField(
+                            readOnly: widget.readOnly,
                             autofocus: widget.autoFocus,
                             onTap: widget.onTap,
                             onTapAlwaysCalled: true,
@@ -1716,10 +1716,10 @@ class _SearchBarState extends State<SearchBar> {
                             style: effectiveTextStyle,
                             enabled: widget.enabled,
                             decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
-                              InputDecorationTheme(
+                              InputDecorationThemeData(
                                 hintStyle: effectiveHintStyle,
                                 // The configuration below is to make sure that the text field
-                                // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                                // in `SearchBar` will not be overridden by the overall `InputDecorationThemeData`
                                 enabledBorder: InputBorder.none,
                                 border: InputBorder.none,
                                 focusedBorder: InputBorder.none,

@@ -52,6 +52,8 @@ namespace flutter {
 
 namespace {
 
+static const std::wstring kWindowClassName = L"FlutterPlatformHandler";
+
 // A scoped wrapper for GlobalAlloc/GlobalFree.
 class ScopedGlobalMemory {
  public:
@@ -241,26 +243,43 @@ PlatformHandler::PlatformHandler(
       return std::make_unique<ScopedClipboard>();
     };
   }
+
+  WNDCLASS window_class = RegisterWindowClass();
+  window_handle_ =
+      CreateWindowEx(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0,
+                     HWND_MESSAGE, nullptr, window_class.hInstance, nullptr);
+
+  if (window_handle_) {
+    SetWindowLongPtr(window_handle_, GWLP_USERDATA,
+                     reinterpret_cast<LONG_PTR>(this));
+  } else {
+    auto error = GetLastError();
+    LPWSTR message = nullptr;
+    size_t size = FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        reinterpret_cast<LPWSTR>(&message), 0, NULL);
+    OutputDebugString(message);
+    LocalFree(message);
+  }
 }
 
-PlatformHandler::~PlatformHandler() = default;
+PlatformHandler::~PlatformHandler() {
+  if (window_handle_) {
+    DestroyWindow(window_handle_);
+    window_handle_ = nullptr;
+  }
+  UnregisterClass(kWindowClassName.c_str(), nullptr);
+}
 
 void PlatformHandler::GetPlainText(
     std::unique_ptr<MethodResult<rapidjson::Document>> result,
     std::string_view key) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
-  if (view == nullptr) {
-    result->Error(kClipboardError,
-                  "Clipboard is not available in Windows headless mode");
-    return;
-  }
-
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(view->GetWindowHandle());
+  int open_result = clipboard->Open(window_handle_);
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
@@ -293,20 +312,11 @@ void PlatformHandler::GetPlainText(
 
 void PlatformHandler::GetHasStrings(
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
-  if (view == nullptr) {
-    result->Error(kClipboardError,
-                  "Clipboard is not available in Windows headless mode");
-    return;
-  }
-
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
   bool hasStrings;
-  int open_result = clipboard->Open(view->GetWindowHandle());
+  int open_result = clipboard->Open(window_handle_);
   if (open_result != kErrorSuccess) {
     // Swallow errors of type ERROR_ACCESS_DENIED. These happen when the app is
     // not in the foreground and GetHasStrings is irrelevant.
@@ -333,19 +343,10 @@ void PlatformHandler::GetHasStrings(
 void PlatformHandler::SetPlainText(
     const std::string& text,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  const FlutterWindowsView* view = engine_->view(kImplicitViewId);
-  if (view == nullptr) {
-    result->Error(kClipboardError,
-                  "Clipboard is not available in Windows headless mode");
-    return;
-  }
-
   std::unique_ptr<ScopedClipboardInterface> clipboard =
       scoped_clipboard_provider_();
 
-  int open_result = clipboard->Open(view->GetWindowHandle());
+  int open_result = clipboard->Open(window_handle_);
   if (open_result != kErrorSuccess) {
     rapidjson::Document error_code;
     error_code.SetInt(open_result);
@@ -367,6 +368,12 @@ void PlatformHandler::SystemSoundPlay(
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
   if (sound_type.compare(kSoundTypeAlert) == 0) {
     MessageBeep(MB_OK);
+    result->Success();
+  } else if (sound_type.compare(kSoundTypeClick) == 0) {
+    // No-op, as there is no system sound for key presses.
+    result->Success();
+  } else if (sound_type.compare(kSoundTypeTick) == 0) {
+    // No-op, as there is no system sound for ticks.
     result->Success();
   } else {
     result->NotImplemented();
@@ -509,6 +516,29 @@ void PlatformHandler::HandleMethodCall(
   } else {
     result->NotImplemented();
   }
+}
+
+WNDCLASS PlatformHandler::RegisterWindowClass() {
+  WNDCLASS window_class{};
+  window_class.hCursor = nullptr;
+  window_class.lpszClassName = kWindowClassName.c_str();
+  window_class.style = 0;
+  window_class.cbClsExtra = 0;
+  window_class.cbWndExtra = 0;
+  window_class.hInstance = GetModuleHandle(nullptr);
+  window_class.hIcon = nullptr;
+  window_class.hbrBackground = 0;
+  window_class.lpszMenuName = nullptr;
+  window_class.lpfnWndProc = WndProc;
+  RegisterClass(&window_class);
+  return window_class;
+}
+
+LRESULT PlatformHandler::WndProc(HWND const window,
+                                 UINT const message,
+                                 WPARAM const wparam,
+                                 LPARAM const lparam) noexcept {
+  return DefWindowProc(window, message, wparam, lparam);
 }
 
 }  // namespace flutter

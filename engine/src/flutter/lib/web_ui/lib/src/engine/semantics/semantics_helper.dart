@@ -43,8 +43,9 @@ String placeholderMessage = 'Enable accessibility';
 ///
 /// See [DesktopSemanticsEnabler], [MobileSemanticsEnabler].
 class SemanticsHelper {
-  SemanticsEnabler _semanticsEnabler =
-      ui_web.browser.isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
+  SemanticsEnabler _semanticsEnabler = ui_web.browser.isDesktop
+      ? DesktopSemanticsEnabler()
+      : MobileSemanticsEnabler();
 
   @visibleForTesting
   set semanticsEnabler(SemanticsEnabler semanticsEnabler) {
@@ -184,8 +185,9 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.
@@ -382,8 +384,9 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement prepareAccessibilityPlaceholder() {
-    final DomElement placeholder =
-        _semanticsPlaceholder = createDomElement('flt-semantics-placeholder');
+    final DomElement placeholder = _semanticsPlaceholder = createDomElement(
+      'flt-semantics-placeholder',
+    );
 
     // Only listen to "click" because other kinds of events are reported via
     // PointerBinding.

@@ -35,7 +35,7 @@ class _DriverInformation {
   _DriverInformation({required ProcessManager processManager}) : _processManager = processManager;
 
   final ProcessManager _processManager;
-  List<List<String>> _sections = <List<String>>[];
+  var _sections = <List<String>>[];
 
   Future<bool> load() async {
     ProcessResult? result;
@@ -54,8 +54,8 @@ class _DriverInformation {
 
     // Break into sections separated by an empty line.
     final List<String> lines = (result.stdout as String).split('\n');
-    final List<List<String>> sections = <List<String>>[<String>[]];
-    for (final String line in lines) {
+    final sections = <List<String>>[<String>[]];
+    for (final line in lines) {
       if (line == '') {
         if (sections.last.isNotEmpty) {
           sections.add(<String>[]);
@@ -89,8 +89,8 @@ class _DriverInformation {
       return null;
     }
 
-    final String prefix = '$name:';
-    for (int i = 0; i < lines.length; i++) {
+    final prefix = '$name:';
+    for (var i = 0; i < lines.length; i++) {
       if (lines[i].startsWith(prefix)) {
         String value = lines[i].substring(prefix.length).trim();
         // Combine multi-line indented values.
@@ -125,26 +125,26 @@ class LinuxDoctorValidator extends DoctorValidator {
   final ProcessManager _processManager;
   final UserMessages _userMessages;
 
-  static const String kClangBinary = 'clang++';
-  static const String kCmakeBinary = 'cmake';
-  static const String kNinjaBinary = 'ninja';
-  static const String kPkgConfigBinary = 'pkg-config';
+  static const kClangBinary = 'clang++';
+  static const kCmakeBinary = 'cmake';
+  static const kNinjaBinary = 'ninja';
+  static const kPkgConfigBinary = 'pkg-config';
 
-  final Map<String, Version> _requiredBinaryVersions = <String, Version>{
+  final _requiredBinaryVersions = <String, Version>{
     kClangBinary: Version(3, 4, 0),
     kCmakeBinary: Version(3, 10, 0),
     kNinjaBinary: Version(1, 8, 0),
     kPkgConfigBinary: Version(0, 29, 0),
   };
 
-  final List<String> _requiredGtkLibraries = <String>['gtk+-3.0', 'glib-2.0', 'gio-2.0'];
+  final _requiredGtkLibraries = <String>['gtk+-3.0', 'glib-2.0', 'gio-2.0'];
 
   @override
   Future<ValidationResult> validateImpl() async {
     ValidationType validationType = ValidationType.success;
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
 
-    final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
+    final installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
       for (final String binary in _requiredBinaryVersions.keys.toList()..sort())
         binary: await _getBinaryVersion(binary),
@@ -233,7 +233,7 @@ class LinuxDoctorValidator extends DoctorValidator {
 
     // Messages for libraries.
     {
-      bool libraryMissing = false;
+      var libraryMissing = false;
       for (final String library in _requiredGtkLibraries) {
         if (!await _libraryIsPresent(library)) {
           libraryMissing = true;
@@ -248,22 +248,21 @@ class LinuxDoctorValidator extends DoctorValidator {
 
     // Messages for drivers.
     {
-      final _DriverInformation driverInfo = _DriverInformation(processManager: _processManager);
+      final driverInfo = _DriverInformation(processManager: _processManager);
       if (!await driverInfo.load()) {
         messages.add(ValidationMessage.hint(_userMessages.eglinfoMissing));
       } else {
-        const String kWaylandPlatform = 'Wayland platform';
-        const String kX11Platform = 'X11 platform';
-        const String kOpenGLCoreProfileRenderer = 'OpenGL core profile renderer';
-        const String kOpenGLCoreProfileShadingLanguageVersion =
+        const kWaylandPlatform = 'Wayland platform';
+        const kX11Platform = 'X11 platform';
+        const kOpenGLCoreProfileRenderer = 'OpenGL core profile renderer';
+        const kOpenGLCoreProfileShadingLanguageVersion =
             'OpenGL core profile shading language version';
-        const String kOpenGLCoreProfileVersion = 'OpenGL core profile version';
-        const String kOpenGLCoreProfileExtensions = 'OpenGL core profile extensions';
-        const String kOpenGLESProfileRenderer = 'OpenGL ES profile renderer';
-        const String kOpenGLESProfileVersion = 'OpenGL ES profile version';
-        const String kOpenGLESProfileShadingLanguageVersion =
-            'OpenGL ES profile shading language version';
-        const String kOpenGLESProfileExtensions = 'OpenGL ES profile extensions';
+        const kOpenGLCoreProfileVersion = 'OpenGL core profile version';
+        const kOpenGLCoreProfileExtensions = 'OpenGL core profile extensions';
+        const kOpenGLESProfileRenderer = 'OpenGL ES profile renderer';
+        const kOpenGLESProfileVersion = 'OpenGL ES profile version';
+        const kOpenGLESProfileShadingLanguageVersion = 'OpenGL ES profile shading language version';
+        const kOpenGLESProfileExtensions = 'OpenGL ES profile extensions';
 
         // Check both Wayland and X11 platforms for value.
         String? getPlatformVariable(String name) {

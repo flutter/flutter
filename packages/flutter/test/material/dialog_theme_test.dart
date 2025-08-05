@@ -40,7 +40,10 @@ MaterialApp _appWithDialog(
     dialogBuilder = DialogTheme(data: dialogTheme, child: dialogBuilder);
   }
 
-  return MaterialApp(theme: theme, home: Material(child: dialogBuilder));
+  return MaterialApp(
+    theme: theme,
+    home: Material(child: dialogBuilder),
+  );
 }
 
 final Key _painterKey = UniqueKey();
@@ -95,6 +98,7 @@ void main() {
     expect(dialogThemeData.barrierColor, null);
     expect(dialogThemeData.insetPadding, null);
     expect(dialogThemeData.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
 
     const DialogTheme dialogTheme = DialogTheme(data: DialogThemeData(), child: SizedBox());
     expect(dialogTheme.backgroundColor, null);
@@ -110,17 +114,17 @@ void main() {
     expect(dialogTheme.barrierColor, null);
     expect(dialogTheme.insetPadding, null);
     expect(dialogTheme.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
   });
 
   testWidgets('Default DialogThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DialogThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -142,11 +146,10 @@ void main() {
       insetPadding: EdgeInsets.all(20.0),
       clipBehavior: Clip.antiAlias,
     ).debugFillProperties(builder);
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode n) => n.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'backgroundColor: ${const Color(0xff123456)}',
       'elevation: 8.0',
@@ -225,8 +228,9 @@ void main() {
     final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
     expect(modalBarrier.color, themeBarrierColor);
 
-    final Finder findPadding =
-        find.ancestor(of: find.byIcon(Icons.cancel), matching: find.byType(Padding)).first;
+    final Finder findPadding = find
+        .ancestor(of: find.byIcon(Icons.cancel), matching: find.byType(Padding))
+        .first;
     final Padding padding = tester.widget<Padding>(findPadding);
     expect(padding.padding, themeActionsPadding);
   });
@@ -331,8 +335,9 @@ void main() {
     final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
     expect(modalBarrier.color, themeBarrierColor);
 
-    final Finder findPadding =
-        find.ancestor(of: find.byIcon(Icons.cancel), matching: find.byType(Padding)).first;
+    final Finder findPadding = find
+        .ancestor(of: find.byIcon(Icons.cancel), matching: find.byType(Padding))
+        .first;
     final Padding padding = tester.widget<Padding>(findPadding);
     expect(padding.padding, themeActionsPadding);
   });
@@ -832,5 +837,32 @@ void main() {
 
     final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('DialogThemeData.constraints is respected if Dialog.constraints is null', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints themeConstraints = BoxConstraints(maxWidth: 500, maxHeight: 500);
+    const DialogThemeData dialogTheme = DialogThemeData(
+      alignment: Alignment.center,
+      constraints: themeConstraints,
+    );
+
+    final Dialog dialog = Dialog(
+      child: SizedBox.expand(child: Container(color: Colors.amber)),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: ThemeData(dialogTheme: dialogTheme)),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the dialog respects the constraints from the theme
+    final Finder dialogFinder = find.byType(Container);
+    final RenderBox renderBox = tester.renderObject(dialogFinder);
+
+    expect(renderBox.constraints.maxWidth, themeConstraints.maxWidth);
+    expect(renderBox.constraints.maxHeight, themeConstraints.maxHeight);
   });
 }

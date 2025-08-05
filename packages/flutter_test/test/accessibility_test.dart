@@ -315,6 +315,80 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('Material2: yellow text on yellow background fails AAA with correct reason', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const MinimumTextContrastGuidelineAAA guideline = MinimumTextContrastGuidelineAAA();
+
+      await tester.pumpWidget(
+        _boilerplate(
+          useMaterial3: false,
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.yellow,
+            child: const Text(
+              'this is a test',
+              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            ),
+          ),
+        ),
+      );
+
+      final Evaluation result = await guideline.evaluate(tester);
+
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'label: "this is a test", textDirection: ltr):\n'
+        'Expected contrast ratio of at least 7.0 but found 1.17 for a font '
+        'size of 14.0.\n'
+        'The computed colors was:\n'
+        'light - ${const Color(0xfffafafa)}, dark - ${const Color(0xffffeb3b)}\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Material3: yellow text on yellow background fails AAA with correct reason', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const MinimumTextContrastGuidelineAAA guideline = MinimumTextContrastGuidelineAAA();
+
+      await tester.pumpWidget(
+        _boilerplate(
+          useMaterial3: true,
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.yellow,
+            child: const Text(
+              'this is a test',
+              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            ),
+          ),
+        ),
+      );
+
+      final Evaluation result = await guideline.evaluate(tester);
+
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'label: "this is a test", textDirection: ltr):\n'
+        'Expected contrast ratio of at least 7.0 but found 1.16 for a font '
+        'size of 14.0.\n'
+        'The computed colors was:\n'
+        'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+      );
+      handle.dispose();
+    });
+
     testWidgets('label without corresponding text is skipped', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
@@ -698,14 +772,18 @@ void main() {
       expect(overlappingLeftResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingBottomResult = await androidTapTargetGuideline.evaluate(tester);
       expect(overlappingBottomResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingRightResult = await androidTapTargetGuideline.evaluate(tester);

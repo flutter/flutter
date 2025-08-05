@@ -24,7 +24,7 @@ void main() {
   });
 
   Future<void> testPlugin({required String template, required Directory tempDir}) async {
-    final String testName = '${template}_test';
+    final testName = '${template}_test';
 
     ProcessResult result = processManager.runSync(<String>[
       flutterBin,

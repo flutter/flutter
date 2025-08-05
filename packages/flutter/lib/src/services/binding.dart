@@ -383,8 +383,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   final ValueNotifier<int?> accessibilityFocus = ValueNotifier<int?>(null);
 
   Future<void> _handleAccessibilityMessage(Object accessibilityMessage) async {
-    final Map<String, dynamic> message =
-        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
+    final Map<String, dynamic> message = (accessibilityMessage as Map<Object?, Object?>)
+        .cast<String, dynamic>();
     final String type = message['type'] as String;
     switch (type) {
       case 'didGainFocus':

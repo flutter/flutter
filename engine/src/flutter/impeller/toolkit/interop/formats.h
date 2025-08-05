@@ -9,13 +9,13 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/txt/src/txt/font_style.h"
 #include "flutter/txt/src/txt/font_weight.h"
 #include "flutter/txt/src/txt/paragraph_style.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
@@ -36,6 +36,14 @@ constexpr std::optional<SkRect> ToSkiaType(const ImpellerRect* rect) {
 
 constexpr SkPoint ToSkiaType(const Point& point) {
   return SkPoint::Make(point.x, point.y);
+}
+
+constexpr SkColor ToSkiaType(const ImpellerColor& color) {
+  return SkColorSetARGB(color.alpha * 255,  //
+                        color.red * 255,    //
+                        color.green * 255,  //
+                        color.blue * 255    //
+  );
 }
 
 constexpr SkVector ToSkiaVector(const Size& point) {
@@ -86,7 +94,7 @@ constexpr flutter::DlColor ToDisplayListType(Color color) {
   );
 }
 
-constexpr SkMatrix ToSkMatrix(const Matrix& matrix) {
+inline SkMatrix ToSkMatrix(const Matrix& matrix) {
   return SkM44::ColMajor(matrix.m).asM33();
 }
 
@@ -429,6 +437,23 @@ constexpr flutter::DlColor ToDisplayListType(ImpellerColor color) {
                           color.blue,                           //
                           ToDisplayListType(color.color_space)  //
   );
+}
+
+constexpr txt::TextDecorationStyle ToTxtType(
+    ImpellerTextDecorationStyle style) {
+  switch (style) {
+    case kImpellerTextDecorationStyleSolid:
+      return txt::TextDecorationStyle::kSolid;
+    case kImpellerTextDecorationStyleDouble:
+      return txt::TextDecorationStyle::kDouble;
+    case kImpellerTextDecorationStyleDotted:
+      return txt::TextDecorationStyle::kDotted;
+    case kImpellerTextDecorationStyleDashed:
+      return txt::TextDecorationStyle::kDashed;
+    case kImpellerTextDecorationStyleWavy:
+      return txt::TextDecorationStyle::kWavy;
+  }
+  return txt::TextDecorationStyle::kSolid;
 }
 
 constexpr txt::FontWeight ToTxtType(ImpellerFontWeight weight) {

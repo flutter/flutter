@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_sampling_options.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/testing.h"
 
@@ -143,7 +144,7 @@ TEST(DisplayListComplexity, DrawPath) {
   line_path_builder.MoveTo(DlPoint(0, 0));
   line_path_builder.LineTo(DlPoint(10, 10));
   line_path_builder.Close();
-  builder_line.DrawPath(DlPath(line_path_builder), DlPaint());
+  builder_line.DrawPath(line_path_builder.TakePath(), DlPaint());
   auto display_list_line = builder_line.Build();
 
   DisplayListBuilder builder_quad;
@@ -151,7 +152,7 @@ TEST(DisplayListComplexity, DrawPath) {
   quad_path_builder.MoveTo(DlPoint(0, 0));
   quad_path_builder.QuadraticCurveTo(DlPoint(10, 10), DlPoint(10, 20));
   quad_path_builder.Close();
-  builder_quad.DrawPath(DlPath(quad_path_builder), DlPaint());
+  builder_quad.DrawPath(quad_path_builder.TakePath(), DlPaint());
   auto display_list_quad = builder_quad.Build();
 
   DisplayListBuilder builder_conic;
@@ -159,7 +160,7 @@ TEST(DisplayListComplexity, DrawPath) {
   conic_path_builder.MoveTo(DlPoint(0, 0));
   conic_path_builder.ConicCurveTo(DlPoint(10, 10), DlPoint(10, 20), 1.5f);
   conic_path_builder.Close();
-  builder_conic.DrawPath(DlPath(conic_path_builder), DlPaint());
+  builder_conic.DrawPath(conic_path_builder.TakePath(), DlPaint());
   auto display_list_conic = builder_conic.Build();
 
   DisplayListBuilder builder_cubic;
@@ -167,7 +168,7 @@ TEST(DisplayListComplexity, DrawPath) {
   cubic_path_builder.MoveTo(DlPoint(0, 0));
   cubic_path_builder.CubicCurveTo(DlPoint(10, 10), DlPoint(10, 20),
                                   DlPoint(20, 20));
-  builder_cubic.DrawPath(DlPath(cubic_path_builder), DlPaint());
+  builder_cubic.DrawPath(cubic_path_builder.TakePath(), DlPaint());
   auto display_list_cubic = builder_cubic.Build();
 
   auto calculators = AccumulatorCalculators();
@@ -185,7 +186,7 @@ TEST(DisplayListComplexity, DrawShadow) {
   line_path_builder.MoveTo(DlPoint(0, 0));
   line_path_builder.LineTo(DlPoint(10, 10));
   line_path_builder.Close();
-  builder_line.DrawShadow(DlPath(line_path_builder), DlColor(SK_ColorRED),
+  builder_line.DrawShadow(line_path_builder.TakePath(), DlColor(SK_ColorRED),
                           10.0f, false, 1.0f);
   auto display_list_line = builder_line.Build();
 
@@ -194,7 +195,7 @@ TEST(DisplayListComplexity, DrawShadow) {
   quad_path_builder.MoveTo(DlPoint(0, 0));
   quad_path_builder.QuadraticCurveTo(DlPoint(10, 10), DlPoint(10, 20));
   quad_path_builder.Close();
-  builder_quad.DrawShadow(DlPath(quad_path_builder), DlColor(SK_ColorRED),
+  builder_quad.DrawShadow(quad_path_builder.TakePath(), DlColor(SK_ColorRED),
                           10.0f, false, 1.0f);
   auto display_list_quad = builder_quad.Build();
 
@@ -203,7 +204,7 @@ TEST(DisplayListComplexity, DrawShadow) {
   conic_path_builder.MoveTo(DlPoint(0, 0));
   conic_path_builder.ConicCurveTo(DlPoint(10, 10), DlPoint(10, 20), 1.5f);
   conic_path_builder.Close();
-  builder_conic.DrawShadow(DlPath(conic_path_builder), DlColor(SK_ColorRED),
+  builder_conic.DrawShadow(conic_path_builder.TakePath(), DlColor(SK_ColorRED),
                            10.0f, false, 1.0f);
   auto display_list_conic = builder_conic.Build();
 
@@ -212,7 +213,7 @@ TEST(DisplayListComplexity, DrawShadow) {
   cubic_path_builder.MoveTo(DlPoint(0, 0));
   cubic_path_builder.CubicCurveTo(DlPoint(10, 10), DlPoint(10, 20),
                                   DlPoint(20, 20));
-  builder_cubic.DrawShadow(DlPath(cubic_path_builder), DlColor(SK_ColorRED),
+  builder_cubic.DrawShadow(cubic_path_builder.TakePath(), DlColor(SK_ColorRED),
                            10.0f, false, 1.0f);
   auto display_list_cubic = builder_cubic.Build();
 

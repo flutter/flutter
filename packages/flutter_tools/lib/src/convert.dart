@@ -46,7 +46,7 @@ const Encoding utf8 = Utf8Codec();
 class Utf8Decoder extends Converter<List<int>, String> {
   const Utf8Decoder({this.reportErrors = true});
 
-  static const cnv.Utf8Decoder _systemDecoder = cnv.Utf8Decoder(allowMalformed: true);
+  static const _systemDecoder = cnv.Utf8Decoder(allowMalformed: true);
 
   final bool reportErrors;
 

@@ -46,7 +46,7 @@ void* TestDartNativeResolver::ResolveFfiCallback(
 }
 
 static std::mutex gIsolateResolversMutex;
-static std::map<Dart_Isolate, std::weak_ptr<TestDartNativeResolver>>
+static std::map<Dart_IsolateGroup, std::weak_ptr<TestDartNativeResolver>>
     gIsolateResolvers;
 
 Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
@@ -56,7 +56,7 @@ Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
   auto name = tonic::StdStringFromDart(dart_name);
 
   std::scoped_lock lock(gIsolateResolversMutex);
-  auto found = gIsolateResolvers.find(Dart_CurrentIsolate());
+  auto found = gIsolateResolvers.find(Dart_CurrentIsolateGroup());
   if (found == gIsolateResolvers.end()) {
     FML_LOG(ERROR) << "Could not resolve native method for :" << name;
     return nullptr;
@@ -80,7 +80,7 @@ static const uint8_t* DartNativeEntrySymbolCallback(
 void* TestDartNativeResolver::FfiNativeResolver(const char* name,
                                                 uintptr_t args_n) {
   std::scoped_lock lock(gIsolateResolversMutex);
-  auto found = gIsolateResolvers.find(Dart_CurrentIsolate());
+  auto found = gIsolateResolvers.find(Dart_CurrentIsolateGroup());
   if (found == gIsolateResolvers.end()) {
     FML_LOG(ERROR) << "Could not resolve native method for :" << name;
     return nullptr;
@@ -109,9 +109,9 @@ void TestDartNativeResolver::SetNativeResolverForIsolate() {
       << "Could not set FFI native resolver in test.";
 
   std::scoped_lock lock(gIsolateResolversMutex);
-  gIsolateResolvers[Dart_CurrentIsolate()] = shared_from_this();
+  gIsolateResolvers[Dart_CurrentIsolateGroup()] = shared_from_this();
 
-  std::vector<Dart_Isolate> isolates_with_dead_resolvers;
+  std::vector<Dart_IsolateGroup> isolates_with_dead_resolvers;
   for (const auto& entry : gIsolateResolvers) {
     if (!entry.second.lock()) {
       isolates_with_dead_resolvers.push_back(entry.first);
