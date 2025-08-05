@@ -87,6 +87,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
   if already_exists:
     print('CIPD package %s tag %s already exists!' % (package_name, git_tag))
 
+  tag_content_hash = False
   if upload and IsLinux() and not already_exists:
     command = [
         'cipd',
@@ -100,6 +101,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
         '-verification-timeout',
         '10m0s',
     ]
+    tag_content_hash = True
   else:
     command = [
         'cipd', 'pkg-build', '-pkg-def', cipd_yaml, '-out',
@@ -108,10 +110,15 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
 
   RunCIPDCommandWithRetries(command, _packaging_dir)
 
+  if tag_content_hash:
+    TagBuildWithContentHash(package_name, content_hash, git_tag, _packaging_dir)
+
+
+def TagBuildWithContentHash(package_name, content_hash, git_tag, _packaging_dir):
   content_tag = 'content_aware_hash:%s' % content_hash
-  already_exists = CheckCIPDPackageExists('flutter/fuchsia', content_tag)
+  already_exists = CheckCIPDPackageExists(package_name, content_tag)
   if already_exists:
-    print('CIPD package flutter/fuchsia tag %s already exists!' % content_tag)
+    print('CIPD package %s tag %s already exists!' % (package_name, content_tag))
     # content hash can match multiple PRs and we cannot tag multiple times.
     return
 
@@ -120,7 +127,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, content_hash, out_dir,
   command = [
       'cipd',
       'set-tag',
-      'flutter/fuchsia',
+      package_name,
       '-tag',
       content_tag,
       '-version',
