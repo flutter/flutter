@@ -63,7 +63,7 @@ typedef PreviewLocalizations = PreviewLocalizationsData Function();
 /// be constant and non-private.
 ///
 /// See also:
-///   - [flutter.dev/to/widget-previews](flutter.dev/to/widget-previews)
+///   - [flutter.dev/to/widget-previews](https://flutter.dev/to/widget-previews)
 ///     for details on getting started with widget previews.
 final class Preview {
   /// Annotation used to mark functions that return widget previews.
