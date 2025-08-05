@@ -388,7 +388,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
-    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy));
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(

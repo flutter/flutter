@@ -312,6 +312,8 @@ class DriveCommand extends RunCommandBase {
             overridePort: stringArg('web-port'),
             overrideTlsCertPath: stringArg('web-tls-cert-path'),
             overrideTlsCertKeyPath: stringArg('web-tls-cert-key-path'),
+            fileSystem: globals.fs,
+            logger: globals.logger
           )
         : null;
     final web = webDevServerConfig != null;

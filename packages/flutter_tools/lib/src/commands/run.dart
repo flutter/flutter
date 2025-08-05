@@ -506,10 +506,11 @@ class RunCommand extends RunCommandBase {
         overrideTlsCertPath: stringArg('web-tls-cert-path'),
         overrideTlsCertKeyPath: stringArg('web-tls-cert-key-path'),
         extraHeaders: extractWebHeaders(),
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
-    } else {
-      return null;
     }
+    return null;
   }
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);

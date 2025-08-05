@@ -5,10 +5,11 @@
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 
-import '../globals.dart' as globals;
+import '../base/logger.dart';
 import '../web/devfs_proxy.dart';
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
+///
 /// The new request will have the same method, headers, body, and context as the
 /// [originalRequest], but its URL will be set to [finalTargetUrl].
 shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
@@ -30,7 +31,7 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
 /// If a proxy request results in a 404 Not Found status from the target, or if an
 /// exception occurs during the proxy attempt, the request is allowed to "fall through"
 /// to the next handler in the Shelf stack.
-shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
+shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy, Logger logger) {
   return (shelf.Handler innerHandler) {
     return (shelf.Request request) async {
       final String requestPath = request.requestedUri.path;
@@ -47,19 +48,15 @@ shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy) {
           try {
             final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
             final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
-            globals.logger.printStatus(
-              '[PROXY] Matched "$requestPath". Requesting "$finalTargetUrl"',
-            );
-            globals.logger.printTrace('[PROXY] Matched with proxy rule: $rule');
+            logger.printStatus('[PROXY] Matched "$requestPath". Requesting "$finalTargetUrl"');
+            logger.printTrace('[PROXY] Matched with proxy rule: $rule');
             if (proxyResponse.statusCode == 404) {
-              globals.printTrace('[PROXY] "$finalTargetUrl" responded with status 404');
+              logger.printTrace('[PROXY] "$finalTargetUrl" responded with status 404');
               return innerHandler(request);
             }
             return proxyResponse;
           } on Exception catch (e) {
-            globals.logger.printError(
-              '[PROXY] Error for $finalTargetUrl: $e. Allowing fall-through.',
-            );
+            logger.printError('[PROXY] Error for $finalTargetUrl: $e. Allowing fall-through.');
 
             return innerHandler(request);
           }

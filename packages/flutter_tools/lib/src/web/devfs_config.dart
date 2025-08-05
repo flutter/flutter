@@ -3,16 +3,40 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart' as fs;
-import '../globals.dart' as globals;
+import '../base/file_system.dart' as fs show File, FileSystem;
+import '../base/logger.dart' show Logger;
+import '../base/os.dart';
 import 'devfs_proxy.dart';
 
 const webDevServerConfigFilePath = 'web_dev_config.yaml';
+const _kLogEntryPrefix = '[WebDevServer]';
+const _kServer = 'server';
+const _kName = 'name';
+const _kValue = 'value';
+const _kHost = 'host';
+const _kPort = 'port';
+const _kHttps = 'https';
+const _kProxy = 'proxy';
+const _kHeaders = 'headers';
+const _kCertKey = 'cert-key';
+const _kCertPath = 'cert-path';
 
+/// Checks if a given [value] has the expected type [T].
+///
+/// Throws a [ToolExit] if the [value] is not null and has the wrong type.
+T _validateType<T>({required Object? value, required String fieldName}) {
+  if (value != null && value is! T) {
+    throwToolExit('$_kLogEntryPrefix $fieldName must be a $T. Found ${value.runtimeType}');
+  }
+  return value as T;
+}
+
+/// Represents the configuration for the web development server as a [WebDevServerConfig].
 @immutable
 class WebDevServerConfig {
   const WebDevServerConfig({
@@ -23,55 +47,55 @@ class WebDevServerConfig {
     this.proxy = const <ProxyRule>[],
   });
 
-  factory WebDevServerConfig.fromYaml(YamlMap yaml) {
+  factory WebDevServerConfig.fromYaml(YamlMap yaml, Logger logger) {
+    _validateType<String>(value: yaml[_kHost], fieldName: _kHost);
+    _validateType<int>(value: yaml[_kPort], fieldName: _kPort);
+    _validateType<YamlMap>(value: yaml[_kHttps], fieldName: _kHttps);
+    _validateType<YamlList>(value: yaml[_kProxy], fieldName: _kProxy);
+    final YamlList? headersList = _validateType<YamlList?>(
+      value: yaml[_kHeaders],
+      fieldName: _kHeaders,
+    );
+
     final headers = <String, String>{};
-    if (yaml['headers'] != null) {
-      if (yaml['headers'] is! YamlList) {
-        throwToolExit(
-          '[WebDevServer] Headers must be a List of maps. Found ${yaml['headers'].runtimeType}',
-        );
-      }
-      final headersList = yaml['headers'] as YamlList;
+    if (headersList != null) {
       for (final Object? item in headersList) {
-        if (item is! YamlMap) {
-          throwToolExit(
-            '[WebDevServer] Each header entry must be a map with "name" and "value" keys. Found ${item.runtimeType}',
-          );
-        }
-        final YamlMap headerMap = item;
-        if (!headerMap.containsKey('name') || !headerMap.containsKey('value')) {
-          throwToolExit('[WebDevServer] Each header entry must contain "name" and "value" keys.');
-        }
-        final Object? name = headerMap['name'];
-        final Object? value = headerMap['value'];
-
-        if (name is! String || value is! String) {
-          throwToolExit(
-            '[WebDevServer] Header "name" and "value" must be strings. Found name: ${name.runtimeType}, value: ${value.runtimeType}',
-          );
-        }
-        headers[name] = value;
-      }
-    }
-    if (yaml['host'] is! String && yaml['host'] != null) {
-      throwToolExit('[WebDevServer] host must be a String. Found ${yaml['host'].runtimeType}');
-    }
-    if (yaml['port'] is! int && yaml['port'] != null) {
-      throwToolExit('[WebDevServer] port must be an int. Found ${yaml['port'].runtimeType}');
-    }
-    if (yaml['https'] is! YamlMap && yaml['https'] != null) {
-      throwToolExit('[WebDevServer] Https must be a Map. Found ${yaml['https'].runtimeType}');
-    }
-
-    final proxyRules = <ProxyRule>[];
-    if (yaml['proxy'] != null) {
-      if (yaml['proxy'] is! YamlList) {
-        throwToolExit('[WebDevServer]Proxy must be a list. Found ${yaml['proxy'].runtimeType}');
-      }
-      final proxyList = yaml['proxy'] as YamlList;
-      for (final dynamic item in proxyList) {
         if (item is YamlMap) {
-          final ProxyRule? rule = ProxyRule.fromYaml(item);
+          final YamlMap headerMap = item;
+          if (!headerMap.containsKey(_kName) || !headerMap.containsKey(_kValue)) {
+            throwToolExit(
+              '$_kLogEntryPrefix Each header entry must contain "$_kName" and "$_kValue" keys.',
+            );
+          }
+
+          final Object? name = headerMap[_kName];
+          if (name is! String) {
+            throwToolExit(
+              '$_kLogEntryPrefix Header "$_kName" must be a non-null String. Found ${name.runtimeType}',
+            );
+          }
+
+          final Object? value = headerMap[_kValue];
+          if (value is! String) {
+            throwToolExit(
+              '$_kLogEntryPrefix Header "$_kValue" must be a non-null String. Found ${value.runtimeType}',
+            );
+          }
+          headers[name] = value;
+        } else {
+          throwToolExit(
+            '$_kLogEntryPrefix Each header entry must be a map. Found ${item.runtimeType}',
+          );
+        }
+      }
+    }
+
+    final YamlList? proxyList = _validateType<YamlList?>(value: yaml[_kProxy], fieldName: _kProxy);
+    final proxyRules = <ProxyRule>[];
+    if (proxyList != null) {
+      for (final Object? item in proxyList) {
+        if (item is YamlMap) {
+          final ProxyRule? rule = ProxyRule.fromYaml(item, logger);
           if (rule != null) {
             proxyRules.add(rule);
           }
@@ -81,13 +105,15 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: yaml['host'] as String? ?? 'any',
-      port: yaml['port'] as int? ?? 0,
-      https: yaml['https'] == null ? null : HttpsConfig.fromYaml(yaml['https'] as YamlMap),
+      host: yaml[_kHost] as String? ?? 'any',
+      port: yaml[_kPort] as int? ?? 0,
+      https: yaml[_kHttps] == null ? null : HttpsConfig.fromYaml(yaml[_kHttps] as YamlMap),
       proxy: proxyRules,
     );
   }
 
+  /// Creates a [WebDevServerConfig] from the [webDevServerConfigFilePath] file
+  /// with optional Command Line overrides
   static Future<WebDevServerConfig> loadFromFile({
     String? overrideHostname,
     String? overridePort,
@@ -95,9 +121,11 @@ class WebDevServerConfig {
     String? overrideTlsCertKeyPath,
     Map<String, String>? extraHeaders,
     List<String>? browserFlags,
+    required fs.FileSystem fileSystem,
+    required Logger logger,
   }) async {
     var fileConfig = const WebDevServerConfig();
-    final fs.File webDevServerConfigFile = globals.fs.file(webDevServerConfigFilePath);
+    final fs.File webDevServerConfigFile = fileSystem.file(webDevServerConfigFilePath);
 
     if (webDevServerConfigFile.existsSync()) {
       try {
@@ -105,21 +133,21 @@ class WebDevServerConfig {
         final YamlDocument yamlDoc = loadYamlDocument(fileContent);
         final YamlNode contents = yamlDoc.contents;
         if (contents is! YamlMap ||
-            !contents.containsKey('server') ||
-            contents['server'] is! YamlMap) {
+            !contents.containsKey(_kServer) ||
+            contents[_kServer] is! YamlMap) {
           throwToolExit(
-            '"[WebDevServer] $webDevServerConfigFilePath" file is missing or malformed.',
+            '$_kLogEntryPrefix $webDevServerConfigFilePath file is missing or malformed.',
           );
         }
 
-        final serverYaml = contents['server'] as YamlMap;
-        fileConfig = WebDevServerConfig.fromYaml(serverYaml);
-        globals.printStatus(
-          '\n [WebDevServer] Loaded configuration from $webDevServerConfigFilePath',
+        final serverYaml = contents[_kServer] as YamlMap;
+        fileConfig = WebDevServerConfig.fromYaml(serverYaml, logger);
+        logger.printStatus(
+          '$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath',
         );
-        globals.printTrace(fileConfig.toString());
+        logger.printTrace(fileConfig.toString());
       } on Exception catch (e) {
-        throwToolExit('[WebDevServer] Error: Failed to parse $webDevServerConfigFilePath: $e');
+        throwToolExit('$_kLogEntryPrefix Error: Failed to parse $webDevServerConfigFilePath: $e');
       }
     }
 
@@ -141,8 +169,7 @@ class WebDevServerConfig {
     );
   }
 
-  /// Creates a new [WebDevServerConfig] by overriding existing properties
-  /// with the provided non-null values.
+  /// Creates a copy of a [WebDevServerConfig] with optional overrides.
   WebDevServerConfig copyWith({
     String? host,
     int? port,
@@ -169,32 +196,26 @@ class WebDevServerConfig {
   String toString() {
     return '''
   WebDevServerConfig:
-  headers: $headers
-  host: $host
-  port: $port
-  https: $https
-  proxy: $proxy''';
+  $_kHeaders: $headers
+  $_kHost: $host
+  $_kPort: $port
+  $_kHttps: $https
+  $_kProxy: $proxy''';
   }
 }
 
+/// Represents the [HttpsConfig] for the web dev server
 @immutable
 class HttpsConfig {
   const HttpsConfig({required this.certPath, required this.certKeyPath});
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
-    if (yaml['cert-path'] is! String && yaml['cert-path'] != null) {
-      throwToolExit(
-        '[WebDevServer] Https cert-path must be a String. Found ${yaml['cert-path'].runtimeType}',
-      );
-    }
-    if (yaml['cert-key-path'] is! String && yaml['cert-key-path'] != null) {
-      throwToolExit(
-        '[WebDevServer] Https cert-key-path must be a String. Found ${yaml['cert-key-path'].runtimeType}',
-      );
-    }
+    _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
+    _validateType<String>(value: yaml[_kCertKey], fieldName: _kCertKey);
+
     return HttpsConfig(
-      certPath: yaml['cert-path'] as String?,
-      certKeyPath: yaml['cert-key-path'] as String?,
+      certPath: yaml[_kCertPath] as String?,
+      certKeyPath: yaml[_kCertKey] as String?,
     );
   }
 
@@ -205,14 +226,15 @@ class HttpsConfig {
   String toString() {
     return '''
     HttpsConfig:
-        certPath: $certPath
-        certKeyPath: $certKeyPath''';
+        $_kCertPath: $certPath
+        $_kCertKey: $certKeyPath''';
   }
 }
 
-Future<int> resolvePort(int? port) async {
+/// Finds a free port or validates the provided port is within the valid range
+Future<int> resolvePort(int? port, OperatingSystemUtils os) async {
   if (port == null) {
-    return globals.os.findFreePort();
+    return os.findFreePort();
   }
   if (port < 0 || port > 65535) {
     throwToolExit('''

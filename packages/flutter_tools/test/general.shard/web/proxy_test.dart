@@ -19,7 +19,7 @@ void main() {
   group('ProxyRule', () {
     test('fromYaml returns null for invalid YAML', () {
       final yaml = YamlMap.wrap(<String, String>{'unknown': 'rule'});
-      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
       expect(rule, isNull);
       expect(logger.errorText, contains('Invalid proxy rule in YAML'));
     });
@@ -29,7 +29,7 @@ void main() {
         'prefix': '/api',
         'target': 'http://localhost:8080',
       });
-      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
       expect(rule, isA<PrefixProxyRule>());
     });
 
@@ -38,7 +38,7 @@ void main() {
         'regex': '/api/(.*)',
         'target': 'http://localhost:8080',
       });
-      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger: logger);
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
       expect(rule, isA<RegexProxyRule>());
     });
   });
@@ -379,7 +379,7 @@ void main() {
         RegexProxyRule(pattern: RegExp(r'^/other_api'), target: 'http://mock-backend.com'),
       ];
 
-      final Middleware middleware = proxyMiddleware(rules);
+      final Middleware middleware = proxyMiddleware(rules, logger);
 
       var innerHandlerCalled = false;
       FutureOr<Response> innerHandler(Request request) {

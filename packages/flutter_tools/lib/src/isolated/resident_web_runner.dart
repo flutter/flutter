@@ -278,7 +278,7 @@ class ResidentWebRunner extends ResidentRunner {
         final WebDevServerConfig originalConfig =
             debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
 
-        final int resolvedPort = await resolvePort(originalConfig.port);
+        final int resolvedPort = await resolvePort(originalConfig.port, globals.os);
 
         final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
         final ExpressionCompiler? expressionCompiler =
