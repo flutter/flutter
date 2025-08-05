@@ -2503,7 +2503,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         iconSize: WidgetStatePropertyAll<double>(iconSize),
                       ).merge(iconButtonTheme.style),
                     ),
-                    child: Semantics(child: decoration.suffixIcon),
+                    child: Semantics(container: true, child: decoration.suffixIcon),
                   ),
                 ),
               ),
