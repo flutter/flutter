@@ -62,6 +62,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required SystemClock systemClock,
     required Analytics analytics,
     bool machine = false,
+    bool? forceDisableWebSocketConnection,
   }) {
     return ResidentWebRunner(
       device,
@@ -78,6 +79,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       terminal: terminal,
       platform: platform,
       outputPreferences: outputPreferences,
+      forceDisableWebSocketConnection: forceDisableWebSocketConnection,
     );
   }
 }
@@ -103,6 +105,7 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
+    bool? forceDisableWebSocketConnection,
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
@@ -111,6 +114,7 @@ class ResidentWebRunner extends ResidentRunner {
        _systemClock = systemClock,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
+       _forceDisableWebSocketConnection = forceDisableWebSocketConnection,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -132,6 +136,7 @@ class ResidentWebRunner extends ResidentRunner {
   final SystemClock _systemClock;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
+  final bool? _forceDisableWebSocketConnection;
 
   @override
   Logger get logger => _logger;
@@ -327,13 +332,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
         // Use Chrome-based connection only if we have a connected ChromiumDevice
         // Otherwise, use DWDS WebSocket connection
-        // Exception: For WebServerDevice in flutter drive context (FLUTTER_WEB_TEST=true),
-        // force disable WebSocket to avoid CI issues where Chrome extension is not available
+        // Can be overridden by forceDisableWebSocketConnection parameter
         final bool useDwdsWebSocketConnection =
+            !(_forceDisableWebSocketConnection ?? false) &&
             !(_chromiumLauncher != null &&
-                nonWebServerConnectedDeviceIds.contains(device!.device!.id)) &&
-            !(device!.device is WebServerDevice &&
-                _platform.environment['FLUTTER_WEB_TEST'] == 'true');
+                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
 
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',

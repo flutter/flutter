@@ -37,5 +37,6 @@ abstract class WebRunnerFactory {
     required SystemClock systemClock,
     required Analytics analytics,
     bool machine = false,
+    bool? forceDisableWebSocketConnection,
   });
 }
