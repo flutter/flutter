@@ -4513,7 +4513,7 @@ void main() {
     },
   );
 
-  testWidgets('DropdownMenu skipTrailingIconTraversal skips trailing icon in focus traversal', (
+  testWidgets('DropdownMenu trailingIconFocusNode is created when not provided', (
     WidgetTester tester,
   ) async {
     final FocusNode textFieldFocusNode = FocusNode();
@@ -4528,7 +4528,6 @@ void main() {
             children: <Widget>[
               DropdownMenu<TestMenu>(
                 dropdownMenuEntries: menuChildren,
-                skipTrailingIconTraversal: true,
                 focusNode: textFieldFocusNode,
               ),
               ElevatedButton(
@@ -4546,10 +4545,13 @@ void main() {
     await tester.pump();
 
     // Ensure the trailing icon does not have focus.
+    // If FocusNode is not created then the TextField will have focus.
     final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
-    expect(Focus.of(iconButton).hasFocus, isFalse);
+    expect(Focus.of(iconButton).hasFocus, isTrue);
 
     // Ensure the TextField has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
     expect(textFieldFocusNode.hasFocus, isTrue);
 
     // Ensure the button has focus.
@@ -4557,7 +4559,6 @@ void main() {
     await tester.pump();
     expect(buttonFocusNode.hasFocus, isTrue);
   });
-
   testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
     const double cursorHeight = 4.0;
     await tester.pumpWidget(

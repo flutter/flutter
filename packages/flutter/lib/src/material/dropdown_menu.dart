@@ -167,7 +167,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.showTrailingIcon = true,
-    this.skipTrailingIconTraversal = false,
+    this.trailingIconFocusNode,
     this.label,
     this.hintText,
     this.helperText,
@@ -249,10 +249,10 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true.
   final bool showTrailingIcon;
 
-  /// Specifies if the [DropdownMenu] should skip the trailing icon traversal when navigating with the keyboard.
+  /// Specifies the [FocusNode] for the trailing icon.
   ///
-  /// Defaults to false.
-  final bool skipTrailingIconTraversal;
+  /// Defaults to null.
+  final FocusNode? trailingIconFocusNode;
 
   /// Optional widget that describes the input field.
   ///
@@ -616,7 +616,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
-    _trailingIconButtonFocusNode = FocusNode(skipTraversal: widget.skipTrailingIconTraversal);
+    _trailingIconButtonFocusNode = widget.trailingIconFocusNode ?? FocusNode();
   }
 
   @override
@@ -685,10 +685,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
         _selectedEntryIndex = index;
       }
-    }
-
-    if (oldWidget.skipTrailingIconTraversal != widget.skipTrailingIconTraversal) {
-      _trailingIconButtonFocusNode.skipTraversal = widget.skipTrailingIconTraversal;
     }
   }
 
