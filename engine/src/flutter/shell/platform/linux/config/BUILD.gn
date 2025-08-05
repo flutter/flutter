@@ -5,38 +5,32 @@
 import("//build/config/linux/pkg_config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 
-if (!is_minimal_linux) {
-  pkg_config("x11") {
-    packages = [ "x11" ]
-  }
-} else {
-  config("x11") {
-  }
-}
+_pkg_configs = [
+  {
+    name = "x11"
+    package = "x11"
+  },
+  {
+    name = "gtk"
+    package = "gtk+-3.0"
+  },
+  {
+    name = "egl"
+    package = "egl"
+  },
+  {
+    name = "epoxy"
+    package = "epoxy"
+  },
+]
 
-if (!is_minimal_linux) {
-  pkg_config("gtk") {
-    packages = [ "gtk+-3.0" ]
-  }
-} else {
-  config("gtk") {
-  }
-}
-
-if (!is_minimal_linux) {
-  pkg_config("egl") {
-    packages = [ "egl" ]
-  }
-} else {
-  config("egl") {
-  }
-}
-
-if (!is_minimal_linux) {
-  pkg_config("epoxy") {
-    packages = [ "epoxy" ]
-  }
-} else {
-  config("epoxy") {
+foreach(pkg, _pkg_configs) {
+  if (!is_minimal_linux) {
+    pkg_config(pkg.name) {
+      packages = [ pkg.package ]
+    }
+  } else {
+    config(pkg.name) {
+    }
   }
 }
