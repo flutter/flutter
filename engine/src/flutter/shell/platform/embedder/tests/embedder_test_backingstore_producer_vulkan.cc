@@ -36,7 +36,7 @@ bool EmbedderTestBackingStoreProducerVulkan::Create(
     test_vulkan_context_ = fml::MakeRefCounted<TestVulkanContext>();
   }
 
-  auto surface_size = SkISize::Make(config->size.width, config->size.height);
+  auto surface_size = DlISize(config->size.width, config->size.height);
   auto optional_image = test_vulkan_context_->CreateImage(surface_size);
   if (!optional_image.has_value()) {
     FML_LOG(ERROR) << "Could not create Vulkan image.";
@@ -57,7 +57,7 @@ bool EmbedderTestBackingStoreProducerVulkan::Create(
       .fLevelCount = 1,
   };
   auto backend_texture = GrBackendTextures::MakeVk(
-      surface_size.width(), surface_size.height(), image_info);
+      surface_size.width, surface_size.height, image_info);
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 

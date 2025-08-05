@@ -55,7 +55,7 @@ void main() {
   });
 
   group('shouldSkipThirdPartyGenerator', () {
-    testWithoutContext('does not skip pub get the parameter is false', () async {
+    testUsingContext('does not skip pub get the parameter is false', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
@@ -74,7 +74,9 @@ void main() {
 
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('pubspec.lock').createSync();
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -107,7 +109,7 @@ void main() {
       expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
     });
 
-    testWithoutContext(
+    testUsingContext(
       'does not skip pub get if package_config.json has "generator": "pub"',
       () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -140,7 +142,9 @@ void main() {
   }
   ''');
         fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-        fileSystem.file('version').writeAsStringSync('b');
+        fileSystem.file('bin/cache/flutter.version.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
         final pub = Pub.test(
           fileSystem: fileSystem,
@@ -162,7 +166,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'does not skip pub get if package_config.json has "generator": "pub"',
       () async {
         final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -195,7 +199,9 @@ void main() {
   }
   ''');
         fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-        fileSystem.file('version').writeAsStringSync('b');
+        fileSystem.file('bin/cache/flutter.version.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
         final pub = Pub.test(
           fileSystem: fileSystem,
@@ -217,12 +223,15 @@ void main() {
       },
     );
 
-    testWithoutContext('skips pub get if the package config "generator" is '
+    testUsingContext('skips pub get if the package config "generator" is '
         'different than "pub"', () async {
       final processManager = FakeProcessManager.empty();
       final logger = BufferLogger.test();
       final fileSystem = MemoryFileSystem.test();
 
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('a'));
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('pubspec.lock').createSync();
       fileSystem.file('.dart_tool/package_config.json')
@@ -248,7 +257,7 @@ void main() {
     });
   });
 
-  testWithoutContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
+  testUsingContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
       'and the current framework version is the same as the last version', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
@@ -258,7 +267,9 @@ void main() {
     fileSystem.file('pubspec.lock').createSync();
     fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-    fileSystem.file('version').writeAsStringSync('a');
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
     final pub = Pub.test(
       fileSystem: fileSystem,
@@ -278,7 +289,7 @@ void main() {
     expect(logger.traceText, contains('Skipping pub get: version match.'));
   });
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version is not the same as the last version',
     () async {
@@ -302,7 +313,9 @@ void main() {
       fileSystem.file('pubspec.lock').createSync();
       fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
       fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
         fileSystem: fileSystem,
@@ -324,7 +337,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version does not exist yet',
     () async {
@@ -347,7 +360,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('pubspec.lock').createSync();
       fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
         fileSystem: fileSystem,
@@ -369,7 +384,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config does not exist',
     () async {
       final fileSystem = MemoryFileSystem.test();
@@ -393,7 +408,9 @@ void main() {
 
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('pubspec.lock').createSync();
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
         fileSystem: fileSystem,
@@ -415,7 +432,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the pubspec.lock does not exist',
     () async {
       final fileSystem = MemoryFileSystem.test();
@@ -435,7 +452,9 @@ void main() {
       final logger = BufferLogger.test();
 
       fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
       fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
       fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
@@ -459,7 +478,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config is older that the pubspec',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -483,7 +502,9 @@ void main() {
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..setLastModifiedSync(DateTime(1991));
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
 
       final pub = Pub.test(
         fileSystem: fileSystem,
@@ -505,7 +526,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'checkUpToDate does not skip pub get if the pubspec.lock is older that the pubspec',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -529,7 +550,9 @@ void main() {
         ..createSync()
         ..setLastModifiedSync(DateTime(1991));
       fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      fileSystem.file('version').writeAsStringSync('b');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('b'));
       fileSystem.file('.dart_tool/version').writeAsStringSync('b');
 
       final pub = Pub.test(
@@ -552,7 +575,7 @@ void main() {
     },
   );
 
-  testWithoutContext('pub get 66 shows message from pub', () async {
+  testUsingContext('pub get 66 shows message from pub', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -614,63 +637,60 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext(
-    'pub get with failing exit code even with OutputMode == failuresOnly',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
+  testUsingContext('pub get with failing exit code even with OutputMode == failuresOnly', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
 
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
-            'get',
-            '--example',
-          ],
-          exitCode: 1,
-          stderr: '===pub get failed stderr here===',
-          stdout: 'out1\nout2\nout3\n',
-          environment: <String, String>{
-            'FLUTTER_ROOT': '',
-            'PUB_ENVIRONMENT': 'flutter_cli:update_packages',
-          },
-        ),
-      ]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          'bin/cache/dart-sdk/bin/dart',
+          'pub',
+          '--suppress-analytics',
+          '--directory',
+          '.',
+          'get',
+          '--example',
+        ],
+        exitCode: 1,
+        stderr: '===pub get failed stderr here===',
+        stdout: 'out1\nout2\nout3\n',
+        environment: <String, String>{
+          'FLUTTER_ROOT': '',
+          'PUB_ENVIRONMENT': 'flutter_cli:update_packages',
+        },
+      ),
+    ]);
 
-      // Intentionally not using pub.test to simulate a real environment, but
-      // we are using non-inherited I/O to avoid printing to the console.
-      final pub = Pub(
-        platform: FakePlatform(),
-        fileSystem: fileSystem,
-        logger: logger,
-        botDetector: const FakeBotDetector(false),
-        processManager: processManager,
-      );
+    // Intentionally not using pub.test to simulate a real environment, but
+    // we are using non-inherited I/O to avoid printing to the console.
+    final pub = Pub(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      botDetector: const FakeBotDetector(false),
+      processManager: processManager,
+    );
 
-      await expectLater(
-        () => pub.get(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          context: PubContext.updatePackages,
-          outputMode: PubOutputMode.failuresOnly,
-        ),
-        throwsToolExit(message: 'Failed to update packages'),
-      );
-      expect(logger.statusText, isEmpty);
-      expect(logger.errorText, contains('===pub get failed stderr here==='));
-      expect(
-        logger.warningText,
-        contains('git remote set-url upstream'),
-        reason: 'When update-packages fails, it is often because of missing an upstream remote.',
-      );
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    await expectLater(
+      () => pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.updatePackages,
+        outputMode: PubOutputMode.failuresOnly,
+      ),
+      throwsToolExit(message: 'Failed to update packages'),
+    );
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, contains('===pub get failed stderr here==='));
+    expect(
+      logger.warningText,
+      contains('git remote set-url upstream'),
+      reason: 'When update-packages fails, it is often because of missing an upstream remote.',
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testWithoutContext('pub get shows working directory on process exception', () async {
+  testUsingContext('pub get shows working directory on process exception', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -735,10 +755,12 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub get does not inherit logger.verbose', () async {
+  testUsingContext('pub get does not inherit logger.verbose', () async {
     final logger = BufferLogger.test(verbose: true);
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.currentDirectory.childFile('version').createSync();
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -777,7 +799,7 @@ exit code: 66
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/116627
-  testWithoutContext('pub get suppresses progress output', () async {
+  testUsingContext('pub get suppresses progress output', () async {
     final logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
 
@@ -825,7 +847,7 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub cache in flutter root is ignored', () async {
+  testUsingContext('pub cache in flutter root is ignored', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -872,12 +894,14 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Preloaded packages are added to the pub cache', () async {
+  testUsingContext('Preloaded packages are added to the pub cache', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory preloadCache = fileSystem.currentDirectory.childDirectory('.pub-preload-cache');
     preloadCache.childFile('a.tar.gz').createSync(recursive: true);
     preloadCache.childFile('b.tar.gz').createSync();
-    fileSystem.currentDirectory.childFile('version').createSync();
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
@@ -930,7 +954,7 @@ exit code: 66
     expect(preloadCache.existsSync(), false);
   });
 
-  testWithoutContext('pub cache in environment is used', () async {
+  testUsingContext('pub cache in environment is used', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -995,7 +1019,9 @@ exit code: 66
     );
 
     final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
-    fileSystem.file('version').createSync();
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
     pkg.childFile('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -1021,7 +1047,7 @@ exit code: 66
     );
   });
 
-  testWithoutContext('Pub error handling', () async {
+  testUsingContext('Pub error handling', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1085,7 +1111,9 @@ exit code: 66
       stdio: FakeStdio(),
     );
 
-    fileSystem.file('version').createSync();
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
     // the good scenario: package_config.json is old, pub updates the file.
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
@@ -1120,5 +1148,22 @@ exit code: 66
       DateTime(2001),
     ); // because nothing should touch it
     logger.clear();
+  });
+}
+
+String _generateFlutterVersionJson(String version) {
+  return jsonEncode({
+    'frameworkVersion': version,
+    'channel': 'master',
+    'repositoryUrl': 'unknown source',
+    'frameworkRevision': '0e7da1d0191dabd0e819ff64cbb708bca56ae938',
+    'frameworkCommitDate': '2025-07-25 13:20:34 -0700',
+    'engineRevision': '0abc2ec29249a3aae12c9742f34096bedb4d4c4c',
+    'engineCommitDate': '2025-07-25 18:44:22.000Z',
+    'engineContentHash': 'd0d01ffd55842d4f32fecb58cdd98dd283606c5c',
+    'engineBuildDate': '2025-07-25 11:58:20.993',
+    'dartSdkVersion': '3.10.0 (build 3.10.0-28.0.dev)',
+    'devToolsVersion': '2.48.0',
+    'flutterVersion': version,
   });
 }
