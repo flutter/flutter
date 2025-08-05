@@ -1376,8 +1376,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
       widget.currentController.value = 1.0;
-      // A null floatingActionButtonScale implies a scale of 1.0. This can happen
-      // when animations are disabled or before they have started.
+      // With FloatingActionButtonAnimator.noAnimation, floatingActionButtonScale is null.
+      // Default to a scale of 1.0 to ensure the button remains visible.
       _updateGeometryScale(1.0);
     } else {
       // If we start without a child we update the geometry object with a
