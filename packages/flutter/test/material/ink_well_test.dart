@@ -36,7 +36,7 @@ void main() {
               onLongPress: () {
                 log.add('long-press');
               },
-              onLongPress: () {
+              onLongPressUp: () {
                 log.add('long-press-up');
               },
               onTapDown: (TapDownDetails details) {
