@@ -5598,17 +5598,15 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SelectableText respects MediaQuery.typographySettings.paragraphSpacing', (WidgetTester tester) async {
+  testWidgets('SelectableText respects MediaQuery.typographySettings.paragraphSpacing', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: const MediaQueryData(
-            typographySettings: TypographySettings(
-              paragraphSpacing: 2.0,
-            ),
-          ),
-          child: const SelectableText('hello world'),
+          data: MediaQueryData(typographySettings: TypographySettings(paragraphSpacing: 2.0)),
+          child: SelectableText('hello world'),
         ),
       ),
     );
