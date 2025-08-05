@@ -138,13 +138,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     );
     return SliverPadding(
       padding: padding,
-      sliver: SliverGrid(
+      sliver: SliverGrid.builder(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        itemCount: widget.recipes!.length,
+        itemBuilder: (BuildContext context, int index) {
           final Recipe? recipe = widget.recipes![index];
           return RecipeCard(
             recipe: recipe,
@@ -152,7 +153,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               showRecipePage(context, recipe);
             },
           );
-        }, childCount: widget.recipes!.length),
+        },
       ),
     );
   }
