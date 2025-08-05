@@ -613,7 +613,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? _selectedEntryIndex;
   late final void Function() _clearSelectedEntryIndex;
 
-  late final FocusNode _trailingIconButtonFocusNode;
+  FocusNode? _localTrailingIconButtonFocusNode;
+  FocusNode get _trailingIconButtonFocusNode =>
+      widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -635,7 +637,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _selectedEntryIndex = index;
     }
     refreshLeadingPadding();
-    _trailingIconButtonFocusNode = widget.trailingIconFocusNode ?? FocusNode();
   }
 
   @override
@@ -644,7 +645,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
-    _trailingIconButtonFocusNode.dispose();
+    _localTrailingIconButtonFocusNode?.dispose();
+    _localTrailingIconButtonFocusNode = null;
     super.dispose();
   }
 

@@ -4113,7 +4113,7 @@ void main() {
     );
 
     // Adding FocusNode to IconButton causes the IconButton to receive focus.
-    // Thus the it does not matter if the TextField has a FocusNode or not.
+    // Thus it does not matter if the TextField has a FocusNode or not.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
@@ -4154,7 +4154,7 @@ void main() {
       );
 
       // Adding FocusNode to IconButton causes the IconButton to receive focus.
-      // Thus the it does not matter if the TextField has a FocusNode or not.
+      // Thus it does not matter if the TextField has a FocusNode or not.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
 
@@ -4559,6 +4559,55 @@ void main() {
     await tester.pump();
     expect(buttonFocusNode.hasFocus, isTrue);
   });
+
+  testWidgets('DropdownMenu trailingIconFocusNode is used when provided', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode textFieldFocusNode = FocusNode();
+    final FocusNode trailingIconFocusNode = FocusNode();
+    final FocusNode buttonFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    addTearDown(trailingIconFocusNode.dispose);
+    addTearDown(buttonFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                focusNode: textFieldFocusNode,
+                trailingIconFocusNode: trailingIconFocusNode,
+              ),
+              ElevatedButton(
+                focusNode: buttonFocusNode,
+                onPressed: () {},
+                child: const Text('Button'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    primaryFocus!.nextFocus();
+    await tester.pump();
+
+    // Ensure the trailing icon has focus.
+    expect(trailingIconFocusNode.hasFocus, isTrue);
+
+    // Ensure the TextField has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(textFieldFocusNode.hasFocus, isTrue);
+
+    // Ensure the button has focus.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(buttonFocusNode.hasFocus, isTrue);
+  });
+
   testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
     const double cursorHeight = 4.0;
     await tester.pumpWidget(
