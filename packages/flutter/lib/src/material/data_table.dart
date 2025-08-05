@@ -484,6 +484,7 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
+          this.sortIconWidget,
   }) : assert(columns.isNotEmpty),
        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
@@ -537,6 +538,11 @@ class DataTable extends StatelessWidget {
   ///
   /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
+
+  /// The widget to use as the sort icon.
+  ///
+  /// If null, a default arrow icon will be used.
+  final Widget? sortIconWidget;
 
   /// Invoked when the user selects or unselects every row, using the
   /// checkbox in the heading row.
@@ -876,6 +882,7 @@ class DataTable extends StatelessWidget {
     required MaterialStateProperty<Color?>? overlayColor,
     required MouseCursor? mouseCursor,
     required MainAxisAlignment headingRowAlignment,
+    required Widget? sortIconWidget,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -893,6 +900,7 @@ class DataTable extends StatelessWidget {
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
+              icon: sortIconWidget,
             ),
             const SizedBox(width: _sortArrowPadding),
           ],
@@ -1201,6 +1209,7 @@ class DataTable extends StatelessWidget {
             column.headingRowAlignment ??
             dataTableTheme.headingRowAlignment ??
             MainAxisAlignment.start,
+            sortIconWidget: sortIconWidget,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -1318,13 +1327,15 @@ class TableRowInkWell extends InkResponse {
 }
 
 class _SortArrow extends StatefulWidget {
-  const _SortArrow({required this.visible, required this.up, required this.duration});
+  const _SortArrow({required this.visible, required this.up, required this.duration, required this.icon});
 
   final bool visible;
 
   final bool? up;
 
   final Duration duration;
+
+  final Widget? icon;
 
   @override
   _SortArrowState createState() => _SortArrowState();
@@ -1424,7 +1435,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
           ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
-        child: const Icon(Icons.arrow_upward, size: _arrowIconSize),
+        child: widget.icon ?? const Icon(Icons.arrow_upward, size: _arrowIconSize),
       ),
     );
   }
