@@ -219,7 +219,7 @@ class ReorderableListView extends StatefulWidget {
   ReorderableListView.separated({
     super.key,
     required IndexedWidgetBuilder itemBuilder,
-    required this.separatorBuilder,
+    required IndexedWidgetBuilder separatorBuilder,
     required this.itemCount,
     required this.onReorder,
     this.onReorderStart,
@@ -246,9 +246,6 @@ class ReorderableListView extends StatefulWidget {
     this.mouseCursor,
   }) : assert(itemCount >= 0),
        itemBuilder = ((BuildContext context, int index) {
-         if (separatorBuilder == null) {
-           return itemBuilder(context, index);
-         }
          final int itemIndex = index ~/ 2;
          if (index.isEven) {
            return itemBuilder(context, itemIndex);
@@ -258,7 +255,8 @@ class ReorderableListView extends StatefulWidget {
        }),
        itemExtent = null,
        itemExtentBuilder = null,
-       prototypeItem = null;
+       prototypeItem = null,
+       this.separatorBuilder = separatorBuilder;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -410,14 +408,19 @@ class ReorderableListView extends StatefulWidget {
 class _ReorderableListViewState extends State<ReorderableListView> {
   final ValueNotifier<bool> _dragging = ValueNotifier<bool>(false);
 
+  bool get _hasSeparators => widget.separatorBuilder != null;
+
+  int _itemIndexFor(int innerIndex) => _hasSeparators ? innerIndex ~/ 2 : innerIndex;
+
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
     assert(() {
       if (item.key == null) {
-        // Separators built by widget.itemBuilder (when widget.separatorBuilder is non-null and index is odd)
-        // might not have keys or might have non-GlobalKeys.
-        // This assertion should only apply to actual reorderable items.
-        if (widget.separatorBuilder == null || index.isEven) {
+        // Separators built by `widget.itemBuilder` (when
+        // `widget.separatorBuilder` is non-null and index is odd) might not
+        // have keys or might have non-GlobalKeys. This assertion should only
+        // apply to actual reorderable items.
+        if (!_hasSeparators || index.isEven) {
           throw FlutterError('Every item of ReorderableListView must have a key.');
         }
       }
@@ -426,7 +429,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
     // If using .separated, separators are at odd indices.
     // We only want drag handles and specific keys for actual items (even indices).
-    final bool isSeparator = widget.separatorBuilder != null && index.isOdd;
+    final bool isSeparator = _hasSeparators && index.isOdd;
 
     if (isSeparator) {
       // Separators should not have the _ReorderableListViewChildGlobalKey
@@ -434,15 +437,15 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       // However, the underlying SliverReorderableList expects all children to have keys.
       // If the separator widget (item) doesn't have a key, we provide one.
       if (item.key == null) {
-        return KeyedSubtree(key: ValueKey<String>('__separator_$index'), child: item);
+        return KeyedSubtree(key: _SeparatorKey(index), child: item);
       }
-      // Separator already has a key.
+      // The separator already has a key.
       return item;
     }
 
-    // This is an actual item (or we are not using .separated)
-    // For .separated constructor, items are at even indices (0, 2, 4, ...)
-    // For non-separated constructors, all indices are items
+    // This is an actual item (or we are not using .separated).
+    // For .separated constructor, items are at even indices (0, 2, 4, ...).
+    // For non-separated constructors, all indices are items.
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
     if (widget.buildDefaultDragHandles) {
@@ -587,12 +590,14 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: (int oldIndex, int newIndex) {
-              if (widget.separatorBuilder != null) {
+              if (_hasSeparators) {
                 // oldIndex will be an even index (item) because separators are not draggable.
-                final int oldItemIndex = oldIndex ~/ 2;
+                final int oldItemIndex = _itemIndexFor(oldIndex);
                 // newIndex is the slot where it's dropped.
                 // The target item slot index determines the new index in the user's item list.
-                final int targetItemSlotIndex = (newIndex + 1) ~/ 2;
+                // The +1 is needed because drop positions are "between" items, not "on" items.
+                // Example: If you drop between item 1 and item 2, we want to insert at position 2.
+                final int targetItemSlotIndex = _itemIndexFor(newIndex + 1);
                 widget.onReorder(oldItemIndex, targetItemSlotIndex);
               } else {
                 widget.onReorder(oldIndex, newIndex);
@@ -600,20 +605,20 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             },
             onReorderStart: (int index) {
               _dragging.value = true;
-              if (widget.separatorBuilder != null) {
+              if (_hasSeparators) {
                 // Should only be called for items (even indices).
                 // SliverReorderableList ensures this by only allowing draggable items.
                 assert(index.isEven, 'onReorderStart should only be called for items.');
-                widget.onReorderStart?.call(index ~/ 2);
+                widget.onReorderStart?.call(_itemIndexFor(index));
               } else {
                 widget.onReorderStart?.call(index);
               }
             },
             onReorderEnd: (int index) {
               _dragging.value = false;
-              if (widget.separatorBuilder != null) {
+              if (_hasSeparators) {
                 // index is the final index of the dragged item. It must be an item.
-                widget.onReorderEnd?.call(index ~/ 2);
+                widget.onReorderEnd?.call(_itemIndexFor(index));
               } else {
                 widget.onReorderEnd?.call(index);
               }
@@ -628,6 +633,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       ],
     );
   }
+}
+
+class _SeparatorKey extends ValueKey<int> {
+  const _SeparatorKey(super.value);
 }
 
 // A global key that takes its identity from the object and uses a value of a
