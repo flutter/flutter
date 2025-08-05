@@ -204,6 +204,7 @@ class Material extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.animationDuration = kThemeChangeDuration,
     this.child,
+    this.animateColor = false,
   }) : assert(elevation >= 0.0),
        assert(!(shape != null && borderRadius != null)),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null)));
@@ -217,6 +218,9 @@ class Material extends StatefulWidget {
   /// affects the shape of the widget, the roundness of its corners if
   /// the shape is rectangular, and the default color.
   final MaterialType type;
+
+  /// Whether the color should be animated.
+  final bool animateColor;
 
   /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material relative to its parent.
@@ -491,10 +495,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       ),
     );
 
-    ShapeBorder? shape =
-        widget.borderRadius != null
-            ? RoundedRectangleBorder(borderRadius: widget.borderRadius!)
-            : widget.shape;
+    ShapeBorder? shape = widget.borderRadius != null
+        ? RoundedRectangleBorder(borderRadius: widget.borderRadius!)
+        : widget.shape;
 
     // PhysicalModel has a temporary workaround for a performance issue that
     // speeds up rectangular non transparent material (the workaround is to
@@ -506,14 +509,13 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // we choose not to as we want the change from the fast-path to the
     // slow-path to be noticeable in the construction site of Material.
     if (widget.type == MaterialType.canvas && shape == null) {
-      final Color color =
-          theme.useMaterial3
-              ? ElevationOverlay.applySurfaceTint(
-                backgroundColor!,
-                widget.surfaceTintColor,
-                widget.elevation,
-              )
-              : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
+      final Color color = theme.useMaterial3
+          ? ElevationOverlay.applySurfaceTint(
+              backgroundColor!,
+              widget.surfaceTintColor,
+              widget.elevation,
+            )
+          : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
 
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
@@ -522,7 +524,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         elevation: widget.elevation,
         color: color,
         shadowColor: modelShadowColor,
-        animateColor: false,
+        animateColor: widget.animateColor,
         child: contents,
       );
     }
@@ -892,15 +894,14 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
               (dynamic value) => ColorTween(begin: value as Color),
             )
             as ColorTween?;
-    _surfaceTintColor =
-        widget.surfaceTintColor != null
-            ? visitor(
-                  _surfaceTintColor,
-                  widget.surfaceTintColor,
-                  (dynamic value) => ColorTween(begin: value as Color),
-                )
-                as ColorTween?
-            : null;
+    _surfaceTintColor = widget.surfaceTintColor != null
+        ? visitor(
+                _surfaceTintColor,
+                widget.surfaceTintColor,
+                (dynamic value) => ColorTween(begin: value as Color),
+              )
+              as ColorTween?
+        : null;
     _border =
         visitor(
               _border,
@@ -914,14 +915,13 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   Widget build(BuildContext context) {
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
-    final Color color =
-        Theme.of(context).useMaterial3
-            ? ElevationOverlay.applySurfaceTint(
-              widget.color,
-              _surfaceTintColor?.evaluate(animation),
-              elevation,
-            )
-            : ElevationOverlay.applyOverlay(context, widget.color, elevation);
+    final Color color = Theme.of(context).useMaterial3
+        ? ElevationOverlay.applySurfaceTint(
+            widget.color,
+            _surfaceTintColor?.evaluate(animation),
+            elevation,
+          )
+        : ElevationOverlay.applyOverlay(context, widget.color, elevation);
     final Color shadowColor = _shadowColor!.evaluate(animation)!;
 
     return PhysicalShape(
@@ -953,10 +953,12 @@ class _ShapeBorderPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter:
-          borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
-      foregroundPainter:
-          borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
+      painter: borderOnForeground
+          ? null
+          : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground
+          ? _ShapeBorderPainter(shape, Directionality.maybeOf(context))
+          : null,
       child: child,
     );
   }

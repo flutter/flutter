@@ -44,9 +44,9 @@ class _SliverOpacityExampleState extends State<SliverOpacityExample> {
           const SliverToBoxAdapter(child: ListTile(title: Text('Before the list...'))),
           SliverOpacity(
             opacity: _visible ? 1.0 : 0.0,
-            sliver: SliverList(delegate: SliverChildListDelegate(_listItems)),
+            sliver: SliverList.list(children: _listItems),
           ),
-          const SliverToBoxAdapter(child: ListTile(title: Text('Before the list...'))),
+          const SliverToBoxAdapter(child: ListTile(title: Text('After the list...'))),
         ],
       ),
       floatingActionButton: FloatingActionButton(

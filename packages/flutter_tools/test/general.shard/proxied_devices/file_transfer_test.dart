@@ -15,7 +15,7 @@ import '../../src/common.dart';
 void main() {
   group('convertToChunks', () {
     test('works correctly', () async {
-      final StreamController<Uint8List> controller = StreamController<Uint8List>();
+      final controller = StreamController<Uint8List>();
       final Stream<Uint8List> chunked = convertToChunks(controller.stream, 4);
       final Future<List<Uint8List>> chunkedListFuture = chunked.toList();
 
@@ -70,25 +70,25 @@ void main() {
 
   group('RollingAdler32', () {
     test('works correctly without rolling', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('abcdefg').forEach(adler32.push);
       expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after rolling once', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('12abcdefg').forEach(adler32.push);
       expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after rolling multiple cycles', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('1234567890123456789abcdefg').forEach(adler32.push);
       expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after reset', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('1234567890123456789abcdefg').forEach(adler32.push);
       adler32.reset();
       utf8.encode('abcdefg').forEach(adler32.push);
@@ -96,35 +96,35 @@ void main() {
     });
 
     test('currentBlock returns the correct entry when read less than one block', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('abcd').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcd'));
     });
 
     test('currentBlock returns the correct entry when read exactly one block', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('abcdefg').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcdefg'));
     });
 
     test('currentBlock returns the correct entry when read more than one block', () {
-      final RollingAdler32 adler32 = RollingAdler32(7);
+      final adler32 = RollingAdler32(7);
       utf8.encode('123456789abcdefg').forEach(adler32.push);
       expect(adler32.currentBlock(), utf8.encode('abcdefg'));
     });
   });
 
   group('FileTransfer', () {
-    const String content1 = 'a...b...c...d...e.';
-    const String content2 = 'b...c...d...a...f...g...b...h..';
-    const List<FileDeltaBlock> expectedDelta = <FileDeltaBlock>[
+    const content1 = 'a...b...c...d...e.';
+    const content2 = 'b...c...d...a...f...g...b...h..';
+    const expectedDelta = <FileDeltaBlock>[
       FileDeltaBlock.fromDestination(start: 4, size: 12),
       FileDeltaBlock.fromDestination(start: 0, size: 4),
       FileDeltaBlock.fromSource(start: 16, size: 8),
       FileDeltaBlock.fromDestination(start: 4, size: 4),
       FileDeltaBlock.fromSource(start: 28, size: 3),
     ];
-    const String expectedBinaryForRebuilding = 'f...g...h..';
+    const expectedBinaryForRebuilding = 'f...g...h..';
     late MemoryFileSystem fileSystem;
     setUp(() {
       fileSystem = MemoryFileSystem();
@@ -200,7 +200,7 @@ void main() {
 
   group('BlockHashes', () {
     test('json conversion works normally', () {
-      const String json = '''
+      const json = '''
 {
   "blockSize":4,
   "totalSize":18,
@@ -215,7 +215,7 @@ void main() {
   "fileMd5":"VT/gkSEdctzUEUJCxclxuQ=="
 }
 ''';
-      final Map<String, Object?> decodedJson = jsonDecode(json) as Map<String, Object?>;
+      final decodedJson = jsonDecode(json) as Map<String, Object?>;
       expect(BlockHashes.fromJson(decodedJson).toJson(), decodedJson);
     });
   });

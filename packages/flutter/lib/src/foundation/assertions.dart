@@ -701,10 +701,9 @@ class FlutterErrorDetails with Diagnosticable {
         // If not: Error is in user code (user violated assertion in framework).
         // If so:  Error is in Framework. We either need an assertion higher up
         //         in the stack, or we've violated our own assertions.
-        final List<StackFrame> stackFrames =
-            StackFrame.fromStackTrace(
-              FlutterError.demangleStackTrace(stack!),
-            ).skipWhile((StackFrame frame) => frame.packageScheme == 'dart').toList();
+        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(
+          FlutterError.demangleStackTrace(stack!),
+        ).skipWhile((StackFrame frame) => frame.packageScheme == 'dart').toList();
         final bool ourFault =
             stackFrames.length >= 2 &&
             stackFrames[0].package == 'flutter' &&

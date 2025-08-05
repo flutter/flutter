@@ -643,8 +643,10 @@ mixin GZipFile on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??=
-          InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()!))!;
+      _data ??= InMemoryFile.parse(
+        '$fullName!$innerName',
+        a.GZipDecoder().decodeBytes(readBytes()!),
+      )!;
       if (_data != null) {
         yield _data!;
       }
@@ -662,8 +664,10 @@ mixin BZip2File on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??=
-          InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()!))!;
+      _data ??= InMemoryFile.parse(
+        '$fullName!$innerName',
+        a.BZip2Decoder().decodeBytes(readBytes()!),
+      )!;
       if (_data != null) {
         yield _data!;
       }

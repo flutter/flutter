@@ -25,17 +25,11 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
 
-final vm_service.Event fakeUnpausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kResume,
-  timestamp: 0,
-);
+final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
-final vm_service.Event fakePausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kPauseException,
-  timestamp: 0,
-);
+final fakePausedEvent = vm_service.Event(kind: vm_service.EventKind.kPauseException, timestamp: 0);
 
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: fakeUnpausedEvent,
   breakpoints: <vm_service.Breakpoint>[],
@@ -53,7 +47,7 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
+final fakePausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: fakePausedEvent,
   breakpoints: <vm_service.Breakpoint>[
@@ -79,7 +73,7 @@ final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final vm_service.VM fakeVM = vm_service.VM(
+final fakeVM = vm_service.VM(
   isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
   pid: 1,
   hostCPU: '',
@@ -94,26 +88,26 @@ final vm_service.VM fakeVM = vm_service.VM(
   systemIsolates: <vm_service.IsolateRef>[],
 );
 
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
+final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],
   },
 );
 
-const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
+const setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
   args: <String, Object>{'viewId': 'a', 'assetDirectory': 'build/flutter_assets', 'isolateId': '1'},
 );
 
-const FakeVmServiceRequest evict = FakeVmServiceRequest(
+const evict = FakeVmServiceRequest(
   method: 'ext.flutter.evict',
   args: <String, Object>{'value': 'asset', 'isolateId': '1'},
 );
 
-const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
+const evictShader = FakeVmServiceRequest(
   method: 'ext.ui.window.reinitializeShader',
   args: <String, Object>{'assetKey': 'foo.frag', 'isolateId': '1'},
 );
@@ -141,8 +135,7 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 
   @override
   final String message;
-  static const String defaultMessage =
-      'A DDS instance is already connected at http://localhost:8181';
+  static const defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
 
   @override
   Map<String, Object?> toJson() {
@@ -176,11 +169,11 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeVmServiceHost? Function()? vmServiceHost;
   Uri? testUri;
-  UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+  var report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
-  int runHotCode = 0;
-  int runColdCode = 0;
+  var runHotCode = 0;
+  var runColdCode = 0;
 
   @override
   ResidentCompiler? generator;
@@ -302,9 +295,9 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? nextOutput;
-  bool didSuppressErrors = false;
+  var didSuppressErrors = false;
   Uri? receivedNativeAssetsYaml;
-  bool recompileCalled = false;
+  var recompileCalled = false;
 
   @override
   Future<CompilerOutput?> recompile(
@@ -365,9 +358,9 @@ class FakeDevice extends Fake implements Device {
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
 
-  bool disposed = false;
-  bool appStopped = false;
-  bool failScreenshot = false;
+  var disposed = false;
+  var appStopped = false;
+  var failScreenshot = false;
 
   @override
   bool supportsHotRestart;
@@ -435,27 +428,27 @@ class FakeDevFS extends Fake implements DevFS {
   PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
-  List<Uri> sources = <Uri>[];
+  var sources = <Uri>[];
 
   @override
-  Uri baseUri = Uri();
+  var baseUri = Uri();
 
   @override
   Future<void> destroy() async {}
 
   @override
-  Set<String> assetPathsToEvict = <String>{};
+  var assetPathsToEvict = <String>{};
 
   @override
-  Set<String> shaderPathsToEvict = <String>{};
+  var shaderPathsToEvict = <String>{};
 
   @override
-  bool didUpdateFontManifest = false;
+  var didUpdateFontManifest = false;
 
-  UpdateFSReport nextUpdateReport = UpdateFSReport(success: true);
+  var nextUpdateReport = UpdateFSReport(success: true);
 
   @override
-  bool hasSetAssetDirectory = false;
+  var hasSetAssetDirectory = false;
 
   @override
   Future<Uri> create() async {

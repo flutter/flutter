@@ -43,20 +43,19 @@ Future<void> main() async {
 
 Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
   await evalFlutter('install', options: <String>['--flavor', 'paid']);
-  final Uint8List assetManifestFileData =
-      File(
-        path.join(
-          projectDir,
-          'build',
-          'ios',
-          'iphoneos',
-          'Paid App.app',
-          'Frameworks',
-          'App.framework',
-          'flutter_assets',
-          'AssetManifest.bin',
-        ),
-      ).readAsBytesSync();
+  final Uint8List assetManifestFileData = File(
+    path.join(
+      projectDir,
+      'build',
+      'ios',
+      'iphoneos',
+      'Paid App.app',
+      'Frameworks',
+      'App.framework',
+      'flutter_assets',
+      'AssetManifest.bin',
+    ),
+  ).readAsBytesSync();
 
   final Map<Object?, Object?> assetManifest =
       const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))

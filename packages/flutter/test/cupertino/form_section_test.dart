@@ -140,10 +140,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(ClipRRect), findsOneWidget);
+    expect(find.byType(ClipRSuperellipse), findsOneWidget);
   });
 
-  testWidgets('Not setting clipBehavior does not produce a RenderClipRRect object', (
+  testWidgets('Not setting clipBehavior does not produce a RenderClipRSuperellipse object', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -152,8 +152,8 @@ void main() {
       ),
     );
 
-    final Iterable<RenderClipRRect> renderClips =
-        tester.allRenderObjects.whereType<RenderClipRRect>();
+    final Iterable<RenderClipRSuperellipse> renderClips = tester.allRenderObjects
+        .whereType<RenderClipRSuperellipse>();
     expect(renderClips, isEmpty);
   });
 

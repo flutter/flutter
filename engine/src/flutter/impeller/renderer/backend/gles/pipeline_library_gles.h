@@ -99,7 +99,8 @@ class PipelineLibraryGLES final
 
   // |PipelineLibrary|
   PipelineFuture<PipelineDescriptor> GetPipeline(PipelineDescriptor descriptor,
-                                                 bool async) override;
+                                                 bool async,
+                                                 bool threadsafe) override;
 
   // |PipelineLibrary|
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(
@@ -119,7 +120,8 @@ class PipelineLibraryGLES final
       const std::weak_ptr<PipelineLibrary>& weak_library,
       const PipelineDescriptor& desc,
       const std::shared_ptr<const ShaderFunction>& vert_shader,
-      const std::shared_ptr<const ShaderFunction>& frag_shader);
+      const std::shared_ptr<const ShaderFunction>& frag_shader,
+      bool threadsafe);
 
   std::shared_ptr<UniqueHandleGLES> GetProgramForKey(const ProgramKey& key);
 

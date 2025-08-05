@@ -6,7 +6,8 @@
 #define FLUTTER_IMPELLER_TOOLKIT_INTEROP_IMAGE_FILTER_H_
 
 #include "flutter/display_list/effects/dl_image_filter.h"
-#include "impeller/toolkit/interop/formats.h"
+#include "impeller/toolkit/interop/context.h"
+#include "impeller/toolkit/interop/fragment_program.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 
@@ -30,6 +31,12 @@ class ImageFilter final
 
   static ScopedObject<ImageFilter> MakeCompose(const ImageFilter& outer,
                                                const ImageFilter& inner);
+
+  static ScopedObject<ImageFilter> MakeFragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      std::vector<std::shared_ptr<flutter::DlColorSource>> samplers,
+      std::shared_ptr<std::vector<uint8_t>> uniform_data);
 
   explicit ImageFilter(std::shared_ptr<flutter::DlImageFilter> filter);
 

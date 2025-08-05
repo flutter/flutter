@@ -36,13 +36,12 @@ void main() {
           );
         },
         home: Builder(
-          builder:
-              (BuildContext context) => ElevatedButton(
-                onPressed: () {
-                  showAboutDialog(context: context, useRootNavigator: false, applicationName: 'A');
-                },
-                child: const Text('Show About Dialog'),
-              ),
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(context: context, useRootNavigator: false, applicationName: 'A');
+            },
+            child: const Text('Show About Dialog'),
+          ),
         ),
       ),
     );
@@ -191,7 +190,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(title: 'flutter_tester', home: Material(child: AboutListTile())),
+      const MaterialApp(
+        title: 'flutter_tester',
+        home: Material(child: AboutListTile()),
+      ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
@@ -515,26 +517,35 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(title: 'flutter_tester', home: Material(child: LicensePage())),
+      const MaterialApp(
+        title: 'flutter_tester',
+        home: Material(child: LicensePage()),
+      ),
     );
     expect(find.text('flutter_tester'), findsOneWidget);
   });
 
   testWidgets('AboutListTile dense property is applied', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: AboutListTile()))),
+      const MaterialApp(
+        home: Material(child: Center(child: AboutListTile())),
+      ),
     );
     Rect tileRect = tester.getRect(find.byType(AboutListTile));
     expect(tileRect.height, 56.0);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: AboutListTile(dense: false)))),
+      const MaterialApp(
+        home: Material(child: Center(child: AboutListTile(dense: false))),
+      ),
     );
     tileRect = tester.getRect(find.byType(AboutListTile));
     expect(tileRect.height, 56.0);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: AboutListTile(dense: true)))),
+      const MaterialApp(
+        home: Material(child: Center(child: AboutListTile(dense: true))),
+      ),
     );
     tileRect = tester.getRect(find.byType(AboutListTile));
     expect(tileRect.height, 48.0);
@@ -550,22 +561,21 @@ void main() {
         initialRoute: '/',
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
-            pageBuilder:
-                (_, _, _) => Navigator(
-                  observers: <NavigatorObserver>[nestedObserver],
-                  onGenerateRoute: (RouteSettings settings) {
-                    return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, _) {
-                        return ElevatedButton(
-                          onPressed: () {
-                            showLicensePage(context: context, applicationName: 'A');
-                          },
-                          child: const Text('Show License Page'),
-                        );
+            pageBuilder: (_, _, _) => Navigator(
+              observers: <NavigatorObserver>[nestedObserver],
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<dynamic>(
+                  pageBuilder: (BuildContext context, _, _) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        showLicensePage(context: context, applicationName: 'A');
                       },
+                      child: const Text('Show License Page'),
                     );
                   },
-                ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -590,26 +600,25 @@ void main() {
         initialRoute: '/',
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
-            pageBuilder:
-                (_, _, _) => Navigator(
-                  observers: <NavigatorObserver>[nestedObserver],
-                  onGenerateRoute: (RouteSettings settings) {
-                    return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, _) {
-                        return ElevatedButton(
-                          onPressed: () {
-                            showLicensePage(
-                              context: context,
-                              useRootNavigator: true,
-                              applicationName: 'A',
-                            );
-                          },
-                          child: const Text('Show License Page'),
+            pageBuilder: (_, _, _) => Navigator(
+              observers: <NavigatorObserver>[nestedObserver],
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<dynamic>(
+                  pageBuilder: (BuildContext context, _, _) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        showLicensePage(
+                          context: context,
+                          useRootNavigator: true,
+                          applicationName: 'A',
                         );
                       },
+                      child: const Text('Show License Page'),
                     );
                   },
-                ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -859,17 +868,12 @@ void main() {
             );
           },
           home: Builder(
-            builder:
-                (BuildContext context) => ElevatedButton(
-                  onPressed: () {
-                    showAboutDialog(
-                      context: context,
-                      useRootNavigator: false,
-                      applicationName: 'A',
-                    );
-                  },
-                  child: const Text('Show About Dialog'),
-                ),
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(context: context, useRootNavigator: false, applicationName: 'A');
+              },
+              child: const Text('Show About Dialog'),
+            ),
           ),
         ),
       );
@@ -903,18 +907,17 @@ void main() {
             );
           },
           home: Builder(
-            builder:
-                (BuildContext context) => ElevatedButton(
-                  onPressed: () {
-                    showAboutDialog(
-                      context: context,
-                      useRootNavigator: false,
-                      applicationName: 'A',
-                      anchorPoint: const Offset(1000, 0),
-                    );
-                  },
-                  child: const Text('Show About Dialog'),
-                ),
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  applicationName: 'A',
+                  anchorPoint: const Offset(1000, 0),
+                );
+              },
+              child: const Text('Show About Dialog'),
+            ),
           ),
         ),
       );
@@ -948,17 +951,12 @@ void main() {
             );
           },
           home: Builder(
-            builder:
-                (BuildContext context) => ElevatedButton(
-                  onPressed: () {
-                    showAboutDialog(
-                      context: context,
-                      useRootNavigator: false,
-                      applicationName: 'A',
-                    );
-                  },
-                  child: const Text('Show About Dialog'),
-                ),
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(context: context, useRootNavigator: false, applicationName: 'A');
+              },
+              child: const Text('Show About Dialog'),
+            ),
           ),
         ),
       );
@@ -977,7 +975,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: AboutListTile(child: Text('About')))),
+      const MaterialApp(
+        home: Scaffold(body: AboutListTile(child: Text('About'))),
+      ),
     );
 
     expect(
@@ -1046,17 +1046,16 @@ void main() {
         home: Scaffold(
           body: Center(
             child: Builder(
-              builder:
-                  (BuildContext context) => GestureDetector(
-                    child: const Text('Show licenses'),
-                    onTap: () {
-                      showLicensePage(
-                        context: context,
-                        applicationName: 'MyApp',
-                        applicationVersion: '1.0.0',
-                      );
-                    },
-                  ),
+              builder: (BuildContext context) => GestureDetector(
+                child: const Text('Show licenses'),
+                onTap: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: 'MyApp',
+                    applicationVersion: '1.0.0',
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -1068,8 +1067,9 @@ void main() {
     await tester.pump();
 
     // Check color when loading.
-    final List<Material> materialLoadings =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialLoadings = tester
+        .widgetList<Material>(find.byType(Material))
+        .toList();
     expect(materialLoadings.length, equals(4));
     expect(materialLoadings[1].color, scaffoldColor);
     expect(materialLoadings[2].color, cardColor);
@@ -1078,8 +1078,9 @@ void main() {
 
     // Check color when done.
     expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
-    final List<Material> materialDones =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialDones = tester
+        .widgetList<Material>(find.byType(Material))
+        .toList();
     expect(materialDones.length, equals(3));
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
@@ -1097,17 +1098,16 @@ void main() {
         home: Scaffold(
           body: Center(
             child: Builder(
-              builder:
-                  (BuildContext context) => GestureDetector(
-                    child: const Text('Show licenses'),
-                    onTap: () {
-                      showLicensePage(
-                        context: context,
-                        applicationName: 'MyApp',
-                        applicationVersion: '1.0.0',
-                      );
-                    },
-                  ),
+              builder: (BuildContext context) => GestureDetector(
+                child: const Text('Show licenses'),
+                onTap: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: 'MyApp',
+                    applicationVersion: '1.0.0',
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -1119,8 +1119,9 @@ void main() {
     await tester.pump();
 
     // Check color when loading.
-    final List<Material> materialLoadings =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialLoadings = tester
+        .widgetList<Material>(find.byType(Material))
+        .toList();
     expect(materialLoadings.length, equals(5));
     expect(materialLoadings[1].color, scaffoldColor);
     expect(materialLoadings[2].color, cardColor);
@@ -1129,8 +1130,9 @@ void main() {
 
     // Check color when done.
     expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
-    final List<Material> materialDones =
-        tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialDones = tester
+        .widgetList<Material>(find.byType(Material))
+        .toList();
     expect(materialDones.length, equals(4));
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
@@ -1192,13 +1194,12 @@ void main() {
         title: 'Flutter Code Sample',
         home: Scaffold(
           body: Builder(
-            builder:
-                (BuildContext context) => TextButton(
-                  child: const Text('Show License Page'),
-                  onPressed: () {
-                    showLicensePage(context: context);
-                  },
-                ),
+            builder: (BuildContext context) => TextButton(
+              child: const Text('Show License Page'),
+              onPressed: () {
+                showLicensePage(context: context);
+              },
+            ),
           ),
         ),
       ),
@@ -1403,7 +1404,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1441,7 +1444,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1459,7 +1464,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1518,7 +1525,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1559,7 +1568,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1577,7 +1588,9 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         title: title,
-        home: Scaffold(body: Directionality(textDirection: textDirection, child: LicensePage())),
+        home: Scaffold(
+          body: Directionality(textDirection: textDirection, child: LicensePage()),
+        ),
       ),
     );
 
@@ -1617,7 +1630,11 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1200.0, 600.0));
 
     await tester.pumpWidget(
-      MaterialApp(title: title, theme: theme, home: const Scaffold(body: LicensePage())),
+      MaterialApp(
+        title: title,
+        theme: theme,
+        home: const Scaffold(body: LicensePage()),
+      ),
     );
 
     await tester.pumpAndSettle(); // Finish rendering the page.
@@ -1645,7 +1662,11 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(title: title, theme: theme, home: const Scaffold(body: LicensePage())),
+      MaterialApp(
+        title: title,
+        theme: theme,
+        home: const Scaffold(body: LicensePage()),
+      ),
     );
 
     await tester.pumpAndSettle(); // Finish rendering the page.
@@ -1683,7 +1704,11 @@ void main() {
       });
 
       await tester.pumpWidget(
-        MaterialApp(title: title, theme: theme, home: const Scaffold(body: LicensePage())),
+        MaterialApp(
+          title: title,
+          theme: theme,
+          home: const Scaffold(body: LicensePage()),
+        ),
       );
 
       await tester.pumpAndSettle(); // Finish rendering the page.
@@ -1838,17 +1863,16 @@ void main() {
         home: Theme(
           data: theme,
           child: Builder(
-            builder:
-                (BuildContext context) => ElevatedButton(
-                  onPressed: () {
-                    showAboutDialog(
-                      context: context,
-                      applicationName: 'Sample Test',
-                      applicationVersion: 'v1.0.0', // Version of the app
-                    );
-                  },
-                  child: const Text('Show About Dialog'),
-                ),
+            builder: (BuildContext context) => ElevatedButton(
+              onPressed: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'Sample Test',
+                  applicationVersion: 'v1.0.0', // Version of the app
+                );
+              },
+              child: const Text('Show About Dialog'),
+            ),
           ),
         ),
       ),
@@ -1863,6 +1887,48 @@ void main() {
 
     final ThemeData licensePageTheme = Theme.of(tester.element(find.text('Powered by Flutter')));
     expect(theme.colorScheme.primary, licensePageTheme.colorScheme.primary);
+  });
+
+  testWidgets('AboutDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: AboutDialog(children: <Widget>[Text('X')])),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
+
+  testWidgets('AboutListTile renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: AboutListTile(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
+
+  testWidgets('LicensePage renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: LicensePage(applicationName: 'X')),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 

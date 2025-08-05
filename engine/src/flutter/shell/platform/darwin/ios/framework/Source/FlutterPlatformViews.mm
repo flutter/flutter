@@ -64,7 +64,7 @@ class CGPathReceiver final : public flutter::DlPathReceiver {
   }
   void Close() override { CGPathCloseSubpath(path_ref_); }
 
-  CGMutablePathRef TakePath() { return path_ref_; }
+  CGMutablePathRef TakePath() const { return path_ref_; }
 
  private:
   CGMutablePathRef path_ref_ = CGPathCreateMutable();

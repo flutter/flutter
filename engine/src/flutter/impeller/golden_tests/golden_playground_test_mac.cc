@@ -132,6 +132,11 @@ void GoldenPlaygroundTest::SetTypographerContext(
 
 void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
+
+  auto context = GetContext();
+  if (context) {
+    context->DisposeThreadLocalCachedResources();
+  }
 }
 
 namespace {
@@ -280,6 +285,9 @@ RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
+  if (!pimpl_->screenshotter) {
+    return nullptr;
+  }
   return pimpl_->screenshotter->GetPlayground().GetContext();
 }
 

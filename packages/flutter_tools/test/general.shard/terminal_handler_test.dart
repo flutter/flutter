@@ -28,7 +28,7 @@ import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
   pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
   breakpoints: <vm_service.Breakpoint>[],
@@ -46,9 +46,9 @@ final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   isolateFlags: <vm_service.IsolateFlag>[],
 );
 
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
+final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],
@@ -57,13 +57,13 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
 
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
-    final TestRunner testRunner = TestRunner();
+    final testRunner = TestRunner();
     final Logger logger = BufferLogger.test();
-    final Signals signals = Signals.test();
-    final Terminal terminal = Terminal.test();
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final ProcessInfo processInfo = ProcessInfo.test(fs);
-    final TerminalHandler terminalHandler = TerminalHandler(
+    final signals = Signals.test();
+    final terminal = Terminal.test();
+    final fs = MemoryFileSystem.test();
+    final processInfo = ProcessInfo.test(fs);
+    final terminalHandler = TerminalHandler(
       testRunner,
       logger: logger,
       signals: signals,
@@ -78,13 +78,13 @@ void main() {
   });
 
   testWithoutContext('keyboard input handling help character surrounded with newlines', () async {
-    final TestRunner testRunner = TestRunner();
+    final testRunner = TestRunner();
     final Logger logger = BufferLogger.test();
-    final Signals signals = Signals.test();
-    final Terminal terminal = Terminal.test();
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final ProcessInfo processInfo = ProcessInfo.test(fs);
-    final TerminalHandler terminalHandler = TerminalHandler(
+    final signals = Signals.test();
+    final terminal = Terminal.test();
+    final fs = MemoryFileSystem.test();
+    final processInfo = ProcessInfo.test(fs);
+    final terminalHandler = TerminalHandler(
       testRunner,
       logger: logger,
       signals: signals,
@@ -215,7 +215,7 @@ void main() {
 
     testWithoutContext('d,D - detach', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
       await terminalHandler.processTerminalInput('d');
 
       expect(runner.calledDetach, true);
@@ -228,7 +228,7 @@ void main() {
 
     testWithoutContext('h,H,? - printHelp', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
       await terminalHandler.processTerminalInput('h');
 
       expect(runner.calledPrintWithDetails, true);
@@ -743,9 +743,8 @@ void main() {
 
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final FakeResidentDevtoolsHandler devtoolsHandler =
-          runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
       expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
       await terminalHandler.processTerminalInput('v');
@@ -811,7 +810,7 @@ void main() {
 
     testWithoutContext('q,Q - exit', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
       await terminalHandler.processTerminalInput('q');
 
       expect(runner.calledExit, true);
@@ -840,7 +839,7 @@ void main() {
 
     testWithoutContext('r - hotReload', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await terminalHandler.processTerminalInput('r');
 
@@ -850,7 +849,7 @@ void main() {
 
     testWithoutContext('R - hotRestart', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await terminalHandler.processTerminalInput('R');
 
@@ -863,7 +862,7 @@ void main() {
         <FakeVmServiceRequest>[],
         reloadExitCode: 1,
       );
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await terminalHandler.processTerminalInput('r');
 
@@ -880,7 +879,7 @@ void main() {
         <FakeVmServiceRequest>[],
         reloadExitCode: 1,
       );
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await terminalHandler.processTerminalInput('R');
 
@@ -898,7 +897,7 @@ void main() {
         reloadExitCode: 1,
         fatalReloadError: true,
       );
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await expectLater(() => terminalHandler.processTerminalInput('r'), throwsToolExit());
 
@@ -912,7 +911,7 @@ void main() {
         reloadExitCode: 1,
         fatalReloadError: true,
       );
-      final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
 
       await expectLater(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
 
@@ -927,7 +926,7 @@ void main() {
       reloadExitCode: 1,
       fatalReloadError: true,
     );
-    const String message = 'This should be cleared';
+    const message = 'This should be cleared';
 
     expect(terminalHandler.logger.statusText, equals(''));
     terminalHandler.logger.printStatus(message);
@@ -938,7 +937,7 @@ void main() {
   });
 
   testWithoutContext('s, can take screenshot on debug device that supports screenshot', () async {
-    final BufferLogger logger = BufferLogger.test();
+    final logger = BufferLogger.test();
     final TerminalHandler terminalHandler = setUpTerminalHandler(
       <FakeVmServiceRequest>[
         listViews,
@@ -963,7 +962,7 @@ void main() {
   testWithoutContext(
     's, will not take screenshot on non-web device without screenshot tooling support',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -980,7 +979,7 @@ void main() {
   testWithoutContext(
     's, can take screenshot on debug web device that does not support screenshot',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[
@@ -1021,7 +1020,7 @@ void main() {
   testWithoutContext(
     's, can take screenshot on device that does not support service protocol',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -1046,7 +1045,7 @@ void main() {
   testWithoutContext(
     's, does not take a screenshot on a device that does not support screenshot or the service protocol',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -1065,7 +1064,7 @@ void main() {
   testWithoutContext(
     's, does not take a screenshot on a web device that does not support screenshot or the service protocol',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -1085,7 +1084,7 @@ void main() {
   testWithoutContext(
     's, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[
@@ -1118,7 +1117,7 @@ void main() {
   testWithoutContext(
     's, bails taking screenshot on debug device if debugAllowBanner during second request',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[
@@ -1146,12 +1145,12 @@ void main() {
   );
 
   testWithoutContext('pidfile creation', () {
-    final BufferLogger testLogger = BufferLogger.test();
+    final testLogger = BufferLogger.test();
     final Signals signals = _TestSignals(Signals.defaultExitSignals);
-    final Terminal terminal = Terminal.test();
-    final MemoryFileSystem fs = MemoryFileSystem.test();
-    final ProcessInfo processInfo = ProcessInfo.test(fs);
-    final FakeResidentRunner residentRunner = FakeResidentRunner(
+    final terminal = Terminal.test();
+    final fs = MemoryFileSystem.test();
+    final processInfo = ProcessInfo.test(fs);
+    final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
         buildInfo: BuildInfo.debug,
@@ -1166,8 +1165,8 @@ void main() {
       ..supportsServiceProtocol = true
       ..stayResident = true;
 
-    const String filename = 'test.pid';
-    final TerminalHandler terminalHandler = TerminalHandler(
+    const filename = 'test.pid';
+    final terminalHandler = TerminalHandler(
       residentRunner,
       logger: testLogger,
       signals: signals,
@@ -1190,14 +1189,14 @@ class FakeResidentRunner extends ResidentHandlers {
   FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem)
     : flutterDevices = <FlutterDevice>[device];
 
-  bool calledDetach = false;
-  bool calledPrint = false;
-  bool calledExit = false;
-  bool calledPrintWithDetails = false;
-  bool calledReload = false;
-  bool calledRestart = false;
-  int reloadExitCode = 0;
-  bool fatalReloadError = false;
+  var calledDetach = false;
+  var calledPrint = false;
+  var calledExit = false;
+  var calledPrintWithDetails = false;
+  var calledReload = false;
+  var calledRestart = false;
+  var reloadExitCode = 0;
+  var fatalReloadError = false;
 
   @override
   final Logger logger;
@@ -1209,31 +1208,31 @@ class FakeResidentRunner extends ResidentHandlers {
   final List<FlutterDevice> flutterDevices;
 
   @override
-  bool canHotReload = true;
+  var canHotReload = true;
 
   @override
-  bool hotMode = true;
+  var hotMode = true;
 
   @override
-  bool isRunningDebug = true;
+  var isRunningDebug = true;
 
   @override
-  bool isRunningProfile = false;
+  var isRunningProfile = false;
 
   @override
-  bool isRunningRelease = false;
+  var isRunningRelease = false;
 
   @override
-  bool stayResident = true;
+  var stayResident = true;
 
   @override
-  bool supportsRestart = true;
+  var supportsRestart = true;
 
   @override
-  bool supportsDetach = true;
+  var supportsDetach = true;
 
   @override
-  bool supportsServiceProtocol = true;
+  var supportsServiceProtocol = true;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1288,7 +1287,7 @@ class FakeResidentRunner extends ResidentHandlers {
 
 // TODO(bkonyi): remove when ready to serve DevTools from DDS.
 class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
-  bool calledLaunchDevToolsInBrowser = false;
+  var calledLaunchDevToolsInBrowser = false;
 
   @override
   bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
@@ -1298,10 +1297,10 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
 
 class FakeDevice extends Fake implements Device {
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
-  bool supportsScreenshot = false;
+  var supportsScreenshot = false;
 
   @override
   String get name => 'Fake Device';
@@ -1310,7 +1309,7 @@ class FakeDevice extends Fake implements Device {
   String get displayName => name;
 
   @override
-  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
+  var dds = DartDevelopmentService(logger: FakeLogger());
 
   @override
   Future<void> takeScreenshot(File file) async {
@@ -1335,11 +1334,11 @@ TerminalHandler setUpTerminalHandler(
   FileSystem? fileSystem,
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
-  final Signals signals = Signals.test();
-  final Terminal terminal = Terminal.test();
+  final signals = Signals.test();
+  final terminal = Terminal.test();
   final FileSystem localFileSystem = fileSystem ?? MemoryFileSystem.test();
-  final ProcessInfo processInfo = ProcessInfo.test(MemoryFileSystem.test());
-  final FlutterDevice device = FlutterDevice(
+  final processInfo = ProcessInfo.test(MemoryFileSystem.test());
+  final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
     buildInfo: BuildInfo(
       buildMode,
@@ -1352,13 +1351,12 @@ TerminalHandler setUpTerminalHandler(
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
-  final FakeResidentRunner residentRunner =
-      FakeResidentRunner(device, testLogger, localFileSystem)
-        ..supportsServiceProtocol = supportsServiceProtocol
-        ..supportsRestart = supportsRestart
-        ..canHotReload = supportsHotReload
-        ..fatalReloadError = fatalReloadError
-        ..reloadExitCode = reloadExitCode;
+  final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
+    ..supportsServiceProtocol = supportsServiceProtocol
+    ..supportsRestart = supportsRestart
+    ..canHotReload = supportsHotReload
+    ..fatalReloadError = fatalReloadError
+    ..reloadExitCode = reloadExitCode;
 
   switch (buildMode) {
     case BuildMode.debug:
@@ -1392,7 +1390,7 @@ TerminalHandler setUpTerminalHandler(
 class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class TestRunner extends Fake implements ResidentRunner {
-  bool hasHelpBeenPrinted = false;
+  var hasHelpBeenPrinted = false;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1428,12 +1426,11 @@ class _TestSignals implements Signals {
 
   final List<ProcessSignal> exitSignals;
 
-  final Map<ProcessSignal, Map<Object, SignalHandler>> _handlersTable =
-      <ProcessSignal, Map<Object, SignalHandler>>{};
+  final _handlersTable = <ProcessSignal, Map<Object, SignalHandler>>{};
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    final Object token = Object();
+    final token = Object();
     _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{})[token] = handler;
     return token;
   }
@@ -1452,7 +1449,7 @@ class _TestSignals implements Signals {
 
   @override
   Stream<Object> get errors => _errors.stream;
-  final StreamController<Object> _errors = StreamController<Object>();
+  final _errors = StreamController<Object>();
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

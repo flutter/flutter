@@ -12,14 +12,11 @@ import '../src/common.dart';
 
 void main() {
   testWithoutContext('state can be set and persists', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir');
     directory.createSync();
     final File stateFile = directory.childFile('.flutter_tool_state');
-    final PersistentToolState state1 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
+    final state1 = PersistentToolState.test(directory: directory, logger: BufferLogger.test());
     expect(state1.shouldRedisplayWelcomeMessage, null);
     state1.setShouldRedisplayWelcomeMessage(true);
     expect(stateFile.existsSync(), true);
@@ -27,29 +24,20 @@ void main() {
     state1.setShouldRedisplayWelcomeMessage(false);
     expect(state1.shouldRedisplayWelcomeMessage, false);
 
-    final PersistentToolState state2 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
+    final state2 = PersistentToolState.test(directory: directory, logger: BufferLogger.test());
     expect(state2.shouldRedisplayWelcomeMessage, false);
   });
 
   testWithoutContext('channel versions can be cached and stored', () {
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final fileSystem = MemoryFileSystem.test();
     final Directory directory = fileSystem.directory('state_dir')..createSync();
-    final PersistentToolState state1 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
+    final state1 = PersistentToolState.test(directory: directory, logger: BufferLogger.test());
 
     state1.updateLastActiveVersion('abc', Channel.master);
     state1.updateLastActiveVersion('ghi', Channel.beta);
     state1.updateLastActiveVersion('jkl', Channel.stable);
 
-    final PersistentToolState state2 = PersistentToolState.test(
-      directory: directory,
-      logger: BufferLogger.test(),
-    );
+    final state2 = PersistentToolState.test(directory: directory, logger: BufferLogger.test());
 
     expect(state2.lastActiveVersion(Channel.master), 'abc');
     expect(state2.lastActiveVersion(Channel.beta), 'ghi');

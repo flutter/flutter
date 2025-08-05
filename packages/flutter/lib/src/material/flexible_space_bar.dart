@@ -225,8 +225,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final FlexibleSpaceBarSettings settings =
-            context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
+        final FlexibleSpaceBarSettings settings = context
+            .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
 
         final List<Widget> children = <Widget>[];
 
@@ -247,10 +247,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           assert(fadeStart <= fadeEnd);
           // If the min and max extent are the same, the app bar cannot collapse
           // and the content should be visible, so opacity = 1.
-          final double opacity =
-              settings.maxExtent == settings.minExtent
-                  ? 1.0
-                  : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          final double opacity = settings.maxExtent == settings.minExtent
+              ? 1.0
+              : 1.0 - Interval(fadeStart, fadeEnd).transform(t);
           double height = settings.maxExtent;
 
           // StretchMode.zoomBackground
@@ -316,10 +315,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle =
-                theme.useMaterial3
-                    ? theme.textTheme.titleLarge!
-                    : theme.primaryTextTheme.titleLarge!;
+            TextStyle titleStyle = theme.useMaterial3
+                ? theme.textTheme.titleLarge!
+                : theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(color: titleStyle.color!.withOpacity(opacity));
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
             final double leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
@@ -333,7 +331,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               begin: widget.expandedTitleScale,
               end: 1.0,
             ).transform(t);
-            final Matrix4 scaleTransform = Matrix4.identity()..scale(scaleValue, scaleValue, 1.0);
+            final Matrix4 scaleTransform = Matrix4.identity()
+              ..scaleByDouble(scaleValue, scaleValue, 1.0, 1);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
             children.add(
               Padding(

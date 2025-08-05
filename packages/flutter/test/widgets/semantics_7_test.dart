@@ -31,7 +31,10 @@ void main() {
             MergeSemantics(
               child: Stack(
                 fit: StackFit.expand,
-                children: <Widget>[Semantics(checked: true), Semantics(label: label)],
+                children: <Widget>[
+                  Semantics(checked: true),
+                  Semantics(label: label),
+                ],
               ),
             ),
           ],
@@ -80,7 +83,10 @@ void main() {
             MergeSemantics(
               child: Stack(
                 fit: StackFit.expand,
-                children: <Widget>[Semantics(checked: true), Semantics(label: label)],
+                children: <Widget>[
+                  Semantics(checked: true),
+                  Semantics(label: label),
+                ],
               ),
             ),
           ],

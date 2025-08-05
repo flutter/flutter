@@ -43,11 +43,10 @@ class _CupertinoTextSelectionHandlePainter extends CustomPainter {
       ),
       Offset(_kSelectionHandleRadius + halfStrokeWidth, size.height),
     );
-    final Path path =
-        Path()
-          ..addOval(circle)
-          // Draw line so it slightly overlaps the circle.
-          ..addRect(line);
+    final Path path = Path()
+      ..addOval(circle)
+      // Draw line so it slightly overlaps the circle.
+      ..addRect(line);
     canvas.drawPath(path, paint);
   }
 
@@ -122,7 +121,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(
+        CupertinoTheme.of(context).selectionHandleColor,
+      ),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
@@ -137,11 +138,10 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
         desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(size: desiredSize, child: customPaint);
         return Transform(
-          transform:
-              Matrix4.identity()
-                ..translate(desiredSize.width / 2, desiredSize.height / 2)
-                ..rotateZ(math.pi)
-                ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
+          transform: Matrix4.identity()
+            ..translateByDouble(desiredSize.width / 2, desiredSize.height / 2, 0, 1)
+            ..rotateZ(math.pi)
+            ..translateByDouble(-desiredSize.width / 2, -desiredSize.height / 2, 0, 1),
           child: handle,
         );
       // iOS should draw an invisible box so the handle can still receive gestures
@@ -264,7 +264,7 @@ class _CupertinoTextSelectionControlsToolbarState
     final double anchorX = clampDouble(
       widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
       _kArrowScreenPadding + mediaQueryPadding.left,
-      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
+      MediaQuery.widthOf(context) - mediaQueryPadding.right - _kArrowScreenPadding,
     );
 
     final double topAmountInEditableRegion =

@@ -462,4 +462,14 @@ bool RoundSuperellipseGeometry::IsAxisAlignedRect() const {
   return false;
 }
 
+StrokeRoundSuperellipseGeometry::StrokeRoundSuperellipseGeometry(
+    const RoundSuperellipse& round_superellipse,
+    const StrokeParameters& parameters)
+    : StrokePathSourceGeometry(parameters),
+      round_superellipse_source_(round_superellipse) {}
+
+const PathSource& StrokeRoundSuperellipseGeometry::GetSource() const {
+  return round_superellipse_source_;
+}
+
 }  // namespace impeller

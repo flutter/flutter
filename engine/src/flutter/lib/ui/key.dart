@@ -164,34 +164,33 @@ class KeyData {
   String _logicalToString() {
     final String result = '0x${logical.toRadixString(16)}';
     final int planeNum = _nonValueBits(logical) & 0x0FF;
-    final String planeDescription =
-        (() {
-          switch (planeNum) {
-            case 0x000:
-              return ' (Unicode)';
-            case 0x001:
-              return ' (Unprintable)';
-            case 0x002:
-              return ' (Flutter)';
-            case 0x011:
-              return ' (Android)';
-            case 0x012:
-              return ' (Fuchsia)';
-            case 0x013:
-              return ' (iOS)';
-            case 0x014:
-              return ' (macOS)';
-            case 0x015:
-              return ' (GTK)';
-            case 0x016:
-              return ' (Windows)';
-            case 0x017:
-              return ' (Web)';
-            case 0x018:
-              return ' (GLFW)';
-          }
-          return '';
-        })();
+    final String planeDescription = (() {
+      switch (planeNum) {
+        case 0x000:
+          return ' (Unicode)';
+        case 0x001:
+          return ' (Unprintable)';
+        case 0x002:
+          return ' (Flutter)';
+        case 0x011:
+          return ' (Android)';
+        case 0x012:
+          return ' (Fuchsia)';
+        case 0x013:
+          return ' (iOS)';
+        case 0x014:
+          return ' (macOS)';
+        case 0x015:
+          return ' (GTK)';
+        case 0x016:
+          return ' (Windows)';
+        case 0x017:
+          return ' (Web)';
+        case 0x018:
+          return ' (GLFW)';
+      }
+      return '';
+    })();
     return '$result$planeDescription';
   }
 

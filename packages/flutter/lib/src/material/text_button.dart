@@ -408,26 +408,26 @@ class TextButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
         ? _TextButtonDefaultsM3(context)
         : styleFrom(
-          foregroundColor: colorScheme.primary,
-          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-          backgroundColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
-          shadowColor: theme.shadowColor,
-          elevation: 0,
-          textStyle: theme.textTheme.labelLarge,
-          padding: _scaledPadding(context),
-          minimumSize: const Size(64, 36),
-          maximumSize: Size.infinite,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-          enabledMouseCursor: SystemMouseCursors.click,
-          disabledMouseCursor: SystemMouseCursors.basic,
-          visualDensity: theme.visualDensity,
-          tapTargetSize: theme.materialTapTargetSize,
-          animationDuration: kThemeChangeDuration,
-          enableFeedback: true,
-          alignment: Alignment.center,
-          splashFactory: InkRipple.splashFactory,
-        );
+            foregroundColor: colorScheme.primary,
+            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            shadowColor: theme.shadowColor,
+            elevation: 0,
+            textStyle: theme.textTheme.labelLarge,
+            padding: _scaledPadding(context),
+            minimumSize: const Size(64, 36),
+            maximumSize: Size.infinite,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.basic,
+            visualDensity: theme.visualDensity,
+            tapTargetSize: theme.materialTapTargetSize,
+            animationDuration: kThemeChangeDuration,
+            enableFeedback: true,
+            alignment: Alignment.center,
+            splashFactory: InkRipple.splashFactory,
+          );
   }
 
   /// Returns the [TextButtonThemeData.style] of the closest
@@ -516,7 +516,6 @@ class _TextButtonWithIconChild extends StatelessWidget {
         buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
-    final double gap = lerpDouble(8, 4, scale)!;
     final TextButtonThemeData textButtonTheme = TextButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
@@ -525,10 +524,10 @@ class _TextButtonWithIconChild extends StatelessWidget {
         IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children:
-          effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      spacing: lerpDouble(8, 4, scale)!,
+      children: effectiveIconAlignment == IconAlignment.start
+          ? <Widget>[icon, Flexible(child: label)]
+          : <Widget>[Flexible(child: label), icon],
     );
   }
 }

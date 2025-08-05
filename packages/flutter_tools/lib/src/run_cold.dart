@@ -12,7 +12,7 @@ import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
 
-const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
+const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 
 class ColdRunner extends ResidentRunner {
   ColdRunner(
@@ -30,7 +30,7 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  bool _didAttach = false;
+  var _didAttach = false;
 
   @override
   bool get canHotReload => false;
@@ -73,10 +73,6 @@ class ColdRunner extends ResidentRunner {
         appFailedToStart();
         return 2;
       }
-    }
-
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
     }
 
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
@@ -155,13 +151,9 @@ class ColdRunner extends ResidentRunner {
 
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final FlutterView view in views) {
+      for (final view in views) {
         globals.printTrace('Connected to $view.');
       }
-    }
-
-    if (debuggingEnabled && debuggingOptions.serveObservatory) {
-      await enableObservatory();
     }
 
     appStartedCompleter?.complete();

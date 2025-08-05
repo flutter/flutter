@@ -217,16 +217,15 @@ final RegExp lrZlib = RegExp(
 // ASCII ART PATTERNS
 
 // If these images are found in a file, they are stripped before we look for license patterns.
-final List<List<String>> asciiArtImages =
-    <String>[
-      r'''
+final List<List<String>> asciiArtImages = <String>[
+  r'''
  ___        _
 |_ _|_ __  (_) __ _
  | || '_ \ | |/ _` |
  | || | | || | (_| |
 |___|_| |_|/ |\__,_|
          |__/''',
-    ].map((String image) => image.split('\n')).toList();
+].map((String image) => image.split('\n')).toList();
 
 // FORWARD REFERENCE
 
@@ -1472,6 +1471,21 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
             .replaceAll(' ', _linebreak)),
     multiLine: true,
     caseSensitive: false,
+  ),
+
+  // Seen in re2 headers.
+  RegExp(
+    kIndent +
+        r'Permission to use, copy, modify, and distribute this software for any *\n'
+            r'^\1\2purpose without fee is hereby granted, provided that this entire notice *\n'
+            r'^\1\2is included in all copies of any software which is or includes a copy *\n'
+            r'^\1\2or modification of this software and in all copies of the supporting *\n'
+            r'^\1\2documentation for such software. *\n'
+            r'^\1\2THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED *\n'
+            r'^\1\2WARRANTY.  IN PARTICULAR, NEITHER THE AUTHORS NOR LUCENT TECHNOLOGIES MAKE ANY *\n'
+            r'^\1\2REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY *\n'
+            r'^\1\2OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE. *\n',
+    multiLine: true,
   ),
 ];
 

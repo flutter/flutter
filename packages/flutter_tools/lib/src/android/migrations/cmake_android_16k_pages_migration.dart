@@ -44,14 +44,15 @@ class CmakeAndroid16kPagesMigration extends ProjectMigrator {
       return;
     }
 
-    final RegExp regex = RegExp(r'target_compile_definitions\(([^ ]*) PUBLIC DART_SHARED_LIB\)');
+    final regex = RegExp(r'target_compile_definitions\(([^ ]*) PUBLIC DART_SHARED_LIB\)');
     final String? projectName = regex.firstMatch(original)?.group(1);
-    const String before = '''
+    const before = '''
  PUBLIC DART_SHARED_LIB)
 ''';
 
     /// Relevant template: templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
-    final String linkerFlags = '''
+    final linkerFlags =
+        '''
 
 if (ANDROID)
   # Support Android 15 16k page size.

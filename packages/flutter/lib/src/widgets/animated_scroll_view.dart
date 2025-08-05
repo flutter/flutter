@@ -845,15 +845,15 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
           right: 0.0,
         );
         // Consume the main axis padding with SliverPadding.
-        effectivePadding =
-            direction == Axis.vertical ? mediaQueryVerticalPadding : mediaQueryHorizontalPadding;
+        effectivePadding = direction == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
         sliver = MediaQuery(
           data: mediaQuery.copyWith(
-            padding:
-                direction == Axis.vertical
-                    ? mediaQueryHorizontalPadding
-                    : mediaQueryVerticalPadding,
+            padding: direction == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
           ),
           child: sliver,
         );
@@ -1134,8 +1134,8 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedGrid] ancestor is found.
   static SliverAnimatedGridState of(BuildContext context) {
-    final SliverAnimatedGridState? result =
-        context.findAncestorStateOfType<SliverAnimatedGridState>();
+    final SliverAnimatedGridState? result = context
+        .findAncestorStateOfType<SliverAnimatedGridState>();
     assert(() {
       if (result == null) {
         throw FlutterError(
@@ -1310,13 +1310,12 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
-      findChildIndexCallback:
-          widget.findChildIndexCallback == null
-              ? null
-              : (Key key) {
-                final int? index = widget.findChildIndexCallback!(key);
-                return index != null ? _indexToItemIndex(index) : null;
-              },
+      findChildIndexCallback: widget.findChildIndexCallback == null
+          ? null
+          : (Key key) {
+              final int? index = widget.findChildIndexCallback!(key);
+              return index != null ? _indexToItemIndex(index) : null;
+            },
     );
   }
 

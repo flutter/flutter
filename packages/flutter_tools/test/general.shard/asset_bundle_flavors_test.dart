@@ -21,7 +21,7 @@ void main() {
     required FileSystem fileSystem,
     required Platform platform,
   }) async {
-    final ManifestAssetBundle bundle = ManifestAssetBundle(
+    final bundle = ManifestAssetBundle(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -44,14 +44,14 @@ void main() {
   testWithoutContext(
     'correctly bundles assets given a simple asset manifest with flavors',
     () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final fileSystem = MemoryFileSystem();
       fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform();
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
 
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem
           .file(fileSystem.path.join('assets', 'common', 'image.png'))
@@ -122,13 +122,13 @@ flutter:
   testWithoutContext(
     'throws a tool exit when a non-flavored folder contains a flavored asset',
     () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final fileSystem = MemoryFileSystem();
       fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
       fileSystem.file(fileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
       fileSystem
@@ -165,13 +165,13 @@ flutter:
   testWithoutContext(
     'throws a tool exit when a flavored folder contains a flavorless asset',
     () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final fileSystem = MemoryFileSystem();
       fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem.file(fileSystem.path.join('vanilla', 'vanilla.png')).createSync(recursive: true);
       fileSystem
           .file(fileSystem.path.join('vanilla', 'flavorless.png'))
@@ -205,13 +205,13 @@ flutter:
   testWithoutContext(
     'tool exits when two file-explicit entries give the same asset different flavors',
     () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final fileSystem = MemoryFileSystem();
       fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem.file('orange.png').createSync(recursive: true);
       fileSystem.file('pubspec.yaml')
         ..createSync()
@@ -243,13 +243,13 @@ flutter:
   testWithoutContext(
     'throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration',
     () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
+      final fileSystem = MemoryFileSystem();
       fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_asset_bundle_test.',
       );
-      final BufferLogger logger = BufferLogger.test();
-      final FakePlatform platform = FakePlatform();
-      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'example');
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       fileSystem
           .file(fileSystem.path.join('vanilla', 'actually-strawberry.png'))
           .createSync(recursive: true);

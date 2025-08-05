@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
 import '../integration.shard/test_utils.dart';
@@ -73,7 +74,7 @@ void main() {
         tryToDelete(tempDir);
       });
 
-      for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
         group('build in ${buildMode.cliName} mode', () {
           late Directory outputPath;
           late Directory outputApp;
@@ -128,7 +129,7 @@ void main() {
                 projectRoot,
                 'build',
                 'ios',
-                '${sentenceCase(buildMode.cliName)}-iphoneos',
+                '${buildMode.uppercaseName}-iphoneos',
               ),
             );
 
@@ -196,7 +197,7 @@ void main() {
               '-',
               infoPlistPath,
             ]);
-            final bool localNetworkUsageFound = localNetworkUsage.exitCode == 0;
+            final localNetworkUsageFound = localNetworkUsage.exitCode == 0;
             expect(localNetworkUsageFound, buildMode == BuildMode.debug);
           });
 
@@ -296,6 +297,62 @@ void main() {
             expect(grepResult.exitCode, 1);
           });
         });
+      }
+
+      for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.profile, BuildMode.release]) {
+        for (final arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+            final String artifactDir;
+            switch (buildMode) {
+              case BuildMode.debug:
+              case BuildMode.jitRelease:
+                artifactDir = 'ios';
+              case BuildMode.profile:
+                artifactDir = 'ios-profile';
+              case BuildMode.release:
+                artifactDir = 'ios-release';
+            }
+            final Directory xcframeworkArtifact = fileSystem.directory(
+              fileSystem.path.join(
+                flutterRoot,
+                'bin',
+                'cache',
+                'artifacts',
+                'engine',
+                artifactDir,
+                'Flutter.xcframework',
+              ),
+            );
+            // Verify Info.plist has correct engine version and build mode
+            final File engineInfo = fileSystem.file(
+              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json'),
+            );
+            expect(engineInfo, exists);
+
+            final String engineVersion;
+            if (json.decode(engineInfo.readAsStringSync().trim()) as Map<String, Object?> case {
+              'git_revision': final String parsedVersion,
+            }) {
+              engineVersion = parsedVersion;
+            } else {
+              fail('engine_stamp.json missing "git_revision" key');
+            }
+
+            final File infoPlist = fileSystem.file(
+              fileSystem.path.joinAll(<String>[
+                xcframeworkArtifact.path,
+                'ios-arm64',
+                'Flutter.framework',
+                'Info.plist',
+              ]),
+            );
+            expect(infoPlist, exists);
+
+            final String infoPlistContents = infoPlist.readAsStringSync();
+            expect(infoPlistContents, contains(engineVersion));
+            expect(infoPlistContents, contains(buildMode.cliName));
+          });
+        }
       }
 
       testWithoutContext('builds all plugin architectures for simulator', () {
@@ -424,7 +481,7 @@ void main() {
         expect(output.stdout, contains('Sending archive event if usage enabled'));
 
         // The output contains extra time related prefix, so cannot use a single string.
-        const List<String> expectedValidationMessages = <String>[
+        const expectedValidationMessages = <String>[
           '[!] App Settings Validation\n',
           '    • Version Number: 1.0.0\n',
           '    • Build Number: 1\n',

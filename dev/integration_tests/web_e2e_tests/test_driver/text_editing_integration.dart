@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_util' as js_util;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,15 +77,23 @@ void main() {
 
     // Press Tab. This should trigger `onFieldSubmitted` of TextField.
     final web.HTMLInputElement input = findElements('input').item(0)! as web.HTMLInputElement;
-    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
-      'keyCode': 13, // Enter.
-      'cancelable': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keydown',
+      web.KeyboardEventInit(
+        keyCode: 13, // Enter.
+        cancelable: true,
+      ),
+    );
     // Release Tab.
-    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
-      'keyCode': 13, // Enter.
-      'cancelable': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keyup',
+      web.KeyboardEventInit(
+        keyCode: 13, // Enter.
+        cancelable: true,
+      ),
+    );
 
     await tester.pumpAndSettle();
 
@@ -112,21 +118,29 @@ void main() {
     final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press Tab. The focus should move to the next TextFormField.
-    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
-      'key': 'Tab',
-      'code': 'Tab',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keydown',
+      web.KeyboardEventInit(
+        key: 'Tab',
+        code: 'Tab',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
     // Release tab.
-    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
-      'key': 'Tab',
-      'code': 'Tab',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keyup',
+      web.KeyboardEventInit(
+        key: 'Tab',
+        code: 'Tab',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
 
     await tester.pumpAndSettle();
 
@@ -153,37 +167,53 @@ void main() {
     final web.HTMLInputElement input = nodeList.item(0)! as web.HTMLInputElement;
 
     // Press and release CapsLock.
-    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
-      'key': 'CapsLock',
-      'code': 'CapsLock',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
-    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
-      'key': 'CapsLock',
-      'code': 'CapsLock',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keydown',
+      web.KeyboardEventInit(
+        key: 'CapsLock',
+        code: 'CapsLock',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
+    dispatchKeyboardEvent(
+      input,
+      'keyup',
+      web.KeyboardEventInit(
+        key: 'CapsLock',
+        code: 'CapsLock',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
 
     // Press Tab. The focus should move to the next TextFormField.
-    dispatchKeyboardEvent(input, 'keydown', <String, dynamic>{
-      'key': 'Tab',
-      'code': 'Tab',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keydown',
+      web.KeyboardEventInit(
+        key: 'Tab',
+        code: 'Tab',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
     // Release Tab.
-    dispatchKeyboardEvent(input, 'keyup', <String, dynamic>{
-      'key': 'Tab',
-      'code': 'Tab',
-      'bubbles': true,
-      'cancelable': true,
-      'composed': true,
-    });
+    dispatchKeyboardEvent(
+      input,
+      'keyup',
+      web.KeyboardEventInit(
+        key: 'Tab',
+        code: 'Tab',
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      ),
+    );
 
     await tester.pumpAndSettle();
 
@@ -245,14 +275,9 @@ void main() {
 web.KeyboardEvent dispatchKeyboardEvent(
   web.EventTarget target,
   String type,
-  Map<String, dynamic> args,
+  web.KeyboardEventInit eventInitDict,
 ) {
-  final Object jsKeyboardEvent = js_util.getProperty(web.window, 'KeyboardEvent') as Object;
-  final List<dynamic> eventArgs = <dynamic>[type, args];
-  final web.KeyboardEvent event =
-      js_util.callConstructor(jsKeyboardEvent, js_util.jsify(eventArgs) as List<dynamic>)
-          as web.KeyboardEvent;
+  final web.KeyboardEvent event = web.KeyboardEvent(type, eventInitDict);
   target.dispatchEvent(event);
-
   return event;
 }

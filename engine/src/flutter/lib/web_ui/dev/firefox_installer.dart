@@ -58,10 +58,9 @@ Future<BrowserInstallation> getOrInstallFirefox(
 
   FirefoxInstaller? installer;
   try {
-    installer =
-        requestedVersion == 'latest'
-            ? await FirefoxInstaller.latest()
-            : FirefoxInstaller(version: requestedVersion);
+    installer = requestedVersion == 'latest'
+        ? await FirefoxInstaller.latest()
+        : FirefoxInstaller(version: requestedVersion);
 
     if (installer.isInstalled) {
       infoLog.writeln(
@@ -110,10 +109,9 @@ class FirefoxInstaller {
   });
 
   static Future<FirefoxInstaller> latest() async {
-    final String latestVersion =
-        io.Platform.isLinux
-            ? await fetchLatestFirefoxVersionLinux()
-            : await fetchLatestFirefoxVersionMacOS();
+    final String latestVersion = io.Platform.isLinux
+        ? await fetchLatestFirefoxVersionLinux()
+        : await fetchLatestFirefoxVersionMacOS();
     return FirefoxInstaller(version: latestVersion);
   }
 
@@ -324,10 +322,9 @@ Future<String> fetchLatestFirefoxVersionMacOS() async {
 Future<BrowserInstallation> getInstaller({String requestedVersion = 'latest'}) async {
   FirefoxInstaller? installer;
   try {
-    installer =
-        requestedVersion == 'latest'
-            ? await FirefoxInstaller.latest()
-            : FirefoxInstaller(version: requestedVersion);
+    installer = requestedVersion == 'latest'
+        ? await FirefoxInstaller.latest()
+        : FirefoxInstaller(version: requestedVersion);
 
     if (installer.isInstalled) {
       print(

@@ -10,7 +10,7 @@ class DeferredComponentsProject extends Project {
   DeferredComponentsProject(this.deferredComponents);
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
 name: test
 environment:
   sdk: ^3.7.0-0
@@ -30,7 +30,7 @@ flutter:
 ''';
 
   @override
-  final String main = r'''
+  final main = r'''
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -111,8 +111,8 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.8.0-rc02" apply false
-    id "org.jetbrains.kotlin.android" version "1.8.22" apply false
+    id "com.android.application" version "8.9.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
 }
 
 include ":app", ":component1"
@@ -214,7 +214,8 @@ dependencies {
 ''';
 
   @override
-  String get androidLocalProperties => '''
+  String get androidLocalProperties =>
+      '''
 flutter.sdk=${getFlutterRoot()}
 flutter.buildMode=release
 flutter.versionName=1.0.0
@@ -239,7 +240,7 @@ storeFile=key.jks
   // This is a test jks keystore, generated for testing use only. Do not use this key in an actual
   // application.
   @override
-  final List<int> androidKey = <int>[
+  final androidKey = <int>[
     0xfe,
     0xed,
     0xfe,

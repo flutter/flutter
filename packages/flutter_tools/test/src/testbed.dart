@@ -30,24 +30,22 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 // A default value should be provided if the vast majority of tests should use
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
-final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
+final _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
-  FileSystem:
-      () => MemoryFileSystem(
-        style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
-      ),
+  FileSystem: () => MemoryFileSystem(
+    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+  ),
   ProcessManager: () => FakeProcessManager.any(),
-  Logger:
-      () => BufferLogger(
-        terminal: AnsiTerminal(
-          stdio: globals.stdio,
-          platform: globals.platform,
-        ), // Danger, using real stdio.
-        outputPreferences: OutputPreferences.test(),
-      ), // Allows reading logs and prevents stdout.
+  Logger: () => BufferLogger(
+    terminal: AnsiTerminal(
+      stdio: globals.stdio,
+      platform: globals.platform,
+    ), // Danger, using real stdio.
+    outputPreferences: OutputPreferences.test(),
+  ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-  OutputPreferences:
-      () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
+  OutputPreferences: () =>
+      OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => TestUsage(), // prevent addition of analytics from burdening test mocks
   Analytics: () => const NoOpAnalytics(),
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
@@ -64,32 +62,34 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 /// Testing that a filesystem operation works as expected:
 ///
-///     void main() {
-///       group('Example', () {
-///         Testbed testbed;
+/// ```dart
+/// void main() {
+///   group('Example', () {
+///     Testbed testbed;
 ///
-///         setUp(() {
-///           testbed = Testbed(setUp: () {
-///             globals.fs.file('foo').createSync()
-///           });
-///         })
-///
-///         test('Can delete a file', () => testbed.run(() {
-///           expect(globals.fs.file('foo').existsSync(), true);
-///           globals.fs.file('foo').deleteSync();
-///           expect(globals.fs.file('foo').existsSync(), false);
-///         }));
+///     setUp(() {
+///       testbed = Testbed(setUp: () {
+///         globals.fs.file('foo').createSync()
 ///       });
-///     }
+///     })
+///
+///     test('Can delete a file', () => testbed.run(() {
+///       expect(globals.fs.file('foo').existsSync(), true);
+///       globals.fs.file('foo').deleteSync();
+///       expect(globals.fs.file('foo').existsSync(), false);
+///     }));
+///   });
+/// }
+/// ```
 ///
 /// For a more detailed example, see the code in test_compiler_test.dart.
-class Testbed {
+class TestBed {
   /// Creates a new [TestBed]
   ///
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
+  TestBed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
     : _setup = setup,
       _overrides = overrides;
 
@@ -101,7 +101,7 @@ class Testbed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
-    final Map<Type, Generator> testOverrides = <Type, Generator>{
+    final testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
       ...?_overrides,
@@ -114,7 +114,7 @@ class Testbed {
     // Cache the original flutter root to restore after the test case.
     final String? originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
-    final Map<Timer, StackTrace> timers = <Timer, StackTrace>{};
+    final timers = <Timer, StackTrace>{};
 
     return HttpOverrides.runZoned(() {
       return runInContext<T?>(() {
@@ -122,28 +122,30 @@ class Testbed {
           name: 'testbed',
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
-            createTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration duration,
-              void Function() timer,
-            ) {
-              final Timer result = parent.createTimer(zone, duration, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
-            createPeriodicTimer: (
-              Zone self,
-              ZoneDelegate parent,
-              Zone zone,
-              Duration period,
-              void Function(Timer) timer,
-            ) {
-              final Timer result = parent.createPeriodicTimer(zone, period, timer);
-              timers[result] = StackTrace.current;
-              return result;
-            },
+            createTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration duration,
+                  void Function() timer,
+                ) {
+                  final Timer result = parent.createTimer(zone, duration, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
+            createPeriodicTimer:
+                (
+                  Zone self,
+                  ZoneDelegate parent,
+                  Zone zone,
+                  Duration period,
+                  void Function(Timer) timer,
+                ) {
+                  final Timer result = parent.createPeriodicTimer(zone, period, timer);
+                  timers[result] = StackTrace.current;
+                  return result;
+                },
           ),
           body: () async {
             Cache.flutterRoot = '';

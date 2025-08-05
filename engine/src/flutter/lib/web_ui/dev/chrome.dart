@@ -23,15 +23,18 @@ const String kBlankPageUrl = 'about:blank';
 
 /// Provides an environment for desktop Chrome.
 class ChromeEnvironment implements BrowserEnvironment {
-  ChromeEnvironment({required bool useDwarf}) : _useDwarf = useDwarf;
+  ChromeEnvironment({required bool useDwarf, required List<String> flags})
+    : _useDwarf = useDwarf,
+      _flags = flags;
 
   late final BrowserInstallation _installation;
 
   final bool _useDwarf;
+  final List<String> _flags;
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
-    return Chrome(url, _installation, debug: debug, useDwarf: _useDwarf);
+    return Chrome(url, _installation, debug: debug, useDwarf: _useDwarf, flags: _flags);
   }
 
   @override
@@ -68,6 +71,7 @@ class Chrome extends Browser {
     BrowserInstallation installation, {
     required bool debug,
     required bool useDwarf,
+    required List<String> flags,
   }) {
     final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
     final Completer<String> exceptionCompleter = Completer<String>();
@@ -116,6 +120,8 @@ class Chrome extends Browser {
           // for WebGL contexts. In order to work around this limitation, we can force
           // GPU rendering with this flag.
           if (environment.isMacosArm) '--use-angle=metal',
+
+          ...flags,
         ];
 
         final Process process = await _spawnChromiumProcess(installation.executable, args);
@@ -141,10 +147,9 @@ class Chrome extends Browser {
     BrowserInstallation installation,
     bool useDwarf,
   ) async {
-    final String userDirectoryPath =
-        environment.webUiDartToolDir
-            .createTempSync('test_chrome_user_data_')
-            .resolveSymbolicLinksSync();
+    final String userDirectoryPath = environment.webUiDartToolDir
+        .createTempSync('test_chrome_user_data_')
+        .resolveSymbolicLinksSync();
     if (!useDwarf) {
       return userDirectoryPath;
     }

@@ -137,8 +137,9 @@ void main() {
           for (final DomSubscription subscription in _domSubscriptions.remove(message['id'])!) {
             subscription.cancel();
           }
-          for (final StreamSubscription<dynamic> subscription
-              in _streamSubscriptions.remove(message['id'])!) {
+          for (final StreamSubscription<dynamic> subscription in _streamSubscriptions.remove(
+            message['id'],
+          )!) {
             subscription.cancel();
           }
         }
@@ -152,18 +153,16 @@ void main() {
       );
 
       _jsApi = _JSApi(
-        resume:
-            () {
-              if (!domDocument.body!.classList.contains('paused')) {
-                return;
-              }
-              domDocument.body!.classList.remove('paused');
-              serverChannel.sink.add(<String, String>{'command': 'resume'});
-            }.toJS,
-        restartCurrent:
-            () {
-              serverChannel.sink.add(<String, String>{'command': 'restart'});
-            }.toJS,
+        resume: () {
+          if (!domDocument.body!.classList.contains('paused')) {
+            return;
+          }
+          domDocument.body!.classList.remove('paused');
+          serverChannel.sink.add(<String, String>{'command': 'resume'});
+        }.toJS,
+        restartCurrent: () {
+          serverChannel.sink.add(<String, String>{'command': 'restart'});
+        }.toJS,
       );
     },
     (dynamic error, StackTrace stackTrace) {
@@ -200,11 +199,6 @@ MultiChannel<dynamic> _connectToServer() {
 StreamChannel<dynamic> _connectToIframe(String url, int id) {
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
-  iframe
-    ..src = url
-    ..width = '1000'
-    ..height = '1000';
-  domDocument.body!.appendChild(iframe);
 
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
 
@@ -225,14 +219,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
         if (message.origin != domWindow.location.origin) {
           return;
         }
-        // We have to do these ugly casts because the message is cross-origin
-        // which isn't handled cleanly by dart:js_interop.
-        if (((message.source as DomMessageEventSource?)?.location as DomMessageEventLocation?)
-                ?.href !=
-            iframe.src) {
-          return;
-        }
-
         message.stopPropagation();
 
         if (message.data == 'port') {
@@ -276,6 +262,12 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       }),
     ),
   );
+
+  iframe
+    ..src = url
+    ..width = '1000'
+    ..height = '1000';
+  domDocument.body!.appendChild(iframe);
 
   return controller.foreign;
 }

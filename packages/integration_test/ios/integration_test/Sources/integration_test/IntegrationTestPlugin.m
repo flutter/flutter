@@ -79,7 +79,12 @@ static NSString *const kMethodRevertImage = @"revertFlutterImage";
 
 - (UIImage *)capturePngScreenshot {
   // Get all windows in the app
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  // TODO(jmagman) Use scenes instead of deprecated windows. See
+  // https://github.com/flutter/flutter/issues/154365
   NSArray<UIWindow *> *windows = [UIApplication sharedApplication].windows;
+#pragma clang diagnostic pop
 
   // Find the overall bounding rect for all windows
   CGRect screenBounds = [UIScreen mainScreen].bounds;

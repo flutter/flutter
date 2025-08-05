@@ -357,6 +357,11 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
+///
+/// See also:
+///
+///  * [debugCheckHasDirectionality], which is a similar, but more general
+///    painting-library level function.
 bool debugCheckHasDirectionality(
   BuildContext context, {
   String? why,

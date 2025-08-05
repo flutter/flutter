@@ -13,7 +13,7 @@ import '../../src/common.dart';
 void main() {
   group('DeferredComponent basics', () {
     testWithoutContext('constructor sets values', () {
-      final DeferredComponent component = DeferredComponent(
+      final component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
         assets: <AssetsEntry>[
@@ -30,7 +30,7 @@ void main() {
     });
 
     testWithoutContext('assignLoadingUnits selects the needed loading units and sets assigned', () {
-      final DeferredComponent component = DeferredComponent(
+      final component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
         assets: <AssetsEntry>[
@@ -42,7 +42,7 @@ void main() {
       expect(component.assigned, false);
       expect(component.loadingUnits, null);
 
-      final List<LoadingUnit> loadingUnits1 = <LoadingUnit>[
+      final loadingUnits1 = <LoadingUnit>[
         LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']),
         LoadingUnit(id: 3, path: 'path/to/so.so', libraries: <String>['lib2', 'lib5']),
         LoadingUnit(id: 4, path: 'path/to/so.so', libraries: <String>['lib6', 'lib7']),
@@ -56,7 +56,7 @@ void main() {
       expect(component.loadingUnits, contains(loadingUnits1[1]));
       expect(component.loadingUnits, isNot(contains(loadingUnits1[2])));
 
-      final List<LoadingUnit> loadingUnits2 = <LoadingUnit>[
+      final loadingUnits2 = <LoadingUnit>[
         LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib2']),
         LoadingUnit(id: 3, path: 'path/to/so.so', libraries: <String>['lib5', 'lib6']),
         LoadingUnit(id: 4, path: 'path/to/so.so', libraries: <String>['lib7', 'lib8']),
@@ -77,7 +77,7 @@ void main() {
     });
 
     testWithoutContext('toString produces correct string for unassigned component', () {
-      final DeferredComponent component = DeferredComponent(
+      final component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
         assets: <AssetsEntry>[
@@ -92,7 +92,7 @@ void main() {
     });
 
     testWithoutContext('toString produces correct string for assigned component', () {
-      final DeferredComponent component = DeferredComponent(
+      final component = DeferredComponent(
         name: 'bestcomponent',
         libraries: <String>['lib1', 'lib2'],
         assets: <AssetsEntry>[
@@ -112,52 +112,32 @@ void main() {
 
   group('LoadingUnit basics', () {
     testWithoutContext('constructor sets values', () {
-      final LoadingUnit unit = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
+      final unit = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
       expect(unit.id, 2);
       expect(unit.path, 'path/to/so.so');
       expect(unit.libraries, <String>['lib1', 'lib4']);
     });
 
     testWithoutContext('toString produces correct string', () {
-      final LoadingUnit unit = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
+      final unit = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
       expect(unit.toString(), '\nLoadingUnit 2\n  Libraries:\n  - lib1\n  - lib4');
     });
 
     testWithoutContext('equalsIgnoringPath works for various input', () {
-      final LoadingUnit unit1 = LoadingUnit(
-        id: 2,
-        path: 'path/to/so.so',
-        libraries: <String>['lib1', 'lib4'],
-      );
-      final LoadingUnit unit2 = LoadingUnit(
+      final unit1 = LoadingUnit(id: 2, path: 'path/to/so.so', libraries: <String>['lib1', 'lib4']);
+      final unit2 = LoadingUnit(
         id: 2,
         path: 'path/to/other/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      final LoadingUnit unit3 = LoadingUnit(
+      final unit3 = LoadingUnit(
         id: 1,
         path: 'path/to/other/so.so',
         libraries: <String>['lib1', 'lib4'],
       );
-      final LoadingUnit unit4 = LoadingUnit(
-        id: 1,
-        path: 'path/to/other/so.so',
-        libraries: <String>['lib1'],
-      );
-      final LoadingUnit unit5 = LoadingUnit(
-        id: 1,
-        path: 'path/to/other/so.so',
-        libraries: <String>['lib2'],
-      );
-      final LoadingUnit unit6 = LoadingUnit(
+      final unit4 = LoadingUnit(id: 1, path: 'path/to/other/so.so', libraries: <String>['lib1']);
+      final unit5 = LoadingUnit(id: 1, path: 'path/to/other/so.so', libraries: <String>['lib2']);
+      final unit6 = LoadingUnit(
         id: 1,
         path: 'path/to/other/so.so',
         libraries: <String>['lib1', 'lib5'],

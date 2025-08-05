@@ -58,9 +58,8 @@ class FocusExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemBuilder:
-            (BuildContext context, int index) =>
-                FocusableText('Item $index', autofocus: index == 0),
+        itemBuilder: (BuildContext context, int index) =>
+            FocusableText('Item $index', autofocus: index == 0),
         itemCount: 50,
       ),
     );

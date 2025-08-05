@@ -74,7 +74,11 @@ Context::Context(std::shared_ptr<impeller::Context> context)
 
 Context::~Context() = default;
 
-std::shared_ptr<impeller::Context> Context::GetContext() {
+impeller::Context& Context::GetContext() {
+  return *context_;
+}
+
+std::shared_ptr<impeller::Context>& Context::GetContextShared() {
   return context_;
 }
 
@@ -101,29 +105,27 @@ Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
 extern int InternalFlutterGpu_Context_GetDefaultColorFormat(
     flutter::gpu::Context* wrapper) {
   return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
-      wrapper->GetContext()->GetCapabilities()->GetDefaultColorFormat()));
+      wrapper->GetContext().GetCapabilities()->GetDefaultColorFormat()));
 }
 
 extern int InternalFlutterGpu_Context_GetDefaultStencilFormat(
     flutter::gpu::Context* wrapper) {
   return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
-      wrapper->GetContext()->GetCapabilities()->GetDefaultStencilFormat()));
+      wrapper->GetContext().GetCapabilities()->GetDefaultStencilFormat()));
 }
 
 extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
     flutter::gpu::Context* wrapper) {
   return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
-      wrapper->GetContext()
-          ->GetCapabilities()
-          ->GetDefaultDepthStencilFormat()));
+      wrapper->GetContext().GetCapabilities()->GetDefaultDepthStencilFormat()));
 }
 
 extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
     flutter::gpu::Context* wrapper) {
-  return wrapper->GetContext()->GetCapabilities()->GetMinimumUniformAlignment();
+  return wrapper->GetContext().GetCapabilities()->GetMinimumUniformAlignment();
 }
 
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper) {
-  return flutter::gpu::SupportsNormalOffscreenMSAA(*wrapper->GetContext());
+  return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
 }

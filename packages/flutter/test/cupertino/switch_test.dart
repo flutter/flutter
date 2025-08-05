@@ -61,14 +61,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return CupertinoSwitch(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (bool newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                 );
               },
             ),
@@ -839,26 +838,26 @@ void main() {
     await expectLater(find.byKey(switchKey), matchesGoldenFile('switch.tap.on.png'));
   });
 
-  PaintPattern onLabelPaintPattern({required int alpha, bool isRtl = false}) =>
-      paints..rect(
-        rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
-        color: const Color(0xffffffff).withAlpha(alpha),
-        style: PaintingStyle.fill,
-      );
+  PaintPattern onLabelPaintPattern({required int alpha, bool isRtl = false}) => paints
+    ..rect(
+      rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
+      color: const Color(0xffffffff).withAlpha(alpha),
+      style: PaintingStyle.fill,
+    );
 
   PaintPattern offLabelPaintPattern({
     required int alpha,
     bool highContrast = false,
     bool isRtl = false,
-  }) =>
-      paints..circle(
-        x: isRtl ? 16.0 : 43.0,
-        y: 19.5,
-        radius: 5.0,
-        color: (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3)).withAlpha(alpha),
-        strokeWidth: 1.0,
-        style: PaintingStyle.stroke,
-      );
+  }) => paints
+    ..circle(
+      x: isRtl ? 16.0 : 43.0,
+      y: 19.5,
+      radius: 5.0,
+      color: (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3)).withAlpha(alpha),
+      strokeWidth: 1.0,
+      style: PaintingStyle.stroke,
+    );
 
   testWidgets('Switch renders switch labels correctly before, during, and after being tapped', (
     WidgetTester tester,
@@ -892,8 +891,9 @@ void main() {
       ),
     );
 
-    final RenderObject switchRenderObject =
-        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+    final RenderObject switchRenderObject = tester
+        .element(find.byType(CupertinoSwitch))
+        .renderObject!;
 
     expect(switchRenderObject, offLabelPaintPattern(alpha: 255));
     expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
@@ -944,8 +944,9 @@ void main() {
         ),
       );
 
-      final RenderObject switchRenderObject =
-          tester.element(find.byType(CupertinoSwitch)).renderObject!;
+      final RenderObject switchRenderObject = tester
+          .element(find.byType(CupertinoSwitch))
+          .renderObject!;
 
       expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 255));
       expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
@@ -997,8 +998,9 @@ void main() {
         ),
       );
 
-      final RenderObject switchRenderObject =
-          tester.element(find.byType(CupertinoSwitch)).renderObject!;
+      final RenderObject switchRenderObject = tester
+          .element(find.byType(CupertinoSwitch))
+          .renderObject!;
 
       expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 255));
       expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 0));
@@ -1235,14 +1237,13 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                onChanged:
-                    enabled
-                        ? (bool newValue) {
-                          setState(() {
-                            value = newValue;
-                          });
-                        }
-                        : null,
+                onChanged: enabled
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
                 focusColor: focusColor,
                 focusNode: focusNode,
                 autofocus: true,

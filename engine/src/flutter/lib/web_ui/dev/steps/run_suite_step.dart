@@ -65,6 +65,7 @@ class RunSuiteStep implements PipelineStep {
     final BrowserEnvironment browserEnvironment = getBrowserEnvironment(
       suite.runConfig.browser,
       useDwarf: useDwarf,
+      browserFlags: suite.runConfig.browserFlags,
     );
     await browserEnvironment.prepare();
 
@@ -200,7 +201,7 @@ class RunSuiteStep implements PipelineStep {
       'Browser': suite.runConfig.browser.name,
       if (isWasm) 'Wasm': 'true',
       'Renderer': rendererName,
-      if (variant != null) 'CanvasKitVariant': variant.name,
+      'CanvasKitVariant': ?variant?.name,
     };
     final SkiaGoldClient skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
 

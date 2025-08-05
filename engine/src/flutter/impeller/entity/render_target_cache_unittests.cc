@@ -39,7 +39,8 @@ class TestAllocator : public Allocator {
   };
 
   virtual std::shared_ptr<Texture> OnCreateTexture(
-      const TextureDescriptor& desc) override {
+      const TextureDescriptor& desc,
+      bool threadsafe) override {
     if (should_fail) {
       return nullptr;
     }

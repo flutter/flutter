@@ -23,10 +23,9 @@ class KeyboardInsertedContent {
   KeyboardInsertedContent.fromJson(Map<String, dynamic> metadata)
     : mimeType = metadata['mimeType'] as String,
       uri = metadata['uri'] as String,
-      data =
-          metadata['data'] != null
-              ? Uint8List.fromList(List<int>.from(metadata['data'] as Iterable<dynamic>))
-              : null;
+      data = metadata['data'] != null
+          ? Uint8List.fromList(List<int>.from(metadata['data'] as Iterable<dynamic>))
+          : null;
 
   /// The mime type of the inserted content.
   final String mimeType;

@@ -106,18 +106,19 @@ class ArchivePublisher {
 
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
-    jsonData['releases'] = <Map<String, dynamic>>[
-      for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
-        if (entry['hash'] != newEntry['hash'] ||
-            entry['channel'] != newEntry['channel'] ||
-            entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
-          entry,
-      newEntry,
-    ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final DateTime aDate = DateTime.parse(a['release_date'] as String);
-      final DateTime bDate = DateTime.parse(b['release_date'] as String);
-      return bDate.compareTo(aDate);
-    });
+    jsonData['releases'] =
+        <Map<String, dynamic>>[
+          for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
+            if (entry['hash'] != newEntry['hash'] ||
+                entry['channel'] != newEntry['channel'] ||
+                entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
+              entry,
+          newEntry,
+        ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+          final DateTime aDate = DateTime.parse(a['release_date'] as String);
+          final DateTime bDate = DateTime.parse(b['release_date'] as String);
+          return bDate.compareTo(aDate);
+        });
     return jsonData;
   }
 

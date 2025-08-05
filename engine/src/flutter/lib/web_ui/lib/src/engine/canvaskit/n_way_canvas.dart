@@ -96,4 +96,11 @@ class CkNWayCanvas {
       _canvases[i].clipRRect(rrect, doAntiAlias);
     }
   }
+
+  /// Calls [clipRSuperellipse] on all canvases.
+  void clipRSuperellipse(ui.RSuperellipse rsuperellipse, bool doAntiAlias) {
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
+    return clipRRect(rsuperellipse.toApproximateRRect(), doAntiAlias);
+  }
 }

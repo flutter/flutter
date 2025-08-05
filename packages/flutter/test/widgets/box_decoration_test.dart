@@ -602,7 +602,10 @@ Future<void> main() async {
             color: Colors.orangeAccent,
             shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
           ),
-          child: Directionality(textDirection: TextDirection.ltr, child: Stack(children: circles)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(children: circles),
+          ),
         ),
       );
     }

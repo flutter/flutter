@@ -37,10 +37,9 @@ class _ScaffoldExampleState extends State<ScaffoldExample> {
         child: Container(height: 50.0),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed:
-            () => setState(() {
-              _count++;
-            }),
+        onPressed: () => setState(() {
+          _count++;
+        }),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

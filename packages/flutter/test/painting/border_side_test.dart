@@ -108,8 +108,11 @@ void main() {
     expect(paint1.style, PaintingStyle.stroke);
     expect(paint1.color, const Color(0xFFFFFF00));
     expect(paint1.blendMode, BlendMode.srcOver);
-    final Paint paint2 =
-        const BorderSide(width: 2.5, color: Color(0xFFFFFF00), style: BorderStyle.none).toPaint();
+    final Paint paint2 = const BorderSide(
+      width: 2.5,
+      color: Color(0xFFFFFF00),
+      style: BorderStyle.none,
+    ).toPaint();
     expect(paint2.strokeWidth, 0.0);
     expect(paint2.style, PaintingStyle.stroke);
     expect(paint2.color, const Color(0x00000000));

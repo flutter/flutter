@@ -4,6 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -14,6 +15,24 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests();
+
+  test('recorder and picture dispose underlying objects properly', () {
+    final ScenePictureRecorder recorder = ui.PictureRecorder() as ScenePictureRecorder;
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    const ui.Rect rect = ui.Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    canvas.clipRect(rect);
+
+    expect(recorder.isRecording, true);
+    expect(recorder.debugDisposed, false);
+    final ui.Picture picture = recorder.endRecording();
+
+    expect(picture.debugDisposed, false);
+    expect(recorder.isRecording, false);
+    expect(recorder.debugDisposed, true);
+
+    picture.dispose();
+    expect(picture.debugDisposed, true);
+  });
 
   test('Picture construction invokes onCreate once', () async {
     int onCreateInvokedCount = 0;

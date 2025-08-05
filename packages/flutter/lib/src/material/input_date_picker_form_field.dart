@@ -259,7 +259,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
-    final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
+    final InputDecorationThemeData inputTheme = theme.inputDecorationTheme;
     final InputBorder effectiveInputBorder =
         datePickerTheme.inputDecorationTheme?.border ??
         theme.inputDecorationTheme.border ??
@@ -268,14 +268,15 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return Semantics(
       container: true,
       child: TextFormField(
-        decoration: InputDecoration(
-          hintText: widget.fieldHintText ?? widget.calendarDelegate.dateHelpText(localizations),
-          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-        ).applyDefaults(
-          inputTheme
-              .merge(datePickerTheme.inputDecorationTheme)
-              .copyWith(border: effectiveInputBorder),
-        ),
+        decoration:
+            InputDecoration(
+              hintText: widget.fieldHintText ?? widget.calendarDelegate.dateHelpText(localizations),
+              labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+            ).applyDefaults(
+              inputTheme
+                  .merge(datePickerTheme.inputDecorationTheme)
+                  .copyWith(border: effectiveInputBorder),
+            ),
         validator: _validateDate,
         keyboardType: widget.keyboardType ?? TextInputType.datetime,
         onSaved: _handleSaved,

@@ -6,10 +6,14 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("geometry") {
   sources = [
+    "arc.cc",
+    "arc.h",
     "color.cc",
     "color.h",
     "constants.cc",
     "constants.h",
+    "dashed_line_path_source.cc",
+    "dashed_line_path_source.h",
     "gradient.cc",
     "gradient.h",
     "half.h",
@@ -17,12 +21,7 @@ impeller_component("geometry") {
     "matrix.h",
     "matrix_decomposition.cc",
     "matrix_decomposition.h",
-    "path.cc",
-    "path.h",
-    "path_builder.cc",
-    "path_builder.h",
-    "path_component.cc",
-    "path_component.h",
+    "path_source.cc",
     "path_source.h",
     "point.cc",
     "point.h",
@@ -80,9 +79,10 @@ impeller_component("geometry_asserts") {
 impeller_component("geometry_unittests") {
   testonly = true
   sources = [
+    "arc_unittests.cc",
     "geometry_unittests.cc",
     "matrix_unittests.cc",
-    "path_unittests.cc",
+    "path_source_unittests.cc",
     "rational_unittests.cc",
     "rect_unittests.cc",
     "round_rect_unittests.cc",
@@ -97,6 +97,7 @@ impeller_component("geometry_unittests") {
   deps = [
     ":geometry",
     ":geometry_asserts",
+    "//flutter/display_list/testing:display_list_testing",
     "//flutter/testing:testing_lib",
   ]
 }

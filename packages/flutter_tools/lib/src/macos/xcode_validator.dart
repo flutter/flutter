@@ -9,7 +9,8 @@ import '../doctor_validator.dart';
 import '../ios/simulators.dart';
 import 'xcode.dart';
 
-String _iOSSimulatorMissing(String version) => '''
+String _iOSSimulatorMissing(String version) =>
+    '''
 iOS $version Simulator not installed; this may be necessary for iOS and macOS development.
 To download and install the platform, open Xcode, select Xcode > Settings > Components,
 and click the GET button for the required platform.
@@ -33,7 +34,7 @@ class XcodeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     String? xcodeVersionInfo;
 

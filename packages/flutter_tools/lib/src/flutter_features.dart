@@ -53,10 +53,13 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override
-  bool get isExplicitPackageDependenciesEnabled => isEnabled(explicitPackageDependencies);
+  bool get isOmitLegacyVersionFileEnabled => isEnabled(omitLegacyVersionFile);
+
+  @override
+  bool get isWindowingEnabled => isEnabled(windowingFeature);
 }
 
-interface class FlutterFeatureFlags with FlutterFeatureFlagsIsEnabled implements FeatureFlags {
+interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
   FlutterFeatureFlags({
     required FlutterVersion flutterVersion,
     required FlutterFeaturesConfig featuresConfig,

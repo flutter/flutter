@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include "export.h"
+#include "live_objects.h"
 
 #include "third_party/skia/include/core/SkData.h"
 
 SKWASM_EXPORT SkData* skData_create(size_t size) {
+  liveDataCount++;
   return SkData::MakeUninitialized(size).release();
 }
 
@@ -23,5 +25,6 @@ SKWASM_EXPORT size_t skData_getSize(SkData* data) {
 }
 
 SKWASM_EXPORT void skData_dispose(SkData* data) {
+  liveDataCount--;
   return data->unref();
 }

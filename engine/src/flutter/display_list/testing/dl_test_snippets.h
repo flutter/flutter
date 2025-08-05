@@ -12,7 +12,6 @@
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/testing/testing.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSurface.h"

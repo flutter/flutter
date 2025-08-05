@@ -13,7 +13,8 @@ class RadioTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);
 
@@ -88,6 +89,10 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  WidgetStateProperty<Color> get backgroundColor =>
+      WidgetStateProperty.all<Color>(Colors.transparent);
 }
 ''';
 }

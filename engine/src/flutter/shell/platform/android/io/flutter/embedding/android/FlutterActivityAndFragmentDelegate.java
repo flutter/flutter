@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_INITIAL_ROUTE;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -64,9 +63,9 @@ import java.util.List;
  * <p>Any time that a "delegate" is created with the purpose of encapsulating the internal behaviors
  * of another object, that delegate is highly susceptible to degeneration. It is easy to tack new
  * responsibilities on to the delegate which would not otherwise be added to the original object. It
- * is also easy to begin hanging listeners and callbacks on a delegate object that likewise would
- * not be added to the original object. A delegate can quickly become a complex web of dependencies
- * and optional references that are very difficult to track.
+ * is also easy to begin hanging listeners and callbacks objectn a delegate object that likewise
+ * would not be added to the original object. A delegate can quickly become a complex web of
+ * dependencies and optional references that are very difficult to track.
  *
  * <p>Maintainers of this class should take care to only place code in this delegate that would
  * otherwise be placed in either {@link FlutterActivity} or {@link FlutterFragment}, and in exactly
@@ -370,6 +369,7 @@ import java.util.List;
    * </ol>
    */
   @NonNull
+  @RequiresApi(API_LEVELS.API_24)
   View onCreateView(
       LayoutInflater inflater,
       @Nullable ViewGroup container,
@@ -667,6 +667,7 @@ import java.util.List;
    *
    * <p>This method removes this delegate's {@link FlutterView}'s {@link FlutterUiDisplayListener}.
    */
+  @RequiresApi(API_LEVELS.API_24)
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
@@ -821,7 +822,6 @@ import java.util.List;
    *
    * @param backEvent The BackEvent object containing information about the touch.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void startBackGesture(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -844,7 +844,6 @@ import java.util.List;
    *
    * @param backEvent An BackEvent object describing the progress event.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void updateBackGestureProgress(@NonNull BackEvent backEvent) {
     ensureAlive();
@@ -869,7 +868,6 @@ import java.util.List;
    * navigation, including finalizing animations and updating the UI to reflect the navigation
    * outcome.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void commitBackGesture() {
     ensureAlive();
@@ -891,7 +889,6 @@ import java.util.List;
    * in response to the back gesture. This includes resetting UI elements to their state prior to
    * the gesture's start.
    */
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   void cancelBackGesture() {
     ensureAlive();

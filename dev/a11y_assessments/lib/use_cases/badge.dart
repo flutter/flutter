@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
+  BadgeUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'Badge';
 
@@ -36,7 +38,11 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: const Center(
         child: Badge(
-          label: Text('5', semanticsLabel: '5 new messages', style: TextStyle(color: Colors.white)),
+          label: Text(
+            '5',
+            semanticsLabel: '5 new messages',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.green,
           child: Icon(Icons.mail, semanticLabel: 'Messages'),
         ),

@@ -18,10 +18,9 @@ void main(List<String> args) async {
   print('Launching embedding-flutter-view');
 
   args = args + _GetArgsFromConfigFile();
-  final parser =
-      ArgParser()
-        ..addFlag('showOverlay', defaultsTo: false)
-        ..addFlag('focusable', defaultsTo: true);
+  final parser = ArgParser()
+    ..addFlag('showOverlay', defaultsTo: false)
+    ..addFlag('focusable', defaultsTo: true);
 
   final arguments = parser.parse(args);
   for (final option in arguments.options) {
@@ -83,10 +82,9 @@ class TestApp {
     canvas.drawRect(windowBounds, paint);
     final picture = recorder.endRecording();
     // Build the scene
-    final sceneBuilder =
-        SceneBuilder()
-          ..pushClipRect(physicalBounds)
-          ..addPicture(Offset.zero, picture);
+    final sceneBuilder = SceneBuilder()
+      ..pushClipRect(physicalBounds)
+      ..addPicture(Offset.zero, picture);
 
     final childPhysicalSize = window.physicalSize * 0.25;
     // Alignment.center
@@ -167,19 +165,18 @@ class TestApp {
     required int timeReceived,
   }) {
     print('embedding-flutter-view reporting touch input to TouchInputListener');
-    final message =
-        utf8
-            .encode(
-              json.encode({
-                'method': 'TouchInputListener.ReportTouchInput',
-                'local_x': localX,
-                'local_y': localY,
-                'time_received': timeReceived,
-                'component_name': 'embedding-flutter-view',
-              }),
-            )
-            .buffer
-            .asByteData();
+    final message = utf8
+        .encode(
+          json.encode({
+            'method': 'TouchInputListener.ReportTouchInput',
+            'local_x': localX,
+            'local_y': localY,
+            'time_received': timeReceived,
+            'component_name': 'embedding-flutter-view',
+          }),
+        )
+        .buffer
+        .asByteData();
     PlatformDispatcher.instance.sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }
@@ -207,11 +204,10 @@ class ChildView {
       ],
     };
 
-    final ByteData createViewMessage =
-        utf8
-            .encode(json.encode(<String, Object>{'method': 'View.create', 'args': args}))
-            .buffer
-            .asByteData();
+    final ByteData createViewMessage = utf8
+        .encode(json.encode(<String, Object>{'method': 'View.create', 'args': args}))
+        .buffer
+        .asByteData();
 
     final platformViewsChannel = 'flutter/platform_views';
 

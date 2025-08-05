@@ -9,10 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Properly constraints the physical size', (WidgetTester tester) async {
-    final FlutterViewSpy view =
-        FlutterViewSpy(view: tester.view)
-          ..physicalConstraints = ViewConstraints.tight(const Size(1008.0, 2198.0))
-          ..devicePixelRatio = 1.912500023841858;
+    final FlutterViewSpy view = FlutterViewSpy(view: tester.view)
+      ..physicalConstraints = ViewConstraints.tight(const Size(1008.0, 2198.0))
+      ..devicePixelRatio = 1.912500023841858;
 
     await tester.pumpWidget(wrapWithView: false, View(view: view, child: const SizedBox()));
 

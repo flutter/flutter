@@ -157,7 +157,9 @@ class _ActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _OptionsItem(child: _TextButton(onPressed: onTap, child: Text(text)));
+    return _OptionsItem(
+      child: _TextButton(onPressed: onTap, child: Text(text)),
+    );
   }
 }
 
