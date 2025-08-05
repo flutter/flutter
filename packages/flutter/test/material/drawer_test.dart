@@ -764,7 +764,7 @@ void main() {
     expect(material.clipBehavior, Clip.antiAlias);
   });
 
-  testWidgets('Drawer barrier is dismissible by default', (WidgetTester tester) async {
+  testWidgets('', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -903,12 +903,7 @@ void main() {
 
     // Test with drawerBarrierDismissible: true (default)
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          key: scaffoldKey,
-          drawer: const Drawer(child: Text('drawer')),
-        ),
-      ),
+      MaterialApp(home: Scaffold(key: scaffoldKey, drawer: const Drawer(child: Text('drawer')))),
     );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -923,7 +918,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text('drawer'), findsNothing);
-
   });
 
   testWidgets('Drawer cannot be dismissed with the escape key', (WidgetTester tester) async {
