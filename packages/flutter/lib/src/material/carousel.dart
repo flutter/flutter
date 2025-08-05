@@ -358,7 +358,7 @@ class CarouselView extends StatefulWidget {
   ///   onIndexChanged: (int index) {
   ///     print('Primary index changed to: $index');
   ///   },
-  ///   children: [
+  ///   children: <Widget>[
   ///     Container(color: Colors.red),
   ///     Container(color: Colors.green),
   ///     Container(color: Colors.blue),
