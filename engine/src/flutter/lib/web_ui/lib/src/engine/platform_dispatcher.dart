@@ -1067,7 +1067,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     style.lineHeight = '${spacingDefault}px';
     style.letterSpacing = '${spacingDefault}px';
     style.wordSpacing = '${spacingDefault}px';
-    style.margin = '0px ${spacingDefault}px 0px 0px';
+    style.margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
 
     _typographySettingsObserver = createDomResizeObserver((
