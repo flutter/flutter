@@ -6,7 +6,7 @@
 ///
 /// To use, import `package:flutter/widget_previews.dart`.
 ///
-/// See [docs.flutter.dev/development/tools/widget-previews](https://docs.flutter.dev/development/tools/widget-previews)
+/// See [flutter.dev/to/widget-previews](https://flutter.dev/to/widget-previews)
 /// for more details on getting started with widget previews.
 library widget_previews;
 

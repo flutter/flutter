@@ -114,9 +114,7 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
 class NoPreviewsDetectedWidget extends StatelessWidget {
   const NoPreviewsDetectedWidget({super.key});
 
-  static Uri documentationUrl = Uri.https(
-    'docs.flutter.dev/development/tools/widget-previews',
-  );
+  static Uri documentationUrl = Uri.https('flutter.dev/to/widget-previews');
 
   @override
   Widget build(BuildContext context) {
