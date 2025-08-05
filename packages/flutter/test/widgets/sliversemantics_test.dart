@@ -459,11 +459,11 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(hint: 'hint one', child: const SizedBox(height: 10.0)),
                 Semantics(hint: 'hint two', child: const SizedBox(height: 10.0)),
-              ]),
+              ],
             ),
           ),
         ],
@@ -557,11 +557,11 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(value: 'value one', child: const SizedBox(height: 10.0)),
                 Semantics(value: 'value two', child: const SizedBox(height: 10.0)),
-              ]),
+              ],
             ),
           ),
         ],
@@ -655,11 +655,11 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(hint: 'hint', child: const SizedBox(height: 10.0)),
                 Semantics(value: 'value', child: const SizedBox(height: 10.0)),
-              ]),
+              ],
             ),
           ),
         ],
@@ -753,11 +753,11 @@ void _tests() {
         slivers: <Widget>[
           SliverSemantics(
             container: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(container: true, child: const Text('child 1')),
                 Semantics(container: true, child: const Text('child 2')),
-              ]),
+              ],
             ),
           ),
         ],
@@ -2366,8 +2366,8 @@ void _tests() {
           SliverSemantics(
             blockUserActions: true,
             explicitChildNodes: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(
                   key: key1,
                   label: 'label1',
@@ -2380,7 +2380,7 @@ void _tests() {
                   onTap: () {},
                   child: const SizedBox(height: 10),
                 ),
-              ]),
+              ],
             ),
           ),
         ],
@@ -2442,8 +2442,8 @@ void _tests() {
           SliverSemantics(
             key: key,
             container: true,
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            sliver: SliverList.list(
+              children: <Widget>[
                 Semantics(
                   blockUserActions: true,
                   label: 'label1',
@@ -2451,7 +2451,7 @@ void _tests() {
                   child: const SizedBox(height: 10),
                 ),
                 Semantics(label: 'label2', onLongPress: () {}, child: const SizedBox(height: 10)),
-              ]),
+              ],
             ),
           ),
         ],

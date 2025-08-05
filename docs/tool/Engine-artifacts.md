@@ -90,12 +90,11 @@ The Flutter project has a plethora of users: engineers working from local branch
 
 | Branch                  | Hashed From                                                          |
 | ----------------------- | -------------------------------------------------------------------- |
-| `main`                  | HEAD                                                                 |
-| `master`                | HEAD                                                                 |
-| `stable`                | HEAD                                                                 |
-| `beta`                  | HEAD                                                                 |
+| `main`,`master`         | HEAD                                                                 |
+| `stable`, `beta`        | HEAD                                                                 |
 | GitHub Merge Queue      | HEAD                                                                 |
 | `flutter-*-candidate.x` | HEAD                                                                 |
+| `HEAD`                  | HEAD                                                                 |
 | Shallow Clones          | HEAD                                                                 |
 | **Everything Else**.    | `merge-base` between `HEAD` and`(origin or upstream)/(main or master)` |
 
