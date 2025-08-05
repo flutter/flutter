@@ -2102,10 +2102,10 @@ The findRenderObject() method was called for the following element:
       onActivate: (_) => throw StateError('kaboom'),
       child: child,
     );
-    await tester.pumpWidget(MetaData(child: widget));
+    await tester.pumpWidget(widget);
     final Element element = tester.element(find.byWidget(child));
 
-    await tester.pumpWidget(widget);
+    await tester.pumpWidget(MetaData(child: widget));
     FlutterError.onError = onError;
     expect(element.debugIsDefunct, true);
   });

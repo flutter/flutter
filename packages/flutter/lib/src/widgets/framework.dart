@@ -4525,39 +4525,35 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
     try {
       final Key? key = newWidget.key;
-      if (key is GlobalKey) {
-        final Element? newChild = _retakeInactiveElement(key, newWidget);
-        if (newChild != null) {
-          assert(newChild._parent == null);
-          assert(() {
-            _debugCheckForCycles(newChild);
-            return true;
-          }());
-          try {
-            newChild._activateWithParent(this, newSlot);
-          } catch (_) {
-            // Attempt to do some clean-up if activation fails to leave tree in a reasonable state.
-            try {
-              deactivateChild(newChild);
-            } catch (_) {
-              // Clean-up failed. Only surface original exception.
-            }
-            rethrow;
-          }
-          final Element? updatedChild = updateChild(newChild, newWidget, newSlot);
-          assert(newChild == updatedChild);
-          return updatedChild!;
-        }
-      }
-      final Element newChild = newWidget.createElement();
+      final Element? inactiveChild = key is GlobalKey
+          ? _retakeInactiveElement(key, newWidget)
+          : null;
+      final Element newChild = inactiveChild ?? newWidget.createElement();
       assert(() {
         _debugCheckForCycles(newChild);
         return true;
       }());
-      newChild.mount(this, newSlot);
-      assert(newChild._lifecycleState == _ElementLifecycle.active);
-
-      return newChild;
+      try {
+        if (inactiveChild != null) {
+          assert(inactiveChild._parent == null);
+          inactiveChild._activateWithParent(this, newSlot);
+          final Element? updatedChild = updateChild(inactiveChild, newWidget, newSlot);
+          assert(inactiveChild == updatedChild);
+          return updatedChild!;
+        } else {
+          newChild.mount(this, newSlot);
+          assert(newChild._lifecycleState == _ElementLifecycle.active);
+          return newChild;
+        }
+      } catch (_) {
+        // Attempt to do some clean-up if activation or mount fails to leave tree in a reasonable state.
+        try {
+          deactivateChild(newChild);
+        } catch (_) {
+          // Clean-up failed. Only surface original exception.
+        }
+        rethrow;
+      }
     } finally {
       if (isTimelineTracked) {
         FlutterTimeline.finishSync();
