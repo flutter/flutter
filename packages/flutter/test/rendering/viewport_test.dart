@@ -837,30 +837,21 @@ void main() {
             center: centerKey,
             reverse: true,
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  List<Widget>.generate(
-                    10,
-                    (int index) => SizedBox(height: itemHeight, child: Text('Item ${-index - 1}')),
-                  ),
-                ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: itemHeight, child: Text('Item ${-index - 1}'));
+                },
               ),
-              SliverList(
+              SliverList.list(
                 key: centerKey,
-                delegate: SliverChildListDelegate(
-                  List<Widget>.generate(
-                    1,
-                    (int index) => const SizedBox(height: itemHeight, child: Text('Item 0')),
-                  ),
-                ),
+                children: const <Widget>[SizedBox(height: itemHeight, child: Text('Item 0'))],
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  List<Widget>.generate(
-                    10,
-                    (int index) => SizedBox(height: itemHeight, child: Text('Item ${index + 1}')),
-                  ),
-                ),
+              SliverList.builder(
+                itemCount: 10,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: itemHeight, child: Text('Item ${index + 1}'));
+                },
               ),
             ],
           ),
