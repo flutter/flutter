@@ -128,9 +128,8 @@ Future<void> testHarnessTestsRunner() async {
   }
 
   // Verify that we correctly generated the version file.
-  final String? versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) {
-    foundError(<String>[versionError]);
+  if (await Version.resolveIn() case final VersionError e) {
+    foundError(<String>[e.error]);
   }
 }
 
