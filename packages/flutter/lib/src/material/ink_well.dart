@@ -1250,11 +1250,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void handleLongPressUp(LongPressUpDetails details) {
+  void handleLongPressUp() {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPressUp != null) {
-      widget.onLongPressUp!(details);
+      widget.onLongPressUp!();
     }
   }
 
