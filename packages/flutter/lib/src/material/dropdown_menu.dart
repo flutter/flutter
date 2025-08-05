@@ -33,8 +33,7 @@ import 'theme_data.dart';
 /// current applied filter.
 ///
 /// Used by [DropdownMenu.filterCallback].
-typedef FilterCallback<T> =
-    List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
+typedef FilterCallback<T> = List<DropdownMenuEntry<T>> Function(List<DropdownMenuEntry<T>> entries, String filter);
 
 /// A callback function that returns the index of the item that matches the
 /// current contents of a text field.
@@ -200,8 +199,7 @@ class DropdownMenu<T> extends StatefulWidget {
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
-             (inputDecorationTheme is InputDecorationTheme ||
-                 inputDecorationTheme is InputDecorationThemeData),
+             (inputDecorationTheme is InputDecorationTheme || inputDecorationTheme is InputDecorationThemeData),
        ),
        _inputDecorationTheme = inputDecorationTheme;
 
@@ -249,9 +247,28 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to true.
   final bool showTrailingIcon;
 
-  /// Specifies the [FocusNode] for the trailing icon.
+  /// Defines the FocusNode for the trailing icon.
   ///
-  /// Defaults to null.
+  /// The [focusNode] is a long-lived object that's typically managed by a
+  /// [StatefulWidget] parent. See [FocusNode] for more information.
+  ///
+  /// To give the keyboard focus to this widget, provide a [focusNode] and then
+  /// use the current [FocusScope] to request the focus:
+  ///
+  /// ```dart
+  /// FocusScope.of(context).requestFocus(myFocusNode);
+  /// ```
+  ///
+  /// This happens automatically when the widget is tapped.
+  ///
+  /// To be notified when the widget gains or loses the focus, add a listener
+  /// to the [focusNode]:
+  ///
+  /// ```dart
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// ```
+  ///
+  /// If null, this widget will create its own [FocusNode].
   final FocusNode? trailingIconFocusNode;
 
   /// Optional widget that describes the input field.
@@ -657,9 +674,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
       if (_selectedEntryIndex != null) {
         final T oldSelectionValue = oldWidget.dropdownMenuEntries[_selectedEntryIndex!].value;
-        final int index = filteredEntries.indexWhere(
-          (DropdownMenuEntry<T> entry) => entry.value == oldSelectionValue,
-        );
+        final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == oldSelectionValue);
         if (index != -1) {
           _effectiveTextEditingController.value = TextEditingValue(
             text: filteredEntries[index].label,
@@ -712,9 +727,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final BuildContext? highlightContext = buttonItemKeys[currentHighlight!].currentContext;
       if (highlightContext != null) {
-        Scrollable.of(
-          highlightContext,
-        ).position.ensureVisible(highlightContext.findRenderObject()!);
+        Scrollable.of(highlightContext).position.ensureVisible(highlightContext.findRenderObject()!);
       }
     }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }
@@ -728,14 +741,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return null;
   }
 
-  List<DropdownMenuEntry<T>> filter(
-    List<DropdownMenuEntry<T>> entries,
-    TextEditingController textEditingController,
-  ) {
+  List<DropdownMenuEntry<T>> filter(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController) {
     final String filterText = textEditingController.text.toLowerCase();
-    return entries
-        .where((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(filterText))
-        .toList();
+    return entries.where((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(filterText)).toList();
   }
 
   bool _shouldUpdateCurrentHighlight(List<DropdownMenuEntry<T>> entries) {
@@ -801,10 +809,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
       final WidgetStateProperty<Color?>? effectiveForegroundColor =
           entry.style?.foregroundColor ?? themeStyle?.foregroundColor;
-      final WidgetStateProperty<Color?>? effectiveIconColor =
-          entry.style?.iconColor ?? themeStyle?.iconColor;
-      final WidgetStateProperty<Color?>? effectiveOverlayColor =
-          entry.style?.overlayColor ?? themeStyle?.overlayColor;
+      final WidgetStateProperty<Color?>? effectiveIconColor = entry.style?.iconColor ?? themeStyle?.iconColor;
+      final WidgetStateProperty<Color?>? effectiveOverlayColor = entry.style?.overlayColor ?? themeStyle?.overlayColor;
       final WidgetStateProperty<Color?>? effectiveBackgroundColor =
           entry.style?.backgroundColor ?? themeStyle?.backgroundColor;
 
@@ -824,17 +830,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Color focusedForegroundColor = resolveFocusedColor(
           effectiveForegroundColor ?? defaultStyle.foregroundColor!,
         )!;
-        final Color focusedIconColor = resolveFocusedColor(
-          effectiveIconColor ?? defaultStyle.iconColor!,
-        )!;
-        final Color focusedOverlayColor = resolveFocusedColor(
-          effectiveOverlayColor ?? defaultStyle.overlayColor!,
-        )!;
+        final Color focusedIconColor = resolveFocusedColor(effectiveIconColor ?? defaultStyle.iconColor!)!;
+        final Color focusedOverlayColor = resolveFocusedColor(effectiveOverlayColor ?? defaultStyle.overlayColor!)!;
         // For the background color we can't rely on the default style which is transparent.
         // Defaults to onSurface.withOpacity(0.12).
         final Color focusedBackgroundColor =
-            resolveFocusedColor(effectiveBackgroundColor) ??
-            Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+            resolveFocusedColor(effectiveBackgroundColor) ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
         effectiveStyle = effectiveStyle.copyWith(
           backgroundColor: MaterialStatePropertyAll<Color>(focusedBackgroundColor),
@@ -853,8 +854,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
       Widget label = entry.labelWidget ?? Text(entry.label);
       if (widget.width != null) {
-        final double horizontalPadding =
-            padding + _kDefaultHorizontalPadding + effectiveInputStartGap;
+        final double horizontalPadding = padding + _kDefaultHorizontalPadding + effectiveInputStartGap;
         label = ConstrainedBox(
           constraints: BoxConstraints(maxWidth: widget.width! - horizontalPadding),
           child: label,
@@ -1017,10 +1017,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (_enableSearch) {
       if (widget.searchCallback != null) {
-        currentHighlight = widget.searchCallback!(
-          filteredEntries,
-          _effectiveTextEditingController.text,
-        );
+        currentHighlight = widget.searchCallback!(filteredEntries, _effectiveTextEditingController.text);
       } else {
         final bool shouldUpdateCurrentHighlight = _shouldUpdateCurrentHighlight(filteredEntries);
         if (shouldUpdateCurrentHighlight) {
@@ -1051,18 +1048,14 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
         minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
-          final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
-              ?.resolve(states)
-              ?.width;
+          final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
           return Size(math.min(widget.width!, effectiveMaximumWidth ?? 0.0), 0.0);
         }),
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
         minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
-          final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
-              ?.resolve(states)
-              ?.width;
+          final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize?.resolve(states)?.width;
           return Size(math.min(anchorWidth, effectiveMaximumWidth ?? 0.0), 0.0);
         }),
       );
@@ -1150,9 +1143,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             hintText: widget.hintText,
             helperText: widget.helperText,
             errorText: widget.errorText,
-            prefixIcon: widget.leadingIcon != null
-                ? SizedBox(key: _leadingKey, child: widget.leadingIcon)
-                : null,
+            prefixIcon: widget.leadingIcon != null ? SizedBox(key: _leadingKey, child: widget.leadingIcon) : null,
             suffixIcon: widget.showTrailingIcon ? trailingButton : null,
           ).applyDefaults(effectiveInputDecorationTheme),
           restorationId: widget.restorationId,
@@ -1172,9 +1163,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                 // See _RenderDropdownMenuBody layout logic.
                 children: <Widget>[
                   textField,
-                  ..._initialMenu!.map(
-                    (Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item),
-                  ),
+                  ..._initialMenu!.map((Widget item) => ExcludeFocus(excluding: !controller.isOpen, child: item)),
                   if (widget.label != null)
                     ExcludeSemantics(
                       child: Padding(
@@ -1246,11 +1235,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
               SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
             },
-            child: Focus(
-              focusNode: _internalFocudeNode,
-              skipTraversal: true,
-              child: const SizedBox.shrink(),
-            ),
+            child: Focus(focusNode: _internalFocudeNode, skipTraversal: true, child: const SizedBox.shrink()),
           ),
           menuAnchor,
         ],
@@ -1335,15 +1320,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         child.layout(innerConstraints, parentUsesSize: true);
         maxHeight ??= child.size.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       child.layout(innerConstraints, parentUsesSize: true);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
       maxHeight ??= child.size.height;
@@ -1360,8 +1343,7 @@ class _RenderDropdownMenuBody extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       context.paintChild(child, offset + childParentData.offset);
     }
   }
@@ -1383,15 +1365,13 @@ class _RenderDropdownMenuBody extends RenderBox
       if (child == firstChild) {
         final Size childSize = child.getDryLayout(innerConstraints);
         maxHeight ??= childSize.height;
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
       final Size childSize = child.getDryLayout(innerConstraints);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, childSize.width);
       maxHeight ??= childSize.height;
@@ -1410,8 +1390,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1425,8 +1404,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1439,8 +1417,7 @@ class _RenderDropdownMenuBody extends RenderBox
     double width = 0;
     while (child != null) {
       if (child == firstChild) {
-        final _DropdownMenuBodyParentData childParentData =
-            child.parentData! as _DropdownMenuBodyParentData;
+        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
         child = childParentData.nextSibling;
         continue;
       }
@@ -1454,8 +1431,7 @@ class _RenderDropdownMenuBody extends RenderBox
         width += maxIntrinsicWidth;
       }
       width = math.max(width, maxIntrinsicWidth);
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
     }
 
@@ -1486,8 +1462,7 @@ class _RenderDropdownMenuBody extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = firstChild;
     if (child != null) {
-      final _DropdownMenuBodyParentData childParentData =
-          child.parentData! as _DropdownMenuBodyParentData;
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
