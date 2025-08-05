@@ -14,7 +14,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_point.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace impeller {
@@ -57,15 +56,15 @@ class SurfaceFrame {
     //
     // If existing damage is unspecified (nullopt), entire frame will be
     // rasterized (no partial redraw). To signal that there is no existing
-    // damage use an empty SkIRect.
-    std::optional<SkIRect> existing_damage = std::nullopt;
+    // damage use an empty DlIRect.
+    std::optional<DlIRect> existing_damage = std::nullopt;
   };
 
   SurfaceFrame(sk_sp<SkSurface> surface,
                FramebufferInfo framebuffer_info,
                const EncodeCallback& encode_callback,
                const SubmitCallback& submit_callback,
-               SkISize frame_size,
+               DlISize frame_size,
                std::unique_ptr<GLContextResult> context_result = nullptr,
                bool display_list_fallback = false);
 
@@ -74,14 +73,14 @@ class SurfaceFrame {
     // frame (n-1), and represents the area that a compositor must recompose.
     //
     // Corresponds to EGL_KHR_swap_buffers_with_damage
-    std::optional<SkIRect> frame_damage;
+    std::optional<DlIRect> frame_damage;
 
     // The buffer damage for a frame is the area changed since that same buffer
     // was last used. If the buffer has not been used before, the buffer damage
     // is the entire area of the buffer.
     //
     // Corresponds to EGL_KHR_partial_update
-    std::optional<SkIRect> buffer_damage;
+    std::optional<DlIRect> buffer_damage;
 
     // Time at which this frame is scheduled to be presented. This is a hint
     // that can be passed to the platform to drop queued frames.
