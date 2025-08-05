@@ -102,8 +102,8 @@ class TableBorder {
         _allSidesMatch<BorderStyle>((BorderSide side) => side.style);
   }
 
-  /// Whether all the outer sides of the border (excluding the inner sides) are identical.
-  bool get outerBorderIsUniform {
+  /// Whether all the outer sides of the border are identical.
+  bool get _outerBorderIsUniform {
     return _outerSidesMatch<Color>((BorderSide side) => side.color) &&
         _outerSidesMatch<double>((BorderSide side) => side.width) &&
         _outerSidesMatch<BorderStyle>((BorderSide side) => side.style);
@@ -138,7 +138,7 @@ class TableBorder {
   }
 
   void _paintTableBorder(Canvas canvas, Rect rect) {
-    if (outerBorderIsUniform && borderRadius != BorderRadius.zero) {
+    if (_outerBorderIsUniform && borderRadius != BorderRadius.zero) {
       final RRect outer = borderRadius.toRRect(rect);
       final RRect inner = outer.deflate(top.width);
       final Paint paint = Paint()..color = top.color;
