@@ -79,11 +79,6 @@ class WidgetPreviewCommand extends FlutterCommand {
   @override
   String get category => FlutterCommandCategory.tools;
 
-  // TODO(bkonyi): show when --verbose is not provided when this feature is
-  // ready to ship.
-  @override
-  bool get hidden => true;
-
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
 }

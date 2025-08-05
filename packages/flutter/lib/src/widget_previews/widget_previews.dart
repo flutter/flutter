@@ -61,7 +61,10 @@ typedef PreviewLocalizations = PreviewLocalizationsData Function();
 ///
 /// **Important Note:** all values provided to the `@Preview()` annotation must
 /// be constant and non-private.
-// TODO(bkonyi): link to actual documentation when available.
+///
+/// See also:
+///   - [flutter.dev/to/widget-previews](https://flutter.dev/to/widget-previews)
+///     for details on getting started with widget previews.
 final class Preview {
   /// Annotation used to mark functions that return widget previews.
   const Preview({
@@ -254,6 +257,8 @@ base class PreviewLocalizationsData {
 
 /// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
 /// widget previews.
+///
+/// NOTE: this interface is not stable and **will change**.
 base class PreviewThemeData {
   /// Creates a collection of [ThemeData] and [CupertinoThemeData] instances
   /// for use in widget previews.
