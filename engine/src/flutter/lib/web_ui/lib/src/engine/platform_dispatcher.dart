@@ -1048,7 +1048,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
     _typographyMeasurementElement = createDomHTMLParagraphElement();
-    _typographyMeasurementElement!.text = 'flutter engine';
+    _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
     final DomCSSStyleDeclaration style = _typographyMeasurementElement!.style;
