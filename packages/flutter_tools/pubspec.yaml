@@ -13,7 +13,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
-  dwds: 24.4.0
+  dwds: 24.4.1
   code_builder: 4.10.1
   collection: 1.19.1
   completion: 1.0.2
@@ -29,7 +29,7 @@ dependencies:
   multicast_dns: 0.3.3
   mustache_template: 2.0.0
   package_config: 2.2.0
-  process: 5.0.4
+  process: 5.0.5
   fake_async: 1.3.3
   stack_trace: 1.12.1
   usage: 4.1.1
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: kav93d
+# PUBSPEC CHECKSUM: hdmfdm
