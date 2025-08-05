@@ -484,13 +484,12 @@ targets:
 
   - name: Mac mac_ios_engine_ddm
     recipe: engine_v2/engine_v2
-    bringup: true
     timeout: 240
     enabled_branches:
       # Don't run this on release branches
       - master
-    backfill: false
     properties:
+      release_build: "true"
       add_recipes_cq: "true"
       config_name: mac_ios_engine_ddm
       $flutter/osx_sdk : >-
