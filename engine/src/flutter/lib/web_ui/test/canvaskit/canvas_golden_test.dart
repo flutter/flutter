@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -223,16 +224,23 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
 
   canvas.save();
-  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 45, 45), ui.ClipOp.intersect, true);
-  canvas.clipRRect(ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)), true);
+  canvas.clipRect(
+    const ui.Rect.fromLTRB(0, 0, 45, 45),
+    clipOp: ui.ClipOp.intersect,
+    doAntiAlias: true,
+  );
+  canvas.clipRRect(
+    ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)),
+    doAntiAlias: true,
+  );
   canvas.clipPath(
-    CkPath()
+    ui.Path()
       ..moveTo(5, 5)
       ..lineTo(25, 5)
       ..lineTo(45, 45)
       ..lineTo(5, 45)
       ..close(),
-    true,
+    doAntiAlias: true,
   );
   canvas.drawColor(const ui.Color.fromARGB(255, 100, 100, 0), ui.BlendMode.srcOver);
   canvas.restore(); // remove clips
@@ -261,8 +269,7 @@ void drawTestPicture(CkCanvas canvas) {
     translateX: 0,
     translateY: 0,
   );
-  canvas.drawAtlasRaw(
-    CkPaint(),
+  canvas.drawRawAtlas(
     generateTestImage(),
     Float32List(4)
       ..[0] = transform.scos
@@ -274,15 +281,17 @@ void drawTestPicture(CkCanvas canvas) {
       ..[1] = 0
       ..[2] = 15
       ..[3] = 15,
-    Uint32List.fromList(<int>[0x00000000]),
+    Int32List.fromList(<int>[0x00000000]),
     ui.BlendMode.srcOver,
+    null,
+    ui.Paint(),
   );
 
   canvas.translate(60, 0);
   canvas.drawDRRect(
     ui.RRect.fromLTRBR(0, 0, 40, 30, const ui.Radius.elliptical(16, 8)),
     ui.RRect.fromLTRBR(10, 10, 30, 20, const ui.Radius.elliptical(4, 8)),
-    CkPaint(),
+    ui.Paint(),
   );
 
   canvas.translate(60, 0);
@@ -314,7 +323,11 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.save();
-  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 50, 30), ui.ClipOp.intersect, true);
+  canvas.clipRect(
+    const ui.Rect.fromLTRB(0, 0, 50, 30),
+    clipOp: ui.ClipOp.intersect,
+    doAntiAlias: true,
+  );
   canvas.drawPaint(CkPaint()..color = const ui.Color(0xFF6688AA));
   canvas.restore();
 
@@ -336,17 +349,17 @@ void drawTestPicture(CkCanvas canvas) {
   //                But keeping this anyway as it's a good test-case that
   //                will ensure it's fixed when we have the fix.
   canvas.drawPoints(
-    CkPaint()
-      ..color = const ui.Color(0xFF0000FF)
-      ..strokeWidth = 5
-      ..strokeCap = ui.StrokeCap.round,
     ui.PointMode.polygon,
-    offsetListToFloat32List(const <ui.Offset>[
+    const <ui.Offset>[
       ui.Offset(10, 10),
       ui.Offset(20, 10),
       ui.Offset(30, 20),
       ui.Offset(40, 20),
-    ]),
+    ],
+    ui.Paint()
+      ..color = const ui.Color(0xFF0000FF)
+      ..strokeWidth = 5
+      ..strokeCap = ui.StrokeCap.round,
   );
 
   canvas.translate(60, 0);
@@ -422,6 +435,7 @@ void drawTestPicture(CkCanvas canvas) {
   {
     canvas.saveLayerWithFilter(
       kDefaultRegion,
+      ui.Paint(),
       ui.ImageFilter.blur(sigmaX: 5, sigmaY: 10, tileMode: ui.TileMode.clamp),
     );
     canvas.drawCircle(const ui.Offset(10, 10), 10, CkPaint());
@@ -454,7 +468,7 @@ void drawTestPicture(CkCanvas canvas) {
   final Matrix4 matrix = Matrix4.identity();
   matrix.translate(30, 30);
   matrix.scale(2, 1.5);
-  canvas.transform(matrix.storage);
+  canvas.transform(matrix.toFloat64());
   canvas.drawCircle(ui.Offset.zero, 10, CkPaint());
   canvas.restore();
 

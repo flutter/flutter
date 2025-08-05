@@ -5,6 +5,7 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../skwasm_impl.dart';
 import 'surface.dart';
 
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
@@ -51,19 +52,24 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   void prepareToDraw() {
-    rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+    // XXX DO NOT SUBMIT
+    // Set the size of the surface here?
+    // rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
   }
 
   @override
-  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures) {
-    if (compositionCanvases.length != pictures.length) {
+  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) async {
+    if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    List<Future<void>> rasterizeFutures = <Future<void>>[];
-    await rasterizer.offscreenSurface.rasterizeToCanvas(
-      currentFrameSize,
-      canvas as RenderCanvas,
-      pictures,
+    final RenderResult renderResult = await rasterizer.offscreenSurface.renderPictures(
+      pictures.cast<SkwasmPicture>(),
     );
+    for (int i = 0; i < displayCanvases.length; i++) {
+      final RenderCanvas renderCanvas = displayCanvases[i] as RenderCanvas;
+      final DomImageBitmap bitmap = renderResult.imageBitmaps[i];
+      renderCanvas.render(bitmap);
+    }
+    return Future<void>.value();
   }
 }

@@ -4,13 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../../engine.dart';
-import '../platform_views/embedder.dart';
-import '../vector_math.dart';
-import 'layer.dart';
-import 'n_way_canvas.dart';
 
 abstract class LayerVisitor {
   void visitRoot(RootLayer root);
@@ -272,7 +267,7 @@ class MeasureVisitor extends LayerVisitor {
 
     measuringCanvas.save();
     measuringCanvas.clipPath(
-      clipPath.clipPath.builtPath as LayerPath,
+      clipPath.clipPath,
       doAntiAlias: clipPath.clipBehavior != ui.Clip.hardEdge,
     );
 
@@ -521,7 +516,7 @@ class PaintVisitor extends LayerVisitor {
 
     nWayCanvas.save();
     nWayCanvas.clipPath(
-      clipPath.clipPath.builtPath as LayerPath,
+      clipPath.clipPath,
       clipPath.clipBehavior != ui.Clip.hardEdge,
     );
 

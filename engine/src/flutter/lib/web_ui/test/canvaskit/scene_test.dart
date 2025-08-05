@@ -4,8 +4,8 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -25,7 +25,7 @@ void testMain() {
       expect(recorder, isA<CkPictureRecorder>());
 
       final ui.Canvas canvas = ui.Canvas(recorder);
-      expect(canvas, isA<CanvasKitCanvas>());
+      expect(canvas, isA<CkCanvas>());
 
       final ui.Paint paint = ui.Paint();
       expect(paint, isA<CkPaint>());

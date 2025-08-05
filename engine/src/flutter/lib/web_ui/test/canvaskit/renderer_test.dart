@@ -6,8 +6,8 @@ import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
@@ -60,7 +60,7 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) {
+  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) {
     // No-op
     return Future<void>.value();
   }

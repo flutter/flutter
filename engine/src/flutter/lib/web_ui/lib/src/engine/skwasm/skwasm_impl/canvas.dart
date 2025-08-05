@@ -434,12 +434,13 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void clear(ui.Color color) {
-    // TODO: implement clear
+    canvasClear(_handle, color.value);
   }
 
   @override
   bool quickReject(ui.Rect rect) {
-    // TODO: implement quickReject
-    throw UnimplementedError();
+    return withStackScope((StackScope s) {
+      return canvasQuickReject(_handle, s.convertRectToNative(rect));
+    });
   }
 }

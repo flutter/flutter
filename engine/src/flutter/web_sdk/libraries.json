@@ -1,6 +1,6 @@
 {
   "comment:0": "NOTE: THIS FILE IS GENERATED. DO NOT EDIT.",
-  "comment:1": "Instead modify 'flutter/web_sdk/libraries.yaml' and follow the instructions therein.",
+  "comment:1": "Instead modify 'web_sdk/libraries.yaml' and follow the instructions therein.",
   "dartdevc": {
     "include": [
       {
@@ -29,6 +29,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_canvaskit": {
+        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   },
@@ -60,6 +63,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_canvaskit": {
+        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   },
@@ -91,6 +97,9 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
+      },
+      "_canvaskit": {
+        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   }

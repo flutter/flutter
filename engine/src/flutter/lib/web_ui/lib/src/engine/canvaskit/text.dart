@@ -9,7 +9,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../text_fragmenter.dart';
 import 'canvaskit_api.dart';
 import 'native_memory.dart';
 import 'painting.dart';
@@ -1151,7 +1150,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   ///
   /// This should only be used with the CanvasKit Chromium variant that's compiled
   /// without ICU data.
-  void injectClientICU(SkParagraphBuilder builder) {
+  static void injectClientICU(SkParagraphBuilder builder) {
     assert(
       canvasKit.ParagraphBuilder.RequiresClientICU(),
       'This method should only be used with the CanvasKit Chromium variant.',

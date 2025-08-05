@@ -395,6 +395,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void transform(Float64List matrix4) {
     if (matrix4.length != 16) {
+      print(matrix4.length);
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
     skCanvas.concat(toSkM44FromFloat32(toMatrix32(matrix4)));

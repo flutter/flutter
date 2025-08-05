@@ -62,13 +62,13 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures) {
-    if (compositionCanvases.length != pictures.length) {
+  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) {
+    if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
     final List<Future<void>> rasterizeFutures = <Future<void>>[];
-    for (int i = 0; i < compositionCanvases.length; i++) {
-      rasterizeFutures.add(rasterizeToCanvas(compositionCanvases[i].displayCanvas!, pictures[i]));
+    for (int i = 0; i < displayCanvases.length; i++) {
+      rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
     }
     return Future.wait<void>(rasterizeFutures);
   }

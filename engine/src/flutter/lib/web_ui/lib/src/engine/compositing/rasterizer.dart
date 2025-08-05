@@ -80,11 +80,11 @@ abstract class ViewRasterizer {
   /// [OffscreenCanvas] is the correct size to draw the frame.
   void prepareToDraw();
 
-  /// Rasterizes the given [pictures] into the [compositionCanvases].
+  /// Rasterizes the given [pictures] into the [displayCanvases].
   ///
-  /// Throws an [ArgumentError] if [compositionCanvases] and [pictures] are not
+  /// Throws an [ArgumentError] if [displayCanvases] and [pictures] are not
   /// the same length.
-  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures);
+  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures);
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -123,7 +123,7 @@ abstract class ViewRasterizer {
 /// because they can be overlaid on top of platform views, which are HTML
 /// content that isn't rendered by Skia.
 ///
-/// [DisplayCanvas]es are drawn into with [ViewRasterizer.rasterizeToCanvas].
+/// [DisplayCanvas]es are drawn into with [ViewRasterizer.rasterize].
 abstract class DisplayCanvas {
   /// The DOM element which, when appended to the scene host, will display the
   /// Skia-rendered content to the screen.

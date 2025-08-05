@@ -367,12 +367,13 @@ class PlatformViewEmbedder {
     }
     _activeComposition = composition;
 
-    final List<CompositionCanvas> compositionCanvases = composition.canvases;
-    int renderCanvasIndex = 0;
+    final List<DisplayCanvas> displayCanvases = composition.canvases
+        .map((CompositionCanvas canvas) => canvas.displayCanvas!)
+        .toList();
     final List<ui.Picture> picturesToRasterize = _context.optimizedCanvasRecorders!
         .map((ui.PictureRecorder recorder) => recorder.endRecording())
         .toList();
-    await rasterizer.rasterize(compositionCanvases, picturesToRasterize);
+    await rasterizer.rasterize(displayCanvases, picturesToRasterize);
     for (final picture in picturesToRasterize) {
       picture.dispose();
     }
@@ -407,7 +408,9 @@ class PlatformViewEmbedder {
           }
         }
       }
-      await rasterizer.rasterizeToCanvas(debugBoundsCanvas!, <ui.Picture>[
+      await rasterizer.rasterize(
+        <DisplayCanvas>[debugBoundsCanvas!],
+        <ui.Picture>[
         boundsRecorder.endRecording(),
       ]);
       sceneHost.append(debugBoundsCanvas!.hostElement);

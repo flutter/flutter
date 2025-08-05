@@ -8,6 +8,7 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -1121,12 +1122,12 @@ void testMain() {
       await renderScene(scene);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView, _platformView, _overlay]);
 
-      final Rendering rendering = CanvasKitRenderer.instance
+      final Composition composition = CanvasKitRenderer.instance
           .debugGetRasterizerForView(implicitView)!
           .viewEmbedder
-          .debugActiveRendering;
-      final List<int> picturesPerCanvas = rendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .debugActiveComposition;
+      final List<int> picturesPerCanvas = composition.canvases
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(picturesPerCanvas, <int>[1, 2]);
     });
@@ -1357,12 +1358,12 @@ void testMain() {
       ]);
 
       // The second-to-last canvas should have all the extra pictures.
-      final Rendering rendering = CanvasKitRenderer.instance
+      final Composition composition = CanvasKitRenderer.instance
           .debugGetRasterizerForView(implicitView)!
           .viewEmbedder
-          .debugActiveRendering;
-      final List<int> numPicturesPerCanvas = rendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .debugActiveComposition;
+      final List<int> numPicturesPerCanvas = composition.canvases
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(numPicturesPerCanvas, <int>[1, 1, 1, 1, 1, 1, 12, 1]);
 
@@ -1418,12 +1419,12 @@ void testMain() {
       ]);
 
       // The last canvas should have all the pictures.
-      final Rendering secondRendering = CanvasKitRenderer.instance
+      final Composition secondComposition = CanvasKitRenderer.instance
           .debugGetRasterizerForView(implicitView)!
           .viewEmbedder
-          .debugActiveRendering;
-      final List<int> picturesPerCanvasInSecondRendering = secondRendering.canvases
-          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .debugActiveComposition;
+      final List<int> picturesPerCanvasInSecondRendering = secondComposition.canvases
+          .map((CompositionCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(picturesPerCanvasInSecondRendering, <int>[19]);
       debugOverrideJsConfiguration(null);

@@ -50,6 +50,7 @@ export 'engine/layer/layer_painting.dart';
 export 'engine/layer/layer_scene_builder.dart';
 export 'engine/layer/layer_tree.dart';
 export 'engine/layer/layer_visitor.dart';
+export 'engine/layer/n_way_canvas.dart';
 export 'engine/lazy_path.dart';
 export 'engine/mouse/context_menu.dart';
 export 'engine/mouse/cursor.dart';

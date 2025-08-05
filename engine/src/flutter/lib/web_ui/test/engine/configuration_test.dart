@@ -10,6 +10,7 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 
 import '../common/matchers.dart';
 

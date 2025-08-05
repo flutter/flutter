@@ -62,7 +62,7 @@ class NWayCanvas {
 
   /// Calls [transform] on all canvases.
   void transform(Float32List matrix) {
-    final Float64List matrix64 = Float64List.view(matrix.buffer);
+    final Float64List matrix64 = Float64List.fromList(matrix);
     for (int i = 0; i < _canvases.length; i++) {
       _canvases[i].transform(matrix64);
     }
