@@ -153,29 +153,36 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
-class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+class _StateDependentMouseCursor extends WidgetStateMouseCursor {
   const _StateDependentMouseCursor({
     this.disabled = SystemMouseCursors.none,
+    this.focused = SystemMouseCursors.none,
     this.dragged = SystemMouseCursors.none,
     this.hovered = SystemMouseCursors.none,
+    this.regular = SystemMouseCursors.none,
   });
 
   final MouseCursor disabled;
+  final MouseCursor focused;
   final MouseCursor hovered;
   final MouseCursor dragged;
+  final MouseCursor regular;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  MouseCursor resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return disabled;
     }
-    if (states.contains(MaterialState.dragged)) {
+    if (states.contains(WidgetState.focused)) {
+      return focused;
+    }
+    if (states.contains(WidgetState.dragged)) {
       return dragged;
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return hovered;
     }
-    return SystemMouseCursors.none;
+    return regular;
   }
 
   @override
@@ -3327,7 +3334,10 @@ void main() {
   });
 
   testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
-    const MouseCursor disabledCursor = SystemMouseCursors.basic;
+    const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
+    const MouseCursor regularCursor = SystemMouseCursors.click;
+    const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
+    const MouseCursor focusedCursor = SystemMouseCursors.precise;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
 
@@ -3336,19 +3346,23 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: Center(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.forbidden,
-                child: Slider(
-                  mouseCursor: const _StateDependentMouseCursor(
-                    disabled: disabledCursor,
-                    hovered: hoveredCursor,
-                    dragged: draggedCursor,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Slider(
+                    mouseCursor: const _StateDependentMouseCursor(
+                      disabled: disabledCursor,
+                      focused: focusedCursor,
+                      hovered: hoveredCursor,
+                      dragged: draggedCursor,
+                      regular: regularCursor,
+                    ),
+                    value: 0.5,
+                    onChanged: enabled ? (double newValue) {} : null,
                   ),
-                  value: 0.5,
-                  onChanged: enabled ? (double newValue) {} : null,
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -3359,30 +3373,48 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
 
+    // System default.
+    await gesture.addPointer(location: Offset.zero);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
+
+    // Disabled.
     await tester.pumpWidget(buildFrame(enabled: false));
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
+    // Regular.
     await tester.pumpWidget(buildFrame(enabled: true));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.none,
-    );
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), regularCursor);
 
-    await gesture.moveTo(tester.getCenter(find.byType(Slider))); // start hover
-    await tester.pumpAndSettle();
+    // Hovered.
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
 
-    await tester.timedDrag(
-      find.byType(Slider),
-      const Offset(20.0, 0.0),
-      const Duration(milliseconds: 100),
-    );
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.move,
-    );
+    // Dragged.
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
+
+    // Hovered.
+    await gesture.up();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    // Focused.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), focusedCursor);
+
+    // System default.
+    await gesture.moveTo(Offset.zero);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
   });
 
   testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
