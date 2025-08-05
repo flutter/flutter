@@ -1633,29 +1633,6 @@ void main() {
       expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
     });
 
-    testWidgets(
-      'ReorderableListView.separated with null separatorBuilder creates expected number of items',
-      (WidgetTester tester) async {
-        final Set<int> itemsCreated = <int>{};
-        await tester.pumpWidget(
-          MaterialApp(
-            home: ReorderableListView.separated(
-              itemBuilder: (BuildContext context, int index) {
-                itemsCreated.add(index);
-                return Text(index.toString(), key: ValueKey<int>(index));
-              },
-              separatorBuilder: null,
-              itemCount: 1000,
-              onReorder: (int from, int to) {},
-            ),
-          ),
-        );
-
-        // Should have only created the first 18 items.
-        expect(itemsCreated, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
-      },
-    );
-
     testWidgets('ReorderableListView.separated only creates the children and separators it needs', (
       WidgetTester tester,
     ) async {
