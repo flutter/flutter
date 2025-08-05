@@ -153,7 +153,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
     : project_(std::make_unique<FlutterProjectBundle>(project)),
       windows_proc_table_(std::move(windows_proc_table)),
       aot_data_(nullptr, nullptr),
-      lifecycle_manager_(std::make_unique<WindowsLifecycleManager>(this)) {
+      lifecycle_manager_(std::make_unique<WindowsLifecycleManager>(this)),
+      display_manager_(std::make_shared<DisplayManager>(this)) {
   if (windows_proc_table_ == nullptr) {
     windows_proc_table_ = std::make_shared<WindowsProcTable>();
   }
@@ -487,14 +488,19 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   }
 
   // Configure device frame rate displayed via devtools.
-  FlutterEngineDisplay display = {};
-  display.struct_size = sizeof(FlutterEngineDisplay);
-  display.display_id = 0;
-  display.single_display = true;
-  display.refresh_rate =
-      1.0 / (static_cast<double>(FrameInterval().count()) / 1000000000.0);
+  auto displays = display_manager_->displays();
+  if (displays.empty()) {
+    FML_LOG(ERROR) << "No displays were found, opting for a stub "
+                      "display";
+    FlutterEngineDisplay display = {};
+    display.struct_size = sizeof(FlutterEngineDisplay);
+    display.display_id = 0;
+    display.single_display = true;
+    display.refresh_rate =
+        1.0 / (static_cast<double>(FrameInterval().count()) / 1000000000.0);
 
-  std::vector<FlutterEngineDisplay> displays = {display};
+    displays = {display};
+  }
   embedder_api_.NotifyDisplayUpdate(engine_,
                                     kFlutterEngineDisplaysUpdateTypeStartup,
                                     displays.data(), displays.size());
@@ -864,6 +870,13 @@ FlutterWindowsView* FlutterWindowsEngine::GetViewFromTopLevelWindow(
     return iterator->second;
   }
   return nullptr;
+}
+
+void FlutterWindowsEngine::OnDisplaysChanged(
+    std::vector<FlutterEngineDisplay> const& displays) const {
+  embedder_api_.NotifyDisplayUpdate(engine_,
+                                    kFlutterEngineDisplaysUpdateTypeStartup,
+                                    displays.data(), displays.size());
 }
 
 void FlutterWindowsEngine::SendSystemLocales() {

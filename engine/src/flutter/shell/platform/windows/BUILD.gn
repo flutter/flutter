@@ -52,6 +52,8 @@ source_set("flutter_windows_source") {
     "cursor_handler.h",
     "direct_manipulation.cc",
     "direct_manipulation.h",
+    "display_manager.cc",
+    "display_manager.h",
     "dpi_utils.cc",
     "dpi_utils.h",
     "egl/context.cc",
