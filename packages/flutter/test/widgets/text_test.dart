@@ -78,15 +78,20 @@ void main() {
     );
 
     RichText text = tester.firstWidget(find.byType(RichText));
+    Padding padding = tester.firstWidget(find.byType(Padding));
     expect(text, isNotNull);
+    expect(padding, isNotNull);
     expect(text.text.style?.height, 2.0);
     expect(text.text.style?.letterSpacing, 2.0);
     expect(text.text.style?.wordSpacing, 2.0);
+    expect(padding.padding, const EdgeInsets.only(bottom: 2.0));
 
     await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
 
     text = tester.firstWidget(find.byType(RichText));
+    padding = tester.firstWidget(find.byType(Padding));
     expect(text, isNotNull);
+    expect(padding, isNull);
     expect(text.text.style?.height, isNot(2.0));
     expect(text.text.style?.letterSpacing, isNot(2.0));
     expect(text.text.style?.wordSpacing, isNot(2.0));
