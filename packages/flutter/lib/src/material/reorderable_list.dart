@@ -256,7 +256,7 @@ class ReorderableListView extends StatefulWidget {
        itemExtent = null,
        itemExtentBuilder = null,
        prototypeItem = null,
-       this.separatorBuilder = separatorBuilder;
+       separatorBuilder = separatorBuilder;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
