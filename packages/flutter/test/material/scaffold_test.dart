@@ -543,13 +543,11 @@ void main() {
               ),
               SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    List<Widget>.generate(
-                      10,
-                      (int index) => SizedBox(height: 100.0, child: Text('B$index')),
-                    ),
-                  ),
+                sliver: SliverList.builder(
+                  itemCount: 10,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 100.0, child: Text('B$index'));
+                  },
                 ),
               ),
             ],
@@ -586,13 +584,11 @@ void main() {
             primary: true,
             slivers: <Widget>[
               const SliverAppBar(title: Text('Title')),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  List<Widget>.generate(
-                    20,
-                    (int index) => SizedBox(height: 100.0, child: Text('$index')),
-                  ),
-                ),
+              SliverList.builder(
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100.0, child: Text('$index'));
+                },
               ),
             ],
           ),
