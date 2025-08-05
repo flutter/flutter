@@ -80,8 +80,11 @@ abstract class ViewRasterizer {
   /// [OffscreenCanvas] is the correct size to draw the frame.
   void prepareToDraw();
 
-  /// Rasterize the [pictures] to the given [canvas].
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<ui.Picture> pictures);
+  /// Rasterizes the given [pictures] into the [compositionCanvases].
+  ///
+  /// Throws an [ArgumentError] if [compositionCanvases] and [pictures] are not
+  /// the same length.
+  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures);
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {

@@ -369,10 +369,11 @@ class PlatformViewEmbedder {
 
     final List<CompositionCanvas> compositionCanvases = composition.canvases;
     int renderCanvasIndex = 0;
-    for (final CompositionCanvas compositionCanvas in compositionCanvases) {
-      final ui.Picture picture = _context.optimizedCanvasRecorders![renderCanvasIndex++]
-          .endRecording();
-      await rasterizer.rasterizeToCanvas(compositionCanvas.displayCanvas!, <ui.Picture>[picture]);
+    final List<ui.Picture> picturesToRasterize = _context.optimizedCanvasRecorders!
+        .map((ui.PictureRecorder recorder) => recorder.endRecording())
+        .toList();
+    await rasterizer.rasterize(compositionCanvases, picturesToRasterize);
+    for (final picture in picturesToRasterize) {
       picture.dispose();
     }
 

@@ -139,11 +139,11 @@ class Surface extends DisplayCanvas {
   Future<void> rasterizeToCanvas(
     BitmapSize bitmapSize,
     RenderCanvas canvas,
-    List<ui.Picture> pictures,
+    ui.Picture picture,
   ) async {
     final CkCanvas skCanvas = getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
-    pictures.forEach(skCanvas.drawPicture);
+    skCanvas.drawPicture(picture);
     flush();
 
     if (browserSupportsCreateImageBitmap) {

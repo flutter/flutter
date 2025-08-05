@@ -48,17 +48,28 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   );
 
   /// Render the given [pictures] so it is displayed by the given [canvas].
-  @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<ui.Picture> pictures) async {
+  Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) async {
     await rasterizer.offscreenSurface.rasterizeToCanvas(
       currentFrameSize,
       canvas as RenderCanvas,
-      pictures,
+      picture,
     );
   }
 
   @override
   void prepareToDraw() {
     rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+  }
+
+  @override
+  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures) {
+    if (compositionCanvases.length != pictures.length) {
+      throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
+    }
+    final List<Future<void>> rasterizeFutures = <Future<void>>[];
+    for (int i = 0; i < compositionCanvases.length; i++) {
+      rasterizeFutures.add(rasterizeToCanvas(compositionCanvases[i].displayCanvas!, pictures[i]));
+    }
+    return Future.wait<void>(rasterizeFutures);
   }
 }

@@ -56,15 +56,26 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     displayFactory.baseCanvas.createOrUpdateSurface(currentFrameSize);
   }
 
-  @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<ui.Picture> pictures) {
+  Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) {
     final Surface surface = canvas as Surface;
     surface.createOrUpdateSurface(currentFrameSize);
     surface.positionToShowFrame(currentFrameSize);
     final CkCanvas skCanvas = surface.getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
-    pictures.forEach(skCanvas.drawPicture);
+    skCanvas.drawPicture(picture);
     surface.flush();
     return Future<void>.value();
+  }
+
+  @override
+  Future<void> rasterize(List<CompositionCanvas> compositionCanvases, List<ui.Picture> pictures) {
+    if (compositionCanvases.length != pictures.length) {
+      throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
+    }
+    final List<Future<void>> rasterizeFutures = <Future<void>>[];
+    for (int i = 0; i < compositionCanvases.length; i++) {
+      rasterizeFutures.add(rasterizeToCanvas(compositionCanvases[i].displayCanvas!, pictures[i]));
+    }
+    return Future.wait<void>(rasterizeFutures);
   }
 }

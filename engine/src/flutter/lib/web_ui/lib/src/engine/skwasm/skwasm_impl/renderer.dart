@@ -640,14 +640,15 @@ class SkwasmRenderer implements Renderer {
         _dumpDebugInfo('live_object_counts', countsJson);
       });
 
-      int i = 0;
-      for (final view in _sceneViews.values) {
-        final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
-        if (debugJson != null) {
-          _dumpDebugInfo('flutter-scene$i', debugJson);
-          i++;
-        }
-      }
+      /// XXX DO NOT SUBMIT Add _viewRasterizer debugs
+      // int i = 0;
+      // for (final view in _sceneViews.values) {
+      //   final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
+      //   if (debugJson != null) {
+      //     _dumpDebugInfo('flutter-scene$i', debugJson);
+      //     i++;
+      //   }
+      // }
     }
   }
 
@@ -655,25 +656,5 @@ class SkwasmRenderer implements Renderer {
   void debugClear() {
     // TODO(harryterkelsen): See what needs to be cleaned up for tests and clear
     // it here.
-  }
-}
-
-class SkwasmPictureRenderer implements PictureRenderer {
-  SkwasmPictureRenderer(this.surface);
-
-  SkwasmSurface surface;
-
-  @override
-  FutureOr<RenderResult> renderPictures(List<LayerPicture> pictures) =>
-      surface.renderPictures(pictures.cast<SkwasmPicture>());
-
-  @override
-  LayerPicture clipPicture(LayerPicture picture, ui.Rect clip) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, clip);
-    canvas.clipRect(clip);
-    canvas.drawPicture(picture);
-
-    return recorder.endRecording() as LayerPicture;
   }
 }
