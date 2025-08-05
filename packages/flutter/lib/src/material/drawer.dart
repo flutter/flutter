@@ -649,10 +649,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   ColorTween _buildScrimColorTween() {
-    return ColorTween(
-      begin: Colors.transparent,
-      end: widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54,
-    );
+    final Color effectiveScrimColor =
+        widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;
+    return ColorTween(begin: effectiveScrimColor.withValues(alpha: 0), end: effectiveScrimColor);
   }
 
   AlignmentDirectional get _drawerOuterAlignment => switch (widget.alignment) {

@@ -187,9 +187,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
+    await tester.pump();
     ColoredBox scrim = getScrim() as ColoredBox;
+    expect(scrim.color, isSameColorAs(Colors.black54.withValues(alpha: 0)));
+
+    await tester.pumpAndSettle();
+    scrim = getScrim() as ColoredBox;
     expect(scrim.color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
@@ -200,8 +203,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
     scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    scrim = getScrim() as ColoredBox;
+    expect(scrim.color, isSameColorAs(const Color(0xFF323232).withValues(alpha: 0)));
 
+    await tester.pumpAndSettle();
     scrim = getScrim() as ColoredBox;
     expect(scrim.color, const Color(0xFF323232));
 
