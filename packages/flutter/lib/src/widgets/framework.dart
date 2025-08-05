@@ -1332,7 +1332,13 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void dispose() {
-    assert(_debugLifecycleState == _StateLifecycle.ready);
+    assert(switch (_debugLifecycleState) {
+      // An Element can be disposed without ever being properly mounted,
+      // if the mount process fails the Element goes straight to the
+      // _InactiveElements list.
+      _StateLifecycle.ready || _StateLifecycle.initialized => true,
+      _StateLifecycle.created || _StateLifecycle.defunct => false,
+    });
     assert(() {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
