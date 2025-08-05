@@ -11,7 +11,7 @@ class HotReloadProject extends Project {
   final bool constApp;
 
   @override
-  final String pubspec = '''
+  final pubspec = '''
   name: test
   environment:
     sdk: ^3.7.0-0
@@ -22,7 +22,8 @@ class HotReloadProject extends Project {
   ''';
 
   @override
-  String get main => '''
+  String get main =>
+      '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';

@@ -1,0 +1,6 @@
+apache llvm
+The LLVM Project is under the Apache License v2.0 with LLVM Exceptions
+(?s).*Apache License
+.*
+---- LLVM Exceptions to the Apache 2.0 License ----
+.*but\s+only\s+in\s+their\s+entirety\s+and\s+only\s+with\s+respect\s+to\s+the\s+Combined\s+Software\.

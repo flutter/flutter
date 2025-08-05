@@ -25,9 +25,8 @@ void main() {
               slivers: <Widget>[
                 SliverAnimatedList(
                   initialItemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext context, int index, Animation<double> animation) =>
-                          Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (BuildContext context, int index, Animation<double> animation) =>
+                      Container(key: Key('$index'), height: 2000.0),
                   findChildIndexCallback: (Key key) {
                     finderCalled = true;
                     return null;
@@ -399,11 +398,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(<Widget>[
-                  const SizedBox(height: 100),
-                  const SizedBox(height: 100),
-                ]),
+              SliverList.list(
+                children: const <Widget>[SizedBox(height: 100), SizedBox(height: 100)],
               ),
               SliverAnimatedList(
                 key: listKey,
@@ -472,8 +468,11 @@ void main() {
         );
 
         // get all list entries in order
-        final List<Text> listEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> listEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the list is rendered in the correct order
         expect(listEntries[0].data, equals('item 0'));
@@ -496,8 +495,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // get all list entries in order
-        final List<Text> reorderedListEntries =
-            find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+        final List<Text> reorderedListEntries = find
+            .byType(Text)
+            .evaluate()
+            .map((Element e) => e.widget as Text)
+            .toList();
 
         // check that the stateful items of the list are rendered in the order provided by findChildIndexCallback
         expect(reorderedListEntries[0].data, equals('item 3'));

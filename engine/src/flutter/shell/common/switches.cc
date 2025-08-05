@@ -93,6 +93,9 @@ void PrintUsage(const std::string& executable_name) {
 
   std::cerr << "Flutter Engine Version: " << GetFlutterEngineVersion()
             << std::endl;
+
+  std::cerr << "Flutter Content Hash: " << GetFlutterContentHash() << std::endl;
+
   std::cerr << "Skia Version: " << GetSkiaVersion() << std::endl;
 
   std::cerr << "Dart Version: " << GetDartVersion() << std::endl << std::endl;
@@ -291,6 +294,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
 
+  settings.profile_startup =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileStartup));
+
   settings.enable_software_rendering =
       command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
 
@@ -331,6 +337,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
 
   command_line.GetOptionValue(FlagForSwitch(Switch::TraceToFile),
                               &settings.trace_to_file);
+
+  settings.profile_microtasks =
+      command_line.HasOption(FlagForSwitch(Switch::ProfileMicrotasks));
 
   settings.skia_deterministic_rendering_on_cpu =
       command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));

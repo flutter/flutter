@@ -9,7 +9,7 @@ import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 
-const String _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
+const _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
 
 /// A build step that runs the generate localizations script from
 /// dev/tool/localizations.
@@ -37,7 +37,7 @@ class GenerateLocalizationsTarget extends Target {
   List<String> get depfiles => <String>['gen_localizations.d'];
 
   @override
-  bool canSkip(Environment environment) {
+  Future<bool> canSkip(Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     return !configFile.existsSync();
   }
@@ -70,12 +70,12 @@ class GenerateLocalizationsTarget extends Target {
       processManager: environment.processManager,
     );
 
-    final Map<String, Object?> dependencies =
+    final dependencies =
         json.decode(environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync())
             as Map<String, Object?>;
-    final List<Object?>? inputs = dependencies['inputs'] as List<Object?>?;
-    final List<Object?>? outputs = dependencies['outputs'] as List<Object?>?;
-    final Depfile depfile = Depfile(
+    final inputs = dependencies['inputs'] as List<Object?>?;
+    final outputs = dependencies['outputs'] as List<Object?>?;
+    final depfile = Depfile(
       <File>[
         configFile,
         if (inputs != null)

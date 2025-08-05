@@ -118,6 +118,13 @@ group("flutter") {
         "//flutter/tools/path_ops",
       ]
 
+      if (host_os == "linux" || host_os == "mac") {
+        public_deps += [
+          "//flutter/tools/licenses_cpp",
+          "//flutter/tools/licenses_cpp:licenses_cpp_testrunner",
+        ]
+      }
+
       if (host_os == "linux") {
         public_deps += [
           # Built alongside gen_snapshot for 64 bit targets
@@ -165,6 +172,12 @@ group("flutter") {
   if ((flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") &&
       is_ios) {
     public_deps += [ "//flutter/testing/ios_scenario_app" ]
+  }
+
+  # Build the standalone Embedder API SDK for platforms that don't vend all
+  # their engine artifacts (via `build_engine_artifacts`).
+  if (is_android && flutter_runtime_mode == "debug") {
+    public_deps += [ "//flutter/shell/platform/embedder:embedder-archive" ]
   }
 }
 

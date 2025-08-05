@@ -55,6 +55,9 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
 
 void SurfaceTextureExternalTextureGLImpeller::Detach() {
   SurfaceTextureExternalTexture::Detach();
+  // Detach will collect the texture handle.
+  // See also: https://github.com/flutter/flutter/issues/152459
+  texture_->Leak();
   texture_.reset();
 }
 

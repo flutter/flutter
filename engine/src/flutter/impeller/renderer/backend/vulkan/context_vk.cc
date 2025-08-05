@@ -119,11 +119,9 @@ size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
 }
 
 namespace {
-thread_local uint64_t tls_context_count = 0;
+std::atomic_uint64_t context_count = 0;
 uint64_t CalculateHash(void* ptr) {
-  // You could make a context once per nanosecond for 584 years on one thread
-  // before this overflows.
-  return ++tls_context_count;
+  return context_count.fetch_add(1);
 }
 }  // namespace
 
@@ -603,7 +601,7 @@ void ContextVK::Shutdown() {
   // pointers ensures that cleanup happens in a correct order.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_.reset();
+  fence_waiter_->Terminate();
   resource_manager_.reset();
 
   raster_message_loop_->Terminate();

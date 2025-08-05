@@ -584,8 +584,12 @@ Shell::~Shell() {
       fml::MakeCopyable([io_manager = std::move(io_manager_),
                          platform_view = platform_view_.get(),
                          &io_latch]() mutable {
+        std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
-        if (platform_view) {
+
+        // If the IO manager is not being used by any other spawned shells,
+        // then detach the resource context from the IO thread.
+        if (platform_view && weak_io_manager.expired()) {
           platform_view->ReleaseResourceContext();
         }
         io_latch.Signal();
@@ -999,15 +1003,6 @@ void Shell::OnPlatformViewDestroyed() {
   // This incorrect assumption can lead to deadlock.
   rasterizer_->DisableThreadMergerIfNeeded();
 
-  // Notify the Dart VM that the PlatformView has been destroyed and some
-  // cleanup activity can be done (e.g: garbage collect the Dart heap).
-  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
-                                    [engine = engine_->GetWeakPtr()]() {
-                                      if (engine) {
-                                        engine->NotifyDestroyed();
-                                      }
-                                    });
-
   // Note:
   // This is a synchronous operation because certain platforms depend on
   // setup/suspension of all activities that may be interacting with the GPU in
@@ -1108,7 +1103,7 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
     expected_frame_sizes_[view_id] =
-        SkISize::Make(metrics.physical_width, metrics.physical_height);
+        DlISize(metrics.physical_width, metrics.physical_height);
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1743,8 +1738,8 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_size = ExpectedFrameSize(view_id);
-  return !expected_frame_size.isEmpty() &&
-         ToSkISize(tree.frame_size()) != expected_frame_size;
+  return !expected_frame_size.IsEmpty() &&
+         tree.frame_size() != expected_frame_size;
 }
 
 // |ServiceProtocol::Handler|
@@ -2347,10 +2342,10 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-SkISize Shell::ExpectedFrameSize(int64_t view_id) {
+DlISize Shell::ExpectedFrameSize(int64_t view_id) {
   auto found = expected_frame_sizes_.find(view_id);
   if (found == expected_frame_sizes_.end()) {
-    return SkISize::MakeEmpty();
+    return DlISize();
   }
   return found->second;
 }

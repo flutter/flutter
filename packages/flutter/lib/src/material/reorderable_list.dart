@@ -562,8 +562,9 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         padding.copyWith(top: start, bottom: end),
       ),
     };
-    final (EdgeInsets headerPadding, EdgeInsets footerPadding) =
-        widget.reverse ? (startPadding, endPadding) : (endPadding, startPadding);
+    final (EdgeInsets headerPadding, EdgeInsets footerPadding) = widget.reverse
+        ? (startPadding, endPadding)
+        : (endPadding, startPadding);
 
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
@@ -580,7 +581,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       clipBehavior: widget.clipBehavior,
       slivers: <Widget>[
         if (widget.header != null)
-          SliverPadding(padding: headerPadding, sliver: SliverToBoxAdapter(child: widget.header)),
+          SliverPadding(
+            padding: headerPadding,
+            sliver: SliverToBoxAdapter(child: widget.header),
+          ),
         SliverPadding(
           padding: listPadding,
           sliver: SliverReorderableList(
@@ -629,7 +633,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           ),
         ),
         if (widget.footer != null)
-          SliverPadding(padding: footerPadding, sliver: SliverToBoxAdapter(child: widget.footer)),
+          SliverPadding(
+            padding: footerPadding,
+            sliver: SliverToBoxAdapter(child: widget.footer),
+          ),
       ],
     );
   }
