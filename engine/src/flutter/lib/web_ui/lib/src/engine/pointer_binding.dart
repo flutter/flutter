@@ -350,6 +350,12 @@ class ClickDebouncer {
   ///
   /// This method is called asynchronously from [_maybeStartDebouncing].
   void _doStartDebouncing(DomEvent event, List<ui.PointerData> data) {
+    // It's possible that debouncing was canceled between the pointerdown event and the execution
+    // of this method.
+    if (!isDebouncing) {
+      return;
+    }
+
     _state = (
       target: event.target!,
       // The 200ms duration was chosen empirically by testing tapping, mouse
