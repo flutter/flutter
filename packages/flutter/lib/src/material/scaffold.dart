@@ -3214,9 +3214,10 @@ class _DismissDrawerAction extends DismissAction {
 
   @override
   void invoke(DismissIntent intent) {
-    if (Scaffold.of(context).isDrawerBarrierDismissible) {
-      Scaffold.of(context).closeDrawer();
-      Scaffold.of(context).closeEndDrawer();
+    final ScaffoldState scaffold = Scaffold.of(context);
+    if (scaffold.isDrawerBarrierDismissible) {
+      scaffold.closeDrawer();
+      scaffold.closeEndDrawer();
     }
   }
 }
