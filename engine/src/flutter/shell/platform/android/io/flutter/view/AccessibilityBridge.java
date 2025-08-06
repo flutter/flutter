@@ -2920,7 +2920,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (addLocale && locale != null && locale.length() > 0) {
         Locale localeObject = Locale.forLanguageTag(locale);
         final LocaleSpan localeSpan = new LocaleSpan(localeObject);
-        Log.e(TAG, "added locale " + locale + " for " + string);
         spannableString.setSpan(localeSpan, 0, string.length(), 0);
       }
 
