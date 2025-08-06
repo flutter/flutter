@@ -21,6 +21,8 @@ class DisplayManager {
 
   std::vector<FlutterEngineDisplay> displays() const;
 
+  HWND get_window_handle() const { return window_handle_; }
+
  private:
   WNDCLASS
   RegisterWindowClass();

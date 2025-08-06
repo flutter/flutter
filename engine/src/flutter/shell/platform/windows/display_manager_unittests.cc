@@ -26,6 +26,14 @@ FlutterProjectBundle GetTestProject() {
   return FlutterProjectBundle{properties};
 }
 
+void PumpMessage() {
+  ::MSG msg;
+  if (::GetMessage(&msg, nullptr, 0, 0)) {
+    ::TranslateMessage(&msg);
+    ::DispatchMessage(&msg);
+  }
+}
+
 class DisplayManagerTest : public WindowsTest {};
 
 class MockFlutterWindowsEngine : public FlutterWindowsEngine {
@@ -33,7 +41,11 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
   explicit MockFlutterWindowsEngine(
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr)
       : FlutterWindowsEngine(GetTestProject(), std::move(windows_proc_table)) {}
-  MOCK_METHOD(bool, running, (), (const));
+  MOCK_METHOD(bool, running, (), (const, override));
+  MOCK_METHOD(void,
+              OnDisplaysChanged,
+              (std::vector<FlutterEngineDisplay> const&),
+              (const, override));
 };
 }  // namespace
 
@@ -66,6 +78,35 @@ TEST_F(DisplayManagerTest, CanGetSingleMonitorInfo) {
   EXPECT_THAT(displays[0].width, ::testing::Eq(800));
   EXPECT_THAT(displays[0].height, ::testing::Eq(600));
   EXPECT_THAT(displays[0].refresh_rate, ::testing::Eq(0));
+}
+
+TEST_F(DisplayManagerTest, CanGetWithDisplayMonitorSettings) {
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+  auto engine = MockFlutterWindowsEngine(windows_proc_table);
+  DisplayManager manager(&engine);
+
+  HMONITOR fake = reinterpret_cast<HMONITOR>(0x1234);
+  EXPECT_CALL(*windows_proc_table, EnumDisplayMonitors)
+      .WillOnce(::testing::Invoke(
+          [=](HDC, LPCRECT, MONITORENUMPROC callback, LPARAM dwData) -> BOOL {
+            callback(fake, nullptr, nullptr, dwData);
+            return TRUE;
+          }));
+  EXPECT_CALL(*windows_proc_table, GetMonitorInfo)
+      .WillOnce(::testing::Invoke([=](HMONITOR, LPMONITORINFO info) -> BOOL {
+        info->rcMonitor.right = 800;
+        info->rcMonitor.left = 0;
+        info->rcMonitor.bottom = 600;
+        info->rcMonitor.top = 0;
+        return TRUE;
+      }));
+  EXPECT_CALL(*windows_proc_table, EnumDisplaySettingsW)
+      .WillOnce(::testing::Invoke([=](LPCWSTR, DWORD, DEVMODEW* lpDevMode) {
+        lpDevMode->dmDisplayFrequency = 1234;
+        return TRUE;
+      }));
+  auto const displays = manager.displays();
+  EXPECT_THAT(displays[0].refresh_rate, ::testing::Eq(1234));
 }
 
 TEST_F(DisplayManagerTest, CanGetMultipleMonitorInfo) {
@@ -123,6 +164,64 @@ TEST_F(DisplayManagerTest, CanGetMultipleMonitorInfo) {
   EXPECT_THAT(displays[1].width, ::testing::Eq(400));
   EXPECT_THAT(displays[1].height, ::testing::Eq(300));
   EXPECT_THAT(displays[1].refresh_rate, ::testing::Eq(0));
+}
+
+TEST_F(DisplayManagerTest, OnDisplaysChangedIsCalledOnDisplayChangeMessage) {
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+  auto engine = MockFlutterWindowsEngine(windows_proc_table);
+  DisplayManager manager(&engine);
+
+  HMONITOR fake = reinterpret_cast<HMONITOR>(0x1234);
+  EXPECT_CALL(*windows_proc_table, EnumDisplayMonitors)
+      .WillOnce(::testing::Invoke(
+          [=](HDC, LPCRECT, MONITORENUMPROC callback, LPARAM dwData) -> BOOL {
+            callback(fake, nullptr, nullptr, dwData);
+            return TRUE;
+          }));
+  EXPECT_CALL(*windows_proc_table, GetMonitorInfo)
+      .WillOnce(::testing::Invoke([=](HMONITOR, LPMONITORINFO info) -> BOOL {
+        info->rcMonitor.right = 800;
+        info->rcMonitor.left = 0;
+        info->rcMonitor.bottom = 600;
+        info->rcMonitor.top = 0;
+        return TRUE;
+      }));
+  EXPECT_CALL(*windows_proc_table, EnumDisplaySettingsW)
+      .WillOnce(::testing::Return(FALSE));
+  EXPECT_CALL(engine, running).WillOnce(::testing::Return(true));
+  EXPECT_CALL(engine, OnDisplaysChanged).Times(1);
+
+  ::SendMessage(manager.get_window_handle(), WM_DISPLAYCHANGE, 0, 0);
+  PumpMessage();
+}
+
+TEST_F(DisplayManagerTest, OnDisplaysChangedIsCalledOnDevniceChangeMessage) {
+  auto windows_proc_table = std::make_shared<MockWindowsProcTable>();
+  auto engine = MockFlutterWindowsEngine(windows_proc_table);
+  DisplayManager manager(&engine);
+
+  HMONITOR fake = reinterpret_cast<HMONITOR>(0x1234);
+  EXPECT_CALL(*windows_proc_table, EnumDisplayMonitors)
+      .WillOnce(::testing::Invoke(
+          [=](HDC, LPCRECT, MONITORENUMPROC callback, LPARAM dwData) -> BOOL {
+            callback(fake, nullptr, nullptr, dwData);
+            return TRUE;
+          }));
+  EXPECT_CALL(*windows_proc_table, GetMonitorInfo)
+      .WillOnce(::testing::Invoke([=](HMONITOR, LPMONITORINFO info) -> BOOL {
+        info->rcMonitor.right = 800;
+        info->rcMonitor.left = 0;
+        info->rcMonitor.bottom = 600;
+        info->rcMonitor.top = 0;
+        return TRUE;
+      }));
+  EXPECT_CALL(*windows_proc_table, EnumDisplaySettingsW)
+      .WillOnce(::testing::Return(FALSE));
+  EXPECT_CALL(engine, running).WillOnce(::testing::Return(true));
+  EXPECT_CALL(engine, OnDisplaysChanged).Times(1);
+
+  ::SendMessage(manager.get_window_handle(), WM_DEVICECHANGE, 0, 0);
+  PumpMessage();
 }
 }  // namespace testing
 }  // namespace flutter

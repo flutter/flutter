@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/display_manager.h"
+#include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 #include <memory>
@@ -133,15 +134,7 @@ BOOL CALLBACK DisplayManager::MonitorEnumProc(HMONITOR hMonitor,
   display.refresh_rate = has_display_settings
                              ? static_cast<double>(dev_mode.dmDisplayFrequency)
                              : 0.0;
-
-  // Approximate device pixel ratio using system DPI
-  UINT dpi_x = 96;
-  HDC screen_dc = GetDC(nullptr);
-  if (screen_dc) {
-    dpi_x = GetDeviceCaps(screen_dc, LOGPIXELSX);
-    ReleaseDC(nullptr, screen_dc);
-  }
-  display.device_pixel_ratio = dpi_x / 96.0;
+  display.device_pixel_ratio = GetDpiForMonitor(hMonitor);
 
   data->displays.push_back(display);
   return TRUE;
