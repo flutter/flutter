@@ -154,7 +154,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   node0.id = 0;
   node0.identifier = "identifier";
   node0.label = "label";
-  node0.locale = "es-MX";
+  node0.locale = "es_MX";
   update.insert(std::make_pair(0, node0));
 
   std::vector<uint8_t> expected_buffer(
