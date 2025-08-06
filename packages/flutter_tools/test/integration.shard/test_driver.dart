@@ -649,16 +649,18 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           timeout: appStartTimeout,
         );
 
-        if (withDebugger) {
+        if (withDebugger || attachPort != null) {
           final Map<String, Object?> debugPort = await _waitFor(
             event: 'app.debugPort',
             timeout: appStartTimeout,
           );
           final wsUriString = (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
           _vmServiceWsUri = Uri.parse(wsUriString);
-          await connectToVmService(pauseOnExceptions: pauseOnExceptions);
-          if (!startPaused) {
-            await resume();
+          if (withDebugger) {
+            await connectToVmService(pauseOnExceptions: pauseOnExceptions);
+            if (!startPaused) {
+              await resume();
+            }
           }
         }
 

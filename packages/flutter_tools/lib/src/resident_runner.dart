@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -235,7 +236,6 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) {
     final completer = Completer<void>();
     late StreamSubscription<void> subscription;
@@ -273,24 +273,48 @@ class FlutterDevice {
           // This first try block is meant to catch errors that occur during DDS startup
           // (e.g., failure to bind to a port, failure to connect to the VM service,
           // attaching to a VM service with existing clients, etc.).
-          try {
-            await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
-              vmServiceUri,
-              debuggingOptions: debuggingOptions,
-            );
-          } on DartDevelopmentServiceException catch (e, st) {
-            if (!allowExistingDdsInstance ||
-                (e.errorCode != DartDevelopmentServiceException.existingDdsInstanceError)) {
+          const kMaxRetries = 3;
+          var retries = 0;
+          while (true) {
+            try {
+              await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
+                vmServiceUri,
+                debuggingOptions: debuggingOptions,
+              );
+              break;
+            } on DartDevelopmentServiceException catch (e, st) {
+              if (e.errorCode == DartDevelopmentServiceException.existingDdsInstanceError) {
+                existingDds = true;
+                break;
+              }
+              // It's possible (but unlikely) that two DDS instances can try and start at the same
+              // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
+              // waiting for a target to attach to). This leads to DDS failing to initialize for
+              // one of the processes when the VM service disconnects it after the other instance
+              // successfully invoked the "_yieldControlToDDS" RPC.
+              //
+              // To handle this, we retry to start DDS after a short delay, which should result in
+              // an existingDdsInstanceError if the failure to start was due to a startup race.
+              //
+              // See https://github.com/flutter/flutter/issues/169265 for details.
+              ++retries;
+              if (retries >= kMaxRetries) {
+                handleError(e, st);
+                return;
+              }
+              // Exponential backoff.
+              final int backoffPeriod = pow(2, retries).toInt() * 100;
+              globals.printTrace(
+                'Failed to start DDS (attempt $retries of $kMaxRetries). '
+                'Retrying in ${backoffPeriod}ms...',
+              );
+              await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
+            } on ToolExit {
+              rethrow;
+            } on Exception catch (e, st) {
               handleError(e, st);
               return;
-            } else {
-              existingDds = true;
             }
-          } on ToolExit {
-            rethrow;
-          } on Exception catch (e, st) {
-            handleError(e, st);
-            return;
           }
         }
         // This second try block handles cases where the VM service connection goes down
@@ -1227,7 +1251,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
-    shutdownDartDevelopmentService();
     appFinished();
   }
 
@@ -1311,7 +1334,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        allowExistingDdsInstance: allowExistingDdsInstance,
         hostVmServicePort: debuggingOptions.hostVmServicePort,
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
