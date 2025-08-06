@@ -53,7 +53,7 @@ void main() {
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 
-    // Build the RouteObserver example widget
+    // Build the RouteObserver example widget.
     await tester.pumpWidget(
       const MaterialApp(
         home: RouteObserverExample(),
