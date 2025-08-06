@@ -22,7 +22,8 @@ class DisplayManager {
   std::vector<FlutterEngineDisplay> displays() const;
 
  private:
-  WNDCLASS RegisterWindowClass();
+  WNDCLASS
+  RegisterWindowClass();
 
   LRESULT
   HandleMessage(UINT const message,

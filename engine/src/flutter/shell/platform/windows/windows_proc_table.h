@@ -11,7 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/native_library.h"
 
-namespace flutter {
+namespace flutter {  // namespace
 
 // Lookup table for Windows APIs that aren't available on all versions of
 // Windows, or for mocking Windows API calls.
@@ -122,6 +122,29 @@ class WindowsProcTable {
                                         BOOL bMenu,
                                         DWORD dwExStyle,
                                         UINT dpi) const;
+
+  // Iterates over the list of available monitors and calls |lpfnEnum|.
+  //
+  // See:
+  // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumdisplaymonitors
+  virtual BOOL EnumDisplayMonitors(HDC hdc,
+                                   LPCRECT lprcClip,
+                                   MONITORENUMPROC lpfnEnum,
+                                   LPARAM dwData) const;
+
+  // Retrieve information about a display monitor.
+  //
+  // See:
+  // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmonitorinfoa
+  virtual BOOL GetMonitorInfo(HMONITOR hMonitor, LPMONITORINFO lpmi) const;
+
+  // Retrieve information about one of the graphics modes for a display device.
+  //
+  // See:
+  // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumdisplaysettingsw
+  virtual BOOL EnumDisplaySettingsW(LPCWSTR lpszDeviceName,
+                                    DWORD iModeNum,
+                                    DEVMODEW* lpDevMode) const;
 
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,

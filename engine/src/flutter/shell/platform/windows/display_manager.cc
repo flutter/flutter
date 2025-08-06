@@ -5,9 +5,17 @@
 #include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
+#include <memory>
 #include "flutter/fml/logging.h"
 
 namespace flutter {
+namespace {
+struct CallbackData {
+  std::shared_ptr<WindowsProcTable> windows_proc_table;
+  std::vector<FlutterEngineDisplay> displays;
+};
+}  // namespace
+
 DisplayManager::DisplayManager(FlutterWindowsEngine* engine) : engine_(engine) {
   WNDCLASS window_class = RegisterWindowClass();
   window_handle_ =
@@ -37,18 +45,19 @@ DisplayManager::~DisplayManager() {
   }
   UnregisterClass(window_class_name_.c_str(), nullptr);
 }
-#include <iostream>
-std::vector<FlutterEngineDisplay> DisplayManager::displays() const {
-  std::vector<FlutterEngineDisplay> displays;
-  EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc,
-                      reinterpret_cast<LPARAM>(&displays));
 
-  if (displays.size() == 1) {
-    displays[0].single_display = true;
-    displays[0].display_id = 0;  // ignored when single_display is true
+std::vector<FlutterEngineDisplay> DisplayManager::displays() const {
+  auto windows_proc_table = engine_->windows_proc_table();
+  CallbackData data = {windows_proc_table, std::vector<FlutterEngineDisplay>()};
+  windows_proc_table->EnumDisplayMonitors(nullptr, nullptr, MonitorEnumProc,
+                                          reinterpret_cast<LPARAM>(&data));
+
+  if (data.displays.size() == 1) {
+    data.displays[0].single_display = true;
+    data.displays[0].display_id = 0;  // ignored when single_display is true
   }
 
-  return displays;
+  return data.displays;
 }
 
 WNDCLASS DisplayManager::RegisterWindowClass() {
@@ -101,18 +110,18 @@ BOOL CALLBACK DisplayManager::MonitorEnumProc(HMONITOR hMonitor,
                                               HDC,
                                               LPRECT,
                                               LPARAM lParam) {
-  auto displays = reinterpret_cast<std::vector<FlutterEngineDisplay>*>(lParam);
+  auto data = reinterpret_cast<CallbackData*>(lParam);
 
   MONITORINFOEX monitor_info = {};
   monitor_info.cbSize = sizeof(MONITORINFOEX);
-  if (!GetMonitorInfo(hMonitor, &monitor_info)) {
+  if (!data->windows_proc_table->GetMonitorInfo(hMonitor, &monitor_info)) {
     return TRUE;
   }
 
   // Get display settings
   DEVMODE dev_mode = {};
   dev_mode.dmSize = sizeof(DEVMODE);
-  bool has_display_settings = EnumDisplaySettings(
+  bool has_display_settings = data->windows_proc_table->EnumDisplaySettingsW(
       monitor_info.szDevice, ENUM_CURRENT_SETTINGS, &dev_mode);
 
   FlutterEngineDisplay display;
@@ -134,7 +143,7 @@ BOOL CALLBACK DisplayManager::MonitorEnumProc(HMONITOR hMonitor,
   }
   display.device_pixel_ratio = dpi_x / 96.0;
 
-  displays->push_back(display);
+  data->displays.push_back(display);
   return TRUE;
 }
 

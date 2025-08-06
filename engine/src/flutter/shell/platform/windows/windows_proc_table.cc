@@ -120,4 +120,22 @@ BOOL WindowsProcTable::AdjustWindowRectExForDpi(LPRECT lpRect,
                                                  dwExStyle, dpi);
 }
 
+BOOL WindowsProcTable::EnumDisplayMonitors(HDC hdc,
+                                           LPCRECT lprcClip,
+                                           MONITORENUMPROC lpfnEnum,
+                                           LPARAM dwData) const {
+  return ::EnumDisplayMonitors(hdc, lprcClip, lpfnEnum, dwData);
+}
+
+BOOL WindowsProcTable::GetMonitorInfo(HMONITOR hMonitor,
+                                      LPMONITORINFO lpmi) const {
+  return ::GetMonitorInfo(hMonitor, lpmi);
+}
+
+BOOL WindowsProcTable::EnumDisplaySettingsW(LPCWSTR lpszDeviceName,
+                                            DWORD iModeNum,
+                                            DEVMODEW* lpDevMode) const {
+  return ::EnumDisplaySettingsW(lpszDeviceName, iModeNum, lpDevMode);
+}
+
 }  // namespace flutter
