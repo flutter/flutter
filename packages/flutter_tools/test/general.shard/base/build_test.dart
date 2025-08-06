@@ -191,7 +191,6 @@ void main() {
 
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      final String snapshotPath = fileSystem.path.join(outputPath, 'app.so');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
@@ -204,8 +203,10 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=$snapshotPath',
+            '--macho=build/foo/App.framework/App',
             '--macho-min-os-version=13.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             '--dwarf-stack-traces',
             '--resolve-dwarf-paths',
             '--save-debugging-info=$debugPath',
@@ -253,7 +254,6 @@ void main() {
 
     testWithoutContext('builds iOS snapshot with obfuscate', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
-      final String snapshotPath = fileSystem.path.join(outputPath, 'app.so');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
         platform: TargetPlatform.ios,
@@ -265,8 +265,10 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=$snapshotPath',
+            '--macho=build/foo/App.framework/App',
             '--macho-min-os-version=13.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             '--obfuscate',
             'main.dill',
           ],
@@ -322,8 +324,10 @@ void main() {
             genSnapshotPath,
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
-            '--macho=${fileSystem.path.join(outputPath, 'app.so')}',
+            '--macho=build/foo/App.framework/App',
             '--macho-min-os-version=13.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
             'main.dill',
           ],
         ),
