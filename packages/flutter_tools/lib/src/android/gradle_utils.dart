@@ -115,9 +115,11 @@ const _versionGroupName = 'version';
 // Groovy DSL with single quotes - 'com.android.tools.build:gradle:{{agpVersion}}'
 // Groovy DSL with double quotes - "com.android.tools.build:gradle:{{agpVersion}}"
 // Kotlin DSL - ("com.android.tools.build.gradle:{{agpVersion}}")
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _androidGradlePluginRegExpFromDependencies = RegExp(
-  r"""[^\/]*\s*((\bclasspath\b)|(\bcompileOnly\b))\s*\(?['"]com\.android\.tools\.build:gradle:(?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:classpath|compileOnly)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.tools\.build:gradle:(?<version>\d+(?:.\d+){1,2}).*\k<quote>""",
   multiLine: true,
 );
 
@@ -127,9 +129,11 @@ final _androidGradlePluginRegExpFromDependencies = RegExp(
 // Groovy DSL with single quotes - id 'com.android.application' version '{{agpVersion}}'
 // Groovy DSL with double quotes - id "com.android.application" version "{{agpVersion}}"
 // Kotlin DSL - id("com.android.application") version "{{agpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _androidGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])com\.android\.application\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -138,9 +142,11 @@ final _androidGradlePluginRegExpFromId = RegExp(
 // Expected content:
 // Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
-// ?<version> is used to name the version group which helps with extraction.
+// `(?<=^[^/]*)` is a positive look behind to ensure that the line is not commented out.
+// `?<version>` is used to name the version group which helps with extraction.
+// `\k<quote>` takes advanatage of the precviously declared `(?<quote>['"])` for reuse.
 final _kotlinGradlePluginRegExpFromId = RegExp(
-  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  r"""\b(?:id)\b(?<=^[^/]*)\s*\(?(?<quote>['"])org\.jetbrains\.kotlin\.android\k<quote>\)?\s+version\s+\k<quote>(?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -154,7 +160,7 @@ final distributionUrlRegex = RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiL
 // gradle.org urls so that we can guarantee any modifications to the url
 // still points to a hosted zip.
 final gradleOrgVersionMatch = RegExp(
-  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+  r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-([\d.]+)-(.*)\.zip',
   multiLine: true,
 );
 
