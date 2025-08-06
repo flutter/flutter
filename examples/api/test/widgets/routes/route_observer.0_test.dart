@@ -62,7 +62,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verify there are no layout exceptions (like RenderFlex overflow)
+    // Verify there are no layout exceptions (like RenderFlex overflow).
     expect(tester.takeException(), isNull);
   });
 }
