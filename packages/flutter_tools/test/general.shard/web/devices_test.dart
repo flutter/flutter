@@ -33,9 +33,7 @@ void main() {
   });
 
   _FakeChromiumDevice getFakeChromiumDevice() {
-    final TestChromiumLauncher launcher = TestChromiumLauncher(
-      launcher: () => _OnceClosableChromium(),
-    );
+    final launcher = TestChromiumLauncher(launcher: () => _OnceClosableChromium());
 
     return _FakeChromiumDevice(
       chromiumLauncher: launcher,
@@ -248,9 +246,8 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
-        .whereType<GoogleChromeDevice>()
-        .first;
+    final GoogleChromeDevice chromeDevice =
+        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
 
     expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
@@ -291,9 +288,8 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
-        .whereType<GoogleChromeDevice>()
-        .first;
+    final GoogleChromeDevice chromeDevice =
+        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
 
     expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');

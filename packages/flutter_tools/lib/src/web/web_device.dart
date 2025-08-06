@@ -141,7 +141,7 @@ abstract class ChromiumDevice extends Device {
   }
 
   bool _isLaunchUrlValid(String url) {
-    final RegExp pattern = RegExp(r'^(https?:\/\/)[^\s]+');
+    final pattern = RegExp(r'^(https?:\/\/)[^\s]+');
     return pattern.hasMatch(url);
   }
 
