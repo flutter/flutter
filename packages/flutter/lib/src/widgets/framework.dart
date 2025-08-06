@@ -2059,13 +2059,62 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
 // ELEMENTS
 
-enum _ElementLifecycle { initial, active, inactive, defunct }
+enum _ElementLifecycle {
+  /// The [Element] is created but has not yet been incorporated into the element
+  /// tree.
+  initial,
+
+  /// The [Element] is incorporated into the Element tree, either via
+  /// [Element.mount] or [Element.activate].
+  active,
+
+  /// The previously `active` [Element] is removed from the Element tree via
+  /// [Element.deactivate].
+  ///
+  /// This [Element] may become `active` again if a parent reclaims it using
+  /// a [GlobalKey], or `defunct` if no parent reclaims it at the end of the
+  /// build phase.
+  inactive,
+
+  /// The [Element] encountered a unrecoverable error while being rebuilt when it
+  /// was `active` or while being incorporated in the tree.
+  ///
+  /// This indicates the [Element]'s subtree is in an inconsistent state and must
+  /// not be re-incorporated into the tree again.
+  ///
+  /// When a unrecoverable error is encountered, the framework calls
+  /// [Element.deactivate] on this [Element] and sets its state to `failed`. This
+  /// process is done on a best-effort basis and does not surface any additional
+  /// errors.
+  ///
+  /// This is one of the two final stages of the element lifecycle and is not
+  /// reversible. Reaching this state typically means that a widget implementation
+  /// is throwing unhandled exceptions that need to be properly handled.
+  failed,
+
+  /// The [Element] is disposed and should not be interacted with.
+  ///
+  /// The [Element] must be `inactive` before transitioning into this state,
+  /// and the state transition occurs in [BuildOwner.finalizeTree] which signals
+  /// the end of the build phase.
+  ///
+  /// This is the final stage of the element lifecycle and is not reversible.
+  defunct;
+
+  bool get debugWaitingForDispose => switch (this) {
+    _ElementLifecycle.initial ||
+    _ElementLifecycle.active ||
+    _ElementLifecycle.defunct ||
+    _ElementLifecycle.failed => false,
+    _ElementLifecycle.inactive => true,
+  };
+}
 
 class _InactiveElements {
   bool _locked = false;
   final Set<Element> _elements = HashSet<Element>();
 
-  void _unmount(Element element) {
+  static void _unmount(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.inactive);
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
@@ -2075,10 +2124,7 @@ class _InactiveElements {
       }
       return true;
     }());
-    element.visitChildren((Element child) {
-      assert(child._parent == element);
-      _unmount(child);
-    });
+    element.visitChildren(_unmount);
     element.unmount();
     assert(element._lifecycleState == _ElementLifecycle.defunct);
   }
@@ -2112,16 +2158,40 @@ class _InactiveElements {
     }
   }
 
+  static void _deactivateFailedSubtreeRecursively(Element element) {
+    // temporarily set
+    element._lifecycleState = _ElementLifecycle.active;
+    try {
+      element.deactivate();
+    } catch (e, stacktrace) {
+      element._ensureDeactivated();
+      // Do not rethrow:
+      // The subtree has already thrown a different error and the framework is
+      // cleaning up on a best-effort basis.
+    }
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
+    element._lifecycleState = _ElementLifecycle.failed;
+    element.visitChildren(_deactivateFailedSubtreeRecursively);
+  }
+
   void add(Element element) {
     assert(!_locked);
     assert(!_elements.contains(element));
     assert(element._parent == null);
-    try {
-      if (element._lifecycleState == _ElementLifecycle.active) {
-        _deactivateRecursively(element);
-      }
-    } finally {
-      _elements.add(element);
+
+    switch (element._lifecycleState) {
+      case _ElementLifecycle.active:
+        try {
+          _deactivateRecursively(element);
+        } finally {
+          _elements.add(element);
+        }
+      case _ElementLifecycle.failed:
+        _deactivateFailedSubtreeRecursively(element);
+      case _ElementLifecycle.inactive:
+        _elements.add(element);
+      case _ElementLifecycle.initial || _ElementLifecycle.defunct:
+        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');
     }
   }
 
@@ -2130,7 +2200,7 @@ class _InactiveElements {
     assert(_elements.contains(element));
     assert(element._parent == null);
     _elements.remove(element);
-    assert(element._lifecycleState != _ElementLifecycle.active);
+    assert(element._lifecycleState == _ElementLifecycle.inactive);
   }
 
   bool debugContains(Element element) {
@@ -4554,6 +4624,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       } catch (_) {
         // Attempt to do some clean-up if activation or mount fails to leave tree in a reasonable state.
         try {
+          newChild._lifecycleState = _ElementLifecycle.failed;
           deactivateChild(newChild);
         } catch (_) {
           // Clean-up failed. Only surface original exception.
@@ -4777,7 +4848,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
-    assert(_lifecycleState == _ElementLifecycle.inactive);
+    assert(_lifecycleState.debugWaitingForDispose);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
     assert(debugMaybeDispatchDisposed(this));
