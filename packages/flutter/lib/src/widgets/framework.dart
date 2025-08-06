@@ -1332,13 +1332,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @protected
   @mustCallSuper
   void dispose() {
-    assert(switch (_debugLifecycleState) {
-      // An Element can be disposed without ever being properly mounted:
-      // if the mount process fails the Element goes straight to the
-      // _InactiveElements list.
-      _StateLifecycle.ready || _StateLifecycle.initialized || _StateLifecycle.created => true,
-      _StateLifecycle.defunct => throw FlutterError('This state is already disposed.'),
-    });
+    assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() {
       _debugLifecycleState = _StateLifecycle.defunct;
       return true;
@@ -2124,7 +2118,10 @@ class _InactiveElements {
       }
       return true;
     }());
-    element.visitChildren(_unmount);
+    element.visitChildren((Element child) {
+      assert(child._parent == element);
+      _unmount(child);
+    });
     element.unmount();
     assert(element._lifecycleState == _ElementLifecycle.defunct);
   }
@@ -2159,11 +2156,12 @@ class _InactiveElements {
   }
 
   static void _deactivateFailedSubtreeRecursively(Element element) {
-    // temporarily set
+    // Temporarily set the Element's state to active in case the deactivate
+    // implementation has related assertions.
     element._lifecycleState = _ElementLifecycle.active;
     try {
       element.deactivate();
-    } catch (e, stacktrace) {
+    } catch (_) {
       element._ensureDeactivated();
       // Do not rethrow:
       // The subtree has already thrown a different error and the framework is
@@ -4785,7 +4783,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// animation frame, if the element has not be reactivated, the framework will
   /// unmount the element.
   ///
-  /// This is (indirectly) called by [deactivateChild].
+  /// In case of an uncaught exception when rebuild a widget subtree, the
+  /// framework also calls this method on the failing subtree to make sure the
+  /// widget tree is in a relatively consistent state. The deactivation of such
+  /// subtrees are performed only on a best-effort basis, and the errors thrown
+  /// during deactivation will not be rethrown.
+  ///
+  /// This is indirectly called by [deactivateChild].
   ///
   /// See the lifecycle documentation for [Element] for additional information.
   ///

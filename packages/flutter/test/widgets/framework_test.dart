@@ -2093,23 +2093,28 @@ The findRenderObject() method was called for the following element:
     expect(element.debugIsDefunct, true);
   });
 
-  testWidgets('widget is not active if throw in activated', (WidgetTester tester) async {
-    final FlutterExceptionHandler? onError = FlutterError.onError;
-    FlutterError.onError = (_) {};
-    const Widget child = Placeholder();
-    final Widget widget = StatefulWidgetSpy(
-      key: GlobalKey(),
-      onActivate: (_) => throw StateError('kaboom'),
-      child: child,
-    );
-    await tester.pumpWidget(widget);
-    final Element element = tester.element(find.byWidget(child));
+  testWidgets(
+    'widget is not active if throw in activated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        key: GlobalKey(),
+        onActivate: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
 
-    await tester.pumpWidget(MetaData(child: widget));
-    FlutterError.onError = onError;
-    expect(element.debugIsActive, false);
-    expect(element.debugIsDefunct, false);
-  });
+      await tester.pumpWidget(MetaData(child: widget));
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
 
   testWidgets('widget is unmounted if throw in dispose', (WidgetTester tester) async {
     final FlutterExceptionHandler? onError = FlutterError.onError;
