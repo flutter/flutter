@@ -273,8 +273,8 @@ class FlutterDevice {
           // This first try block is meant to catch errors that occur during DDS startup
           // (e.g., failure to bind to a port, failure to connect to the VM service,
           // attaching to a VM service with existing clients, etc.).
-          const kMaxRetries = 3;
-          var retries = 0;
+          const kMaxAttempts = 3;
+          var attempts = 0;
           while (true) {
             try {
               await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
@@ -297,15 +297,15 @@ class FlutterDevice {
               // an existingDdsInstanceError if the failure to start was due to a startup race.
               //
               // See https://github.com/flutter/flutter/issues/169265 for details.
-              ++retries;
-              if (retries >= kMaxRetries) {
+              ++attempts;
+              if (attempts >= kMaxAttempts) {
                 handleError(e, st);
                 return;
               }
               // Exponential backoff.
-              final int backoffPeriod = pow(2, retries).toInt() * 100;
+              final int backoffPeriod = (1 << attempts) * 100;
               globals.printTrace(
-                'Failed to start DDS (attempt $retries of $kMaxRetries). '
+                'Failed to start DDS (attempt $attempts of $kMaxAttempts). '
                 'Retrying in ${backoffPeriod}ms...',
               );
               await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
