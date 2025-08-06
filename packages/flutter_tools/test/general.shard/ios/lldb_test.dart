@@ -448,19 +448,12 @@ class FakeLLDBProcess implements io.Process {
 class FakeLLDBCommand {
   const FakeLLDBCommand({
     required this.command,
-    // this.workingDirectory,
-    // this.environment,
-    // this.encoding,
-    // this.duration = Duration.zero,
-    // this.onRun,
     this.exitCode = 0,
     required this.stdin,
     required this.stdout,
     required this.stderr,
     this.completer,
     this.exception,
-    // this.outputFollowsExit = false,
-    // this.processStartMode,
   });
 
   /// The exact commands that must be matched for this [FakeCommand] to be

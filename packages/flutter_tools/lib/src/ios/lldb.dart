@@ -88,7 +88,7 @@ return False
       await _setBreakpoint();
       await _attachToAppProcess(appProcessId);
       await _resumeProcess();
-    } on _LLDBError catch(e) {
+    } on _LLDBError catch (e) {
       _logger.printError('lldb failed with error: ${e.message}');
       exit();
       return false;
@@ -176,8 +176,9 @@ return False
     await futureLog;
   }
 
+  /// Sets a breakpoint, waits for it print the breakpoint id, and adds a python
+  /// script command to be executed whenever the breakpoint is hit.
   Future<void> _setBreakpoint() async {
-    // Set the breakpoint and wait for it to print the breakpoint id.
     final Future<String> futureLog = _startWaitingForLog(
       _breakpointPattern,
     ).catchError(handleAsyncError);
@@ -280,7 +281,8 @@ class _LLDBLogPatternCompleter {
   }
 }
 
-/// A container class for associated a [Process] that is is running LLDB with the iOS device process of an application.
+/// A container class for associating a [Process] that is is running LLDB with
+/// the iOS device process of an application.
 class _LLDBProcess {
   _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
     : _lldbProcess = process,

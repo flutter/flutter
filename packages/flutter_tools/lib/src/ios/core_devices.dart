@@ -347,7 +347,6 @@ class IOSCoreDeviceControl {
     }
   }
 
-  /// Get a list of all CoreDevices.
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
   }) async {
@@ -426,7 +425,6 @@ class IOSCoreDeviceControl {
     ];
   }
 
-  /// Checks if an app is installed on a device.
   Future<bool> isAppInstalled({required String deviceId, required String bundleId}) async {
     final List<IOSCoreDeviceInstalledApp> apps = await getInstalledApps(
       deviceId: deviceId,
@@ -438,7 +436,6 @@ class IOSCoreDeviceControl {
     return false;
   }
 
-  /// Installs an app on a device.
   Future<bool> installApp({required String deviceId, required String bundlePath}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -596,7 +593,6 @@ class IOSCoreDeviceControl {
     }
   }
 
-  /// Terminates a process on a device.
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -647,7 +643,6 @@ class IOSCoreDeviceControl {
   }
 }
 
-/// A single iOS CoreDevice.
 class IOSCoreDevice {
   IOSCoreDevice._({
     required this.capabilities,
@@ -712,10 +707,8 @@ class IOSCoreDevice {
     );
   }
 
-  /// The device's UDID.
   String? get udid => hardwareProperties?.udid;
 
-  /// The device's connection interface.
   DeviceConnectionInterface? get connectionInterface {
     return switch (connectionProperties?.transportType?.toLowerCase()) {
       'localnetwork' => DeviceConnectionInterface.wireless,
@@ -735,12 +728,10 @@ class IOSCoreDevice {
   @visibleForTesting
   final _IOSCoreDeviceHardwareProperties? hardwareProperties;
 
-  /// The identifier used by `devicectl` to uniquely identify a device.
   final String? coreDeviceIdentifier;
   final String? visibilityClass;
 }
 
-/// The capabilities of an iOS CoreDevice.
 class _IOSCoreDeviceCapability {
   _IOSCoreDeviceCapability._({required this.featureIdentifier, required this.name});
 
@@ -769,7 +760,6 @@ class _IOSCoreDeviceCapability {
   final String? name;
 }
 
-/// The connection properties of an iOS CoreDevice.
 class _IOSCoreDeviceConnectionProperties {
   _IOSCoreDeviceConnectionProperties._({
     required this.authenticationType,
@@ -856,7 +846,6 @@ class _IOSCoreDeviceConnectionProperties {
   final String? tunnelTransportProtocol;
 }
 
-/// The device properties of an iOS CoreDevice.
 @visibleForTesting
 class IOSCoreDeviceProperties {
   IOSCoreDeviceProperties._({
@@ -927,7 +916,6 @@ class IOSCoreDeviceProperties {
   final String? screenViewingURL;
 }
 
-/// The hardware properties of an iOS CoreDevice.
 class _IOSCoreDeviceHardwareProperties {
   _IOSCoreDeviceHardwareProperties._({
     required this.cpuType,
@@ -1042,7 +1030,6 @@ class _IOSCoreDeviceHardwareProperties {
   final String? udid;
 }
 
-/// The CPU type of an iOS CoreDevice.
 class _IOSCoreDeviceCPUType {
   _IOSCoreDeviceCPUType._({this.name, this.subType, this.cpuType});
 
@@ -1068,7 +1055,6 @@ class _IOSCoreDeviceCPUType {
   final int? cpuType;
 }
 
-/// An app installed on an iOS CoreDevice.
 @visibleForTesting
 class IOSCoreDeviceInstalledApp {
   IOSCoreDeviceInstalledApp._({
@@ -1133,7 +1119,6 @@ class IOSCoreDeviceInstalledApp {
   final String? version;
 }
 
-/// The result of launching an app on an iOS CoreDevice.
 class IOSCoreDeviceLaunchResult {
   IOSCoreDeviceLaunchResult._({required this.outcome, required this.process});
 
@@ -1177,7 +1162,6 @@ class IOSCoreDeviceLaunchResult {
   final IOSCoreDeviceRunningProcess? process;
 }
 
-/// A running process on an iOS CoreDevice.
 class IOSCoreDeviceRunningProcess {
   IOSCoreDeviceRunningProcess._({required this.executable, required this.processIdentifier});
 
