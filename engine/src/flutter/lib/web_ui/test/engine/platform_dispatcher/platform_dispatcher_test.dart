@@ -290,7 +290,7 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
     });
 
-    test('calls onMetricsChanged when the typography probe size changes', () async {
+    test('calls onMetricsChanged when the typography measurement element size changes', () async {
       final DomElement root = domDocument.documentElement!;
       final DomElement style = createDomHTMLStyleElement(null);
       final ui.VoidCallback? oldCallback = ui.PlatformDispatcher.instance.onMetricsChanged;
@@ -315,7 +315,8 @@ void testMain() {
         isCalled = true;
       };
 
-      style.text = 'html { line-height: 2; word-spacing: 4px; letter-spacing: 1px; }';
+      style.text =
+          'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
       root.append(style);
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
