@@ -5,16 +5,15 @@
 import 'package:yaml/yaml.dart';
 import '../base/logger.dart';
 
-const _kLogEntryPrefix = '[PROXY]';
-const _kPrefix = 'prefix';
-const _kRegex = 'regex';
-const _kTarget = 'target';
-const _kReplace = 'replace';
-const _kPattern = 'pattern';
-
 /// Represents a rule for proxying requests based on a specific pattern.
 /// Subclasses must implement the [matches], [replace], and [getTargetUri] methods.
 sealed class ProxyRule {
+  static const _kLogEntryPrefix = '[ProxyRule]';
+  static const _kTarget = 'target';
+  static const _kRegex = 'regex';
+  static const _kPrefix = 'prefix';
+  static const _kReplace = 'replace';
+
   /// Checks if the given [path] matches the rule's pattern.
   bool matches(String path);
 
@@ -30,7 +29,7 @@ sealed class ProxyRule {
   static ProxyRule? fromYaml(YamlMap yaml, Logger logger) {
     if (PrefixProxyRule.canHandle(yaml) && RegexProxyRule.canHandle(yaml)) {
       logger.printError(
-        '$_kLogEntryPrefix Both "$_kPrefix" and "$_kRegex" are defined in the proxy rule YAML. Only one should be used.',
+        '$_kLogEntryPrefix Both $_kPrefix and $_kRegex are defined in the proxy rule YAML. Only one should be used.',
       );
       return null;
     } else if (PrefixProxyRule.canHandle(yaml)) {
@@ -89,15 +88,15 @@ class RegexProxyRule implements ProxyRule {
 
   @override
   String toString() {
-    return '{$_kPattern: ${_pattern.pattern}, $_kTarget: $_target, $_kReplace: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
   /// It requires the 'regex' key to be present and non-empty.
   static bool canHandle(YamlMap yaml) {
-    return yaml.containsKey(_kRegex) &&
-        yaml[_kRegex] is String &&
-        (yaml[_kRegex] as String).isNotEmpty;
+    return yaml.containsKey(ProxyRule._kRegex) &&
+        yaml[ProxyRule._kRegex] is String &&
+        (yaml[ProxyRule._kRegex] as String).isNotEmpty;
   }
 
   /// Attempts to create a [RegexProxyRule] from the provided [yaml] map.
@@ -105,14 +104,14 @@ class RegexProxyRule implements ProxyRule {
   /// and returns null.
   /// If the 'regex' is invalid, it logs a warning and treats it as a string.
   static RegexProxyRule? fromYaml(YamlMap yaml, Logger effectiveLogger) {
-    final regex = yaml[_kRegex] as String?;
-    final target = yaml[_kTarget] as String?;
-    final replacement = yaml[_kReplace] as String?;
+    final regex = yaml[ProxyRule._kRegex] as String?;
+    final target = yaml[ProxyRule._kTarget] as String?;
+    final replacement = yaml[ProxyRule._kReplace] as String?;
     if (regex == null || regex.isEmpty) {
       return null;
     } else if (target == null || target.isEmpty) {
       effectiveLogger.printError(
-        "$_kLogEntryPrefix Invalid '$_kTarget' for 'regex': $regex. '$_kTarget' cannot be null",
+        '${ProxyRule._kLogEntryPrefix} Invalid ${ProxyRule._kTarget} for ${ProxyRule._kRegex}: $regex. ${ProxyRule._kTarget} cannot be null',
       );
       return null;
     }
@@ -122,7 +121,7 @@ class RegexProxyRule implements ProxyRule {
     } on FormatException catch (e) {
       pattern = RegExp(RegExp.escape(regex));
       effectiveLogger.printWarning(
-        "$_kLogEntryPrefix Invalid $_kRegex pattern in '$_kRegex': '$regex'. Treating $regex as string. Error: $e",
+        '${ProxyRule._kLogEntryPrefix} Invalid regex pattern in ${ProxyRule._kRegex}: $regex. Treating $regex as string. Error: $e',
       );
     }
     return RegexProxyRule(pattern: pattern, target: target, replacement: replacement?.trim());
@@ -132,62 +131,37 @@ class RegexProxyRule implements ProxyRule {
 /// A [ProxyRule] implementation that matches paths starting with a specific prefix.
 ///
 /// If a [_replacement] string is provided, it replaces the prefix in the matched path.
-class PrefixProxyRule implements ProxyRule {
+class PrefixProxyRule extends RegexProxyRule {
   /// Creates a [PrefixProxyRule] with the given [pattern] prefix, [target] URI base,
   /// and optional [replacement] string.
-  PrefixProxyRule({required String pattern, required String target, String? replacement})
-    : _pattern = pattern,
-      _target = target,
-      _replacement = replacement;
-
-  final String _pattern;
-  final String _target;
-  final String? _replacement;
-
-  @override
-  bool matches(String path) {
-    return path.startsWith(_pattern);
-  }
-
-  @override
-  String replace(String path) {
-    if (_replacement == null) {
-      return path;
-    }
-    return path.replaceFirst(_pattern, _replacement);
-  }
-
-  @override
-  Uri getTargetUri() {
-    final Uri targetBaseUri = Uri.parse(_target);
-    return targetBaseUri;
-  }
+  PrefixProxyRule({required String pattern, required super.target, super.replacement})
+    : super(pattern: RegExp('^${RegExp.escape(pattern)}'));
 
   @override
   String toString() {
-    return '{$_kPattern: $_pattern, $_kTarget: $_target, $_kReplace: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
   /// It requires the 'prefix' key to be present and non-empty.
   static bool canHandle(YamlMap yaml) {
-    return yaml.containsKey(_kPrefix) &&
-        yaml[_kPrefix] is String &&
-        (yaml[_kPrefix] as String).isNotEmpty;
+    return yaml.containsKey(ProxyRule._kPrefix) &&
+        yaml[ProxyRule._kPrefix] is String &&
+        (yaml[ProxyRule._kPrefix] as String).isNotEmpty;
   }
 
   /// Attempts to create a [PrefixProxyRule] from the provided [yaml] map.
   /// If the 'prefix' or 'target' keys are missing or invalid, it logs an error
   /// and returns null.
   static PrefixProxyRule? fromYaml(YamlMap yaml, Logger effectiveLogger) {
-    final pattern = yaml[_kPrefix] as String?;
-    final target = yaml[_kTarget] as String?;
-    final replacement = yaml[_kReplace] as String?;
+    final pattern = yaml[ProxyRule._kPrefix] as String?;
+    final target = yaml[ProxyRule._kTarget] as String?;
+    final replacement = yaml[ProxyRule._kReplace] as String?;
     if (pattern == null || pattern.isEmpty) {
       return null;
     } else if (target == null || target.isEmpty) {
       effectiveLogger.printError(
-        "[PROXY] Invalid '$_kTarget' for '$_kPrefix': $pattern. '$_kTarget' cannot be null",
+        '${ProxyRule._kLogEntryPrefix} Invalid ${ProxyRule._kTarget} for ${ProxyRule._kPrefix}: $pattern. ${ProxyRule._kTarget} cannot be null',
       );
       return null;
     }

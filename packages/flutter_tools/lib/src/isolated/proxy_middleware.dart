@@ -1,12 +1,13 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 
 import '../base/logger.dart';
 import '../web/devfs_proxy.dart';
+
+const _kLogEntryPrefix = '[proxyMiddleware]';
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
@@ -22,48 +23,54 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
   );
 }
 
-/// Creates a [shelf.Middleware] that proxies requests based on a list of [ProxyRule]s.
+/// Iterates through the provided [effectiveProxy] rules for each incoming [shelf.Request].
 ///
-/// This middleware iterates through the provided [effectiveProxy] rules for each incoming
-/// [shelf.Request]. If a rule's pattern matches the request's path, the request is
+/// If a rule's pattern matches the request's path, the request is
 /// rewritten and forwarded to the target URI defined in the matching [ProxyRule].
-///
-/// If a proxy request results in a 404 Not Found status from the target, or if an
-/// exception occurs during the proxy attempt, the request is allowed to "fall through"
-/// to the next handler in the Shelf stack.
+/// Otherwise, the request is passed to the next handler in the Shelf stack.
+Future<shelf.Response> _applyProxyRules(
+  shelf.Request request,
+  List<ProxyRule> effectiveProxy,
+  shelf.Handler innerHandler,
+  Logger logger,
+) async {
+  final String requestPath = request.requestedUri.path;
+  for (final rule in effectiveProxy) {
+    if (!rule.matches(requestPath)) {
+      continue;
+    }
+
+    /// Rewrites the request path based on the matching rule by:
+    /// 1. Getting the base target URI from the rule.
+    /// 2. Replacing the request path according to the rule's replacement logic.
+    /// 3. Resolving the final target URL by combining the target URI and the rewritten
+    ///    request path.
+    final Uri targetUri = rule.getTargetUri();
+    final String rewrittenPath = rule.replace(requestPath);
+    final Uri finalTargetUrl = targetUri.resolve(rewrittenPath);
+    try {
+      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
+      final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
+      logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
+      logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
+      if (proxyResponse.statusCode == 404) {
+        logger.printTrace('$_kLogEntryPrefix "$finalTargetUrl" responded with status 404');
+        return innerHandler(request);
+      }
+      return proxyResponse;
+    } on Exception catch (e) {
+      logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');
+      return innerHandler(request);
+    }
+  }
+  return innerHandler(request);
+}
+
+/// Creates a [shelf.Middleware] that proxies requests based on a list of [ProxyRule]s.
 shelf.Middleware proxyMiddleware(List<ProxyRule> effectiveProxy, Logger logger) {
   return (shelf.Handler innerHandler) {
     return (shelf.Request request) async {
-      final String requestPath = request.requestedUri.path;
-      for (final rule in effectiveProxy) {
-        if (rule.matches(requestPath)) {
-          /// Rewrites the request path based on the matching rule by:
-          /// 1. Getting the base target URI from the rule.
-          /// 2. Replacing the request path according to the rule's replacement logic.
-          /// 3. Resolving the final target URL by combining the target URI and the rewritten
-          ///    request path.
-          final Uri targetUri = rule.getTargetUri();
-          final String rewrittenRequest = rule.replace(requestPath);
-          final Uri finalTargetUrl = targetUri.resolve(rewrittenRequest);
-          try {
-            final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
-            final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
-            logger.printStatus('[PROXY] Matched "$requestPath". Requesting "$finalTargetUrl"');
-            logger.printTrace('[PROXY] Matched with proxy rule: $rule');
-            if (proxyResponse.statusCode == 404) {
-              logger.printTrace('[PROXY] "$finalTargetUrl" responded with status 404');
-              return innerHandler(request);
-            }
-            return proxyResponse;
-          } on Exception catch (e) {
-            logger.printError('[PROXY] Error for $finalTargetUrl: $e. Allowing fall-through.');
-
-            return innerHandler(request);
-          }
-        }
-      }
-
-      return innerHandler(request);
+      return _applyProxyRules(request, effectiveProxy, innerHandler, logger);
     };
   };
 }
