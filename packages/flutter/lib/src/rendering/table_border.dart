@@ -180,11 +180,11 @@ class TableBorder {
     final RRect borderRect = borderRadius.toRRect(rect);
     final Paint paint = Paint()..color = color;
 
-    final RRect inner = _deflateRRect(
+    final RRect inner = RRectUtils.deflateRRect(
       borderRect,
       EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset),
     );
-    final RRect outer = _inflateRRect(
+    final RRect outer = RRectUtils.inflateRRect(
       borderRect,
       EdgeInsets.fromLTRB(
         left.strokeOutset,
@@ -194,50 +194,6 @@ class TableBorder {
       ),
     );
     canvas.drawDRRect(outer, inner, paint);
-  }
-
-  /// Inflates an [RRect] by the given [EdgeInsets].
-  static RRect _inflateRRect(RRect rect, EdgeInsets insets) {
-    return RRect.fromLTRBAndCorners(
-      rect.left - insets.left,
-      rect.top - insets.top,
-      rect.right + insets.right,
-      rect.bottom + insets.bottom,
-      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(
-        minimum: Radius.zero,
-      ),
-      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(
-        minimum: Radius.zero,
-      ),
-      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(
-        minimum: Radius.zero,
-      ),
-      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(
-        minimum: Radius.zero,
-      ),
-    );
-  }
-
-  /// Deflates an [RRect] by the given [EdgeInsets].
-  static RRect _deflateRRect(RRect rect, EdgeInsets insets) {
-    return RRect.fromLTRBAndCorners(
-      rect.left + insets.left,
-      rect.top + insets.top,
-      rect.right - insets.right,
-      rect.bottom - insets.bottom,
-      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(
-        minimum: Radius.zero,
-      ),
-      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(
-        minimum: Radius.zero,
-      ),
-      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(
-        minimum: Radius.zero,
-      ),
-      bottomLeft: (rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(
-        minimum: Radius.zero,
-      ),
-    );
   }
 
   /// Creates a copy of this border but with the widths scaled by the factor `t`.
