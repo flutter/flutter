@@ -922,7 +922,7 @@ class TypographySettings {
     this.paragraphSpacing,
   });
 
-  /// The height of this text span, as a multiple of the font size.
+  /// The height of the text, as a multiple of the font size.
   final double? lineHeight;
 
   /// The amount of space (in logical pixels) to add between each letter.
