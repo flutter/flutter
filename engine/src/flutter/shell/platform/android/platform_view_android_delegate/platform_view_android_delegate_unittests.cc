@@ -194,7 +194,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
   buffer_int32[position++] = -1;  // node0.tooltip
   buffer_int32[position++] = -1;  // node0.linkUrl
   buffer_int32[position++] = expected_strings.size();
-  expected_strings.push_back(node0.linkUrl);  // node0.locale
+  expected_strings.push_back(node0.locale);  // node0.locale
   buffer_int32[position++] = node0.textDirection;
   buffer_float32[position++] = node0.rect.left();
   buffer_float32[position++] = node0.rect.top();
