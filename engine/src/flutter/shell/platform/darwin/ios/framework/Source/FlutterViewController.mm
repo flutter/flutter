@@ -1634,8 +1634,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   _viewportMetrics.width_constraint = maxWidth;
   _viewportMetrics.height_constraint = maxHeight;
-  //  _viewportMetrics.physical_width = self.maxWidth;
-  //  _viewportMetrics.physical_height = self.maxHeight;
+
   NSLog(@"Updated auto-resize constraints: maxWidth = %f, maxHeight = %f", maxWidth, maxHeight);
 }
 
