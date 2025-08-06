@@ -1003,7 +1003,7 @@ class DebuggingOptions {
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
-    this.webDevServerConfig = const WebDevServerConfig(),
+    this.webDevServerConfig,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,

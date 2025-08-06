@@ -496,18 +496,24 @@ class RunCommand extends RunCommandBase {
   Future<WebDevServerConfig?> getWebDevServerConfig() async {
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
+    final int? webPort = stringArg('web-port') != null
+        ? int.tryParse(stringArg('web-port')!)
+        : null;
+
     if (featureFlags.isWebEnabled &&
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
-      return WebDevServerConfig.loadFromFile(
-        overrideHostname: stringArg('web-hostname'),
-        overridePort: stringArg('web-port'),
-        overrideTlsCertPath: stringArg('web-tls-cert-path'),
-        overrideTlsCertKeyPath: stringArg('web-tls-cert-key-path'),
-        extraHeaders: extractWebHeaders(),
+      return (await WebDevServerConfig.loadFromFile(
         fileSystem: globals.fs,
         logger: globals.logger,
+      )).copyWith(
+        host: stringArg('web-hostname'),
+        port: webPort,
+        https: HttpsConfig(
+          certPath: stringArg('web-tls-cert-path'),
+          certKeyPath: stringArg('web-tls-cert-key-path'),
+        ),
       );
     }
     return null;

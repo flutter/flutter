@@ -136,6 +136,9 @@ class WebAssetServer implements AssetReader {
   /// contains a list of objects each with three fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
+  /// bundle. To support embedded libraries, the path should include the
+  /// `baseUri` of the web server.
+  /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
   ///

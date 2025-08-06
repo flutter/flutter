@@ -112,61 +112,39 @@ class WebDevServerConfig {
     );
   }
 
-  /// Creates a [WebDevServerConfig] from the [webDevServerConfigFilePath] file
-  /// with optional Command Line overrides
+  /// Creates a [WebDevServerConfig] from the `web_dev_config.yaml` file.
+  ///
+  /// This method is responsible for loading and parsing the configuration
   static Future<WebDevServerConfig> loadFromFile({
-    String? overrideHostname,
-    String? overridePort,
-    String? overrideTlsCertPath,
-    String? overrideTlsCertKeyPath,
-    Map<String, String>? extraHeaders,
-    List<String>? browserFlags,
     required fs.FileSystem fileSystem,
     required Logger logger,
   }) async {
-    var fileConfig = const WebDevServerConfig();
     final fs.File webDevServerConfigFile = fileSystem.file(webDevServerConfigFilePath);
 
-    if (webDevServerConfigFile.existsSync()) {
-      try {
-        final String fileContent = await webDevServerConfigFile.readAsString();
-        final YamlDocument yamlDoc = loadYamlDocument(fileContent);
-        final YamlNode contents = yamlDoc.contents;
-        if (contents is! YamlMap ||
-            !contents.containsKey(_kServer) ||
-            contents[_kServer] is! YamlMap) {
-          throwToolExit(
-            '$_kLogEntryPrefix $webDevServerConfigFilePath file is missing or malformed.',
-          );
-        }
+    if (!webDevServerConfigFile.existsSync()) {
+      return const WebDevServerConfig();
+    }
 
-        final serverYaml = contents[_kServer] as YamlMap;
-        fileConfig = WebDevServerConfig.fromYaml(serverYaml, logger);
-        logger.printStatus(
-          '$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath',
+    try {
+      final String fileContent = await webDevServerConfigFile.readAsString();
+      final YamlDocument yamlDoc = loadYamlDocument(fileContent);
+      final YamlNode contents = yamlDoc.contents;
+      if (contents is! YamlMap ||
+          !contents.containsKey(_kServer) ||
+          contents[_kServer] is! YamlMap) {
+        throwToolExit(
+          '$_kLogEntryPrefix Found $webDevServerConfigFilePath configuration file but it was malformed.',
         );
-        logger.printTrace(fileConfig.toString());
-      } on Exception catch (e) {
-        throwToolExit('$_kLogEntryPrefix Error: Failed to parse $webDevServerConfigFilePath: $e');
       }
+
+      final serverYaml = contents[_kServer] as YamlMap;
+      final fileConfig = WebDevServerConfig.fromYaml(serverYaml, logger);
+      logger.printStatus('$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath');
+      logger.printTrace(fileConfig.toString());
+      return fileConfig;
+    } on Exception catch (e) {
+      throwToolExit('$_kLogEntryPrefix Error: Failed to parse $webDevServerConfigFilePath: $e');
     }
-
-    HttpsConfig? httpsOverride;
-    if (overrideTlsCertPath != null || overrideTlsCertKeyPath != null) {
-      httpsOverride = HttpsConfig(
-        certPath: overrideTlsCertPath,
-        certKeyPath: overrideTlsCertKeyPath,
-      );
-    }
-
-    final combinedHeaders = <String, String>{...fileConfig.headers, ...?extraHeaders};
-
-    return fileConfig.copyWith(
-      host: overrideHostname,
-      port: overridePort != null ? int.tryParse(overridePort) : null,
-      https: httpsOverride,
-      headers: combinedHeaders,
-    );
   }
 
   /// Creates a copy of a [WebDevServerConfig] with optional overrides.
@@ -195,7 +173,7 @@ class WebDevServerConfig {
   @override
   String toString() {
     return '''
-  WebDevServerConfig:
+WebDevServerConfig:
   $_kHeaders: $headers
   $_kHost: $host
   $_kPort: $port
@@ -207,7 +185,7 @@ class WebDevServerConfig {
 /// Represents the [HttpsConfig] for the web dev server
 @immutable
 class HttpsConfig {
-  const HttpsConfig({required this.certPath, required this.certKeyPath});
+  const HttpsConfig({this.certPath, this.certKeyPath});
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
     _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
@@ -219,15 +197,23 @@ class HttpsConfig {
     );
   }
 
+  /// Creates a copy of this [HttpsConfig] with optional overrides.
+  HttpsConfig copyWith({String? certPath, String? certKeyPath}) {
+    return HttpsConfig(
+      certPath: certPath ?? this.certPath,
+      certKeyPath: certKeyPath ?? this.certKeyPath,
+    );
+  }
+
   final String? certPath;
   final String? certKeyPath;
 
   @override
   String toString() {
     return '''
-    HttpsConfig:
-        $_kCertPath: $certPath
-        $_kCertKey: $certKeyPath''';
+HttpsConfig:
+  $_kCertPath: $certPath
+  $_kCertKey: $certKeyPath''';
   }
 }
 
