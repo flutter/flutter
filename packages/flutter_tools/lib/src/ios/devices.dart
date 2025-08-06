@@ -279,6 +279,7 @@ class IOSDevice extends Device {
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
     required IOSCoreDeviceControl coreDeviceControl,
+    required IOSCoreDeviceLauncher coreDeviceLauncher,
     required XcodeDebug xcodeDebug,
     required IProxy iProxy,
     required super.logger,
@@ -286,6 +287,7 @@ class IOSDevice extends Device {
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
+       _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
@@ -305,16 +307,9 @@ class IOSDevice extends Device {
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
+  final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
   final IProxy _iproxy;
-
-  late final _coreDeviceLauncher = IOSCoreDeviceLauncher(
-    coreDeviceControl: _coreDeviceControl,
-    logger: _logger,
-    xcodeDebug: _xcodeDebug,
-    fileSystem: _fileSystem,
-    processUtils: globals.processUtils,
-  );
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -520,7 +515,6 @@ class IOSDevice extends Device {
       route,
       platformArgs,
       interfaceType: connectionInterface,
-      isCoreDevice: isCoreDevice,
     );
     Status startAppStatus = _logger.startProgress('Installing and launching...');
     try {
@@ -937,37 +931,22 @@ class IOSDevice extends Device {
     final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
       _logger.printError(
         'Xcode is taking longer than expected to start debugging the app. '
-        'Ensure the project is opened in Xcode.',
+        'If the issue persists, try closing Xcode and re-running your Flutter command.',
       );
     });
-
-    bool launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
-      deviceId: id,
-      debuggingOptions: debuggingOptions,
-      package: package,
-      launchArguments: launchArguments,
-      mainPath: mainPath,
-      shutdownHooks: shutdownHooks,
-    );
 
     // Kill Xcode on shutdown when running from CI
     if (debuggingOptions.usingCISystem) {
       shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
     }
-    if (launchSuccess) {
-      timer.cancel();
-      return launchSuccess;
-    }
 
-    // If Xcode launch fails, try again using a temporary project.
-    launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
+    final bool launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
       deviceId: id,
       debuggingOptions: debuggingOptions,
       package: package,
       launchArguments: launchArguments,
       mainPath: mainPath,
-      shutdownHooks: shutdownHooks,
-      forceTemporaryXcodeProject: true,
+      templateRenderer: globals.templateRenderer,
     );
 
     timer.cancel();
@@ -981,8 +960,7 @@ class IOSDevice extends Device {
     if (deployDebugger != null && deployDebugger.debuggerAttached) {
       return deployDebugger.exit();
     }
-    await _coreDeviceLauncher.stopApp(deviceId: id);
-    return false;
+    return _coreDeviceLauncher.stopApp(deviceId: id);
   }
 
   @override

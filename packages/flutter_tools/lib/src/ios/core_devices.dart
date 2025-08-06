@@ -10,16 +10,14 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'lldb.dart';
-import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
-import 'xcodeproj.dart';
 
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
@@ -28,19 +26,18 @@ class IOSCoreDeviceLauncher {
     required XcodeDebug xcodeDebug,
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
+    @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
        _xcodeDebug = xcodeDebug,
        _fileSystem = fileSystem,
-       _processUtils = processUtils;
+       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils);
 
   final IOSCoreDeviceControl _coreDeviceControl;
   final Logger _logger;
   final XcodeDebug _xcodeDebug;
   final FileSystem _fileSystem;
-  final ProcessUtils _processUtils;
-
-  late final _lldb = LLDB(logger: _logger, processUtils: _processUtils);
+  final LLDB _lldb;
 
   /// Install and launch the app on the device without a debugger. This is generally only used for release mode.
   Future<bool> launchAppWithoutDebugger({
@@ -59,7 +56,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Launch app to device
-    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl._launchApp(
+    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
       deviceId: deviceId,
       bundleId: bundleId,
       launchArguments: launchArguments,
@@ -88,7 +85,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Launch app on device, but start it stopped so it will wait until the debugger is attached before starting.
-    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl._launchApp(
+    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
       deviceId: deviceId,
       bundleId: bundleId,
       launchArguments: launchArguments,
@@ -106,7 +103,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Start LLDB and attach to the device process.
-    final bool attachStatus = await _lldb.launchAndAttach(deviceId, processId);
+    final bool attachStatus = await _lldb.attachAndStart(deviceId, processId);
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
     if (!attachStatus) {
@@ -121,8 +118,8 @@ class IOSCoreDeviceLauncher {
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
     required List<String> launchArguments,
-    required String? mainPath,
-    required ShutdownHooks shutdownHooks,
+    required TemplateRenderer templateRenderer,
+    String? mainPath,
     @visibleForTesting Duration? discoveryTimeout,
     bool forceTemporaryXcodeProject = false,
   }) async {
@@ -135,42 +132,39 @@ class IOSCoreDeviceLauncher {
       }
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
         bundlePath,
-        templateRenderer: globals.templateRenderer,
+        templateRenderer: templateRenderer,
         verboseLogging: _logger.isVerbose,
       );
     } else if (package is BuildableIOSApp) {
       final IosProject project = package.project;
+      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
+      final Directory? xcodeWorkspace = project.xcodeWorkspace;
+      if (xcodeWorkspace == null) {
+        _logger.printError('Unable to get Xcode workspace.');
+        return false;
+      }
+      final String? scheme = await project.schemeForBuildInfo(
+        debuggingOptions.buildInfo,
+        logger: _logger,
+      );
+      if (scheme == null) {
+        return false;
+      }
+      _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
       // Before installing/launching/debugging with Xcode, update the build
       // settings to use a custom configuration build directory so Xcode
       // knows where to find the app bundle to launch.
-      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
-      await updateGeneratedXcodeProperties(
+      await _xcodeDebug.updateConfigurationBuildDir(
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
-        targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
       );
-
-      final XcodeProjectInfo? projectInfo = await project.projectInfo();
-      if (projectInfo == null) {
-        globals.printError('Xcode project not found.');
-        return false;
-      }
-      if (project.xcodeWorkspace == null) {
-        globals.printError('Unable to get Xcode workspace.');
-        return false;
-      }
-      final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-      if (scheme == null) {
-        projectInfo.reportFlavorNotFoundAndExit();
-      }
-
-      _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
 
       debugProject = XcodeDebugProject(
         scheme: scheme,
         xcodeProject: project.xcodeProject,
-        xcodeWorkspace: project.xcodeWorkspace!,
+        xcodeWorkspace: xcodeWorkspace,
         hostAppProjectName: project.hostAppProjectName,
         expectedConfigurationBuildDir: bundle.parent.absolute.path,
         verboseLogging: _logger.isVerbose,
@@ -181,6 +175,13 @@ class IOSCoreDeviceLauncher {
       _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
       return false;
     }
+
+    // Core Devices (iOS 17 devices) are debugged through Xcode so don't
+    // include these flags, which are used to check if the app was launched
+    // via Flutter CLI and `ios-deploy`.
+    launchArguments.removeWhere(
+      (String arg) => arg == '--enable-checked-mode' || arg == '--verify-entry-points',
+    );
 
     final bool debugSuccess = await _xcodeDebug.debugApp(
       project: debugProject,
@@ -206,9 +207,9 @@ class IOSCoreDeviceLauncher {
       processToStop = processId;
     }
 
-    // There is no process to stop, so return true.
+    // There is no process to stop, so return false.
     if (processToStop == null) {
-      return true;
+      return false;
     }
 
     // Killing the lldb process may not kill the app process. Kill it with
@@ -523,7 +524,8 @@ class IOSCoreDeviceControl {
   ///
   /// If [startStopped] is true, the app will be launched and paused, waiting
   /// for a debugger to attach.
-  Future<IOSCoreDeviceLaunchResult?> _launchApp({
+  @visibleForTesting
+  Future<IOSCoreDeviceLaunchResult?> launchApp({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],
@@ -558,9 +560,14 @@ class IOSCoreDeviceControl {
       final String stringOutput = output.readAsStringSync();
 
       try {
-        return IOSCoreDeviceLaunchResult.fromJson(
+        final result = IOSCoreDeviceLaunchResult.fromJson(
           json.decode(stringOutput) as Map<String, Object?>,
         );
+        if (result.outcome == null) {
+          _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+          return null;
+        }
+        return result;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
         _logger.printError('devicectl returned non-JSON response: $stringOutput');

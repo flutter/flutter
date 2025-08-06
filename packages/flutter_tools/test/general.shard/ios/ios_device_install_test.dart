@@ -381,6 +381,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: FakeXcodeDebug(),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
@@ -408,4 +409,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   Future<bool> isAppInstalled({required String deviceId, required String bundleId}) async {
     return true;
   }
+}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
 }
