@@ -49,7 +49,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 600);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
 
-    // Rebuild the widget tree with the new window size
+    // Rebuild the widget tree with the new window size.
     addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 
