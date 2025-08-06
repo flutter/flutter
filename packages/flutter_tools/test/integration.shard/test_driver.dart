@@ -186,7 +186,7 @@ abstract final class FlutterTestDriver {
     String extension, {
     Map<String, Object?> args = const <String, Object>{},
   }) async {
-    final int? port = _vmServiceWsUri != null ? vmServicePort : _attachPort;
+    final int port = _attachPort ?? vmServicePort!;
     final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
     final Isolate isolate = await waitForExtension(vmService, extension);
     return vmService.callServiceExtension(extension, isolateId: isolate.id, args: args);
