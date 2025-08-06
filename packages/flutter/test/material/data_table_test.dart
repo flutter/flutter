@@ -96,7 +96,7 @@ void main() {
     expect(log, <String>['onLongPress: Cupcake']);
     log.clear();
 
-    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
     await tester.pump();
@@ -137,7 +137,7 @@ void main() {
     expect(log, <String>['cell-tapDown: 375', 'cell-tapCancel: 375', 'cell-longPress: 375']);
     log.clear();
 
-    TestGesture gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
     await tester.pump(const Duration(milliseconds: 100));
     // onTapDown callback is registered.
     expect(log, equals(<String>['cell-tapDown: 375']));
