@@ -47,6 +47,9 @@ void main() {
             onLongPress: () {
               log.add('onLongPress: ${dessert.name}');
             },
+	    onHover: () {
+	      log.add('onHover: ${dessert.name}');
+	    },
             cells: <DataCell>[
               DataCell(Text(dessert.name)),
               DataCell(
@@ -89,6 +92,15 @@ void main() {
     await tester.longPress(find.text('Cupcake'));
 
     expect(log, <String>['onLongPress: Cupcake']);
+    log.clear();
+
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Cupcake')));
+
+    expect(log, <String>['onHover: Cupcake']);
     log.clear();
 
     await tester.tap(find.text('Calories'));
