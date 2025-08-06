@@ -132,7 +132,7 @@ class RegexProxyRule implements ProxyRule {
 ///
 /// If a [_replacement] string is provided, it replaces the prefix in the matched path.
 class PrefixProxyRule extends RegexProxyRule {
-  /// Creates a [PrefixProxyRule] with the given [pattern] prefix, [target] URI base,
+  /// Creates a [PrefixProxyRule] with the given [prefix] prefix, [target] URI base,
   /// and optional [replacement] string.
   PrefixProxyRule({required String prefix, required super.target, super.replacement})
     : super(pattern: RegExp('^${RegExp.escape(prefix)}'));
