@@ -47,8 +47,10 @@ void main() {
             onLongPress: () {
               log.add('onLongPress: ${dessert.name}');
             },
-	    onHover: () {
-	      log.add('onHover: ${dessert.name}');
+	    onHover: (bool hovering) {
+	      if (hovering) {
+		log.add('onHover: ${dessert.name}');
+	      }
 	    },
             cells: <DataCell>[
               DataCell(Text(dessert.name)),

@@ -148,6 +148,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -160,6 +161,7 @@ class DataRow {
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
+    this.onHover,
     this.color,
     this.mouseCursor,
     required this.cells,
@@ -199,6 +201,11 @@ class DataRow {
   /// that callback behavior overrides the gesture behavior of the row for
   /// that particular cell.
   final GestureLongPressCallback? onLongPress;
+
+  /// Called if the row is hovered.
+  ///
+  /// If non-null, hovering the row will invoke this callback.
+  final ValueChanged<bool>? onHover;
 
   /// Whether the row is selected.
   ///
@@ -951,6 +958,7 @@ class DataTable extends StatelessWidget {
     required GestureTapCancelCallback? onTapCancel,
     required MaterialStateProperty<Color?>? overlayColor,
     required GestureLongPressCallback? onRowLongPress,
+    required ValueChanged<bool>? onRowHover,
     required MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
@@ -1007,10 +1015,11 @@ class DataTable extends StatelessWidget {
         overlayColor: overlayColor,
         child: label,
       );
-    } else if (onSelectChanged != null || onRowLongPress != null) {
+    } else if (onSelectChanged != null || onRowLongPress != null || onRowHover != null) {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
+	onHover: onRowHover,
         overlayColor: overlayColor,
         mouseCursor: mouseCursor,
         child: label,
@@ -1223,6 +1232,7 @@ class DataTable extends StatelessWidget {
               : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
+	  onRowHover: row.onHover,
           mouseCursor:
               row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
         );
