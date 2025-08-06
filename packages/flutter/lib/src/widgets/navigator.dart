@@ -5971,8 +5971,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   List<Object> computeSerializableData() {
-    return super.computeSerializableData()
-      ..addAll(<Object>[restorationScopeId, name, if (arguments != null) arguments!]);
+    return super.computeSerializableData()..addAll(<Object>[restorationScopeId, name, ?arguments]);
   }
 
   @override
@@ -6014,11 +6013,8 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     assert(isRestorable);
     final ui.CallbackHandle? handle = ui.PluginUtilities.getCallbackHandle(routeBuilder);
     assert(handle != null);
-    return super.computeSerializableData()..addAll(<Object>[
-      restorationScopeId,
-      handle!.toRawHandle(),
-      if (arguments != null) arguments!,
-    ]);
+    return super.computeSerializableData()
+      ..addAll(<Object>[restorationScopeId, handle!.toRawHandle(), ?arguments]);
   }
 
   @override

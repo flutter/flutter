@@ -75,13 +75,13 @@ bool GPUSurfaceVulkanImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
-    const SkISize& size) {
+    const DlISize& size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
   }
 
-  if (size.isEmpty()) {
+  if (size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
   }
@@ -156,7 +156,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
     impeller::TextureDescriptor desc;
     desc.format = format.value();
-    desc.size = impeller::ISize{size.width(), size.height()};
+    desc.size = impeller::ISize{size.width, size.height};
     desc.storage_mode = impeller::StorageMode::kDevicePrivate;
     desc.mip_count = 1;
     desc.compression_type = impeller::CompressionType::kLossless;
@@ -277,7 +277,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
+DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

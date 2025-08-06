@@ -266,7 +266,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.topCenter,
-      children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
+      children: <Widget>[...previousChildren, ?currentChild],
     );
   }
 

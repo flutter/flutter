@@ -531,7 +531,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _visible = NO;
   _project = project ?: [[FlutterDartProject alloc] init];
   _messengerHandlers = [[NSMutableDictionary alloc] init];
-  _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _pluginAppDelegates = [NSPointerArray weakObjectsPointerArray];
   _pluginRegistrars = [[NSMutableDictionary alloc] init];
   _currentMessengerConnection = 1;

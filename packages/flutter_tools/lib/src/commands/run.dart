@@ -170,6 +170,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             'is only meaningful in debug and profile builds.',
       )
       ..addFlag(
+        'profile-startup',
+        negatable: false,
+        help:
+            'Make the profiler discard new samples once the profiler sample '
+            'buffer is full. When this flag is not set, the profiler sample '
+            'buffer is used as a ring buffer, meaning that once it is full, '
+            'new samples start overwriting the oldest ones.',
+        hide: !verboseHelp,
+      )
+      ..addFlag(
         'enable-software-rendering',
         negatable: false,
         help:
@@ -376,6 +386,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
+        profileStartup: boolArg('profile-startup'),
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
