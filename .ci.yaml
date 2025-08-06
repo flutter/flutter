@@ -591,10 +591,6 @@ targets:
         ["framework", "hostonly", "linux"]
       docs: >
         {"build": "master", "deploy": "main-docs-flutter-prod"}
-      validation: docs
-      validation_name: Docs
-      firebase_project: main-docs-flutter-prod
-      release_ref: refs/heads/master
     drone_dimensions:
       - os=Linux
 
@@ -619,13 +615,6 @@ targets:
         ["framework", "hostonly", "linux"]
       docs: >
         {"build": "stable"}
-      validation: docs
-      validation_name: Docs
-      # TODO(matanlurey): Neither of these properties are actually used, since
-      # the branch name is not "master", but if they are removed, the recipe
-      # will fail. See https://github.com/flutter/flutter/issues/169108.
-      firebase_project: main-docs-flutter-prod
-      release_ref: refs/heads/master
     drone_dimensions:
       - os=Linux
 
@@ -653,9 +642,6 @@ targets:
         ["framework", "hostonly", "linux"]
       docs: >
         {"post_process": "stable", "deploy": "docs-flutter-dev"}
-      validation: docs_deploy
-      validation_name: Docs_deploy
-      firebase_project: docs-flutter-dev
     drone_dimensions:
       - os=Linux
 
