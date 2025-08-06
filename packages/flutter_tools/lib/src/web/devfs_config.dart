@@ -23,17 +23,17 @@ const _kPort = 'port';
 const _kHttps = 'https';
 const _kProxy = 'proxy';
 const _kHeaders = 'headers';
-const _kCertKey = 'cert-key';
+const _kCertKeyPath = 'cert-key-path';
 const _kCertPath = 'cert-path';
 
 /// Checks if a given [value] has the expected type [T].
 ///
 /// Throws a [ToolExit] if the [value] is not null and has the wrong type.
-T _validateType<T>({required Object? value, required String fieldName}) {
+T? _validateType<T>({required Object? value, required String fieldName}) {
   if (value != null && value is! T) {
     throwToolExit('$_kLogEntryPrefix $fieldName must be a $T. Found ${value.runtimeType}');
   }
-  return value as T;
+  return value as T?;
 }
 
 /// Represents the configuration for the web development server as a [WebDevServerConfig].
@@ -48,11 +48,11 @@ class WebDevServerConfig {
   });
 
   factory WebDevServerConfig.fromYaml(YamlMap yaml, Logger logger) {
-    _validateType<String>(value: yaml[_kHost], fieldName: _kHost);
-    _validateType<int>(value: yaml[_kPort], fieldName: _kPort);
-    _validateType<YamlMap>(value: yaml[_kHttps], fieldName: _kHttps);
-    _validateType<YamlList>(value: yaml[_kProxy], fieldName: _kProxy);
-    final YamlList? headersList = _validateType<YamlList?>(
+    final String? host = _validateType<String>(value: yaml[_kHost], fieldName: _kHost);
+    final int? port = _validateType<int>(value: yaml[_kPort], fieldName: _kPort);
+    final YamlMap? https = _validateType<YamlMap>(value: yaml[_kHttps], fieldName: _kHttps);
+    
+    final YamlList? headersList = _validateType<YamlList>(
       value: yaml[_kHeaders],
       fieldName: _kHeaders,
     );
@@ -90,7 +90,7 @@ class WebDevServerConfig {
       }
     }
 
-    final YamlList? proxyList = _validateType<YamlList?>(value: yaml[_kProxy], fieldName: _kProxy);
+    final YamlList? proxyList = _validateType<YamlList>(value: yaml[_kProxy], fieldName: _kProxy);
     final proxyRules = <ProxyRule>[];
     if (proxyList != null) {
       for (final Object? item in proxyList) {
@@ -105,9 +105,9 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: yaml[_kHost] as String? ?? 'any',
-      port: yaml[_kPort] as int? ?? 0,
-      https: yaml[_kHttps] == null ? null : HttpsConfig.fromYaml(yaml[_kHttps] as YamlMap),
+      host: host ?? 'any',
+      port: port ?? 0,
+      https: https == null ? null : HttpsConfig.fromYaml(https),
       proxy: proxyRules,
     );
   }
@@ -159,7 +159,7 @@ class WebDevServerConfig {
       host: host ?? this.host,
       port: port ?? this.port,
       https: https ?? this.https,
-      headers: headers ?? this.headers,
+      headers: {...?headers, ...this.headers},
       proxy: proxy ?? this.proxy,
     );
   }
@@ -188,12 +188,12 @@ class HttpsConfig {
   const HttpsConfig({this.certPath, this.certKeyPath});
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
-    _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
-    _validateType<String>(value: yaml[_kCertKey], fieldName: _kCertKey);
+    final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
+    final String? certKeyPath = _validateType<String>(value: yaml[_kCertKeyPath], fieldName: _kCertKeyPath);
 
     return HttpsConfig(
-      certPath: yaml[_kCertPath] as String?,
-      certKeyPath: yaml[_kCertKey] as String?,
+      certPath: certPath,
+      certKeyPath: certKeyPath,
     );
   }
 
@@ -213,7 +213,7 @@ class HttpsConfig {
     return '''
 HttpsConfig:
   $_kCertPath: $certPath
-  $_kCertKey: $certKeyPath''';
+  $_kCertKeyPath: $certKeyPath''';
   }
 }
 

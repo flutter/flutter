@@ -518,6 +518,7 @@ class RunCommand extends RunCommandBase {
         host: stringArg('web-hostname'),
         port: webPort,
         https: httpsConfig,
+        headers: extractWebHeaders(),
       );
       return webDevServerConfig;
     }

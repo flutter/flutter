@@ -320,6 +320,7 @@ class DriveCommand extends RunCommandBase {
       host: stringArg('web-hostname'),
       port: webPort,
       https: httpsConfig,
+      headers: extractWebHeaders(),
     );
     final web = webDevServerConfig != null;
 
