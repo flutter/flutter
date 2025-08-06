@@ -127,7 +127,7 @@ void SemanticsUpdateBuilder::updateNode(
   node.role = static_cast<SemanticsRole>(role);
   node.validationResult =
       static_cast<SemanticsValidationResult>(validationResult);
-  node.locale = locale;
+  node.locale = std::move(locale);
 
   nodes_[id] = node;
 }
