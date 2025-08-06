@@ -91,7 +91,6 @@ void main() {
     text = tester.firstWidget(find.byType(RichText));
     expect(find.byType(Padding), findsNothing);
     expect(text, isNotNull);
-    expect(padding, isNull);
     expect(text.text.style?.height, isNull);
     expect(text.text.style?.letterSpacing, isNull);
     expect(text.text.style?.wordSpacing, isNull);
