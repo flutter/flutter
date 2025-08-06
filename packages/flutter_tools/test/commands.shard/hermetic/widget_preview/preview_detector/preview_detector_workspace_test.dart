@@ -34,7 +34,7 @@ void main() {
       await previewDetector.dispose();
     });
 
-    const String simplePreviewSource = '''
+    const simplePreviewSource = '''
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -42,7 +42,7 @@ import 'package:flutter/widget_previews.dart';
 Widget preview() => Text('Hello world!');
 ''';
 
-    const String noPreviewSource = '''
+    const noPreviewSource = '''
 import 'package:flutter/material.dart';
 
 Widget foo() => Text('Hello world!');
@@ -51,13 +51,12 @@ Widget foo() => Text('Hello world!');
     testUsingContext(
       'can detect previews in existing files in multiple workspace projects',
       () async {
-        workspace
-          ..createWorkspaceProject(
-            name: 'foo',
-          ).writeFile((path: 'foo.dart', source: simplePreviewSource))
-          ..createWorkspaceProject(
-            name: 'bar',
-          ).writeFile((path: 'bar.dart', source: simplePreviewSource));
+        (await workspace.createWorkspaceProject(
+          name: 'foo',
+        )).writeFile((path: 'foo.dart', source: simplePreviewSource));
+        (await workspace.createWorkspaceProject(
+          name: 'bar',
+        )).writeFile((path: 'bar.dart', source: simplePreviewSource));
 
         final PreviewDependencyGraph mapping = await previewDetector.initialize();
         expect(mapping.nodesWithPreviews.length, 2);
@@ -66,15 +65,14 @@ Widget foo() => Text('Hello world!');
 
     testUsingContext('can detect previews in updated files', () async {
       // Create two projects with existing previews and one without.
-      workspace
-        ..createWorkspaceProject(
-          name: 'foo',
-        ).writeFile((path: 'foo.dart', source: simplePreviewSource))
-        ..createWorkspaceProject(
-          name: 'bar',
-        ).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'foo',
+      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'bar',
+      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
 
-      final WidgetPreviewProject projectBaz = workspace.createWorkspaceProject(name: 'baz')
+      final WidgetPreviewProject projectBaz = (await workspace.createWorkspaceProject(name: 'baz'))
         ..writeFile((path: 'baz.dart', source: noPreviewSource));
 
       // Initialize the file watcher.
@@ -103,13 +101,12 @@ Widget foo() => Text('Hello world!');
 
     testUsingContext('can detect previews in newly added projects', () async {
       // Create two projects with existing previews.
-      workspace
-        ..createWorkspaceProject(
-          name: 'foo',
-        ).writeFile((path: 'foo.dart', source: simplePreviewSource))
-        ..createWorkspaceProject(
-          name: 'bar',
-        ).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'foo',
+      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'bar',
+      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
@@ -121,24 +118,23 @@ Widget foo() => Text('Hello world!');
           // The new preview in baz.dart should be included in the preview mapping.
           expect(updated.nodesWithPreviews.length, 3);
         },
-        changeOperation: () =>
-            workspace.createWorkspaceProject(name: 'baz')
+        changeOperation: () async =>
+            (await workspace.createWorkspaceProject(name: 'baz'))
               ..writeFile((path: 'baz.dart', source: simplePreviewSource)),
       );
     });
 
     testUsingContext('can detect previews removed due to deleted project', () async {
       // Create three projects with existing previews.
-      workspace
-        ..createWorkspaceProject(
-          name: 'foo',
-        ).writeFile((path: 'foo.dart', source: simplePreviewSource))
-        ..createWorkspaceProject(
-          name: 'bar',
-        ).writeFile((path: 'bar.dart', source: simplePreviewSource))
-        ..createWorkspaceProject(
-          name: 'baz',
-        ).writeFile((path: 'baz.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'foo',
+      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'bar',
+      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(
+        name: 'baz',
+      )).writeFile((path: 'baz.dart', source: simplePreviewSource));
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
@@ -157,10 +153,9 @@ Widget foo() => Text('Hello world!');
 
     testUsingContext("can detect changes in a subproject's pubspec.yaml", () async {
       // Create three empty projects in the same workspace.
-      workspace
-        ..createWorkspaceProject(name: 'foo')
-        ..createWorkspaceProject(name: 'bar');
-      final WidgetPreviewProject bazProject = workspace.createWorkspaceProject(name: 'baz');
+      await workspace.createWorkspaceProject(name: 'foo');
+      await workspace.createWorkspaceProject(name: 'bar');
+      final WidgetPreviewProject bazProject = await workspace.createWorkspaceProject(name: 'baz');
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
@@ -176,10 +171,9 @@ Widget foo() => Text('Hello world!');
 
     testUsingContext("can detect changes in a workspace's root pubspec.yaml", () async {
       // Create three empty projects in the same workspace.
-      workspace
-        ..createWorkspaceProject(name: 'foo')
-        ..createWorkspaceProject(name: 'bar')
-        ..createWorkspaceProject(name: 'baz');
+      await workspace.createWorkspaceProject(name: 'foo');
+      await workspace.createWorkspaceProject(name: 'bar');
+      await workspace.createWorkspaceProject(name: 'baz');
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();

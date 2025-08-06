@@ -549,10 +549,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             replyToPlatformMessage(callback, jsonCodec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            final Map<String, Object?> arguments = decoded.arguments as Map<String, Object?>;
+            final String? text = arguments['text'] as String?;
+            ClipboardMessageHandler().setDataMethodCall(callback, text);
             return;
           case 'Clipboard.getData':
-            ClipboardMessageHandler().getDataMethodCall(callback);
+            final String? format = decoded.arguments as String?;
+            ClipboardMessageHandler().getDataMethodCall(callback, format);
             return;
           case 'Clipboard.hasStrings':
             ClipboardMessageHandler().hasStringsMethodCall(callback);
@@ -742,10 +745,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // by checking if the `_viewsRenderedInCurrentFrame` is non-null and this
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
-    // TODO(harryterkelsen): HTML renderer needs to violate the render rule in
-    // order to perform golden tests in Flutter framework because on the HTML
-    // renderer, golden tests render to DOM and then take a browser screenshot,
-    // https://github.com/flutter/flutter/issues/137073.
     if (shouldRender) {
       await renderer.renderScene(scene, target);
     }
@@ -902,9 +901,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     configuration = configuration.copyWith(locales: parseBrowserLanguages());
   }
 
+  /// Overrides the browser languages list.
+  ///
+  /// If [value] is null, resets the browser languages back to the real value.
+  ///
+  /// This is intended for tests only.
+  @visibleForTesting
+  static void debugOverrideBrowserLanguages(List<String>? value) {
+    _browserLanguagesOverride = value;
+  }
+
+  static List<String>? _browserLanguagesOverride;
+
+  @visibleForTesting
   static List<ui.Locale> parseBrowserLanguages() {
     // TODO(yjbanov): find a solution for IE
-    final List<String>? languages = domWindow.navigator.languages;
+    final List<String>? languages = _browserLanguagesOverride ?? domWindow.navigator.languages;
     if (languages == null || languages.isEmpty) {
       // To make it easier for the app code, let's not leave the locales list
       // empty. This way there's fewer corner cases for apps to handle.
@@ -913,12 +925,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
     final List<ui.Locale> locales = <ui.Locale>[];
     for (final String language in languages) {
-      final List<String> parts = language.split('-');
-      if (parts.length > 1) {
-        locales.add(ui.Locale(parts.first, parts.last));
-      } else {
-        locales.add(ui.Locale(language));
-      }
+      final DomLocale domLocale = DomLocale(language);
+      locales.add(
+        ui.Locale.fromSubtags(
+          languageCode: domLocale.language,
+          scriptCode: domLocale.script,
+          countryCode: domLocale.region,
+        ),
+      );
     }
 
     assert(locales.isNotEmpty);
@@ -1292,8 +1306,26 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     });
   }
 
+  /// The [ui.FrameData] object for the current frame.
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => FrameService.instance.frameData;
+
+  /// A callback that is invoked when the window updates the [ui.FrameData].
+  @override
+  ui.VoidCallback? get onFrameDataChanged => _onFrameDataChanged;
+  ui.VoidCallback? _onFrameDataChanged;
+  Zone _onFrameDataChangedZone = Zone.root;
+  @override
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    _onFrameDataChanged = callback;
+    _onFrameDataChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnFrameDataChanged() {
+    invoke(onFrameDataChanged, _onFrameDataChangedZone);
+  }
 
   @override
   double scaleFontSize(double unscaledFontSize) => unscaledFontSize * textScaleFactor;

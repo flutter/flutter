@@ -299,12 +299,7 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    final List<String> commitCmd = <String>[
-      'commit',
-      '--message',
-      message,
-      if (authorArg != null) authorArg,
-    ];
+    final List<String> commitCmd = <String>['commit', '--message', message, ?authorArg];
     stdio.printTrace('Executing git $commitCmd...');
     final io.ProcessResult commitResult = await git.run(
       commitCmd,
