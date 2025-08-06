@@ -424,39 +424,6 @@ void main() {
         expect(fakeXcodeDebug.debugStarted, isTrue);
       });
 
-      testWithoutContext('succeeds with BuildableIOSApp and forceTemporaryXcodeProject', () async {
-        final processManager = FakeProcessManager.any();
-        final logger = BufferLogger.test();
-        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
-        final IOSApp package = FakeBuildableIOSApp(FakeIosProject());
-        final fileSystem = MemoryFileSystem.test();
-        final fakeXcodeDebug = FakeXcodeDebug(
-          tempXcodeProject: fileSystem.systemTempDirectory,
-          expectedLaunchArguments: [],
-        );
-
-        final launcher = IOSCoreDeviceLauncher(
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          logger: logger,
-          xcodeDebug: fakeXcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
-          lldb: FakeLLDB(),
-        );
-        final bool result = await launcher.launchAppWithXcodeDebugger(
-          deviceId: 'device-id',
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          package: package,
-          launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
-          templateRenderer: FakeTemplateRenderer(),
-          forceTemporaryXcodeProject: true,
-        );
-
-        expect(result, isTrue);
-        expect(fakeXcodeDebug.isTemporaryProject, isTrue);
-        expect(fakeXcodeDebug.debugStarted, isTrue);
-      });
-
       testWithoutContext('succeeds with BuildableIOSApp', () async {
         final processManager = FakeProcessManager.any();
         final logger = BufferLogger.test();

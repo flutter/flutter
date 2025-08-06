@@ -882,11 +882,6 @@ const _validScheme = '''
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   FakeIOSCoreDeviceLauncher({this.launchResult = true});
   bool launchResult;
-  // bool xcodeLaunchResult;
-  // var launchedWithLLDB = false;
-  // var launchedWithXcode = false;
-
-  // Completer<void>? xcodeCompleter;
 
   @override
   Future<bool> launchAppWithoutDebugger({
@@ -905,31 +900,6 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundleId,
     required List<String> launchArguments,
   }) async {
-    // launchedWithLLDB = true;
-    // return lldbLaunchResult;
     return true;
   }
-
-  // @override
-  // Future<bool> launchAppWithXcodeDebugger({
-  //   required String deviceId,
-  //   required DebuggingOptions debuggingOptions,
-  //   required IOSApp package,
-  //   required List<String> launchArguments,
-  //   required TemplateRenderer templateRenderer,
-  //   String? mainPath,
-  //   Duration? discoveryTimeout,
-  //   bool forceTemporaryXcodeProject = false,
-  // }) async {
-  //   if (xcodeCompleter != null) {
-  //     await xcodeCompleter!.future;
-  //   }
-  //   launchedWithXcode = true;
-  //   return xcodeLaunchResult;
-  // }
-
-  // @override
-  // Future<bool> stopApp({required String deviceId, int? processId}) async {
-  //   return false;
-  // }
 }

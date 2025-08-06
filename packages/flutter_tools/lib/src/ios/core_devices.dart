@@ -136,17 +136,12 @@ class IOSCoreDeviceLauncher {
     required TemplateRenderer templateRenderer,
     String? mainPath,
     @visibleForTesting Duration? discoveryTimeout,
-    bool forceTemporaryXcodeProject = false,
   }) async {
     XcodeDebugProject? debugProject;
 
-    if (package is PrebuiltIOSApp || forceTemporaryXcodeProject) {
-      String bundlePath = package.deviceBundlePath;
-      if (forceTemporaryXcodeProject) {
-        bundlePath = _fileSystem.directory(package.deviceBundlePath).absolute.path;
-      }
+    if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-        bundlePath,
+        package.deviceBundlePath,
         templateRenderer: templateRenderer,
         verboseLogging: _logger.isVerbose,
       );

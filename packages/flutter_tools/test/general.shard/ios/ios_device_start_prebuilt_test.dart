@@ -1318,7 +1318,6 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required TemplateRenderer templateRenderer,
     String? mainPath,
     Duration? discoveryTimeout,
-    bool forceTemporaryXcodeProject = false,
   }) async {
     if (xcodeCompleter != null) {
       await xcodeCompleter!.future;
