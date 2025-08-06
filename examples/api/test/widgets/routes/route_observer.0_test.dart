@@ -60,7 +60,6 @@ void main() {
       ),
     );
 
-    // Allow layout to settle
     await tester.pumpAndSettle();
 
     // Verify there are no layout exceptions (like RenderFlex overflow)
