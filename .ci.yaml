@@ -3241,6 +3241,7 @@ targets:
 
   # Samsung Galaxy S24, Impeller (Vulkan)
   - name: Linux_galaxy_s24 new_gallery_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/173335
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
