@@ -327,7 +327,7 @@ public class FlutterLoader {
         // user-provided compiled native code.
         if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
           if (!shouldAddAotSharedLibraryNameFlag(arg)) {
-            return;
+            break;
           }
         }
 
@@ -473,7 +473,7 @@ public class FlutterLoader {
    * wish to use.
    */
   // TODO(camsim99): check if this handles errors properly
-  // TODO(camsim99): check on file separators
+  // TODO(camsim99): check on file separators (File.separator) instead of /
   private boolean shouldAddAotSharedLibraryNameFlag(@NonNull String aotSharedLibraryNameArg)
       throws IOException {
     // Isolate AOT shared library path.
@@ -500,7 +500,7 @@ public class FlutterLoader {
       Pattern aotSharedLibraryInApkPattern =
           Pattern.compile("^" + Pattern.quote(splitAndSourceApkDir) + "/([^/]+\\.so)$");
       Matcher aotSharedLibraryInApkMatcher =
-          aotSharedLibraryInApkPattern.matcher(aotSharedLibraryNameArg);
+          aotSharedLibraryInApkPattern.matcher(aotSharedLibraryPathCanonicalPath);
 
       if (aotSharedLibraryInApkMatcher.find()) {
         return true;
@@ -512,7 +512,7 @@ public class FlutterLoader {
     Pattern aotSharedLibraryInNativeCodeDirPattern =
         Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "/([^/]+\\.so)$");
     Matcher aotSharedLibraryInNativeCodeDirMatcher =
-        aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryNameArg);
+        aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInNativeCodeDirMatcher.find()) {
       return true;
     }
@@ -523,7 +523,7 @@ public class FlutterLoader {
         Pattern.compile(
             "^" + Pattern.quote(internalStorageDirectoryPath) + "((?:/[^/]+)+/)?([^/]+\\.so)$");
     Matcher aotSharedLibraryInInternalStorageMatcher =
-        aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryNameArg);
+        aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInInternalStorageMatcher.find()) {
       return true;
     }
