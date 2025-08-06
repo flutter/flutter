@@ -58,7 +58,7 @@ TaskFunction createHotModeTest({
       '--no-publish-port',
       '--verbose',
       '--uninstall-first',
-      if (additionalOptions != null) ...additionalOptions,
+      ...?additionalOptions,
     ];
     int hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;
@@ -71,8 +71,9 @@ TaskFunction createHotModeTest({
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
 
-      final String rootPubspec =
-          File(path.join(flutterDirectory.path, 'pubspec.yaml')).readAsStringSync();
+      final String rootPubspec = File(
+        path.join(flutterDirectory.path, 'pubspec.yaml'),
+      ).readAsStringSync();
       final YamlEditor yamlEditor = YamlEditor(rootPubspec);
       yamlEditor.update(<String>['workspace'], <String>['edited_flutter_gallery']);
       File(

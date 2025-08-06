@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1117,12 +1118,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged =
-        !enabled
-            ? null
-            : (RangeValues newValues) {
-              values = newValues;
-            };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -1418,12 +1418,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<RangeValues>? onChanged =
-            !enabled
-                ? null
-                : (RangeValues newValues) {
-                  values = newValues;
-                };
+        final ValueChanged<RangeValues>? onChanged = !enabled
+            ? null
+            : (RangeValues newValues) {
+                values = newValues;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -1929,6 +1928,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1940,6 +1940,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1987,6 +1988,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1998,6 +2000,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2071,6 +2074,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2081,6 +2085,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2134,11 +2139,10 @@ void main() {
       values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -2174,13 +2178,12 @@ void main() {
         ),
       );
 
-      final RenderObject renderObject =
-          tester.allRenderObjects
-              .where(
-                (RenderObject renderObject) =>
-                    renderObject.runtimeType.toString() == '_RenderRangeSlider',
-              )
-              .first;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       expect(
         renderObject,
@@ -2239,13 +2242,12 @@ void main() {
         ),
       );
 
-      final RenderObject renderObject =
-          tester.allRenderObjects
-              .where(
-                (RenderObject renderObject) =>
-                    renderObject.runtimeType.toString() == '_RenderRangeSlider',
-              )
-              .first;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       //There should no gap between the inactive track and active track.
       expect(
@@ -2285,13 +2287,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame(10));
 
-    final RenderObject renderObject =
-        tester.allRenderObjects
-            .where(
-              (RenderObject renderObject) =>
-                  renderObject.runtimeType.toString() == '_RenderRangeSlider',
-            )
-            .first;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where(
+          (RenderObject renderObject) =>
+              renderObject.runtimeType.toString() == '_RenderRangeSlider',
+        )
+        .first;
 
     // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
     await tester.pumpWidget(buildFrame(15));
@@ -2431,14 +2432,13 @@ void main() {
                       }),
                       values: values,
                       max: 100.0,
-                      onChanged:
-                          enabled
-                              ? (RangeValues newValues) {
-                                setState(() {
-                                  values = newValues;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (RangeValues newValues) {
+                              setState(() {
+                                values = newValues;
+                              });
+                            }
+                          : null,
                       onChangeStart: enabled ? (RangeValues newValues) {} : null,
                       onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                     ),
@@ -2461,11 +2461,6 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
     await tester.pumpWidget(buildFrame(enabled: true));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.none,
-    );
-
     await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
@@ -2496,14 +2491,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2544,6 +2538,164 @@ void main() {
     );
   });
 
+  testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(20, 80);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // Focus on the start thumb
+    final Finder rangeSliderFinder = find.byType(RangeSlider);
+    expect(rangeSliderFinder, findsOneWidget);
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+  });
+
+  testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 30.0),
+                max: 100.0,
+                onChanged: (RangeValues v) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    // Focus on the start thumb
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  });
+
   testWidgets('RangeSlider is draggable and has correct dragged color', (
     WidgetTester tester,
   ) async {
@@ -2562,14 +2714,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2634,14 +2785,13 @@ void main() {
 
                       return null;
                     }),
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                     onChangeStart: enabled ? (RangeValues newValues) {} : null,
                     onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                   ),
@@ -2881,13 +3031,13 @@ void main() {
         valueIndicatorBox,
         isVisible
             ? (paints
-              ..path(color: theme.valueIndicatorColor)
-              ..paragraph())
-            : isNot(
-              paints
                 ..path(color: theme.valueIndicatorColor)
-                ..paragraph(),
-            ),
+                ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
       );
       if (dragged) {
         await gesture!.up();
@@ -3321,12 +3471,11 @@ void main() {
     final Color valueIndicatorColor = colorScheme.inverseSurface;
     RangeValues values = const RangeValues(25.0, 75.0);
     Widget buildApp({int? divisions, bool enabled = true}) {
-      final ValueChanged<RangeValues>? onChanged =
-          !enabled
-              ? null
-              : (RangeValues newValues) {
-                values = newValues;
-              };
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
       return MaterialApp(
         home: Material(
           child: Center(

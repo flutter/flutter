@@ -31,8 +31,8 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
 
   @override
   String? migrateLine(String line) {
-    String updatedString = line;
-    final Map<Pattern, String> originalToReplacement = <Pattern, String>{
+    var updatedString = line;
+    final originalToReplacement = <Pattern, String>{
       // objectVersion value has been 46, 50, 51, and 54 in the template.
       RegExp(r'objectVersion = \d+;'): 'objectVersion = 54;',
       // LastUpgradeCheck is in the Xcode project file, not scheme file.

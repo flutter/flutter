@@ -397,13 +397,12 @@ class _GeometryIconPainter extends CustomPainter {
     const Size size = Size(20, 20);
     canvas.scale(canvasSize.width / size.width, canvasSize.height / size.height);
 
-    final Paint paint =
-        Paint()
-          ..color = const Color(0xFFF84F39)
-          ..style = paintStyle
-          ..strokeJoin = StrokeJoin.round
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 2.0;
+    final Paint paint = Paint()
+      ..color = const Color(0xFFF84F39)
+      ..style = paintStyle
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 2.0;
     final Rect frame = Offset.zero & size;
     canvas.drawDRRect(
       RRect.fromRectAndRadius(frame, const Radius.elliptical(5, 4)),

@@ -215,7 +215,7 @@ class Color {
   final ColorSpace colorSpace;
 
   static int _floatToInt8(double x) {
-    return (x * 255.0).round() & 0xff;
+    return (x * 255.0).round().clamp(0, 255);
   }
 
   /// A 32 bit value representing this color.
@@ -233,7 +233,7 @@ class Color {
   ///
   /// Unlike accessing the floating point equivalent channels individually
   /// ([a], [r], [g], [b]), this method is intentionally _lossy_, and scales
-  /// each channel using `(channel * 255.0).round() & 0xff`.
+  /// each channel using `(channel * 255.0).round().clamp(0, 255)`.
   ///
   /// While useful for storing a 32-bit integer value, prefer accessing the
   /// individual channels (and storing the double equivalent) where higher
@@ -263,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use (*.a * 255.0).round() & 0xff')
+  @Deprecated('Use (*.a * 255.0).round().clamp(0, 255)')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -274,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use (*.r * 255.0).round() & 0xff')
+  @Deprecated('Use (*.r * 255.0).round().clamp(0, 255)')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use (*.g * 255.0).round() & 0xff')
+  @Deprecated('Use (*.g * 255.0).round().clamp(0, 255)')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use (*.b * 255.0).round() & 0xff')
+  @Deprecated('Use (*.b * 255.0).round().clamp(0, 255)')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
@@ -4833,8 +4833,9 @@ base class Gradient extends Shader {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
   }
@@ -4886,8 +4887,9 @@ base class Gradient extends Shader {
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
 
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
@@ -4968,8 +4970,9 @@ base class Gradient extends Shader {
        super._() {
     _validateColorStops(colors, colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initSweep(
       center.dx,
@@ -5467,8 +5470,9 @@ base class Vertices extends NativeFieldWrapperClass1 {
       return true;
     }());
     final Float32List encodedPositions = _encodePointList(positions);
-    final Float32List? encodedTextureCoordinates =
-        (textureCoordinates != null) ? _encodePointList(textureCoordinates) : null;
+    final Float32List? encodedTextureCoordinates = (textureCoordinates != null)
+        ? _encodePointList(textureCoordinates)
+        : null;
     final Int32List? encodedColors = colors != null ? _encodeColorList(colors) : null;
     final Uint16List? encodedIndices = indices != null ? Uint16List.fromList(indices) : null;
 
@@ -7121,8 +7125,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Int32List? colorBuffer =
-        (colors == null || colors.isEmpty) ? null : _encodeColorList(colors);
+    final Int32List? colorBuffer = (colors == null || colors.isEmpty)
+        ? null
+        : _encodeColorList(colors);
     final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 

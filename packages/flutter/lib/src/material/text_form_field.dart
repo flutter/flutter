@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -218,10 +217,9 @@ class TextFormField extends FormField<String> {
 
            final String? errorText = field.errorText;
            if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
+             effectiveDecoration = errorBuilder != null
+                 ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                 : effectiveDecoration.copyWith(errorText: errorText);
            }
 
            void onChangedHandler(String value) {
@@ -332,7 +330,7 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(editableTextState: editableTextState);
     }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
@@ -367,10 +365,9 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

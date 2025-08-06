@@ -128,6 +128,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         valueHelp: 'path/to/trace.binpb',
       )
       ..addFlag(
+        'profile-microtasks',
+        negatable: false,
+        help:
+            'Enable collection of information about each microtask. '
+            'Information about completed microtasks will be written to the '
+            '"Microtask" timeline stream. Information about queued microtasks '
+            'will be accessible from Dart / Flutter DevTools.',
+        hide: !verboseHelp,
+      )
+      ..addFlag(
         'trace-skia',
         negatable: false,
         help:
@@ -158,6 +168,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help:
             'Whether the Dart VM sampling CPU profiler is enabled. This flag '
             'is only meaningful in debug and profile builds.',
+      )
+      ..addFlag(
+        'profile-startup',
+        negatable: false,
+        help:
+            'Make the profiler discard new samples once the profiler sample '
+            'buffer is full. When this flag is not set, the profiler sample '
+            'buffer is used as a ring buffer, meaning that once it is full, '
+            'new samples start overwriting the oldest ones.',
+        hide: !verboseHelp,
       )
       ..addFlag(
         'enable-software-rendering',
@@ -216,6 +236,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
@@ -230,6 +251,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
+  bool get enableFlutterGpu => (argResults!['enable-flutter-gpu'] as bool?) ?? false;
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
@@ -261,13 +283,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
-            ? int.parse(stringArg('web-browser-debug-port')!)
-            : null;
-    final List<String> webBrowserFlags =
-        featureFlags.isWebEnabled ? stringsArg(FlutterOptions.kWebBrowserFlag) : const <String>[];
+        ? int.parse(stringArg('web-browser-debug-port')!)
+        : null;
+    final List<String> webBrowserFlags = featureFlags.isWebEnabled
+        ? stringsArg(FlutterOptions.kWebBrowserFlag)
+        : const <String>[];
 
-    final Map<String, String> webHeaders =
-        featureFlags.isWebEnabled ? extractWebHeaders() : const <String, String>{};
+    final Map<String, String> webHeaders = featureFlags.isWebEnabled
+        ? extractWebHeaders()
+        : const <String, String>{};
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
@@ -292,6 +316,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
+        enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
@@ -321,6 +346,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         traceSystrace: boolArg('trace-systrace'),
         traceToFile: stringArg('trace-to-file'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
+        profileMicrotasks: boolArg('profile-microtasks'),
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
@@ -356,9 +382,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
+        profileStartup: boolArg('profile-startup'),
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
@@ -385,6 +413,7 @@ class RunCommand extends RunCommandBase {
     // without needing to know the port.
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
+    addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -407,14 +436,6 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
-      ..addFlag(
-        'machine',
-        hide: !verboseHelp,
-        negatable: false,
-        help:
-            'Handle machine structured JSON command input and provide output '
-            'and progress in machine friendly format.',
-      )
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
@@ -469,7 +490,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  final String name = 'run';
+  final name = 'run';
 
   @override
   DeprecationBehavior get deprecationBehavior =>
@@ -477,13 +498,13 @@ class RunCommand extends RunCommandBase {
   DeprecationBehavior _deviceDeprecationBehavior = DeprecationBehavior.none;
 
   @override
-  final String description = 'Run your Flutter app on an attached device.';
+  final description = 'Run your Flutter app on an attached device.';
 
   @override
   String get category => FlutterCommandCategory.project;
 
   List<Device>? devices;
-  bool webMode = false;
+  var webMode = false;
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -523,87 +544,85 @@ class RunCommand extends RunCommandBase {
     );
   }
 
-  late final Future<AnalyticsUsageValuesRecord> _sharedAnalyticsUsageValues =
-      (() async {
-        String deviceType, deviceOsVersion;
-        bool isEmulator;
-        bool anyAndroidDevices = false;
-        bool anyIOSDevices = false;
-        bool anyWirelessIOSDevices = false;
+  late final Future<AnalyticsUsageValuesRecord> _sharedAnalyticsUsageValues = (() async {
+    String deviceType, deviceOsVersion;
+    bool isEmulator;
+    var anyAndroidDevices = false;
+    var anyIOSDevices = false;
+    var anyWirelessIOSDevices = false;
 
-        if (devices == null || devices!.isEmpty) {
-          deviceType = 'none';
-          deviceOsVersion = 'none';
-          isEmulator = false;
-        } else if (devices!.length == 1) {
-          final Device device = devices![0];
-          final TargetPlatform platform = await device.targetPlatform;
-          anyAndroidDevices = platform == TargetPlatform.android;
-          anyIOSDevices = platform == TargetPlatform.ios;
-          if (device is IOSDevice && device.isWirelesslyConnected) {
-            anyWirelessIOSDevices = true;
-          }
-          deviceType = getNameForTargetPlatform(platform);
-          deviceOsVersion = await device.sdkNameAndVersion;
-          isEmulator = await device.isLocalEmulator;
-        } else {
-          deviceType = 'multiple';
-          deviceOsVersion = 'multiple';
-          isEmulator = false;
-          for (final Device device in devices!) {
-            final TargetPlatform platform = await device.targetPlatform;
-            anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
-            anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
-            if (device is IOSDevice && device.isWirelesslyConnected) {
-              anyWirelessIOSDevices = true;
-            }
-            if (anyAndroidDevices && anyIOSDevices) {
-              break;
-            }
-          }
+    if (devices == null || devices!.isEmpty) {
+      deviceType = 'none';
+      deviceOsVersion = 'none';
+      isEmulator = false;
+    } else if (devices!.length == 1) {
+      final Device device = devices![0];
+      final TargetPlatform platform = await device.targetPlatform;
+      anyAndroidDevices = platform == TargetPlatform.android;
+      anyIOSDevices = platform == TargetPlatform.ios;
+      if (device is IOSDevice && device.isWirelesslyConnected) {
+        anyWirelessIOSDevices = true;
+      }
+      deviceType = getNameForTargetPlatform(platform);
+      deviceOsVersion = await device.sdkNameAndVersion;
+      isEmulator = await device.isLocalEmulator;
+    } else {
+      deviceType = 'multiple';
+      deviceOsVersion = 'multiple';
+      isEmulator = false;
+      for (final Device device in devices!) {
+        final TargetPlatform platform = await device.targetPlatform;
+        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
+        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (device is IOSDevice && device.isWirelesslyConnected) {
+          anyWirelessIOSDevices = true;
         }
+        if (anyAndroidDevices && anyIOSDevices) {
+          break;
+        }
+      }
+    }
 
-        String? iOSInterfaceType;
-        if (anyIOSDevices) {
-          iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
-        }
+    String? iOSInterfaceType;
+    if (anyIOSDevices) {
+      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
+    }
 
-        String? androidEmbeddingVersion;
-        final List<String> hostLanguage = <String>[];
-        if (anyAndroidDevices) {
-          final AndroidProject androidProject = FlutterProject.current().android;
-          if (androidProject.existsSync()) {
-            hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
-            androidEmbeddingVersion =
-                androidProject.getEmbeddingVersion().toString().split('.').last;
-          }
-        }
-        if (anyIOSDevices) {
-          final IosProject iosProject = FlutterProject.current().ios;
-          if (iosProject.exists) {
-            final Iterable<File> swiftFiles = iosProject.hostAppRoot
-                .listSync(recursive: true, followLinks: false)
-                .whereType<File>()
-                .where((File file) => globals.fs.path.extension(file.path) == '.swift');
-            hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
-          }
-        }
+    String? androidEmbeddingVersion;
+    final hostLanguage = <String>[];
+    if (anyAndroidDevices) {
+      final AndroidProject androidProject = FlutterProject.current().android;
+      if (androidProject.existsSync()) {
+        hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
+        androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
+      }
+    }
+    if (anyIOSDevices) {
+      final IosProject iosProject = FlutterProject.current().ios;
+      if (iosProject.exists) {
+        final Iterable<File> swiftFiles = iosProject.hostAppRoot
+            .listSync(recursive: true, followLinks: false)
+            .whereType<File>()
+            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
+        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
+      }
+    }
 
-        final BuildInfo buildInfo = await getBuildInfo();
-        final String modeName = buildInfo.modeName;
-        return (
-          runIsEmulator: isEmulator,
-          runTargetName: deviceType,
-          runTargetOsVersion: deviceOsVersion,
-          runModeName: modeName,
-          runProjectModule: project.isModule,
-          runProjectHostLanguage: hostLanguage.join(','),
-          runAndroidEmbeddingVersion: androidEmbeddingVersion,
-          runEnableImpeller: enableImpeller.asBool,
-          runIOSInterfaceType: iOSInterfaceType,
-          runIsTest: targetFile.endsWith('_test.dart'),
-        );
-      })();
+    final BuildInfo buildInfo = await getBuildInfo();
+    final String modeName = buildInfo.modeName;
+    return (
+      runIsEmulator: isEmulator,
+      runTargetName: deviceType,
+      runTargetOsVersion: deviceOsVersion,
+      runModeName: modeName,
+      runProjectModule: project.isModule,
+      runProjectHostLanguage: hostLanguage.join(','),
+      runAndroidEmbeddingVersion: androidEmbeddingVersion,
+      runEnableImpeller: enableImpeller.asBool,
+      runIOSInterfaceType: iOSInterfaceType,
+      runIsTest: targetFile.endsWith('_test.dart'),
+    );
+  })();
 
   @override
   bool get shouldRunPub {
@@ -694,8 +713,9 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: await createDebuggingOptions(webMode),
         benchmarkMode: boolArg('benchmark'),
-        applicationBinary:
-            applicationBinaryPath == null ? null : globals.fs.file(applicationBinaryPath),
+        applicationBinary: applicationBinaryPath == null
+            ? null
+            : globals.fs.file(applicationBinaryPath),
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
@@ -724,8 +744,9 @@ class RunCommand extends RunCommandBase {
       debuggingOptions: await createDebuggingOptions(webMode),
       traceStartup: traceStartup,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-      applicationBinary:
-          applicationBinaryPath == null ? null : globals.fs.file(applicationBinaryPath),
+      applicationBinary: applicationBinaryPath == null
+          ? null
+          : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
     );
   }
@@ -743,7 +764,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
 
-    if (boolArg('machine')) {
+    if (outputMachineFormat) {
       if (devices!.length > 1) {
         throwToolExit('"--machine" does not support "-d all".');
       }
@@ -757,8 +778,9 @@ class RunCommand extends RunCommandBase {
           route,
           await createDebuggingOptions(webMode),
           hotMode,
-          applicationBinary:
-              applicationBinaryPath == null ? null : globals.fs.file(applicationBinaryPath),
+          applicationBinary: applicationBinaryPath == null
+              ? null
+              : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
@@ -804,7 +826,7 @@ class RunCommand extends RunCommandBase {
         stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
       expFlags = stringsArg(FlutterOptions.kEnableExperiment);
     }
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[
+    final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
@@ -828,7 +850,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+    final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
     // This callback can't throw.
@@ -893,16 +915,15 @@ class RunCommand extends RunCommandBase {
 }
 
 /// Schema for the usage values to send for analytics reporting.
-typedef AnalyticsUsageValuesRecord =
-    ({
-      String? runAndroidEmbeddingVersion,
-      bool? runEnableImpeller,
-      String? runIOSInterfaceType,
-      bool runIsEmulator,
-      bool runIsTest,
-      String runModeName,
-      String runProjectHostLanguage,
-      bool runProjectModule,
-      String runTargetName,
-      String runTargetOsVersion,
-    });
+typedef AnalyticsUsageValuesRecord = ({
+  String? runAndroidEmbeddingVersion,
+  bool? runEnableImpeller,
+  String? runIOSInterfaceType,
+  bool runIsEmulator,
+  bool runIsTest,
+  String runModeName,
+  String runProjectHostLanguage,
+  bool runProjectModule,
+  String runTargetName,
+  String runTargetOsVersion,
+});

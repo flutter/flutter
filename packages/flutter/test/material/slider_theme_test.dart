@@ -22,11 +22,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -70,11 +69,10 @@ void main() {
       year2023: false,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'trackHeight: 7.0',
@@ -139,12 +137,11 @@ void main() {
     try {
       double value = 0.45;
       Widget buildApp({int? divisions, bool enabled = true}) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -309,12 +306,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           theme: theme,
           home: Directionality(
@@ -946,14 +942,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -2141,15 +2136,17 @@ void main() {
           body: Center(
             child: SliderTheme(
               data: ThemeData().sliderTheme.copyWith(
-                allowedInteraction:
-                    isAllowedInteractionInThemeNull ? null : SliderInteraction.slideOnly,
+                allowedInteraction: isAllowedInteractionInThemeNull
+                    ? null
+                    : SliderInteraction.slideOnly,
               ),
               child: StatefulBuilder(
                 builder: (_, void Function(void Function()) setState) {
                   return Slider(
                     value: value,
-                    allowedInteraction:
-                        isAllowedInteractionInSliderNull ? null : SliderInteraction.tapOnly,
+                    allowedInteraction: isAllowedInteractionInSliderNull
+                        ? null
+                        : SliderInteraction.tapOnly,
                     onChanged: (double newValue) {
                       setState(() {
                         value = newValue;
@@ -2739,7 +2736,9 @@ void main() {
     const double startPadding = 100;
     const double endPadding = 20;
     await tester.pumpWidget(
-      buildSlider(padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding)),
+      buildSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -3236,7 +3235,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(child: Center(child: Slider(value: value, onChanged: (double value) {}))),
+        home: Material(
+          child: Center(
+            child: Slider(value: value, onChanged: (double value) {}),
+          ),
+        ),
       ),
     );
 
@@ -3336,7 +3339,10 @@ void main() {
         return MaterialApp(
           theme: theme,
           home: Material(
-            child: SizedBox(width: 300, child: Slider(value: value, onChanged: (double value) {})),
+            child: SizedBox(
+              width: 300,
+              child: Slider(value: value, onChanged: (double value) {}),
+            ),
           ),
         );
       }
@@ -3433,12 +3439,11 @@ void main() {
       try {
         double value = 0.45;
         Widget buildApp({int? divisions, bool enabled = true}) {
-          final ValueChanged<double>? onChanged =
-              !enabled
-                  ? null
-                  : (double d) {
-                    value = d;
-                  };
+          final ValueChanged<double>? onChanged = !enabled
+              ? null
+              : (double d) {
+                  value = d;
+                };
           return MaterialApp(
             theme: theme,
             home: Material(

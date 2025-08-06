@@ -32,7 +32,7 @@ import 'application_package.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
-const String iosSimulatorId = 'apple_ios_simulator';
+const iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators({required IOSSimulatorUtils iosSimulatorUtils})
@@ -149,7 +149,7 @@ class SimControl {
     //   }
     // }
 
-    final List<String> command = <String>[
+    final command = <String>[
       ..._xcode.xcrunCommand(),
       'simctl',
       'list',
@@ -290,7 +290,7 @@ class SimControl {
 
   /// Runs `simctl list runtimes available iOS --json` and returns all available iOS simulator runtimes.
   Future<List<IOSSimulatorRuntime>> listAvailableIOSRuntimes() async {
-    final List<IOSSimulatorRuntime> runtimes = <IOSSimulatorRuntime>[];
+    final runtimes = <IOSSimulatorRuntime>[];
     final RunResult results = await _processUtils.run(<String>[
       ..._xcode.xcrunCommand(),
       'simctl',
@@ -381,7 +381,7 @@ class IOSSimulator extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
 
-  final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
+  final _logReaders = <IOSApp?, DeviceLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
 
   @override
@@ -421,7 +421,7 @@ class IOSSimulator extends Device {
 
     // Check if the device is part of a blocked category.
     // We do not yet support WatchOS or tvOS devices.
-    final RegExp blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
+    final blocklist = RegExp(r'Apple (TV|Watch)', caseSensitive: false);
     if (blocklist.hasMatch(name)) {
       _supportMessage = 'Flutter does not support Apple TV or Apple Watch.';
       return false;
@@ -584,13 +584,13 @@ class IOSSimulator extends Device {
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
         : globals.fs.path.join(
-          globals.fsUtils.homeDirPath!,
-          'Library',
-          'Logs',
-          'CoreSimulator',
-          id,
-          'system.log',
-        );
+            globals.fsUtils.homeDirPath!,
+            'Library',
+            'Logs',
+            'CoreSimulator',
+            id,
+            'system.log',
+          );
   }
 
   @override
@@ -599,7 +599,7 @@ class IOSSimulator extends Device {
   @override
   Future<String> get sdkNameAndVersion async => simulatorCategory;
 
-  final RegExp _iosSdkRegExp = RegExp(r'iOS( |-)(\d+)');
+  final _iosSdkRegExp = RegExp(r'iOS( |-)(\d+)');
 
   Future<int> get sdkMajorVersion async {
     final Match? sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
@@ -644,15 +644,14 @@ class IOSSimulator extends Device {
     required bool ipv6,
     required Logger logger,
   }) {
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: false,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
       mdnsVMServiceDiscoveryForAttach,
@@ -814,7 +813,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   final String? _appName;
 
-  late final StreamController<String> _linesController = StreamController<String>.broadcast(
+  late final _linesController = StreamController<String>.broadcast(
     onListen: _start,
     onCancel: _stop,
   );
@@ -883,23 +882,21 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   // Match the log prefix (in order to shorten it):
   // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
   // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) The Dart VM service is listening on http://127.0.0.1:57701/
-  static final RegExp _mapRegex = RegExp(
-    r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$',
-  );
+  static final _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
-  static final RegExp _lastMessageSingleRegex = RegExp(
+  static final _lastMessageSingleRegex = RegExp(
     r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$',
   );
-  static final RegExp _lastMessageMultipleRegex = RegExp(
+  static final _lastMessageMultipleRegex = RegExp(
     r'\S+ +\S+ +\S+ --- last message repeated (\d+) times ---$',
   );
 
-  static final RegExp _flutterRunnerRegex = RegExp(r' FlutterRunner\[\d+\] ');
+  static final _flutterRunnerRegex = RegExp(r' FlutterRunner\[\d+\] ');
 
   // Remember what we did with the last line, in case we need to process
   // a multiline record
-  bool _lastLineMatched = false;
+  var _lastLineMatched = false;
 
   String? _filterDeviceLine(String string) {
     final Match? match = _mapRegex.matchAsPrefix(string);
@@ -976,7 +973,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       if (_lastLine != null) {
         int repeat = int.parse(multi.group(1)!);
         repeat = math.max(0, math.min(100, repeat));
-        for (int i = 1; i < repeat; i++) {
+        for (var i = 1; i < repeat; i++) {
           _linesController.add(_lastLine!);
         }
       }
@@ -992,7 +989,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   //   "eventMessage" : "flutter: 21",
-  static final RegExp _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
+  static final _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
   void _onUnifiedLoggingLine(String line) {
     // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
     final Match? eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);
@@ -1044,7 +1041,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   final IOSSimulator device;
 
-  final List<ForwardedPort> _ports = <ForwardedPort>[];
+  final _ports = <ForwardedPort>[];
 
   @override
   List<ForwardedPort> get forwardedPorts => _ports;
@@ -1066,8 +1063,8 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    final List<ForwardedPort> portsCopy = List<ForwardedPort>.of(_ports);
-    for (final ForwardedPort port in portsCopy) {
+    final portsCopy = List<ForwardedPort>.of(_ports);
+    for (final port in portsCopy) {
       await unforward(port);
     }
   }

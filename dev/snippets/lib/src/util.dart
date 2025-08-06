@@ -80,13 +80,12 @@ class FlutterInformation {
     } else {
       String flutterCommand;
       if (platform.environment['FLUTTER_ROOT'] != null) {
-        flutterCommand =
-            filesystem
-                .directory(platform.environment['FLUTTER_ROOT'])
-                .childDirectory('bin')
-                .childFile('flutter')
-                .absolute
-                .path;
+        flutterCommand = filesystem
+            .directory(platform.environment['FLUTTER_ROOT'])
+            .childDirectory('bin')
+            .childFile('flutter')
+            .absolute
+            .path;
       } else {
         flutterCommand = 'flutter';
       }
@@ -237,18 +236,17 @@ SampleStats getSampleStats(SourceElement element) {
   final int wordCount = element.wordCount;
   final int lineCount = element.lineCount;
   final int linkCount = element.referenceCount;
-  final String description =
-      <String>[
-        'Documentation has $wordCount ${wordCount == 1 ? 'word' : 'words'} on ',
-        '$lineCount ${lineCount == 1 ? 'line' : 'lines'}',
-        if (linkCount > 0 && element.hasSeeAlso) ', ',
-        if (linkCount > 0 && !element.hasSeeAlso) ' and ',
-        if (linkCount > 0) 'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
-        if (linkCount > 0 && element.hasSeeAlso) ', and ',
-        if (linkCount == 0 && element.hasSeeAlso) 'and ',
-        if (element.hasSeeAlso) 'has a "See also:" section',
-        '.',
-      ].join();
+  final String description = <String>[
+    'Documentation has $wordCount ${wordCount == 1 ? 'word' : 'words'} on ',
+    '$lineCount ${lineCount == 1 ? 'line' : 'lines'}',
+    if (linkCount > 0 && element.hasSeeAlso) ', ',
+    if (linkCount > 0 && !element.hasSeeAlso) ' and ',
+    if (linkCount > 0) 'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
+    if (linkCount > 0 && element.hasSeeAlso) ', and ',
+    if (linkCount == 0 && element.hasSeeAlso) 'and ',
+    if (element.hasSeeAlso) 'has a "See also:" section',
+    '.',
+  ].join();
   return SampleStats(
     totalSamples: total,
     dartpadSamples: dartpads,
