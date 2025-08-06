@@ -1875,11 +1875,16 @@ class _ViewConfiguration {
       minWidth: 0,
       maxWidth: 0,
     ),
-    // TODO: is this where we add the ViewConstraints?
+    this.layoutConstraints = const ViewConstraints(
+      minWidth: 0,
+      maxWidth: 0,
+      minHeight: 0,
+      maxHeight: 0,
+    ),
   });
 
-  /// TODO: .... add comments
   final ViewConstraints viewConstraints;
+  final ViewConstraints layoutConstraints;
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].

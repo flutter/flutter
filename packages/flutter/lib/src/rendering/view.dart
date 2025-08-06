@@ -8,7 +8,7 @@
 library;
 
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate, ViewConstraints;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -43,10 +43,16 @@ class ViewConfiguration {
       view.physicalConstraints,
     );
     final double devicePixelRatio = view.devicePixelRatio;
+
     return ViewConfiguration(
-      physicalConstraints: physicalConstraints,
-      logicalConstraints: physicalConstraints / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio,
+      physicalConstraints: BoxConstraints.tight(view.physicalSize),
+      logicalConstraints: BoxConstraints(
+        minWidth: 0,
+        maxWidth: (view.physicalConstraints.maxWidth) / devicePixelRatio,
+        minHeight: 0,
+         maxHeight: (view.physicalConstraints.maxHeight) / devicePixelRatio,
+       ),
+       devicePixelRatio: devicePixelRatio,
     );
   }
 
@@ -291,58 +297,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    if (child == null) {
-      _size = constraints.biggest;
-      assert(size.isFinite);
-      return;
-    }
-
-    RenderBox? findFirstSizedChild(RenderObject? node) {
-      if (node == null) {
-        return null;
-      }
-      RenderBox? result;
-      void visit(RenderObject currentNode) {
-        if (result != null) return; // Stop once we've found it.
-
-        if (currentNode is RenderBox) {
-          final double w = currentNode.getMaxIntrinsicWidth(double.infinity);
-          final double h = currentNode.getMaxIntrinsicHeight(double.infinity);
-          if (w > 0.0 && h > 0.0) {
-            result = currentNode;
-            return;
-          }
-        }
-        currentNode.visitChildren(visit);
-      }
-      visit(node);
-      return result;
-    }
-
-    final RenderBox? contentBox = findFirstSizedChild(child);
-    Size naturalSize = constraints.biggest; // Fallback to screen size.
-
-    if (contentBox != null) {
-      // 2. Calculate the natural size.
-      final double maxIntrinsicWidth = contentBox.getMaxIntrinsicWidth(double.infinity);
-      final double maxIntrinsicHeight = contentBox.getMaxIntrinsicHeight(double.infinity);
-      final Size calculatedSize = Size(maxIntrinsicWidth, maxIntrinsicHeight);
-      // Use the calculated size only if it's valid and smaller than the screen.
-      if (calculatedSize.width > 0.0 && calculatedSize.height > 0.0) {
-        naturalSize = Size(
-          calculatedSize.width.clamp(0.0, constraints.maxWidth),
-          calculatedSize.height.clamp(0.0, constraints.maxHeight),
-        );
-      }
-    }
-
-    // 3. Use the natural size for layout.
-    _size = naturalSize;
-    child!.layout(BoxConstraints.tight(naturalSize));
-
-    // --- END MODIFIED LOGIC ---
-
+    final bool sizedByChild = true;
+    print("Constraints $constraints");
+    child?.layout(constraints, parentUsesSize: true);
+    _size = sizedByChild && child != null ? child!.size : constraints.smallest;
+    print("child size ${child!.size}");
+    print("size ${_size}");
     assert(size.isFinite);
+    assert(constraints.isSatisfiedBy(size));
+    assert(_rootTransform != null);
   }
 
   /// Determines the set of render objects located at the given position.

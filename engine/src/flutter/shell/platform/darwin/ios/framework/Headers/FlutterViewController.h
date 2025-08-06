@@ -102,14 +102,6 @@ FLUTTER_DARWIN_EXPORT
                         nibName:(nullable NSString*)nibName
                          bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initWithEngine:(FlutterEngine*)engine
-                       nibName:(nullable NSString*)nibName
-                        bundle:(nullable NSBundle*)nibBundle
-                      minWidth:(CGFloat)minWidth
-                      maxWidth:(CGFloat)maxWidth
-                     minHeight:(CGFloat)minHeight
-                     maxHeight:(CGFloat)maxHeight;
-
 /**
  * Initializer that is called from loading a FlutterViewController from a XIB.
  *
