@@ -564,7 +564,7 @@ void main() {
             artifacts: artifacts,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
-            coreDeviceLauncher: FakeIOSCoreDeviceLauncher(launchResult: false)
+            coreDeviceLauncher: FakeIOSCoreDeviceLauncher(launchResult: false),
           );
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
@@ -811,9 +811,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   }
 }
 
-class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-
-}
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
 
 const _validScheme = '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -880,7 +878,6 @@ const _validScheme = '''
    </ArchiveAction>
 </Scheme>
 ''';
-
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   FakeIOSCoreDeviceLauncher({this.launchResult = true});

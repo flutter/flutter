@@ -9,9 +9,8 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../convert.dart';
 
-/// LLDB is the default debugger in Xcode on macOS and supports debugging Swift, C, Objective-C and C++ on the desktop and iOS devices and simulator.
-///
-/// Once the application has launched on a physical iOS device, you can attach to it using LLDB.
+/// LLDB is the default debugger in Xcode on macOS. Once the application has
+/// launched on a physical iOS device, you can attach to it using LLDB.
 ///
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
@@ -24,11 +23,13 @@ class LLDB {
 
   _LLDBProcess? _lldbProcess;
 
+  /// Whether or not a LLDB process is running.
   bool get isRunning => _lldbProcess != null;
 
-  int? get processId => _lldbProcess?.processId;
+  /// The process id of the application running on the iOS device.
+  int? get appProcessId => _lldbProcess?.appProcessId;
 
-  _LLDBLogWaiter? _logWaiter;
+  _LLDBLogPatternCompleter? _logCompleter;
 
   /// Pattern of lldb log when the process is stopped.
   ///
@@ -37,14 +38,17 @@ class LLDB {
 
   /// Pattern of lldb log when the process is resuming.
   ///
-  /// (lldb) Process 6152 resuming
+  /// Example: (lldb) Process 6152 resuming
   static final _lldbProcessResuming = RegExp(r'Process \d+ resuming');
 
   /// Pattern of lldb log when the breakpoint is added.
   ///
-  /// Breakpoint 1: no locations (pending).
+  /// Example: Breakpoint 1: no locations (pending).
   static final _breakpointPattern = RegExp(r'Breakpoint (\d+)*:');
 
+  /// Breakpoint script required for JIT on iOS.
+  ///
+  /// This should match [_lldbPythonHelperTemplate] in packages/flutter_tools/lib/src/xcode_project.dart.
   static const _pythonScript = '''
 """Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages."""
 base = frame.register["x0"].GetValueAsAddress()
@@ -66,24 +70,26 @@ if not error.Success():
 return False
 ''';
 
-  /// Starts LLDB, selects the given [deviceId], sets breakpoints, attaches and starts the app's process ([processId]).
-  Future<bool> attachAndStart(String deviceId, int processId) async {
+  /// Starts an LLDB process and inputs commands to start debugging the [appProcessId].
+  /// This will start a debugserver on the device, which is required for JIT.
+  Future<bool> attachAndStart(String deviceId, int appProcessId) async {
     Timer? timer;
     try {
       timer = Timer(const Duration(minutes: 2), () {
-        _logWaiter?.invalidateWaiter(_LLDBError('Failed to launch within time limit'));
+        _logCompleter?.completeError(_LLDBError('Failed to launch within time limit'));
         exit();
       });
 
-      final bool start = await _startLLDB(processId);
+      final bool start = await _startLLDB(appProcessId);
       if (!start) {
         return false;
       }
       await _selectDevice(deviceId);
       await _setBreakpoint();
-      await _attachToAppProcess(processId);
+      await _attachToAppProcess(appProcessId);
       await _resumeProcess();
-    } on _LLDBError {
+    } on _LLDBError catch(e) {
+      _logger.printError('lldb failed with error: ${e.message}');
       exit();
       return false;
     } finally {
@@ -93,7 +99,11 @@ return False
   }
 
   /// Starts LLDB process and leave it running.
-  Future<bool> _startLLDB(int processId) async {
+  ///
+  /// Streams `stdout` and `stderr`. When receiving a log from `stdout`, check
+  /// if it matches the pattern [_logCompleter] is waiting for. If a log is sent
+  /// to `stderr`, complete with an error and stop the process.
+  Future<bool> _startLLDB(int appProcessId) async {
     if (_lldbProcess != null) {
       _logger.printError(
         'An LLDB process is already running. It must be stopped before starting a new one.',
@@ -103,7 +113,7 @@ return False
     try {
       _lldbProcess = _LLDBProcess(
         process: await _processUtils.start(<String>['lldb']),
-        processId: processId,
+        appProcessId: appProcessId,
         logger: _logger,
       );
 
@@ -112,24 +122,15 @@ return False
           .transform<String>(const LineSplitter())
           .listen((String line) {
             _logger.printTrace('[lldb]: $line');
-            _logWaiter?.checkForMatch(line);
+            _logCompleter?.checkForMatch(line);
           });
 
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            _logger.printError('[stderr]: $line');
-            // When LLDB receives stderr it can indicate an error that will prevent the process from moving forward.
-            // TODO: handle errors
-            // [stderr] error: 'device' is not a valid command.
-            // [stderr] Internal logic error: Connection was invalidated
-            // [stderr] no device selected: use 'device select <identifier>' to select a device.
-            // [stderr] The specified device was not found.
-            // [stderr]: Timeout while connecting to remote device.
-            // deive is locked
-            _logWaiter?.invalidateWaiter(_LLDBError(line));
-            exit();
+            _logger.printError('[lldb]: $line');
+            monitorError(line);
           });
 
       unawaited(
@@ -154,7 +155,7 @@ return False
   bool exit() {
     final bool success = (_lldbProcess == null) || _lldbProcess!.kill();
     _lldbProcess = null;
-    _logWaiter = null;
+    _logCompleter = null;
     return success;
   }
 
@@ -163,26 +164,32 @@ return False
     await _lldbProcess?.stdinWriteln('device select $deviceId');
   }
 
-  /// Attaches LLDB to the [processId] running on the device.
-  Future<void> _attachToAppProcess(int processId) async {
-    final Future<String?> futureLog = _setupLogWaiter(_lldbProcessStopped).catchError(handleError);
-    await _lldbProcess?.stdinWriteln('device process attach --pid $processId');
+  /// Attaches LLDB to the [appProcessId] running on the device.
+  Future<void> _attachToAppProcess(int appProcessId) async {
+    // Since the app starts stopped (--start-stopped), we expect a stopped state
+    // after attaching.
+    final Future<String> futureLog = _startWaitingForLog(
+      _lldbProcessStopped,
+    ).catchError(handleAsyncError);
 
-    // Since the app starts stopped (--start-stopped), we expect a stopped state after attaching.
-    await _waitForLog(futureLog);
+    await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
+    await futureLog;
   }
 
   Future<void> _setBreakpoint() async {
     // Set the breakpoint and wait for it to print the breakpoint id.
-    final Future<String?> futureLog = _setupLogWaiter(_breakpointPattern).catchError(handleError);
+    final Future<String> futureLog = _startWaitingForLog(
+      _breakpointPattern,
+    ).catchError(handleAsyncError);
+
     await _lldbProcess?.stdinWriteln(
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
     );
-    final String log = await _waitForLog(futureLog);
+    final String log = await futureLog;
     final Match? match = _breakpointPattern.firstMatch(log);
     final String? breakpointId = match?.group(1);
     if (breakpointId == null) {
-      throw _LLDBError('LLDB failed to set breakpoint with log: $log');
+      throw _LLDBError('LLDB failed to get breakpoint from log: $log');
     }
 
     // Once it has the breakpoint id, set the python script.
@@ -194,74 +201,93 @@ return False
 
   /// Resume the stopped process.
   Future<void> _resumeProcess() async {
-    final Future<String?> futureLog = _setupLogWaiter(_lldbProcessResuming).catchError(handleError);
+    final Future<String> futureLog = _startWaitingForLog(
+      _lldbProcessResuming,
+    ).catchError(handleAsyncError);
+
     await _lldbProcess?.stdinWriteln('process continue');
-    await _waitForLog(futureLog);
+    await futureLog;
   }
 
-  Future<String> _setupLogWaiter(RegExp pattern) async {
+  /// Creates a completer and returns its future. Methods that utilize this should
+  /// start waiting for the log before writing to stdin to avoid race conditions.
+  ///
+  /// When the [_lldbProcess]'s `stdout` receives a log that matches the [pattern],
+  /// the future will complete.
+  Future<String> _startWaitingForLog(RegExp pattern) async {
     if (_lldbProcess == null) {
       throw _LLDBError('LLDB is not running.');
     }
-    // TODO: wait limit?
-    _logWaiter = _LLDBLogWaiter(pattern);
-    return _logWaiter!.waitForLog();
+    _logCompleter = _LLDBLogPatternCompleter(pattern);
+    return _logCompleter!.future;
   }
 
-  Future<String> handleError(Object error) async {
+  Future<String> handleAsyncError(Object error) async {
     if (error is _LLDBError) {
       throw error;
     }
     throw _LLDBError('Unexpected error when waiting for lldb.');
   }
 
-  Future<String> _waitForLog(Future<String?> futureLog) async {
-    final String? log = await futureLog;
-    if (log == null) {
-      throw _LLDBError('LLDB received an error while launching.');
+  /// Checks if [error] is a fatal error and stops the process if so.
+  void monitorError(String error) {
+    // The LLDB process does not stop when it receives these errors but is no
+    // longer debugging the application. When one of these errors is received,
+    // stop the LLDB process.
+    final fatalErrors = <String>[
+      "error: 'device' is not a valid command.",
+      "no device selected: use 'device select <identifier>' to select a device.",
+      'The specified device was not found.',
+      'Timeout while connecting to remote device.',
+      'Internal logic error: Connection was invalidated',
+    ];
+
+    if (fatalErrors.contains(error)) {
+      _logCompleter?.completeError(_LLDBError(error));
+      exit();
     }
-    return log;
   }
 }
 
 class _LLDBError implements Exception {
   _LLDBError(this.message);
 
-  final String? message;
-
-  @override
-  String toString() => 'Error: $message';
+  final String message;
 }
 
-class _LLDBLogWaiter {
-  _LLDBLogWaiter(RegExp pattern) : _waitCompleter = Completer<String>(), _waitingFor = pattern;
-  final RegExp _waitingFor;
-  final Completer<String> _waitCompleter;
+/// A completer that waits for a log line to match a pattern.
+class _LLDBLogPatternCompleter {
+  _LLDBLogPatternCompleter(this._pattern);
 
-  Future<String> waitForLog() async {
-    return _waitCompleter.future;
-  }
+  final RegExp _pattern;
+  final _completer = Completer<String>();
+
+  Future<String> get future => _completer.future;
 
   void checkForMatch(String line) {
-    if (_waitingFor.hasMatch(line)) {
-      _waitCompleter.complete(line);
+    if (_completer.isCompleted) {
+      return;
+    }
+    if (_pattern.hasMatch(line)) {
+      _completer.complete(line);
     }
   }
 
-  void invalidateWaiter(Object error) {
-    if (!_waitCompleter.isCompleted) {
-      _waitCompleter.completeError(error);
+  void completeError(Object error, [StackTrace? stackTrace]) {
+    if (!_completer.isCompleted) {
+      _completer.completeError(error, stackTrace);
     }
   }
 }
 
+/// A container class for associated a [Process] that is is running LLDB with the iOS device process of an application.
 class _LLDBProcess {
-  _LLDBProcess({required Process process, required this.processId, required Logger logger})
+  _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
     : _lldbProcess = process,
       _logger = logger;
 
   final Process _lldbProcess;
-  final int processId;
+  final int appProcessId;
 
   final Logger _logger;
 
@@ -277,6 +303,8 @@ class _LLDBProcess {
     return _lldbProcess.kill();
   }
 
+  /// Writes [line] to [_lldbProcess]'s `stdin` and catches exceptions
+  /// (see https://github.com/flutter/flutter/pull/139784).
   Future<void> stdinWriteln(String line, {void Function(Object, StackTrace)? onError}) async {
     Future<void> writeln() {
       return ProcessUtils.writelnToStdinGuarded(

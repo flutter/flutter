@@ -3000,7 +3000,7 @@ class FakeLLDB extends Fake implements LLDB {
   bool get isRunning => _isRunning;
 
   @override
-  int? get processId => _processId;
+  int? get appProcessId => _processId;
 
   void setIsRunning(bool running, int? processId) {
     _isRunning = running;

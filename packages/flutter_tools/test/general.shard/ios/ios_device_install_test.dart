@@ -411,5 +411,4 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   }
 }
 
-class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
-}
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}

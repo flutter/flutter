@@ -582,13 +582,6 @@ class IOSDevice extends Device {
         _logger.printError(
           'The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...',
         );
-        if (isCoreDevice && debuggingOptions.debuggingEnabled) {
-          _logger.printError(
-            'Open the Xcode window the project is opened in to ensure the app '
-            'is running. If the app is not running, try selecting "Product > Run" '
-            'to fix the problem.',
-          );
-        }
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
         if (isWirelesslyConnected) {
@@ -915,7 +908,8 @@ class IOSDevice extends Device {
         launchArguments: launchArguments,
       );
 
-      // If it succeeds to launch with LLDB, return, otherwise continue on to try launching with Xcode.
+      // If it succeeds to launch with LLDB, return, otherwise continue on to
+      // try launching with Xcode.
       if (launchSuccess) {
         return launchSuccess;
       }

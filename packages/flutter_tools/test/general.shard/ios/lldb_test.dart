@@ -19,7 +19,7 @@ import '../../src/fake_process_manager.dart';
 void main() {
   testWithoutContext('attachAndStart fails if lldb fails', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
 
     final processCompleter = Completer<void>();
     final lldbCommand = FakeLLDBCommand(
@@ -38,16 +38,17 @@ void main() {
     final processUtils = ProcessUtils(processManager: processManager, logger: logger);
     final lldb = LLDB(logger: logger, processUtils: processUtils);
 
-    final bool success = await lldb.attachAndStart(deviceId, appProcessId);
+    final bool success = await lldb.attachAndStart(deviceId, appappProcessId);
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
-    expect(lldb.processId, isNull);
+    expect(lldb.appProcessId, isNull);
     expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.errorText, contains('Process exception running lldb'));
   });
 
   testWithoutContext('attachAndStart returns true on success', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
     const breakpointId = 123;
 
     final breakPointCompleter = Completer<List<int>>();
@@ -78,7 +79,7 @@ void main() {
     final lldb = LLDB(logger: logger, processUtils: processUtils);
 
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
-    const processAttachMatcher = 'device process attach --pid $appProcessId';
+    const processAttachMatcher = 'device process attach --pid $appappProcessId';
     const processResumedMatcher = 'process continue';
     final expectedInputs = [
       'device select $deviceId',
@@ -113,21 +114,22 @@ Target 0: (Runner) stopped.
         );
       }
       if (line == processResumedMatcher) {
-        processResumedCompleted.complete(utf8.encode('Process $appProcessId resuming\n'));
+        processResumedCompleted.complete(utf8.encode('Process $appappProcessId resuming\n'));
       }
     });
 
-    final bool success = await lldb.attachAndStart(deviceId, appProcessId);
+    final bool success = await lldb.attachAndStart(deviceId, appappProcessId);
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
-    expect(lldb.processId, appProcessId);
+    expect(lldb.appProcessId, appappProcessId);
     expect(expectedInputs, isEmpty);
     expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.errorText, isEmpty);
   });
 
   testWithoutContext('attachAndStart returns false when stderr during log waiter', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
 
     final breakPointCompleter = Completer<List<int>>();
     final errorCompleter = Completer<List<int>>();
@@ -155,27 +157,29 @@ Target 0: (Runner) stopped.
 
     const breakPointMatcher = r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
     final expectedInputs = ['device select $deviceId', breakPointMatcher];
+    const errorText = "error: 'device' is not a valid command.\n";
 
     stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
       expectedInputs.remove(line);
       if (line == breakPointMatcher) {
-        errorCompleter.complete(utf8.encode("error: 'device' is not a valid command.\n"));
+        errorCompleter.complete(utf8.encode(errorText));
       }
     });
 
-    final bool success = await lldb.attachAndStart(deviceId, appProcessId);
+    final bool success = await lldb.attachAndStart(deviceId, appappProcessId);
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
-    expect(lldb.processId, isNull);
+    expect(lldb.appProcessId, isNull);
     expect(expectedInputs, isEmpty);
     expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.errorText, contains(errorText));
   });
 
   testWithoutContext('attachAndStart returns false when stderr not during log waiter', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
 
     final breakPointCompleter = Completer<List<int>>();
     final errorCompleter = Completer<List<int>>();
@@ -201,25 +205,27 @@ Target 0: (Runner) stopped.
     final processUtils = ProcessUtils(processManager: processManager, logger: logger);
     final lldb = LLDB(logger: logger, processUtils: processUtils);
     final expectedInputs = ['device select $deviceId'];
+    const errorText = "error: 'device' is not a valid command.\n";
 
     stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
       expectedInputs.remove(line);
-      errorCompleter.complete(utf8.encode("error: 'device' is not a valid command.\n"));
+      errorCompleter.complete(utf8.encode(errorText));
     });
 
-    final bool success = await lldb.attachAndStart(deviceId, appProcessId);
+    final bool success = await lldb.attachAndStart(deviceId, appappProcessId);
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
-    expect(lldb.processId, isNull);
+    expect(lldb.appProcessId, isNull);
     expect(expectedInputs, isEmpty);
     expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.errorText, contains(errorText));
   });
 
   testWithoutContext('attachAndStart returns false if times out', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
 
     final stdinController = StreamController<List<int>>();
 
@@ -242,11 +248,12 @@ Target 0: (Runner) stopped.
 
     final completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
-      final Future<bool> futureResult = lldb.attachAndStart(deviceId, appProcessId);
+      final Future<bool> futureResult = lldb.attachAndStart(deviceId, appappProcessId);
       futureResult.then((bool success) {
         expect(success, isFalse);
         expect(lldb.isRunning, isFalse);
-        expect(lldb.processId, isNull);
+        expect(lldb.appProcessId, isNull);
+        expect(logger.errorText, contains('Failed to launch within time limit'));
         completer.complete();
       });
       time.elapse(const Duration(minutes: 2));
@@ -257,7 +264,7 @@ Target 0: (Runner) stopped.
 
   testWithoutContext('exit returns true and kills process', () async {
     const deviceId = '123';
-    const appProcessId = 5678;
+    const appappProcessId = 5678;
 
     final stdinController = StreamController<List<int>>();
 
@@ -286,13 +293,13 @@ Target 0: (Runner) stopped.
       }
     });
 
-    unawaited(lldb.attachAndStart(deviceId, appProcessId));
+    unawaited(lldb.attachAndStart(deviceId, appappProcessId));
 
     await lldbStarted.future;
     final bool exitStatus = lldb.exit();
     expect(exitStatus, isTrue);
     expect(lldb.isRunning, isFalse);
-    expect(lldb.processId, isNull);
+    expect(lldb.appProcessId, isNull);
     expect(processManager.hasRemainingExpectations, isFalse);
   });
 
@@ -306,7 +313,7 @@ Target 0: (Runner) stopped.
     final bool exitStatus = lldb.exit();
     expect(exitStatus, isTrue);
     expect(lldb.isRunning, isFalse);
-    expect(lldb.processId, isNull);
+    expect(lldb.appProcessId, isNull);
   });
 }
 

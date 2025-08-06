@@ -19,6 +19,15 @@ import 'application_package.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
 
+/// Provides methods for launching and debugging apps on physical iOS CoreDevices.
+///
+/// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
+/// with iOS 17 or greater are CoreDevices.
+///
+/// This class handles launching apps with different methods:
+/// - [launchAppWithoutDebugger]: Uses `devicectl` to install and launch the app without a debugger.
+/// - [launchAppWithLLDBDebugger]: Uses `devicectl` to install and launch the app, then attaches an LLDB debugger.
+/// - [launchAppWithXcodeDebugger]: Uses Xcode automation to install, launch, and debug the app.
 class IOSCoreDeviceLauncher {
   IOSCoreDeviceLauncher({
     required IOSCoreDeviceControl coreDeviceControl,
@@ -39,7 +48,8 @@ class IOSCoreDeviceLauncher {
   final FileSystem _fileSystem;
   final LLDB _lldb;
 
-  /// Install and launch the app on the device without a debugger. This is generally only used for release mode.
+  /// Install and launch the app on the device with `devicectl` ([_coreDeviceControl])
+  /// and do not attach a debugger. This is generally only used for release mode.
   Future<bool> launchAppWithoutDebugger({
     required String deviceId,
     required String bundlePath,
@@ -69,6 +79,10 @@ class IOSCoreDeviceLauncher {
     return true;
   }
 
+  /// Install and launch the app on the device with `devicectl` ([_coreDeviceControl])
+  /// and then attach a LLDB debugger ([_lldb]).
+  ///
+  /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
     required String bundlePath,
@@ -113,6 +127,7 @@ class IOSCoreDeviceLauncher {
     return attachStatus;
   }
 
+  /// Install and launch the app on the device through Xcode using Mac Automation ([_xcodeDebug]).
   Future<bool> launchAppWithXcodeDebugger({
     required String deviceId,
     required DebuggingOptions debuggingOptions,
@@ -192,7 +207,9 @@ class IOSCoreDeviceLauncher {
     return debugSuccess;
   }
 
-  /// Stop the app attached to LLDB if applicable. Otherwise, stop the [processId]. There may be a process that is not attached to LLDB is LLDB failed to attach.
+  /// Stop the app depending on how it was launched.
+  ///
+  /// Returns `false` if the stop process fails or if there is no process to stop.
   Future<bool> stopApp({required String deviceId, int? processId}) async {
     if (_xcodeDebug.debugStarted) {
       return _xcodeDebug.exit();
@@ -200,14 +217,14 @@ class IOSCoreDeviceLauncher {
 
     int? processToStop;
     if (_lldb.isRunning) {
-      processToStop = _lldb.processId;
-      // Exit the lldb process so it doesn't process any kill signals before the app is killed by devicectl.
+      processToStop = _lldb.appProcessId;
+      // Exit the lldb process so it doesn't process any kill signals before
+      // the app is killed by devicectl.
       _lldb.exit();
     } else {
       processToStop = processId;
     }
 
-    // There is no process to stop, so return false.
     if (processToStop == null) {
       return false;
     }
@@ -335,6 +352,7 @@ class IOSCoreDeviceControl {
     }
   }
 
+  /// Get a list of all CoreDevices.
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
   }) async {
@@ -413,6 +431,7 @@ class IOSCoreDeviceControl {
     ];
   }
 
+  /// Checks if an app is installed on a device.
   Future<bool> isAppInstalled({required String deviceId, required String bundleId}) async {
     final List<IOSCoreDeviceInstalledApp> apps = await getInstalledApps(
       deviceId: deviceId,
@@ -424,6 +443,7 @@ class IOSCoreDeviceControl {
     return false;
   }
 
+  /// Installs an app on a device.
   Future<bool> installApp({required String deviceId, required String bundlePath}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -581,6 +601,7 @@ class IOSCoreDeviceControl {
     }
   }
 
+  /// Terminates a process on a device.
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -631,6 +652,7 @@ class IOSCoreDeviceControl {
   }
 }
 
+/// A single iOS CoreDevice.
 class IOSCoreDevice {
   IOSCoreDevice._({
     required this.capabilities,
@@ -695,8 +717,10 @@ class IOSCoreDevice {
     );
   }
 
+  /// The device's UDID.
   String? get udid => hardwareProperties?.udid;
 
+  /// The device's connection interface.
   DeviceConnectionInterface? get connectionInterface {
     return switch (connectionProperties?.transportType?.toLowerCase()) {
       'localnetwork' => DeviceConnectionInterface.wireless,
@@ -716,10 +740,12 @@ class IOSCoreDevice {
   @visibleForTesting
   final _IOSCoreDeviceHardwareProperties? hardwareProperties;
 
+  /// The identifier used by `devicectl` to uniquely identify a device.
   final String? coreDeviceIdentifier;
   final String? visibilityClass;
 }
 
+/// The capabilities of an iOS CoreDevice.
 class _IOSCoreDeviceCapability {
   _IOSCoreDeviceCapability._({required this.featureIdentifier, required this.name});
 
@@ -748,6 +774,7 @@ class _IOSCoreDeviceCapability {
   final String? name;
 }
 
+/// The connection properties of an iOS CoreDevice.
 class _IOSCoreDeviceConnectionProperties {
   _IOSCoreDeviceConnectionProperties._({
     required this.authenticationType,
@@ -834,6 +861,7 @@ class _IOSCoreDeviceConnectionProperties {
   final String? tunnelTransportProtocol;
 }
 
+/// The device properties of an iOS CoreDevice.
 @visibleForTesting
 class IOSCoreDeviceProperties {
   IOSCoreDeviceProperties._({
@@ -904,6 +932,7 @@ class IOSCoreDeviceProperties {
   final String? screenViewingURL;
 }
 
+/// The hardware properties of an iOS CoreDevice.
 class _IOSCoreDeviceHardwareProperties {
   _IOSCoreDeviceHardwareProperties._({
     required this.cpuType,
@@ -1018,6 +1047,7 @@ class _IOSCoreDeviceHardwareProperties {
   final String? udid;
 }
 
+/// The CPU type of an iOS CoreDevice.
 class _IOSCoreDeviceCPUType {
   _IOSCoreDeviceCPUType._({this.name, this.subType, this.cpuType});
 
@@ -1043,6 +1073,7 @@ class _IOSCoreDeviceCPUType {
   final int? cpuType;
 }
 
+/// An app installed on an iOS CoreDevice.
 @visibleForTesting
 class IOSCoreDeviceInstalledApp {
   IOSCoreDeviceInstalledApp._({
@@ -1107,6 +1138,7 @@ class IOSCoreDeviceInstalledApp {
   final String? version;
 }
 
+/// The result of launching an app on an iOS CoreDevice.
 class IOSCoreDeviceLaunchResult {
   IOSCoreDeviceLaunchResult._({required this.outcome, required this.process});
 
@@ -1150,6 +1182,7 @@ class IOSCoreDeviceLaunchResult {
   final IOSCoreDeviceRunningProcess? process;
 }
 
+/// A running process on an iOS CoreDevice.
 class IOSCoreDeviceRunningProcess {
   IOSCoreDeviceRunningProcess._({required this.executable, required this.processIdentifier});
 
