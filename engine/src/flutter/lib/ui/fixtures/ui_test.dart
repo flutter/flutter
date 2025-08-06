@@ -342,7 +342,7 @@ void sendSemanticsUpdateWithLocale() {
     role: SemanticsRole.none,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
-    locale: 'es-MX',
+    locale: Locale('es', 'MX'),
   );
   _semanticsUpdate(builder.build());
 }
