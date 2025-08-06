@@ -659,8 +659,14 @@ class RenderStack extends RenderBox
     } else {
       size = constraints.biggest;
     }
-
-    assert(size.isFinite);
+    assert(
+      size.isFinite,
+      'A Stack requires bounded constraints from its parent. '
+      'This error commonly occurs when a Stack is placed inside a widget like Column, '
+      'ListView, or other widgets that do not constrain their children. '
+      'To fix this, wrap the Stack in a widget that provides finite height and width, '
+      'such as a SizedBox, ConstrainedBox, or Expanded.',
+    );
     return size;
   }
 
