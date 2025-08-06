@@ -45,7 +45,7 @@ void main() {
   testWidgets('RouteObserver example renders without overflow on small screen', (
     WidgetTester tester,
   ) async {
-    // Set the screen size to a smaller value (e.g., 300x600)
+    // Set the screen size to a smaller value (e.g., 300x600).
     tester.binding.window.physicalSizeTestValue = const Size(300, 600);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
 
