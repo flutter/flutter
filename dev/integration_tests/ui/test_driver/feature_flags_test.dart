@@ -17,8 +17,6 @@ void main() {
   });
 
   test('Can run with feature flags enabled', () async {
-    // TODO(loic-sharma): Turn on a framework feature flag once one exists.
-    // https://github.com/flutter/flutter/issues/167668
-    await driver?.waitFor(find.text('Feature flags: "{}"'));
+    await driver?.waitFor(find.text('Feature flags: "{windowing}"'));
   }, timeout: Timeout.none);
 }

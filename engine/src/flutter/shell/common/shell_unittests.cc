@@ -206,10 +206,10 @@ class MockSurface : public Surface {
 
   MOCK_METHOD(std::unique_ptr<SurfaceFrame>,
               AcquireFrame,
-              (const SkISize& size),
+              (const DlISize& size),
               (override));
 
-  MOCK_METHOD(SkMatrix, GetRootTransformation, (), (const, override));
+  MOCK_METHOD(DlMatrix, GetRootTransformation, (), (const, override));
 
   MOCK_METHOD(GrDirectContext*, GetContext, (), (override));
 
@@ -2487,7 +2487,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
         sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
-            MakeSizedDisplayList(50, 50), SkISize::Make(50, 50));
+            MakeSizedDisplayList(50, 50), DlISize(50, 50));
         EXPECT_NE(image, nullptr);
 
         latch->Signal();
