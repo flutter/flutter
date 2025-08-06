@@ -51,7 +51,7 @@ class WebDevServerConfig {
     final String? host = _validateType<String>(value: yaml[_kHost], fieldName: _kHost);
     final int? port = _validateType<int>(value: yaml[_kPort], fieldName: _kPort);
     final YamlMap? https = _validateType<YamlMap>(value: yaml[_kHttps], fieldName: _kHttps);
-    
+
     final YamlList? headersList = _validateType<YamlList>(
       value: yaml[_kHeaders],
       fieldName: _kHeaders,
@@ -189,12 +189,12 @@ class HttpsConfig {
 
   factory HttpsConfig.fromYaml(YamlMap yaml) {
     final String? certPath = _validateType<String>(value: yaml[_kCertPath], fieldName: _kCertPath);
-    final String? certKeyPath = _validateType<String>(value: yaml[_kCertKeyPath], fieldName: _kCertKeyPath);
-
-    return HttpsConfig(
-      certPath: certPath,
-      certKeyPath: certKeyPath,
+    final String? certKeyPath = _validateType<String>(
+      value: yaml[_kCertKeyPath],
+      fieldName: _kCertKeyPath,
     );
+
+    return HttpsConfig(certPath: certPath, certKeyPath: certKeyPath);
   }
 
   /// Creates a copy of this [HttpsConfig] with optional overrides.
