@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
