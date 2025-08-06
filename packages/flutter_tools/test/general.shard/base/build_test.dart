@@ -16,27 +16,6 @@ const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
 const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
 
-const kDefaultClang = <String>[
-  '-miphoneos-version-min=13.0',
-  '-isysroot',
-  'path/to/sdk',
-  '-dynamiclib',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@executable_path/Frameworks',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@loader_path/Frameworks',
-  '-fapplication-extension',
-  '-install_name',
-  '@rpath/App.framework/App',
-  '-o',
-  'build/foo/App.framework/App',
-  'build/foo/app.so',
-];
-
 void main() {
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
@@ -215,7 +194,6 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -275,7 +253,6 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -333,7 +310,6 @@ void main() {
         ),
         kWhichSysctlCommand,
         kARMCheckCommand,
-        const FakeCommand(command: <String>['xcrun', 'clang', '-arch', 'arm64', ...kDefaultClang]),
         const FakeCommand(
           command: <String>[
             'xcrun',
