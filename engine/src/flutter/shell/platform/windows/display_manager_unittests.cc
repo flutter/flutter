@@ -74,7 +74,8 @@ TEST_F(DisplayManagerTest, CanGetSingleMonitorInfo) {
   auto const displays = manager.displays();
   EXPECT_THAT(displays.size(), ::testing::Eq(1));
   EXPECT_THAT(displays[0].single_display, ::testing::Eq(true));
-  EXPECT_THAT(displays[0].display_id, ::testing::Eq(0));
+  EXPECT_THAT(displays[0].display_id,
+              ::testing::Eq(reinterpret_cast<FlutterEngineDisplayId>(fake)));
   EXPECT_THAT(displays[0].width, ::testing::Eq(800));
   EXPECT_THAT(displays[0].height, ::testing::Eq(600));
   EXPECT_THAT(displays[0].refresh_rate, ::testing::Eq(0));

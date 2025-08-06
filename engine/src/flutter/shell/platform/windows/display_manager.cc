@@ -55,7 +55,6 @@ std::vector<FlutterEngineDisplay> DisplayManager::displays() const {
 
   if (data.displays.size() == 1) {
     data.displays[0].single_display = true;
-    data.displays[0].display_id = 0;  // ignored when single_display is true
   }
 
   return data.displays;
