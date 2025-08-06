@@ -42,26 +42,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('RouteObserver example renders without overflow on small screen', (WidgetTester tester) async {
-  // Set the screen size to a smaller value (e.g., 300x600)
-  tester.binding.window.physicalSizeTestValue = const Size(300, 600);
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+  testWidgets('RouteObserver example renders without overflow on small screen', (
+    WidgetTester tester,
+  ) async {
+    // Set the screen size to a smaller value (e.g., 300x600)
+    tester.binding.window.physicalSizeTestValue = const Size(300, 600);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
 
-  // Rebuild the widget tree with the new window size
-  addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-  addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    // Rebuild the widget tree with the new window size
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 
-  // Build the RouteObserver example widget
-  await tester.pumpWidget(
-    const MaterialApp(
-      home: RouteObserverExample(), // Replace with actual widget used in the sample
-    ),
-  );
+    // Build the RouteObserver example widget
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: RouteObserverExample(), // Replace with actual widget used in the sample
+      ),
+    );
 
-  // Allow layout to settle
-  await tester.pumpAndSettle();
+    // Allow layout to settle
+    await tester.pumpAndSettle();
 
-  // Verify there are no layout exceptions (like RenderFlex overflow)
-  expect(tester.takeException(), isNull);
-});
+    // Verify there are no layout exceptions (like RenderFlex overflow)
+    expect(tester.takeException(), isNull);
+  });
 }
