@@ -266,6 +266,13 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
         strings.push_back(node.linkUrl);
       }
 
+      if (node.locale.empty()) {
+        buffer_int32[position++] = -1;
+      } else {
+        buffer_int32[position++] = strings.size();
+        strings.push_back(node.locale);
+      }
+
       buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
