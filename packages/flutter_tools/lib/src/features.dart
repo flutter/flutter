@@ -64,6 +64,9 @@ abstract class FeatureFlags {
   /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
   bool get isOmitLegacyVersionFileEnabled;
 
+  /// Whether desktop windowing is enabled.
+  bool get isWindowingEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -83,6 +86,7 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    windowingFeature,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -201,6 +205,17 @@ const omitLegacyVersionFile = Feature(
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
+);
+
+/// Whether desktop windowing is enabled.
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+const windowingFeature = Feature(
+  name: 'support for windowing on macOS, Linux, and Windows',
+  configSetting: 'enable-windowing',
+  environmentOverride: 'FLUTTER_WINDOWING',
+  runtimeId: 'windowing',
+  master: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

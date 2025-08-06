@@ -173,6 +173,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
+            git: globals.git,
           ),
         ],
         suppressAnalytics: !globals.analytics.okToSend,
@@ -322,7 +323,7 @@ class LoggerFactory {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return AppRunLogger(parent: logger);
+      return MachineOutputLogger(parent: logger);
     }
     return logger;
   }

@@ -596,6 +596,11 @@ class CreateCommand extends FlutterCommand with CreateBase {
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
+      final String commandsToRun = [
+        if (relativeAppPath != '.') '  \$ cd $relativeAppPath',
+        r'  $ flutter run',
+      ].join('\n');
+
       // Let them know a summary of the state of their tooling.
       globals.printStatus('''
 You can find general documentation for Flutter at: https://docs.flutter.dev/
@@ -604,8 +609,7 @@ If you prefer video documentation, consider: https://www.youtube.com/c/flutterde
 
 In order to run your $application, type:
 
-  \$ cd $relativeAppPath
-  \$ flutter run
+$commandsToRun
 
 Your $application code is in $relativeAppMain.
 ''');
