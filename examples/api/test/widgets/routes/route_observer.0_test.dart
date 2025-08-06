@@ -56,7 +56,7 @@ void main() {
     // Build the RouteObserver example widget
     await tester.pumpWidget(
       const MaterialApp(
-        home: RouteObserverExample(), // Replace with actual widget used in the sample
+        home: RouteObserverExample(),
       ),
     );
 
