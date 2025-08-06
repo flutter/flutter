@@ -1099,8 +1099,8 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
-    bool has_given_constraints = (metrics.width_constraint != 0.0 ||
-                                  metrics.height_constraint != 0.0);
+    bool has_given_constraints =
+        (metrics.width_constraint != 0.0 || metrics.height_constraint != 0.0);
 
     if (has_given_constraints) {
       expected_frame_constraints_[view_id] = {
@@ -1751,10 +1751,10 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-//  auto expected_frame_constraints = ExpectedFrameSize(view_id);
+  //  auto expected_frame_constraints = ExpectedFrameSize(view_id);
   return false;
-//  return !isSizeWithinConstraints(tree.frame_size(),
-//                                  expected_frame_constraints);
+  //  return !isSizeWithinConstraints(tree.frame_size(),
+  //                                  expected_frame_constraints);
 }
 
 // |ServiceProtocol::Handler|
