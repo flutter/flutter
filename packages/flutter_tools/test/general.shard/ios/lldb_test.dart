@@ -223,7 +223,7 @@ Target 0: (Runner) stopped.
     expect(logger.errorText, contains(errorText));
   });
 
-  testWithoutContext('attachAndStart returns false if times out', () async {
+  testWithoutContext('attachAndStart prints warning if takes too long', () async {
     const deviceId = '123';
     const appappProcessId = 5678;
 
@@ -244,22 +244,27 @@ Target 0: (Runner) stopped.
     final processUtils = ProcessUtils(processManager: processManager, logger: logger);
     final lldb = LLDB(logger: logger, processUtils: processUtils);
 
-    stdinController.stream.listen((List<int> data) => {});
-
     final completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
-      final Future<bool> futureResult = lldb.attachAndStart(deviceId, appappProcessId);
-      futureResult.then((bool success) {
-        expect(success, isFalse);
-        expect(lldb.isRunning, isFalse);
-        expect(lldb.appProcessId, isNull);
-        expect(logger.errorText, contains('Failed to launch within time limit'));
+
+    stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
+      String line,
+    ) {
+      if (!completer.isCompleted) {
         completer.complete();
-      });
+      }
+    });
+
+    await FakeAsync().run((FakeAsync time) {
+      lldb.attachAndStart(deviceId, appappProcessId);
       time.elapse(const Duration(minutes: 2));
       time.flushMicrotasks();
       return completer.future;
     });
+
+    expect(
+      logger.errorText,
+      contains('LLDB is taking longer than expected to start debugging the app'),
+    );
   });
 
   testWithoutContext('exit returns true and kills process', () async {

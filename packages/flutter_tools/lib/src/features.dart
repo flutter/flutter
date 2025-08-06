@@ -64,6 +64,9 @@ abstract class FeatureFlags {
   /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
   bool get isOmitLegacyVersionFileEnabled;
 
+  /// Whether physical iOS devices are debugging with LLDB.
+  bool get isLLDBDebuggingEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -83,6 +86,7 @@ abstract class FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    lldbDebugging,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -201,6 +205,16 @@ const omitLegacyVersionFile = Feature(
   master: FeatureChannelSetting(available: true),
   beta: FeatureChannelSetting(available: true),
   stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off, Xcode debugging is used instead.
+const lldbDebugging = Feature(
+  name: 'support for debugging with LLDB for physical iOS devices. If LLDB debugging is off, Xcode debugging is used instead.',
+  configSetting: 'enable-lldb-debugging',
+  environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

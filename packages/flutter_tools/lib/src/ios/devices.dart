@@ -24,6 +24,7 @@ import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -900,7 +901,8 @@ class IOSDevice extends Device {
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // Use LLDB if available.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    if (xcodeVersion != null && xcodeVersion.major >= 16) {
+    final bool lldbEnabled = featureFlags.isLLDBDebuggingEnabled;
+    if (xcodeVersion != null && xcodeVersion.major >= 16 && lldbEnabled) {
       final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
         deviceId: id,
         bundlePath: package.deviceBundlePath,

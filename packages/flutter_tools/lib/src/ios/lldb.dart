@@ -75,9 +75,16 @@ return False
   Future<bool> attachAndStart(String deviceId, int appProcessId) async {
     Timer? timer;
     try {
-      timer = Timer(const Duration(minutes: 2), () {
-        _logCompleter?.completeError(_LLDBError('Failed to launch within time limit'));
-        exit();
+      timer = Timer(const Duration(minutes: 1), () {
+        _logger.printError(
+          'LLDB is taking longer than expected to start debugging the app. '
+          "LLDB debugging can be disabled for the project by adding the following in the project's pubspec.yaml:\n"
+          'flutter:\n'
+          '  config:\n'
+          '    enable-lldb-debugging: false\n'
+          'Or disable LLDB debugging globally with the following command:\n'
+          '  "flutter config --no-enable-lldb-debugging"',
+        );
       });
 
       final bool start = await _startLLDB(appProcessId);
@@ -130,7 +137,7 @@ return False
           .transform<String>(const LineSplitter())
           .listen((String line) {
             _logger.printError('[lldb]: $line');
-            monitorError(line);
+            _monitorError(line);
           });
 
       unawaited(
@@ -170,7 +177,7 @@ return False
     // after attaching.
     final Future<String> futureLog = _startWaitingForLog(
       _lldbProcessStopped,
-    ).catchError(handleAsyncError);
+    ).catchError(_handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
     await futureLog;
@@ -181,7 +188,7 @@ return False
   Future<void> _setBreakpoint() async {
     final Future<String> futureLog = _startWaitingForLog(
       _breakpointPattern,
-    ).catchError(handleAsyncError);
+    ).catchError(_handleAsyncError);
 
     await _lldbProcess?.stdinWriteln(
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
@@ -204,7 +211,7 @@ return False
   Future<void> _resumeProcess() async {
     final Future<String> futureLog = _startWaitingForLog(
       _lldbProcessResuming,
-    ).catchError(handleAsyncError);
+    ).catchError(_handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');
     await futureLog;
@@ -223,7 +230,7 @@ return False
     return _logCompleter!.future;
   }
 
-  Future<String> handleAsyncError(Object error) async {
+  Future<String> _handleAsyncError(Object error) async {
     if (error is _LLDBError) {
       throw error;
     }
@@ -231,7 +238,7 @@ return False
   }
 
   /// Checks if [error] is a fatal error and stops the process if so.
-  void monitorError(String error) {
+  void _monitorError(String error) {
     // The LLDB process does not stop when it receives these errors but is no
     // longer debugging the application. When one of these errors is received,
     // stop the LLDB process.
