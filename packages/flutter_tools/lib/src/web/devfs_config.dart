@@ -112,6 +112,8 @@ class WebDevServerConfig {
     );
   }
 
+  static bool _loadFromFileAlreadyLogged = false;
+
   /// Creates a [WebDevServerConfig] from the `web_dev_config.yaml` file.
   ///
   /// This method is responsible for loading and parsing the configuration
@@ -139,8 +141,11 @@ class WebDevServerConfig {
 
       final serverYaml = contents[_kServer] as YamlMap;
       final fileConfig = WebDevServerConfig.fromYaml(serverYaml, logger);
-      logger.printStatus('$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath');
-      logger.printTrace(fileConfig.toString());
+      if (!_loadFromFileAlreadyLogged) {
+        logger.printStatus('$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath');
+        logger.printTrace(fileConfig.toString());
+        _loadFromFileAlreadyLogged = true;
+      }
       return fileConfig;
     } on Exception catch (e) {
       throwToolExit('$_kLogEntryPrefix Error: Failed to parse $webDevServerConfigFilePath: $e');
