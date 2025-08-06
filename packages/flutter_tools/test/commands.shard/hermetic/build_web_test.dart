@@ -655,7 +655,7 @@ void main() {
   );
 
   testUsingContext(
-    'Rejects --static-assets-url value that does not start with http or does not end with /',
+    'Rejects --static-assets-url value that does not end with /',
     () async {
       final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
