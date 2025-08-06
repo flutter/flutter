@@ -11,7 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/native_library.h"
 
-namespace flutter {  // namespace
+namespace flutter {
 
 // Lookup table for Windows APIs that aren't available on all versions of
 // Windows, or for mocking Windows API calls.
