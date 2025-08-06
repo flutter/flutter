@@ -71,15 +71,16 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             ),
             SliverSafeArea(
               top: false, // Top safe area is consumed by the navigation bar.
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              sliver: SliverList.builder(
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
                   return _ListItem(
                     name: randomizedContacts[index][0],
                     place: randomizedContacts[index][1],
                     date: randomizedContacts[index][2],
                     called: randomizedContacts[index][3] == 'true',
                   );
-                }, childCount: 20),
+                },
               ),
             ),
           ],
@@ -154,17 +155,16 @@ class _ListItem extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: 38.0,
-            child:
-                called!
-                    ? Align(
-                      alignment: Alignment.topCenter,
-                      child: Icon(
-                        CupertinoIcons.phone_solid,
-                        color: CupertinoColors.inactiveGray.resolveFrom(context),
-                        size: 18.0,
-                      ),
-                    )
-                    : null,
+            child: called!
+                ? Align(
+                    alignment: Alignment.topCenter,
+                    child: Icon(
+                      CupertinoIcons.phone_solid,
+                      color: CupertinoColors.inactiveGray.resolveFrom(context),
+                      size: 18.0,
+                    ),
+                  )
+                : null,
           ),
           Expanded(
             child: Container(

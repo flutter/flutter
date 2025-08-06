@@ -752,16 +752,9 @@ class RenderWrap extends RenderBox
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
-      final _RunMetrics? newRun =
-          currentRun == null
-              ? _RunMetrics(child, childSize)
-              : currentRun.tryAddingNewChild(
-                child,
-                childSize,
-                flipMainAxis,
-                spacing,
-                mainAxisLimit,
-              );
+      final _RunMetrics? newRun = currentRun == null
+          ? _RunMetrics(child, childSize)
+          : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
       if (newRun != null) {
         runMetrics.add(newRun);
         childrenAxisSize += currentRun?.axisSize.flipped ?? _AxisSize.empty;
@@ -790,8 +783,9 @@ class RenderWrap extends RenderBox
     final double crossAxisFreeSpace = math.max(0.0, freeAxisSize.crossAxisExtent);
 
     final (bool flipMainAxis, bool flipCrossAxis) = _areAxesFlipped;
-    final WrapCrossAlignment effectiveCrossAlignment =
-        flipCrossAxis ? crossAxisAlignment._flipped : crossAxisAlignment;
+    final WrapCrossAlignment effectiveCrossAlignment = flipCrossAxis
+        ? crossAxisAlignment._flipped
+        : crossAxisAlignment;
     final (double runLeadingSpace, double runBetweenSpace) = runAlignment._distributeSpace(
       crossAxisFreeSpace,
       runSpacing,
@@ -828,7 +822,10 @@ class RenderWrap extends RenderBox
         final _AxisSize(
           mainAxisExtent: double childMainAxisExtent,
           crossAxisExtent: double childCrossAxisExtent,
-        ) = _AxisSize.fromSize(size: getChildSize(child), direction: direction);
+        ) = _AxisSize.fromSize(
+          size: getChildSize(child),
+          direction: direction,
+        );
         final double childCrossAxisOffset =
             effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
         positionChild(

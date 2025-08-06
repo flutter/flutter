@@ -232,11 +232,13 @@ void main() {
 
   group('JsonObject.map', () {
     test('returns multiple fields', () {
-      final (String name, int age, bool isStudent) = const JsonObject(<String, Object?>{
-        'name': 'Alice',
-        'age': 42,
-        'isStudent': true,
-      }).map((JsonObject json) {
+      final (
+        String name,
+        int age,
+        bool isStudent,
+      ) = const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': true}).map((
+        JsonObject json,
+      ) {
         return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
       });
 
@@ -286,11 +288,11 @@ void main() {
     });
 
     test('allows a default with onError', () {
-      final (String name, int age, bool isStudent) = const JsonObject(<String, Object?>{
-        'name': 'Alice',
-        'age': 42,
-        'isStudent': 'true',
-      }).map(
+      final (
+        String name,
+        int age,
+        bool isStudent,
+      ) = const JsonObject(<String, Object?>{'name': 'Alice', 'age': 42, 'isStudent': 'true'}).map(
         (JsonObject json) {
           return (json.string('name'), json.integer('age'), json.boolean('isStudent'));
         },

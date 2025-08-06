@@ -317,5 +317,20 @@ TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, DrawAtlasWithColorBurn) {
+  DisplayListBuilder builder;
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
+
+  std::vector<DlColor> colors = {DlColor::kDarkGrey(), DlColor::kBlack(),
+                                 DlColor::kLightGrey(), DlColor::kWhite()};
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
+                    colors.data(), /*count=*/4, DlBlendMode::kColorBurn,
+                    DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

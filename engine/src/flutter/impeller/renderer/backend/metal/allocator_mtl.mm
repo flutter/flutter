@@ -159,7 +159,8 @@ std::shared_ptr<DeviceBuffer> AllocatorMTL::OnCreateBuffer(
 }
 
 std::shared_ptr<Texture> AllocatorMTL::OnCreateTexture(
-    const TextureDescriptor& desc) {
+    const TextureDescriptor& desc,
+    bool threadsafe) {
   if (!IsValid()) {
     return nullptr;
   }

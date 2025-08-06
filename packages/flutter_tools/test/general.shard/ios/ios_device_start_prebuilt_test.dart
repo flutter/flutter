@@ -34,7 +34,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 // The command used to actually launch the app with args in release/profile.
-const FakeCommand kLaunchReleaseCommand = FakeCommand(
+const kLaunchReleaseCommand = FakeCommand(
   command: <String>[
     'HostArtifact.iosDeploy',
     '--id',
@@ -51,7 +51,7 @@ const FakeCommand kLaunchReleaseCommand = FakeCommand(
 );
 
 // The command used to just launch the app with args in debug.
-const FakeCommand kLaunchDebugCommand = FakeCommand(
+const kLaunchDebugCommand = FakeCommand(
   command: <String>[
     'HostArtifact.iosDeploy',
     '--id',
@@ -109,8 +109,8 @@ FakeCommand attachDebuggerCommand({
 void main() {
   testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
-    final FakeDevicePortForwarder devicePortForwarder = FakeDevicePortForwarder();
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    final devicePortForwarder = FakeDevicePortForwarder();
+    final deviceLogReader = FakeDeviceLogReader();
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
@@ -130,9 +130,7 @@ void main() {
     'IOSDevice.startApp attaches in debug mode via log reading on iOS 13+',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        attachDebuggerCommand(),
-      ]);
+      final processManager = FakeProcessManager.list(<FakeCommand>[attachDebuggerCommand()]);
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
@@ -143,7 +141,7 @@ void main() {
         uncompressedBundle: fileSystem.currentDirectory,
         applicationPackage: fileSystem.currentDirectory,
       );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+      final deviceLogReader = FakeDeviceLogReader();
 
       device.portForwarder = const NoOpDevicePortForwarder();
       device.setLogReader(iosApp, deviceLogReader);
@@ -170,10 +168,10 @@ void main() {
   testWithoutContext(
     'IOSDevice.startApp twice in a row where ios-deploy fails the first time',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdout: 'PROCESS_EXITED'),
         attachDebuggerCommand(
           stdout:
@@ -223,9 +221,7 @@ void main() {
     'IOSDevice.startApp launches in debug mode via log reading on <iOS 13',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        kLaunchDebugCommand,
-      ]);
+      final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchDebugCommand]);
       final IOSDevice device = setUpIOSDevice(
         sdkVersion: '12.4.4',
         processManager: processManager,
@@ -237,7 +233,7 @@ void main() {
         uncompressedBundle: fileSystem.currentDirectory,
         applicationPackage: fileSystem.currentDirectory,
       );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+      final deviceLogReader = FakeDeviceLogReader();
 
       device.portForwarder = const NoOpDevicePortForwarder();
       device.setLogReader(iosApp, deviceLogReader);
@@ -265,10 +261,10 @@ void main() {
     'IOSDevice.startApp prints warning message if discovery takes longer than configured timeout for wired device',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final CompleterIOSink stdin = CompleterIOSink();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final logger = BufferLogger.test();
+      final stdin = CompleterIOSink();
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdin: stdin, completer: completer),
       ]);
       final IOSDevice device = setUpIOSDevice(
@@ -282,7 +278,7 @@ void main() {
         uncompressedBundle: fileSystem.currentDirectory,
         applicationPackage: fileSystem.currentDirectory,
       );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+      final deviceLogReader = FakeDeviceLogReader();
 
       device.portForwarder = const NoOpDevicePortForwarder();
       device.setLogReader(iosApp, deviceLogReader);
@@ -318,10 +314,10 @@ void main() {
     'IOSDevice.startApp prints warning message if discovery takes longer than configured timeout for wireless device',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final CompleterIOSink stdin = CompleterIOSink();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final logger = BufferLogger.test();
+      final stdin = CompleterIOSink();
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdin: stdin, completer: completer, isWirelessDevice: true),
       ]);
       final IOSDevice device = setUpIOSDevice(
@@ -336,7 +332,7 @@ void main() {
         uncompressedBundle: fileSystem.currentDirectory,
         applicationPackage: fileSystem.currentDirectory,
       );
-      final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+      final deviceLogReader = FakeDeviceLogReader();
 
       device.portForwarder = const NoOpDevicePortForwarder();
       device.setLogReader(iosApp, deviceLogReader);
@@ -383,10 +379,10 @@ void main() {
   testWithoutContext(
     'IOSDevice.startApp retries when ios-deploy loses connection the first time in CI',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(
           stdout:
               '(lldb)     run\nsuccess\nProcess 525 exited with status = -1 (0xffffffff) lost connection',
@@ -435,9 +431,9 @@ void main() {
   testWithoutContext(
     'IOSDevice.startApp does not retry when ios-deploy loses connection if not in CI',
     () async {
-      final BufferLogger logger = BufferLogger.test();
+      final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(
           stdout:
               '(lldb)     run\nsuccess\nProcess 525 exited with status = -1 (0xffffffff) lost connection',
@@ -473,9 +469,7 @@ void main() {
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      kLaunchReleaseCommand,
-    ]);
+    final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchReleaseCommand]);
     final IOSDevice device = setUpIOSDevice(processManager: processManager, fileSystem: fileSystem);
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -499,7 +493,7 @@ void main() {
 
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           'script',
@@ -518,6 +512,7 @@ void main() {
           '--args',
           <String>[
             '--enable-dart-profiling',
+            '--profile-startup',
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
@@ -533,6 +528,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
+            '--profile-microtasks',
             '--verbose-logging',
             '--purge-persistent-cache',
             '--enable-impeller=false',
@@ -557,7 +553,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    final deviceLogReader = FakeDeviceLogReader();
 
     device.portForwarder = const NoOpDevicePortForwarder();
     device.setLogReader(iosApp, deviceLogReader);
@@ -585,6 +581,8 @@ void main() {
         traceSystrace: true,
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        profileStartup: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,
@@ -600,7 +598,7 @@ void main() {
 
   testWithoutContext('startApp using route', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           'script',
@@ -642,7 +640,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    final deviceLogReader = FakeDeviceLogReader();
 
     device.portForwarder = const NoOpDevicePortForwarder();
     device.setLogReader(iosApp, deviceLogReader);
@@ -667,7 +665,7 @@ void main() {
 
   testWithoutContext('startApp using trace-startup', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
           'script',
@@ -709,7 +707,7 @@ void main() {
       uncompressedBundle: fileSystem.currentDirectory,
       applicationPackage: fileSystem.currentDirectory,
     );
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    final deviceLogReader = FakeDeviceLogReader();
 
     device.portForwarder = const NoOpDevicePortForwarder();
     device.setLogReader(iosApp, deviceLogReader);
@@ -735,7 +733,7 @@ void main() {
     group('in debug mode', () {
       testUsingContext('succeeds', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final FakeProcessManager processManager = FakeProcessManager.empty();
+        final processManager = FakeProcessManager.empty();
 
         final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
             .childDirectory('flutter_empty_xcode.rand0');
@@ -763,7 +761,7 @@ void main() {
           uncompressedBundle: bundleLocation,
           applicationPackage: bundleLocation,
         );
-        final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+        final deviceLogReader = FakeDeviceLogReader();
 
         device.portForwarder = const NoOpDevicePortForwarder();
         device.setLogReader(iosApp, deviceLogReader);
@@ -786,13 +784,13 @@ void main() {
 
       testUsingContext('prints warning message if it takes too long to start debugging', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final FakeProcessManager processManager = FakeProcessManager.empty();
-        final BufferLogger logger = BufferLogger.test();
+        final processManager = FakeProcessManager.empty();
+        final logger = BufferLogger.test();
         final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
             .childDirectory('flutter_empty_xcode.rand0');
         final Directory bundleLocation = fileSystem.currentDirectory;
-        final Completer<void> completer = Completer<void>();
-        final FakeXcodeDebug xcodeDebug = FakeXcodeDebug(
+        final completer = Completer<void>();
+        final xcodeDebug = FakeXcodeDebug(
           expectedProject: XcodeDebugProject(
             scheme: 'Runner',
             xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
@@ -818,7 +816,7 @@ void main() {
           uncompressedBundle: bundleLocation,
           applicationPackage: bundleLocation,
         );
-        final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+        final deviceLogReader = FakeDeviceLogReader();
 
         device.portForwarder = const NoOpDevicePortForwarder();
         device.setLogReader(iosApp, deviceLogReader);
@@ -850,7 +848,7 @@ void main() {
 
       testUsingContext('succeeds with shutdown hook added when running from CI', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final FakeProcessManager processManager = FakeProcessManager.empty();
+        final processManager = FakeProcessManager.empty();
 
         final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
             .childDirectory('flutter_empty_xcode.rand0');
@@ -878,7 +876,7 @@ void main() {
           uncompressedBundle: bundleLocation,
           applicationPackage: bundleLocation,
         );
-        final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+        final deviceLogReader = FakeDeviceLogReader();
 
         device.portForwarder = const NoOpDevicePortForwarder();
         device.setLogReader(iosApp, deviceLogReader);
@@ -889,7 +887,7 @@ void main() {
           deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
         });
 
-        final FakeShutDownHooks shutDownHooks = FakeShutDownHooks();
+        final shutDownHooks = FakeShutDownHooks();
 
         final LaunchResult launchResult = await device.startApp(
           iosApp,
@@ -907,7 +905,7 @@ void main() {
         'IOSDevice.startApp attaches in debug mode via mDNS when device logging fails',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final FakeProcessManager processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.empty();
 
           final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
               .childDirectory('flutter_empty_xcode.rand0');
@@ -935,7 +933,7 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
@@ -953,10 +951,8 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery:
-              () => FakeMDnsVmServiceDiscovery(
-                allowthrowOnMissingLocalNetworkPermissionsError: false,
-              ),
+          MDnsVmServiceDiscovery: () =>
+              FakeMDnsVmServiceDiscovery(allowthrowOnMissingLocalNetworkPermissionsError: false),
         },
       );
 
@@ -968,7 +964,7 @@ void main() {
 
         testUsingContext('when mDNS fails', () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final FakeProcessManager processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.empty();
 
           final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
               .childDirectory('flutter_empty_xcode.rand0');
@@ -996,7 +992,7 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
@@ -1028,10 +1024,10 @@ void main() {
         'IOSDevice.startApp fails to find Dart VM in CI',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final FakeProcessManager processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.empty();
 
-          const String pathToFlutterLogs = '/path/to/flutter/logs';
-          const String pathToHome = '/path/to/home';
+          const pathToFlutterLogs = '/path/to/flutter/logs';
+          const pathToHome = '/path/to/home';
 
           final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
               .childDirectory('flutter_empty_xcode.rand0');
@@ -1064,17 +1060,17 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
 
-          const String projectLogsPath = 'Runner-project1/Logs/Launch/Runner.xcresults';
+          const projectLogsPath = 'Runner-project1/Logs/Launch/Runner.xcresults';
           fileSystem
               .directory('$pathToHome/Library/Developer/Xcode/DerivedData/$projectLogsPath')
               .createSync(recursive: true);
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           await FakeAsync().run((FakeAsync time) {
             final Future<LaunchResult> futureLaunchResult = device.startApp(
               iosApp,
@@ -1111,7 +1107,7 @@ void main() {
         'IOSDevice.startApp prints guided message when iOS 18.4 crashes due to JIT',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
-          final FakeProcessManager processManager = FakeProcessManager.empty();
+          final processManager = FakeProcessManager.empty();
 
           final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
               .childDirectory('flutter_empty_xcode.rand0');
@@ -1140,7 +1136,7 @@ void main() {
             uncompressedBundle: bundleLocation,
             applicationPackage: bundleLocation,
           );
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+          final deviceLogReader = FakeDeviceLogReader();
 
           device.portForwarder = const NoOpDevicePortForwarder();
           device.setLogReader(iosApp, deviceLogReader);
@@ -1150,7 +1146,7 @@ void main() {
             deviceLogReader.addLine(kJITCrashFailureMessage);
           });
 
-          final Completer<void> completer = Completer<void>();
+          final completer = Completer<void>();
           // device.startApp() asynchronously calls throwToolExit, so we
           // catch it in a zone.
           unawaited(
@@ -1191,11 +1187,11 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
 }) {
-  final Artifacts artifacts = Artifacts.test();
+  final artifacts = Artifacts.test();
   final FakePlatform macPlatform =
       platform ?? FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 
-  final Cache cache = Cache.test(
+  final cache = Cache.test(
     platform: macPlatform,
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),
@@ -1236,7 +1232,7 @@ IOSDevice setUpIOSDevice({
 }
 
 class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
-  bool disposed = false;
+  var disposed = false;
 
   @override
   Future<void> dispose() async {
@@ -1252,7 +1248,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
   bool returnsNull;
   bool allowthrowOnMissingLocalNetworkPermissionsError;
 
-  Completer<void> completer = Completer<void>();
+  var completer = Completer<void>();
   @override
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
@@ -1295,7 +1291,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   final Completer<void>? completer;
 
   @override
-  bool debugStarted = false;
+  var debugStarted = false;
 
   @override
   Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
@@ -1345,7 +1341,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
 
 class FakeShutDownHooks extends Fake implements ShutdownHooks {
-  List<ShutdownHook> hooks = <ShutdownHook>[];
+  var hooks = <ShutdownHook>[];
   @override
   void addShutdownHook(ShutdownHook shutdownHook) {
     hooks.add(shutdownHook);

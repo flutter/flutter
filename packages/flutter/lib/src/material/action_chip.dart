@@ -222,10 +222,9 @@ class ActionChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults =
-        Theme.of(context).useMaterial3
-            ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
-            : null;
+    final ChipThemeData? defaults = Theme.of(context).useMaterial3
+        ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
+        : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,

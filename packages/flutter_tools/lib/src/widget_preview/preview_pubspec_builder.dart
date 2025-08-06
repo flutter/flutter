@@ -43,7 +43,7 @@ class PreviewPubspecBuilder {
   ///   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
   ///     by widgets being previewed.
   ///   - url_launcher, which is used to open a browser to the preview documentation.
-  static const List<String> _kWidgetPreviewScaffoldDeps = <String>[
+  static const _kWidgetPreviewScaffoldDeps = <String>[
     'dtd',
     'flutter_lints',
     'google_fonts',
@@ -75,11 +75,6 @@ class PreviewPubspecBuilder {
   }
 
   @visibleForTesting
-  static FontAsset transformFontAsset(FontAsset asset) {
-    return FontAsset(transformAssetUri(asset.assetUri), weight: asset.weight, style: asset.style);
-  }
-
-  @visibleForTesting
   static DeferredComponent transformDeferredComponent(DeferredComponent component) {
     return DeferredComponent(
       name: component.name,
@@ -89,26 +84,38 @@ class PreviewPubspecBuilder {
     );
   }
 
-  Future<void> populatePreviewPubspec({required FlutterProject rootProject}) async {
+  Future<void> populatePreviewPubspec({
+    required FlutterProject rootProject,
+    String? updatedPubspecPath,
+  }) async {
     final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
 
     // Overwrite the pubspec for the preview scaffold project to include assets
-    // from the root project.
+    // from the root project. Dependencies are removed as part of this operation
+    // and they need to be added back below.
     widgetPreviewScaffoldProject.replacePubspec(
       buildPubspec(
-        rootManifest: rootProject.manifest,
+        rootProject: rootProject,
         widgetPreviewManifest: widgetPreviewScaffoldProject.manifest,
       ),
     );
 
     // Adds a path dependency on the parent project so previews can be
     // imported directly into the preview scaffold.
-    const String pubAdd = 'add';
-    // Use `json.encode` to handle escapes correctly.
-    final String pathDescriptor = json.encode(<String, Object?>{
-      // `pub add` interprets relative paths relative to the current directory.
-      'path': rootProject.directory.fileSystem.path.relative(rootProject.directory.path),
-    });
+    const pubAdd = 'add';
+    final workspacePackages = <String, String>{
+      for (final FlutterProject project in <FlutterProject>[
+        rootProject,
+        ...rootProject.workspaceProjects,
+      ])
+        // Use `json.encode` to handle escapes correctly.
+        project.manifest.appName: json.encode(<String, Object?>{
+          // `pub add` interprets relative paths relative to the current directory.
+          'path': widgetPreviewScaffoldProject.directory.fileSystem.path.relative(
+            project.directory.path,
+          ),
+        }),
+    };
 
     final PubOutputMode outputMode = verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
     await pub.interactively(
@@ -118,7 +125,9 @@ class PreviewPubspecBuilder {
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
-        '${rootProject.manifest.appName}:$pathDescriptor',
+        for (final MapEntry<String, String>(:String key, :String value)
+            in workspacePackages.entries)
+          '$key:$value',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
@@ -149,40 +158,32 @@ class PreviewPubspecBuilder {
       outputMode: outputMode,
     );
 
-    previewManifest.updatePubspecHash();
+    previewManifest.updatePubspecHash(updatedPubspecPath: updatedPubspecPath);
   }
 
-  void onPubspecChangeDetected() {
+  void onPubspecChangeDetected(String path) {
     // TODO(bkonyi): trigger hot reload or restart?
-    logger.printStatus('Changes to pubspec.yaml detected.');
-    populatePreviewPubspec(rootProject: rootProject);
+    logger.printStatus('Changes to $path detected.');
+    populatePreviewPubspec(rootProject: rootProject, updatedPubspecPath: path);
   }
 
   @visibleForTesting
   FlutterManifest buildPubspec({
-    required FlutterManifest rootManifest,
+    required FlutterProject rootProject,
     required FlutterManifest widgetPreviewManifest,
   }) {
-    final List<AssetsEntry> assets = rootManifest.assets.map(transformAssetsEntry).toList();
-
-    final List<Font> fonts = <Font>[
-      ...widgetPreviewManifest.fonts,
-      ...rootManifest.fonts.map((Font font) {
-        return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
-      }),
+    final deferredComponents = <DeferredComponent>[
+      ...?rootProject.manifest.deferredComponents?.map(transformDeferredComponent),
+      for (final FlutterProject project in rootProject.workspaceProjects)
+        ...?project.manifest.deferredComponents?.map(transformDeferredComponent),
     ];
 
-    final List<Uri> shaders = rootManifest.shaders.map(transformAssetUri).toList();
-
-    final List<DeferredComponent>? deferredComponents =
-        rootManifest.deferredComponents?.map(transformDeferredComponent).toList();
-
+    // Copy the manifest with dependencies removed to handle situations where a package or
+    // workspace name has changed. We'll re-add them later.
     return widgetPreviewManifest.copyWith(
       logger: logger,
-      assets: assets,
-      fonts: fonts,
-      shaders: shaders,
       deferredComponents: deferredComponents,
+      removeDependencies: true,
     );
   }
 }
