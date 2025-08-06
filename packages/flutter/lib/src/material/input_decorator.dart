@@ -1018,9 +1018,8 @@ class _RenderDecoration extends RenderBox
         constraints.maxWidth -
             (decoration.inputGap * 2 +
                 iconWidth +
-                contentPadding.horizontal +
-                prefixIconSize.width +
-                suffixIconSpace),
+                (prefixIcon == null ? contentPadding.start : prefixIconSize.width) +
+                (suffixIcon == null ? contentPadding.end : suffixIconSpace)),
       );
 
       // Increase the available width for the label when it is scaled down.
