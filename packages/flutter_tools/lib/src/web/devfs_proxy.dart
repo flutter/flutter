@@ -134,8 +134,8 @@ class RegexProxyRule implements ProxyRule {
 class PrefixProxyRule extends RegexProxyRule {
   /// Creates a [PrefixProxyRule] with the given [pattern] prefix, [target] URI base,
   /// and optional [replacement] string.
-  PrefixProxyRule({required String pattern, required super.target, super.replacement})
-    : super(pattern: RegExp('^${RegExp.escape(pattern)}'));
+  PrefixProxyRule({required String prefix, required super.target, super.replacement})
+    : super(pattern: RegExp('^${RegExp.escape(prefix)}'));
 
   @override
   String toString() {
@@ -165,6 +165,6 @@ class PrefixProxyRule extends RegexProxyRule {
       );
       return null;
     }
-    return PrefixProxyRule(pattern: pattern, target: target, replacement: replacement?.trim());
+    return PrefixProxyRule(prefix: pattern, target: target, replacement: replacement?.trim());
   }
 }

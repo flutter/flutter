@@ -70,10 +70,7 @@ void main() {
       });
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
-      expect(
-        rule.toString(),
-        r'{pattern: ^/api/(.*), target: http://localhost:8080, replace: /$1}',
-      );
+      expect(rule.toString(), r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1}');
     });
 
     test('fromYaml logs warning for invalid regex format', () {
@@ -84,17 +81,14 @@ void main() {
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
       expect(logger.warningText, contains('Invalid regex pattern'));
-      expect(
-        rule.toString(),
-        r'{pattern: \[invalid, target: http://localhost:8080, replace: null}',
-      );
+      expect(rule.toString(), r'{regex: \[invalid, target: http://localhost:8080, replace: null}');
     });
 
     test('fromYaml returns null if target is missing', () {
       final yaml = YamlMap.wrap(<String, String>{'regex': '/api/(.*)'});
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNull);
-      expect(logger.errorText, contains("Invalid 'target' for 'regex'"));
+      expect(logger.errorText, contains('Invalid target for regex'));
     });
 
     test('matches returns true when regex matches path', () {
@@ -214,7 +208,7 @@ void main() {
       expect(rule, isNotNull);
       expect(
         rule.toString(),
-        '{prefix: /old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
+        '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
       );
     });
 
@@ -222,24 +216,24 @@ void main() {
       final yaml = YamlMap.wrap(<String, String>{'prefix': '/api'});
       final PrefixProxyRule? rule = PrefixProxyRule.fromYaml(yaml, logger);
       expect(rule, isNull);
-      expect(logger.errorText, contains("Invalid 'target' for 'prefix'"));
+      expect(logger.errorText, contains('Invalid target for prefix'));
     });
 
     test('matches returns true when path starts with prefix', () {
-      final rule = PrefixProxyRule(pattern: '/api/v1', target: 'http://localhost:8080');
+      final rule = PrefixProxyRule(prefix: '/api/v1', target: 'http://localhost:8080');
       expect(rule.matches('/api/v1/users'), isTrue);
       expect(rule.matches('/api/v1'), isTrue);
     });
 
     test('matches returns false when path does not start with prefix', () {
-      final rule = PrefixProxyRule(pattern: '/api/v1', target: 'http://localhost:8080');
+      final rule = PrefixProxyRule(prefix: '/api/v1', target: 'http://localhost:8080');
       expect(rule.matches('/auth/login/api/v1'), isFalse);
       expect(rule.matches('/api'), isFalse);
     });
 
     test('replace correctly replaces the prefix', () {
       final rule = PrefixProxyRule(
-        pattern: '/api/',
+        prefix: '/api/',
         target: 'http://localhost:8080',
         replacement: '/',
       );
@@ -247,13 +241,13 @@ void main() {
     });
 
     test('replace returns original path if no replacement', () {
-      final rule = PrefixProxyRule(pattern: '/api/', target: 'http://localhost:8080');
+      final rule = PrefixProxyRule(prefix: '/api/', target: 'http://localhost:8080');
       expect(rule.replace('/api/users/123'), '/api/users/123');
     });
 
     test('replace matches exactly', () {
       final rule = PrefixProxyRule(
-        pattern: '/api',
+        prefix: '/api',
         target: 'http://localhost:8080',
         replacement: '/',
       );
@@ -262,7 +256,7 @@ void main() {
 
     test('replace removes pattern if empty string', () {
       final rule = PrefixProxyRule(
-        pattern: '/api/users',
+        prefix: '/api/users',
         target: 'http://localhost:8080',
         replacement: '',
       );
@@ -271,7 +265,7 @@ void main() {
 
     test('replace replaces first occurence', () {
       final rule = PrefixProxyRule(
-        pattern: '/api/users',
+        prefix: '/api/users',
         target: 'http://localhost:8080',
         replacement: '/product',
       );
@@ -280,7 +274,7 @@ void main() {
 
     test('replace returns original path for non-matching pattern', () {
       final rule = PrefixProxyRule(
-        pattern: '/api/users',
+        prefix: '/api/users',
         target: 'http://localhost:8080',
         replacement: '/product',
       );
@@ -288,7 +282,7 @@ void main() {
     });
 
     test('getTargetUri returns correct Uri', () {
-      final rule = PrefixProxyRule(pattern: '/api/users', target: 'http://localhost:8080');
+      final rule = PrefixProxyRule(prefix: '/api/users', target: 'http://localhost:8080');
       final Uri targetUri = rule.getTargetUri();
       expect(targetUri.toString(), 'http://localhost:8080');
       expect(targetUri.scheme, 'http');
