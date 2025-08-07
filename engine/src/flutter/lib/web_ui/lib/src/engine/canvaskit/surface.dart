@@ -15,7 +15,6 @@ import '../platform_dispatcher.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
-import '../compositing/render_canvas.dart';
 import 'util.dart';
 
 // Only supported in profile/release mode. Allows Flutter to use MSAA but

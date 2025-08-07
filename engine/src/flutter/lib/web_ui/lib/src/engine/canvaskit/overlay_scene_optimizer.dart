@@ -10,7 +10,6 @@ import '../../engine.dart' show PlatformViewManager;
 import '../compositing/composition.dart';
 import '../platform_views/embedder.dart';
 import '../vector_math.dart';
-import '../layer/layer.dart';
 
 /// If `true`, draws the computed bounds for platform views and pictures to
 /// help debug issues with the overlay optimization.

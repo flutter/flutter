@@ -4,11 +4,9 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart';
-import '../util.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 
