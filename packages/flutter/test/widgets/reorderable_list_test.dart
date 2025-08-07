@@ -798,6 +798,58 @@ void main() {
     },
   );
 
+  testWidgets('ReorderableList animation jumping on interruption', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(3, (int index) => index);
+
+    await tester.pumpWidget(TestList(items: items));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('item 0')), Offset.zero);
+    expect(tester.getTopLeft(find.text('item 1')), const Offset(0, 100));
+
+    // Start drag
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // The swap threshold is at 50px (halfway between item centers at 50 and 150)
+    // Slowly drag down to just past the swap threshold (55px)
+    for (int i = 0; i < 6; i++) {
+      await drag.moveBy(const Offset(0, 10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    // Start dragging back - we'll check right after crossing the threshold
+    // Drag back just past the threshold (to 45px) to trigger the swap back
+    await drag.moveBy(const Offset(0, -10));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Check for animation jumping immediately after crossing the threshold
+    final double item1Y = tester.getCenter(find.text('item 1')).dy;
+
+    // At this moment, Item1 should have just started animating from ~Y=150
+    // If it jumps due to the bug, it will be at Y=108
+    // With correct behavior, it should still be close to its starting position
+    if (item1Y < 120 && item1Y > 90) {
+      fail('Animation jumping detected! Item1 jumped to Y=$item1Y when crossing threshold');
+    }
+
+    // Complete the drag back to original position
+    for (int i = 0; i < 5; i++) {
+      await drag.moveBy(const Offset(0, -10));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    // Release and watch the animation
+    await drag.up();
+
+    // Pump multiple times to see the animation
+    for (int i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('SliverReorderableList calls onReorderStart and onReorderEnd correctly', (
     WidgetTester tester,
   ) async {

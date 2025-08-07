@@ -1227,6 +1227,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       newTargetOffset = Offset.zero;
     }
     if (newTargetOffset != _targetOffset) {
+      final Offset previousTarget = _targetOffset;
       _targetOffset = newTargetOffset;
       if (animate) {
         if (_offsetAnimation == null) {
@@ -1242,7 +1243,14 @@ class _ReorderableItemState extends State<_ReorderableItem> {
                 })
                 ..forward();
         } else {
-          _startOffset = offset;
+          // Animation interrupted - calculate current position from previous animation
+          final double currentAnimValue = Curves.easeInOut.transform(_offsetAnimation!.value);
+          final Offset currentPosition = Offset.lerp(
+            _startOffset,
+            previousTarget,
+            currentAnimValue,
+          )!;
+          _startOffset = currentPosition;
           _offsetAnimation!.forward(from: 0.0);
         }
       } else {
