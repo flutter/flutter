@@ -246,8 +246,9 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
     expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
@@ -288,8 +289,9 @@ void main() {
       processManager: processManager,
     );
 
-    final GoogleChromeDevice chromeDevice =
-        (await webDevices.pollingGetDevices()).whereType<GoogleChromeDevice>().first;
+    final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+        .whereType<GoogleChromeDevice>()
+        .first;
 
     expect(await chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
