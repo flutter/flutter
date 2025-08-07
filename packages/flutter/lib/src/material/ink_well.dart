@@ -367,7 +367,7 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user lifts their finger after a long press on the button.
   ///
-  /// This callback is triggered at the end of a long press gesture—specifically,
+  /// This callback is triggered at the end of a long press gesture, specifically
   /// after the user holds a long press and then releases it. It does not include
   /// position details.
   ///
