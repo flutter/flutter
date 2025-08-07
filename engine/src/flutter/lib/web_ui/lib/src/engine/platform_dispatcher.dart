@@ -1044,6 +1044,41 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
+  ui.TypographySettings? _computeTypographySettings() {
+    final double? lineHeight = parseStyleProperty(
+      _typographyMeasurementElement!,
+      'line-height',
+    )?.toDouble();
+    final double? wordSpacing = parseStyleProperty(
+      _typographyMeasurementElement!,
+      'word-spacing',
+    )?.toDouble();
+    final double? letterSpacing = parseStyleProperty(
+      _typographyMeasurementElement!,
+      'letter-spacing',
+    )?.toDouble();
+    // There is no direct CSS property for paragraph spacing,
+    // so on the web this feature is usually implemented
+    // by extension authors by leveraging `margin-bottom` on
+    // the `p` element.
+    final double? paragraphSpacing = parseStyleProperty(
+      _typographyMeasurementElement!,
+      'margin-bottom',
+    )?.toDouble();
+    if (lineHeight == null &&
+        wordSpacing == null &&
+        letterSpacing == null &&
+        paragraphSpacing == null) {
+      return null;
+    }
+    return ui.TypographySettings(
+      lineHeight: lineHeight,
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      paragraphSpacing: paragraphSpacing,
+    );
+  }
+
   /// Set the callback function for updating [typographySettings] based on
   /// the sizing changes of an off-screen element with text.
   void _addTypographySettingsObserver() {
@@ -1074,30 +1109,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
     ) {
-      final double? lineHeight = parseStyleProperty(
-        _typographyMeasurementElement!,
-        'line-height',
-      )?.toDouble();
-      final double? wordSpacing = parseStyleProperty(
-        _typographyMeasurementElement!,
-        'word-spacing',
-      )?.toDouble();
-      final double? letterSpacing = parseStyleProperty(
-        _typographyMeasurementElement!,
-        'letter-spacing',
-      )?.toDouble();
-      // There is no direct CSS property for paragraph spacing,
-      // so on the web this feature is usually implemented
-      // by extension authors by leveraging `margin-bottom` on
-      // the `p` element.
-      final double? paragraphSpacing = parseStyleProperty(
-        _typographyMeasurementElement!,
-        'margin-bottom',
-      )?.toDouble();
-      if (lineHeight == spacingDefault &&
-          wordSpacing == spacingDefault &&
-          letterSpacing == spacingDefault &&
-          paragraphSpacing == spacingDefault) {
+      final ui.TypographySettings? computedTypographySettings = _computeTypographySettings();
+      if (computedTypographySettings != null &&
+          computedTypographySettings.lineHeight == spacingDefault &&
+          computedTypographySettings.wordSpacing == spacingDefault &&
+          computedTypographySettings.letterSpacing == spacingDefault &&
+          computedTypographySettings.paragraphSpacing == spacingDefault) {
         // Ignore initial resize event if computed values match default ones.
         if (typographySettings == null) {
           return;
@@ -1106,14 +1123,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         _updateTypographySettings(const ui.TypographySettings());
         return;
       }
-      _updateTypographySettings(
-        ui.TypographySettings(
-          lineHeight: lineHeight,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          paragraphSpacing: paragraphSpacing,
-        ),
-      );
+      _updateTypographySettings(computedTypographySettings);
     });
 
     _typographySettingsObserver!.observe(_typographyMeasurementElement!);
