@@ -33,8 +33,9 @@ bool WindowManager::HasTopLevelWindows() const {
 
 FlutterViewId WindowManager::CreateRegularWindow(
     const WindowCreationRequest* request) {
-  auto window =
-      HostWindow::CreateRegularWindow(this, engine_, request->content_size);
+  auto window = HostWindow::CreateRegularWindow(
+      this, engine_, request->preferred_size, request->preferred_constraints,
+      request->title);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -134,8 +135,8 @@ HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
   }
 }
 
-FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
-    HWND hwnd) {
+flutter::ActualWindowSize
+InternalFlutterWindows_WindowManager_GetWindowContentSize(HWND hwnd) {
   RECT rect;
   GetClientRect(hwnd, &rect);
   double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
@@ -148,11 +149,42 @@ FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
   };
 }
 
-void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+void InternalFlutterWindows_WindowManager_SetWindowSize(
     HWND hwnd,
-    const flutter::WindowSizing* size) {
+    const flutter::WindowSizeRequest* size) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   if (window) {
     window->SetContentSize(*size);
   }
+}
+
+void InternalFlutterWindows_WindowManager_SetWindowConstraints(
+    HWND hwnd,
+    const flutter::WindowConstraints* constraints) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    window->SetConstraints(*constraints);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_SetFullscreen(
+    HWND hwnd,
+    const flutter::FullscreenRequest* request) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  const std::optional<FlutterEngineDisplayId> display_id =
+      request->has_display_id
+          ? std::optional<FlutterEngineDisplayId>(request->display_id)
+          : std::nullopt;
+  if (window) {
+    window->SetFullscreen(request->fullscreen, display_id);
+  }
+}
+
+bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    return window->GetFullscreen();
+  }
+
+  return false;
 }
