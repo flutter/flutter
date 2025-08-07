@@ -759,7 +759,12 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   final Color? backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
-  static const int kTransitionMilliseconds = 800;
+  ///
+  /// Eyeballed on a physical Pixel 9 running Android 16. This does not match
+  /// the actual value used by native Android, which is 800ms, because native
+  /// Android is using Material 3 Expressive springs that are not currently
+  /// supported by Flutter. So for now at least, this is an approximation.
+  static const int kTransitionMilliseconds = 450;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
