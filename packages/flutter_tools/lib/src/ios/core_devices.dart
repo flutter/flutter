@@ -647,6 +647,7 @@ class IOSCoreDeviceControl {
     }
   }
 
+  /// Terminate the [processId] on the device using `devicectl`.
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     if (!_xcode.isDevicectlInstalled) {
       _logger.printError('devicectl is not installed.');
@@ -686,6 +687,9 @@ class IOSCoreDeviceControl {
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
         _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        return false;
+      } on TypeError {
+        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
