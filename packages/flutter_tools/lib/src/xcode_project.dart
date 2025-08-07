@@ -733,7 +733,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       }
       final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
         buildInfo,
-        deviceId: deviceId,
         scheme: scheme,
         isWatch: true,
       );
