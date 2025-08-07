@@ -150,7 +150,7 @@ class IOSCoreDeviceLauncher {
       final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
       final Directory? xcodeWorkspace = project.xcodeWorkspace;
       if (xcodeWorkspace == null) {
-        _logger.printError('Unable to get Xcode workspace.');
+        _logger.printTrace('Unable to get Xcode workspace.');
         return false;
       }
       final String? scheme = await project.schemeForBuildInfo(
@@ -182,7 +182,7 @@ class IOSCoreDeviceLauncher {
     } else {
       // This should not happen. Currently, only PrebuiltIOSApp and
       // BuildableIOSApp extend from IOSApp.
-      _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+      _logger.printTrace('IOSApp type ${package.runtimeType} is not recognized.');
       return false;
     }
 
@@ -598,7 +598,7 @@ class IOSCoreDeviceControl {
     bool startStopped = false,
   }) async {
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      _logger.printTrace('devicectl is not installed.');
       return null;
     }
 
@@ -630,17 +630,17 @@ class IOSCoreDeviceControl {
           json.decode(stringOutput) as Map<String, Object?>,
         );
         if (result.outcome == null) {
-          _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+          _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
           return null;
         }
         return result;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return null;
       }
     } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
+      _logger.printTrace('Error executing devicectl: $err');
       return null;
     } finally {
       tempDirectory.deleteSync(recursive: true);
@@ -650,7 +650,7 @@ class IOSCoreDeviceControl {
   /// Terminate the [processId] on the device using `devicectl`.
   Future<bool> terminateProcess({required String deviceId, required int processId}) async {
     if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
+      _logger.printTrace('devicectl is not installed.');
       return false;
     }
 
@@ -682,18 +682,18 @@ class IOSCoreDeviceControl {
         if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
           return true;
         }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       } on FormatException {
         // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
+        _logger.printTrace('devicectl returned non-JSON response: $stringOutput');
         return false;
       } on TypeError {
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
+        _logger.printTrace('devicectl returned unexpected JSON response: $stringOutput');
         return false;
       }
     } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
+      _logger.printTrace('Error executing devicectl: $err');
       return false;
     } finally {
       tempDirectory.deleteSync(recursive: true);
