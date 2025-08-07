@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport '../xcode_project.dart';
+library;
+
 import 'dart:async';
 
 import '../base/io.dart';
@@ -48,7 +51,7 @@ class LLDB {
 
   /// Breakpoint script required for JIT on iOS.
   ///
-  /// This should match [_lldbPythonHelperTemplate] in packages/flutter_tools/lib/src/xcode_project.dart.
+  /// This should match the "handle_new_rx_page" function in [IosProject._lldbPythonHelperTemplate].
   static const _pythonScript = '''
 """Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages."""
 base = frame.register["x0"].GetValueAsAddress()
