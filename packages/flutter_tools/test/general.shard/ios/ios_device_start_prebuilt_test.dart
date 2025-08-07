@@ -1219,6 +1219,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: interfaceType,
@@ -1345,3 +1346,5 @@ class FakeShutDownHooks extends Fake implements ShutdownHooks {
     hooks.add(shutdownHook);
   }
 }
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
