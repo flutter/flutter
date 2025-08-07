@@ -8,25 +8,7 @@ import 'colors.dart';
 import 'constants.dart';
 
 /// {@template flutter.cupertino.CupertinoFocusHalo}
-/// A wrapper around [FocusTraversalGroup] to apply a Cupertino-style focus border
-/// around its child when any of child focus nodes gain focus.
-///
-/// The focus border is drawn using a border color specified by [focusColor] and
-/// is rounded by a border radius specified by [borderRadius].
-///
-/// For example, to highlight a section of the widget tree when any button inside that
-/// section has focus, one could write:
-///
-/// ```dart
-/// CupertinoFocusHalo.onRect(
-///   child: Column(
-///     children: [
-///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
-///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
-///     ],
-///   ),
-/// )
-/// ```
+/// Applies a Cupertino-style focus border around its child when any of child focus nodes gain focus.
 ///
 /// See also:
 ///
@@ -34,10 +16,39 @@ import 'constants.dart';
 /// {@endtemplate}
 class CupertinoFocusHalo extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  /// 
+  /// For example, to highlight a rectangular section of the widget tree when any button inside that
+  /// section has focus, one could write:
+  ///
+  /// ```dart
+  /// CupertinoFocusHalo.onRect(
+  ///   child: Column(
+  ///     children: [
+  ///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
+  ///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
   const CupertinoFocusHalo.onRect({required this.child, super.key})
     : _borderRadius = BorderRadius.zero;
 
   /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  /// 
+  /// For example, to highlight a rounded rectangular section of the widget tree when any button inside that
+  /// section has focus, one could write:
+  ///
+  /// ```dart
+  /// CupertinoFocusHalo.onRRect(
+  ///   borderRadius: BorderRadius.circular(10.0),
+  ///   child: Column(
+  ///     children: [
+  ///       CupertinoButton(child: Text('Child 1'), onPressed: () {}),
+  ///       CupertinoButton(child: Text('Child 2'), onPressed: () {}),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
   const CupertinoFocusHalo.onRRect({
     required this.child,
     required BorderRadiusGeometry borderRadius,

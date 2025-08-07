@@ -2419,6 +2419,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
 
+      expect(isOneSelected, isFalse);
+
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
 
@@ -2458,6 +2460,8 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
+
+       expect(isCancelSelected, isFalse);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
@@ -2534,7 +2538,7 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLDarkFocusColor =
+    final Color defaultDarkFocusColor =
         HSLColor.fromColor(
           CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
         ).toColor();
@@ -2576,7 +2580,7 @@ void main() {
     final BoxDecoration decoration =
         tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
 
-    expect(decoration.color, defaultLDarkFocusColor);
+    expect(decoration.color, defaultDarkFocusColor);
 
     focusNode.unfocus();
     await tester.pumpAndSettle();
@@ -2595,7 +2599,7 @@ void main() {
 
     const Color focusColor = Colors.orange;
 
-    final Color defaultLDarkFocusColor =
+    final Color defaultDarkFocusColor =
         HSLColor.fromColor(focusColor.withOpacity(kCupertinoButtonTintedOpacityDark)).toColor();
 
     await tester.pumpWidget(
@@ -2636,7 +2640,7 @@ void main() {
     final BoxDecoration decoration =
         tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
 
-    expect(decoration.color, defaultLDarkFocusColor);
+    expect(decoration.color, defaultDarkFocusColor);
 
     focusNode.unfocus();
     await tester.pumpAndSettle();
