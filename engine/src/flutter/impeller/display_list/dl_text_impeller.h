@@ -18,7 +18,7 @@ class DlTextImpeller : public DlText {
 
   ~DlTextImpeller() = default;
 
-  explicit DlTextImpeller(const std::shared_ptr<impeller::TextFrame> frame)
+  explicit DlTextImpeller(const std::shared_ptr<impeller::TextFrame>& frame)
       : frame_(frame) {}
 
   DlRect getBounds() const { return frame_->GetBounds(); }
