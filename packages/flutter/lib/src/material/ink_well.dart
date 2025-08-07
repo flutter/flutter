@@ -377,7 +377,6 @@ class InkResponse extends StatelessWidget {
   ///
   /// See also:
   ///  * [onLongPress], which is triggered when the long press gesture is recognized.
-  ///  * [onLongPressStart], [onLongPressMoveUpdate], and [onLongPressEnd] for more granular gesture handling.
   final GestureLongPressUpCallback? onLongPressUp;
 
   /// Called when the user taps this part of the material with a secondary button.
