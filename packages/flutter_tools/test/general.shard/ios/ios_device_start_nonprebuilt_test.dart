@@ -1174,6 +1174,7 @@ IOSDevice setUpIOSDevice({
   Artifacts? artifacts,
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
+  IOSCoreDeviceLauncher? coreDeviceLauncher,
   FakeXcodeDebug? xcodeDebug,
   DarwinArch cpuArchitecture = DarwinArch.arm64,
 }) {
@@ -1206,6 +1207,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArchitecture: cpuArchitecture,
     connectionInterface: DeviceConnectionInterface.attached,
@@ -1392,3 +1394,5 @@ const _validScheme = '''
    </ArchiveAction>
 </Scheme>
 ''';
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}

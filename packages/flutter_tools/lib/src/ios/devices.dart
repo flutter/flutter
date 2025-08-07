@@ -280,6 +280,7 @@ class IOSDevice extends Device {
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
     required IOSCoreDeviceControl coreDeviceControl,
+    required IOSCoreDeviceLauncher coreDeviceLauncher,
     required XcodeDebug xcodeDebug,
     required IProxy iProxy,
     required super.logger,
@@ -287,6 +288,7 @@ class IOSDevice extends Device {
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
+       _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
@@ -306,6 +308,10 @@ class IOSDevice extends Device {
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
+
+  // TODO(vashworth): See https://github.com/flutter/flutter/issues/173416.
+  // ignore: unused_field
+  final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
   final IProxy _iproxy;
 
