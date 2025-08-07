@@ -1860,7 +1860,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
+        expect(logger.traceText, contains('ERROR: The operation couldn?t be completed.'));
         expect(tempFile, isNot(exists));
         expect(result, isNull);
       });
@@ -1972,7 +1972,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+        expect(logger.traceText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(result, isNull);
       });
@@ -2011,7 +2011,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.traceText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(result, isNull);
       });
@@ -2167,7 +2167,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
+        expect(logger.traceText, contains('ERROR: The operation couldn?t be completed.'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -2284,7 +2284,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+        expect(logger.traceText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -2325,7 +2325,7 @@ invalid JSON
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.traceText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
