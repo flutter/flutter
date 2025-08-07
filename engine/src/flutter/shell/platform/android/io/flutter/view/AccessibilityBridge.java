@@ -565,9 +565,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   }
 
   private boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
-    return semanticsNode.parent != null &&
-            shouldSetCollectionInfo(semanticsNode.parent) &&
-            semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
+    return semanticsNode.parent != null
+        && shouldSetCollectionInfo(semanticsNode.parent)
+        && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
   }
 
   @RequiresApi(API_LEVELS.API_31)
@@ -901,27 +901,28 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (shouldSetCollectionItemInfo(semanticsNode)) {
       SemanticsNode parent = semanticsNode.parent;
       List<SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
-      boolean verticalScroll = !(parent.hasAction(Action.SCROLL_LEFT)
-              || parent.hasAction(Action.SCROLL_RIGHT));
+      boolean verticalScroll =
+          !(parent.hasAction(Action.SCROLL_LEFT) || parent.hasAction(Action.SCROLL_RIGHT));
       int nodeIndex = scrollChildren.indexOf(semanticsNode);
       if (verticalScroll) {
-        result.setCollectionItemInfo(new AccessibilityNodeInfo.CollectionItemInfo(
+        result.setCollectionItemInfo(
+            new AccessibilityNodeInfo.CollectionItemInfo(
                 nodeIndex, // row index
                 1, // row span
                 1, // column index
                 1, // column span
                 semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-        ));
+                ));
       } else {
-        result.setCollectionItemInfo(new AccessibilityNodeInfo.CollectionItemInfo(
+        result.setCollectionItemInfo(
+            new AccessibilityNodeInfo.CollectionItemInfo(
                 1, // row index
                 1, // row span
                 nodeIndex, // column index
                 1, // column span
                 semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
-        ));
+                ));
       }
-
     }
     if (semanticsNode.hasAction(Action.INCREASE) || semanticsNode.hasAction(Action.DECREASE)) {
       // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
