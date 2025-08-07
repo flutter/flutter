@@ -109,6 +109,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     ),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
+    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: FakeXcodeDebug(),
     platform: platform,
     name: 'iPhone 1',
@@ -126,3 +127,5 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
