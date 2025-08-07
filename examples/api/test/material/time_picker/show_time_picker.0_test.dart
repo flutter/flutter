@@ -63,3 +63,47 @@ void main() {
     expect(find.text('OK'), findsOneWidget);
   });
 }
+
+testWidgets('AM/PM buttons have correct selected semantics on iOS', (WidgetTester tester) async {
+  debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return TextButton(
+            onPressed: () {
+              showTimePicker(
+                context: context,
+                initialTime: const TimeOfDay(hour: 14, minute: 0),
+              );
+            },
+            child: const Text('Open Picker'),
+          );
+        },
+      ),
+    ),
+  );
+
+  await tester.tap(find.text('Open Picker'));
+  await tester.pumpAndSettle();
+
+  final Finder pmButtonSemantics = find.descendant(
+    of: find.widgetWithText(InkWell, 'PM'),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is Semantics && widget.properties.selected == true,
+    ),
+  );
+
+  final Finder amButtonSemantics = find.descendant(
+    of: find.widgetWithText(InkWell, 'AM'),
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget is Semantics && widget.properties.selected == false,
+    ),
+  );
+
+  expect(pmButtonSemantics, findsOneWidget, reason: 'The selected PM button should have Semantics with selected: true');
+  expect(amButtonSemantics, findsOneWidget, reason: 'The unselected AM button should have Semantics with selected: false');
+
+  debugDefaultTargetPlatformOverride = null;
+});
