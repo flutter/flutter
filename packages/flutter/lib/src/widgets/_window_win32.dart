@@ -16,8 +16,7 @@ import 'binding.dart';
 typedef HWND = Pointer<Void>;
 
 const int _WM_SIZE = 0x0005;
-const int _WM_FOCUS = 0x0007;
-const int _WM_KILLFOCUS = 0x0008;
+const int _WM_ACTIVATE = 0x0006;
 const int _WM_CLOSE = 0x0010;
 
 const int _SW_RESTORE = 9;
@@ -394,7 +393,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
-    } else if (message == _WM_SIZE || message == _WM_FOCUS || message == _WM_KILLFOCUS) {
+    } else if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     }
     return null;

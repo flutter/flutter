@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
@@ -63,8 +64,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     );
     titleController = TextEditingController(text: initialTitle);
 
-    // TODO: Re-add listeners (somehow?)
-    // widget.controller.addListener(_onNotification);
+    widget.controller.addListener(_onNotification);
   }
 
   void _onNotification() {
@@ -99,7 +99,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   @override
   void dispose() {
     super.dispose();
-    // widget.controller.removeListener(_onNotification);
+    widget.controller.removeListener(_onNotification);
   }
 
   @override
