@@ -21,8 +21,12 @@
 #include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/math.h"
-#include "flutter/impeller/display_list/dl_text_impeller.h"
-#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"
+
+#if IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  //nogncheck
+#endif
+
 #include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
@@ -5500,6 +5504,7 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
                      DlPaint());
   });
 
+#if IMPELLER_SUPPORTS_RENDERING
   test_bounded("DrawTextFrame", [](DlCanvas& builder) {
     auto blob = GetTestTextBlob("Hello");
     auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
@@ -5517,6 +5522,7 @@ TEST_F(DisplayListTest, BoundedRenderOpsDoNotReportUnbounded) {
                      draw_rect.GetBottom() - blob->bounds().bottom(),
                      DlPaint());
   });
+#endif
 
   test_bounded("DrawBoundedDisplayList", [](DlCanvas& builder) {
     DisplayListBuilder nested_builder(root_cull);
