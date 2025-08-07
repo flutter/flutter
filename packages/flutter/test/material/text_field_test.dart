@@ -5705,6 +5705,7 @@ void main() {
               currentValueLength: 9,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
               ],
