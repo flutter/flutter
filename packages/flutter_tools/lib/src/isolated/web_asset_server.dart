@@ -648,6 +648,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       indexHtml.withSubstitutions(
         // Currently, we don't support --base-href for the "run" command.
         baseHref: '/',
+        // Currently, we don't support --static-assets-url for the "run" command.
+        staticAssetsUrl: '/',
         serviceWorkerVersion: null,
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
