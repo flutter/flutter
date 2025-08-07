@@ -910,22 +910,18 @@ class AlertDialog extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (icon != null) iconWidget!,
-                  if (title != null) titleWidget!,
-                  if (content != null) contentWidget!,
-                ],
+                children: <Widget>[?iconWidget, ?titleWidget, ?contentWidget],
               ),
             ),
           ),
-        if (actions != null) actionsWidget!,
+        ?actionsWidget,
       ];
     } else {
       columnChildren = <Widget>[
-        if (icon != null) iconWidget!,
-        if (title != null) titleWidget!,
-        if (content != null) Flexible(child: contentWidget!),
-        if (actions != null) actionsWidget!,
+        ?iconWidget,
+        ?titleWidget,
+        if (contentWidget != null) Flexible(child: contentWidget),
+        ?actionsWidget,
       ];
     }
 

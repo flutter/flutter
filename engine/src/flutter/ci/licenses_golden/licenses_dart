@@ -1,4 +1,4 @@
-Signature: db8e503b91c110102cba80e0fd002ad8
+Signature: 61dd904ddd4ec5f8730ae4bbf5a49672
 
 ====================================================================================================
 LIBRARY: dart
@@ -3361,8 +3361,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartdev_isolate.cc + ../../../flutter/third_party/dart/LICENSE
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartdev_isolate.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/exe_utils.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/exe_utils.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/ffi_unit_test/run_ffi_unit_tests.cc + ../../../flutter/third_party/dart/LICENSE
@@ -3429,8 +3427,6 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/js_pa
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/internal/lowering.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/dart/runtime/bin/dartdev_isolate.cc
-FILE: ../../../flutter/third_party/dart/runtime/bin/dartdev_isolate.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/exe_utils.cc
 FILE: ../../../flutter/third_party/dart/runtime/bin/exe_utils.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/ffi_unit_test/run_ffi_unit_tests.cc
@@ -3816,8 +3812,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartaotruntime_test_component.cml + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartvm_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/main_impl.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/run_vm_tests_test_component.cml + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/lib/ffi_dynamic_library.h + ../../../flutter/third_party/dart/LICENSE
@@ -3878,8 +3874,8 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/async/future_extensions.dart +
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/third_party/dart/runtime/bin/dart_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/bin/dartaotruntime_test_component.cml
+FILE: ../../../flutter/third_party/dart/runtime/bin/dartvm_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/bin/main_impl.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/run_vm_tests_test_component.cml
 FILE: ../../../flutter/third_party/dart/runtime/lib/ffi_dynamic_library.h
@@ -4208,7 +4204,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/common_options.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartdev.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartdev_options.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dartdev_options.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/macho_loader.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/mappable.cc + ../../../flutter/third_party/dart/LICENSE
@@ -4237,7 +4237,11 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_mod
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/utils/dart_mcp_server/dart_mcp_server.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/dart/runtime/bin/common_options.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c
+FILE: ../../../flutter/third_party/dart/runtime/bin/dartdev.cc
+FILE: ../../../flutter/third_party/dart/runtime/bin/dartdev_options.cc
+FILE: ../../../flutter/third_party/dart/runtime/bin/dartdev_options.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.cc
 FILE: ../../../flutter/third_party/dart/runtime/bin/macho_loader.h
 FILE: ../../../flutter/third_party/dart/runtime/bin/mappable.cc
@@ -4449,6 +4453,7 @@ FILE: ../../../flutter/third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dart.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dartaotruntime.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dartaotruntime_product.plist
+FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/dartvm.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/gen_snapshot.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/gen_snapshot_product.plist
 FILE: ../../../flutter/third_party/dart/runtime/tools/entitlements/run_futures_aot.plist
@@ -4892,7 +4897,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/5ede85aff7987feca316732cfce023aa85c1bdb8
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/3f1307d72d6f3dd8a48e73a52bc89e8dc1a3d1b3
 /third_party/fallback_root_certificates/
 
 ====================================================================================================

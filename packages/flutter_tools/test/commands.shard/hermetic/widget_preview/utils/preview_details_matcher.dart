@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_details.dart';
 import 'package:test/test.dart';
@@ -16,30 +15,21 @@ class PreviewDetailsMatcher extends Matcher {
     required this.functionName,
     required this.isBuilder,
     this.name,
-    this.nameSymbol,
     this.size,
     this.textScaleFactor,
     this.wrapper,
     this.theme,
     this.brightness,
     this.localizations,
-  }) {
-    if (name != null && nameSymbol != null) {
-      fail('name and nameSymbol cannot both be provided.');
-    }
-  }
+  });
 
   final String functionName;
   final bool isBuilder;
   final String packageName;
 
-  // Proivde when the expected expression for 'name' is a literal.
   final String? name;
-
-  // Provide when the expected expression for 'name' is not a literal.
-  final String? nameSymbol;
   final String? size;
-  final String? textScaleFactor;
+  final double? textScaleFactor;
   final String? wrapper;
   final String? theme;
   final String? brightness;
@@ -70,7 +60,7 @@ class PreviewDetailsMatcher extends Matcher {
   }
 
   @override
-  bool matches(dynamic item, Map<Object?, Object?> matchState) {
+  bool matches(Object? item, Map<Object?, Object?> matchState) {
     if (item is! PreviewDetails) {
       return false;
     }
@@ -81,9 +71,6 @@ class PreviewDetailsMatcher extends Matcher {
       required Object? actual,
       required Object? expected,
     }) {
-      if (actual is Expression) {
-        actual = actual.toSource();
-      }
       if (actual != expected) {
         matchState[name] = (actual: actual, expected: expected);
         matches = false;
@@ -95,25 +82,37 @@ class PreviewDetailsMatcher extends Matcher {
     checkPropertyMatch(name: 'isBuilder', actual: item.isBuilder, expected: isBuilder);
     checkPropertyMatch(
       name: PreviewDetails.kName,
-      actual: item.name,
-      expected: name != null ? "'$name'" : nameSymbol,
+      actual: item.name.toStringValue(),
+      expected: name,
     );
-    checkPropertyMatch(name: PreviewDetails.kSize, actual: item.size, expected: size);
+    checkPropertyMatch(
+      name: PreviewDetails.kSize,
+      actual: item.size.isNull ? null : item.size.toString(),
+      expected: size,
+    );
     checkPropertyMatch(
       name: PreviewDetails.kTextScaleFactor,
-      actual: item.textScaleFactor,
+      actual: item.textScaleFactor.toDoubleValue(),
       expected: textScaleFactor,
     );
-    checkPropertyMatch(name: PreviewDetails.kWrapper, actual: item.wrapper, expected: wrapper);
-    checkPropertyMatch(name: PreviewDetails.kTheme, actual: item.theme, expected: theme);
+    checkPropertyMatch(
+      name: PreviewDetails.kWrapper,
+      actual: item.wrapper.toFunctionValue2()?.displayName,
+      expected: wrapper,
+    );
+    checkPropertyMatch(
+      name: PreviewDetails.kTheme,
+      actual: item.theme.toFunctionValue2()?.displayName,
+      expected: theme,
+    );
     checkPropertyMatch(
       name: PreviewDetails.kBrightness,
-      actual: item.brightness,
+      actual: item.brightness.isNull ? null : item.brightness.variable2!.toString(),
       expected: brightness,
     );
     checkPropertyMatch(
       name: PreviewDetails.kLocalizations,
-      actual: item.localizations,
+      actual: item.localizations.toFunctionValue2()?.displayName,
       expected: localizations,
     );
     return matches;

@@ -267,7 +267,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
-                     IRect cull_rect);
+                     IRect32 cull_rect);
 
   ~CanvasDlDispatcher() = default;
 

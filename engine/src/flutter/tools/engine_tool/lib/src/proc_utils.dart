@@ -63,7 +63,7 @@ final class ProcessArtifacts {
   void save(File file) {
     file.writeAsStringSync(
       JsonObject(<String, Object?>{
-        if (pid != null) 'pid': pid,
+        'pid': ?pid,
         'exitCode': exitCode,
         'stdout': stdout,
         'stderr': stderr,

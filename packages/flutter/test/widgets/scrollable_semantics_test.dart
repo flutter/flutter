@@ -268,7 +268,7 @@ void main() {
                       expandedHeight: kExpandedAppBarHeight,
                       flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
                     ),
-                    SliverList(delegate: SliverChildListDelegate(containers)),
+                    SliverList.list(children: containers),
                   ],
                 );
               },

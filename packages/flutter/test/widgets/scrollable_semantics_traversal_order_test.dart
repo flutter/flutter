@@ -37,7 +37,7 @@ void main() {
             child: CustomScrollView(
               controller: controller,
               semanticChildCount: 30,
-              slivers: <Widget>[SliverList(delegate: SliverChildListDelegate(listChildren))],
+              slivers: <Widget>[SliverList.list(children: listChildren)],
             ),
           ),
         ),
@@ -187,9 +187,10 @@ void main() {
             child: CustomScrollView(
               controller: controller,
               slivers: <Widget>[
-                SliverFixedExtentList(
+                SliverFixedExtentList.list(
                   itemExtent: 200.0,
-                  delegate: SliverChildListDelegate(listChildren, addSemanticIndexes: false),
+                  addSemanticIndexes: false,
+                  children: listChildren,
                 ),
               ],
             ),

@@ -597,7 +597,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       final List<String> requestedPlatforms = _getUserRequestedPlatforms();
 
       final String commandsToRun = [
-        if (relativeAppPath != '.') '  \$ cd $relativeAppMain',
+        if (relativeAppPath != '.') '  \$ cd $relativeAppPath',
         r'  $ flutter run',
       ].join('\n');
 

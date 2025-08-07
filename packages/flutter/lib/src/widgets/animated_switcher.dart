@@ -231,7 +231,7 @@ class AnimatedSwitcher extends StatefulWidget {
   static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.center,
-      children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
+      children: <Widget>[...previousChildren, ?currentChild],
     );
   }
 
