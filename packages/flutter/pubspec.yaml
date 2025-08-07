@@ -19,6 +19,7 @@ dependencies:
   vector_math: 2.2.0
   sky_engine:
     sdk: flutter
+  ffi: ^2.1.4
 
 dev_dependencies:
   flutter_driver:
