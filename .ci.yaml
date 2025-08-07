@@ -5483,6 +5483,7 @@ targets:
 
   - name: Mac_ios hot_mode_dev_cycle_ios_xcode_debug
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
