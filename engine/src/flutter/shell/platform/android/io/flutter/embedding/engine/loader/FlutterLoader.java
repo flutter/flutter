@@ -27,10 +27,13 @@ import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -210,7 +213,7 @@ public class FlutterLoader {
                     // https://github.com/flutter/flutter/issues/151638,
                     // log the contents of the split libraries directory as well.
 
-                    List<String> splitAndSourceDirs = getSplitApkSourceDirectories();
+                    List<String> splitAndSourceDirs = getSplitApkSourceDirectories(appContext);
 
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
@@ -259,12 +262,14 @@ public class FlutterLoader {
     }
   }
 
-  private List<String> getSplitApkSourceDirectories() {
+  private List<String> getSplitApkSourceDirectories(@NonNull Context appContext) {
     List<String> splitAndSourceDirs = new ArrayList<>();
     // Get supported ABI and prepare path suffix for lib directories
     String[] abis = Build.SUPPORTED_ABIS;
     for (String abi : abis) {
-      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+      // TODO(camsim99): Figure out if the ! is important for the other use case.
+      // String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+      String libPathSuffix = File.separator + "lib" + File.separator + abi;
 
       // Get split APK lib paths
       String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
@@ -326,7 +331,7 @@ public class FlutterLoader {
         // potentially
         // user-provided compiled native code.
         if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
-          if (!shouldAddAotSharedLibraryNameFlag(arg)) {
+          if (!shouldAddAotSharedLibraryNameFlag(applicationContext, arg)) {
             break;
           }
         }
@@ -474,8 +479,10 @@ public class FlutterLoader {
    */
   // TODO(camsim99): check if this handles errors properly
   // TODO(camsim99): check on file separators (File.separator) instead of /
-  private boolean shouldAddAotSharedLibraryNameFlag(@NonNull String aotSharedLibraryNameArg)
+  private boolean shouldAddAotSharedLibraryNameFlag(
+      @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
       throws IOException {
+    Log.e("CAMILLE", "aotSharedLibraryNameArg: " + aotSharedLibraryNameArg);
     // Isolate AOT shared library path.
     String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(?<path>.*)$";
     Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
@@ -489,26 +496,36 @@ public class FlutterLoader {
               + "is invalid. Please provide a valid path name.");
     }
     String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group("path");
+    Log.e("CAMILLE", "aotSharedLibraryPath: " + aotSharedLibraryPath);
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = new File(aotSharedLibraryPath);
     String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
 
-    // Check if library lives within aplication APK.
-    List<String> splitAndSourceApkDirs = getSplitApkSourceDirectories();
-    for (String splitAndSourceApkDir : splitAndSourceApkDirs) {
-      Pattern aotSharedLibraryInApkPattern =
-          Pattern.compile("^" + Pattern.quote(splitAndSourceApkDir) + "/([^/]+\\.so)$");
-      Matcher aotSharedLibraryInApkMatcher =
-          aotSharedLibraryInApkPattern.matcher(aotSharedLibraryPathCanonicalPath);
+    Log.e("CAMILLE", "aotSharedLibraryPathCanonicalPath: " + aotSharedLibraryPathCanonicalPath);
 
-      if (aotSharedLibraryInApkMatcher.find()) {
-        return true;
-      }
-    }
+    // Check if library lives within aplication APK.
+    // List<String> splitAndSourceApkDirs = getSplitApkSourceDirectories(applicationContext);
+    // for (String splitAndSourceApkDir : splitAndSourceApkDirs) {
+    //   Log.e("CAMILLE", "splitAndSourceApkDir: " + splitAndSourceApkDir);
+    //   Pattern aotSharedLibraryInApkPattern =
+    //       Pattern.compile("^" + Pattern.quote(splitAndSourceApkDir) + "/([^/]+\\.so)$");
+    //   Matcher aotSharedLibraryInApkMatcher =
+    //       aotSharedLibraryInApkPattern.matcher(aotSharedLibraryPathCanonicalPath);
+
+    //   if (aotSharedLibraryInApkMatcher.find()) {
+    //     return true;
+    //   }
+    // }
+    // String applicationPackageName = applicationContext.getPackageName();
+    // Log.e("CAMILLE", "applicationPackageName: " + applicationPackageName);
+    // ApplicationInfo ai =
+    // applicationContext.getPackageManager().getApplicationInfo(applicationPackageName, 0);
+    // String nativeLibraryPath = ai.nativeLibraryDir + "/libmyintentstest.so";
 
     // Check if library lives within application's native code directory.
     String nativeCodeDirectoryPath = flutterApplicationInfo.nativeLibraryDir;
+    Log.e("CAMILLE", "nativeCodeDirectoryPath: " + nativeCodeDirectoryPath);
     Pattern aotSharedLibraryInNativeCodeDirPattern =
         Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "/([^/]+\\.so)$");
     Matcher aotSharedLibraryInNativeCodeDirMatcher =
@@ -517,17 +534,30 @@ public class FlutterLoader {
       return true;
     }
 
+    // TODO(camsim99): note to self that I think we need to keep full paths if we do a check outside
+    // of the APK
+    // ...honestly for clarity.
     // Check if library lives within application's internal storage.
-    String internalStorageDirectoryPath = applicationContext.getApplicationContext().getFilesDir();
+    // TODO(camsim99): figure out if I need to expand my check here since this may not be an
+    // absolute path.
+    File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();
+    String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
+    // Log.e("CAMILLE", "internalStorageDirectoryPath: " + internalStorageDirectoryPath);
+    Log.e(
+        "CAMILLE",
+        "internalStorageDirectoryPathCanonicalPath: " + internalStorageDirectoryPathCanonicalPath);
     Pattern aotSharedLibraryInInternalStoragePattern =
         Pattern.compile(
-            "^" + Pattern.quote(internalStorageDirectoryPath) + "((?:/[^/]+)+/)?([^/]+\\.so)$");
+            "^"
+                + Pattern.quote(internalStorageDirectoryPathCanonicalPath)
+                + "/((?:[^/]+/)*)([^/]+\\.so)$");
     Matcher aotSharedLibraryInInternalStorageMatcher =
         aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInInternalStorageMatcher.find()) {
       return true;
     }
 
+    Log.e("CAMILLE", "shouldAddAotSharedLibraryNameFlag returning false!");
     return false;
   }
 
