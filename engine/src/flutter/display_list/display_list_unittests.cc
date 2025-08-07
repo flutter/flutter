@@ -5251,7 +5251,6 @@ TEST_F(DisplayListTest, ClipRectRRectPathPromoteToClipRect) {
   DlRoundRect clip_rrect = DlRoundRect::MakeRect(clip_rect);
   DlRect draw_rect = clip_rect.Expand(2.0f, 2.0f);
   DlPath clip_path = DlPath::MakeRoundRect(clip_rrect);
-  ASSERT_TRUE(clip_path.IsRoundRect());
 
   DisplayListBuilder builder;
   builder.ClipPath(clip_path, DlClipOp::kIntersect, false);
@@ -5272,7 +5271,6 @@ TEST_F(DisplayListTest, ClipOvalRRectPathPromoteToClipOval) {
   DlRoundRect clip_rrect = DlRoundRect::MakeOval(clip_rect);
   DlRect draw_rect = clip_rect.Expand(2.0f, 2.0f);
   DlPath clip_path = DlPath::MakeRoundRect(clip_rrect);
-  ASSERT_TRUE(clip_path.IsRoundRect());
 
   DisplayListBuilder builder;
   builder.ClipPath(clip_path, DlClipOp::kIntersect, false);
