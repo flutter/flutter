@@ -681,13 +681,13 @@ void main() {
       });
 
       testWithoutContext('fails to launch app', () async {
-        final bool status = await deviceControl.launchApp(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: 'device-id',
           bundleId: 'com.example.flutterApp',
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl is not installed.'));
-        expect(status, isFalse);
+        expect(logger.traceText, contains('devicectl is not installed.'));
+        expect(result, isNull);
       });
 
       testWithoutContext('fails to check if app is installed', () async {
@@ -1287,403 +1287,7 @@ invalid JSON
           ),
         );
 
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, isEmpty);
-        expect(tempFile, isNot(exists));
-        expect(status, true);
-      });
-
-      testWithoutContext('Successful launch with launch args', () async {
-        const deviceControlOutput = '''
-{
-  "info" : {
-    "arguments" : [
-      "devicectl",
-      "device",
-      "process",
-      "launch",
-      "--device",
-      "00001234-0001234A3C03401E",
-      "com.example.flutterApp",
-      "--arg1",
-      "--arg2",
-      "--json-output",
-      "/var/folders/wq/randompath/T/flutter_tools.rand0/core_devices.rand0/install_results.json"
-    ],
-    "commandType" : "devicectl.device.process.launch",
-    "environment" : {
-
-    },
-    "outcome" : "success",
-    "version" : "341"
-  },
-  "result" : {
-    "deviceIdentifier" : "123456BB5-AEDE-7A22-B890-1234567890DD",
-    "launchOptions" : {
-      "activatedWhenStarted" : true,
-      "arguments" : [
-
-      ],
-      "environmentVariables" : {
-        "TERM" : "vt100"
-      },
-      "platformSpecificOptions" : {
-
-      },
-      "startStopped" : false,
-      "terminateExistingInstances" : false,
-      "user" : {
-        "active" : true
-      }
-    },
-    "process" : {
-      "auditToken" : [
-        12345,
-        678
-      ],
-      "executable" : "file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/Runner",
-      "processIdentifier" : 1234
-    }
-  }
-}
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--arg1',
-              '--arg2',
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ),
-        );
-
-        final bool status = await deviceControl.launchApp(
-          deviceId: deviceId,
-          bundleId: bundleId,
-          launchArguments: <String>['--arg1', '--arg2'],
-        );
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, isEmpty);
-        expect(tempFile, isNot(exists));
-        expect(status, true);
-      });
-
-      testWithoutContext('devicectl fails install with an error', () async {
-        const deviceControlOutput = '''
-{
-  "error" : {
-    "code" : -10814,
-    "domain" : "NSOSStatusErrorDomain",
-    "userInfo" : {
-      "_LSFunction" : {
-        "string" : "runEvaluator"
-      },
-      "_LSLine" : {
-        "int" : 1608
-      }
-    }
-  },
-  "info" : {
-    "arguments" : [
-      "devicectl",
-      "device",
-      "process",
-      "launch",
-      "--device",
-      "00001234-0001234A3C03401E",
-      "com.example.flutterApp",
-      "--json-output",
-      "/var/folders/wq/randompath/T/flutter_tools.rand0/core_devices.rand0/install_results.json"
-    ],
-    "commandType" : "devicectl.device.process.launch",
-    "environment" : {
-
-    },
-    "outcome" : "failed",
-    "version" : "341"
-  }
-}
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-            exitCode: 1,
-            stderr: '''
-ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatusErrorDomain error -10814.)
-    _LSFunction = runEvaluator
-    _LSLine = 1608
-''',
-          ),
-        );
-
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
-        expect(tempFile, isNot(exists));
-        expect(status, false);
-      });
-
-      testWithoutContext('devicectl fails install without an error', () async {
-        const deviceControlOutput = '''
-{
-  "error" : {
-    "code" : -10814,
-    "domain" : "NSOSStatusErrorDomain",
-    "userInfo" : {
-      "_LSFunction" : {
-        "string" : "runEvaluator"
-      },
-      "_LSLine" : {
-        "int" : 1608
-      }
-    }
-  },
-  "info" : {
-    "arguments" : [
-      "devicectl",
-      "device",
-      "process",
-      "launch",
-      "--device",
-      "00001234-0001234A3C03401E",
-      "com.example.flutterApp",
-      "--json-output",
-      "/var/folders/wq/randompath/T/flutter_tools.rand0/core_devices.rand0/install_results.json"
-    ],
-    "commandType" : "devicectl.device.process.launch",
-    "environment" : {
-
-    },
-    "outcome" : "failed",
-    "version" : "341"
-  }
-}
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ),
-        );
-
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(tempFile, isNot(exists));
-        expect(status, false);
-      });
-
-      testWithoutContext('fails launch because of unexpected JSON', () async {
-        const deviceControlOutput = '''
-{
-  "valid_unexpected_json": true
-}
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ),
-        );
-
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
-        expect(tempFile, isNot(exists));
-        expect(status, false);
-      });
-
-      testWithoutContext('fails launch because of invalid JSON', () async {
-        const deviceControlOutput = '''
-invalid JSON
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ),
-        );
-
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
-
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned non-JSON response'));
-        expect(tempFile, isNot(exists));
-        expect(status, false);
-      });
-    });
-
-    group('launchAppInternal', () {
-      const deviceId = 'device-id';
-      const bundleId = 'com.example.flutterApp';
-
-      testWithoutContext('Successful launch without launch args', () async {
-        const deviceControlOutput = '''
-{
-  "info" : {
-    "arguments" : [
-      "devicectl",
-      "device",
-      "process",
-      "launch",
-      "--device",
-      "00001234-0001234A3C03401E",
-      "com.example.flutterApp",
-      "--json-output",
-      "/var/folders/wq/randompath/T/flutter_tools.rand0/core_devices.rand0/install_results.json"
-    ],
-    "commandType" : "devicectl.device.process.launch",
-    "environment" : {
-
-    },
-    "outcome" : "success",
-    "version" : "341"
-  },
-  "result" : {
-    "deviceIdentifier" : "123456BB5-AEDE-7A22-B890-1234567890DD",
-    "launchOptions" : {
-      "activatedWhenStarted" : true,
-      "arguments" : [
-
-      ],
-      "environmentVariables" : {
-        "TERM" : "vt100"
-      },
-      "platformSpecificOptions" : {
-
-      },
-      "startStopped" : false,
-      "terminateExistingInstances" : false,
-      "user" : {
-        "active" : true
-      }
-    },
-    "process" : {
-      "auditToken" : [
-        12345,
-        678
-      ],
-      "executable" : "file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/Runner",
-      "processIdentifier" : 1234
-    }
-  }
-}
-''';
-        final File tempFile = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0')
-            .childFile('launch_results.json');
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'device',
-              'process',
-              'launch',
-              '--device',
-              deviceId,
-              bundleId,
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ),
-        );
-
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -1775,7 +1379,7 @@ invalid JSON
           ),
         );
 
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
           launchArguments: <String>['--arg1', '--arg2'],
@@ -1854,7 +1458,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           ),
         );
 
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -1925,7 +1529,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           ),
         );
 
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -1966,7 +1570,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           ),
         );
 
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -2005,7 +1609,7 @@ invalid JSON
           ),
         );
 
-        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchAppInternal(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
         );
@@ -3584,7 +3188,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   }
 
   @override
-  Future<IOSCoreDeviceLaunchResult?> launchAppInternal({
+  Future<IOSCoreDeviceLaunchResult?> launchApp({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],

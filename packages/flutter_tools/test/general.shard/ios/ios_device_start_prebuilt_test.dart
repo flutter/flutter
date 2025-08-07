@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -24,8 +25,10 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -131,9 +134,11 @@ void main() {
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[attachDebuggerCommand()]);
+      final fakeAnalytics = FakeAnalytics();
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
+        analytics: fakeAnalytics,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
@@ -162,6 +167,13 @@ void main() {
       expect(launchResult.started, true);
       expect(launchResult.hasVmService, true);
       expect(await device.stopApp(iosApp), false);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging success',
+        ),
+      ]);
     },
   );
 
@@ -171,6 +183,7 @@ void main() {
       final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final completer = Completer<void>();
+      final fakeAnalytics = FakeAnalytics();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdout: 'PROCESS_EXITED'),
         attachDebuggerCommand(
@@ -183,6 +196,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         logger: logger,
+        analytics: fakeAnalytics,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
@@ -202,7 +216,6 @@ void main() {
 
       expect(launchResult.started, false);
       expect(launchResult.hasVmService, false);
-
       final LaunchResult secondLaunchResult = await device.startApp(
         iosApp,
         prebuiltApplication: true,
@@ -214,6 +227,18 @@ void main() {
       expect(secondLaunchResult.started, true);
       expect(secondLaunchResult.hasVmService, true);
       expect(await device.stopApp(iosApp), true);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'launch failed',
+        ),
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging success',
+        ),
+      ]);
     },
   );
 
@@ -222,10 +247,12 @@ void main() {
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchDebugCommand]);
+      final fakeAnalytics = FakeAnalytics();
       final IOSDevice device = setUpIOSDevice(
         sdkVersion: '12.4.4',
         processManager: processManager,
         fileSystem: fileSystem,
+        analytics: fakeAnalytics,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
@@ -254,6 +281,13 @@ void main() {
       expect(launchResult.started, true);
       expect(launchResult.hasVmService, true);
       expect(await device.stopApp(iosApp), false);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+          result: 'debugging success',
+        ),
+      ]);
     },
   );
 
@@ -264,12 +298,14 @@ void main() {
       final logger = BufferLogger.test();
       final stdin = CompleterIOSink();
       final completer = Completer<void>();
+      final fakeAnalytics = FakeAnalytics();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdin: stdin, completer: completer),
       ]);
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
+        analytics: fakeAnalytics,
         logger: logger,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
@@ -307,6 +343,13 @@ void main() {
       expect(utf8.decoder.convert(stdin.writes.first), contains('process interrupt'));
       completer.complete();
       expect(processManager, hasNoRemainingExpectations);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging success',
+        ),
+      ]);
     },
   );
 
@@ -317,12 +360,14 @@ void main() {
       final logger = BufferLogger.test();
       final stdin = CompleterIOSink();
       final completer = Completer<void>();
+      final fakeAnalytics = FakeAnalytics();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(stdin: stdin, completer: completer, isWirelessDevice: true),
       ]);
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
+        analytics: fakeAnalytics,
         logger: logger,
         interfaceType: DeviceConnectionInterface.wireless,
       );
@@ -371,6 +416,13 @@ void main() {
         ),
       );
       completer.complete();
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging success',
+        ),
+      ]);
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()},
@@ -382,6 +434,7 @@ void main() {
       final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
       final completer = Completer<void>();
+      final fakeAnalytics = FakeAnalytics();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(
           stdout:
@@ -399,6 +452,7 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         logger: logger,
+        analytics: fakeAnalytics,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',
@@ -425,6 +479,13 @@ void main() {
       expect(launchResult.started, true);
       expect(launchResult.hasVmService, true);
       expect(await device.stopApp(iosApp), true);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging success',
+        ),
+      ]);
     },
   );
 
@@ -433,6 +494,7 @@ void main() {
     () async {
       final logger = BufferLogger.test();
       final FileSystem fileSystem = MemoryFileSystem.test();
+      final fakeAnalytics = FakeAnalytics();
       final processManager = FakeProcessManager.list(<FakeCommand>[
         attachDebuggerCommand(
           stdout:
@@ -442,6 +504,7 @@ void main() {
       final IOSDevice device = setUpIOSDevice(
         processManager: processManager,
         fileSystem: fileSystem,
+        analytics: fakeAnalytics,
         logger: logger,
       );
       final IOSApp iosApp = PrebuiltIOSApp(
@@ -464,13 +527,25 @@ void main() {
       expect(launchResult.started, false);
       expect(launchResult.hasVmService, false);
       expect(await device.stopApp(iosApp), false);
+      expect(fakeAnalytics.sentEvents, [
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+          result: 'debugging failed',
+        ),
+      ]);
     },
   );
 
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchReleaseCommand]);
-    final IOSDevice device = setUpIOSDevice(processManager: processManager, fileSystem: fileSystem);
+    final fakeAnalytics = FakeAnalytics();
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      analytics: fakeAnalytics,
+    );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
       bundleName: 'Runner',
@@ -489,10 +564,18 @@ void main() {
     expect(launchResult.hasVmService, false);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunch.name,
+        result: 'release success',
+      ),
+    ]);
   });
 
   testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -546,6 +629,7 @@ void main() {
       sdkVersion: '13.3',
       processManager: processManager,
       fileSystem: fileSystem,
+      analytics: fakeAnalytics,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -594,10 +678,18 @@ void main() {
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+        result: 'debugging success',
+      ),
+    ]);
   });
 
   testWithoutContext('startApp using route', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -633,6 +725,7 @@ void main() {
       sdkVersion: '13.3',
       processManager: processManager,
       fileSystem: fileSystem,
+      analytics: fakeAnalytics,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -661,10 +754,18 @@ void main() {
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+        result: 'debugging success',
+      ),
+    ]);
   });
 
   testWithoutContext('startApp using trace-startup', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
+    final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: <String>[
@@ -700,6 +801,7 @@ void main() {
       sdkVersion: '13.3',
       processManager: processManager,
       fileSystem: fileSystem,
+      analytics: fakeAnalytics,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -727,33 +829,85 @@ void main() {
     expect(launchResult.started, true);
     expect(await device.stopApp(iosApp), false);
     expect(processManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, [
+      Event.appleUsageEvent(
+        workflow: 'ios-physical-deployment',
+        parameter: IOSDeploymentMethod.iosDeployLaunchAndAttach.name,
+        result: 'debugging success',
+      ),
+    ]);
   });
 
   group('IOSDevice.startApp for CoreDevice', () {
     group('in debug mode', () {
-      testUsingContext('succeeds', () async {
+      testUsingContext(
+        'uses LLDB with Xcode 16+',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final processManager = FakeProcessManager.empty();
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
+          final fakeLauncher = FakeIOSCoreDeviceLauncher();
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            coreDeviceLauncher: fakeLauncher,
+            analytics: fakeAnalytics,
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final deviceLogReader = FakeDeviceLogReader();
+
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
+
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
+
+          final LaunchResult launchResult = await device.startApp(
+            iosApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            platformArgs: <String, dynamic>{},
+          );
+
+          expect(launchResult.started, true);
+          expect(fakeLauncher.launchedWithLLDB, true);
+          expect(fakeLauncher.launchedWithXcode, false);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+              result: 'debugging success',
+            ),
+          ]);
+        },
+        overrides: {
+          Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0)),
+          Analytics: () => FakeAnalytics(),
+        },
+      );
+
+      testUsingContext('uses Xcode if LLDB fails', () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final processManager = FakeProcessManager.empty();
-
-        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-            .childDirectory('flutter_empty_xcode.rand0');
         final Directory bundleLocation = fileSystem.currentDirectory;
+        final fakeAnalytics = FakeAnalytics();
+        final fakeLauncher = FakeIOSCoreDeviceLauncher(lldbLaunchResult: false);
         final IOSDevice device = setUpIOSDevice(
           processManager: processManager,
           fileSystem: fileSystem,
           isCoreDevice: true,
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          xcodeDebug: FakeXcodeDebug(
-            expectedProject: XcodeDebugProject(
-              scheme: 'Runner',
-              xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-              xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-              hostAppProjectName: 'Runner',
-            ),
-            expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
-            expectedBundlePath: bundleLocation.path,
-          ),
+          coreDeviceLauncher: fakeLauncher,
+          analytics: fakeAnalytics,
         );
         final IOSApp iosApp = PrebuiltIOSApp(
           projectBundleId: 'app',
@@ -780,152 +934,196 @@ void main() {
         );
 
         expect(launchResult.started, true);
-      });
-
-      testUsingContext('prints warning message if it takes too long to start debugging', () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final processManager = FakeProcessManager.empty();
-        final logger = BufferLogger.test();
-        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-            .childDirectory('flutter_empty_xcode.rand0');
-        final Directory bundleLocation = fileSystem.currentDirectory;
-        final completer = Completer<void>();
-        final xcodeDebug = FakeXcodeDebug(
-          expectedProject: XcodeDebugProject(
-            scheme: 'Runner',
-            xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-            xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-            hostAppProjectName: 'Runner',
+        expect(fakeLauncher.launchedWithLLDB, true);
+        expect(fakeLauncher.launchedWithXcode, true);
+        expect(fakeAnalytics.sentEvents, [
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+            result: 'launch failed',
           ),
-          expectedDeviceId: '123',
-          expectedLaunchArguments: <String>['--enable-dart-profiling'],
-          expectedBundlePath: bundleLocation.path,
-          completer: completer,
-        );
-        final IOSDevice device = setUpIOSDevice(
-          processManager: processManager,
-          fileSystem: fileSystem,
-          logger: logger,
-          isCoreDevice: true,
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          xcodeDebug: xcodeDebug,
-        );
-        final IOSApp iosApp = PrebuiltIOSApp(
-          projectBundleId: 'app',
-          bundleName: 'Runner',
-          uncompressedBundle: bundleLocation,
-          applicationPackage: bundleLocation,
-        );
-        final deviceLogReader = FakeDeviceLogReader();
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+            result: 'debugging success',
+          ),
+        ]);
+      }, overrides: {Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0))});
 
-        device.portForwarder = const NoOpDevicePortForwarder();
-        device.setLogReader(iosApp, deviceLogReader);
+      testUsingContext(
+        'uses Xcode if less than Xcode 16',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final processManager = FakeProcessManager.empty();
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
+          final fakeLauncher = FakeIOSCoreDeviceLauncher(lldbLaunchResult: false);
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            coreDeviceLauncher: fakeLauncher,
+            analytics: fakeAnalytics,
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final deviceLogReader = FakeDeviceLogReader();
 
-        // Start writing messages to the log reader.
-        Timer.run(() {
-          deviceLogReader.addLine('Foo');
-          deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-        });
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
 
-        FakeAsync().run((FakeAsync fakeAsync) {
-          device.startApp(
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
+
+          final LaunchResult launchResult = await device.startApp(
             iosApp,
             prebuiltApplication: true,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             platformArgs: <String, dynamic>{},
           );
 
-          fakeAsync.flushTimers();
-          expect(
-            logger.errorText,
-            contains(
-              'Xcode is taking longer than expected to start debugging the app. Ensure the project is opened in Xcode.',
+          expect(launchResult.started, true);
+          expect(fakeLauncher.launchedWithLLDB, false);
+          expect(fakeLauncher.launchedWithXcode, true);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+              result: 'debugging success',
             ),
+          ]);
+        },
+        overrides: {Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))},
+      );
+
+      testUsingContext(
+        'using Xcode prints warning message if it takes too long to start debugging',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final processManager = FakeProcessManager.empty();
+          final logger = BufferLogger.test();
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
+          final xcodeDebugCompleter = Completer<void>();
+          final fakeLauncher = FakeIOSCoreDeviceLauncher(lldbLaunchResult: false);
+          fakeLauncher.xcodeCompleter = xcodeDebugCompleter;
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            logger: logger,
+            isCoreDevice: true,
+            coreDeviceLauncher: fakeLauncher,
+            analytics: fakeAnalytics,
           );
-          completer.complete();
-        });
-      });
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final deviceLogReader = FakeDeviceLogReader();
 
-      testUsingContext('succeeds with shutdown hook added when running from CI', () async {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final processManager = FakeProcessManager.empty();
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
 
-        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-            .childDirectory('flutter_empty_xcode.rand0');
-        final Directory bundleLocation = fileSystem.currentDirectory;
-        final IOSDevice device = setUpIOSDevice(
-          processManager: processManager,
-          fileSystem: fileSystem,
-          isCoreDevice: true,
-          coreDeviceControl: FakeIOSCoreDeviceControl(),
-          xcodeDebug: FakeXcodeDebug(
-            expectedProject: XcodeDebugProject(
-              scheme: 'Runner',
-              xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-              xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-              hostAppProjectName: 'Runner',
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
+
+          FakeAsync().run((FakeAsync fakeAsync) {
+            device.startApp(
+              iosApp,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+              platformArgs: <String, dynamic>{},
+            );
+
+            fakeAsync.flushTimers();
+            expect(
+              logger.errorText,
+              contains(
+                'Xcode is taking longer than expected to start debugging the app. If the issue persists, try closing Xcode and re-running your Flutter command.',
+              ),
+            );
+            xcodeDebugCompleter.complete();
+          });
+        },
+        overrides: {Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))},
+      );
+
+      testUsingContext(
+        'using Xcode succeeds with shutdown hook added when running from CI',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final processManager = FakeProcessManager.empty();
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            analytics: fakeAnalytics,
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final deviceLogReader = FakeDeviceLogReader();
+
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
+
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine('Foo');
+            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+          });
+
+          final shutDownHooks = FakeShutDownHooks();
+
+          final LaunchResult launchResult = await device.startApp(
+            iosApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, usingCISystem: true),
+            platformArgs: <String, dynamic>{},
+            shutdownHooks: shutDownHooks,
+          );
+
+          expect(launchResult.started, true);
+          expect(shutDownHooks.hooks.length, 1);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+              result: 'debugging success',
             ),
-            expectedDeviceId: '123',
-            expectedLaunchArguments: <String>['--enable-dart-profiling'],
-            expectedBundlePath: bundleLocation.path,
-          ),
-        );
-        final IOSApp iosApp = PrebuiltIOSApp(
-          projectBundleId: 'app',
-          bundleName: 'Runner',
-          uncompressedBundle: bundleLocation,
-          applicationPackage: bundleLocation,
-        );
-        final deviceLogReader = FakeDeviceLogReader();
-
-        device.portForwarder = const NoOpDevicePortForwarder();
-        device.setLogReader(iosApp, deviceLogReader);
-
-        // Start writing messages to the log reader.
-        Timer.run(() {
-          deviceLogReader.addLine('Foo');
-          deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-        });
-
-        final shutDownHooks = FakeShutDownHooks();
-
-        final LaunchResult launchResult = await device.startApp(
-          iosApp,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, usingCISystem: true),
-          platformArgs: <String, dynamic>{},
-          shutdownHooks: shutDownHooks,
-        );
-
-        expect(launchResult.started, true);
-        expect(shutDownHooks.hooks.length, 1);
-      });
+          ]);
+        },
+      );
 
       testUsingContext(
         'IOSDevice.startApp attaches in debug mode via mDNS when device logging fails',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
-
-          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-              .childDirectory('flutter_empty_xcode.rand0');
           final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
           final IOSDevice device = setUpIOSDevice(
             processManager: processManager,
             fileSystem: fileSystem,
             isCoreDevice: true,
-            coreDeviceControl: FakeIOSCoreDeviceControl(),
-            xcodeDebug: FakeXcodeDebug(
-              expectedProject: XcodeDebugProject(
-                scheme: 'Runner',
-                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-                hostAppProjectName: 'Runner',
-              ),
-              expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
-              expectedBundlePath: bundleLocation.path,
-            ),
+            analytics: fakeAnalytics,
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -947,7 +1145,13 @@ void main() {
 
           expect(launchResult.started, true);
           expect(launchResult.hasVmService, true);
-          expect(await device.stopApp(iosApp), true);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+              result: 'debugging success',
+            ),
+          ]);
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
@@ -965,26 +1169,13 @@ void main() {
         testUsingContext('when mDNS fails', () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
-
-          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-              .childDirectory('flutter_empty_xcode.rand0');
           final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
           final IOSDevice device = setUpIOSDevice(
             processManager: processManager,
             fileSystem: fileSystem,
             isCoreDevice: true,
-            coreDeviceControl: FakeIOSCoreDeviceControl(),
-            xcodeDebug: FakeXcodeDebug(
-              expectedProject: XcodeDebugProject(
-                scheme: 'Runner',
-                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-                hostAppProjectName: 'Runner',
-              ),
-              expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
-              expectedBundlePath: bundleLocation.path,
-            ),
+            analytics: fakeAnalytics,
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -1016,7 +1207,13 @@ void main() {
 
           expect(launchResult.started, true);
           expect(launchResult.hasVmService, true);
-          expect(await device.stopApp(iosApp), true);
+          expect(fakeAnalytics.sentEvents, [
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+              result: 'debugging success',
+            ),
+          ]);
         }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
       });
 
@@ -1028,30 +1225,17 @@ void main() {
 
           const pathToFlutterLogs = '/path/to/flutter/logs';
           const pathToHome = '/path/to/home';
-
-          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-              .childDirectory('flutter_empty_xcode.rand0');
           final Directory bundleLocation = fileSystem.currentDirectory;
+          final fakeAnalytics = FakeAnalytics();
           final IOSDevice device = setUpIOSDevice(
             processManager: processManager,
             fileSystem: fileSystem,
             isCoreDevice: true,
-            coreDeviceControl: FakeIOSCoreDeviceControl(),
-            xcodeDebug: FakeXcodeDebug(
-              expectedProject: XcodeDebugProject(
-                scheme: 'Runner',
-                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-                hostAppProjectName: 'Runner',
-              ),
-              expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
-              expectedBundlePath: bundleLocation.path,
-            ),
             platform: FakePlatform(
               operatingSystem: 'macos',
               environment: <String, String>{'HOME': pathToHome},
             ),
+            analytics: fakeAnalytics,
           );
 
           final IOSApp iosApp = PrebuiltIOSApp(
@@ -1091,6 +1275,13 @@ void main() {
                     .existsSync(),
                 true,
               );
+              expect(fakeAnalytics.sentEvents, [
+                Event.appleUsageEvent(
+                  workflow: 'ios-physical-deployment',
+                  parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+                  result: 'debugging failed',
+                ),
+              ]);
               completer.complete();
             });
             time.elapse(const Duration(minutes: 15));
@@ -1108,27 +1299,12 @@ void main() {
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
-
-          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-              .childDirectory('flutter_empty_xcode.rand0');
           final Directory bundleLocation = fileSystem.currentDirectory;
           final IOSDevice device = setUpIOSDevice(
             sdkVersion: '18.4',
             processManager: processManager,
             fileSystem: fileSystem,
             isCoreDevice: true,
-            coreDeviceControl: FakeIOSCoreDeviceControl(),
-            xcodeDebug: FakeXcodeDebug(
-              expectedProject: XcodeDebugProject(
-                scheme: 'Runner',
-                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-                hostAppProjectName: 'Runner',
-              ),
-              expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
-              expectedBundlePath: bundleLocation.path,
-            ),
           );
           final IOSApp iosApp = PrebuiltIOSApp(
             projectBundleId: 'app',
@@ -1184,6 +1360,8 @@ IOSDevice setUpIOSDevice({
   DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
   bool isCoreDevice = false,
   IOSCoreDeviceControl? coreDeviceControl,
+  IOSCoreDeviceLauncher? coreDeviceLauncher,
+  Analytics? analytics,
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
 }) {
@@ -1214,6 +1392,7 @@ IOSDevice setUpIOSDevice({
           artifacts: artifacts,
           cache: cache,
         ),
+    analytics: analytics ?? FakeAnalytics(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -1221,7 +1400,7 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
-    coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
     cpuArchitecture: DarwinArch.arm64,
     connectionInterface: interfaceType,
@@ -1275,64 +1454,6 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
 }
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {
-  FakeXcodeDebug({
-    this.debugSuccess = true,
-    this.expectedProject,
-    this.expectedDeviceId,
-    this.expectedLaunchArguments,
-    this.expectedBundlePath,
-    this.completer,
-  });
-
-  final bool debugSuccess;
-  final XcodeDebugProject? expectedProject;
-  final String? expectedDeviceId;
-  final List<String>? expectedLaunchArguments;
-  final String? expectedBundlePath;
-  final Completer<void>? completer;
-
-  @override
-  var debugStarted = false;
-
-  @override
-  Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
-    String deviceBundlePath, {
-    required TemplateRenderer templateRenderer,
-    Directory? projectDestination,
-    bool verboseLogging = false,
-  }) async {
-    if (expectedBundlePath != null) {
-      expect(expectedBundlePath, deviceBundlePath);
-    }
-    return expectedProject!;
-  }
-
-  @override
-  Future<bool> debugApp({
-    required XcodeDebugProject project,
-    required String deviceId,
-    required List<String> launchArguments,
-  }) async {
-    if (expectedProject != null) {
-      expect(project.scheme, expectedProject!.scheme);
-      expect(project.xcodeWorkspace.path, expectedProject!.xcodeWorkspace.path);
-      expect(project.xcodeProject.path, expectedProject!.xcodeProject.path);
-      expect(project.isTemporaryProject, expectedProject!.isTemporaryProject);
-    }
-    if (expectedDeviceId != null) {
-      expect(deviceId, expectedDeviceId);
-    }
-    if (expectedLaunchArguments != null) {
-      expect(expectedLaunchArguments, launchArguments);
-    }
-    debugStarted = debugSuccess;
-
-    if (completer != null) {
-      await completer!.future;
-    }
-    return debugSuccess;
-  }
-
   @override
   Future<bool> exit({bool force = false, bool skipDelay = false}) async {
     return true;
@@ -1349,4 +1470,61 @@ class FakeShutDownHooks extends Fake implements ShutdownHooks {
   }
 }
 
-class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.currentVersion});
+
+  @override
+  Version? currentVersion;
+}
+
+class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
+  FakeIOSCoreDeviceLauncher({this.lldbLaunchResult = true, this.xcodeLaunchResult = true});
+  bool lldbLaunchResult;
+  bool xcodeLaunchResult;
+  var launchedWithLLDB = false;
+  var launchedWithXcode = false;
+
+  Completer<void>? xcodeCompleter;
+
+  @override
+  Future<bool> launchAppWithLLDBDebugger({
+    required String deviceId,
+    required String bundlePath,
+    required String bundleId,
+    required List<String> launchArguments,
+  }) async {
+    launchedWithLLDB = true;
+    return lldbLaunchResult;
+  }
+
+  @override
+  Future<bool> launchAppWithXcodeDebugger({
+    required String deviceId,
+    required DebuggingOptions debuggingOptions,
+    required IOSApp package,
+    required List<String> launchArguments,
+    required TemplateRenderer templateRenderer,
+    String? mainPath,
+    Duration? discoveryTimeout,
+  }) async {
+    if (xcodeCompleter != null) {
+      await xcodeCompleter!.future;
+    }
+    launchedWithXcode = true;
+    return xcodeLaunchResult;
+  }
+
+  @override
+  Future<bool> stopApp({required String deviceId, int? processId}) async {
+    return false;
+  }
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) {
+    sentEvents.add(event);
+  }
+}
