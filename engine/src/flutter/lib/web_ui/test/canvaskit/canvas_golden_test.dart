@@ -224,12 +224,8 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
 
   canvas.save();
-  canvas.clipRect(
-    const ui.Rect.fromLTRB(0, 0, 45, 45),
-  );
-  canvas.clipRRect(
-    ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)),
-  );
+  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 45, 45));
+  canvas.clipRRect(ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)));
   canvas.clipPath(
     ui.Path()
       ..moveTo(5, 5)
@@ -319,9 +315,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.save();
-  canvas.clipRect(
-    const ui.Rect.fromLTRB(0, 0, 50, 30),
-  );
+  canvas.clipRect(const ui.Rect.fromLTRB(0, 0, 50, 30));
   canvas.drawPaint(CkPaint()..color = const ui.Color(0xFF6688AA));
   canvas.restore();
 
@@ -340,12 +334,7 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.translate(60, 0);
   canvas.drawPoints(
     ui.PointMode.polygon,
-    const <ui.Offset>[
-      ui.Offset(10, 10),
-      ui.Offset(20, 10),
-      ui.Offset(30, 20),
-      ui.Offset(40, 20),
-    ],
+    const <ui.Offset>[ui.Offset(10, 10), ui.Offset(20, 10), ui.Offset(30, 20), ui.Offset(40, 20)],
     ui.Paint()
       ..color = const ui.Color(0xFF0000FF)
       ..strokeWidth = 5

@@ -39,13 +39,7 @@ class TextPaint {
     }
   }
 
-  void paintLineOnCanvasKit(
-    CkCanvas canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
+  void paintLineOnCanvasKit(CkCanvas canvas, TextLayout layout, TextLine line, double x, double y) {
     for (final BidiRun run in line.visualRuns) {
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final clusterText = layout.textClusters[i];

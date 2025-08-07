@@ -97,8 +97,7 @@ sdk_rewriter("web_locale_keymap_library") {
 
 sdk_rewriter("canvaskit_library") {
   library_name = "canvaskit"
-  api_file =
-      "//flutter/lib/web_ui/lib/src/engine/canvaskit.dart"
+  api_file = "//flutter/lib/web_ui/lib/src/engine/canvaskit.dart"
   input_dir = "//flutter/lib/web_ui/lib/src/engine/canvaskit/"
   output_dir = "$root_out_dir/flutter_web_sdk/lib/_canvaskit/"
 }

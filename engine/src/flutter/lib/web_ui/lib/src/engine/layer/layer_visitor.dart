@@ -440,10 +440,7 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
 
     // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
-    measuringCanvas.clipRect(
-      colorFilter.paintBounds,
-      doAntiAlias: false,
-    );
+    measuringCanvas.clipRect(colorFilter.paintBounds, doAntiAlias: false);
 
     measuringCanvas.saveLayer(colorFilter.paintBounds, paint);
     measureChildren(colorFilter);
@@ -513,10 +510,7 @@ class PaintVisitor extends LayerVisitor {
     assert(clipPath.needsPainting);
 
     nWayCanvas.save();
-    nWayCanvas.clipPath(
-      clipPath.clipPath,
-      clipPath.clipBehavior != ui.Clip.hardEdge,
-    );
+    nWayCanvas.clipPath(clipPath.clipPath, clipPath.clipBehavior != ui.Clip.hardEdge);
 
     if (clipPath.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
       nWayCanvas.saveLayer(clipPath.paintBounds, null);

@@ -32,6 +32,7 @@ class SkwasmRenderer implements Renderer {
   void debugResetRasterizer() {
     _rasterizer = _createRasterizer();
   }
+
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
@@ -418,6 +419,7 @@ class SkwasmRenderer implements Renderer {
       }
     }
   }
+
   // TODO(harryterkelsen): Merge this logic with the async logic in
   // [EngineScene], https://github.com/flutter/flutter/issues/142072.
   @override
