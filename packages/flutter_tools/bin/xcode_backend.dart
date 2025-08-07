@@ -150,11 +150,7 @@ class Context {
   // TODO(hellohuanlin): Instead of using inheritance to stub the function in
   // the subclass, we should favor composition by injecting the dependencies.
   // See: https://github.com/flutter/flutter/issues/173133
-  ProcessResult runSyncProcess(
-    String bin,
-    List<String> args, {
-    String? workingDirectory,
-  }) {
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
     return Process.runSync(bin, args, workingDirectory: workingDirectory);
   }
 
