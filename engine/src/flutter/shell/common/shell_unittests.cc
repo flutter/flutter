@@ -4831,9 +4831,9 @@ TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
   std::ostringstream stream;
   fml::LogMessage::CaptureNextLog(&stream);
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-  ASSERT_TRUE(stream.str().find(
-                  "[Action Required] The application opted out of Impeller") !=
-              std::string::npos);
+  ASSERT_TRUE(
+      stream.str().find("[Action Required]: Impeller opt-out deprecated.") !=
+      std::string::npos);
   ASSERT_TRUE(shell);
   DestroyShell(std::move(shell), task_runners);
 }
