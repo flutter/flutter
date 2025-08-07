@@ -476,8 +476,8 @@ Shell::Shell(DartVMRef vm,
   if (!settings.enable_impeller && settings.warn_on_impeller_opt_out) {
     FML_LOG(IMPORTANT) <<  //
         R"warn([Action Required]: Impeller opt-out deprecated.
-    The application opted out of Impeller by either using: the
-    `--no-enable-impeller` flag, `FLTEnableImpeller` plist flag, or the
+    The application opted out of Impeller by either using the
+    `--no-enable-impeller` flag or the
     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
     These options are going to go away in an upcoming Flutter release. Remove
     the explicit opt-out. If you need to opt-out, please report a bug describing
