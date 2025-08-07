@@ -5675,6 +5675,48 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField prefix icon and suffix icon create a sibling node', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: _textEditingController(text: 'some text'),
+          decoration: const InputDecoration(prefixIcon: Text('Prefix'), suffixIcon: Text('Suffix')),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              value: 'some text',
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+              inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+              ],
+            ),
+            TestSemantics.rootChild(id: 2, textDirection: TextDirection.ltr, label: 'Prefix'),
+            TestSemantics.rootChild(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
     final TextStyle suffixStyle = TextStyle(color: Colors.pink[500], fontSize: 10.0);
 
