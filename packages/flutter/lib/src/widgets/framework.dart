@@ -2070,13 +2070,13 @@ enum _ElementLifecycle {
   /// build phase.
   inactive,
 
-  /// The [Element] encountered a unrecoverable error while being rebuilt when it
+  /// The [Element] encountered an unrecoverable error while being rebuilt when it
   /// was `active` or while being incorporated in the tree.
   ///
   /// This indicates the [Element]'s subtree is in an inconsistent state and must
   /// not be re-incorporated into the tree again.
   ///
-  /// When a unrecoverable error is encountered, the framework calls
+  /// When an unrecoverable error is encountered, the framework calls
   /// [Element.deactivate] on this [Element] and sets its state to `failed`. This
   /// process is done on a best-effort basis and does not surface any additional
   /// errors.
@@ -2093,15 +2093,7 @@ enum _ElementLifecycle {
   /// the end of the build phase.
   ///
   /// This is the final stage of the element lifecycle and is not reversible.
-  defunct;
-
-  bool get debugWaitingForDispose => switch (this) {
-    _ElementLifecycle.initial ||
-    _ElementLifecycle.active ||
-    _ElementLifecycle.defunct ||
-    _ElementLifecycle.failed => false,
-    _ElementLifecycle.inactive => true,
-  };
+  defunct,
 }
 
 class _InactiveElements {
@@ -4623,6 +4615,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         // Attempt to do some clean-up if activation or mount fails to leave tree in a reasonable state.
         try {
           newChild._lifecycleState = _ElementLifecycle.failed;
+          // This call makes sure the entire newChild subtree will be marked as failed.
           deactivateChild(newChild);
         } catch (_) {
           // Clean-up failed. Only surface original exception.
@@ -4852,7 +4845,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.unmount()`.
   @mustCallSuper
   void unmount() {
-    assert(_lifecycleState.debugWaitingForDispose);
+    assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(owner != null);
     assert(debugMaybeDispatchDisposed(this));
