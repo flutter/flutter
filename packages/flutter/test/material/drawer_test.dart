@@ -183,31 +183,28 @@ void main() {
       );
     }
 
+    Future<void> checkScrim(Color color) async {
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      ColoredBox scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color.withValues(alpha: 0)));
+
+      await tester.pumpAndSettle();
+      scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color));
+
+      await tester.tap(find.byType(Drawer));
+      await tester.pumpAndSettle();
+      expect(find.byType(Drawer), findsNothing);
+    }
+
     // Default drawerScrimColor
-
     await tester.pumpWidget(buildFrame());
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    ColoredBox scrim = getScrim() as ColoredBox;
-    expect(scrim.color, Colors.black54);
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(Colors.black54);
 
     // Specific drawerScrimColor
-
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    scrim = getScrim() as ColoredBox;
-    expect(scrim.color, const Color(0xFF323232));
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(const Color(0xFF323232));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
