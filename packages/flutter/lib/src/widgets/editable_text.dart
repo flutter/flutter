@@ -4981,7 +4981,7 @@ class EditableTextState extends State<EditableText>
 
   // The time when the last call to [hideSystemToolbar] was made.
   Duration? _hideSystemToolbarLastTimestamp;
-  static const Duration _systemToolbarToggleDebounceThreshold = Duration(milliseconds: 100);
+  static const Duration _kSystemToolbarToggleDebounceThreshold = Duration(milliseconds: 100);
 
   /// This is called by the [SystemContextMenu] when the platform dismisses the system
   /// context menu.
@@ -5012,7 +5012,7 @@ class EditableTextState extends State<EditableText>
       if (_hideSystemToolbarLastTimestamp != null &&
           (SchedulerBinding.instance.currentSystemFrameTimeStamp -
                   _hideSystemToolbarLastTimestamp!) <
-              _systemToolbarToggleDebounceThreshold) {
+              _kSystemToolbarToggleDebounceThreshold) {
         // Do not show the system toolbar if it was only just hidden. This is
         // needed to prevent the system toolbar from being shown again when tapping
         // the selection to toggle the toolbar on iOS.
@@ -5022,7 +5022,7 @@ class EditableTextState extends State<EditableText>
         // The framework implements a feature on iOS that toggles the toolbar whenever
         // the selection is tapped on. The system context menu on iOS dismisses itself
         // whenever a tap happens outside of it. In this scenario the framework first
-        // handles the dismiss event from the platform, as a result of the tap and hides
+        // handles the dismiss event from the platform as a result of the tap and hides
         // the toolbar. Then the framework handles the same tap and attempts to toggle
         // the toolbar. Since the toolbar is hidden at the time when the framework handles
         // the tap it attempts to show the toolbar again. The expected behavior would be
