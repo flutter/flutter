@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -437,6 +439,21 @@ class ReorderableListState extends State<ReorderableList> {
     _sliverReorderableListKey.currentState!.cancelReorder();
   }
 
+  /// Animates an item from one position to another.
+  Future<void> animateItemToIndex({
+    required int fromIndex,
+    required int toIndex,
+    Duration duration = const Duration(milliseconds: 500),
+    Curve curve = Curves.easeInOut,
+  }) async {
+    return _sliverReorderableListKey.currentState!.animateItemToIndex(
+      fromIndex: fromIndex,
+      toIndex: toIndex,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
   @protected
   @override
   Widget build(BuildContext context) {
@@ -783,6 +800,187 @@ class SliverReorderableListState extends State<SliverReorderableList>
     });
   }
 
+  /// Animates an item from one position to another with smooth lift/move/settle animation.
+  ///
+  /// This creates a visual effect where the item:
+  /// 1. Lifts up with elevation and slight scale
+  /// 2. Moves to the new position
+  /// 3. Settles down into place
+  ///
+  /// Other items animate to make room as the moving item progresses.
+  Future<void> animateItemToIndex({
+    required int fromIndex,
+    required int toIndex,
+    Duration duration = const Duration(milliseconds: 500),
+    Curve curve = Curves.easeInOut,
+  }) async {
+    if (fromIndex < 0 ||
+        fromIndex >= widget.itemCount ||
+        toIndex < 0 ||
+        toIndex >= widget.itemCount ||
+        fromIndex == toIndex) {
+      return;
+    }
+
+    if (_dragInfo != null) {
+      cancelReorder();
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+
+    await _performProgrammaticReorder(fromIndex, toIndex, duration, curve);
+  }
+
+  /// Performs the actual programmatic reorder animation with lift/move/settle phases
+  Future<void> _performProgrammaticReorder(
+    int fromIndex,
+    int toIndex,
+    Duration duration,
+    Curve curve,
+  ) async {
+    // Get the item that will be moved
+    final _ReorderableItemState? movingItem = _items[fromIndex];
+    if (movingItem == null || !movingItem.mounted) {
+      return;
+    }
+
+    // Create a visual proxy of the moving item for animation
+    final Rect movingItemGeometry = movingItem.targetGeometry();
+    final double movingItemExtent = _sizeExtent(movingItemGeometry.size, _scrollDirection);
+
+    // Start the programmatic reorder
+    setState(() {
+      _dragIndex = fromIndex;
+      _insertIndex = fromIndex; // Start at current position, will animate to final
+
+      widget.onReorderStart?.call(fromIndex);
+
+      _dragInfo = _DragInfo(
+        item: movingItem,
+        initialPosition: movingItemGeometry.topLeft,
+        scrollDirection: _scrollDirection,
+        onUpdate: _handleProgrammaticDragUpdate,
+        onCancel: _dragCancel,
+        onEnd: _dragEnd,
+        onDropCompleted: _dropCompleted,
+        proxyDecorator: widget.proxyDecorator,
+        tickerProvider: this,
+      );
+
+      movingItem.dragging = true;
+      movingItem.rebuild();
+      _dragInfo!.startDrag();
+    });
+
+    final OverlayState overlay = Overlay.of(context, debugRequiredFor: widget);
+    assert(_overlayEntry == null);
+    _overlayEntry = OverlayEntry(builder: _dragInfo!.createProxy);
+    overlay.insert(_overlayEntry!);
+
+    // Animation controller for the drag movement
+    final AnimationController animationController = AnimationController(
+      duration: duration,
+      vsync: this,
+    );
+
+    final CurvedAnimation animation = CurvedAnimation(parent: animationController, curve: curve);
+
+    // Calculate start and end positions for the drag
+    final Offset startPositionGlobal = movingItemGeometry.topLeft;
+    late Offset endPositionGlobal;
+
+    // Calculate where the item should end up (in global coordinates)
+    if (toIndex == 0) {
+      // Moving to top - calculate the top position accounting for any padding/margins
+      // Get the current position of the first item as reference
+      final _ReorderableItemState? currentFirstItem = _items.values
+          .where((_ReorderableItemState item) => item.index == 0)
+          .firstOrNull;
+      if (currentFirstItem != null) {
+        endPositionGlobal = currentFirstItem.targetGeometry().topLeft;
+      } else {
+        // Fallback - move to the very top
+        endPositionGlobal = Offset(startPositionGlobal.dx, 0);
+      }
+    } else {
+      // Moving to another position - calculate based on target index
+      // We need to account for the fact that items will have moved by the time we arrive
+      final _ReorderableItemState? targetItem = _items[toIndex];
+      if (targetItem != null) {
+        final Rect targetGeometry = targetItem.targetGeometry();
+        // If moving down, target the current position of the target item
+        // If moving up, target where the target item will be after it moves down
+        if (fromIndex < toIndex) {
+          endPositionGlobal = targetGeometry.topLeft;
+        } else {
+          // Moving up - target where this item will be after others move down
+          endPositionGlobal = Offset(startPositionGlobal.dx, targetGeometry.topLeft.dy);
+        }
+      } else {
+        // Fallback - estimate position
+        final double estimatedY = startPositionGlobal.dy + (toIndex - fromIndex) * movingItemExtent;
+        endPositionGlobal = Offset(startPositionGlobal.dx, estimatedY);
+      }
+    }
+
+    void animationListener() {
+      if (!mounted || _dragInfo == null) {
+        return;
+      }
+
+      final double progress = animation.value;
+
+      // Interpolate the drag position
+      final Offset currentPosition = Offset.lerp(startPositionGlobal, endPositionGlobal, progress)!;
+
+      // Calculate delta from previous position
+      final Offset delta = currentPosition - _dragInfo!.dragPosition;
+
+      // Update the drag position
+      _dragInfo!.dragPosition = currentPosition;
+
+      // Manually trigger the update callback since we're not going through update()
+      // This calls _handleProgrammaticDragUpdate which calls _dragUpdateItems
+      _dragInfo!.onUpdate?.call(_dragInfo!, currentPosition, delta);
+    }
+
+    animation.addListener(animationListener);
+
+    // Handle animation completion
+    final Completer<void> completer = Completer<void>();
+    animation.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        // Brief delay before cleanup for smooth animation completion
+        Future<void>.delayed(const Duration(milliseconds: 50), () {
+          if (!mounted || _dragInfo == null) {
+            return;
+          }
+
+          animation.removeListener(animationListener);
+
+          widget.onReorderEnd?.call(_insertIndex!);
+
+          final int fromIndex = _dragIndex!;
+          final int toIndex = _insertIndex!;
+          if (fromIndex != toIndex) {
+            widget.onReorder.call(fromIndex, toIndex);
+          }
+
+          setState(() {
+            _dragReset();
+          });
+
+          animationController.dispose();
+          completer.complete();
+        });
+      }
+    });
+
+    // Start the animation
+    animationController.forward();
+
+    return completer.future;
+  }
+
   void _registerItem(_ReorderableItemState item) {
     if (_dragInfo != null && _items[item.index] != item) {
       item.updateForGap(_dragInfo!.index, _dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
@@ -916,6 +1114,13 @@ class SliverReorderableListState extends State<SliverReorderableList>
       _overlayEntry = null;
       _finalDropPosition = null;
     }
+  }
+
+  void _handleProgrammaticDragUpdate(_DragInfo info, Offset position, Offset delta) {
+    setState(() {
+      _overlayEntry?.markNeedsBuild();
+      _dragUpdateItems();
+    });
   }
 
   void _resetItemGap() {

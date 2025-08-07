@@ -104,6 +104,7 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
+    this.controller,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -175,6 +176,7 @@ class ReorderableListView extends StatefulWidget {
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
     this.mouseCursor,
+    this.controller,
   }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -312,12 +314,55 @@ class ReorderableListView extends StatefulWidget {
   ///  hovering, and [SystemMouseCursors.grabbing] when dragging.
   final MouseCursor? mouseCursor;
 
+  /// Controller for programmatically reordering items.
+  ///
+  /// This allows you to animate items to new positions without user interaction.
+  final ReorderableListController? controller;
+
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
   final ValueNotifier<bool> _dragging = ValueNotifier<bool>(false);
+  final GlobalKey<SliverReorderableListState> _sliverListKey =
+      GlobalKey<SliverReorderableListState>();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?._state = this;
+  }
+
+  @override
+  void didUpdateWidget(ReorderableListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._state = null;
+      widget.controller?._state = this;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller?._state = null;
+    _dragging.dispose();
+    super.dispose();
+  }
+
+  Future<void> _animateItemToIndex({
+    required int fromIndex,
+    required int toIndex,
+    Duration duration = const Duration(milliseconds: 500),
+    Curve curve = Curves.easeInOut,
+  }) async {
+    return _sliverListKey.currentState?.animateItemToIndex(
+      fromIndex: fromIndex,
+      toIndex: toIndex,
+      duration: duration,
+      curve: curve,
+    );
+  }
 
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
@@ -410,12 +455,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   }
 
   @override
-  void dispose() {
-    _dragging.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasOverlay(context));
@@ -470,6 +509,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         SliverPadding(
           padding: listPadding,
           sliver: SliverReorderableList(
+            key: _sliverListKey,
             itemBuilder: _itemBuilder,
             itemExtent: widget.itemExtent,
             itemExtentBuilder: widget.itemExtentBuilder,
@@ -523,4 +563,24 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(subKey, state);
+}
+
+/// Controller for programmatically reordering items in a ReorderableListView.
+class ReorderableListController {
+  _ReorderableListViewState? _state;
+
+  /// Animates an item from one position to another.
+  Future<void> animateItemToIndex({
+    required int fromIndex,
+    required int toIndex,
+    Duration duration = const Duration(milliseconds: 500),
+    Curve curve = Curves.easeInOut,
+  }) async {
+    return _state?._animateItemToIndex(
+      fromIndex: fromIndex,
+      toIndex: toIndex,
+      duration: duration,
+      curve: curve,
+    );
+  }
 }
