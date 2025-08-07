@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show PlatformViewManager;
+import '../../engine.dart' show PictureLayer, PlatformViewManager;
 import '../compositing/composition.dart';
 import '../platform_views/embedder.dart';
 import '../vector_math.dart';

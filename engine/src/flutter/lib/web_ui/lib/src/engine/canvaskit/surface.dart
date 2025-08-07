@@ -8,6 +8,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../compositing/rasterizer.dart';
+import '../compositing/render_canvas.dart';
 import '../configuration.dart';
 import '../display.dart';
 import '../dom.dart';
