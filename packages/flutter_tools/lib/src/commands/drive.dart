@@ -29,6 +29,7 @@ import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
+import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -303,8 +304,26 @@ class DriveCommand extends RunCommandBase {
     if (screenshot != null && !device.supportsScreenshot) {
       _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
 
-    final bool web = device is WebServerDevice || device is ChromiumDevice;
+    final WebDevServerConfig? fileConfig = (device is WebServerDevice || device is ChromiumDevice)
+        ? (await WebDevServerConfig.loadFromFile(fileSystem: globals.fs, logger: globals.logger))
+        : null;
+
+    final HttpsConfig? httpsConfig = fileConfig?.https?.copyWith(
+      certPath: stringArg('web-tls-cert-path'),
+      certKeyPath: stringArg('web-tls-cert-key-path'),
+    );
+
+    final WebDevServerConfig? webDevServerConfig = fileConfig?.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+    );
+    final web = webDevServerConfig != null;
+
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
@@ -324,7 +343,9 @@ class DriveCommand extends RunCommandBase {
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
         : _fileSystem.file(applicationBinaryPath);
