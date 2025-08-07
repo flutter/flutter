@@ -589,7 +589,7 @@ class IOSCoreDeviceControl {
   /// If [startStopped] is true, the app will be launched and paused, waiting
   /// for a debugger to attach.
   // TODO(vashworth): Rename this method to launchApp and replace old version.
-  // See https://github.com/flutter/flutter/pull/173360#issuecomment-3162070718.
+  // See https://github.com/flutter/flutter/issues/173416.
   @visibleForTesting
   Future<IOSCoreDeviceLaunchResult?> launchAppInternal({
     required String deviceId,
