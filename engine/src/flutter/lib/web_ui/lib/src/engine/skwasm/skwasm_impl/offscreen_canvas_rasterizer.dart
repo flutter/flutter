@@ -11,9 +11,11 @@ import '../skwasm_impl.dart';
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
 /// one or many on-screen <canvas> elements to actually display the scene.
 class OffscreenCanvasRasterizer extends Rasterizer {
+  OffscreenCanvasRasterizer(this.offscreenSurface);
+
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
-  final SkwasmSurface offscreenSurface = SkwasmSurface();
+  final SkwasmSurface offscreenSurface;
 
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
@@ -25,9 +27,7 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
-    // XXX DO NOT SUBMIT
-    // Do something here.
-    // offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
+    offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
   }
 
   @override
@@ -51,9 +51,8 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   void prepareToDraw() {
-    // XXX DO NOT SUBMIT
-    // Set the size of the surface here?
-    // rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+    // No need to do anything here. Skwasm sizes the surface in the `rasterize`
+    // call below.
   }
 
   @override
@@ -70,5 +69,10 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
       renderCanvas.render(bitmap);
     }
     return Future<void>.value();
+  }
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    return null;
   }
 }

@@ -78,4 +78,9 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     }
     return Future.wait<void>(rasterizeFutures);
   }
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    return null;
+  }
 }

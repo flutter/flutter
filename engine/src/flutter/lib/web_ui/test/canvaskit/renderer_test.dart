@@ -64,6 +64,11 @@ class TestViewRasterizer extends ViewRasterizer {
     // No-op
     return Future<void>.value();
   }
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    return null;
+  }
 }
 
 void testMain() {

@@ -127,6 +127,10 @@ class SkwasmSurface {
     return ByteData.sublistView(output);
   }
 
+  void setSkiaResourceCacheMaxBytes(int bytes) {
+    surfaceSetResourceCacheLimitBytes(handle, bytes);
+  }
+
   void dispose() {
     surfaceDestroy(handle);
   }

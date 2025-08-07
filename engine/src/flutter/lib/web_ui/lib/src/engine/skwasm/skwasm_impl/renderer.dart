@@ -16,22 +16,12 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer implements Renderer {
   late SkwasmSurface surface;
+  late Rasterizer _rasterizer;
 
   // Listens for view creation events from the view manager.
   late StreamSubscription<int> _onViewCreatedListener;
   // Listens for view disposal events from the view manager.
   late StreamSubscription<int> _onViewDisposedListener;
-
-  Rasterizer _rasterizer = _createRasterizer();
-
-  static Rasterizer _createRasterizer() {
-    return OffscreenCanvasRasterizer();
-  }
-
-  /// Resets the [Rasterizer] to the default value. Used in tests.
-  void debugResetRasterizer() {
-    _rasterizer = _createRasterizer();
-  }
 
   bool get isMultiThreaded => skwasmIsMultiThreaded();
 
@@ -338,6 +328,7 @@ class SkwasmRenderer implements Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
+    _rasterizer = OffscreenCanvasRasterizer(surface);
     // Views may have been registered before this renderer was initialized.
     // Create rasterizers for them and then start listening for new view
     // creation/disposal events.
@@ -642,15 +633,14 @@ class SkwasmRenderer implements Renderer {
         _dumpDebugInfo('live_object_counts', countsJson);
       });
 
-      /// XXX DO NOT SUBMIT Add _viewRasterizer debugs
-      // int i = 0;
-      // for (final view in _sceneViews.values) {
-      //   final Map<String, dynamic>? debugJson = view.dumpDebugInfo();
-      //   if (debugJson != null) {
-      //     _dumpDebugInfo('flutter-scene$i', debugJson);
-      //     i++;
-      //   }
-      // }
+      int i = 0;
+      for (final viewRasterizer in _rasterizers.values) {
+        final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
+        if (debugJson != null) {
+          _dumpDebugInfo('flutter-scene$i', debugJson);
+          i++;
+        }
+      }
     }
   }
 

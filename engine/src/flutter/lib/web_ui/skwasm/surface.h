@@ -55,6 +55,7 @@ class Surface {
 
   // Main thread only
   void dispose();
+  void setResourceCacheLimit(int bytes);
   uint32_t renderPictures(SkPicture** picture, int count);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);

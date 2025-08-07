@@ -116,6 +116,9 @@ abstract class ViewRasterizer {
   void debugClear() {
     viewEmbedder.debugClear();
   }
+
+  /// Returns helpful debug information.
+  Map<String, dynamic>? dumpDebugInfo();
 }
 
 /// A [DisplayCanvas] is an abstraction for a canvas element which displays
