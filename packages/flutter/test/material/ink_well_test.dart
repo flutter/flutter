@@ -72,7 +72,7 @@ void main() {
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
 
-    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press','long-press-up']));
+    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press', 'long-press-up']));
 
     log.clear();
     TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
