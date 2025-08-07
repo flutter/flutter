@@ -67,7 +67,10 @@ class _CupertinoFocusHaloState extends State<CupertinoFocusHalo> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusTraversalGroup(
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      includeSemantics: false,
       onFocusChange: (bool hasFocus) {
         setState(() {
           _childHasFocus = hasFocus;
