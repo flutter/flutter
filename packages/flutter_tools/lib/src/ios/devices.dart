@@ -309,7 +309,7 @@ class IOSDevice extends Device {
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
 
-  // TODO(vashworth): See https://github.com/flutter/flutter/pull/173360#issuecomment-3162070718.
+  // TODO(vashworth): See https://github.com/flutter/flutter/issues/173416.
   // ignore: unused_field
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
