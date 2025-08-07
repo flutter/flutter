@@ -226,12 +226,9 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
   canvas.clipRect(
     const ui.Rect.fromLTRB(0, 0, 45, 45),
-    clipOp: ui.ClipOp.intersect,
-    doAntiAlias: true,
   );
   canvas.clipRRect(
     ui.RRect.fromLTRBR(5, 5, 50, 50, const ui.Radius.circular(8)),
-    doAntiAlias: true,
   );
   canvas.clipPath(
     ui.Path()
@@ -240,7 +237,6 @@ void drawTestPicture(CkCanvas canvas) {
       ..lineTo(45, 45)
       ..lineTo(5, 45)
       ..close(),
-    doAntiAlias: true,
   );
   canvas.drawColor(const ui.Color.fromARGB(255, 100, 100, 0), ui.BlendMode.srcOver);
   canvas.restore(); // remove clips
@@ -325,8 +321,6 @@ void drawTestPicture(CkCanvas canvas) {
   canvas.save();
   canvas.clipRect(
     const ui.Rect.fromLTRB(0, 0, 50, 30),
-    clipOp: ui.ClipOp.intersect,
-    doAntiAlias: true,
   );
   canvas.drawPaint(CkPaint()..color = const ui.Color(0xFF6688AA));
   canvas.restore();
@@ -344,10 +338,6 @@ void drawTestPicture(CkCanvas canvas) {
   }
 
   canvas.translate(60, 0);
-  // TODO(yjbanov): CanvasKit.drawPoints is currently broken
-  //                https://github.com/flutter/flutter/issues/71489
-  //                But keeping this anyway as it's a good test-case that
-  //                will ensure it's fixed when we have the fix.
   canvas.drawPoints(
     ui.PointMode.polygon,
     const <ui.Offset>[
@@ -370,7 +360,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawShadow(
-    CkPath()..addRect(const ui.Rect.fromLTRB(0, 0, 40, 30)),
+    ui.Path()..addRect(const ui.Rect.fromLTRB(0, 0, 40, 30)),
     const ui.Color(0xFF00FF00),
     4,
     true,
@@ -478,7 +468,7 @@ void drawTestPicture(CkCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawPath(
-    CkPath()
+    ui.Path()
       ..moveTo(30, 20)
       ..lineTo(50, 50)
       ..lineTo(10, 50)

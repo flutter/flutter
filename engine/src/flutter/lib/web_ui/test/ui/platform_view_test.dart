@@ -14,7 +14,6 @@ import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/rendering.dart';
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 EngineFlutterWindow get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
@@ -376,9 +375,29 @@ Future<void> testMain() async {
     );
     expect(sceneHost.querySelectorAll('flt-clip').single.style.width, '100%');
     expect(sceneHost.querySelectorAll('flt-clip').single.style.height, '100%');
-    // CanvasKit doesn't use the `rect` CSS clip-path to clip but it should:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isCanvasKit);
+  });
+
+  test('clips platform views with Paths', () async {
+    await _createPlatformView(1, platformViewType);
+
+    final ui.SceneBuilder sb = ui.SceneBuilder();
+    sb.pushOffset(0, 0);
+    sb.pushClipPath(
+      ui.Path()
+        ..lineTo(0, 10)
+        ..lineTo(10, 0)
+        ..close(),
+    );
+    sb.addPlatformView(1, width: 10, height: 10);
+    await renderScene(sb.build());
+
+    expect(
+      sceneHost.querySelectorAll('flt-clip').single.style.clipPath,
+      'path("M 0 0 L 0 10 L 10 0 L 0 0 Z")',
+    );
+    expect(sceneHost.querySelectorAll('flt-clip').single.style.width, '100%');
+    expect(sceneHost.querySelectorAll('flt-clip').single.style.height, '100%');
+  });
 
   test('correctly transforms platform views', () async {
     await _createPlatformView(1, platformViewType);
@@ -462,10 +481,7 @@ Future<void> testMain() async {
       'matrix(1, 0, 0, 1, 6, 6)',
       'matrix(1, 0, 0, 1, 3, 3)',
     ]);
-    // Skwasm pre-transforms the clips instead of applying the transforms
-    // stepwise in each clip:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isSkwasm);
+  });
 
   test('converts device pixels to logical pixels (no clips)', () async {
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
@@ -483,9 +499,7 @@ Future<void> testMain() async {
 
     expect(getTransformChain(slotHost), <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)']);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
-    // Skwasm has an empty <flt-clip> element as a parent of the platform view:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isSkwasm);
+  });
 
   test('converts device pixels to logical pixels (with clips)', () async {
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
@@ -509,10 +523,7 @@ Future<void> testMain() async {
       'matrix(0.25, 0, 0, 0.25, 0.75, 0.75)',
     ]);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
-    // Skwasm pre-transforms the clips instead of applying the transforms
-    // stepwise in each clip:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isSkwasm);
+  });
 
   test('renders overlays on top of platform views', () async {
     debugOverrideJsConfiguration(
@@ -658,9 +669,7 @@ Future<void> testMain() async {
     await renderTestScene(viewCount: 0);
     _expectSceneMatches(<_EmbeddedViewMarker>[]);
     debugOverrideJsConfiguration(null);
-    // Skwasm doesn't cap the maximum number of overlays:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isSkwasm);
+  });
 
   test('correctly reuses overlays', () async {
     final ui.PictureRecorder testRecorder = ui.PictureRecorder();
@@ -784,9 +793,7 @@ Future<void> testMain() async {
       _overlay,
       _platformView,
     ]);
-    // Skwasm doesn't cap the maximum number of overlays:
-    // https://github.com/flutter/flutter/issues/172308
-  }, skip: isSkwasm);
+  });
 
   test('embeds and disposes of a platform view', () async {
     await _createPlatformView(1, platformViewType);
@@ -854,7 +861,7 @@ Future<void> testMain() async {
     // The below line should not throw an error.
     await renderScene(sb.build());
     _expectSceneMatches(<_EmbeddedViewMarker>[]);
-  }, skip: isSkwasm);
+  });
 
   test('does not create overlays for invisible platform views', () async {
     final ui.PictureRecorder testRecorder = ui.PictureRecorder();
@@ -1086,7 +1093,7 @@ Future<void> testMain() async {
       _platformView,
       _overlay,
     ]);
-  }, skip: isSkwasm);
+  });
 
   test('optimizes overlays when pictures and platform views do not overlap', () async {
     ui.Picture rectPicture(ui.Rect rect) {

@@ -657,4 +657,14 @@ class SkwasmRenderer implements Renderer {
     // TODO(harryterkelsen): See what needs to be cleaned up for tests and clear
     // it here.
   }
+
+  /// Disposes this renderer.
+  void dispose() {
+    _onViewCreatedListener.cancel();
+    _onViewDisposedListener.cancel();
+    for (final ViewRasterizer rasterizer in _rasterizers.values) {
+      rasterizer.dispose();
+    }
+    _rasterizers.clear();
+  }
 }

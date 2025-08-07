@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../../engine.dart';
 import '../color_filter.dart';
 import '../util.dart';
 import 'canvaskit_api.dart';
@@ -46,7 +47,7 @@ class ManagedSkColorFilter {
 }
 
 /// CanvasKit implementation of [ui.ColorFilter].
-abstract class CkColorFilter implements CkManagedSkImageFilterConvertible {
+abstract class CkColorFilter implements CkManagedSkImageFilterConvertible, LayerImageFilter {
   const CkColorFilter();
 
   /// Converts this color filter into an image filter.
@@ -92,6 +93,15 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible {
 
   @override
   Matrix4 get transform => Matrix4.identity();
+
+  @override
+  ui.Rect filterBounds(ui.Rect input) {
+    late ui.Rect result;
+    withSkImageFilter((SkImageFilter filter) {
+      result = rectFromSkIRect(filter.getOutputBounds(toSkRect(input)));
+    }, defaultBlurTileMode: ui.TileMode.decal);
+    return result;
+  }
 }
 
 /// A reusable identity transform matrix.

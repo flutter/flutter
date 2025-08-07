@@ -71,29 +71,6 @@ void testMain() {
       );
     });
 
-    test('clips platform views with RRects', () async {
-      ui_web.platformViewRegistry.registerViewFactory(
-        'test-platform-view',
-        (int viewId) => createDomHTMLDivElement()..id = 'view-0',
-      );
-      await createPlatformView(0, 'test-platform-view');
-
-      final LayerSceneBuilder sb = LayerSceneBuilder();
-      sb.pushOffset(0, 0);
-      sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
-      sb.addPlatformView(0, width: 10, height: 10);
-      await renderScene(sb.build());
-
-      expect(sceneHost.querySelectorAll('#sk_path_defs').single, isNotNull);
-      expect(
-        sceneHost.querySelectorAll('#sk_path_defs').single.querySelectorAll('clipPath').single,
-        isNotNull,
-      );
-      expect(sceneHost.querySelectorAll('flt-clip').single.style.clipPath, 'url("#svgClip1")');
-      expect(sceneHost.querySelectorAll('flt-clip').single.style.width, '100%');
-      expect(sceneHost.querySelectorAll('flt-clip').single.style.height, '100%');
-    });
-
     test('correctly transforms platform views', () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
@@ -632,35 +609,6 @@ void testMain() {
       // The actual contents of the platform view are kept in the dom, until
       // it's actually disposed of!
       expect(platformViewsHost.querySelectorAll('flt-platform-view'), hasLength(2));
-    });
-
-    test('removes old SVG clip definitions from the DOM when the view is recomposited', () async {
-      ui_web.platformViewRegistry.registerViewFactory(
-        'test-platform-view',
-        (int viewId) => createDomHTMLDivElement()..id = 'test-view',
-      );
-      await createPlatformView(0, 'test-platform-view');
-
-      Future<void> renderTestScene() async {
-        final LayerSceneBuilder sb = LayerSceneBuilder();
-        sb.pushOffset(0, 0);
-        sb.pushClipRRect(ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
-        sb.addPlatformView(0, width: 10, height: 10);
-        await renderScene(sb.build());
-      }
-
-      final DomNode skPathDefs = sceneHost.querySelector('#sk_path_defs')!;
-
-      expect(skPathDefs.childNodes, hasLength(0));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
-
-      await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
     });
 
     test('does not crash when a prerolled platform view is not composited', () async {

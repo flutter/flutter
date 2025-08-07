@@ -288,7 +288,6 @@ class MeasureVisitor extends LayerVisitor {
     measuringCanvas.save();
     measuringCanvas.clipRect(
       clipRect.clipRect,
-      clipOp: ui.ClipOp.intersect,
       doAntiAlias: clipRect.clipBehavior != ui.Clip.hardEdge,
     );
     if (clipRect.clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
@@ -377,7 +376,7 @@ class MeasureVisitor extends LayerVisitor {
     final ui.Rect offsetPaintBounds = imageFilter.paintBounds.shift(-imageFilter.offset);
     measuringCanvas.save();
     measuringCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
-    measuringCanvas.clipRect(offsetPaintBounds, clipOp: ui.ClipOp.intersect, doAntiAlias: false);
+    measuringCanvas.clipRect(offsetPaintBounds, doAntiAlias: false);
     final ui.Paint paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
     measuringCanvas.saveLayer(offsetPaintBounds, paint);
@@ -443,7 +442,6 @@ class MeasureVisitor extends LayerVisitor {
     // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
     measuringCanvas.clipRect(
       colorFilter.paintBounds,
-      clipOp: ui.ClipOp.intersect,
       doAntiAlias: false,
     );
 

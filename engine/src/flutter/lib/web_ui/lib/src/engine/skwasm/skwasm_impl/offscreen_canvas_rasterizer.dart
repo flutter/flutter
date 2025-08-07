@@ -6,7 +6,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../skwasm_impl.dart';
-import 'surface.dart';
 
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to

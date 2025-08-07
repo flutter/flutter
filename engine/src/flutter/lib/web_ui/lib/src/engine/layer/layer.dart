@@ -5,8 +5,6 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'layer_visitor.dart';
-
 /// A layer to be composed into a scene.
 ///
 /// A layer is the lowest-level rendering primitive. It represents an atomic

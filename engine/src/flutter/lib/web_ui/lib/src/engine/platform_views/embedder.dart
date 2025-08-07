@@ -6,15 +6,6 @@ import 'dart:math' as math;
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-/// Used for clipping and filter svg resources.
-///
-/// Position needs to be absolute since these svgs are sandwiched between
-/// canvas elements and can cause layout shifts otherwise.
-final SVGSVGElement kSvgResourceHeader = createSVGSVGElement()
-  ..setAttribute('width', 0)
-  ..setAttribute('height', 0)
-  ..style.position = 'absolute';
-
 /// This composites HTML views into the [ui.Scene].
 class PlatformViewEmbedder {
   PlatformViewEmbedder(this.sceneHost, this.rasterizer);
@@ -189,25 +180,6 @@ class PlatformViewEmbedder {
     return head;
   }
 
-  /// Clean up the old SVG clip definitions, as this platform view is about to
-  /// be recomposited.
-  void _cleanUpClipDefs(int viewId) {
-    if (_svgClipDefs.containsKey(viewId)) {
-      final DomElement clipDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
-      final List<DomElement> nodesToRemove = <DomElement>[];
-      final Set<String> oldDefs = _svgClipDefs[viewId]!;
-      for (final DomElement child in clipDefs.children) {
-        if (oldDefs.contains(child.id)) {
-          nodesToRemove.add(child);
-        }
-      }
-      for (final DomElement node in nodesToRemove) {
-        node.remove();
-      }
-      _svgClipDefs[viewId]!.clear();
-    }
-  }
-
   void _applyMutators(EmbeddedViewParams params, DomElement embeddedView, int viewId) {
     final MutatorsStack mutators = params.mutators;
     DomElement head = embeddedView;
@@ -216,7 +188,6 @@ class PlatformViewEmbedder {
         : Matrix4.translationValues(params.offset.dx, params.offset.dy, 0);
     double embeddedOpacity = 1.0;
     _resetAnchor(head);
-    _cleanUpClipDefs(viewId);
 
     for (final Mutator mutator in mutators) {
       switch (mutator.type) {
@@ -238,41 +209,27 @@ class PlatformViewEmbedder {
           clipView.style.height = '100%';
           if (mutator.rect != null) {
             final ui.Rect rect = mutator.rect!;
-            clipView.style.clip =
-                'rect(${rect.top}px, ${rect.right}px, '
-                '${rect.bottom}px, ${rect.left}px)';
+            clipView.style.clipPath =
+                'rect(${rect.top}px ${rect.right}px '
+                '${rect.bottom}px ${rect.left}px)';
           } else if (mutator.rrect != null) {
-            final LayerPath path = ui.Path() as LayerPath;
-            path.addRRect(mutator.rrect!);
-            _ensureSvgPathDefs();
-            final DomElement pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
-            _clipPathCount += 1;
-            final String clipId = 'svgClip$_clipPathCount';
-            final SVGClipPathElement newClipPath = createSVGClipPathElement();
-            newClipPath.id = clipId;
-            newClipPath.append(createSVGPathElement()..setAttribute('d', path.toSvgString()));
-
-            pathDefs.append(newClipPath);
-            // Store the id of the node instead of [newClipPath] directly. For
-            // some reason, calling `newClipPath.remove()` doesn't remove it
-            // from the DOM.
-            _svgClipDefs.putIfAbsent(viewId, () => <String>{}).add(clipId);
-            clipView.style.clipPath = 'url(#$clipId)';
+            final ui.RRect rrect = mutator.rrect!;
+            if (rrect.blRadius == rrect.brRadius &&
+                rrect.blRadius == rrect.tlRadius &&
+                rrect.blRadius == rrect.trRadius &&
+                rrect.blRadiusX == rrect.blRadiusY) {
+              clipView.style.clipPath =
+                  'rect(${rrect.top}px ${rrect.right}px '
+                  '${rrect.bottom}px ${rrect.left}px '
+                  'round ${rrect.blRadiusX}px)';
+            } else {
+              final LayerPath path = ui.Path() as LayerPath;
+              path.addRRect(mutator.rrect!);
+              clipView.style.clipPath = 'path("${path.toSvgString()}")';
+            }
           } else if (mutator.path != null) {
             final LayerPath path = (mutator.path! as LazyPath).builtPath as LayerPath;
-            _ensureSvgPathDefs();
-            final DomElement pathDefs = _svgPathDefs!.querySelector('#sk_path_defs')!;
-            _clipPathCount += 1;
-            final String clipId = 'svgClip$_clipPathCount';
-            final SVGClipPathElement newClipPath = createSVGClipPathElement();
-            newClipPath.id = clipId;
-            newClipPath.append(createSVGPathElement()..setAttribute('d', path.toSvgString()));
-            pathDefs.append(newClipPath);
-            // Store the id of the node instead of [newClipPath] directly. For
-            // some reason, calling `newClipPath.remove()` doesn't remove it
-            // from the DOM.
-            _svgClipDefs.putIfAbsent(viewId, () => <String>{}).add(clipId);
-            clipView.style.clipPath = 'url(#$clipId)';
+            clipView.style.clipPath = 'path("${path.toSvgString()}")';
           }
           _resetAnchor(clipView);
           head = clipView;
@@ -301,24 +258,6 @@ class PlatformViewEmbedder {
   void _resetAnchor(DomElement element) {
     element.style.transformOrigin = '0 0 0';
     element.style.position = 'absolute';
-  }
-
-  int _clipPathCount = 0;
-
-  DomElement? _svgPathDefs;
-
-  /// The nodes containing the SVG clip definitions needed to clip this view.
-  final Map<int, Set<String>> _svgClipDefs = <int, Set<String>>{};
-
-  /// Ensures we add a container of SVG path defs to the DOM so they can
-  /// be referred to in clip-path: url(#blah).
-  void _ensureSvgPathDefs() {
-    if (_svgPathDefs != null) {
-      return;
-    }
-    _svgPathDefs = kSvgResourceHeader.cloneNode(false) as SVGElement;
-    _svgPathDefs!.append(createSVGDefsElement()..id = 'sk_path_defs');
-    sceneHost.append(_svgPathDefs!);
   }
 
   /// Optimizes the scene to use the fewest possible canvases. This sets up
@@ -410,9 +349,8 @@ class PlatformViewEmbedder {
       }
       await rasterizer.rasterize(
         <DisplayCanvas>[debugBoundsCanvas!],
-        <ui.Picture>[
-        boundsRecorder.endRecording(),
-      ]);
+        <ui.Picture>[boundsRecorder.endRecording()],
+      );
       sceneHost.append(debugBoundsCanvas!.hostElement);
     }
 
@@ -465,8 +403,6 @@ class PlatformViewEmbedder {
     // More cleanup
     _currentCompositionParams.remove(viewId);
     _viewsToRecomposite.remove(viewId);
-    _cleanUpClipDefs(viewId);
-    _svgClipDefs.remove(viewId);
   }
 
   /// Modify the given rendering by removing canvases until the number of
@@ -672,18 +608,6 @@ class PlatformViewEmbedder {
     return result;
   }
 
-  /// Deletes SVG clip paths, useful for tests.
-  void debugCleanupSvgClipPaths() {
-    final DomElement? parent = _svgPathDefs?.children.single;
-    if (parent != null) {
-      for (DomNode? child = parent.lastChild; child != null; child = parent.lastChild) {
-        parent.removeChild(child);
-      }
-    }
-    _svgClipDefs.clear();
-    _clipPathCount = 0;
-  }
-
   static void removeElement(DomElement element) {
     element.remove();
   }
@@ -693,7 +617,6 @@ class PlatformViewEmbedder {
     _viewClipChains.keys.toList().forEach(disposeView);
     _context = EmbedderFrameContext();
     _currentCompositionParams.clear();
-    debugCleanupSvgClipPaths();
     _currentCompositionParams.clear();
     _viewClipChains.clear();
     _viewsToRecomposite.clear();
