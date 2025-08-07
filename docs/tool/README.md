@@ -39,8 +39,10 @@ cd flutter/packages/flutter_tools
 dart analyze .
 ```
 
-To format all Dart files in the repository, run the following from the root directory:
+To format:
+
 ```shell
+cd flutter/packages/flutter_tools
 dart format .
 ```
 
