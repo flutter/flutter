@@ -16,6 +16,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
@@ -89,8 +90,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   text_paint.setStrokeWidth(options.stroke_width);
   text_paint.setDrawStyle(options.stroke ? DlDrawStyle::kStroke
                                          : DlDrawStyle::kFill);
-  canvas.DrawTextFrame(frame, options.position.x, options.position.y,
-                       text_paint);
+  canvas.DrawText(DlTextImpeller::Make(frame), options.position.x,
+                  options.position.y, text_paint);
   return true;
 }
 
@@ -477,7 +478,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
       auto blob = SkTextBlob::MakeFromString(t.text, sk_font);
       ASSERT_NE(blob, nullptr);
       auto frame = MakeTextFrameFromTextBlobSkia(blob);
-      builder.DrawTextFrame(frame, 0, 0, text_paint);
+      builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
     }
     builder.Restore();
   }
@@ -622,7 +623,7 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   auto blob = SkTextBlob::MakeFromString("Hello", sk_font);
   ASSERT_NE(blob, nullptr);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
-  builder.DrawTextFrame(frame, 0, 0, text_paint);
+  builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
