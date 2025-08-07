@@ -180,7 +180,7 @@ return False
     // after attaching.
     final Future<String> futureLog = _startWaitingForLog(
       _lldbProcessStopped,
-    ).catchError(_handleAsyncError);
+    ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('device process attach --pid $appProcessId');
     await futureLog;
@@ -191,7 +191,7 @@ return False
   Future<void> _setBreakpoint() async {
     final Future<String> futureLog = _startWaitingForLog(
       _breakpointPattern,
-    ).catchError(_handleAsyncError);
+    ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln(
       r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
@@ -214,7 +214,7 @@ return False
   Future<void> _resumeProcess() async {
     final Future<String> futureLog = _startWaitingForLog(
       _lldbProcessResuming,
-    ).catchError(_handleAsyncError);
+    ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');
     await futureLog;
