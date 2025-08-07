@@ -4981,17 +4981,17 @@ class EditableTextState extends State<EditableText>
 
   // The time when the last call to [hideSystemToolbar] was made.
   Duration? _hideSystemToolbarLastTimestamp;
-  static const Duration _kSystemToolbarToggleDebounceThreshold = Duration(milliseconds: 100);
-
-  /// This is called by the [SystemContextMenu] when the platform dismisses the system
-  /// context menu.
-  void hideSystemToolbar() {
-    _hideSystemToolbarLastTimestamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
-    hideToolbar(false);
-  }
+  // The threshold that should be exceeded since the last
+  // `_hideSystemToolbarLastTimestamp` to show the toolbar
+  // in a subsequent call to [toggleToolbar].
+  Duration? _systemToolbarToggleDebounceThreshold;
 
   @override
-  void hideToolbar([bool hideHandles = true]) {
+  void hideToolbar([bool hideHandles = true, Duration? toggleDebounceDuration]) {
+    if (toggleDebounceDuration != null) {
+      _systemToolbarToggleDebounceThreshold = toggleDebounceDuration;
+      _hideSystemToolbarLastTimestamp = SchedulerBinding.instance.currentSystemFrameTimeStamp;
+    }
     // Stop listening to parent scroll events when toolbar is hidden.
     _disposeScrollNotificationObserver();
     if (hideHandles) {
@@ -5004,15 +5004,17 @@ class EditableTextState extends State<EditableText>
   }
 
   /// Toggles the visibility of the toolbar.
+  @override
   void toggleToolbar([bool hideHandles = true]) {
     final TextSelectionOverlay selectionOverlay = _selectionOverlay ??= _createSelectionOverlay();
     if (selectionOverlay.toolbarIsVisible) {
       hideToolbar(hideHandles);
     } else {
       if (_hideSystemToolbarLastTimestamp != null &&
+          _systemToolbarToggleDebounceThreshold != null &&
           (SchedulerBinding.instance.currentSystemFrameTimeStamp -
                   _hideSystemToolbarLastTimestamp!) <
-              _kSystemToolbarToggleDebounceThreshold) {
+              _systemToolbarToggleDebounceThreshold!) {
         // Do not show the system toolbar if it was only just hidden. This is
         // needed to prevent the system toolbar from being shown again when tapping
         // the selection to toggle the toolbar on iOS.
@@ -5031,6 +5033,7 @@ class EditableTextState extends State<EditableText>
         return;
       } else {
         _hideSystemToolbarLastTimestamp = null;
+        _systemToolbarToggleDebounceThreshold = null;
       }
       showToolbar();
     }
