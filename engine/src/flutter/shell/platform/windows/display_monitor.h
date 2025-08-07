@@ -6,16 +6,19 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_DISPLAY_MONITOR_H_
 
 #include <windows.h>
-#include "shell/platform/windows/windows_proc_table.h"
+#include <memory>
+#include <vector>
+
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/windows_proc_table.h"
 
 namespace flutter {
 
 class FlutterWindowsEngine;
 class DisplayMonitor {
  public:
-  DisplayMonitor(FlutterWindowsEngine* engine,
-                 std::shared_ptr<WindowsProcTable> win32);
-  virtual ~DisplayMonitor();
+  explicit DisplayMonitor(FlutterWindowsEngine* engine);
+  ~DisplayMonitor();
 
   // Updates the display information and notifies the engine
   void UpdateDisplays();
@@ -27,6 +30,9 @@ class DisplayMonitor {
                            WPARAM wparam,
                            LPARAM lparam,
                            LRESULT* result);
+
+  // Get the display information for all displays
+  std::vector<FlutterEngineDisplay> GetDisplays() const;
 
  private:
   // Called by EnumDisplayMonitors once for each display.

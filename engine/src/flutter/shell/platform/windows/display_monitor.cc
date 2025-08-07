@@ -15,19 +15,14 @@ namespace {
 
 // Data structure to pass to the display enumeration callback.
 struct MonitorEnumState {
-  DisplayMonitor* display_monitor;
+  const DisplayMonitor* display_monitor;
   std::vector<FlutterEngineDisplay>* displays;
 };
 
 }  // namespace
 
-DisplayMonitor::DisplayMonitor(FlutterWindowsEngine* engine,
-                               std::shared_ptr<WindowsProcTable> win32)
-    : engine_(engine), win32_(std::move(win32)) {
-  if (win32_ == nullptr) {
-    win32_ = std::make_shared<WindowsProcTable>();
-  }
-}
+DisplayMonitor::DisplayMonitor(FlutterWindowsEngine* engine)
+    : engine_(engine), win32_(engine->windows_proc_table()) {}
 
 DisplayMonitor::~DisplayMonitor() {}
 
@@ -36,7 +31,7 @@ BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
                                                   LPRECT rect,
                                                   LPARAM data) {
   MonitorEnumState* state = reinterpret_cast<MonitorEnumState*>(data);
-  DisplayMonitor* self = state->display_monitor;
+  const DisplayMonitor* self = state->display_monitor;
   std::vector<FlutterEngineDisplay>* displays = state->displays;
 
   MONITORINFOEXW monitor_info = {};
@@ -62,7 +57,7 @@ BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
 
   FlutterEngineDisplay display = {};
   display.struct_size = sizeof(FlutterEngineDisplay);
-  display.display_id = displays->size() + 1;
+  display.display_id = reinterpret_cast<FlutterEngineDisplayId>(monitor);
   display.single_display = false;
   display.refresh_rate = dev_mode.dmDisplayFrequency;
   display.width = monitor_info.rcMonitor.right - monitor_info.rcMonitor.left;
@@ -75,15 +70,7 @@ BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
 }
 
 void DisplayMonitor::UpdateDisplays() {
-  std::vector<FlutterEngineDisplay> displays;
-  MonitorEnumState state = {this, &displays};
-  win32_->EnumDisplayMonitors(nullptr, nullptr, EnumMonitorCallback,
-                              reinterpret_cast<LPARAM>(&state));
-
-  if (displays.size() == 1) {
-    displays[0].single_display = true;
-  }
-
+  auto displays = GetDisplays();
   engine_->UpdateDisplay(displays);
 }
 
@@ -99,6 +86,19 @@ bool DisplayMonitor::HandleWindowMessage(HWND hwnd,
       break;
   }
   return false;
+}
+
+std::vector<FlutterEngineDisplay> DisplayMonitor::GetDisplays() const {
+  std::vector<FlutterEngineDisplay> displays;
+  MonitorEnumState state = {this, &displays};
+  win32_->EnumDisplayMonitors(nullptr, nullptr, EnumMonitorCallback,
+                              reinterpret_cast<LPARAM>(&state));
+
+  if (displays.size() == 1) {
+    displays[0].single_display = true;
+  }
+
+  return displays;
 }
 
 }  // namespace flutter

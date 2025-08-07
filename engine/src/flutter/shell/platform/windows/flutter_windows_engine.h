@@ -27,7 +27,6 @@
 #include "flutter/shell/platform/windows/accessibility_plugin.h"
 #include "flutter/shell/platform/windows/compositor.h"
 #include "flutter/shell/platform/windows/cursor_handler.h"
-#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/egl/manager.h"
 #include "flutter/shell/platform/windows/egl/proc_table.h"
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
@@ -57,6 +56,7 @@ namespace flutter {
 constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
+class DisplayMonitor;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(

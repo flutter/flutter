@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/compositor_opengl.h"
 #include "flutter/shell/platform/windows/compositor_software.h"
+#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
 #include "flutter/shell/platform/windows/system_utils.h"
@@ -200,8 +201,7 @@ FlutterWindowsEngine::FlutterWindowsEngine(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
-  display_monitor_ =
-      std::make_unique<DisplayMonitor>(this, windows_proc_table_);
+  display_monitor_ = std::make_unique<DisplayMonitor>(this);
 
   window_proc_delegate_manager_->RegisterTopLevelWindowProcDelegate(
       [](HWND hwnd, UINT msg, WPARAM wpar, LPARAM lpar, void* user_data,

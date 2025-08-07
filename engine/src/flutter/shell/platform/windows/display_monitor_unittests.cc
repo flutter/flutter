@@ -32,11 +32,12 @@ class DisplayMonitorTest : public WindowsTest {};
 
 // Test that the display monitor correctly handles multiple monitors
 TEST_F(DisplayMonitorTest, MultipleMonitors) {
-  FlutterWindowsEngineBuilder builder(GetContext());
-  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
-
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
+
+  FlutterWindowsEngineBuilder builder(GetContext());
+  builder.SetWindowsProcTable(mock_windows_proc_table);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
 
   HMONITOR mock_monitor1 = reinterpret_cast<HMONITOR>(123);
   HMONITOR mock_monitor2 = reinterpret_cast<HMONITOR>(456);
@@ -78,29 +79,28 @@ TEST_F(DisplayMonitorTest, MultipleMonitors) {
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplaySettings(_, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine and proc table
-  auto display_monitor =
-      std::make_unique<DisplayMonitor>(engine.get(), mock_windows_proc_table);
+  // Create the display monitor with the mock engine
+  auto display_monitor = std::make_unique<DisplayMonitor>(engine.get());
 
   display_monitor->UpdateDisplays();
 }
 
 // Test that the display monitor correctly handles a display change message
 TEST_F(DisplayMonitorTest, HandleDisplayChangeMessage) {
-  // Create a mock engine
-  FlutterWindowsEngineBuilder builder(GetContext());
-  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
-
   // Create a mock Windows proc table
   auto mock_windows_proc_table =
       std::make_shared<NiceMock<MockWindowsProcTable>>();
 
+  // Create a mock engine
+  FlutterWindowsEngineBuilder builder(GetContext());
+  builder.SetWindowsProcTable(mock_windows_proc_table);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
   EXPECT_CALL(*mock_windows_proc_table, EnumDisplayMonitors(_, _, _, _))
       .WillRepeatedly(Return(TRUE));
 
-  // Create the display monitor with the mock engine and proc table
-  auto display_monitor =
-      std::make_unique<DisplayMonitor>(engine.get(), mock_windows_proc_table);
+  // Create the display monitor with the mock engine
+  auto display_monitor = std::make_unique<DisplayMonitor>(engine.get());
 
   // Test handling a display change message
   HWND dummy_hwnd = reinterpret_cast<HWND>(1);
