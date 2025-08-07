@@ -315,12 +315,19 @@ void testMain() {
         isCalled = true;
       };
 
+      const ui.TypographySettings expectedTypographySettings = ui.TypographySettings(
+        lineHeight: 2.0,
+        letterSpacing: 1.0,
+        wordSpacing: 4.0,
+        paragraphSpacing: 10.0,
+      );
       style.text =
           'html *{ line-height: 2 !important; word-spacing: 4px !important; letter-spacing: 1px !important; margin-bottom: 10px !important; }';
       root.append(style);
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
 
       isCalled = false;
 
@@ -328,6 +335,7 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isFalse);
       expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, const ui.TypographySettings());
 
       isCalled = false;
 
@@ -335,6 +343,7 @@ void testMain() {
       await waitForResizeObserver();
       expect(root.contains(style), isTrue);
       expect(isCalled, isTrue);
+      expect(ui.PlatformDispatcher.instance.typographySettings, expectedTypographySettings);
     });
 
     test('disposes all its views', () {
