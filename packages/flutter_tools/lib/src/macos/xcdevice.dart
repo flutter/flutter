@@ -592,14 +592,6 @@ class XCDevice {
           }
         }
 
-        final coreDeviceLauncher = IOSCoreDeviceLauncher(
-          coreDeviceControl: _coreDeviceControl,
-          logger: _logger,
-          xcodeDebug: _xcodeDebug,
-          fileSystem: globals.fs,
-          processUtils: _processUtils,
-        );
-
         deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
@@ -613,7 +605,13 @@ class XCDevice {
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
-          coreDeviceLauncher: coreDeviceLauncher,
+          coreDeviceLauncher: IOSCoreDeviceLauncher(
+            coreDeviceControl: _coreDeviceControl,
+            logger: _logger,
+            xcodeDebug: _xcodeDebug,
+            fileSystem: globals.fs,
+            processUtils: _processUtils,
+          ),
           xcodeDebug: _xcodeDebug,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,

@@ -207,9 +207,11 @@ const omitLegacyVersionFile = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
-/// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off, Xcode debugging is used instead.
+/// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
+/// Xcode debugging is used instead.
 const lldbDebugging = Feature(
-  name: 'support for debugging with LLDB for physical iOS devices. If LLDB debugging is off, Xcode debugging is used instead.',
+  name: 'support for debugging with LLDB for physical iOS devices',
+  extraHelpText: 'If LLDB debugging is off, Xcode debugging is used instead.',
   configSetting: 'enable-lldb-debugging',
   environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),

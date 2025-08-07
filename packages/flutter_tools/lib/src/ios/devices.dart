@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -58,6 +59,15 @@ In the meantime, we recommend these temporary workarounds:
 * If you must use a device updated to $deviceVersion, use Flutter's release or
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
+
+enum IOSDeploymentMethod {
+  iosDeployLaunch,
+  iosDeployLaunchAndAttach,
+  coreDeviceWithoutDebugger,
+  coreDeviceWithLLDB,
+  coreDeviceWithXcode,
+  coreDeviceWithXcodeFallback,
+}
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
@@ -518,6 +528,8 @@ class IOSDevice extends Device {
       interfaceType: connectionInterface,
     );
     Status startAppStatus = _logger.startProgress('Installing and launching...');
+
+    IOSDeploymentMethod? deploymentMethod;
     try {
       ProtocolDiscovery? vmServiceDiscovery;
       var installationResult = 1;
@@ -533,18 +545,21 @@ class IOSDevice extends Device {
       }
 
       if (isCoreDevice) {
-        installationResult =
-            await _startAppOnCoreDevice(
-              debuggingOptions: debuggingOptions,
-              package: package,
-              launchArguments: launchArguments,
-              mainPath: mainPath,
-              discoveryTimeout: discoveryTimeout,
-              shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
-            )
-            ? 0
-            : 1;
+        final (
+          bool result,
+          IOSDeploymentMethod coreDeviceDeploymentMethod,
+        ) = await _startAppOnCoreDevice(
+          debuggingOptions: debuggingOptions,
+          package: package,
+          launchArguments: launchArguments,
+          mainPath: mainPath,
+          discoveryTimeout: discoveryTimeout,
+          shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+        );
+        installationResult = result ? 0 : 1;
+        deploymentMethod = coreDeviceDeploymentMethod;
       } else if (iosDeployDebugger == null) {
+        deploymentMethod = IOSDeploymentMethod.iosDeployLaunch;
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
@@ -554,15 +569,30 @@ class IOSDevice extends Device {
           uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
+        deploymentMethod = IOSDeploymentMethod.iosDeployLaunchAndAttach;
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
+        globals.analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'launch failed',
+          ),
+        );
         _printInstallError(bundle);
         await dispose();
         return LaunchResult.failed();
       }
 
       if (!debuggingOptions.debuggingEnabled) {
+        globals.analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'release success',
+          ),
+        );
         return LaunchResult.succeeded();
       }
 
@@ -621,6 +651,13 @@ class IOSDevice extends Device {
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
           await dispose();
+          globals.analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: deploymentMethod.name,
+              result: 'wireless debugging failed',
+            ),
+          );
           return LaunchResult.failed();
         }
 
@@ -677,13 +714,36 @@ class IOSDevice extends Device {
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
         await dispose();
+        globals.analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'debugging failed',
+          ),
+        );
         return LaunchResult.failed();
       }
+      globals.analytics.send(
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: deploymentMethod.name,
+          result: 'debugging success',
+        ),
+      );
       return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       await dispose();
+      if (deploymentMethod != null) {
+        globals.analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'process exception',
+          ),
+        );
+      }
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
@@ -880,7 +940,7 @@ class IOSDevice extends Device {
   ///
   /// Therefore, when starting an app on a CoreDevice, use `devicectl` when
   /// debugging is not enabled. Otherwise, use Xcode automation.
-  Future<bool> _startAppOnCoreDevice({
+  Future<(bool, IOSDeploymentMethod)> _startAppOnCoreDevice({
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
     required List<String> launchArguments,
@@ -890,12 +950,13 @@ class IOSDevice extends Device {
   }) async {
     // When starting the app in release mode, do not launch with a debugger.
     if (!debuggingOptions.debuggingEnabled) {
-      return _coreDeviceLauncher.launchAppWithoutDebugger(
+      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithoutDebugger(
         deviceId: id,
         bundlePath: package.deviceBundlePath,
         bundleId: package.id,
         launchArguments: launchArguments,
       );
+      return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
     }
 
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
@@ -913,7 +974,15 @@ class IOSDevice extends Device {
       // If it succeeds to launch with LLDB, return, otherwise continue on to
       // try launching with Xcode.
       if (launchSuccess) {
-        return launchSuccess;
+        return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
+      } else {
+        globals.analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+            result: 'launch failed',
+          ),
+        );
       }
     }
 
@@ -946,7 +1015,7 @@ class IOSDevice extends Device {
     );
 
     timer.cancel();
-    return launchSuccess;
+    return (launchSuccess, IOSDeploymentMethod.coreDeviceWithXcode);
   }
 
   @override
