@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -29,6 +30,21 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   String pageTitle = getUseCaseName(SnackBarUseCase());
 
+  void showAccessibleSnackBar(String message, {VoidCallback? onAction}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: onAction != null ? SnackBarAction(label: 'Action', onPressed: onAction) : null,
+      ),
+    );
+
+    // Slight delay ensures announcement happens AFTER snackbar shows
+    Future<void>.delayed(const Duration(milliseconds: 100), () {
+      debugPrint('Announcing: $message');
+      SemanticsService.announce(message, TextDirection.ltr);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,19 +58,17 @@ class MainWidgetState extends State<MainWidget> {
             ElevatedButton(
               child: const Text('Show Snackbar'),
               onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
+                showAccessibleSnackBar('Awesome Snackbar!');
               },
             ),
             ElevatedButton(
               child: const Text('Show Snackbar with action '),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Awesome Snackbar!'),
-                    action: SnackBarAction(label: 'Action', onPressed: () {}),
-                  ),
+                showAccessibleSnackBar(
+                  'Awesome Snackbar!',
+                  onAction: () {
+                    SnackBarAction(label: 'Action', onPressed: () {});
+                  },
                 );
               },
             ),
