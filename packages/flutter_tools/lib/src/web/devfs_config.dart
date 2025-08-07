@@ -112,7 +112,7 @@ class WebDevServerConfig {
     );
   }
 
-  static bool _loadFromFileAlreadyLogged = false;
+  static var _loadFromFileAlreadyLogged = false;
 
   /// Creates a [WebDevServerConfig] from the `web_dev_config.yaml` file.
   ///
