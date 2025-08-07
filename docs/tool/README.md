@@ -39,10 +39,9 @@ cd flutter/packages/flutter_tools
 dart analyze .
 ```
 
-To format code, run: 
-```
+To format all Dart files in the repository, run the following from the root directory:
+```shell
 dart format .
-```
 
 Note, if relying on in editor analysis and you check out a new Flutter SDK commit,
 you may need to restart your editor so that a new analyzer instance is started from
