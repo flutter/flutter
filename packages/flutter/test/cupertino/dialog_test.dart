@@ -2461,7 +2461,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
-       expect(isCancelSelected, isFalse);
+      expect(isCancelSelected, isFalse);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
@@ -2479,10 +2479,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultLightFocusColor =
-        HSLColor.fromColor(
-          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
-        ).toColor();
+    final Color defaultLightFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
+    ).toColor();
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2538,10 +2537,9 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    final Color defaultDarkFocusColor =
-        HSLColor.fromColor(
-          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
-        ).toColor();
+    final Color defaultDarkFocusColor = HSLColor.fromColor(
+      CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
+    ).toColor();
 
     await tester.pumpWidget(
       TestScaffoldApp(
@@ -2599,8 +2597,9 @@ void main() {
 
     const Color focusColor = Colors.orange;
 
-    final Color defaultDarkFocusColor =
-        HSLColor.fromColor(focusColor.withOpacity(kCupertinoButtonTintedOpacityDark)).toColor();
+    final Color defaultDarkFocusColor = HSLColor.fromColor(
+      focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
+    ).toColor();
 
     await tester.pumpWidget(
       TestScaffoldApp(
