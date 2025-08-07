@@ -20,7 +20,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'focus_traversal.dart';
+import 'cupertino_focus_halo.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
@@ -1460,31 +1460,6 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     widget.onPressed();
   }
 
-  // Calculates the font size for action sheet buttons.
-  //
-  // The `contextBodySize` is the body font size specified by context. The
-  // return value is the button font size, including the effect of context font
-  // scale factor. Divide by context font scale factor before using in a `Text`.
-  static double _buttonFontSize(double contextBodySize) {
-    // It is observed that the native action sheet buttons use font sizes that
-    // deviate from standard HIG specifications in a non-linear way. The following
-    // table shows the regular body font size vs the button font size:
-    //
-    //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
-    //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
-    //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
-
-    // For very small or very large text, simple rules can be observed.
-    // For mid-sized text, piecewise linear interpolation is used.
-    return switch (contextBodySize) {
-      <= 17 => 21.0,
-      <= 19 => lerpDouble(21.0, 23.0, (contextBodySize - 17.0) / (19.0 - 17.0))!,
-      <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0) / (21.0 - 19.0))!,
-      <= 24 => 24.0,
-      _ => contextBodySize,
-    };
-  }
-
   void _onShowFocusHighlight(bool showHighlight) {
     setState(() {
       _isFocused = showHighlight;
@@ -1529,17 +1504,63 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
                   _isFocused
                       ? DecoratedBox(
                         decoration: BoxDecoration(color: effectiveFocusBackgroundColor),
-                        child: _buildContent(),
+                        child: _ActionSheetActionContent(
+                          isDestructiveAction: widget.isDestructiveAction,
+                          isDefaultAction: widget.isDefaultAction,
+                          child: widget.child,
+                        ),
                       )
-                      : _buildContent(),
+                      : _ActionSheetActionContent(
+                        isDestructiveAction: widget.isDestructiveAction,
+                        isDefaultAction: widget.isDefaultAction,
+                        child: widget.child,
+                      ),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildContent() {
+class _ActionSheetActionContent extends StatelessWidget {
+  const _ActionSheetActionContent({
+    required this.isDestructiveAction,
+    required this.isDefaultAction,
+    required this.child,
+  });
+
+  final bool isDestructiveAction;
+  final bool isDefaultAction;
+  final Widget child;
+
+  // Calculates the font size for action sheet buttons.
+  //
+  // The `contextBodySize` is the body font size specified by context. The
+  // return value is the button font size, including the effect of context font
+  // scale factor. Divide by context font scale factor before using in a `Text`.
+  static double _buttonFontSize(double contextBodySize) {
+    // It is observed that the native action sheet buttons use font sizes that
+    // deviate from standard HIG specifications in a non-linear way. The following
+    // table shows the regular body font size vs the button font size:
+    //
+    //  Text scale  | xs |  s |  m |  l | xl | xxl | xxxl | ax1 | ax2 | ax3 | ax4 | ax5
+    //  Body font   | 14 | 15 | 16 | 17 | 19 |  21 |  23  |  28 |  33 |  40 |  47 |  53
+    //  Button font | 21 | 21 | 21 | 21 | 23 |  24 |  24  |  28 |  33 |  40 |  47 |  53
+
+    // For very small or very large text, simple rules can be observed.
+    // For mid-sized text, piecewise linear interpolation is used.
+    return switch (contextBodySize) {
+      <= 17 => 21.0,
+      <= 19 => lerpDouble(21.0, 23.0, (contextBodySize - 17.0) / (19.0 - 17.0))!,
+      <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0) / (21.0 - 19.0))!,
+      <= 24 => 24.0,
+      _ => contextBodySize,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // The context scale factor is derived from the current body size and the
     // standard body size in "large".
     const double higLargeBodySize = 17.0;
@@ -1551,12 +1572,12 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
       // `Text` will scale the provided font size inside, so its parameter is
       // unscaled first.
       fontSize: fontSize / contextScaleFactor,
-      color: widget.isDestructiveAction
+      color: isDestructiveAction
           ? CupertinoDynamicColor.resolve(CupertinoColors.systemRed, context)
           : CupertinoTheme.of(context).primaryColor,
     );
 
-    if (widget.isDefaultAction) {
+    if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
     final double verticalPadding =
@@ -1573,7 +1594,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
       child: DefaultTextStyle(
         style: style,
         textAlign: TextAlign.center,
-        child: Center(child: widget.child),
+        child: Center(child: child),
       ),
     );
   }
