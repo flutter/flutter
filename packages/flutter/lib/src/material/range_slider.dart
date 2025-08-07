@@ -639,6 +639,12 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       if (tapValue > values.end || inEndTouchTarget) {
         return Thumb.end;
       }
+      // choose the closest thumb and snap position.
+      if (tapValue - values.start < values.end - tapValue) {
+        return Thumb.start;
+      } else {
+        return Thumb.end;
+      }
     }
     return null;
   }
