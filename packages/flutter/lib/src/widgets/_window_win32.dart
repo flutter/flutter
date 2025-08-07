@@ -16,6 +16,8 @@ import 'binding.dart';
 typedef HWND = Pointer<Void>;
 
 const int _WM_SIZE = 0x0005;
+const int _WM_FOCUS = 0x0007;
+const int _WM_KILLFOCUS = 0x0008;
 const int _WM_CLOSE = 0x0010;
 
 const int _SW_RESTORE = 9;
@@ -29,13 +31,20 @@ const int _SW_MINIMIZE = 6;
 /// When finished handling messages, implementations should deregister
 /// themselves with [WindowingOwnerWIn32.removeMessageHandler].
 ///
+/// {@macro flutter.widgets.windowing.experimental}
+///
 /// See also:
 ///
 ///  * [WindowingOwnerWin32], the class that manages these handlers.
+@internal
 abstract class WindowsMessageHandler {
-  /// Handles a window message. Returned value, if not null will be
-  /// returned to the system as LRESULT and will stop all other
-  /// handlers from being called.
+  /// Handles a window message.
+  ///
+  /// Returned value, if not null will be returned to the system as LRESULT
+  /// and will stop all other handlers from being called.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   int? handleWindowsMessage(
     FlutterView view,
     HWND windowHandle,
@@ -50,14 +59,24 @@ abstract class WindowsMessageHandler {
 ///  If [Platform.isWindows] is false, then the constructor will throw an
 /// [UnsupportedError].
 ///
+/// {@macro flutter.widgets.windowing.experimental}
+///
 /// See also:
 ///
 ///  * [WindowingOwner], the abstract class that manages native windows.
+@internal
 class WindowingOwnerWin32 extends WindowingOwner {
   /// Creates a new [WindowingOwnerWin32] instance.
   ///
   /// If [Platform.isWindows] is false, then this constructor will throw an
   /// [UnsupportedError].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [WindowingOwner], the abstract class that manages native windows.
+  @internal
   WindowingOwnerWin32() {
     if (!Platform.isWindows) {
       UnsupportedError('Only available on the Win32 platform');
@@ -73,6 +92,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
 
   final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
 
+  @internal
   @override
   RegularWindowController createRegularWindowController({
     Size? preferredSize,
@@ -101,10 +121,13 @@ class WindowingOwnerWin32 extends WindowingOwner {
   /// Callers must remove their message handlers using
   /// [WindowingOwnerWin32.removeMessageHandler].
   ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
   /// See also:
   ///
   ///  * [WindowsMessageHandler], the interface for message handlers.
   ///  * [WindowingOwnerWin32.removeMessageHandler], to remove message handlers.
+  @internal
   void addMessageHandler(WindowsMessageHandler handler) {
     if (_messageHandlers.contains(handler)) {
       return;
@@ -117,10 +140,13 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   /// If the handler has not been registered, this method has no effect.
   ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
   /// See also:
   ///
   ///  * [WindowsMessageHandler], the interface for message handlers.
   ///  * [WindowingOwnerWin32.addMessageHandler], to register message handlers.
+  @internal
   void removeMessageHandler(WindowsMessageHandler handler) {
     _messageHandlers.remove(handler);
   }
@@ -146,6 +172,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     }
   }
 
+  @internal
   @override
   bool hasTopLevelWindows() {
     return _hasTopLevelWindows(PlatformDispatcher.instance.engineId!);
@@ -164,6 +191,12 @@ class WindowingOwnerWin32 extends WindowingOwner {
 ///
 /// If [Platform.isWindows] is false, then the constructor will throw an
 /// [UnsupportedError].
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [RegularWindowController], the base class for regular windows.
 class RegularWindowControllerWin32 extends RegularWindowController
     implements WindowsMessageHandler {
   /// Creates a new regular window controller for Win32.
@@ -173,6 +206,12 @@ class RegularWindowControllerWin32 extends RegularWindowController
   ///
   /// When this constructor completes the native window has been created and
   /// has a view associated with it.
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [RegularWindowController], the base class for regular windows.
+  @internal
   RegularWindowControllerWin32({
     required WindowingOwnerWin32 owner,
     required RegularWindowControllerDelegate delegate,
@@ -267,6 +306,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
     request.ref.from(constraints);
     _setWindowConstraints(getWindowHandle(), request);
     ffi.calloc.free(request);
+
+    notifyListeners();
   }
 
   @override
@@ -275,6 +316,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
     final Pointer<ffi.Utf16> titlePointer = title.toNativeUtf16();
     _setWindowTitle(getWindowHandle(), titlePointer);
     ffi.calloc.free(titlePointer);
+
+    notifyListeners();
   }
 
   @override
@@ -351,8 +394,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
-    } else if (message == _WM_SIZE) {
-      // TODO: notify context of size change
+    } else if (message == _WM_SIZE || message == _WM_FOCUS || message == _WM_KILLFOCUS) {
+      notifyListeners();
     }
     return null;
   }
@@ -374,13 +417,6 @@ class RegularWindowControllerWin32 extends RegularWindowController
     symbol: 'InternalFlutterWindows_WindowManager_GetWindowContentSize',
   )
   external static _ActualWindowSize _getWindowContentSize(Pointer<Void> windowHandle);
-
-  @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf16>, Int32)>(symbol: 'GetWindowTextW')
-  external static void _getWindowTitle(
-    Pointer<Void> windowHandle,
-    Pointer<ffi.Utf16> title,
-    int maxLength,
-  );
 
   @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf16>)>(symbol: 'SetWindowTextW')
   external static void _setWindowTitle(Pointer<Void> windowHandle, Pointer<ffi.Utf16> title);

@@ -19,6 +19,7 @@ import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../foundation/_features.dart';
 import 'binding.dart';
@@ -62,7 +63,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 ///
 ///  * [RegularWindowController], the controller for regular top-level windows.
 @internal
-sealed class BaseWindowController {
+sealed class BaseWindowController extends ChangeNotifier {
   /// The current size of the drawable area of the window.
   ///
   /// This might differ from the requested size.
@@ -506,10 +507,14 @@ class RegularWindow extends StatelessWidget {
   @internal
   @override
   Widget build(BuildContext context) {
-    return WindowScope(
-      controller: controller,
-      child: View(view: controller.rootView, child: child),
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (BuildContext context, Widget? _) => WindowScope(
+        controller: controller,
+        child: View(view: controller.rootView, child: child),
+      ),
     );
+    ;
   }
 }
 
