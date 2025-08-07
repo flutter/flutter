@@ -913,7 +913,7 @@ class SingletonFlutterWindow extends FlutterView {
 //
 // When changes are made to this class, the equivalent APIs in each of the
 // embedders *must* be updated.
-class TypographySettings {
+final class TypographySettings {
   /// Creates a new [TypographySettings].
   const TypographySettings({
     this.lineHeight,
@@ -936,6 +936,18 @@ class TypographySettings {
 
   /// The amount of space (in logical pixels) to add between each paragraph.
   final double? paragraphSpacing;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TypographySettings &&
+        other.lineHeight == lineHeight &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.paragraphSpacing == paragraphSpacing;
+  }
+
+  @override
+  int get hashCode => Object.hash(lineHeight, letterSpacing, wordSpacing, paragraphSpacing);
 }
 
 /// Additional accessibility features that may be enabled by the platform.
