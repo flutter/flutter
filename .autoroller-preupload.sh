@@ -22,7 +22,7 @@ LICENSES_PATH="$REPO_PATH/engine/src/flutter/sky/packages/sky_engine/LICENSE"
 DATA_PATH="$REPO_PATH/engine/src/flutter/tools/licenses_cpp/data"
 
 # This calls `gn gen`.
-"$GN" --runtime-mode profile --no-goma --no-rbe
+"$GN" --runtime-mode profile --no-goma --no-rbe --enable-minimal-linux
 ninja -C "$PROFILE_PATH" licenses_cpp
 "$LICENSE_CPP" \
   --working_dir="$WORKING_DIR" \
