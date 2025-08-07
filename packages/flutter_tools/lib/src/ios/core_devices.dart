@@ -536,7 +536,6 @@ class IOSCoreDeviceControl {
   ///
   /// If [startStopped] is true, the app will be launched and paused, waiting
   /// for a debugger to attach.
-  @visibleForTesting
   Future<IOSCoreDeviceLaunchResult?> launchApp({
     required String deviceId,
     required String bundleId,

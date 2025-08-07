@@ -40,6 +40,7 @@ import 'iproxy.dart';
 import 'mac.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
+import 'xcodeproj.dart';
 
 const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
@@ -933,16 +934,24 @@ class IOSDevice extends Device {
     );
   }
 
+  /// Uses either `devicectl` or Xcode automation to install, launch, and debug
+  /// apps on physical iOS devices.
+  ///
   /// Starting with Xcode 15 and iOS 17, `ios-deploy` stopped working due to
   /// the new CoreDevice connectivity stack. Previously, `ios-deploy` was used
   /// to install the app, launch the app, and start `debugserver`.
+  ///
   /// Xcode 15 introduced a new command line tool called `devicectl` that
   /// includes much of the functionality supplied by `ios-deploy`. However,
-  /// `devicectl` lacks the ability to start a `debugserver` and therefore `ptrace`, which are needed
-  /// for debug mode due to using a JIT Dart VM.
+  /// `devicectl` lacked the ability to start a `debugserver` and therefore `ptrace`,
+  /// which are needed for debug mode due to using a JIT Dart VM.
+  ///
+  /// Xcode 16 introduced a command to lldb that allows you to start a debugserver, which
+  /// can be used in unison with `devicectl`.
   ///
   /// Therefore, when starting an app on a CoreDevice, use `devicectl` when
-  /// debugging is not enabled. Otherwise, use Xcode automation.
+  /// debugging is not enabled. If using Xcode 16, use `devicectl` and `lldb`.
+  /// Otherwise use Xcode automation.
   Future<(bool, IOSDeploymentMethod)> _startAppOnCoreDevice({
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
@@ -951,14 +960,26 @@ class IOSDevice extends Device {
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
-    // When starting the app in release mode, do not launch with a debugger.
     if (!debuggingOptions.debuggingEnabled) {
-      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithoutDebugger(
+      // Release mode
+
+      // Install app to device
+      final bool installSuccess = await _coreDeviceControl.installApp(
         deviceId: id,
         bundlePath: package.deviceBundlePath,
+      );
+      if (!installSuccess) {
+        return (installSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
+      }
+
+      // Launch app to device
+      final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
+        deviceId: id,
         bundleId: package.id,
         launchArguments: launchArguments,
       );
+      final bool launchSuccess = launchResult != null && launchResult.outcome == 'success';
+
       return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
     }
 
@@ -1003,22 +1024,76 @@ class IOSDevice extends Device {
       );
     });
 
+    XcodeDebugProject debugProject;
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    if (package is PrebuiltIOSApp) {
+      debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
+        package.deviceBundlePath,
+        templateRenderer: globals.templateRenderer,
+        verboseLogging: _logger.isVerbose,
+      );
+    } else if (package is BuildableIOSApp) {
+      // Before installing/launching/debugging with Xcode, update the build
+      // settings to use a custom configuration build directory so Xcode
+      // knows where to find the app bundle to launch.
+      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
+      await updateGeneratedXcodeProperties(
+        project: flutterProject,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        configurationBuildDir: bundle.parent.absolute.path,
+      );
+
+      final IosProject project = package.project;
+      final XcodeProjectInfo? projectInfo = await project.projectInfo();
+      if (projectInfo == null) {
+        globals.printError('Xcode project not found.');
+        return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+      }
+      if (project.xcodeWorkspace == null) {
+        globals.printError('Unable to get Xcode workspace.');
+        return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+      }
+      final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
+      if (scheme == null) {
+        projectInfo.reportFlavorNotFoundAndExit();
+      }
+
+      _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
+      debugProject = XcodeDebugProject(
+        scheme: scheme,
+        xcodeProject: project.xcodeProject,
+        xcodeWorkspace: project.xcodeWorkspace!,
+        hostAppProjectName: project.hostAppProjectName,
+        expectedConfigurationBuildDir: bundle.parent.absolute.path,
+        verboseLogging: _logger.isVerbose,
+      );
+    } else {
+      // This should not happen. Currently, only PrebuiltIOSApp and
+      // BuildableIOSApp extend from IOSApp.
+      _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+      return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+    }
+
+    final List<String> filteredLaunchArguments = launchArguments
+        .where((String arg) => arg != '--enable-checked-mode' && arg != '--verify-entry-points')
+        .toList();
+
+    final bool debugSuccess = await _xcodeDebug.debugApp(
+      project: debugProject,
+      deviceId: id,
+      launchArguments: filteredLaunchArguments,
+    );
+    timer.cancel();
+
     // Kill Xcode on shutdown when running from CI
     if (debuggingOptions.usingCISystem) {
       shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
     }
 
-    final bool launchSuccess = await _coreDeviceLauncher.launchAppWithXcodeDebugger(
-      deviceId: id,
-      debuggingOptions: debuggingOptions,
-      package: package,
-      launchArguments: launchArguments,
-      mainPath: mainPath,
-      templateRenderer: globals.templateRenderer,
-    );
-
-    timer.cancel();
-    return (launchSuccess, IOSDeploymentMethod.coreDeviceWithXcode);
+    return (debugSuccess, IOSDeploymentMethod.coreDeviceWithXcode);
   }
 
   @override
@@ -1027,6 +1102,9 @@ class IOSDevice extends Device {
     final IOSDeployDebugger? deployDebugger = iosDeployDebugger;
     if (deployDebugger != null && deployDebugger.debuggerAttached) {
       return deployDebugger.exit();
+    }
+    if (_xcodeDebug.debugStarted) {
+      return _xcodeDebug.exit();
     }
     return _coreDeviceLauncher.stopApp(deviceId: id);
   }

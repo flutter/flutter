@@ -9,6 +9,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/hot_mode_tests.dart';
 import 'package:path/path.dart' as path;
 
+/// This is a test to validate that Xcode debugging still works now that LLDB is the default.
 Future<void> main() async {
   await task(() async {
     deviceOperatingSystem = DeviceOperatingSystem.ios;
