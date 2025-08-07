@@ -655,6 +655,33 @@ void main() {
   );
 
   testUsingContext(
+    'Rejects --static-assets-url value that does not end with /',
+    () async {
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+
+      await expectLater(
+        runner.run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          '--static-assets-url=i_dont_end_with_forward_slash',
+        ]),
+        throwsToolExit(
+          message:
+              'Received a --static-assets-url value of "i_dont_end_with_forward_slash"\n'
+              '--static-assets-url should end with /',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
     'flutter build web option visibility',
     () async {
       final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);

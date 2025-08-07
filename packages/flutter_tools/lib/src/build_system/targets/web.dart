@@ -661,6 +661,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
         final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
+          staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
