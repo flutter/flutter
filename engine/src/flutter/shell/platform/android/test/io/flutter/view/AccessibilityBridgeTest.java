@@ -2248,6 +2248,7 @@ public class AccessibilityBridgeTest {
     List<TestStringAttribute> hintAttributes;
     String tooltip = null;
     String linkUrl = null;
+    String locale = null;
     int textDirection = 0;
     float left = 0.0f;
     float top = 0.0f;
@@ -2315,6 +2316,12 @@ public class AccessibilityBridgeTest {
         bytes.putInt(-1);
       } else {
         strings.add(linkUrl);
+        bytes.putInt(strings.size() - 1);
+      }
+      if (locale == null) {
+        bytes.putInt(-1);
+      } else {
+        strings.add(locale);
         bytes.putInt(strings.size() - 1);
       }
       bytes.putInt(textDirection);
