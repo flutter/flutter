@@ -1111,19 +1111,19 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawText",
        {
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 10);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 20, 10);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 20);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
               r.drawText(DlTextSkia::Make(GetTestTextBlob(2)), 10, 10);
             }},

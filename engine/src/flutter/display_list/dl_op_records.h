@@ -1013,6 +1013,14 @@ struct DrawTextOp final : DrawOpBase {
   const std::shared_ptr<DlText> text;
 
   void dispatch(DlOpReceiver& receiver) const { receiver.drawText(text, x, y); }
+
+  DisplayListCompare equals(const DrawTextOp* other) const {
+    return text->getTextBlob() == other->text->getTextBlob() &&
+                   text->getTextFrame() == other->text->getTextFrame() &&
+                   x == other->x && y == other->y
+               ? DisplayListCompare::kEqual
+               : DisplayListCompare::kNotEqual;
+  }
 };
 
 // 4 byte header + 52 byte payload packs evenly into 56 bytes
