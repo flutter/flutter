@@ -23,6 +23,15 @@ const int _SW_MAXIMIZE = 3;
 const int _SW_MINIMIZE = 6;
 
 /// Abstract handler class for Windows messages.
+///
+/// Implementations of this class should register with
+/// [WindowingOwnerWin32.addMessageHandler] to begin receiving messages.
+/// When finished handling messages, implementations should deregister
+/// themselves with [WindowingOwnerWIn32.removeMessageHandler].
+///
+/// See also:
+///
+///  * [WindowingOwnerWin32], the class that manages these handlers.
 abstract class WindowsMessageHandler {
   /// Handles a window message. Returned value, if not null will be
   /// returned to the system as LRESULT and will stop all other
@@ -36,13 +45,19 @@ abstract class WindowsMessageHandler {
   );
 }
 
-/// Windowing owner implementation for Windows.
+/// [WindowingOwner] implementation for Windows.
 ///
-/// This class will only be successfully instantiated on the Win32 platform.
-/// If the platform is not on Windows, the constructor with thrown an
+///  If [Platform.isWindows] is false, then the constructor will throw an
 /// [UnsupportedError].
+///
+/// See also:
+///
+///  * [WindowingOwner], the abstract class that manages native windows.
 class WindowingOwnerWin32 extends WindowingOwner {
   /// Creates a new [WindowingOwnerWin32] instance.
+  ///
+  /// If [Platform.isWindows] is false, then this constructor will throw an
+  /// [UnsupportedError].
   WindowingOwnerWin32() {
     if (!Platform.isWindows) {
       UnsupportedError('Only available on the Win32 platform');
@@ -55,6 +70,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
     _initializeWindowing(PlatformDispatcher.instance.engineId!, request);
     ffi.calloc.free(request);
   }
+
+  final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
 
   @override
   RegularWindowController createRegularWindowController({
@@ -72,7 +89,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     );
   }
 
-  /// Register a new message handler.
+  /// Register a new [WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
   /// windows.
@@ -80,6 +97,14 @@ class WindowingOwnerWin32 extends WindowingOwner {
   /// Adding a handler multiple times has no effect.
   ///
   /// Handlers are called in the order that they are added.
+  ///
+  /// Callers must remove their message handlers using
+  /// [WindowingOwnerWin32.removeMessageHandler].
+  ///
+  /// See also:
+  ///
+  ///  * [WindowsMessageHandler], the interface for message handlers.
+  ///  * [WindowingOwnerWin32.removeMessageHandler], to remove message handlers.
   void addMessageHandler(WindowsMessageHandler handler) {
     if (_messageHandlers.contains(handler)) {
       return;
@@ -88,14 +113,17 @@ class WindowingOwnerWin32 extends WindowingOwner {
     _messageHandlers.add(handler);
   }
 
-  /// Unregister a message handler.
+  /// Unregister a [WindowsMessageHandler].
   ///
-  /// If the handler does not exist, this method has no effect.
+  /// If the handler has not been registered, this method has no effect.
+  ///
+  /// See also:
+  ///
+  ///  * [WindowsMessageHandler], the interface for message handlers.
+  ///  * [WindowingOwnerWin32.addMessageHandler], to register message handlers.
   void removeMessageHandler(WindowsMessageHandler handler) {
     _messageHandlers.remove(handler);
   }
-
-  final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
 
   void _onMessage(Pointer<_WindowsMessage> message) {
     final List<WindowsMessageHandler> handlers = List<WindowsMessageHandler>.from(_messageHandlers);
@@ -132,11 +160,19 @@ class WindowingOwnerWin32 extends WindowingOwner {
   external static void _initializeWindowing(int engineId, Pointer<_WindowingInitRequest> request);
 }
 
-/// The Win32 implementation of the regular window controller.
+/// Implementation of [RegularWindowController] for the Windows platform.
+///
+/// If [Platform.isWindows] is false, then the constructor will throw an
+/// [UnsupportedError].
 class RegularWindowControllerWin32 extends RegularWindowController
     implements WindowsMessageHandler {
-  /// Creates a new regular window controller for Win32. When this constructor
-  /// completes the FlutterView is created and framework is aware of it.
+  /// Creates a new regular window controller for Win32.
+  ///
+  /// If [Platform.isWindows] is false, then this constructor will throw an
+  /// [UnsupportedError].
+  ///
+  /// When this constructor completes the native window has been created and
+  /// has a view associated with it.
   RegularWindowControllerWin32({
     required WindowingOwnerWin32 owner,
     required RegularWindowControllerDelegate delegate,
@@ -159,6 +195,10 @@ class RegularWindowControllerWin32 extends RegularWindowController
     rootView = flutterView;
   }
 
+  final WindowingOwnerWin32 _owner;
+  final RegularWindowControllerDelegate _delegate;
+  bool _destroyed = false;
+
   @override
   Size get contentSize {
     _ensureNotDestroyed();
@@ -169,6 +209,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   @override
   String get title {
+    _ensureNotDestroyed();
     final int length = _getWindowTextLength(getWindowHandle());
     if (length == 0) {
       return '';
@@ -186,6 +227,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   @override
   bool get isActivated {
+    _ensureNotDestroyed();
     return _getForegroundWindow() == getWindowHandle();
   }
 
@@ -203,11 +245,13 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   @override
   bool get isFullscreen {
+    _ensureNotDestroyed();
     return _getFullscreen(getWindowHandle());
   }
 
   @override
   void setSize(Size? size) {
+    _ensureNotDestroyed();
     final Pointer<_WindowSizeRequest> request = ffi.calloc<_WindowSizeRequest>();
     request.ref.hasSize = size != null;
     request.ref.width = size?.width ?? 0;
@@ -218,6 +262,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   @override
   void setConstraints(BoxConstraints constraints) {
+    _ensureNotDestroyed();
     final Pointer<_WindowConstraints> request = ffi.calloc<_WindowConstraints>();
     request.ref.from(constraints);
     _setWindowConstraints(getWindowHandle(), request);
@@ -269,7 +314,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   }
 
   /// Returns HWND pointer to the top level window.
-  Pointer<Void> getWindowHandle() {
+  HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _getWindowHandle(PlatformDispatcher.instance.engineId!, rootView.viewId);
   }
@@ -279,9 +324,6 @@ class RegularWindowControllerWin32 extends RegularWindowController
       throw StateError('Window has been destroyed.');
     }
   }
-
-  final RegularWindowControllerDelegate _delegate;
-  bool _destroyed = false;
 
   @override
   void destroy() {
@@ -314,8 +356,6 @@ class RegularWindowControllerWin32 extends RegularWindowController
     }
     return null;
   }
-
-  final WindowingOwnerWin32 _owner;
 
   @Native<Int64 Function(Int64, Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_CreateRegularWindow',
