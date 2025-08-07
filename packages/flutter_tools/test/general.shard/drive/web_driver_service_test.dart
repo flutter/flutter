@@ -349,7 +349,6 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Usage? usage,
     Analytics? analytics,
     bool machine = false,
-    bool? forceDisableWebSocketConnection,
   }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(

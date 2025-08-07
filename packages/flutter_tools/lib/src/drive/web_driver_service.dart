@@ -23,7 +23,6 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
-import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -110,9 +109,6 @@ class WebDriverService extends DriverService {
       platform: _platform,
       outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
-      // Force disable WebSocket connection for WebServerDevice to avoid CI issues
-      // where Chrome extension is not available
-      forceDisableWebSocketConnection: device is WebServerDevice,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

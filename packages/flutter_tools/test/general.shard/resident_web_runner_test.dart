@@ -2047,9 +2047,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
-  var useDwdsWebSocketConnection = false;
-
-  @override
   Future<Uri> create() async {
     return baseUri;
   }
