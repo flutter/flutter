@@ -142,7 +142,9 @@ class WebDevServerConfig {
       final serverYaml = contents[_kServer] as YamlMap;
       final fileConfig = WebDevServerConfig.fromYaml(serverYaml, logger);
       if (!_loadFromFileAlreadyLogged) {
-        logger.printStatus('$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath');
+        logger.printStatus(
+          '$_kLogEntryPrefix Loaded configuration from $webDevServerConfigFilePath',
+        );
         logger.printTrace(fileConfig.toString());
         _loadFromFileAlreadyLogged = true;
       }
