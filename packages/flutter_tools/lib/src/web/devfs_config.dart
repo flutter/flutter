@@ -91,17 +91,9 @@ class WebDevServerConfig {
     }
 
     final YamlList? proxyList = _validateType<YamlList>(value: yaml[_kProxy], fieldName: _kProxy);
-    final proxyRules = <ProxyRule>[];
-    if (proxyList != null) {
-      for (final Object? item in proxyList) {
-        if (item is YamlMap) {
-          final ProxyRule? rule = ProxyRule.fromYaml(item, logger);
-          if (rule != null) {
-            proxyRules.add(rule);
-          }
-        }
-      }
-    }
+    final proxyRules = <ProxyRule>[
+      ...?proxyList?.whereType<YamlMap>().map((e) => ProxyRule.fromYaml(e, logger)).nonNulls,
+    ];
 
     return WebDevServerConfig(
       headers: headers,
