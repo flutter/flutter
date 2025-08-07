@@ -1019,7 +1019,7 @@ class DataTable extends StatelessWidget {
       label = TableRowInkWell(
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
-	onHover: onRowHover,
+        onHover: onRowHover,
         overlayColor: overlayColor,
         mouseCursor: mouseCursor,
         child: label,
@@ -1232,7 +1232,7 @@ class DataTable extends StatelessWidget {
               : () => row.onSelectChanged?.call(!row.selected),
           overlayColor: row.color ?? effectiveDataRowColor,
           onRowLongPress: row.onLongPress,
-	  onRowHover: row.onHover,
+          onRowHover: row.onHover,
           mouseCursor:
               row.mouseCursor?.resolve(states) ?? dataTableTheme.dataRowCursor?.resolve(states),
         );
