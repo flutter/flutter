@@ -365,18 +365,17 @@ class InkResponse extends StatelessWidget {
   /// Called when the user long-presses on this part of the material.
   final GestureLongPressCallback? onLongPress;
 
-  /// Called when the user releases a long press gesture on the button.
+  /// Called when the user lifts their finger after a long press on the button.
   ///
-  /// This callback is triggered after the user has held a long press and then lifts their finger,
-  /// indicating the end of the long press interaction. It does not provide position details.
+  /// This callback is triggered at the end of a long press gesture—specifically,
+  /// after the user holds a long press and then releases it. It does not include
+  /// position details.
   ///
-  /// To detect the position where the long press was released, consider using [onLongPressEnd] instead.
-  ///
-  /// Typical use cases include triggering an action only when the long press is completed,
-  /// such as showing a context menu or confirming a gesture.
+  /// Common use cases include performing an action only after the long press completes,
+  /// such as displaying a context menu or confirming a held gesture.
   ///
   /// See also:
-  ///  * [onLongPress], which is triggered when the long press gesture is recognized.
+  ///  * [onLongPress], which is triggered when the long press gesture is first recognized.
   final GestureLongPressUpCallback? onLongPressUp;
 
   /// Called when the user taps this part of the material with a secondary button.
@@ -1252,9 +1251,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void handleLongPressUp() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (widget.onLongPressUp != null) {
-      widget.onLongPressUp?.call();
-    }
+    widget.onLongPressUp?.call();
   }
 
   void handleSecondaryTap() {
