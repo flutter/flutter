@@ -52,6 +52,7 @@ class CanvasKitRenderer implements Renderer {
 
   /// The scene host, where the root canvas and overlay canvases are added to.
   DomElement? _sceneHost;
+
   DomElement? get sceneHost => _sceneHost;
 
   Rasterizer _rasterizer = _createRasterizer();
@@ -86,6 +87,7 @@ class CanvasKitRenderer implements Renderer {
 
   // Listens for view creation events from the view manager.
   StreamSubscription<int>? _onViewCreatedListener;
+
   // Listens for view disposal events from the view manager.
   StreamSubscription<int>? _onViewDisposedListener;
 
@@ -364,7 +366,12 @@ class CanvasKitRenderer implements Renderer {
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
   }) => isExperimentalWebParagraph
-      ? WebTextStyle(fontFamily: fontFamily, fontSize: fontSize, color: color)
+      ? WebTextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          foreground: foreground,
+          background: background,
+        )
       : CkTextStyle(
           color: color,
           decoration: decoration,

@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'code_unit_flags.dart';
+import 'dart:math' as math;
 import 'debug.dart';
 import 'layout.dart';
 import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
-  TextWrapper(this._text, this._layout) {
+  TextWrapper(this._layout) {
+    // Start a new line from the beginning of the text
     startNewLine(0, 0.0);
   }
 
-  final String _text;
   final TextLayout _layout;
 
   int _startLine = 0;
@@ -26,65 +26,71 @@ class TextWrapper {
   double _widthWhitespaces = 0.0;
   double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
 
+  double get maxIntrinsicWidth => _maxIntrinsicWidth;
+  double _maxIntrinsicWidth = 0.0;
+
+  double get minIntrinsicWidth => _minIntrinsicWidth;
+  double _minIntrinsicWidth = double.infinity;
+
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kWhitespaceFlag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isWhitespace;
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kSoftLineBreakFlag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isSoftLineBreak;
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return _hasCodeUnitFlag(cluster, CodeUnitFlags.kHardLineBreakFlag);
-  }
-
-  bool _hasCodeUnitFlag(ExtendedTextCluster cluster, int flag) {
-    return _layout.codeUnitFlags[cluster.start].hasFlag(flag);
+    return _layout.codeUnitFlags[cluster.textRange.start].isHardLineBreak;
   }
 
   // TODO(jlavrova): Consider combining this with `_layout.addLine`.
+  // Answer: startNewLine and _layout.addLine should not be combined.
+  // It's too much trouble to keep them in accord and there are cases when we call one without another.
   void startNewLine(int start, double clusterWidth) {
     _startLine = start;
     _whitespaces = ClusterRange.collapsed(start);
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
+    _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
     _widthLetters = clusterWidth;
-    _top = 0.0;
   }
 
   void breakLines(double width) {
-    // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
+    // LTR: "words":[startLine:whitespaces.start) "whitespaces":[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
+    // RTL: "letters":(...:whitespaces.end] "whitespaces":(whitespaces.end:whitespaces.start] "words":(whitespaces.start:startLine]
 
     startNewLine(0, 0.0);
+    _top = 0.0;
 
     bool hardLineBreak = false;
-    for (int index = 0; index < _layout.textClusters.length - 1; index++) {
+    for (int index = 0; index != _layout.textClusters.length - 1; index += 1) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
-      // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
-      double widthCluster = cluster.bounds.width;
+      double widthCluster = cluster.advance.width;
       hardLineBreak = isHardLineBreak(cluster);
 
       if (hardLineBreak) {
+        WebParagraphDebug.log('isHardLineBreak: $index');
         // Break the line and then continue with the current cluster as usual
-        if (_whitespaces.end < index) {
+        if (_whitespaces.end != index) {
           // Take letters into account
           _widthText += _widthWhitespaces + _widthLetters;
-          _whitespaces.start = _whitespaces.end = index;
+          _whitespaces.start = index;
+          _whitespaces.end = index;
         }
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
           _whitespaces.clone(),
-          _widthWhitespaces,
           hardLineBreak,
           _top,
         );
-
-        // Start a new line
+        // Start a new line with an empty text
         startNewLine(index, 0.0);
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
+        WebParagraphDebug.log('isSoftLineBreak: $index');
         // Mark the potential line break and then continue with the current cluster as usual
-        if (_whitespaces.start == _startLine) {
+        if (_whitespaces.start == _startLine && _whitespaces.end != _startLine) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
           // these are the leading spaces and Flutter wants them to be preserved
           // We need to pretend that these are not whitespaces
@@ -97,15 +103,18 @@ class TextWrapper {
           // Close the softBreak sequence
           _whitespaces.end = index;
           // Start a new cluster sequence
+          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
           _widthLetters = 0.0;
         }
       }
 
       // Check if we have a (hanging) whitespace which does not affect the line width
       if (isWhitespace(cluster)) {
-        if (_whitespaces.end < index) {
+        WebParagraphDebug.log('isWhitespace: @$index ${cluster.textRange}');
+        if (_whitespaces.end != index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
+          _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
           _widthLetters = 0.0;
           _whitespaces = ClusterRange.collapsed(index);
           _widthWhitespaces = 0.0;
@@ -118,6 +127,9 @@ class TextWrapper {
 
       // Check if we exceeded the line width
       if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
+        WebParagraphDebug.log(
+          'exceeded: $index $_widthText + $_widthWhitespaces + $_widthLetters + $widthCluster = ${_widthText + _widthWhitespaces + _widthLetters + widthCluster} ',
+        );
         if (_whitespaces.start != _startLine) {
           // There was at least one possible line break so we can use it to break the text
         } else if (index > _startLine) {
@@ -127,6 +139,7 @@ class TextWrapper {
             // We possibly have some leading spaces and some text after
             _widthText = _widthWhitespaces + _widthLetters;
             _widthWhitespaces = 0.0;
+            _minIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthLetters);
             _widthLetters = 0.0;
             _whitespaces.start = _whitespaces.end = index;
           } else {
@@ -147,16 +160,15 @@ class TextWrapper {
         }
 
         // Add the line
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
         _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
-          _widthText,
-          _whitespaces.clone(),
-          _widthWhitespaces,
+          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
           hardLineBreak,
           _top,
         );
 
-        // Start a new line but keep the clusters sequence
+        // Start a new line with already collected clusters sequence
         startNewLine(_whitespaces.end, _widthLetters);
       }
 
@@ -165,7 +177,7 @@ class TextWrapper {
     }
 
     // Assume a soft line break at the end of the text
-    if (_whitespaces.end < _layout.textClusters.length - 1) {
+    if (_whitespaces.end != _layout.textClusters.length - 1) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
       _whitespaces = ClusterRange.collapsed(_layout.textClusters.length - 1);
@@ -173,11 +185,10 @@ class TextWrapper {
       _widthText += _widthLetters;
     }
 
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthText);
     _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
-      _widthText,
       _whitespaces.clone(),
-      _widthWhitespaces,
       hardLineBreak,
       _top,
     );
@@ -194,17 +205,19 @@ class TextWrapper {
       _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
     }
     */
+    /*
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];
-        // TODO(jlavrova): Cluster index being used as text index.
-        final String text = _text.substring(line.clusters.start, line.clusters.end);
-        final String whitespaces = !line.whitespaces.isEmpty ? '${line.whitespaces.size}' : 'no';
-        final String hardLineBreak = line.hardBreak ? 'hardlineBreak' : '';
+        final String text = _text.substring(line.textRange.start, line.textRange.end);
+        final String whitespaces =
+            !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
+        final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
-          '$i: "$text" [${line.clusters.start}:${line.clusters.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
+          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
         );
       }
     }
+    */
   }
 }
