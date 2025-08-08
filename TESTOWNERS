@@ -267,6 +267,7 @@
 /dev/devicelab/bin/tasks/hello_world_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_simulator.dart @louisehsu @flutter/tool
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_xcode_debug.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_macos_target__benchmark.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_win_target__benchmark.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/integration_ui_test_test_macos.dart @cbracken @flutter/desktop
