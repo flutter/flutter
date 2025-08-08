@@ -28,10 +28,12 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
+import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web_template.dart';
-
+import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
@@ -179,7 +181,7 @@ class WebAssetServer implements AssetReader {
   Uri get baseUri => _baseUri;
   late Uri _baseUri;
 
-  /// Start the web asset server on a [hostname] and [port].
+  /// Start the web asset server with configuration provided by [webDevServerConfig].
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
@@ -188,10 +190,6 @@ class WebAssetServer implements AssetReader {
   /// trace.
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
-    String hostname,
-    int port,
-    String? tlsCertPath,
-    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -200,8 +198,8 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders, {
+    ExpressionCompiler? expressionCompiler, {
+    required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -216,6 +214,13 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
   }) async {
+    final String hostname = webDevServerConfig.host;
+    final int port = webDevServerConfig.port;
+    final String? tlsCertPath = webDevServerConfig.https?.certPath;
+    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final Map<String, String> extraHeaders = webDevServerConfig.headers;
+    final List<ProxyRule> proxy = webDevServerConfig.proxy;
+
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -386,6 +391,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
