@@ -983,6 +983,8 @@ class IOSDevice extends Device {
       return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
     }
 
+    IOSDeploymentMethod? deploymentMethod;
+
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // Use LLDB if available.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
@@ -1000,6 +1002,7 @@ class IOSDevice extends Device {
       if (launchSuccess) {
         return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
       } else {
+        deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
         _analytics.send(
           Event.appleUsageEvent(
             workflow: 'ios-physical-deployment',
@@ -1009,6 +1012,8 @@ class IOSDevice extends Device {
         );
       }
     }
+
+    deploymentMethod ??= IOSDeploymentMethod.coreDeviceWithXcode;
 
     // If LLDB is not available or fails, fallback to using Xcode.
     _logger.printStatus(
@@ -1049,11 +1054,11 @@ class IOSDevice extends Device {
       final XcodeProjectInfo? projectInfo = await project.projectInfo();
       if (projectInfo == null) {
         globals.printError('Xcode project not found.');
-        return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+        return (false, deploymentMethod);
       }
       if (project.xcodeWorkspace == null) {
         globals.printError('Unable to get Xcode workspace.');
-        return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+        return (false, deploymentMethod);
       }
       final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
       if (scheme == null) {
@@ -1074,7 +1079,7 @@ class IOSDevice extends Device {
       // This should not happen. Currently, only PrebuiltIOSApp and
       // BuildableIOSApp extend from IOSApp.
       _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
-      return (false, IOSDeploymentMethod.coreDeviceWithXcode);
+      return (false, deploymentMethod);
     }
 
     final List<String> filteredLaunchArguments = launchArguments
@@ -1093,7 +1098,7 @@ class IOSDevice extends Device {
       shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
     }
 
-    return (debugSuccess, IOSDeploymentMethod.coreDeviceWithXcode);
+    return (debugSuccess, deploymentMethod);
   }
 
   @override

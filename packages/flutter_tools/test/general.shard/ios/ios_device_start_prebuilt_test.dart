@@ -958,7 +958,7 @@ void main() {
           ),
           Event.appleUsageEvent(
             workflow: 'ios-physical-deployment',
-            parameter: IOSDeploymentMethod.coreDeviceWithXcode.name,
+            parameter: IOSDeploymentMethod.coreDeviceWithXcodeFallback.name,
             result: 'debugging success',
           ),
         ]);
