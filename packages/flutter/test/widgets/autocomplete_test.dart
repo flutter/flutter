@@ -3342,7 +3342,7 @@ void main() {
 
     handle.dispose();
   });
-  
+
   testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
