@@ -2248,6 +2248,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///    [Scaffold].
   bool get isDrawerOpen => _drawerOpened.value;
 
+  /// Whether the [Scaffold.drawerBarrierDismissible] flag is set.
+  bool get isDrawerBarrierDismissible => widget.drawerBarrierDismissible;
+
   /// Whether the [Scaffold.endDrawer] is opened.
   ///
   /// See also:
@@ -3256,8 +3259,11 @@ class _DismissDrawerAction extends DismissAction {
 
   @override
   void invoke(DismissIntent intent) {
-    Scaffold.of(context).closeDrawer();
-    Scaffold.of(context).closeEndDrawer();
+    final ScaffoldState scaffold = Scaffold.of(context);
+    if (scaffold.isDrawerBarrierDismissible) {
+      scaffold.closeDrawer();
+      scaffold.closeEndDrawer();
+    }
   }
 }
 
