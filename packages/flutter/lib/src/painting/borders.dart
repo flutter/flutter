@@ -38,7 +38,7 @@ enum BorderStyle {
 /// step.
 ///
 /// The corner radii are adjusted per-axis and clamped to be non-negative.
-/// Note that callers may still need to ensure the radii do not exceed the
+/// Callers may still need to ensure the radii do not exceed the
 /// size of the resulting rectangle.
 ///
 /// See also:
@@ -335,7 +335,7 @@ class BorderSide with Diagnosticable {
     }
     if (a.style == b.style && a.strokeAlign == b.strokeAlign) {
       return BorderSide(
-        color: Color.lerp(a.color, b.color, t)!,
+        color: Color.lerp(a.color, b.color, t),
         width: width,
         style: a.style, // == b.style
         strokeAlign: a.strokeAlign, // == b.strokeAlign
@@ -351,13 +351,13 @@ class BorderSide with Diagnosticable {
     };
     if (a.strokeAlign != b.strokeAlign) {
       return BorderSide(
-        color: Color.lerp(colorA, colorB, t)!,
+        color: Color.lerp(colorA, colorB, t),
         width: width,
         strokeAlign: ui.lerpDouble(a.strokeAlign, b.strokeAlign, t)!,
       );
     }
     return BorderSide(
-      color: Color.lerp(colorA, colorB, t)!,
+      color: Color.lerp(colorA, colorB, t),
       width: width,
       strokeAlign: a.strokeAlign, // == b.strokeAlign
     );
