@@ -408,8 +408,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _announceSemantics(bool resultsAvailable) {
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final String optionsHint = resultsAvailable
-        ? 'Search results available'
-        : 'Search results not available'; // localizations.optionsHint;
+        ? localizations.searchResultsAvailable
+        : localizations.searchResultsUnavailable;
     SemanticsService.announce(optionsHint, localizations.textDirection);
   }
 

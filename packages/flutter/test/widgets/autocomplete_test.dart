@@ -3278,6 +3278,7 @@ void main() {
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
+    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3326,7 +3327,7 @@ void main() {
     await tester.pump();
     expect(find.byKey(optionsKey), findsOneWidget);
     expect(lastOptions.length, kOptions.length);
-    expect(tester.takeAnnouncements().first.message, 'Search results available');
+    expect(tester.takeAnnouncements().first.message, localizations.searchResultsAvailable);
 
     await tester.enterText(find.byKey(fieldKey), 'a');
     await tester.pump();
@@ -3337,7 +3338,7 @@ void main() {
     await tester.enterText(find.byKey(fieldKey), 'zzzz');
     await tester.pump();
     expect(find.byKey(optionsKey), findsNothing);
-    expect(tester.takeAnnouncements().first.message, 'Search results not available');
+    expect(tester.takeAnnouncements().first.message, localizations.searchResultsUnavailable);
 
     handle.dispose();
   });
