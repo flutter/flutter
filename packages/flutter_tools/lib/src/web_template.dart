@@ -11,6 +11,7 @@ import 'base/file_system.dart';
 
 /// Placeholder for base href
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
+const kStaticAssetsUrlPlaceholder = r'$FLUTTER_STATIC_ASSETS_URL';
 
 class WebTemplateWarning {
   WebTemplateWarning(this.warningText, this.lineNumber);
@@ -101,11 +102,16 @@ class WebTemplate {
     required File flutterJsFile,
     String? buildConfig,
     String? flutterBootstrapJs,
+    String? staticAssetsUrl,
   }) {
     String newContent = _content;
 
     if (newContent.contains(kBaseHrefPlaceholder)) {
       newContent = newContent.replaceAll(kBaseHrefPlaceholder, baseHref);
+    }
+
+    if (newContent.contains(kStaticAssetsUrlPlaceholder) && staticAssetsUrl != null) {
+      newContent = newContent.replaceAll(kStaticAssetsUrlPlaceholder, staticAssetsUrl);
     }
 
     if (serviceWorkerVersion != null) {
