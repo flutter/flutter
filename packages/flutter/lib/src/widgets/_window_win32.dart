@@ -68,7 +68,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   /// Creates a new [WindowingOwnerWin32] instance.
   ///
   /// If [Platform.isWindows] is false, then this constructor will throw an
-  /// [UnsupportedError].
+  /// [UnsupportedError]
+  ///
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   ///
@@ -76,30 +77,53 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   ///  * [WindowingOwner], the abstract class that manages native windows.
   @internal
-  WindowingOwnerWin32() {
+  WindowingOwnerWin32()
+    : win32PlatformInterface = _NativeWin32PlatformInterface(),
+      platformDispatcher = PlatformDispatcher.instance {
     if (!Platform.isWindows) {
-      UnsupportedError('Only available on the Win32 platform');
+      throw UnsupportedError('Only available on the Win32 platform');
     }
 
     final Pointer<WindowingInitRequest> request = ffi.calloc<WindowingInitRequest>()
       ..ref.onMessage = NativeCallable<Void Function(Pointer<WindowsMessage>)>.isolateLocal(
         _onMessage,
       ).nativeFunction;
-    win32platforminterface.initialize(PlatformDispatcher.instance.engineId!, request);
+    win32PlatformInterface.initialize(platformDispatcher.engineId!, request);
+    ffi.calloc.free(request);
+  }
+
+  /// Creates a new [WindowingOwnerWin32] instance for testing purposes.
+  ///
+  /// This constructor will not throw when we are not on the win32 platform.
+  ///
+  /// This constructor takes a [win32PlatformInterface], which is most likely
+  /// a mock interface in addition to a custom [platformDispatcher] so that
+  /// [PlatformDispatcher.engineId] can successfully be mocked.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  @visibleForTesting
+  WindowingOwnerWin32.test({
+    required this.win32PlatformInterface,
+    required this.platformDispatcher,
+  }) {
+    final Pointer<WindowingInitRequest> request = ffi.calloc<WindowingInitRequest>()
+      ..ref.onMessage = NativeCallable<Void Function(Pointer<WindowsMessage>)>.isolateLocal(
+        _onMessage,
+      ).nativeFunction;
+    win32PlatformInterface.initialize(platformDispatcher.engineId!, request);
     ffi.calloc.free(request);
   }
 
   final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
-  final Win32PlatformInterface _win32platforminterface = _NativeWin32PlatformInterface();
 
-  /// Getter for the [Win32PlatformInterface].
-  ///
-  /// Overriding this is only useful for testing.
+  /// Provides access to the native win32 backend.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  @protected
-  Win32PlatformInterface get win32platforminterface => _win32platforminterface;
+  final Win32PlatformInterface win32PlatformInterface;
+
+  final PlatformDispatcher platformDispatcher;
 
   @internal
   @override
@@ -184,7 +208,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @internal
   @override
   bool hasTopLevelWindows() {
-    return win32platforminterface.hasTopLevelWindows(PlatformDispatcher.instance.engineId!);
+    return win32PlatformInterface.hasTopLevelWindows(platformDispatcher.engineId!);
   }
 }
 
@@ -228,8 +252,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
       ..ref.preferredSize.from(preferredSize)
       ..ref.preferredConstraints.from(preferredConstraints)
       ..ref.title = (title ?? 'Regular window').toNativeUtf16();
-    final int viewId = _owner.win32platforminterface.createWindow(
-      PlatformDispatcher.instance.engineId!,
+    final int viewId = _owner.win32PlatformInterface.createWindow(
+      _owner.platformDispatcher.engineId!,
       request,
     );
     ffi.calloc.free(request);
@@ -246,7 +270,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    final ActualContentSize size = _owner.win32platforminterface.getWindowContentSize(
+    final ActualContentSize size = _owner.win32PlatformInterface.getWindowContentSize(
       getWindowHandle(),
     );
     final Size result = Size(size.width, size.height);
@@ -256,7 +280,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @override
   String get title {
     _ensureNotDestroyed();
-    final int length = _owner.win32platforminterface.getWindowTextLength(getWindowHandle());
+    final int length = _owner.win32PlatformInterface.getWindowTextLength(getWindowHandle());
     if (length == 0) {
       return '';
     }
@@ -264,7 +288,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     final Pointer<Uint16> data = ffi.calloc<Uint16>(length + 1);
     try {
       final Pointer<ffi.Utf16> buffer = data.cast<ffi.Utf16>();
-      _owner.win32platforminterface.getWindowText(getWindowHandle(), buffer, length + 1);
+      _owner.win32PlatformInterface.getWindowText(getWindowHandle(), buffer, length + 1);
       return buffer.toDartString();
     } finally {
       ffi.calloc.free(data);
@@ -274,25 +298,25 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @override
   bool get isActivated {
     _ensureNotDestroyed();
-    return _owner.win32platforminterface.getForegroundWindow() == getWindowHandle();
+    return _owner.win32PlatformInterface.getForegroundWindow() == getWindowHandle();
   }
 
   @override
   bool get isMaximized {
     _ensureNotDestroyed();
-    return _owner.win32platforminterface.isZoomed(getWindowHandle()) != 0;
+    return _owner.win32PlatformInterface.isZoomed(getWindowHandle()) != 0;
   }
 
   @override
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _owner.win32platforminterface.isIconic(getWindowHandle()) != 0;
+    return _owner.win32PlatformInterface.isIconic(getWindowHandle()) != 0;
   }
 
   @override
   bool get isFullscreen {
     _ensureNotDestroyed();
-    return _owner.win32platforminterface.getFullscreen(getWindowHandle());
+    return _owner.win32PlatformInterface.getFullscreen(getWindowHandle());
   }
 
   @override
@@ -302,7 +326,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     request.ref.hasSize = size != null;
     request.ref.width = size?.width ?? 0;
     request.ref.height = size?.height ?? 0;
-    _owner.win32platforminterface.setWindowContentSize(getWindowHandle(), request);
+    _owner.win32PlatformInterface.setWindowContentSize(getWindowHandle(), request);
     ffi.calloc.free(request);
   }
 
@@ -311,7 +335,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     _ensureNotDestroyed();
     final Pointer<WindowConstraintsRequest> request = ffi.calloc<WindowConstraintsRequest>();
     request.ref.from(constraints);
-    _owner.win32platforminterface.setWindowConstraints(getWindowHandle(), request);
+    _owner.win32PlatformInterface.setWindowConstraints(getWindowHandle(), request);
     ffi.calloc.free(request);
 
     notifyListeners();
@@ -321,7 +345,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   void setTitle(String title) {
     _ensureNotDestroyed();
     final Pointer<ffi.Utf16> titlePointer = title.toNativeUtf16();
-    _owner.win32platforminterface.setWindowTitle(getWindowHandle(), titlePointer);
+    _owner.win32PlatformInterface.setWindowTitle(getWindowHandle(), titlePointer);
     ffi.calloc.free(titlePointer);
 
     notifyListeners();
@@ -330,16 +354,16 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @override
   void activate() {
     _ensureNotDestroyed();
-    _owner.win32platforminterface.showWindow(getWindowHandle(), _SW_RESTORE);
+    _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
   }
 
   @override
   void setMaximized(bool maximized) {
     _ensureNotDestroyed();
     if (maximized) {
-      _owner.win32platforminterface.showWindow(getWindowHandle(), _SW_MAXIMIZE);
+      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_MAXIMIZE);
     } else {
-      _owner.win32platforminterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
     }
   }
 
@@ -347,9 +371,9 @@ class RegularWindowControllerWin32 extends RegularWindowController
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _owner.win32platforminterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
+      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
     } else {
-      _owner.win32platforminterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
     }
   }
 
@@ -359,15 +383,15 @@ class RegularWindowControllerWin32 extends RegularWindowController
     request.ref.hasDisplayId = false;
     request.ref.displayId = display?.id ?? 0;
     request.ref.fullscreen = fullscreen;
-    _owner.win32platforminterface.setFullscreen(getWindowHandle(), request);
+    _owner.win32PlatformInterface.setFullscreen(getWindowHandle(), request);
     ffi.calloc.free(request);
   }
 
   /// Returns HWND pointer to the top level window.
   HWND getWindowHandle() {
     _ensureNotDestroyed();
-    return _owner.win32platforminterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+    return _owner.win32PlatformInterface.getWindowHandle(
+      _owner.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -383,7 +407,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     if (_destroyed) {
       return;
     }
-    _owner.win32platforminterface.destroyWindow(getWindowHandle());
+    _owner.win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
     _delegate.onWindowDestroyed();
     _owner.removeMessageHandler(this);
@@ -467,7 +491,7 @@ class _NativeWin32PlatformInterface extends Win32PlatformInterface {
 
   @override
   void destroyWindow(HWND windowHandle) {
-    return _destroyWindow(windowHandle);
+    _destroyWindow(windowHandle);
   }
 
   @override
