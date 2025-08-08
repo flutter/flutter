@@ -6,11 +6,33 @@
     "cas_archive": false,
     "name": "licenses",
     "description": "Runs the license check script.",
+    "gn": [
+        "--target-dir",
+        "ci/host_release_licenses",
+        "--runtime-mode",
+        "release",
+        "--no-rbe",
+        "--no-goma",
+        "--enable-minimal-linux"
+    ],
+    "ninja": {
+        "config": "ci/host_release_licenses",
+        "targets": [
+            "flutter/tools/licenses_cpp",
+            "flutter/tools/licenses_cpp:licenses_cpp_testrunner"
+        ]
+    },
     "tests": [
         {
-            "name": "licenses check",
-            "max_attempts": 1,
-            "script": "flutter/ci/licenses.sh"
+            "name": "Run license_cpp unittests",
+            "script": "out/ci/host_release_licenses/licenses_cpp_testrunner"
+        },
+        {
+            "name": "Run license_cpp",
+            "script": "flutter/ci/licenses_cpp.sh",
+            "parameters": [
+                "ci/host_release_licenses"
+            ]
         }
     ]
 }

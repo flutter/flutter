@@ -54,6 +54,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isOmitLegacyVersionFileEnabled => isEnabled(omitLegacyVersionFile);
+
+  @override
+  bool get isWindowingEnabled => isEnabled(windowingFeature);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

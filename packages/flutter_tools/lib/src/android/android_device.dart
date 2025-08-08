@@ -23,11 +23,11 @@ import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
-import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
+import 'gradle_utils.dart' as gradle_utils;
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -327,9 +327,9 @@ class AndroidDevice extends Device {
 
       // This has been reported to return null on some devices. In this case,
       // assume the lowest supported API to still allow Flutter to run.
-      // Sample output: '22'
+      // Sample output: '24'
       final String sdkVersion =
-          await _getProperty('ro.build.version.sdk') ?? minApiLevel.toString();
+          await _getProperty('ro.build.version.sdk') ?? gradle_utils.minSdkVersion;
 
       final int? sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
@@ -337,10 +337,10 @@ class AndroidDevice extends Device {
         return false;
       }
 
-      if (sdkVersionParsed < minApiLevel) {
+      if (sdkVersionParsed < gradle_utils.minSdkVersionInt) {
         _logger.printError(
           'The Android version ($sdkVersion) on the target device is too old. Please '
-          'use a $minVersionName (version $minApiLevel / $minVersionText) device or later.',
+          'use a API ${gradle_utils.minSdkVersion} device or later.',
         );
         return false;
       }

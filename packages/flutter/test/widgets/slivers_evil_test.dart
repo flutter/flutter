@@ -148,8 +148,8 @@ void main() {
                         floating: true,
                       ),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverList(
-                        delegate: SliverChildListDelegate(<Widget>[
+                      SliverList.list(
+                        children: <Widget>[
                           Container(height: 50.0),
                           Container(height: 50.0),
                           Container(height: 50.0),
@@ -165,7 +165,7 @@ void main() {
                           Container(height: 50.0),
                           Container(height: 50.0),
                           Container(height: 50.0),
-                        ]),
+                        ],
                       ),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),

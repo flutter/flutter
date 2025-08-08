@@ -132,6 +132,9 @@ declare_args() {
   # Debug build.
   is_debug = true
 
+  # Whether this is a minimal linux instance without x11, etc.
+  is_minimal_linux = false
+
   # Whether we're a traditional desktop unix.
   is_desktop_linux = current_os == "linux" && current_os != "chromeos"
 

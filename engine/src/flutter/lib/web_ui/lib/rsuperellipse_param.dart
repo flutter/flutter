@@ -336,6 +336,8 @@ class _RSuperellipseQuadrant {
   final _RSuperellipseOctant top;
   final _RSuperellipseOctant right;
 
+  bool get isSharpCorner => top.seN < 2 || right.seN < 2;
+
   void addToPath(
     _RSuperellipsePath path, {
     required bool reverse,
@@ -345,7 +347,7 @@ class _RSuperellipseQuadrant {
       _Transform.makeTranslate(offset),
       _Transform.makeScale(signedScale.scale(extraScale.width, extraScale.height)),
     );
-    if (top.seN < 2 || right.seN < 2) {
+    if (isSharpCorner) {
       if (!reverse) {
         final _Transform transformOctant = _Transform.makeComposite(
           transform,
@@ -406,13 +408,14 @@ class _RSuperellipsePathBuilder {
   // Build a path for an RSuperellipse with arbitrary position and radii.
   _RSuperellipsePathBuilder.exact(RSuperellipse r) : path = Path() {
     final _RSuperellipsePath p = _RSuperellipsePath(path);
-    final Offset start = Offset((r.left + r.right) / 2, r.top);
-    path.moveTo(start.dx, start.dy);
 
     final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
     final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
     final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
+
+    final Offset start = Offset(topSplit, r.top);
+    path.moveTo(start.dx, start.dy);
     _RSuperellipseQuadrant(
       Offset(topSplit, rightSplit),
       Offset(r.right, r.top),

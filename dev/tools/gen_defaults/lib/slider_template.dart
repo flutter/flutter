@@ -62,14 +62,14 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get disabledThumbColor => ${componentColor('$tokenGroup.disabled.handle')};
 
   @override
-  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.dragged)) {
+  Color? get overlayColor => WidgetStateColor.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.dragged)) {
       return _colors.primary.withOpacity(0.1);
     }
-    if (states.contains(MaterialState.hovered)) {
+    if (states.contains(WidgetState.hovered)) {
       return _colors.primary.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return _colors.primary.withOpacity(0.1);
     }
 
@@ -100,18 +100,18 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape(tickMarkRadius: ${getToken("$tokenGroup.stop-indicator.size")} / 2);
 
   @override
-  MaterialStateProperty<Size?>? get thumbSize {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Size?>? get thumbSize {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return const Size(${getToken("$tokenGroup.disabled.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return const Size(${getToken("$tokenGroup.hover.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return const Size(${getToken("$tokenGroup.focus.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return const Size(${getToken("$tokenGroup.pressed.handle.width")}, ${getToken("$tokenGroup.handle.height")});
       }
       return const Size(${getToken("$tokenGroup.handle.width")}, ${getToken("$tokenGroup.handle.height")});
