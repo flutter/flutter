@@ -99,7 +99,7 @@ return False
       await _attachToAppProcess(appProcessId);
       await _resumeProcess();
     } on _LLDBError catch (e) {
-      _logger.printError('lldb failed with error: ${e.message}');
+      _logger.printTrace('lldb failed with error: ${e.message}');
       exit();
       return false;
     } finally {
@@ -115,7 +115,7 @@ return False
   /// to `stderr`, complete with an error and stop the process.
   Future<bool> _startLLDB(int appProcessId) async {
     if (_lldbProcess != null) {
-      _logger.printError(
+      _logger.printTrace(
         'An LLDB process is already running. It must be stopped before starting a new one.',
       );
       return false;
@@ -139,7 +139,7 @@ return False
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-            _logger.printError('[lldb]: $line');
+            _logger.printTrace('[lldb]: $line');
             _monitorError(line);
           });
 
@@ -155,7 +155,7 @@ return False
             }),
       );
     } on ProcessException catch (exception) {
-      _logger.printError('Process exception running lldb:\n$exception');
+      _logger.printTrace('Process exception running lldb:\n$exception');
       return false;
     }
     return true;

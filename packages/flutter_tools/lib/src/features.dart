@@ -67,6 +67,9 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
+  /// Whether physical iOS devices are debugging with LLDB.
+  bool get isLLDBDebuggingEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -87,6 +90,7 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    lldbDebugging,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -216,6 +220,23 @@ const windowingFeature = Feature(
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
   master: FeatureChannelSetting(available: true),
+);
+
+/// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
+/// Xcode debugging is used instead.
+///
+/// Requires iOS 17+ and Xcode 26+. If those requirements are not met, the previous
+/// default debugging method is used instead.
+const lldbDebugging = Feature(
+  name: 'support for debugging with LLDB for physical iOS devices',
+  extraHelpText:
+      'If LLDB debugging is off, Xcode debugging is used instead. '
+      'Only available for iOS 17 or newer devices. Requires Xcode 26 or greater.',
+  configSetting: 'enable-lldb-debugging',
+  environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
