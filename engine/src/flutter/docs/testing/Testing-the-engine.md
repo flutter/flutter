@@ -31,7 +31,7 @@ from the `flutter` directory, after building the engine variant to test
 an Apple Silicon Mac), run:
 
 ```sh
-testing/run_tests.py --type=engine --variant=host_debug_unopt_arm64 
+testing/run_tests.py --type=engine --variant=host_debug_unopt_arm64
 ```
 
 Behind the scenes, those tests in the same directory are built together as a
