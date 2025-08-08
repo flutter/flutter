@@ -436,7 +436,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       return;
     }
     if (_options.isEmpty != options.isEmpty) {
-      _announceSemantics(_options.isEmpty);
+      _announceSemantics(options.isNotEmpty);
     }
     _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
