@@ -3354,7 +3354,7 @@ uint64_t FlutterEngineGetCurrentTime();
 
 //------------------------------------------------------------------------------
 /// @brief      Inform the engine to run the specified task. This task has been
-///             given to the engine via the
+///             given to the embedder via the
 ///             `FlutterTaskRunnerDescription.post_task_callback`. This call
 ///             must only be made at the target time specified in that callback.
 ///             Running the task before that time is undefined behavior.
