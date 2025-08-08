@@ -14,11 +14,16 @@ const _kLogEntryPrefix = '[proxyMiddleware]';
 ///
 /// The new request will have the same method, headers, body, and context as the
 /// [originalRequest], but its URL will be set to [finalTargetUrl].
-shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
+shelf.Request proxyRequest(
+  shelf.Request originalRequest,
+  Uri finalTargetUrl,
+  Map<String, String> proxyHeaders,
+) {
+  final finalHeaders = <String, String>{...originalRequest.headers, ...proxyHeaders};
   return shelf.Request(
     originalRequest.method,
     finalTargetUrl,
-    headers: originalRequest.headers,
+    headers: finalHeaders,
     body: originalRequest.read(),
     context: originalRequest.context,
   );
@@ -46,11 +51,13 @@ Future<shelf.Response> _applyProxyRules(
     /// 2. Replacing the request path according to the rule's replacement logic.
     /// 3. Resolving the final target URL by combining the target URI and the rewritten
     ///    request path.
+    /// 4. Getting the proxy headers from the rule.
     final Uri targetUri = rule.getTargetUri();
     final String rewrittenPath = rule.replace(requestPath);
     final Uri finalTargetUrl = targetUri.resolve(rewrittenPath);
+    final Map<String, String> proxyHeaders = rule.proxyHeaders;
     try {
-      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
+      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl, proxyHeaders);
       final shelf.Response proxyResponse = await proxyHandler(targetUri)(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');

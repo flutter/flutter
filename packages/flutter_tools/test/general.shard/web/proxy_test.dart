@@ -70,7 +70,10 @@ void main() {
       });
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
-      expect(rule.toString(), r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1}');
+      expect(
+        rule.toString(),
+        r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1, headers: null}',
+      );
     });
 
     test('fromYaml logs warning for invalid regex format', () {
@@ -81,7 +84,10 @@ void main() {
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
       expect(logger.warningText, contains('Invalid regex pattern'));
-      expect(rule.toString(), r'{regex: \[invalid, target: http://localhost:8080, replace: null}');
+      expect(
+        rule.toString(),
+        r'{regex: \[invalid, target: http://localhost:8080, replace: null, headers: null}',
+      );
     });
 
     test('fromYaml returns null if target is missing', () {
@@ -208,7 +214,7 @@ void main() {
       expect(rule, isNotNull);
       expect(
         rule.toString(),
-        '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
+        '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix, headers: null}',
       );
     });
 
@@ -310,7 +316,7 @@ void main() {
         body: originalBody,
         context: originalContext,
       );
-      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl);
+      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl, {});
 
       final expectedHeadersFiltered = Map<String, String>.fromEntries(
         originalHeaders.entries.where(
@@ -336,7 +342,7 @@ void main() {
 
       final originalRequest = Request('GET', originalUrl);
 
-      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl);
+      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl, {});
 
       expect(proxiedRequest.method, 'GET');
       expect(proxiedRequest.url.toString(), 'empty-new');
@@ -355,7 +361,7 @@ void main() {
           body: method == 'PUT' || method == 'PATCH' ? '{"key": "value"}' : null,
         );
 
-        final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl);
+        final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl, {});
         expect(proxiedRequest.method, method, reason: 'Method "$method" should be preserved');
 
         if (method == 'PUT' || method == 'PATCH') {
@@ -364,6 +370,103 @@ void main() {
           expect(await proxiedRequest.readAsString(), '');
         }
       }
+    });
+    test('should correctly add and overwrite additional headers', () async {
+      final Uri originalUrl = Uri.parse('http://original.example.com/path');
+      final Uri finalTargetUrl = Uri.parse('http://target.example.com/newpath');
+      const originalBody = 'Test Body Content';
+      final originalContext = <String, Object>{'session_id': 'abc123'};
+      final originalHeaders = <String, String>{
+        'Accept': 'application/json',
+        'X-Original-Id': '12345',
+        'Authorization': 'Bearer original_token',
+        'content-length': 'ignored_by_shelf',
+      };
+
+      final ruleHeaders = <String, String>{
+        'X-Added-Header': 'new_value',
+        'Authorization': 'Bearer new_token',
+        'User-Agent': 'ShelfProxyTest/1.0',
+      };
+
+      final originalRequest = Request(
+        'GET',
+        originalUrl,
+        headers: originalHeaders,
+        body: originalBody,
+        context: originalContext,
+      );
+
+      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl, ruleHeaders);
+
+      final expectedHeaders = <String, String>{
+        'Accept': 'application/json',
+        'X-Original-Id': '12345',
+        'X-Added-Header': 'new_value',
+        'Authorization': 'Bearer new_token',
+        'User-Agent': 'ShelfProxyTest/1.0',
+      };
+
+      expect(proxiedRequest.method, 'GET');
+      expect(proxiedRequest.url.toString(), 'newpath');
+      expect(proxiedRequest.context, originalContext);
+
+      for (final MapEntry<String, String> entry in expectedHeaders.entries) {
+        expect(proxiedRequest.headers, containsPair(entry.key, entry.value));
+      }
+
+      expect(proxiedRequest.headers['Authorization'], 'Bearer new_token');
+      expect(proxiedRequest.headers['Accept'], 'application/json');
+      expect(proxiedRequest.headers['X-Original-Id'], '12345');
+      expect(proxiedRequest.headers['X-Added-Header'], 'new_value');
+      expect(proxiedRequest.headers['User-Agent'], 'ShelfProxyTest/1.0');
+      final String proxiedBody = await proxiedRequest.readAsString();
+      expect(proxiedBody, originalBody);
+    });
+
+    test('should handle no rule headers', () async {
+      final Uri originalUrl = Uri.parse('http://original.example.com/path');
+      final Uri finalTargetUrl = Uri.parse('http://target.example.com/newpath');
+      const originalBody = 'Test Body Content';
+      final originalContext = <String, Object>{'session_id': 'abc123'};
+      final originalHeaders = <String, String>{
+        'Accept': 'application/json',
+        'X-Original-Id': '12345',
+        'Authorization': 'Bearer original_token',
+        'content-length': 'ignored_by_shelf',
+      };
+
+      final ruleHeaders = <String, String>{};
+
+      final originalRequest = Request(
+        'GET',
+        originalUrl,
+        headers: originalHeaders,
+        body: originalBody,
+        context: originalContext,
+      );
+
+      final Request proxiedRequest = proxyRequest(originalRequest, finalTargetUrl, ruleHeaders);
+
+      final expectedHeaders = <String, String>{
+        'Accept': 'application/json',
+        'X-Original-Id': '12345',
+        'Authorization': 'Bearer original_token',
+      };
+
+      expect(proxiedRequest.method, 'GET');
+      expect(proxiedRequest.url.toString(), 'newpath');
+      expect(proxiedRequest.context, originalContext);
+
+      for (final MapEntry<String, String> entry in expectedHeaders.entries) {
+        expect(proxiedRequest.headers, containsPair(entry.key, entry.value));
+      }
+
+      expect(proxiedRequest.headers['Authorization'], 'Bearer original_token');
+      expect(proxiedRequest.headers['Accept'], 'application/json');
+      expect(proxiedRequest.headers['X-Original-Id'], '12345');
+      final String proxiedBody = await proxiedRequest.readAsString();
+      expect(proxiedBody, originalBody);
     });
   });
 
