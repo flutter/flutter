@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -698,6 +699,10 @@ class SliverReorderableListState extends State<SliverReorderableList>
   MultiDragGestureRecognizer? _recognizer;
   int? _recognizerPointer;
 
+  // Queue for programmatic animations to ensure sequential execution
+  final Queue<_ProgrammaticAnimationOperation> _animationQueue = Queue<_ProgrammaticAnimationOperation>();
+  bool _isProcessingQueue = false;
+
   EdgeDraggingAutoScroller? _autoScroller;
 
   late ScrollableState _scrollable;
@@ -740,6 +745,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
   @protected
   @override
   void dispose() {
+    _clearAnimationQueue();
     _dragReset();
     _recognizer?.dispose();
     super.dispose();
@@ -807,7 +813,11 @@ class SliverReorderableListState extends State<SliverReorderableList>
   /// 2. Moves to the new position
   /// 3. Settles down into place
   ///
-  /// Other items animate to make room as the moving item progresses.
+  /// This method queues animations to ensure they execute sequentially when
+  /// called in rapid succession. Each animation completes before the next begins.
+  ///
+  /// Returns a [Future] that completes when the specific animation finishes
+  /// (which may be after other queued animations).
   Future<void> animateItemToIndex({
     required int fromIndex,
     required int toIndex,
@@ -822,12 +832,26 @@ class SliverReorderableListState extends State<SliverReorderableList>
       return;
     }
 
-    if (_dragInfo != null) {
-      cancelReorder();
-      await Future<void>.delayed(const Duration(milliseconds: 16));
+    // Create operation with a completer for this specific animation
+    final Completer<void> completer = Completer<void>();
+    final _ProgrammaticAnimationOperation operation = _ProgrammaticAnimationOperation(
+      fromIndex: fromIndex,
+      toIndex: toIndex,
+      duration: duration,
+      curve: curve,
+      completer: completer,
+    );
+
+    // Add to queue
+    _animationQueue.add(operation);
+
+    // Process queue if not already processing
+    if (!_isProcessingQueue) {
+      _processAnimationQueue();
     }
 
-    await _performProgrammaticReorder(fromIndex, toIndex, duration, curve);
+    // Return future that completes when this specific animation finishes
+    return completer.future;
   }
 
   /// Performs the actual programmatic reorder animation with lift/move/settle phases
@@ -981,6 +1005,75 @@ class SliverReorderableListState extends State<SliverReorderableList>
     return completer.future;
   }
 
+  /// Processes queued programmatic animations sequentially.
+  ///
+  /// Ensures only one animation runs at a time by checking _isProcessingQueue.
+  /// Adds a frame delay between animations to allow Flutter to rebuild widgets,
+  /// preventing visual glitches where items appear to morph during rapid animations.
+  Future<void> _processAnimationQueue() async {
+    if (_isProcessingQueue || _animationQueue.isEmpty) {
+      return;
+    }
+
+    _isProcessingQueue = true;
+
+    while (_animationQueue.isNotEmpty && mounted) {
+      final _ProgrammaticAnimationOperation operation = _animationQueue.removeFirst();
+
+      // Cancel any existing drag operation first
+      if (_dragInfo != null) {
+        cancelReorder();
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+      }
+
+      try {
+        // Execute the animation using the exact indices that were enqueued
+        // KEY BEHAVIOR: The indices are used as-is, but they refer to whatever item
+        // is at that position when THIS operation starts executing (not when it was
+        // originally enqueued). Example: Two rapid "move 0 to 2" calls will:
+        // 1. Move item A (at index 0) to position 2
+        // 2. Move item B (now at index 0 after A moved) to position 2
+        await _performProgrammaticReorder(
+          operation.fromIndex,
+          operation.toIndex,
+          operation.duration,
+          operation.curve,
+        );
+
+        // 16ms delay between animations to allow Flutter to rebuild widgets
+        // This prevents visual glitches where the drag proxy captures stale data
+        if (_animationQueue.isNotEmpty) {
+          await Future<void>.delayed(const Duration(milliseconds: 16));
+        }
+
+        // Mark this specific operation as complete
+        operation.completer.complete();
+      } catch (error) {
+        // If an error occurs, complete with error
+        operation.completer.completeError(error);
+      }
+    }
+
+    _isProcessingQueue = false;
+  }
+
+  /// Clears all pending animation operations from the queue.
+  ///
+  /// Called when the widget is disposed or when a manual drag starts
+  /// (user intent takes precedence over programmatic animations).
+  void _clearAnimationQueue() {
+    while (_animationQueue.isNotEmpty) {
+      final _ProgrammaticAnimationOperation operation = _animationQueue.removeFirst();
+      // Cancel pending operations
+      if (!operation.completer.isCompleted) {
+        operation.completer.completeError(
+          StateError('Animation cancelled'),
+        );
+      }
+    }
+    _isProcessingQueue = false;
+  }
+
   void _registerItem(_ReorderableItemState item) {
     if (_dragInfo != null && _items[item.index] != item) {
       item.updateForGap(_dragInfo!.index, _dragInfo!.index, _dragInfo!.itemExtent, false, _reverse);
@@ -1001,6 +1094,8 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   Drag? _dragStart(Offset position) {
     assert(_dragInfo == null);
+    // Clear any pending programmatic animations when user starts manual drag
+    _clearAnimationQueue();
     final _ReorderableItemState item = _items[_dragIndex!]!;
     item.dragging = true;
     widget.onReorderStart?.call(_dragIndex!);
@@ -1853,4 +1948,25 @@ class _ReorderableItemGlobalKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(subKey, index, state);
+}
+
+/// Represents a queued programmatic animation operation.
+///
+/// Stores the animation parameters and a completer to track when
+/// this specific operation finishes, even if other operations are
+/// queued after it.
+class _ProgrammaticAnimationOperation {
+  _ProgrammaticAnimationOperation({
+    required this.fromIndex,
+    required this.toIndex,
+    required this.duration,
+    required this.curve,
+    required this.completer,
+  });
+
+  final int fromIndex;
+  final int toIndex;
+  final Duration duration;
+  final Curve curve;
+  final Completer<void> completer;
 }
