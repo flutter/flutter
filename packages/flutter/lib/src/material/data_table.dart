@@ -484,28 +484,28 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
-          this.sortIconWidget,
+    this.sortIconWidget,
   }) : assert(columns.isNotEmpty),
-       assert(
+        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
-       ),
-       assert(
-         !rows.any((DataRow row) => row.cells.length != columns.length),
-         'All rows must have the same number of cells as there are header cells (${columns.length})',
-       ),
-       assert(dividerThickness == null || dividerThickness >= 0),
-       assert(
-         dataRowMinHeight == null ||
-             dataRowMaxHeight == null ||
-             dataRowMaxHeight >= dataRowMinHeight,
-       ),
-       assert(
+        ),
+        assert(
+          !rows.any((DataRow row) => row.cells.length != columns.length),
+          'All rows must have the same number of cells as there are header cells (${columns.length})',
+        ),
+        assert(dividerThickness == null || dividerThickness >= 0),
+        assert(
+          dataRowMinHeight == null ||
+              dataRowMaxHeight == null ||
+              dataRowMaxHeight >= dataRowMinHeight,
+        ),
+        assert(
          dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
-       ),
-       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
-       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
-       _onlyTextColumn = _initOnlyTextColumn(columns);
+          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
+        ),
+        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
+        _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -536,10 +536,13 @@ class DataTable extends StatelessWidget {
   /// smallest values for the current sort column are last in the
   /// table).
   ///
-  /// Ascending order is represented by an upwards-facing arrow.
+  /// If no `sortIconWidget` is provided, an upwards-facing arrow is used by default to represent ascending order.
   final bool sortAscending;
 
   /// The widget to use as the sort icon.
+  ///
+  /// When sorting, the icon will rotate by default.
+  /// For optimal UI, ensure the icon has a transparent background.
   ///
   /// If null, a default arrow icon will be used.
   final Widget? sortIconWidget;
@@ -841,12 +844,12 @@ class DataTable extends StatelessWidget {
         horizontalMargin ?? themeData.dataTableTheme.horizontalMargin ?? _horizontalMargin;
     final double effectiveCheckboxHorizontalMarginStart =
         checkboxHorizontalMargin ??
-        themeData.dataTableTheme.checkboxHorizontalMargin ??
-        effectiveHorizontalMargin;
+            themeData.dataTableTheme.checkboxHorizontalMargin ??
+            effectiveHorizontalMargin;
     final double effectiveCheckboxHorizontalMarginEnd =
         checkboxHorizontalMargin ??
-        themeData.dataTableTheme.checkboxHorizontalMargin ??
-        effectiveHorizontalMargin / 2.0;
+            themeData.dataTableTheme.checkboxHorizontalMargin ??
+            effectiveHorizontalMargin / 2.0;
     Widget contents = Semantics(
       container: true,
       child: Padding(
@@ -893,14 +896,15 @@ class DataTable extends StatelessWidget {
         mainAxisAlignment: headingRowAlignment,
         children: <Widget>[
           if (headingRowAlignment == MainAxisAlignment.center && onSort != null)
-            const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
+            const SizedBox(
+                width: _SortArrowState._arrowIconSize + _sortArrowPadding),
           label,
           if (onSort != null) ...<Widget>[
-            _SortArrow(
+            _SortIcon(
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
-              icon: sortIconWidget,
+              sortIconWidget: sortIconWidget ?? dataTableTheme.sortIconWidget,
             ),
             const SizedBox(width: _sortArrowPadding),
           ],
@@ -964,11 +968,11 @@ class DataTable extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
     if (showEditIcon) {
-      const Widget icon = Icon(Icons.edit, size: 18.0);
+      const Widget sortIconWidget = Icon(Icons.edit, size: 18.0);
       label = Expanded(child: label);
       label = Row(
         textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[label, icon],
+        children: <Widget>[label, sortIconWidget],
       );
     }
 
@@ -1061,14 +1065,14 @@ class DataTable extends StatelessWidget {
         _horizontalMargin;
     final double effectiveCheckboxHorizontalMarginStart =
         checkboxHorizontalMargin ??
-        dataTableTheme.checkboxHorizontalMargin ??
-        theme.dataTableTheme.checkboxHorizontalMargin ??
-        effectiveHorizontalMargin;
+            dataTableTheme.checkboxHorizontalMargin ??
+            theme.dataTableTheme.checkboxHorizontalMargin ??
+            effectiveHorizontalMargin;
     final double effectiveCheckboxHorizontalMarginEnd =
         checkboxHorizontalMargin ??
-        dataTableTheme.checkboxHorizontalMargin ??
-        theme.dataTableTheme.checkboxHorizontalMargin ??
-        effectiveHorizontalMargin / 2.0;
+            dataTableTheme.checkboxHorizontalMargin ??
+            theme.dataTableTheme.checkboxHorizontalMargin ??
+            effectiveHorizontalMargin / 2.0;
     final double effectiveColumnSpacing =
         columnSpacing ??
         dataTableTheme.columnSpacing ??
@@ -1105,8 +1109,8 @@ class DataTable extends StatelessWidget {
         final Border? border = showBottomBorder
             ? Border(bottom: borderSide)
             : index == 0
-            ? null
-            : Border(top: borderSide);
+                ? null
+                : Border(top: borderSide);
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: BoxDecoration(
@@ -1195,9 +1199,9 @@ class DataTable extends StatelessWidget {
         numeric: column.numeric,
         onSort: column.onSort != null
             ? () => column.onSort!(
-                dataColumnIndex,
-                sortColumnIndex != dataColumnIndex || !sortAscending,
-              )
+                  dataColumnIndex,
+                  sortColumnIndex != dataColumnIndex || !sortAscending,
+                )
             : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
@@ -1209,7 +1213,7 @@ class DataTable extends StatelessWidget {
             column.headingRowAlignment ??
             dataTableTheme.headingRowAlignment ??
             MainAxisAlignment.start,
-            sortIconWidget: sortIconWidget,
+        sortIconWidget: sortIconWidget ?? dataTableTheme.sortIconWidget,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
@@ -1326,8 +1330,12 @@ class TableRowInkWell extends InkResponse {
   }
 }
 
-class _SortArrow extends StatefulWidget {
-  const _SortArrow({required this.visible, required this.up, required this.duration, required this.icon});
+class _SortIcon extends StatefulWidget {
+  const _SortIcon(
+      {required this.visible,
+      required this.up,
+      required this.duration,
+      required this.sortIconWidget});
 
   final bool visible;
 
@@ -1335,13 +1343,13 @@ class _SortArrow extends StatefulWidget {
 
   final Duration duration;
 
-  final Widget? icon;
+  final Widget? sortIconWidget;
 
   @override
-  _SortArrowState createState() => _SortArrowState();
+  _SortIconState createState() => _SortIconState();
 }
 
-class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
+class _SortIconState extends State<_SortIcon> with TickerProviderStateMixin {
   late final AnimationController _opacityController;
   late final CurvedAnimation _opacityAnimation;
 
@@ -1389,7 +1397,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(_SortArrow oldWidget) {
+  void didUpdateWidget(_SortIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
     bool skipArrow = false;
     final bool? newUp = widget.up ?? _up;
@@ -1433,7 +1441,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       opacity: _opacityAnimation,
       child: Transform(
         transform: Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
-          ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
+              ..setTranslationRaw(0.0, _arrowIconBaselineOffset, 0.0),
         alignment: Alignment.center,
         child: widget.icon ?? const Icon(Icons.arrow_upward, size: _arrowIconSize),
       ),
