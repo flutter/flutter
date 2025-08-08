@@ -3801,8 +3801,6 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-
-      //tester.getSemantics(find.text('Test')),
       matchesSemantics(
         hasFocusAction: true,
         hasTapAction: true,
@@ -3819,8 +3817,6 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(TextField)),
-
-      //tester.getSemantics(find.text('Test')),
       matchesSemantics(
         hasFocusAction: true,
         isTextField: true,
