@@ -40,8 +40,9 @@ SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createMatrix(
     DlScalar* matrix33,
     FilterQuality quality) {
   liveImageFilterCount++;
-  return new sp_wrapper<DlImageFilter>(DlImageFilter::MakeMatrix(
-      createDlMatrixFrom3x3(matrix33), samplingOptionsForQuality(quality)));
+  auto dlFilter = DlImageFilter::MakeMatrix(createDlMatrixFrom3x3(matrix33),
+                                            samplingOptionsForQuality(quality));
+  return dlFilter ? new sp_wrapper<DlImageFilter>(dlFilter) : nullptr;
 }
 
 SKWASM_EXPORT sp_wrapper<DlImageFilter>* imageFilter_createFromColorFilter(
@@ -99,17 +100,6 @@ colorFilter_createLinearToSRGBGamma() {
   liveColorFilterCount++;
   return new sp_wrapper<const DlColorFilter>(
       DlColorFilter::MakeLinearToSrgbGamma());
-}
-
-SKWASM_EXPORT sp_wrapper<const DlColorFilter>* colorFilter_compose(
-    sp_wrapper<DlColorFilter>* outer,
-    sp_wrapper<DlColorFilter>* inner) {
-  liveColorFilterCount++;
-  // TODO(jacksongardner): we might not need this API at all if DlPaint handles
-  // invertColors
-  return nullptr;  // new sp_wrapper<const
-                   // DlColorFilter>(DlColorFilter::MakeCompose(outer->shared(),
-                   // inner->shared()));
 }
 
 SKWASM_EXPORT void colorFilter_dispose(
