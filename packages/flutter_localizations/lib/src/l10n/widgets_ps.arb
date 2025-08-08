@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Search Web",
   "shareButtonLabel": "Share...",
   "pasteButtonLabel": "پیټ کړئ",
-  "selectAllButtonLabel": "غوره کړئ"
+  "selectAllButtonLabel": "غوره کړئ",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

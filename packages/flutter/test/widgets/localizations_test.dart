@@ -22,6 +22,8 @@ void main() {
     expect(localizations.reorderItemRight, isNotNull);
     expect(localizations.reorderItemToEnd, isNotNull);
     expect(localizations.reorderItemToStart, isNotNull);
+    expect(localizations.searchResultsAvailable, isNotNull);
+    expect(localizations.searchResultsUnavailable, isNotNull);
     expect(localizations.copyButtonLabel, isNotNull);
     expect(localizations.cutButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);

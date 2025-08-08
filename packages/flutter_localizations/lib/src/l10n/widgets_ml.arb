@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "വെബിൽ തിരയുക",
   "shareButtonLabel": "പങ്കിടുക",
   "pasteButtonLabel": "ഒട്ടിക്കുക",
-  "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക"
+  "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

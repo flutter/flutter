@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Op internet zoeken",
   "shareButtonLabel": "Delen",
   "pasteButtonLabel": "Plakken",
-  "selectAllButtonLabel": "Alles selecteren"
+  "selectAllButtonLabel": "Alles selecteren",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

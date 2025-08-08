@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "वेबमा खोज्नुहोस्",
   "shareButtonLabel": "सेयर गर्नुहोस्",
   "pasteButtonLabel": "टाँस्नुहोस्",
-  "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्"
+  "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "جستجو در وب",
   "shareButtonLabel": "هم‌رسانی کردن",
   "pasteButtonLabel": "جای‌گذاری",
-  "selectAllButtonLabel": "انتخاب همه"
+  "selectAllButtonLabel": "انتخاب همه",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

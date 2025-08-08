@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Keresés az interneten",
   "shareButtonLabel": "Megosztás",
   "pasteButtonLabel": "Beillesztés",
-  "selectAllButtonLabel": "Összes kijelölése"
+  "selectAllButtonLabel": "Összes kijelölése",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

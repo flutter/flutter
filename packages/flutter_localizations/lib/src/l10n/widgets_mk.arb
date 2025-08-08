@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Пребарајте на интернет",
   "shareButtonLabel": "Сподели",
   "pasteButtonLabel": "Залепи",
-  "selectAllButtonLabel": "Избери ги сите"
+  "selectAllButtonLabel": "Избери ги сите",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

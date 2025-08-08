@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ድርን ፈልግ",
   "shareButtonLabel": "አጋራ",
   "pasteButtonLabel": "ለጥፍ",
-  "selectAllButtonLabel": "ሁሉንም ምረጥ"
+  "selectAllButtonLabel": "ሁሉንም ምረጥ",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Szukaj w internecie",
   "shareButtonLabel": "Udostępnij",
   "pasteButtonLabel": "Wklej",
-  "selectAllButtonLabel": "Zaznacz wszystko"
+  "selectAllButtonLabel": "Zaznacz wszystko",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }
