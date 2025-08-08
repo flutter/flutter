@@ -2,17 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ffi';
+import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'package:ffi/ffi.dart' as ffi;
-import 'package:flutter/semantics.dart';
-import 'package:flutter/src/foundation/binding.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/src/foundation/_features.dart';
+import 'package:flutter/src/widgets/_window.dart';
 
 import 'package:flutter/src/widgets/_window_win32.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Win32 window test', () {
+    setUp(() {
+      isWindowingEnabled = true;
+    });
+
     group('Platform.isWindows is false', () {
       setUp(() {
         Platform.isWindows = false;
@@ -23,13 +28,378 @@ void main() {
       });
     });
 
-    testWidgets('WindowingOwner32 constructor does NOT throw when on windows', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('WindowingOwner32 constructor initializes', (WidgetTester tester) async {
+      bool isInitialized = false;
       WindowingOwnerWin32.test(
-        win32PlatformInterface: _MockWin32PlatformInterface(),
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onInitialize: (WindowingInitRequest request) => isInitialized = true,
+        ),
         platformDispatcher: tester.platformDispatcher,
       );
+
+      expect(isInitialized, true);
+    });
+
+    testWidgets('WindowingOwner32 can create a regular window', (WidgetTester tester) async {
+      bool hasCreated = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onCreateWindow: (int engineId, WindowCreationRequest request) {
+            expect(engineId, tester.platformDispatcher.engineId);
+            expect(request.preferredSize.hasSize, true);
+            expect(request.preferredSize.width, 400);
+            expect(request.preferredSize.height, 300);
+
+            expect(request.preferredConstraints.hasConstraints, true);
+            expect(request.preferredConstraints.minWidth, 100);
+            expect(request.preferredConstraints.minHeight, 101);
+            expect(request.preferredConstraints.maxWidth, 500);
+            expect(request.preferredConstraints.maxHeight, 501);
+            hasCreated = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      owner.createRegularWindowController(
+        preferredSize: const Size(400, 300),
+        preferredConstraints: const BoxConstraints(
+          minWidth: 100,
+          minHeight: 101,
+          maxWidth: 500,
+          maxHeight: 501,
+        ),
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      expect(hasCreated, true);
+    });
+
+    testWidgets('WindowingOwner32 can destroy a regular window', (WidgetTester tester) async {
+      bool hasDestroyed = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onDestroyWindow: (HWND hwnd) {
+            hasDestroyed = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.destroy();
+      expect(hasDestroyed, true);
+    });
+
+    testWidgets('WindowingOwner32 can get content size', (WidgetTester tester) async {
+      bool hasGottenContentSize = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onGetContentSize: (HWND hwnd) {
+            hasGottenContentSize = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.contentSize;
+      expect(hasGottenContentSize, true);
+    });
+
+    testWidgets('WindowingOwner32 can set title', (WidgetTester tester) async {
+      bool hasSetTitle = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onSetTitle: (HWND hwnd, Pointer<ffi.Utf16> title) {
+            hasSetTitle = true;
+            expect(title.toDartString(), 'Hello world');
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setTitle('Hello world');
+      expect(hasSetTitle, true);
+    });
+
+    testWidgets('WindowingOwner32 can set content size', (WidgetTester tester) async {
+      bool hasSetSize = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onSetContentSize: (HWND hwnd, WindowSizeRequest request) {
+            hasSetSize = true;
+            expect(request.hasSize, true);
+            expect(request.width, 800);
+            expect(request.height, 600);
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setSize(const Size(800, 600));
+      expect(hasSetSize, true);
+    });
+
+    testWidgets('WindowingOwner32 can set constraints', (WidgetTester tester) async {
+      bool hasSetConstraints = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onSetConstraints: (HWND hwnd, WindowConstraintsRequest request) {
+            hasSetConstraints = true;
+            expect(request.hasConstraints, true);
+            expect(request.minWidth, 100);
+            expect(request.minHeight, 101);
+            expect(request.maxWidth, 500);
+            expect(request.maxHeight, 501);
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setConstraints(
+        const BoxConstraints(minWidth: 100, minHeight: 101, maxWidth: 500, maxHeight: 501),
+      );
+      expect(hasSetConstraints, true);
+    });
+
+    testWidgets('WindowingOwner32 can activate', (WidgetTester tester) async {
+      bool hasShown = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onShowWindow: (HWND hwnd, int sw) {
+            hasShown = true;
+            expect(sw, 9); // SW_RESTORE
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.activate();
+      expect(hasShown, true);
+    });
+
+    testWidgets('WindowingOwner32 can maximize', (WidgetTester tester) async {
+      bool hasMaximized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onShowWindow: (HWND hwnd, int sw) {
+            hasMaximized = true;
+            expect(sw, 3); // SW_MAXIMIZE
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setMaximized(true);
+      expect(hasMaximized, true);
+    });
+
+    testWidgets('WindowingOwner32 can unmaximize', (WidgetTester tester) async {
+      bool hasUnmaximized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onShowWindow: (HWND hwnd, int sw) {
+            hasUnmaximized = true;
+            expect(sw, 9); // SW_RESTORE
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setMaximized(false);
+      expect(hasUnmaximized, true);
+    });
+
+    testWidgets('WindowingOwner32 can minimize', (WidgetTester tester) async {
+      bool hasMinimized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onShowWindow: (HWND hwnd, int sw) {
+            hasMinimized = true;
+            expect(sw, 6); // SW_MINIMIZE
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setMinimized(true);
+      expect(hasMinimized, true);
+    });
+
+    testWidgets('WindowingOwner32 can unmaximize', (WidgetTester tester) async {
+      bool hasUnminimized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onShowWindow: (HWND hwnd, int sw) {
+            hasUnminimized = true;
+            expect(sw, 9); // SW_RESTORE
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setMinimized(false);
+      expect(hasUnminimized, true);
+    });
+
+    testWidgets('WindowingOwner32 can set fullscreen', (WidgetTester tester) async {
+      bool hasFullscreen = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onSetFullscreen: (HWND hwnd, WindowFullscreenRequest request) {
+            hasFullscreen = true;
+            expect(request.fullscreen, true);
+            expect(request.hasDisplayId, false);
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.setFullscreen(true);
+      expect(hasFullscreen, true);
+    });
+
+    testWidgets('WindowingOwner32 can get isMinimized', (WidgetTester tester) async {
+      bool hasCalledIsMinimized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onIsIconic: (HWND hwnd) {
+            hasCalledIsMinimized = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.isMinimized;
+      expect(hasCalledIsMinimized, true);
+    });
+
+    testWidgets('WindowingOwner32 can get isMaximized', (WidgetTester tester) async {
+      bool hasCalledIsMaximized = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onIsZoomed: (HWND hwnd) {
+            hasCalledIsMaximized = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.isMaximized;
+      expect(hasCalledIsMaximized, true);
+    });
+
+    testWidgets('WindowingOwner32 can get isFullscreen', (WidgetTester tester) async {
+      bool hasCalledIsFullscreen = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onGetFullscreen: (HWND hwnd) {
+            hasCalledIsFullscreen = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.isFullscreen;
+      expect(hasCalledIsFullscreen, true);
+    });
+
+    testWidgets('WindowingOwner32 can get title', (WidgetTester tester) async {
+      bool hasCalledTextLengthGetter = false;
+      bool hasCalledTextGetter = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onGetWindowTextLength: (HWND hwnd) {
+            hasCalledTextLengthGetter = true;
+          },
+          onGetWindowText: (HWND hwnd, Pointer<ffi.Utf16> title, int length) {
+            hasCalledTextGetter = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.title;
+      expect(hasCalledTextLengthGetter, true);
+      expect(hasCalledTextGetter, true);
+    });
+
+    testWidgets('WindowingOwner32 can get isActivated', (WidgetTester tester) async {
+      bool hasCalledIsActivated = false;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onGetForegroundWindow: () {
+            hasCalledIsActivated = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      controller.isActivated;
+      expect(hasCalledIsActivated, true);
     });
   });
 }
@@ -53,7 +423,7 @@ class _MockWin32PlatformInterface extends Win32PlatformInterface {
     this.onGetForegroundWindow,
   });
 
-  final int viewId = 1;
+  final int viewId = 0;
   final HWND hwnd = Pointer<Void>.fromAddress(0x8000);
   final bool _hasToplevelWindows = true;
   Pointer<ActualContentSize>? size;
@@ -155,13 +525,13 @@ class _MockWin32PlatformInterface extends Win32PlatformInterface {
   @override
   int getWindowTextLength(HWND windowHandle) {
     onGetWindowTextLength?.call(windowHandle);
-    return 0;
+    return 10;
   }
 
   @override
   int getWindowText(HWND windowHandle, Pointer<ffi.Utf16> lpString, int maxLength) {
     onGetWindowText?.call(windowHandle, lpString, maxLength);
-    return 0;
+    return 10;
   }
 
   @override
