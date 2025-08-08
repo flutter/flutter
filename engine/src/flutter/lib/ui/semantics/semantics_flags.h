@@ -42,6 +42,7 @@ struct SemanticsFlags {
   bool hasSelectedState = false;
   bool hasRequiredState = false;
   bool isRequired = false;
+  bool isComboBox = false;
 };
 
 //------------------------------------------------------------------------------
@@ -87,7 +88,8 @@ class NativeSemanticsFlags
                                  bool isExpanded,
                                  bool hasSelectedState,
                                  bool hasRequiredState,
-                                 bool isRequired);
+                                 bool isRequired,
+                                 bool isComboBox);
 
   //----------------------------------------------------------------------------
   /// Returns the c++ representataion of SemanticsFlags.

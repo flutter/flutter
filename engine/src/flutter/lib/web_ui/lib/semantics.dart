@@ -162,6 +162,7 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  static const int _kIsComboBoxIndex = 1 << 31;
   // WARNING: JavaScript can only go up to 32 bits!
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
@@ -222,6 +223,7 @@ class SemanticsFlag {
     'hasRequiredState',
   );
   static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+  static const SemanticsFlag isComboBox = SemanticsFlag._(_kIsComboBoxIndex, 'isComboBox');
 
   static const Map<int, SemanticsFlag> _kFlagById = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
@@ -255,6 +257,7 @@ class SemanticsFlag {
     _kIsExpandedIndex: isExpanded,
     _kHasRequiredStateIndex: hasRequiredState,
     _kIsRequiredIndex: isRequired,
+    _kIsComboBoxIndex: isComboBox,
   };
 
   static List<SemanticsFlag> get values => _kFlagById.values.toList(growable: false);
@@ -299,6 +302,7 @@ class SemanticsFlags {
     this.hasSelectedState = false,
     this.hasRequiredState = false,
     this.isRequired = false,
+    this.isComboBox = false,
   });
   static const SemanticsFlags none = SemanticsFlags();
   final bool hasCheckedState;
@@ -332,6 +336,7 @@ class SemanticsFlags {
   final bool hasSelectedState;
   final bool hasRequiredState;
   final bool isRequired;
+  final bool isComboBox;
 
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
@@ -366,6 +371,7 @@ class SemanticsFlags {
       hasSelectedState: hasSelectedState || other.hasSelectedState,
       hasRequiredState: hasRequiredState || other.hasRequiredState,
       isRequired: isRequired || other.isRequired,
+      isComboBox: isComboBox || other.isComboBox,
     );
   }
 
@@ -401,6 +407,7 @@ class SemanticsFlags {
     bool? hasSelectedState,
     bool? hasRequiredState,
     bool? isRequired,
+    bool? isComboBox,
   }) {
     return SemanticsFlags(
       hasCheckedState: hasCheckedState ?? this.hasCheckedState,
@@ -434,6 +441,7 @@ class SemanticsFlags {
       hasSelectedState: hasSelectedState ?? this.hasSelectedState,
       hasRequiredState: hasRequiredState ?? this.hasRequiredState,
       isRequired: isRequired ?? this.isRequired,
+      isComboBox: isComboBox ?? this.isComboBox,
     );
   }
 
@@ -472,7 +480,8 @@ class SemanticsFlags {
           isExpanded == other.isExpanded &&
           hasSelectedState == other.hasSelectedState &&
           hasRequiredState == other.hasRequiredState &&
-          isRequired == other.isRequired;
+          isRequired == other.isRequired &&
+          isComboBox == other.isComboBox;
 
   @override
   int get hashCode => Object.hashAll(<bool>[
@@ -507,6 +516,7 @@ class SemanticsFlags {
     hasSelectedState,
     hasRequiredState,
     isRequired,
+    isComboBox,
   ]);
 
   List<String> toStrings() {
@@ -542,6 +552,7 @@ class SemanticsFlags {
       if (hasSelectedState) 'hasSelectedState',
       if (hasRequiredState) 'hasRequiredState',
       if (isRequired) 'isRequired',
+      if (isComboBox) 'isComboBox',
     ];
   }
 
@@ -576,7 +587,8 @@ class SemanticsFlags {
         (isExpanded && other.isExpanded) ||
         (hasSelectedState && other.hasSelectedState) ||
         (hasRequiredState && other.hasRequiredState) ||
-        (isRequired && other.isRequired);
+        (isRequired && other.isRequired) ||
+        (isComboBox && other.isComboBox);
   }
 }
 

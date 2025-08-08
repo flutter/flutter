@@ -219,6 +219,9 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
   if (priv->flags.is_image) {
     return ATK_ROLE_IMAGE;
   }
+  if (priv->flags.is_combo_box) {
+    return ATK_ROLE_COMBO_BOX;
+  }
 
   return ATK_ROLE_PANEL;
 }
