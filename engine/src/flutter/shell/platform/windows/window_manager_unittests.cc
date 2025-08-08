@@ -170,7 +170,7 @@ TEST_F(WindowManagerTest, CanConstrainByMinimiumSize) {
                                                                    view_id);
   WindowConstraints constraints{.has_view_constraints = true,
                                 .view_min_width = 900,
-                                .view_min_height = 1000,
+                                .view_min_height = 700,
                                 .view_max_width = 10000,
                                 .view_max_height = 10000};
   InternalFlutterWindows_WindowManager_SetWindowConstraints(window_handle,
@@ -179,7 +179,7 @@ TEST_F(WindowManagerTest, CanConstrainByMinimiumSize) {
   ActualWindowSize actual_size =
       InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
   EXPECT_EQ(actual_size.width, 900);
-  EXPECT_EQ(actual_size.height, 1000);
+  EXPECT_EQ(actual_size.height, 700);
 }
 
 TEST_F(WindowManagerTest, CanConstrainByMaximumSize) {
