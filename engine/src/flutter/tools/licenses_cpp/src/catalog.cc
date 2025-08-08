@@ -8,6 +8,8 @@
 #include <fstream>
 #include <vector>
 
+#include "flutter/third_party/abseil-cpp/absl/log/log.h"
+
 namespace fs = std::filesystem;
 
 namespace {
@@ -255,6 +257,8 @@ absl::StatusOr<Catalog::Entry> Catalog::ParseEntry(std::istream& is) {
                            std::istreambuf_iterator<char>());
 
   std::string ignore_whitespace_matcher = IgnoreWhitespace(matcher_text);
+
+  VLOG(4) << "matcher:" << name << ":\n" << ignore_whitespace_matcher;
 
   return Catalog::Entry{.name = std::move(name),
                         .unique = std::move(unique),

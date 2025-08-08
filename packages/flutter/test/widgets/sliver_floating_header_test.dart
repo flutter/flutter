@@ -20,13 +20,14 @@ void main() {
                   Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
                 },
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return switch (axis) {
                     Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
                     Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
                   };
-                }, childCount: 100),
+                },
               ),
             ],
           ),
@@ -187,10 +188,11 @@ void main() {
                 ),
                 child: SizedBox(height: 200, child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
+                },
               ),
             ],
           ),
@@ -246,10 +248,11 @@ void main() {
                 snapMode: snapMode,
                 child: const SizedBox(height: 200, child: Text('header')),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              SliverList.builder(
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
                   return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
+                },
               ),
             ],
           ),

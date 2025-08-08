@@ -37,6 +37,7 @@ import '../run_hot.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
@@ -274,31 +275,12 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        Future<int> getPort() async {
-          if (debuggingOptions.port == null) {
-            return globals.os.findFreePort();
-          }
+        final WebDevServerConfig originalConfig =
+            debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
 
-          final int? port = int.tryParse(debuggingOptions.port ?? '');
+        final int resolvedPort = await resolvePort(originalConfig.port, globals.os);
 
-          if (port == null) {
-            logger.printError('''
-Received a non-integer value for port: ${debuggingOptions.port}
-A randomly-chosen available port will be used instead.
-''');
-            return globals.os.findFreePort();
-          }
-
-          if (port < 0 || port > 65535) {
-            throwToolExit('''
-Invalid port: ${debuggingOptions.port}
-Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
-    ''');
-          }
-
-          return port;
-        }
-
+        final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
             ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
@@ -323,10 +305,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 nonWebServerConnectedDeviceIds.contains(device!.device!.id));
 
         device!.devFS = WebDevFS(
-          hostname: debuggingOptions.hostname ?? 'localhost',
-          port: await getPort(),
-          tlsCertPath: debuggingOptions.tlsCertPath,
-          tlsCertKeyPath: debuggingOptions.tlsCertKeyPath,
+          webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -337,7 +316,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
-          extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
@@ -352,7 +330,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           platform: _platform,
         );
         Uri url = await device!.devFS!.create();
-        if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
+        if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {

@@ -223,12 +223,7 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _git
-        .logSync([
-          '-n',
-          '1',
-          '--pretty=format:%ar',
-          if (revision != null) revision,
-        ], workingDirectory: flutterRoot)
+        .logSync(['-n', '1', '--pretty=format:%ar', ?revision], workingDirectory: flutterRoot)
         .stdout
         .trim();
   }
