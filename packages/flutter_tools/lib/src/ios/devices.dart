@@ -1082,6 +1082,9 @@ class IOSDevice extends Device {
       return (false, deploymentMethod);
     }
 
+    // Core Devices (iOS 17 devices) are debugged through Xcode so don't
+    // include these flags, which are used to check if the app was launched
+    // via Flutter CLI and `ios-deploy`.
     final List<String> filteredLaunchArguments = launchArguments
         .where((String arg) => arg != '--enable-checked-mode' && arg != '--verify-entry-points')
         .toList();
