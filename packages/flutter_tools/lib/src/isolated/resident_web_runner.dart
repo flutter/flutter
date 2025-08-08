@@ -903,6 +903,16 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
               }
             });
           }
+
+          if (websocketUri != null) {
+            if (debuggingOptions.vmserviceOutFile != null) {
+              _fileSystem.file(debuggingOptions.vmserviceOutFile)
+                ..createSync(recursive: true)
+                ..writeAsStringSync(websocketUri.toString());
+            }
+            _logger.printStatus('Debug service listening on $websocketUri');
+          }
+          connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
         }),
       );
     }
@@ -916,16 +926,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         ),
       );
     }
-    if (websocketUri != null) {
-      if (debuggingOptions.vmserviceOutFile != null) {
-        _fileSystem.file(debuggingOptions.vmserviceOutFile)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(websocketUri.toString());
-      }
-      _logger.printStatus('Debug service listening on $websocketUri');
-    }
+
     appStartedCompleter?.complete();
-    connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
     if (stayResident) {
       await waitForAppToFinish();
     } else {
