@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../canvaskit/canvaskit_canvas.dart';
+import '../canvaskit/canvas.dart';
 import '../dom.dart';
 import '../util.dart';
 import 'debug.dart';
@@ -328,7 +328,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   // TODO(jlavrova): Delete.
-  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
+  void paintOnCanvasKit(CkCanvas canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
     }

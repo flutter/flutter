@@ -5,15 +5,17 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'surface.dart';
+import '../skwasm_impl.dart';
 
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
 /// one or many on-screen <canvas> elements to actually display the scene.
 class OffscreenCanvasRasterizer extends Rasterizer {
+  OffscreenCanvasRasterizer(this.offscreenSurface);
+
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
-  final Surface offscreenSurface = Surface();
+  final SkwasmSurface offscreenSurface;
 
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
@@ -47,30 +49,26 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
-  /// Render the given [pictures] so it is displayed by the given [canvas].
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) async {
-    await rasterizer.offscreenSurface.rasterizeToCanvas(
-      currentFrameSize,
-      canvas as RenderCanvas,
-      picture,
-    );
-  }
-
   @override
   void prepareToDraw() {
-    rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+    // No need to do anything here. Skwasm sizes the surface in the `rasterize`
+    // call below.
   }
 
   @override
-  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) {
+  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) async {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    final List<Future<void>> rasterizeFutures = <Future<void>>[];
+    final RenderResult renderResult = await rasterizer.offscreenSurface.renderPictures(
+      pictures.cast<SkwasmPicture>(),
+    );
     for (int i = 0; i < displayCanvases.length; i++) {
-      rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
+      final RenderCanvas renderCanvas = displayCanvases[i] as RenderCanvas;
+      final DomImageBitmap bitmap = renderResult.imageBitmaps[i];
+      renderCanvas.render(bitmap);
     }
-    return Future.wait<void>(rasterizeFutures);
+    return Future<void>.value();
   }
 
   @override

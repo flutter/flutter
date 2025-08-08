@@ -173,7 +173,7 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
   ImageFilterEngineLayer(this.filter, this.offset);
 
   final ui.Offset offset;
-  final ui.ImageFilter filter;
+  final LayerImageFilter filter;
 
   @override
   void accept(LayerVisitor visitor) {
@@ -203,7 +203,7 @@ class PictureLayer extends Layer {
   PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   /// The picture to paint into the canvas.
-  final CkPicture picture;
+  final LayerPicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;

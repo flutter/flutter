@@ -6,6 +6,8 @@ import 'dart:js_interop';
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
+import 'canvaskit_api.dart';
+
 /// Collects native objects that weren't explicitly disposed of using
 /// [UniqueRef.dispose] or [CountedRef.unref].
 ///

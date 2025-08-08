@@ -39,6 +39,11 @@ void Surface::dispose() {
 }
 
 // Main thread only
+void Surface::setResourceCacheLimit(int bytes) {
+  _grContext->setResourceCacheLimit(bytes);
+}
+
+// Main thread only
 uint32_t Surface::renderPictures(SkPicture** pictures, int count) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
@@ -260,6 +265,11 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
 SKWASM_EXPORT void surface_dispose(Surface* surface) {
   // This should be called directly only on the worker
   surface->dispose();
+}
+
+SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Surface* surface,
+                                                      int bytes) {
+  surface->setResourceCacheLimit(bytes);
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Surface* surface,

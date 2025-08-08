@@ -39,6 +39,9 @@ dartdevc:
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
 
+    _canvaskit:
+      uri: "lib/_canvaskit/canvaskit.dart"
+
 dart2js:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: dart2js}
@@ -65,6 +68,9 @@ dart2js:
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
 
+    _canvaskit:
+      uri: "lib/_canvaskit/canvaskit.dart"
+
 wasm:
   include:
     - {path: "../dart-sdk/lib/libraries.json", target: wasm}
@@ -90,3 +96,6 @@ wasm:
 
     _web_test_fonts:
       uri: "lib/_web_test_fonts/web_test_fonts.dart"
+
+    _canvaskit:
+      uri: "lib/_canvaskit/canvaskit.dart"
