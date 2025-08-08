@@ -842,7 +842,7 @@ void main() {
   group('IOSDevice.startApp for CoreDevice', () {
     group('in debug mode', () {
       testUsingContext(
-        'uses LLDB with Xcode 16+',
+        'uses LLDB with Xcode 26+',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
@@ -892,7 +892,7 @@ void main() {
           ]);
         },
         overrides: {
-          Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0)),
+          Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0)),
           Analytics: () => FakeAnalytics(),
         },
       );
@@ -962,10 +962,10 @@ void main() {
             result: 'debugging success',
           ),
         ]);
-      }, overrides: {Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0))});
+      }, overrides: {Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
 
       testUsingContext(
-        'uses Xcode if less than Xcode 16',
+        'uses Xcode if less than Xcode 26',
         () async {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final processManager = FakeProcessManager.empty();
@@ -1027,7 +1027,7 @@ void main() {
             ),
           ]);
         },
-        overrides: {Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))},
+        overrides: {Xcode: () => FakeXcode(currentVersion: Version(16, 0, 0))},
       );
 
       testUsingContext('succeeds', () async {

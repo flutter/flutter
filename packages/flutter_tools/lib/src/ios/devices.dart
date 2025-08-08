@@ -986,10 +986,11 @@ class IOSDevice extends Device {
     IOSDeploymentMethod? deploymentMethod;
 
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
-    // Use LLDB if available.
+    // However, it doesn't work reliably until Xcode 26.
+    // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 16 && lldbEnabled) {
+    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
       final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
         deviceId: id,
         bundlePath: package.deviceBundlePath,

@@ -224,9 +224,14 @@ const windowingFeature = Feature(
 
 /// Enable LLDB debugging for physical iOS devices. When LLDB debugging is off,
 /// Xcode debugging is used instead.
+///
+/// Requires iOS 17+ and Xcode 26+. If those requirements are not met, the previous
+/// default debugging method is used instead.
 const lldbDebugging = Feature(
   name: 'support for debugging with LLDB for physical iOS devices',
-  extraHelpText: 'If LLDB debugging is off, Xcode debugging is used instead.',
+  extraHelpText:
+      'If LLDB debugging is off, Xcode debugging is used instead. '
+      'Only available for iOS 17 or newer devices. Requires Xcode 26 or greater.',
   configSetting: 'enable-lldb-debugging',
   environmentOverride: 'FLUTTER_LLDB_DEBUGGING',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
