@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
+import 'package:glob/glob.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
@@ -288,6 +289,81 @@ void main() {
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
       expect(targetUri.port, 8080);
+    });
+  });
+
+  group('SourceProxyRule', () {
+    test('canHandle returns true for valid source', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'source': '/assets/**',
+        'target': 'http://localhost:8080',
+      });
+      expect(SourceProxyRule.canHandle(yaml), isTrue);
+    });
+
+    test('canHandle returns false for missing source', () {
+      final yaml = YamlMap.wrap(<String, String>{'target': 'http://localhost:8080'});
+      expect(SourceProxyRule.canHandle(yaml), isFalse);
+    });
+
+    test('canHandle returns false for empty source', () {
+      final yaml = YamlMap.wrap(<String, String>{'source': '', 'target': 'http://localhost:8080'});
+      expect(SourceProxyRule.canHandle(yaml), isFalse);
+    });
+
+    test('fromYaml creates a SourceProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'source': '/assets/**',
+        'target': 'http://localhost:8080/data',
+        'replace': '/static_files',
+      });
+      final SourceProxyRule? rule = SourceProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(
+        rule.toString(),
+        '{source: /assets/**, target: http://localhost:8080/data, replace: /static_files}',
+      );
+    });
+
+    test('fromYaml returns null if target is missing', () {
+      final yaml = YamlMap.wrap(<String, String>{'source': '/assets/**'});
+      final SourceProxyRule? rule = SourceProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNull);
+      expect(
+        logger.errorText,
+        contains('[ProxyRule] Invalid target for source: /assets/**. target cannot be null'),
+      );
+    });
+
+    test('matches returns true when glob matches path', () {
+      final rule = SourceProxyRule(source: Glob('/assets/**.jpg'), target: 'http://localhost:8080');
+      expect(rule.matches('/assets/images/cat.jpg'), isTrue);
+      expect(rule.matches('/assets/cat.jpg'), isTrue);
+      expect(rule.matches('/assets/images/subfolder/cat.jpg'), isTrue);
+    });
+
+    test('matches returns false when glob does not match path', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/**/*.jpg'),
+        target: 'http://localhost:8080',
+      );
+      expect(rule.matches('/assets/images/dog.png'), isFalse);
+      expect(rule.matches('/assets/images/dog'), isFalse);
+      expect(rule.matches('/style.css'), isFalse);
+    });
+
+    test('replace correctly replaces with replacement string', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/**'),
+        target: 'http://localhost:8080',
+        replacement: '/static',
+      );
+      expect(rule.replace('/assets/images/image.jpg'), '/static');
+    });
+
+    test('replace returns original path for no replacement', () {
+      final rule = SourceProxyRule(source: Glob('/assets/**'), target: 'http://localhost:8080');
+      expect(rule.replace('/assets/images/image.jpg'), '/assets/images/image.jpg');
     });
   });
 
