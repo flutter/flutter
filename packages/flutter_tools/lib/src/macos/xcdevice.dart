@@ -602,6 +602,7 @@ class XCDevice {
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
+          analytics: globals.analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,

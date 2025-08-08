@@ -1194,7 +1194,6 @@ class DebuggingOptions {
     String? route,
     Map<String, Object?> platformArgs, {
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
-    bool isCoreDevice = false,
   }) {
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
@@ -1207,13 +1206,7 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartFlags.isNotEmpty)
         '--dart-flags=$dartFlags',
       if (useTestFonts) '--use-test-fonts',
-      // Core Devices (iOS 17 devices) are debugged through Xcode so don't
-      // include these flags, which are used to check if the app was launched
-      // via Flutter CLI and `ios-deploy`.
-      if (debuggingEnabled && !isCoreDevice) ...<String>[
-        '--enable-checked-mode',
-        '--verify-entry-points',
-      ],
+      if (debuggingEnabled) ...<String>['--enable-checked-mode', '--verify-entry-points'],
       if (enableSoftwareRendering) '--enable-software-rendering',
       if (traceSystrace) '--trace-systrace',
       if (traceToFile != null) '--trace-to-file="$traceToFile"',
