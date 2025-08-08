@@ -18,7 +18,6 @@ export 'canvaskit/mask_filter.dart';
 export 'canvaskit/multi_surface_rasterizer.dart';
 export 'canvaskit/native_memory.dart';
 export 'canvaskit/offscreen_canvas_rasterizer.dart';
-export 'canvaskit/overlay_scene_optimizer.dart';
 export 'canvaskit/painting.dart';
 export 'canvaskit/path.dart';
 export 'canvaskit/path_metrics.dart';
