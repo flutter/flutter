@@ -815,6 +815,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      // The child is not visible.
+      return const SizedBox.shrink();
+    }
     final Offset target = MatrixUtils.transformPoint(
       layoutInfo.childPaintTransform,
       layoutInfo.childSize.center(Offset.zero),
