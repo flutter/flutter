@@ -2135,33 +2135,14 @@ class _InactiveElements {
     try {
       element.deactivate();
     } catch (_) {
-      element._ensureDeactivated();
+      Element._deactivateFailedSubtreeRecursively(element);
       rethrow;
-    } finally {
-      assert(element._lifecycleState == _ElementLifecycle.inactive);
-      element.visitChildren(_deactivateRecursively);
-      assert(() {
-        element.debugDeactivated();
-        return true;
-      }());
     }
-  }
-
-  static void _deactivateFailedSubtreeRecursively(Element element) {
-    // Temporarily set the Element's state to active in case the deactivate
-    // implementation has related assertions.
-    element._lifecycleState = _ElementLifecycle.active;
-    try {
-      element.deactivate();
-    } catch (_) {
-      element._ensureDeactivated();
-      // Do not rethrow:
-      // The subtree has already thrown a different error and the framework is
-      // cleaning up on a best-effort basis.
-    }
-    assert(element._lifecycleState == _ElementLifecycle.inactive);
-    element._lifecycleState = _ElementLifecycle.failed;
-    element.visitChildren(_deactivateFailedSubtreeRecursively);
+    element.visitChildren(_deactivateRecursively);
+    assert(() {
+      element.debugDeactivated();
+      return true;
+    }());
   }
 
   void add(Element element) {
@@ -2171,16 +2152,13 @@ class _InactiveElements {
 
     switch (element._lifecycleState) {
       case _ElementLifecycle.active:
-        try {
-          _deactivateRecursively(element);
-        } finally {
-          _elements.add(element);
-        }
-      case _ElementLifecycle.failed:
-        _deactivateFailedSubtreeRecursively(element);
+        _deactivateRecursively(element);
+        // This element is only added to _elements if the whole subtree is
+        // successfully deactivated.
+        _elements.add(element);
       case _ElementLifecycle.inactive:
         _elements.add(element);
-      case _ElementLifecycle.initial || _ElementLifecycle.defunct:
+      case _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
         assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');
     }
   }
@@ -4612,14 +4590,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           return newChild;
         }
       } catch (_) {
-        // Attempt to do some clean-up if activation or mount fails to leave tree in a reasonable state.
-        try {
-          newChild._lifecycleState = _ElementLifecycle.failed;
-          // This call makes sure the entire newChild subtree will be marked as failed.
-          deactivateChild(newChild);
-        } catch (_) {
-          // Clean-up failed. Only surface original exception.
-        }
+        // Attempt to do some clean-up if activation or mount fails
+        // to leave tree in a reasonable state.
+        _deactivateFailedChildSilently(newChild);
         rethrow;
       }
     } finally {
@@ -4670,6 +4643,38 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
+  }
+
+  void _deactivateFailedChildSilently(Element child) {
+    try {
+      child._parent = null;
+      child.detachRenderObject();
+      _deactivateFailedSubtreeRecursively(child);
+    } catch (_) {
+      // Do not rethrow:
+      // The subtree has already thrown a different error and the framework is
+      // cleaning up on a best-effort basis.
+    }
+  }
+
+  // This method calls _ensureDeactivated for the subtree rooted at `element`,
+  // supressing all exceptions thrown.
+  //
+  // This method will attempt to keep doing treewalk even one of the nodes
+  // failed to deactivate.
+  //
+  // The subtree has already thrown a different error and the framework is
+  // cleaning up on a best-effort basis.
+  static void _deactivateFailedSubtreeRecursively(Element element) {
+    try {
+      element.deactivate();
+    } catch (_) {
+      element._ensureDeactivated();
+    }
+    element._lifecycleState = _ElementLifecycle.failed;
+    try {
+      element.visitChildren(_deactivateFailedSubtreeRecursively);
+    } catch (_) {}
   }
 
   // The children that have been forgotten by forgetChild. This will be used in
@@ -6261,10 +6266,7 @@ class InheritedElement extends ProxyElement {
 
   @override
   void debugDeactivated() {
-    assert(() {
-      assert(_dependents.isEmpty);
-      return true;
-    }());
+    assert(_dependents.isEmpty);
     super.debugDeactivated();
   }
 

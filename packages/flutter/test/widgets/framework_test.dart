@@ -2090,7 +2090,8 @@ The findRenderObject() method was called for the following element:
 
     await tester.pumpWidget(const SizedBox());
     FlutterError.onError = onError;
-    expect(element.debugIsDefunct, true);
+    expect(element.debugIsActive, false);
+    expect(element.debugIsDefunct, false);
   });
 
   testWidgets(
