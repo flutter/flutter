@@ -1060,6 +1060,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self.platformPlugin showLookUpViewController:selectedText];
 }
 
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    performPlatformChannelContextMenuCustomAction:(NSString*)customActionID
+                                       withClient:(int)client {
+  [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                           arguments:@[ @(client), customActionID ]];
+}
+
 #pragma mark - FlutterViewEngineDelegate
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView showToolbar:(int)client {
