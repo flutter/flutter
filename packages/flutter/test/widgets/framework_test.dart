@@ -2078,21 +2078,26 @@ The findRenderObject() method was called for the following element:
     );
   });
 
-  testWidgets('widget is not active if throw in deactivated', (WidgetTester tester) async {
-    final FlutterExceptionHandler? onError = FlutterError.onError;
-    FlutterError.onError = (_) {};
-    const Widget child = Placeholder();
-    await tester.pumpWidget(
-      StatefulWidgetSpy(onDeactivate: (_) => throw StateError('kaboom'), child: child),
-    );
-    final Element element = tester.element(find.byWidget(child));
-    assert(element.debugIsActive);
+  testWidgets(
+    'widget is not active if throw in deactivated',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      await tester.pumpWidget(
+        StatefulWidgetSpy(onDeactivate: (_) => throw StateError('kaboom'), child: child),
+      );
+      final Element element = tester.element(find.byWidget(child));
+      assert(element.debugIsActive);
 
-    await tester.pumpWidget(const SizedBox());
-    FlutterError.onError = onError;
-    expect(element.debugIsActive, false);
-    expect(element.debugIsDefunct, false);
-  });
+      await tester.pumpWidget(const SizedBox());
+      FlutterError.onError = onError;
+      expect(element.debugIsActive, false);
+      expect(element.debugIsDefunct, false);
+    },
+  );
 
   testWidgets(
     'widget is not active if throw in activated',
@@ -2117,21 +2122,26 @@ The findRenderObject() method was called for the following element:
     },
   );
 
-  testWidgets('widget is unmounted if throw in dispose', (WidgetTester tester) async {
-    final FlutterExceptionHandler? onError = FlutterError.onError;
-    FlutterError.onError = (_) {};
-    const Widget child = Placeholder();
-    final Widget widget = StatefulWidgetSpy(
-      onDispose: (_) => throw StateError('kaboom'),
-      child: child,
-    );
-    await tester.pumpWidget(widget);
-    final Element element = tester.element(find.byWidget(child));
-    await tester.pumpWidget(child);
+  testWidgets(
+    'widget is unmounted if throw in dispose',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final FlutterExceptionHandler? onError = FlutterError.onError;
+      FlutterError.onError = (_) {};
+      const Widget child = Placeholder();
+      final Widget widget = StatefulWidgetSpy(
+        onDispose: (_) => throw StateError('kaboom'),
+        child: child,
+      );
+      await tester.pumpWidget(widget);
+      final Element element = tester.element(find.byWidget(child));
+      await tester.pumpWidget(child);
 
-    FlutterError.onError = onError;
-    expect(element.debugIsDefunct, true);
-  });
+      FlutterError.onError = onError;
+      expect(element.debugIsDefunct, true);
+    },
+  );
 }
 
 class _TestInheritedElement extends InheritedElement {
