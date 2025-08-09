@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Deursoek web",
   "shareButtonLabel": "Deel",
   "pasteButtonLabel": "Plak",
-  "selectAllButtonLabel": "Kies alles"
+  "selectAllButtonLabel": "Kies alles",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

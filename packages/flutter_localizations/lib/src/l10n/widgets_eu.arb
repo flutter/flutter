@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu guztiak"
+  "selectAllButtonLabel": "Hautatu guztiak",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

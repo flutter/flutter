@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish",
   "pasteButtonLabel": "Joylash",
-  "selectAllButtonLabel": "Hammasi"
+  "selectAllButtonLabel": "Hammasi",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }

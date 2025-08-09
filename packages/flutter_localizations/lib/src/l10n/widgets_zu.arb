@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Sesha Iwebhu",
   "shareButtonLabel": "Yabelana",
   "pasteButtonLabel": "Namathisela",
-  "selectAllButtonLabel": "Khetha konke"
+  "selectAllButtonLabel": "Khetha konke",
+  "searchResultsAvailable": "Search results available",
+  "searchResultsUnavailable": "Search results not available"
 }
