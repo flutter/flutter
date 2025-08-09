@@ -217,6 +217,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(double to, {required Duration duration, required Curve curve});
 
+  // TODO(kszczek): implement an animateTo variant with implicit duration and curve
+
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
   /// [animateTo] is called.
   ///
