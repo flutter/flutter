@@ -915,6 +915,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
         }),
       );
+    } else {
+      connectionInfoCompleter?.complete(DebugConnectionInfo());
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingOptions.enableDevTools) {
@@ -928,9 +930,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
 
     appStartedCompleter?.complete();
-    if (!supportsServiceProtocol) {
-      connectionInfoCompleter?.complete(DebugConnectionInfo());
-    }
     if (stayResident) {
       await waitForAppToFinish();
     } else {
