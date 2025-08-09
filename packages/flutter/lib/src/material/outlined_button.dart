@@ -83,6 +83,7 @@ class OutlinedButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior,
     super.statesController,
+    super.isEnabled,
     required super.child,
   });
 
