@@ -695,6 +695,77 @@ void main() {
     headerCenter = tester.getCenter(find.text('Header'));
     expect(headerCenter.dx, equals(400));
   });
+
+  testWidgets('DataTable uses sortIconWidget from theme when not provided directly', (WidgetTester tester) async {
+    // Custom sort icon widget to use in the theme
+    const Key themeIconKey = Key('themeIcon');
+    const Widget themeIcon = Icon(Icons.arrow_downward, key: themeIconKey);
+    
+    // Custom sort icon widget to use directly in the DataTable
+    const Key directIconKey = Key('directIcon');
+    const Widget directIcon = Icon(Icons.arrow_upward, key: directIconKey);
+
+    // Build a DataTable with sorting enabled, using theme's sortIconWidget
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          dataTableTheme: const DataTableThemeData(
+            sortIconWidget: themeIcon,
+          ),
+        ),
+        home: Material(
+          child: DataTable(
+            sortColumnIndex: 0,
+            sortAscending: true,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('Header'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(cells: <DataCell>[DataCell(Text('Data'))])
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the theme's sort icon is being used
+    expect(find.byKey(themeIconKey), findsOneWidget);
+    expect(find.byKey(directIconKey), findsNothing);
+
+    // Now rebuild with a directly provided sortIconWidget
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          dataTableTheme: const DataTableThemeData(
+            sortIconWidget: themeIcon,
+          ),
+        ),
+        home: Material(
+          child: DataTable(
+            sortColumnIndex: 0,
+            sortAscending: true,
+            sortIconWidget: directIcon,
+            columns: <DataColumn>[
+              DataColumn(
+                label: const Text('Header'),
+                onSort: (int columnIndex, bool ascending) {},
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(cells: <DataCell>[DataCell(Text('Data'))])
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Verify that the directly provided sort icon is now being used instead of the theme's
+    expect(find.byKey(themeIconKey), findsNothing);
+    expect(find.byKey(directIconKey), findsOneWidget);
+  });
 }
 
 BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {

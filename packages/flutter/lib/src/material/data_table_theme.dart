@@ -61,17 +61,18 @@ class DataTableThemeData with Diagnosticable {
     this.headingCellCursor,
     this.dataRowCursor,
     this.headingRowAlignment,
-  }) : assert(
-         dataRowMinHeight == null ||
-             dataRowMaxHeight == null ||
-             dataRowMaxHeight >= dataRowMinHeight,
-       ),
-       assert(
+    this.sortIconWidget,
+  })  : assert(
+          dataRowMinHeight == null ||
+              dataRowMaxHeight == null ||
+              dataRowMaxHeight >= dataRowMinHeight,
+        ),
+        assert(
          dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
-         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
-       ),
-       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
-       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
+        ),
+        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
   /// {@macro flutter.material.dataTable.decoration}
   final Decoration? decoration;
@@ -127,6 +128,12 @@ class DataTableThemeData with Diagnosticable {
   /// If specified, overrides the default value of [DataColumn.headingRowAlignment].
   final MainAxisAlignment? headingRowAlignment;
 
+  /// If specified, overrides the default value of [DataTable.sortIconWidget].
+  ///
+  /// This widget will be used as the sort indicator for all sortable columns
+  /// in the data table, unless overridden by the individual [DataTable.sortIconWidget].
+  final Widget? sortIconWidget;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -150,6 +157,7 @@ class DataTableThemeData with Diagnosticable {
     MaterialStateProperty<MouseCursor?>? headingCellCursor,
     MaterialStateProperty<MouseCursor?>? dataRowCursor,
     MainAxisAlignment? headingRowAlignment,
+    Widget? sortIconWidget,
   }) {
     assert(
       dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
@@ -174,6 +182,7 @@ class DataTableThemeData with Diagnosticable {
       headingCellCursor: headingCellCursor ?? this.headingCellCursor,
       dataRowCursor: dataRowCursor ?? this.dataRowCursor,
       headingRowAlignment: headingRowAlignment ?? this.headingRowAlignment,
+      sortIconWidget: sortIconWidget ?? this.sortIconWidget,
     );
   }
 
@@ -219,22 +228,23 @@ class DataTableThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
-    decoration,
-    dataRowColor,
-    dataRowMinHeight,
-    dataRowMaxHeight,
-    dataTextStyle,
-    headingRowColor,
-    headingRowHeight,
-    headingTextStyle,
-    horizontalMargin,
-    columnSpacing,
-    dividerThickness,
-    checkboxHorizontalMargin,
-    headingCellCursor,
-    dataRowCursor,
-    headingRowAlignment,
-  );
+        decoration,
+        dataRowColor,
+        dataRowMinHeight,
+        dataRowMaxHeight,
+        dataTextStyle,
+        headingRowColor,
+        headingRowHeight,
+        headingTextStyle,
+        horizontalMargin,
+        columnSpacing,
+        dividerThickness,
+        checkboxHorizontalMargin,
+        headingCellCursor,
+        dataRowCursor,
+        headingRowAlignment,
+        sortIconWidget,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -259,7 +269,8 @@ class DataTableThemeData with Diagnosticable {
         other.checkboxHorizontalMargin == checkboxHorizontalMargin &&
         other.headingCellCursor == headingCellCursor &&
         other.dataRowCursor == dataRowCursor &&
-        other.headingRowAlignment == headingRowAlignment;
+        other.headingRowAlignment == headingRowAlignment &&
+        other.sortIconWidget == sortIconWidget;
   }
 
   @override
@@ -313,6 +324,13 @@ class DataTableThemeData with Diagnosticable {
       EnumProperty<MainAxisAlignment>(
         'headingRowAlignment',
         headingRowAlignment,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<Widget?>(
+        'sortIconWidget',
+        sortIconWidget,
         defaultValue: null,
       ),
     );
