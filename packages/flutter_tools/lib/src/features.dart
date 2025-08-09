@@ -199,16 +199,13 @@ const swiftPackageManager = Feature(
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
 ///
 /// Tracking removal: <https://github.com/flutter/flutter/issues/171900>.
-const omitLegacyVersionFile = Feature(
+const omitLegacyVersionFile = Feature.fullyEnabled(
   name: 'stops writing the legacy version file',
   configSetting: 'omit-legacy-version-file',
   extraHelpText:
       'If set, the file {FLUTTER_ROOT}/version is no longer written as part of '
       'the flutter tool execution; a newer file format has existed for some '
       'time in {FLUTTER_ROOT}/bin/cache/flutter.version.json.',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
 );
 
 /// Whether desktop windowing is enabled.
