@@ -737,7 +737,8 @@ class _AmPmButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Semantics(
-          checked: selected,
+          selected: Theme.of(context).platform == TargetPlatform.iOS ? selected : null,
+          checked: Theme.of(context).platform == TargetPlatform.iOS ? null : selected,
           inMutuallyExclusiveGroup: true,
           button: true,
           child: Center(
