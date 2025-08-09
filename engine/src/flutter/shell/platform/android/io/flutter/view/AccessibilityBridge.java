@@ -2262,7 +2262,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private enum StringAttributeType {
     SPELLOUT,
     LOCALE,
-    URL
   }
 
   private static class StringAttribute {
@@ -2335,8 +2334,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // API level >= 28; otherwise, this is attached to the end of content description.
     @Nullable private String tooltip;
 
-    // The Url the widget's points to.
+    // The Url this node points to.
     @Nullable private String linkUrl;
+
+    // The locale of the content of this node.
+    @Nullable private String locale;
 
     // The id of the sibling node that is before this node in traversal
     // order.
@@ -2551,6 +2553,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
       stringIndex = buffer.getInt();
       linkUrl = stringIndex == -1 ? null : strings[stringIndex];
+
+      stringIndex = buffer.getInt();
+      locale = stringIndex == -1 ? null : strings[stringIndex];
 
       textDirection = TextDirection.fromInt(buffer.getInt());
 
@@ -2840,29 +2845,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     private CharSequence getValue() {
-      return createSpannableString(value, valueAttributes);
+      return createSpannableString(value, valueAttributes, false, true);
     }
 
     private CharSequence getLabel() {
-      List<StringAttribute> attributes = labelAttributes;
-      if (linkUrl != null && linkUrl.length() > 0) {
-        if (attributes == null) {
-          attributes = new ArrayList<StringAttribute>();
-        } else {
-          attributes = new ArrayList<StringAttribute>(attributes);
-        }
-        UrlStringAttribute uriStringAttribute = new UrlStringAttribute();
-        uriStringAttribute.start = 0;
-        uriStringAttribute.end = label.length();
-        uriStringAttribute.url = linkUrl;
-        uriStringAttribute.type = StringAttributeType.URL;
-        attributes.add(uriStringAttribute);
-      }
-      return createSpannableString(label, attributes);
+      return createSpannableString(label, labelAttributes, true, true);
     }
 
     private CharSequence getHint() {
-      return createSpannableString(hint, hintAttributes);
+      return createSpannableString(hint, hintAttributes, false, true);
     }
 
     private CharSequence getValueLabelHint() {
@@ -2895,7 +2886,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return result;
     }
 
-    private SpannableString createSpannableString(String string, List<StringAttribute> attributes) {
+    private SpannableString createSpannableString(
+        String string, List<StringAttribute> attributes, boolean addURL, boolean addLocale) {
       if (string == null) {
         return null;
       }
@@ -2917,16 +2909,20 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 spannableString.setSpan(localeSpan, attribute.start, attribute.end, 0);
                 break;
               }
-            case URL:
-              {
-                UrlStringAttribute uriAttribute = (UrlStringAttribute) attribute;
-                final URLSpan urlSpan = new URLSpan(uriAttribute.url);
-                spannableString.setSpan(urlSpan, attribute.start, attribute.end, 0);
-                break;
-              }
           }
         }
       }
+      if (addURL && linkUrl != null && linkUrl.length() > 0) {
+        final URLSpan urlSpan = new URLSpan(linkUrl);
+        spannableString.setSpan(urlSpan, 0, string.length(), 0);
+      }
+
+      if (addLocale && locale != null && locale.length() > 0) {
+        Locale localeObject = Locale.forLanguageTag(locale);
+        final LocaleSpan localeSpan = new LocaleSpan(localeObject);
+        spannableString.setSpan(localeSpan, 0, string.length(), 0);
+      }
+
       return spannableString;
     }
   }
