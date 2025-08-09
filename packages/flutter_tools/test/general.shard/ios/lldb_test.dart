@@ -43,7 +43,7 @@ void main() {
     expect(lldb.isRunning, isFalse);
     expect(lldb.appProcessId, isNull);
     expect(processManager.hasRemainingExpectations, isFalse);
-    expect(logger.errorText, contains('Process exception running lldb'));
+    expect(logger.traceText, contains('Process exception running lldb'));
   });
 
   testWithoutContext('attachAndStart returns true on success', () async {
@@ -174,7 +174,7 @@ Target 0: (Runner) stopped.
     expect(lldb.appProcessId, isNull);
     expect(expectedInputs, isEmpty);
     expect(processManager.hasRemainingExpectations, isFalse);
-    expect(logger.errorText, contains(errorText));
+    expect(logger.traceText, contains(errorText));
   });
 
   testWithoutContext('attachAndStart returns false when stderr not during log waiter', () async {
@@ -220,7 +220,7 @@ Target 0: (Runner) stopped.
     expect(lldb.appProcessId, isNull);
     expect(expectedInputs, isEmpty);
     expect(processManager.hasRemainingExpectations, isFalse);
-    expect(logger.errorText, contains(errorText));
+    expect(logger.traceText, contains(errorText));
   });
 
   testWithoutContext('attachAndStart prints warning if takes too long', () async {
