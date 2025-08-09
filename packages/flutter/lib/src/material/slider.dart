@@ -11,6 +11,7 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -177,6 +178,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.label,
     this.activeColor,
     this.inactiveColor,
@@ -229,6 +231,7 @@ class Slider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
+    this.integralDivisions = false,
     this.label,
     this.mouseCursor,
     this.activeColor,
@@ -403,6 +406,13 @@ class Slider extends StatefulWidget {
   ///
   /// If null, the slider is continuous.
   final int? divisions;
+
+	/// Whether to round division to avoid floating-point precision errors.
+	///
+	/// Only takes effect when [divisions] is not null. Has no effect on continuous sliders.
+	///
+	/// Defaults to false.
+  final bool integralDivisions;
 
   /// A label to show above the slider when the slider is active and
   /// [SliderThemeData.showValueIndicator] is satisfied.
@@ -768,7 +778,12 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _lerp(double value) {
     assert(value >= 0.0);
     assert(value <= 1.0);
-    return value * (widget.max - widget.min) + widget.min;
+
+    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+    if (widget.integralDivisions && widget.divisions != null) {
+      return (lerpValue * widget.divisions!).round() / widget.divisions!;
+    }
+    return lerpValue;
   }
 
   double _discretize(double value) {
