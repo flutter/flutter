@@ -22,6 +22,16 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
   const DoNothingAndStopPropagationTextIntent();
 }
 
+/// An [Intent] to send the event straight to the engine.
+///
+/// See also:
+///
+///   * [DefaultTextEditingShortcuts], which triggers this [Intent].
+class DoNothingAndStopEnterKeyPropagationIntent extends Intent {
+  /// Creates an instance of [DoNothingAndStopEnterKeyPropagationIntent].
+  const DoNothingAndStopEnterKeyPropagationIntent();
+}
+
 /// A text editing related [Intent] that performs an operation towards a given
 /// direction of the current caret location.
 abstract class DirectionalTextEditingIntent extends Intent {
