@@ -2264,7 +2264,10 @@ class CupertinoTimerPicker extends StatefulWidget {
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
 }
 
-class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
+class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> with TickerProviderStateMixin {
+  // Animation configuration
+  static const Duration _kLabelAnimationDuration = Duration(milliseconds: 200);
+
   late TextDirection textDirection;
   late CupertinoLocalizations localizations;
 
@@ -2478,6 +2481,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   Widget _buildHourPicker(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
     _hourScrollController ??= FixedExtentScrollController(initialItem: selectedHour!);
     return CupertinoPicker(
+      key: ValueKey('cupertino_hour_picker'),
       scrollController: _hourScrollController,
       magnification: _kMagnification,
       offAxisFraction: _calculateOffAxisFraction(additionalPadding.start, 0),
@@ -2526,12 +2530,85 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           },
           child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
-        _buildLabel(
-          localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          additionalPadding,
+        _buildAnimatedLabel(
+          labelBuilder: (int value) => localizations.timerPickerHourLabel(value) ?? '',
+          currentValue: lastSelectedHour ?? selectedHour!,
+          baseValue: 1,
+          additionalPadding: additionalPadding,
         ),
       ],
     );
+  }
+
+  /// Builds a label with animated suffix that changes when the value changes.
+  ///
+  /// [labelBuilder] is a function that takes a value and returns the full label text.
+  /// [currentValue] is the current value to display.
+  /// [baseValue] is the value used to split the label into prefix and suffix.
+  /// [additionalPadding] is the padding to apply to the label.
+  Widget _buildAnimatedLabel({
+    required String Function(int) labelBuilder,
+    required int currentValue,
+    required int baseValue,
+    required EdgeInsetsDirectional additionalPadding,
+  }) {
+    final String baseLabel = labelBuilder(baseValue);
+    final String currentLabel = labelBuilder(currentValue);
+    final List<String> parts = currentLabel.split(baseLabel);
+    final String prefix = parts.first;
+    final String suffix = parts.length > 1 ? parts.last : '';
+
+    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
+      start: numberLabelWidth + _kTimerPickerLabelPadSize + additionalPadding.start,
+    );
+
+    const TextStyle labelStyle = TextStyle(
+      fontSize: _kTimerPickerLabelFontSize,
+      fontWeight: FontWeight.w600,
+    );
+
+    return IgnorePointer(
+        child: Padding(
+          padding: padding.resolve(textDirection),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+            child: SizedBox(
+              height: numberLabelHeight,
+              child: Baseline(
+                baseline: numberLabelBaseline,
+                baselineType: TextBaseline.alphabetic,
+                child: RichText(
+                  text: TextSpan(
+                    style: labelStyle,
+                    children: <InlineSpan>[
+                      TextSpan(text: prefix + baseLabel),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: AnimatedSwitcher(
+                          duration: _kLabelAnimationDuration,
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                            opacity: animation,
+                              child: child,
+                            );
+                          },
+                          child: Text(
+                            suffix,
+                            key: ValueKey<String>(suffix),
+                            style: labelStyle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
