@@ -241,9 +241,17 @@ void main() {
     await tester.drag(find.text('5'), const Offset(0.0, -500.0));
     await tester.pump();
 
+    Finder findItem(String text) {
+      return find.descendant(
+        of: find.byType(SliverFixedExtentList),
+        matching: find.widgetWithText(ColoredBox, text),
+      );
+    }
+
     // Screen is 600px high. Moved bottom item 500px up. It's now at the top.
-    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '5')).dy, 0.0);
-    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '10')).dy, 600.0);
+    expect(findItem('5'), findsOneWidget);
+    expect(tester.getTopLeft(findItem('5')).dy, 0.0);
+    expect(tester.getBottomLeft(findItem('10')).dy, 600.0);
 
     // Stop returning the first 3 items.
     await tester.pumpWidget(
@@ -271,10 +279,10 @@ void main() {
     // Move up by 4 items, meaning item 1 would have been at the top but
     // 0 through 3 no longer exist, so item 4, 3 items down, is the first one.
     // Item 4 is also shifted to the top.
-    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '4')).dy, 0.0);
+    expect(tester.getTopLeft(findItem('4')).dy, 0.0);
 
     // Because the screen is still 600px, item 9 is now visible at the bottom instead
     // of what's supposed to be item 6 had we not re-shifted.
-    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
+    expect(tester.getBottomLeft(findItem('9')).dy, 600.0);
   });
 }
