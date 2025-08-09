@@ -589,12 +589,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_master", "deploy"]
-      validation: docs
-      validation_name: Docs
-      firebase_project: main-docs-flutter-prod
-      release_ref: refs/heads/master
+      docs: >
+        {"build": "master", "deploy": "main-docs-flutter-prod"}
     drone_dimensions:
       - os=Linux
 
@@ -617,15 +613,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["build_stable"]
-      validation: docs
-      validation_name: Docs
-      # TODO(matanlurey): Neither of these properties are actually used, since
-      # the branch name is not "master", but if they are removed, the recipe
-      # will fail. See https://github.com/flutter/flutter/issues/169108.
-      firebase_project: main-docs-flutter-prod
-      release_ref: refs/heads/master
+      docs: >
+        {"build": "stable"}
     drone_dimensions:
       - os=Linux
 
@@ -651,11 +640,8 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      docs_actions: >
-        ["post_process", "deploy"]
-      validation: docs_deploy
-      validation_name: Docs_deploy
-      firebase_project: docs-flutter-dev
+      docs: >
+        {"post_process": "stable", "deploy": "docs-flutter-dev"}
     drone_dimensions:
       - os=Linux
 
@@ -1192,7 +1178,6 @@ targets:
   - name: Linux linux_feature_flags_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     presubmit: false
     properties:
       xvfb: "1"
@@ -1535,7 +1520,6 @@ targets:
       - DEPS
 
   - name: Linux android_java17_tool_integration_tests
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -2347,15 +2331,6 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_defines_test
-
-  - name: Linux_pixel_7pro android_obfuscate_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: android_obfuscate_test
 
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
@@ -5506,6 +5481,16 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
 
+  - name: Mac_ios hot_mode_dev_cycle_ios_xcode_debug
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hot_mode_dev_cycle_ios_xcode_debug
+
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -6214,7 +6199,6 @@ targets:
       - DEPS
 
   - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/148834
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:

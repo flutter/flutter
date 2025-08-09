@@ -502,6 +502,8 @@ class TestFeatureFlags implements FeatureFlags {
     this.isNativeAssetsEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
+    this.isWindowingEnabled = false,
+    this.isLLDBDebuggingEnabled = false,
   });
 
   @override
@@ -541,6 +543,12 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isOmitLegacyVersionFileEnabled;
 
   @override
+  final bool isWindowingEnabled;
+
+  @override
+  final bool isLLDBDebuggingEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -553,7 +561,10 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
+      windowingFeature => isWindowingEnabled,
+      lldbDebugging => isLLDBDebuggingEnabled,
       _ => false,
     };
   }
@@ -572,6 +583,8 @@ class TestFeatureFlags implements FeatureFlags {
     nativeAssets,
     swiftPackageManager,
     omitLegacyVersionFile,
+    windowingFeature,
+    lldbDebugging,
   ];
 
   @override
@@ -667,10 +680,7 @@ class FakeStopwatch implements Stopwatch {
 
 class FakeStopwatchFactory implements StopwatchFactory {
   FakeStopwatchFactory({Stopwatch? stopwatch, Map<String, Stopwatch>? stopwatches})
-    : stopwatches = <String, Stopwatch>{
-        if (stopwatches != null) ...stopwatches,
-        if (stopwatch != null) '': stopwatch,
-      };
+    : stopwatches = <String, Stopwatch>{...?stopwatches, '': ?stopwatch};
 
   Map<String, Stopwatch> stopwatches;
 
