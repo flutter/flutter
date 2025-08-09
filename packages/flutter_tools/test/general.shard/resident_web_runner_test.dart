@@ -31,6 +31,7 @@ import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
@@ -1664,7 +1665,9 @@ flutter:
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
-      expect(await residentWebRunner.run(), 0);
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      expect(await residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+      await connectionInfoCompleter.future;
       final File generatedLocalizationsFile = globals.fs
           .directory('lib')
           .childDirectory('l10n')
@@ -1867,8 +1870,13 @@ flutter:
     'throws when port is an integer outside the valid TCP range',
     () async {
       final logger = BufferLogger.test();
+      const webDevServerConfig = WebDevServerConfig(port: 65536);
+      const webDevServerConfig2 = WebDevServerConfig(port: -1);
 
-      var debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
+      var debuggingOptions = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        webDevServerConfig: webDevServerConfig,
+      );
       ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
@@ -1876,7 +1884,10 @@ flutter:
       );
       await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
 
-      debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
+      debuggingOptions = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        webDevServerConfig: webDevServerConfig2,
+      );
       residentWebRunner = setUpResidentRunner(
         flutterDevice,
         logger: logger,
@@ -2045,6 +2056,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   PackageConfig? lastPackageConfig = PackageConfig.empty;
+
+  @override
+  var useDwdsWebSocketConnection = false;
 
   @override
   Future<Uri> create() async {

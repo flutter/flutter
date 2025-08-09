@@ -350,7 +350,7 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
           [](const flutter::SurfaceFrame& surface_frame,
              flutter::DlCanvas* canvas) { return true; },
           [](const flutter::SurfaceFrame& surface_frame) { return true; },
-          flutter::ToSkISize(frame_size)));
+          frame_size));
 }
 
 void DrawFrameWithView(
@@ -383,7 +383,7 @@ void DrawFrameWithView(
           [](const flutter::SurfaceFrame& surface_frame,
              flutter::DlCanvas* canvas) { return true; },
           [](const flutter::SurfaceFrame& surface_frame) { return true; },
-          flutter::ToSkISize(frame_size)));
+          frame_size));
 }
 
 };  // namespace

@@ -50,7 +50,7 @@ void _tests() {
                     expandedHeight: appBarExpandedHeight,
                     title: Text('Semantics Test with Slivers'),
                   ),
-                  SliverList(delegate: SliverChildListDelegate(listChildren)),
+                  SliverList.list(children: listChildren),
                 ],
               ),
             ),
@@ -429,7 +429,7 @@ void _tests() {
                 child: CustomScrollView(
                   slivers: <Widget>[
                     const SliverAppBar(pinned: true, expandedHeight: 100.0, title: Text('AppBar')),
-                    SliverList(delegate: SliverChildListDelegate(listChildren)),
+                    SliverList.list(children: listChildren),
                   ],
                   controller: controller,
                 ),
@@ -645,7 +645,7 @@ void _tests() {
                   reverse: true, // This is the important setting for this test.
                   slivers: <Widget>[
                     const SliverAppBar(pinned: true, expandedHeight: 100.0, title: Text('AppBar')),
-                    SliverList(delegate: SliverChildListDelegate(listChildren)),
+                    SliverList.list(children: listChildren),
                   ],
                   controller: controller,
                 ),
@@ -875,7 +875,7 @@ void _tests() {
                       offset: offset,
                       center: forwardAppBarKey,
                       slivers: <Widget>[
-                        SliverList(delegate: SliverChildListDelegate(backwardChildren)),
+                        SliverList.list(children: backwardChildren),
                         const SliverAppBar(
                           pinned: true,
                           expandedHeight: 100.0,
@@ -891,7 +891,7 @@ void _tests() {
                             title: Text('Forward app bar', textDirection: TextDirection.ltr),
                           ),
                         ),
-                        SliverList(delegate: SliverChildListDelegate(forwardChildren)),
+                        SliverList.list(children: forwardChildren),
                       ],
                     );
                   },

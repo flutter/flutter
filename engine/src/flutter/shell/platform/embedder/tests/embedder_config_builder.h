@@ -92,7 +92,7 @@ class EmbedderConfigBuilder {
 
   FlutterCompositor& GetCompositor();
 
-  void SetSurface(SkISize surface_size) { context_.SetSurface(surface_size); }
+  void SetSurface(DlISize surface_size) { context_.SetSurface(surface_size); }
 
   void SetRenderTargetType(
       EmbedderTestBackingStoreProducer::RenderTargetType type,

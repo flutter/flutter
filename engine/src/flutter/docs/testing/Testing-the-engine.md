@@ -186,6 +186,7 @@ testing/run_tests.py --type=objc
 
 to easily build and run the XCTests.
 
+- Add the `--variant host_debug_unopt_arm64` argument when using an arm64 Mac targeting either simulators or physical devices.
 - Add the `--ios-variant ios_debug_sim_unopt_arm64` argument when using an arm64 Mac simulator (built with `--simulator-cpu=arm64`).
 
 This script only has a limited amount of smartness. If you've never built the engine before, it'll build the test and classes under test with a reasonable default configuration. If you've built the engine before, it'll re-build the engine with the same GN flags. You may want to double check your GN flags ([See compiling for ios from macos](../contributing/Compiling-the-engine.md#compiling-for-ios-from-macos)) if you haven't built the engine for a while.

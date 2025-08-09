@@ -791,22 +791,6 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'Get launch arguments for physical CoreDevice with debugging enabled with no launch arguments',
-      () {
-        final original = DebuggingOptions.enabled(BuildInfo.debug);
-
-        final List<String> launchArguments = original.getIOSLaunchArguments(
-          EnvironmentType.physical,
-          null,
-          <String, Object?>{},
-          isCoreDevice: true,
-        );
-
-        expect(launchArguments.join(' '), <String>['--enable-dart-profiling'].join(' '));
-      },
-    );
-
     testWithoutContext('Get launch arguments for physical device with iPv4 network connection', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug);
 

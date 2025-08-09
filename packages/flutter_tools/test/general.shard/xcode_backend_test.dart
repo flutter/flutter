@@ -370,8 +370,8 @@ void main() {
 
   group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds');
-      buildDir.createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
       final context = TestContext(
         <String>['test_vm_service_bonjour_service'],
         <String, String>{
@@ -389,6 +389,124 @@ void main() {
         ),
       );
     });
+
+    test('Missing NSBonjourServices key in Info.plist should not fail Xcode compilation', () {
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+      final context = TestContext(
+        <String>['test_vm_service_bonjour_service'],
+        <String, String>{
+          'CONFIGURATION': 'Debug',
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'INFOPLIST_PATH': 'Info.plist',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-extract',
+              'NSBonjourServices',
+              'xml1',
+              '-o',
+              '-',
+              infoPlist.path,
+            ],
+            exitCode: 1,
+            stderr: 'No value at that key path or invalid key path: NSBonjourServices',
+          ),
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-insert',
+              'NSBonjourServices',
+              '-json',
+              '["_dartVmService._tcp"]',
+              infoPlist.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-extract',
+              'NSLocalNetworkUsageDescription',
+              'xml1',
+              '-o',
+              '-',
+              infoPlist.path,
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+      expect(context.stderr, isNot(contains('error: ')));
+    });
+
+    test(
+      'Missing NSLocalNetworkUsageDescription in Info.plist should not fail Xcode compilation',
+      () {
+        final Directory buildDir = fileSystem.directory('/path/to/builds')
+          ..createSync(recursive: true);
+        final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+        final context = TestContext(
+          <String>['test_vm_service_bonjour_service'],
+          <String, String>{
+            'CONFIGURATION': 'Debug',
+            'BUILT_PRODUCTS_DIR': buildDir.path,
+            'INFOPLIST_PATH': 'Info.plist',
+          },
+          commands: <FakeCommand>[
+            FakeCommand(
+              command: <String>[
+                'plutil',
+                '-extract',
+                'NSBonjourServices',
+                'xml1',
+                '-o',
+                '-',
+                infoPlist.path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'plutil',
+                '-insert',
+                'NSBonjourServices.0',
+                '-string',
+                '_dartVmService._tcp',
+                infoPlist.path,
+              ],
+            ),
+            FakeCommand(
+              command: <String>[
+                'plutil',
+                '-extract',
+                'NSLocalNetworkUsageDescription',
+                'xml1',
+                '-o',
+                '-',
+                infoPlist.path,
+              ],
+              exitCode: 1,
+              stderr:
+                  'No value at that key path or invalid key path: NSLocalNetworkUsageDescription',
+            ),
+            FakeCommand(
+              command: <String>[
+                'plutil',
+                '-insert',
+                'NSLocalNetworkUsageDescription',
+                '-string',
+                'Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.',
+                infoPlist.path,
+              ],
+            ),
+          ],
+          fileSystem: fileSystem,
+        )..run();
+        expect(context.stderr, isNot(contains('error: ')));
+      },
+    );
   });
 
   for (final platform in platforms) {
@@ -1054,13 +1172,7 @@ class TestContext extends Context {
   }
 
   @override
-  ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
-  }) {
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
     return processManager.runSync(
       <dynamic>[bin, ...args],
       workingDirectory: workingDirectory,
