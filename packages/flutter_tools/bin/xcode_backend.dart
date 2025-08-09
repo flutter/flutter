@@ -115,14 +115,17 @@ class Context {
     if (verbose) {
       print('♦ $bin ${args.join(' ')}');
     }
-    final ProcessResult result = Process.runSync(bin, args, workingDirectory: workingDirectory);
+    final ProcessResult result = runSyncProcess(bin, args, workingDirectory: workingDirectory);
     if (verbose) {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
-      if (result.exitCode != 0) {
+      // If allowFail, do not fail Xcode build. An example is on macOS 26,
+      // plutil reports NSBonjourServices key not found via stderr (rather than
+      // stdout on older macOS), and it should not cause compile failure.
+      if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
@@ -142,6 +145,13 @@ class Context {
       throw Exception('Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}');
     }
     return result;
+  }
+
+  // TODO(hellohuanlin): Instead of using inheritance to stub the function in
+  // the subclass, we should favor composition by injecting the dependencies.
+  // See: https://github.com/flutter/flutter/issues/173133
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
+    return Process.runSync(bin, args, workingDirectory: workingDirectory);
   }
 
   /// Log message to stderr.

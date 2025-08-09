@@ -3805,6 +3805,7 @@ void main() {
         hasFocusAction: true,
         hasTapAction: true,
         isTextField: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         label: 'Test',
@@ -3819,6 +3820,7 @@ void main() {
       matchesSemantics(
         hasFocusAction: true,
         isTextField: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         label: 'Test',
@@ -4338,6 +4340,7 @@ void main() {
                           inputType: SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isReadOnly,

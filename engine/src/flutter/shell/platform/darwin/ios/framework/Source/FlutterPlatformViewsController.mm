@@ -710,8 +710,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       continue;
     }
 
-    std::unique_ptr<flutter::SurfaceFrame> frame =
-        layer->surface->AcquireFrame(flutter::ToSkISize(self.frameSize));
+    std::unique_ptr<flutter::SurfaceFrame> frame = layer->surface->AcquireFrame(self.frameSize);
     // If frame is null, AcquireFrame already printed out an error message.
     if (!frame) {
       continue;

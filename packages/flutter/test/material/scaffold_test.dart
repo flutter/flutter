@@ -543,13 +543,11 @@ void main() {
               ),
               SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    List<Widget>.generate(
-                      10,
-                      (int index) => SizedBox(height: 100.0, child: Text('B$index')),
-                    ),
-                  ),
+                sliver: SliverList.builder(
+                  itemCount: 10,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 100.0, child: Text('B$index'));
+                  },
                 ),
               ),
             ],
@@ -586,13 +584,11 @@ void main() {
             primary: true,
             slivers: <Widget>[
               const SliverAppBar(title: Text('Title')),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  List<Widget>.generate(
-                    20,
-                    (int index) => SizedBox(height: 100.0, child: Text('$index')),
-                  ),
-                ),
+              SliverList.builder(
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100.0, child: Text('$index'));
+                },
               ),
             ],
           ),
@@ -3579,6 +3575,29 @@ void main() {
       expect(tester.getSize(find.byKey(bodyKey)).height, 400);
     },
   );
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/172866.
+  testWidgets('BottomAppBar with noAnimation FAB does not throw null error', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          body: const SizedBox(),
+          bottomNavigationBar: const BottomAppBar(),
+          floatingActionButton: FloatingActionButton(onPressed: () {}),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+
+    expect(find.byType(BottomAppBar), findsOneWidget);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
