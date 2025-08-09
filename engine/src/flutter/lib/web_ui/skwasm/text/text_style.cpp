@@ -115,11 +115,13 @@ SKWASM_EXPORT void textStyle_setLocale(TextStyle* style, SkString* locale) {
 }
 
 SKWASM_EXPORT void textStyle_setBackground(TextStyle* style, SkPaint* paint) {
-  style->setBackgroundColor(*paint);
+  // TODO(jacksongardner): This is actually a DlPaint, so we need to convert it
+  // style->setBackgroundColor(*paint);
 }
 
 SKWASM_EXPORT void textStyle_setForeground(TextStyle* style, SkPaint* paint) {
-  style->setForegroundColor(*paint);
+  // TODO(jacksongardner): This is actually a DlPaint, so we need to convert it
+  // style->setForegroundColor(*paint);
 }
 
 SKWASM_EXPORT void textStyle_addShadow(TextStyle* style,

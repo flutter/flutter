@@ -333,8 +333,7 @@ DisplayListOpCategory DisplayList::GetOpCategory(DisplayListOpType type) {
     case DisplayListOpType::kDrawImageNineWithAttr:
     case DisplayListOpType::kDrawAtlas:
     case DisplayListOpType::kDrawAtlasCulled:
-    case DisplayListOpType::kDrawTextBlob:
-    case DisplayListOpType::kDrawTextFrame:
+    case DisplayListOpType::kDrawText:
     case DisplayListOpType::kDrawShadow:
     case DisplayListOpType::kDrawShadowTransparentOccluder:
       return DisplayListOpCategory::kRendering;

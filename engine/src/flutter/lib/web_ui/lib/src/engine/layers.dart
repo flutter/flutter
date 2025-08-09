@@ -418,7 +418,7 @@ class ImageFilterOperation implements LayerOperation {
   final ui.Offset offset;
 
   @override
-  ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect);
+  ui.Rect mapRect(ui.Rect contentRect) => filter.filterBounds(contentRect).shift(offset);
 
   @override
   void pre(SceneCanvas canvas) {

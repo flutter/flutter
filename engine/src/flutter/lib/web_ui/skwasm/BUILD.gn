@@ -70,7 +70,6 @@ template("skwasm_variant") {
 
     if (is_debug) {
       ldflags += [
-        "-sDEMANGLE_SUPPORT=1",
         "-sASSERTIONS=1",
         "-sGL_ASSERTIONS=1",
       ]
@@ -79,9 +78,12 @@ template("skwasm_variant") {
     }
 
     deps = [
+      "//flutter/display_list",
       "//flutter/skia",
       "//flutter/skia/modules/skparagraph",
       "//flutter/skia/modules/skunicode",
+
+      # "//flutter/txt",
     ]
   }
 }
