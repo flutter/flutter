@@ -18,6 +18,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
@@ -120,7 +121,7 @@ public class FlutterLoader {
     this.executorService = executorService;
   }
 
-  private boolean initialized = false;
+  @VisibleForTesting boolean initialized = false;
   @Nullable private Settings settings;
   private long initStartTimestampMillis;
   private FlutterApplicationInfo flutterApplicationInfo;
@@ -326,20 +327,21 @@ public class FlutterLoader {
               + DEFAULT_LIBRARY);
 
       String aotSharedLibraryNameFlagPrefix = "--" + AOT_SHARED_LIBRARY_NAME + "=";
-      for (String arg : args) {
-        // Perform security check for path containing application's compiled Dart code and
-        // potentially
-        // user-provided compiled native code.
-        if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
-          if (!shouldAddAotSharedLibraryNameFlag(applicationContext, arg)) {
-            break;
+      if (args != null) {
+        for (String arg : args) {
+          // Perform security check for path containing application's compiled Dart code and
+          // potentially user-provided compiled native code.
+          if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
+            if (!shouldAddAotSharedLibraryNameFlag(applicationContext, arg)) {
+              break;
+            }
           }
-        }
 
-        // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
-        // arguments to be used for engine initialization and should be fixed. See
-        // https://github.com/flutter/flutter/issues/172553.
-        shellArgs.add(arg);
+          // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
+          // arguments to be used for engine initialization and should be fixed. See
+          // https://github.com/flutter/flutter/issues/172553.
+          shellArgs.add(arg);
+        }
       }
 
       String kernelPath = null;
@@ -477,12 +479,11 @@ public class FlutterLoader {
    * directory, we will warn the application developer to ensure they have vetted the library they
    * wish to use.
    */
-  // TODO(camsim99): check if this handles errors properly
   // TODO(camsim99): check on file separators (File.separator) instead of /
   private boolean shouldAddAotSharedLibraryNameFlag(
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
       throws IOException {
-    Log.e("CAMILLE", "aotSharedLibraryNameArg: " + aotSharedLibraryNameArg);
+    System.out.println("shouldAddAotSharedLibraryNameFlag called!");
     // Isolate AOT shared library path.
     String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(?<path>.*)$";
     Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
@@ -496,56 +497,30 @@ public class FlutterLoader {
               + "is invalid. Please provide a valid path name.");
     }
     String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group("path");
-    Log.e("CAMILLE", "aotSharedLibraryPath: " + aotSharedLibraryPath);
+    System.out.println("aotSharedLibraryPath " + aotSharedLibraryPath);
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = new File(aotSharedLibraryPath);
     String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
-
-    Log.e("CAMILLE", "aotSharedLibraryPathCanonicalPath: " + aotSharedLibraryPathCanonicalPath);
-
-    // Check if library lives within aplication APK.
-    // List<String> splitAndSourceApkDirs = getSplitApkSourceDirectories(applicationContext);
-    // for (String splitAndSourceApkDir : splitAndSourceApkDirs) {
-    //   Log.e("CAMILLE", "splitAndSourceApkDir: " + splitAndSourceApkDir);
-    //   Pattern aotSharedLibraryInApkPattern =
-    //       Pattern.compile("^" + Pattern.quote(splitAndSourceApkDir) + "/([^/]+\\.so)$");
-    //   Matcher aotSharedLibraryInApkMatcher =
-    //       aotSharedLibraryInApkPattern.matcher(aotSharedLibraryPathCanonicalPath);
-
-    //   if (aotSharedLibraryInApkMatcher.find()) {
-    //     return true;
-    //   }
-    // }
-    // String applicationPackageName = applicationContext.getPackageName();
-    // Log.e("CAMILLE", "applicationPackageName: " + applicationPackageName);
-    // ApplicationInfo ai =
-    // applicationContext.getPackageManager().getApplicationInfo(applicationPackageName, 0);
-    // String nativeLibraryPath = ai.nativeLibraryDir + "/libmyintentstest.so";
+    System.out.println("aotSharedLibraryPathCanonicalPath:" + aotSharedLibraryPathCanonicalPath);
 
     // Check if library lives within application's native code directory.
     String nativeCodeDirectoryPath = flutterApplicationInfo.nativeLibraryDir;
-    Log.e("CAMILLE", "nativeCodeDirectoryPath: " + nativeCodeDirectoryPath);
+    System.out.println("nativeCodeDirectoryPath: " + nativeCodeDirectoryPath);
     Pattern aotSharedLibraryInNativeCodeDirPattern =
-        Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "/([^/]+\\.so)$");
+        Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "(?:/.*)?\\.so$");
     Matcher aotSharedLibraryInNativeCodeDirMatcher =
         aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInNativeCodeDirMatcher.find()) {
+      System.out.println("APK path found!");
       return true;
     }
 
-    // TODO(camsim99): note to self that I think we need to keep full paths if we do a check outside
-    // of the APK
-    // ...honestly for clarity.
     // Check if library lives within application's internal storage.
     // TODO(camsim99): figure out if I need to expand my check here since this may not be an
     // absolute path.
     File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();
     String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
-    // Log.e("CAMILLE", "internalStorageDirectoryPath: " + internalStorageDirectoryPath);
-    Log.e(
-        "CAMILLE",
-        "internalStorageDirectoryPathCanonicalPath: " + internalStorageDirectoryPathCanonicalPath);
     Pattern aotSharedLibraryInInternalStoragePattern =
         Pattern.compile(
             "^"
@@ -557,7 +532,6 @@ public class FlutterLoader {
       return true;
     }
 
-    Log.e("CAMILLE", "shouldAddAotSharedLibraryNameFlag returning false!");
     return false;
   }
 
