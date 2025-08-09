@@ -500,7 +500,7 @@ class IOSDevice extends Device {
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
       );
       if (!buildResult.success) {
-        _logger.printError('Could not build the precompiled application for the device.');
+        _logger.printError('Error: could not code sign the application.');
         await diagnoseXcodeBuildFailure(
           buildResult,
           analytics: _analytics,
