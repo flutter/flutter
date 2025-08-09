@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -380,6 +381,7 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
+    analytics: FakeAnalytics(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
     xcodeDebug: FakeXcodeDebug(),
@@ -412,3 +414,5 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
 }
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+
+class FakeAnalytics extends Fake implements Analytics {}
