@@ -496,6 +496,7 @@ void AccessibilityBridge::SetIntListAttributesFromFlutterUpdate(
   FlutterSemanticsAction actions = node.actions;
   if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
     std::vector<int32_t> custom_action_ids;
+    custom_action_ids.reserve(node.custom_accessibility_actions.size());
     for (size_t i = 0; i < node.custom_accessibility_actions.size(); i++) {
       custom_action_ids.push_back(node.custom_accessibility_actions[i]);
     }

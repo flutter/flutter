@@ -25,7 +25,7 @@ std::unique_ptr<std::vector<uint8_t>> JsonMessageCodec::EncodeMessageInternal(
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   // clang-tidy has trouble reasoning about some of the complicated array and
   // pointer-arithmetic code in rapidjson.
-  // NOLINTNEXTLINE(clang-analyzer-core.*)
+  // NOLINTNEXTLINE(clang-analyzer-core.*,clang-analyzer-security.*)
   message.Accept(writer);
   const char* buffer_start = buffer.GetString();
   return std::make_unique<std::vector<uint8_t>>(

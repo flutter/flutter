@@ -63,14 +63,14 @@ TEST(BasicMessageChannelTest, Registration) {
 
   bool callback_called = false;
   const std::string message_value("hello");
-  channel.SetMessageHandler(
-      [&callback_called, message_value](const auto& message, auto reply) {
-        callback_called = true;
-        // Ensure that the wrapper received a correctly decoded message and a
-        // reply.
-        EXPECT_EQ(std::get<std::string>(message), message_value);
-        EXPECT_NE(reply, nullptr);
-      });
+  channel.SetMessageHandler([&callback_called, message_value](
+                                const auto& message, const auto& reply) {
+    callback_called = true;
+    // Ensure that the wrapper received a correctly decoded message and a
+    // reply.
+    EXPECT_EQ(std::get<std::string>(message), message_value);
+    EXPECT_NE(reply, nullptr);
+  });
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
   EXPECT_NE(messenger.last_message_handler(), nullptr);
   // Send a test message to trigger the handler test assertions.
@@ -89,7 +89,7 @@ TEST(BasicMessageChannelTest, Unregistration) {
   BasicMessageChannel channel(&messenger, channel_name,
                               &flutter::StandardMessageCodec::GetInstance());
 
-  channel.SetMessageHandler([](const auto& message, auto reply) {});
+  channel.SetMessageHandler([](const auto& message, const auto& reply) {});
   EXPECT_EQ(messenger.last_message_handler_channel(), channel_name);
   EXPECT_NE(messenger.last_message_handler(), nullptr);
 
