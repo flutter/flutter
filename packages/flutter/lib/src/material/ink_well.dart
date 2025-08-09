@@ -418,7 +418,7 @@ class InkResponse extends StatelessWidget {
   /// become highlighted and false if this part of the material has stopped
   /// being highlighted.
   ///
-  /// If all of [onTap], [onDoubleTap], [onLongPress] and [onLongPressUp] become null while a
+  /// If all of [onTap], [onDoubleTap], [onLongPress], and [onLongPressUp] become null while a
   /// gesture is ongoing, then [onTapCancel] will be fired and
   /// [onHighlightChanged] will be fired with the value false _during the
   /// build_. This means, for instance, that in that scenario [State.setState]
