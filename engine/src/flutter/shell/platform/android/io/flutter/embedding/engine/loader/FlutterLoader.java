@@ -18,6 +18,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
@@ -27,10 +28,13 @@ import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -117,7 +121,7 @@ public class FlutterLoader {
     this.executorService = executorService;
   }
 
-  private boolean initialized = false;
+  @VisibleForTesting boolean initialized = false;
   @Nullable private Settings settings;
   private long initStartTimestampMillis;
   private FlutterApplicationInfo flutterApplicationInfo;
@@ -210,28 +214,7 @@ public class FlutterLoader {
                     // https://github.com/flutter/flutter/issues/151638,
                     // log the contents of the split libraries directory as well.
 
-                    List<String> splitAndSourceDirs = new ArrayList<>();
-                    // Get supported ABI and prepare path suffix for lib directories
-                    String[] abis = Build.SUPPORTED_ABIS;
-                    for (String abi : abis) {
-                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
-
-                      // Get split APK lib paths
-                      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
-                      List<String> splitLibPaths = new ArrayList<>();
-                      if (splitSourceDirs != null) {
-                        for (String splitSourceDir : splitSourceDirs) {
-                          splitLibPaths.add(splitSourceDir + libPathSuffix);
-                        }
-                        splitAndSourceDirs.addAll(splitLibPaths);
-                      }
-
-                      String baseApkPath = appContext.getApplicationInfo().sourceDir;
-                      if (baseApkPath != null && !baseApkPath.isEmpty()) {
-                        String baseApkLibDir = baseApkPath + libPathSuffix;
-                        splitAndSourceDirs.add(baseApkLibDir);
-                      }
-                    }
+                    List<String> splitAndSourceDirs = getSplitApkSourceDirectories(appContext);
 
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
@@ -280,6 +263,35 @@ public class FlutterLoader {
     }
   }
 
+  private List<String> getSplitApkSourceDirectories(@NonNull Context appContext) {
+    List<String> splitAndSourceDirs = new ArrayList<>();
+    // Get supported ABI and prepare path suffix for lib directories
+    String[] abis = Build.SUPPORTED_ABIS;
+    for (String abi : abis) {
+      // TODO(camsim99): Figure out if the ! is important for the other use case.
+      // String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+      String libPathSuffix = File.separator + "lib" + File.separator + abi;
+
+      // Get split APK lib paths
+      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
+      List<String> splitLibPaths = new ArrayList<>();
+      if (splitSourceDirs != null) {
+        for (String splitSourceDir : splitSourceDirs) {
+          splitLibPaths.add(splitSourceDir + libPathSuffix);
+        }
+        splitAndSourceDirs.addAll(splitLibPaths);
+      }
+
+      String baseApkPath = appContext.getApplicationInfo().sourceDir;
+      if (baseApkPath != null && !baseApkPath.isEmpty()) {
+        String baseApkLibDir = baseApkPath + libPathSuffix;
+        splitAndSourceDirs.add(baseApkLibDir);
+      }
+    }
+
+    return splitAndSourceDirs;
+  }
+
   /**
    * Blocks until initialization of the native system has completed.
    *
@@ -313,8 +325,23 @@ public class FlutterLoader {
               + flutterApplicationInfo.nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
+
+      String aotSharedLibraryNameFlagPrefix = "--" + AOT_SHARED_LIBRARY_NAME + "=";
       if (args != null) {
-        Collections.addAll(shellArgs, args);
+        for (String arg : args) {
+          // Perform security check for path containing application's compiled Dart code and
+          // potentially user-provided compiled native code.
+          if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
+            if (!shouldAddAotSharedLibraryNameFlag(applicationContext, arg)) {
+              break;
+            }
+          }
+
+          // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
+          // arguments to be used for engine initialization and should be fixed. See
+          // https://github.com/flutter/flutter/issues/172553.
+          shellArgs.add(arg);
+        }
       }
 
       String kernelPath = null;
@@ -327,16 +354,13 @@ public class FlutterLoader {
         shellArgs.add(
             "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
       } else {
-        shellArgs.add(
-            "--" + AOT_SHARED_LIBRARY_NAME + "=" + flutterApplicationInfo.aotSharedLibraryName);
+        shellArgs.add(aotSharedLibraryNameFlagPrefix + flutterApplicationInfo.aotSharedLibraryName);
 
         // Most devices can load the AOT shared library based on the library name
         // with no directory path.  Provide a fully qualified path to the library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            "--"
-                + AOT_SHARED_LIBRARY_NAME
-                + "="
+            aotSharedLibraryNameFlagPrefix
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -443,6 +467,72 @@ public class FlutterLoader {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Checks if the library that engine will use to load application's Dart code lives within a path
+   * we consider safe: within the application's APK, within the application's native code directory
+   * within internal storage, or within application's internal storage (which means the library was
+   * explicitly placed there by the application developer).
+   *
+   * <p>In the case where the library lives within internal storage but not in the native code
+   * directory, we will warn the application developer to ensure they have vetted the library they
+   * wish to use.
+   */
+  // TODO(camsim99): check on file separators (File.separator) instead of /
+  private boolean shouldAddAotSharedLibraryNameFlag(
+      @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
+      throws IOException {
+    System.out.println("shouldAddAotSharedLibraryNameFlag called!");
+    // Isolate AOT shared library path.
+    String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(?<path>.*)$";
+    Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
+    Matcher aotSharedLibraryNameMatcher =
+        aotSharedLibraryNamePattern.matcher(aotSharedLibraryNameArg);
+
+    if (!aotSharedLibraryNameMatcher.find()) {
+      throw new IllegalArgumentException(
+          "AOT shared library name argument "
+              + aotSharedLibraryNameArg
+              + "is invalid. Please provide a valid path name.");
+    }
+    String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group("path");
+    System.out.println("aotSharedLibraryPath " + aotSharedLibraryPath);
+
+    // Canocalize path for safety analysis.
+    File aotSharedLibraryFile = new File(aotSharedLibraryPath);
+    String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
+    System.out.println("aotSharedLibraryPathCanonicalPath:" + aotSharedLibraryPathCanonicalPath);
+
+    // Check if library lives within application's native code directory.
+    String nativeCodeDirectoryPath = flutterApplicationInfo.nativeLibraryDir;
+    System.out.println("nativeCodeDirectoryPath: " + nativeCodeDirectoryPath);
+    Pattern aotSharedLibraryInNativeCodeDirPattern =
+        Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "(?:/.*)?\\.so$");
+    Matcher aotSharedLibraryInNativeCodeDirMatcher =
+        aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryPathCanonicalPath);
+    if (aotSharedLibraryInNativeCodeDirMatcher.find()) {
+      System.out.println("APK path found!");
+      return true;
+    }
+
+    // Check if library lives within application's internal storage.
+    // TODO(camsim99): figure out if I need to expand my check here since this may not be an
+    // absolute path.
+    File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();
+    String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
+    Pattern aotSharedLibraryInInternalStoragePattern =
+        Pattern.compile(
+            "^"
+                + Pattern.quote(internalStorageDirectoryPathCanonicalPath)
+                + "/((?:[^/]+/)*)([^/]+\\.so)$");
+    Matcher aotSharedLibraryInInternalStorageMatcher =
+        aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryPathCanonicalPath);
+    if (aotSharedLibraryInInternalStorageMatcher.find()) {
+      return true;
+    }
+
+    return false;
   }
 
   private static boolean isLeakVM(@Nullable Bundle metaData) {
