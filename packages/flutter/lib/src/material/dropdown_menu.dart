@@ -1404,16 +1404,16 @@ class _RenderDropdownMenuBody extends RenderBox
         child = childParentData.nextSibling;
         continue;
       }
-      final double maxIntrinsicWidth = child.getMinIntrinsicWidth(height);
+      final double minIntrinsicWidth = child.getMinIntrinsicWidth(height);
       // Add the width of leading icon.
       if (child == lastChild) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
       // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
-      width = math.max(width, maxIntrinsicWidth);
+      width = math.max(width, minIntrinsicWidth);
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;
