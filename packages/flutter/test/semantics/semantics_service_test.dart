@@ -20,22 +20,24 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
-    await SemanticsService.announce('announcement 1', TextDirection.ltr);
+    await SemanticsService.announce('announcement 1', TextDirection.ltr, viewId: 1);
     await SemanticsService.announce(
       'announcement 2',
       TextDirection.rtl,
       assertiveness: Assertiveness.assertive,
+      viewId: 2,
     );
     expect(
       log,
       equals(<Map<String, dynamic>>[
         <String, dynamic>{
           'type': 'announce',
-          'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1},
+          'data': <String, dynamic>{'viewId': 1, 'message': 'announcement 1', 'textDirection': 1},
         },
         <String, dynamic>{
           'type': 'announce',
           'data': <String, dynamic>{
+            'viewId': 2,
             'message': 'announcement 2',
             'textDirection': 0,
             'assertiveness': 1,

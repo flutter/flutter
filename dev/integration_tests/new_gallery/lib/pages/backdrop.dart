@@ -267,6 +267,7 @@ class _SettingsIcon extends AnimatedWidget {
                 SemanticsService.announce(
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
                   GalleryOptions.of(context).resolvedTextDirection()!,
+                  viewId: View.maybeOf(context)?.viewId,
                 );
               },
               child: Padding(

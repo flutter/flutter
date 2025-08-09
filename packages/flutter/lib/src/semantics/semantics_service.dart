@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show TextDirection;
+import 'dart:ui' show PlatformDispatcher, TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
@@ -33,6 +33,9 @@ abstract final class SemanticsService {
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
   ///
+  /// The [viewId] is the ID of the view that the announcement is associated with.
+  /// If not provided, it defaults to the implicit view ID of the current platform.
+  ///
   /// Not all platforms support announcements. Check to see if it is supported using
   /// [MediaQuery.supportsAnnounceOf] before calling this method.
   ///
@@ -48,11 +51,13 @@ abstract final class SemanticsService {
     String message,
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
+    int? viewId,
   }) async {
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
       message,
       textDirection,
       assertiveness: assertiveness,
+      viewId: viewId ?? PlatformDispatcher.instance.implicitView?.viewId,
     );
     await SystemChannels.accessibility.send(event.toMap());
   }
