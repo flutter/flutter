@@ -337,9 +337,7 @@ class TextButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -387,9 +385,7 @@ class TextButton extends ButtonStyleButton {
   /// * `maximumSize` - Size.infinite
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - SystemMouseCursors.basic
   /// * `visualDensity` - theme.visualDensity
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -408,26 +404,26 @@ class TextButton extends ButtonStyleButton {
     return Theme.of(context).useMaterial3
         ? _TextButtonDefaultsM3(context)
         : styleFrom(
-            foregroundColor: colorScheme.primary,
-            disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
-            backgroundColor: Colors.transparent,
-            disabledBackgroundColor: Colors.transparent,
-            shadowColor: theme.shadowColor,
-            elevation: 0,
-            textStyle: theme.textTheme.labelLarge,
-            padding: _scaledPadding(context),
-            minimumSize: const Size(64, 36),
-            maximumSize: Size.infinite,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-            enabledMouseCursor: SystemMouseCursors.click,
-            disabledMouseCursor: SystemMouseCursors.basic,
-            visualDensity: theme.visualDensity,
-            tapTargetSize: theme.materialTapTargetSize,
-            animationDuration: kThemeChangeDuration,
-            enableFeedback: true,
-            alignment: Alignment.center,
-            splashFactory: InkRipple.splashFactory,
-          );
+          foregroundColor: colorScheme.primary,
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shadowColor: theme.shadowColor,
+          elevation: 0,
+          textStyle: theme.textTheme.labelLarge,
+          padding: _scaledPadding(context),
+          minimumSize: const Size(64, 36),
+          maximumSize: Size.infinite,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+          enabledMouseCursor: kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          disabledMouseCursor: SystemMouseCursors.basic,
+          visualDensity: theme.visualDensity,
+          tapTargetSize: theme.materialTapTargetSize,
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: true,
+          alignment: Alignment.center,
+          splashFactory: InkRipple.splashFactory,
+        );
   }
 
   /// Returns the [TextButtonThemeData.style] of the closest
@@ -525,9 +521,10 @@ class _TextButtonWithIconChild extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
-      children: effectiveIconAlignment == IconAlignment.start
-          ? <Widget>[icon, Flexible(child: label)]
-          : <Widget>[Flexible(child: label), icon],
+      children:
+          effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
     );
   }
 }
@@ -639,13 +636,9 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  MaterialStateProperty<MouseCursor?>? get mouseCursor => MaterialStateProperty.all<MouseCursor?>(
+    kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+  );
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;
