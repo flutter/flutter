@@ -1435,6 +1435,39 @@ void main() {
         ),
       );
     });
+
+    testWidgets('CalendarDatePicker renders at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: CalendarDatePicker(
+                initialDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onDateChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: CalendarDatePicker(
+                initialDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onDateChanged: (_) {},
+                initialCalendarMode: DatePickerMode.year,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   });
 
   group('YearPicker', () {
@@ -1519,6 +1552,23 @@ void main() {
       );
       await tester.tap(find.text('2018'));
       expect(selectedYear, equals(DateTime(2018, DateTime.june)));
+    });
+
+    testWidgets('YearPicker renders at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox.shrink(
+              child: YearPicker(
+                selectedDate: DateTime(2025),
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2026),
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
     });
   });
 
