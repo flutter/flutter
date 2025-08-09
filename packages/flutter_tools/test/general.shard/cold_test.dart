@@ -242,7 +242,6 @@ class TestFlutterDevice extends FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    required bool allowExistingDdsInstance,
   }) async {
     throw exception;
   }
