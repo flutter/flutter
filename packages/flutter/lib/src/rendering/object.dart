@@ -2059,9 +2059,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    if (!(_isRelayoutBoundary ?? true)) {
-      child._isRelayoutBoundary = null;
-    }
+    assert(() {
+      child._debugLaidOutByThisParentBefore = false;
+      return true;
+    }());
     child.parentData!.detach();
     child.parentData = null;
     child._parent = null;
@@ -2348,9 +2349,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     _owner = owner;
     // If the node was dirtied in some way while unattached, make sure to add
     // it to the appropriate dirty list now that an owner is available
-    if (_needsLayout && _isRelayoutBoundary != null) {
-      // Don't enter this block if we've never laid out at all;
-      // scheduleInitialLayout() will handle it
+    if (_needsLayout) {
       _needsLayout = false;
       markNeedsLayout();
     }
@@ -2430,9 +2429,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// [markNeedsLayout] in deciding whether to recursively mark the parent as
   /// also needing layout.
   ///
-  /// The flag is initially set to `null` when [layout] has yet been called, and
-  /// reset to `null` when the parent drops this child via [dropChild].
-  bool? _isRelayoutBoundary;
+  /// The flag is initially set to false when [layout] has yet been called.
+  /// Setting this to false is always correct as this is a performance
+  /// optimization.
+  bool _isRelayoutBoundary = false;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
@@ -2470,21 +2470,33 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
 
+  /// This flag is true if [layout] has been called at least once for this
+  /// [RenderObject] by its current parent.
+  ///
+  /// In debug mode, this flag is set to false in [dropChild] and set to true in
+  /// [layout]. This flag is always false when asserts are disabled.
+  bool _debugLaidOutByThisParentBefore = false;
+
+  // TODO(LongCatIsLooong): consider removing this check entirely, or introduce
+  // a new flag on RenderObject so the rendering layer knows when a child subtree
+  // is being skipped for layout, see the comments regarding the use of
+  // _debugLaidOutByThisParentBefore.
   bool _debugRelayoutBoundaryAlreadyMarkedNeedsLayout() {
-    for (
-      RenderObject? node = this;
-      node != null && node._isRelayoutBoundary != null;
-      node = node.parent
-    ) {
-      final bool alreadyMarkedNeedsLayout = node._needsLayout || node._debugDoingThisLayout;
-      if (!alreadyMarkedNeedsLayout) {
-        return false;
-      }
-      if (node._isRelayoutBoundary!) {
-        return true;
-      }
+    final bool alreadyMarkedNeedsLayout = _needsLayout || _debugDoingThisLayout;
+    if (!alreadyMarkedNeedsLayout) {
+      return false;
     }
-    return true;
+
+    // This debug method verifies that every node with _needsLayout sets to true
+    // is reachable via tree-walk. However RenderObjects who deliberately skips
+    // children (e.g., RenderSliverMultiBoxAdaptor or _RenderTheater) want to
+    // make part of the tree unreachable for performance reasons. The implementation
+    // here tries to detect such cases by checking _debugLaidOutByThisParentBefore:
+    // if this RenderObject has never been laid out by the current parent, then
+    // we assume that the parent will layout the subtree when needed.
+    return !_debugLaidOutByThisParentBefore ||
+        _isRelayoutBoundary ||
+        (debugLayoutParent?._debugRelayoutBoundaryAlreadyMarkedNeedsLayout() ?? true);
   }
 
   /// Mark this render object's layout information as dirty, and either register
@@ -2532,7 +2544,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (owner case final PipelineOwner owner? when (_isRelayoutBoundary ?? false)) {
+    if (owner case final PipelineOwner owner? when _isRelayoutBoundary) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
           debugPrintStack(label: 'markNeedsLayout() called for $this');
@@ -2592,7 +2604,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(attached);
     assert(parent == null);
     assert(!owner!._debugDoingLayout);
-    assert(_isRelayoutBoundary == null);
+    assert(!_isRelayoutBoundary);
     _isRelayoutBoundary = true;
     assert(() {
       _debugCanParentUseSize = false;
@@ -2604,7 +2616,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert((_isRelayoutBoundary ?? false) || this is RenderObjectWithLayoutCallbackMixin);
+    assert(_isRelayoutBoundary || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2713,6 +2725,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }());
 
     _isRelayoutBoundary = !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
+    assert(() {
+      _debugLaidOutByThisParentBefore = true;
+      return true;
+    }());
     if (!_needsLayout && constraints == _constraints) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
@@ -3854,16 +3870,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         header += ' DISPOSED';
         return header;
       }
-
-      int count = 0;
-      for (
-        RenderObject? node = this;
-        node != null && !(node._isRelayoutBoundary ?? false);
-        node = node.parent
-      ) {
-        if (node._isRelayoutBoundary == null) {
-          count = -1;
-          break;
+      if (_debugLaidOutByThisParentBefore && !_isRelayoutBoundary) {
+        int count = 1;
+        RenderObject? target = parent;
+        while (target != null && !target._isRelayoutBoundary) {
+          target = target.parent;
+          count += 1;
         }
         count += 1;
       }
@@ -5406,12 +5418,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   @override
   _RenderObjectSemantics get owner => this;
 
-  bool get parentDataDirty {
-    if (isRoot) {
-      return false;
-    }
-    return parentData == null;
-  }
+  bool get parentDataDirty => !isRoot && parentData == null;
 
   /// If this forms a semantics node, all of the properties in config are
   /// used in creating the node. There is nothing to be merged up.
