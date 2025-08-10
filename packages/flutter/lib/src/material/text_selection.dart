@@ -111,7 +111,11 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     return switch (type) {
       TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2, -4),
       TextSelectionHandleType.left => const Offset(_kHandleSize, 0),
