@@ -3805,6 +3805,7 @@ void main() {
         hasFocusAction: true,
         hasTapAction: true,
         isTextField: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         label: 'Test',
@@ -3819,6 +3820,7 @@ void main() {
       matchesSemantics(
         hasFocusAction: true,
         isTextField: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         label: 'Test',
@@ -4409,6 +4411,7 @@ void main() {
                           inputType: SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
                             SemanticsFlag.hasEnabledState,
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isReadOnly,
@@ -4586,6 +4589,23 @@ void main() {
       expect(selectedValueText.style.color, disabledColor);
     },
   );
+
+  testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
+    const double cursorHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            cursorHeight: cursorHeight,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.cursorHeight, cursorHeight);
+  });
 }
 
 enum TestMenu {

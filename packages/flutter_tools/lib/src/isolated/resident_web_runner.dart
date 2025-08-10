@@ -37,6 +37,7 @@ import '../run_hot.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
@@ -157,8 +158,17 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
 
-  /// WebServer device is debuggable when running with --start-paused.
-  bool get deviceIsDebuggable => device!.device is! WebServerDevice || debuggingOptions.startPaused;
+  /// Device is debuggable if not a WebServer device, or if running with
+  /// --start-paused or using DWDS WebSocket connection (WebServer device).
+  bool get deviceIsDebuggable =>
+      device!.device is! WebServerDevice ||
+      debuggingOptions.startPaused ||
+      _useDwdsWebSocketConnection;
+
+  bool get _useDwdsWebSocketConnection {
+    final DevFS? devFS = device?.devFS;
+    return devFS is WebDevFS && devFS.useDwdsWebSocketConnection;
+  }
 
   @override
   // Web uses a different plugin registry.
@@ -274,31 +284,12 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        Future<int> getPort() async {
-          if (debuggingOptions.port == null) {
-            return globals.os.findFreePort();
-          }
+        final WebDevServerConfig originalConfig =
+            debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
 
-          final int? port = int.tryParse(debuggingOptions.port ?? '');
+        final int resolvedPort = await resolvePort(originalConfig.port, globals.os);
 
-          if (port == null) {
-            logger.printError('''
-Received a non-integer value for port: ${debuggingOptions.port}
-A randomly-chosen available port will be used instead.
-''');
-            return globals.os.findFreePort();
-          }
-
-          if (port < 0 || port > 65535) {
-            throwToolExit('''
-Invalid port: ${debuggingOptions.port}
-Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
-    ''');
-          }
-
-          return port;
-        }
-
+        final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
         final ExpressionCompiler? expressionCompiler =
             debuggingOptions.webEnableExpressionEvaluation
             ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
@@ -323,10 +314,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
                 nonWebServerConnectedDeviceIds.contains(device!.device!.id));
 
         device!.devFS = WebDevFS(
-          hostname: debuggingOptions.hostname ?? 'localhost',
-          port: await getPort(),
-          tlsCertPath: debuggingOptions.tlsCertPath,
-          tlsCertKeyPath: debuggingOptions.tlsCertKeyPath,
+          webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -337,7 +325,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
-          extraHeaders: debuggingOptions.webHeaders,
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
@@ -352,7 +339,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           platform: _platform,
         );
         Uri url = await device!.devFS!.create();
-        if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
+        if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
         if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
@@ -812,86 +799,102 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     Uri? websocketUri;
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
-      _connectionResult = await connectDebug;
-      unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
+      unawaited(
+        connectDebug!.then((connectionResult) async {
+          _connectionResult = connectionResult;
+          unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
-      void onLogEvent(vmservice.Event event) {
-        final String message = processVmServiceMessage(event);
-        _logger.printStatus(message);
-      }
-
-      // This flag is needed to manage breakpoints properly.
-      if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
-        try {
-          final vmservice.Response result = await _vmService.service.setFlag(
-            'pause_isolates_on_start',
-            'true',
-          );
-          if (result is! vmservice.Success) {
-            _logger.printError('setFlag failure: $result');
+          void onLogEvent(vmservice.Event event) {
+            final String message = processVmServiceMessage(event);
+            _logger.printStatus(message);
           }
-        } on Exception catch (e) {
-          _logger.printError(
-            'Failed to set pause_isolates_on_start=true, proceeding. '
-            'Error: $e',
+
+          // This flag is needed to manage breakpoints properly.
+          if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
+            try {
+              final vmservice.Response result = await _vmService.service.setFlag(
+                'pause_isolates_on_start',
+                'true',
+              );
+              if (result is! vmservice.Success) {
+                _logger.printError('setFlag failure: $result');
+              }
+            } on Exception catch (e) {
+              _logger.printError(
+                'Failed to set pause_isolates_on_start=true, proceeding. '
+                'Error: $e',
+              );
+            }
+          }
+
+          _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
+          _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
+          _serviceSub = _vmService.service.onServiceEvent.listen(_onServiceEvent);
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kService);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're not already subscribed.
+          }
+          await setUpVmService(
+            reloadSources: (String isolateId, {bool? force, bool? pause}) async {
+              await restart(pause: pause);
+            },
+            device: device!.device,
+            flutterProject: flutterProject,
+            printStructuredErrorLogMethod: printStructuredErrorLog,
+            vmService: _vmService.service,
           );
-        }
-      }
 
-      _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
-      _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
-      _serviceSub = _vmService.service.onServiceEvent.listen(_onServiceEvent);
-      try {
-        await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
-      } on vmservice.RPCError {
-        // It is safe to ignore this error because we expect an error to be
-        // thrown if we're already subscribed.
-      }
-      try {
-        await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
-      } on vmservice.RPCError {
-        // It is safe to ignore this error because we expect an error to be
-        // thrown if we're already subscribed.
-      }
-      try {
-        await _vmService.service.streamListen(vmservice.EventStreams.kService);
-      } on vmservice.RPCError {
-        // It is safe to ignore this error because we expect an error to be
-        // thrown if we're already subscribed.
-      }
-      try {
-        await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
-      } on vmservice.RPCError {
-        // It is safe to ignore this error because we expect an error to be
-        // thrown if we're not already subscribed.
-      }
-      await setUpVmService(
-        reloadSources: (String isolateId, {bool? force, bool? pause}) async {
-          await restart(pause: pause);
-        },
-        device: device!.device,
-        flutterProject: flutterProject,
-        printStructuredErrorLogMethod: printStructuredErrorLog,
-        vmService: _vmService.service,
-      );
+          websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
+          device!.vmService = _vmService;
 
-      websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
-      device!.vmService = _vmService;
-
-      // Run main immediately if the app is not started paused or if there
-      // is no debugger attached. Otherwise, runMain when a resume event
-      // is received.
-      if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
-        _connectionResult!.appConnection!.runMain();
-      } else {
-        late StreamSubscription<void> resumeSub;
-        resumeSub = _vmService.service.onDebugEvent.listen((vmservice.Event event) {
-          if (event.type == vmservice.EventKind.kResume) {
+          // Run main immediately if the app is not started paused or if there
+          // is no debugger attached. Otherwise, runMain when a resume event
+          // is received.
+          if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
             _connectionResult!.appConnection!.runMain();
-            resumeSub.cancel();
+          } else {
+            late StreamSubscription<void> resumeSub;
+            resumeSub = _vmService.service.onDebugEvent.listen((vmservice.Event event) {
+              if (event.type == vmservice.EventKind.kResume) {
+                _connectionResult!.appConnection!.runMain();
+                resumeSub.cancel();
+              }
+            });
           }
-        });
-      }
+
+          if (websocketUri != null) {
+            if (debuggingOptions.vmserviceOutFile != null) {
+              _fileSystem.file(debuggingOptions.vmserviceOutFile)
+                ..createSync(recursive: true)
+                ..writeAsStringSync(websocketUri.toString());
+            }
+            _logger.printStatus('Debug service listening on $websocketUri');
+          }
+          connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
+        }),
+      );
+    } else {
+      connectionInfoCompleter?.complete(DebugConnectionInfo());
     }
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     if (debuggingOptions.enableDevTools) {
@@ -903,16 +906,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         ),
       );
     }
-    if (websocketUri != null) {
-      if (debuggingOptions.vmserviceOutFile != null) {
-        _fileSystem.file(debuggingOptions.vmserviceOutFile)
-          ..createSync(recursive: true)
-          ..writeAsStringSync(websocketUri.toString());
-      }
-      _logger.printStatus('Debug service listening on $websocketUri');
-    }
+
     appStartedCompleter?.complete();
-    connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
     if (stayResident) {
       await waitForAppToFinish();
     } else {

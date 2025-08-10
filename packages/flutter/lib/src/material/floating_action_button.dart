@@ -565,7 +565,7 @@ class FloatingActionButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (child != null) child!,
+                ?child,
                 if (child != null && isExtended) SizedBox(width: iconLabelSpacing),
                 if (isExtended) _extendedLabel!,
               ],
