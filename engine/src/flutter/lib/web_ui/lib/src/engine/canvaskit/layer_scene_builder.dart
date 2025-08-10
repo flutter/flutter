@@ -7,6 +7,9 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+// Warn about performance overlay on Web only once per page load.
+bool _webPerfOverlayWarned = false;
+
 class LayerScene implements ui.Scene {
   LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
 
@@ -38,8 +41,15 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
-    // We don't plan to implement this on the web.
-    throw UnimplementedError();
+    // Not implemented on Web. Avoid crashing; warn once to guide developers.
+    if (!_webPerfOverlayWarned) {
+      _webPerfOverlayWarned = true;
+      print(
+        'showPerformanceOverlay is not supported on Flutter Web. '
+        'Use DevTools Performance (Timeline) instead.'
+      );
+    }
+    // No-op on Web.
   }
 
   @override
