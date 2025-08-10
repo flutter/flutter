@@ -851,7 +851,7 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.red);
   });
 
-  testWidgets('MaterialApp respects highContrastThemeMode.standard regardless of system setting', (
+  testWidgets('MaterialApp respects highContrastThemeMode.disabled regardless of system setting', (
     WidgetTester tester,
   ) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
@@ -864,7 +864,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(primaryColor: Colors.red),
         highContrastTheme: ThemeData(primaryColor: Colors.blue),
-        highContrastThemeMode: HighContrastThemeMode.standard,
+        highContrastThemeMode: HighContrastThemeMode.disabled,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -877,7 +877,7 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.red);
   });
 
-  testWidgets('MaterialApp respects highContrastThemeMode.highContrast regardless of system setting', (
+  testWidgets('MaterialApp respects highContrastThemeMode.enabled regardless of system setting', (
     WidgetTester tester,
   ) async {
     addTearDown(tester.platformDispatcher.clearAllTestValues);
@@ -890,7 +890,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(primaryColor: Colors.red),
         highContrastTheme: ThemeData(primaryColor: Colors.blue),
-        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        highContrastThemeMode: HighContrastThemeMode.enabled,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -919,7 +919,7 @@ void main() {
         darkTheme: ThemeData(primaryColor: Colors.green),
         highContrastTheme: ThemeData(primaryColor: Colors.blue),
         highContrastDarkTheme: ThemeData(primaryColor: Colors.yellow),
-        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        highContrastThemeMode: HighContrastThemeMode.enabled,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -945,7 +945,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(primaryColor: Colors.red),
         // No highContrastTheme provided
-        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        highContrastThemeMode: HighContrastThemeMode.enabled,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);

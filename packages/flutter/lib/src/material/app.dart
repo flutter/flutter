@@ -72,11 +72,11 @@ enum HighContrastThemeMode {
   /// the system settings.
   system,
 
-  /// Always use the standard theme regardless of system preference.
-  standard,
+  /// Always use the standard theme (high contrast disabled) regardless of system preference.
+  disabled,
 
-  /// Always use the high contrast theme regardless of system preference.
-  highContrast,
+  /// Always use the high contrast theme (high contrast enabled) regardless of system preference.
+  enabled,
 }
 
 /// An application that uses Material Design.
@@ -515,10 +515,10 @@ class MaterialApp extends StatefulWidget {
   /// the high contrast versions ([highContrastTheme] or [highContrastDarkTheme])
   /// will be used when available.
   ///
-  /// If set to [HighContrastThemeMode.standard] the standard themes ([theme]
+  /// If set to [HighContrastThemeMode.disabled] the standard themes ([theme]
   /// or [darkTheme]) will always be used, regardless of system preference.
   ///
-  /// If set to [HighContrastThemeMode.highContrast] the high contrast themes
+  /// If set to [HighContrastThemeMode.enabled] the high contrast themes
   /// ([highContrastTheme] or [highContrastDarkTheme]) will be used when
   /// available, regardless of system preference. If the high contrast theme
   /// is not available, it will fallback to the standard theme.
@@ -1038,8 +1038,8 @@ class _MaterialAppState extends State<MaterialApp> {
     final bool systemHighContrast = MediaQuery.highContrastOf(context);
     final bool useHighContrast = switch (highContrastMode) {
       HighContrastThemeMode.system => systemHighContrast,
-      HighContrastThemeMode.standard => false,
-      HighContrastThemeMode.highContrast => true,
+      HighContrastThemeMode.disabled => false,
+      HighContrastThemeMode.enabled => true,
     };
     
     if (useDarkTheme && useHighContrast && widget.highContrastDarkTheme != null) {
