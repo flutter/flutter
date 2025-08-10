@@ -17676,6 +17676,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return const SizedBox();
@@ -17781,6 +17782,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return Container();

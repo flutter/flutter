@@ -114,6 +114,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     // iOS selection handles do not respond to taps.

@@ -107,6 +107,7 @@ abstract class TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]);
 
@@ -299,6 +300,7 @@ class EmptyTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     return const SizedBox.shrink();
@@ -546,6 +548,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
         TextSelectionHandleType.right,
       )
+      ..cursorWidth = renderObject.cursorWidth
       ..lineHeightAtStart = _getStartGlyphHeight()
       ..endHandleType = _chooseType(
         renderObject.textDirection,
@@ -1330,6 +1333,12 @@ class SelectionOverlay {
     markNeedsBuild();
   }
 
+  /// The width of the cursor.
+  ///
+  /// This value is used by [TextSelectionControls.buildHandle] for calculating
+  /// the handle offset when handle type is [TextSelectionTypeHandle.collapsed].
+  double cursorWidth = 2.0;
+
   /// The line height at the selection end.
   ///
   /// This value is used for calculating the size of the end selection handle.
@@ -1767,6 +1776,7 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
         handleLayerLink: startHandleLayerLink,
+        cursorWidth: cursorWidth,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
         onSelectionHandleDragUpdate: _handleStartHandleDragUpdate,
@@ -1795,6 +1805,7 @@ class SelectionOverlay {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
+        cursorWidth: cursorWidth,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
         onSelectionHandleDragUpdate: _handleEndHandleDragUpdate,
@@ -1969,6 +1980,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   const _SelectionHandleOverlay({
     required this.type,
     required this.handleLayerLink,
+    required this.cursorWidth,
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
     this.onSelectionHandleDragUpdate,
@@ -1980,6 +1992,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   });
 
   final LayerLink handleLayerLink;
+  final double cursorWidth;
   final VoidCallback? onSelectionHandleTapped;
   final ValueChanged<DragStartDetails>? onSelectionHandleDragStart;
   final ValueChanged<DragUpdateDetails>? onSelectionHandleDragUpdate;
@@ -2118,6 +2131,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
                   context,
                   widget.type,
                   widget.preferredLineHeight,
+                  widget.cursorWidth,
                   widget.onSelectionHandleTapped,
                 ),
               ),

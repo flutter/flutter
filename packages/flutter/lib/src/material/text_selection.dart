@@ -76,6 +76,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     final ThemeData theme = Theme.of(context);
