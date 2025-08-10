@@ -66,6 +66,19 @@ enum ThemeMode {
   dark,
 }
 
+/// Describes how high contrast theme selection will be handled by [MaterialApp].
+enum HighContrastThemeMode {
+  /// Use either the standard or high contrast theme based on what the user has selected in
+  /// the system settings.
+  system,
+
+  /// Always use the standard theme regardless of system preference.
+  standard,
+
+  /// Always use the high contrast theme regardless of system preference.
+  highContrast,
+}
+
 /// An application that uses Material Design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -236,6 +249,7 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.highContrastThemeMode = HighContrastThemeMode.system,
     this.themeAnimationDuration = kThemeAnimationDuration,
     this.themeAnimationCurve = Curves.linear,
     this.locale,
@@ -287,6 +301,7 @@ class MaterialApp extends StatefulWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.themeMode = ThemeMode.system,
+    this.highContrastThemeMode = HighContrastThemeMode.system,
     this.themeAnimationDuration = kThemeAnimationDuration,
     this.themeAnimationCurve = Curves.linear,
     this.locale,
@@ -491,6 +506,31 @@ class MaterialApp extends StatefulWidget {
   ///  * [ThemeData.brightness], which indicates to various parts of the
   ///    system what kind of theme is being used.
   final ThemeMode? themeMode;
+
+  /// Determines how high contrast theme selection will be handled.
+  ///
+  /// If set to [HighContrastThemeMode.system], the choice of whether to use the
+  /// high contrast version of a theme will be based on the user's system
+  /// accessibility preferences. If the [MediaQuery.highContrastOf] is true,
+  /// the high contrast versions ([highContrastTheme] or [highContrastDarkTheme])
+  /// will be used when available.
+  ///
+  /// If set to [HighContrastThemeMode.standard] the standard themes ([theme]
+  /// or [darkTheme]) will always be used, regardless of system preference.
+  ///
+  /// If set to [HighContrastThemeMode.highContrast] the high contrast themes
+  /// ([highContrastTheme] or [highContrastDarkTheme]) will be used when
+  /// available, regardless of system preference. If the high contrast theme
+  /// is not available, it will fallback to the standard theme.
+  ///
+  /// The default value is [HighContrastThemeMode.system].
+  ///
+  /// See also:
+  ///
+  ///  * [highContrastTheme], which is used when high contrast is selected for light mode.
+  ///  * [highContrastDarkTheme], which is used when high contrast is selected for dark mode.
+  ///  * [MediaQuery.highContrastOf], which indicates the system's high contrast preference.
+  final HighContrastThemeMode? highContrastThemeMode;
 
   /// The duration of animated theme changes.
   ///
@@ -987,16 +1027,26 @@ class _MaterialAppState extends State<MaterialApp> {
     ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
+    final HighContrastThemeMode highContrastMode = 
+        widget.highContrastThemeMode ?? HighContrastThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme =
         mode == ThemeMode.dark ||
         (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
-    final bool highContrast = MediaQuery.highContrastOf(context);
-    if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
+    
+    // Determine if high contrast should be used based on the mode
+    final bool systemHighContrast = MediaQuery.highContrastOf(context);
+    final bool useHighContrast = switch (highContrastMode) {
+      HighContrastThemeMode.system => systemHighContrast,
+      HighContrastThemeMode.standard => false,
+      HighContrastThemeMode.highContrast => true,
+    };
+    
+    if (useDarkTheme && useHighContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
     } else if (useDarkTheme && widget.darkTheme != null) {
       theme = widget.darkTheme;
-    } else if (highContrast && widget.highContrastTheme != null) {
+    } else if (useHighContrast && widget.highContrastTheme != null) {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData();

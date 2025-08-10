@@ -795,6 +795,191 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.lightGreen);
   });
 
+  testWidgets('MaterialApp respects highContrastThemeMode.system with high contrast on', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        highContrastThemeMode: HighContrastThemeMode.system,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+  });
+
+  testWidgets('MaterialApp respects highContrastThemeMode.system with high contrast off', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        highContrastThemeMode: HighContrastThemeMode.system,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.red);
+  });
+
+  testWidgets('MaterialApp respects highContrastThemeMode.standard regardless of system setting', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        highContrastThemeMode: HighContrastThemeMode.standard,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.red);
+  });
+
+  testWidgets('MaterialApp respects highContrastThemeMode.highContrast regardless of system setting', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+  });
+
+  testWidgets('MaterialApp respects highContrastThemeMode with dark themes', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        darkTheme: ThemeData(primaryColor: Colors.green),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        highContrastDarkTheme: ThemeData(primaryColor: Colors.yellow),
+        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.yellow);
+  });
+
+  testWidgets('MaterialApp falls back to standard theme when high contrast theme is not available', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        // No highContrastTheme provided
+        highContrastThemeMode: HighContrastThemeMode.highContrast,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.red);
+  });
+
+  testWidgets('MaterialApp defaults to HighContrastThemeMode.system when not specified', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+
+    late ThemeData appliedTheme;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primaryColor: Colors.red),
+        highContrastTheme: ThemeData(primaryColor: Colors.blue),
+        // No highContrastThemeMode specified - should default to system
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(appliedTheme.primaryColor, Colors.blue);
+  });
+
   testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
