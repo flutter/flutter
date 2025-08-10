@@ -1344,7 +1344,7 @@ class SelectionOverlay {
   /// The width of the cursor.
   ///
   /// This value is used by [TextSelectionControls.buildHandle] for calculating
-  /// the handle offset when handle type is [TextSelectionTypeHandle.collapsed].
+  /// the handle offset when handle type is [TextSelectionHandleType.collapsed].
   double cursorWidth = 2.0;
 
   /// The line height at the selection end.
