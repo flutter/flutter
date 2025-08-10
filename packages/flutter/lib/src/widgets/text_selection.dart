@@ -2082,6 +2082,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
       widget.preferredLineHeight,
+      isEditText: false,
     );
 
     // Make sure a drag is eagerly accepted. This is used on iOS to match the

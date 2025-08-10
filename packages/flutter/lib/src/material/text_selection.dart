@@ -15,6 +15,7 @@ import 'text_selection_toolbar_text_button.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
+const double _kDefaultCursorWidth = 2.0;
 
 // Padding between the toolbar and the anchor.
 const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
@@ -91,8 +92,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       ),
     );
 
-    // [handle] is a circle, with a rectangle in the top left quadrant of that
-    // circle (an onion pointing to 10:30). We rotate [handle] to point
+    // [handle] is a circle, with a square in the top left quadrant of that
+    // circle (an onion pointing to Northwest). We rotate [handle] to point
     // straight up or up-right depending on the handle type.
     return switch (type) {
       TextSelectionHandleType.left => Transform.rotate(
@@ -100,11 +101,20 @@ class MaterialTextSelectionControls extends TextSelectionControls {
         child: handle,
       ), // points up-right
       TextSelectionHandleType.right => handle, // points up-left
-      TextSelectionHandleType.collapsed => Transform.rotate(
-        angle: math.pi / 4.0,
-        child: handle,
+      TextSelectionHandleType.collapsed => Transform.translate(
+        offset: Offset((cursorWidth ?? _kDefaultCursorWidth) / 2, _getVerticalOffset()),
+        child: Transform.rotate(angle: math.pi / 4.0, child: handle),
       ), // points up
     };
+  }
+
+  /// When the handle is [TextSelectionHandleType.collapsed], it is rotated by
+  /// 45 degrees (π/4 radians). This rotation causes its vertex to protrude
+  /// beyond the handle's circular radius.
+  /// This protrusion length is calculated using the Pythagorean theorem.
+  double _getVerticalOffset() {
+    const double radius = _kHandleSize / 2;
+    return radius * (math.sqrt(2) - 1);
   }
 
   /// Gets anchor for material-style text selection handles.
@@ -117,7 +127,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     bool isEditText = true,
   }) {
     return switch (type) {
-      TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2, -4),
+      TextSelectionHandleType.collapsed => Offset(_kHandleSize / 2, isEditText ? -4 : 0),
       TextSelectionHandleType.left => const Offset(_kHandleSize, 0),
       TextSelectionHandleType.right => Offset.zero,
     };
