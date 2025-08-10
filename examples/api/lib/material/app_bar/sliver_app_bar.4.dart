@@ -43,14 +43,15 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
                 background: FlutterLogo(),
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            SliverList.builder(
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) {
                 return Container(
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
                   child: Center(child: Text('$index', textScaler: const TextScaler.linear(5.0))),
                 );
-              }, childCount: 20),
+              },
             ),
           ],
         ),
