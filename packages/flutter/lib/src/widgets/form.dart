@@ -16,6 +16,7 @@ import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'navigator.dart';
 import 'pop_scope.dart';
 import 'restoration.dart';
@@ -280,17 +281,24 @@ class FormState extends State<Form> {
         break;
     }
 
+    final Widget form;
     if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
-      return PopScope<Object?>(
+      form = PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvokedWithResult: widget._callPopInvoked,
         child: _FormScope(formState: this, generation: _generation, child: widget.child),
       );
+    } else {
+      form = WillPopScope(
+        onWillPop: widget.onWillPop,
+        child: _FormScope(formState: this, generation: _generation, child: widget.child),
+      );
     }
-
-    return WillPopScope(
-      onWillPop: widget.onWillPop,
-      child: _FormScope(formState: this, generation: _generation, child: widget.child),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      role: SemanticsRole.form,
+      child: form,
     );
   }
 
@@ -369,7 +377,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty && MediaQuery.supportsAnnounceOf(context)) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
@@ -466,6 +474,7 @@ class FormField<T> extends StatefulWidget {
     super.key,
     required this.builder,
     this.onSaved,
+    this.onReset,
     this.forceErrorText,
     this.validator,
     this.errorBuilder,
@@ -484,6 +493,10 @@ class FormField<T> extends StatefulWidget {
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
   final FormFieldSetter<T>? onSaved;
+
+  /// An optional method to call when the form field is reset via
+  /// [FormFieldState.reset].
+  final VoidCallback? onReset;
 
   /// An optional property that forces the [FormFieldState] into an error state
   /// by directly setting the [FormFieldState.errorText] property without
@@ -528,9 +541,6 @@ class FormField<T> extends StatefulWidget {
   final FormFieldErrorBuilder? errorBuilder;
 
   /// An optional value to initialize the form field to, or null otherwise.
-  ///
-  /// This is called `value` in the [DropdownButtonFormField] constructor to be
-  /// consistent with [DropdownButton].
   ///
   /// The `initialValue` affects the form field's state in two cases:
   /// 1. When the form field is first built, `initialValue` determines the field's initial state.
@@ -631,6 +641,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
+    widget.onReset?.call();
     Form.maybeOf(context)?._fieldDidChange();
   }
 
@@ -769,6 +780,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
+    final Widget child = Semantics(
+      validationResult: hasError
+          ? SemanticsValidationResult.invalid
+          : SemanticsValidationResult.valid,
+      child: widget.builder(this),
+    );
+
     if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
@@ -783,11 +801,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           }
         },
         focusNode: _focusNode,
-        child: widget.builder(this),
+        child: child,
       );
     }
 
-    return widget.builder(this);
+    return child;
   }
 }
 

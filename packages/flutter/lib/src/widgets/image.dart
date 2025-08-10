@@ -18,8 +18,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import '../painting/_web_image_info_io.dart'
-    if (dart.library.js_util) '../painting/_web_image_info_web.dart';
-import '_web_image_io.dart' if (dart.library.js_util) '_web_image_web.dart';
+    if (dart.library.js_interop) '../painting/_web_image_info_web.dart';
+import '_web_image_io.dart' if (dart.library.js_interop) '_web_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'disposable_build_context.dart';
@@ -421,6 +421,12 @@ class Image extends StatefulWidget {
   ///    [repeat], filtering, and blurring.
   ///
   /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
+  ///
+  /// ### Android Permissions
+  ///
+  /// Images fetched from the network require the internet permission.
+  /// Ensure that all AndroidMainifest.xml variants (especially release) have the internet permission.
+  /// See https://docs.flutter.dev/data-and-backend/networking for more information.
   Image.network(
     String src, {
     super.key,
@@ -1168,10 +1174,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     final ImageStream newStream = provider.resolve(
       createLocalImageConfiguration(
         context,
-        size:
-            widget.width != null && widget.height != null
-                ? Size(widget.width!, widget.height!)
-                : null,
+        size: widget.width != null && widget.height != null
+            ? Size(widget.width!, widget.height!)
+            : null,
       ),
     );
     _updateSourceStream(newStream);
@@ -1185,22 +1190,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError:
-            widget.errorBuilder != null || kDebugMode
-                ? (Object error, StackTrace? stackTrace) {
-                  setState(() {
-                    _lastException = error;
-                    _lastStack = stackTrace;
-                  });
-                  assert(() {
-                    if (widget.errorBuilder == null) {
-                      // ignore: only_throw_errors, since we're just proxying the error.
-                      throw error; // Ensures the error message is printed to the console.
-                    }
-                    return true;
-                  }());
-                }
-                : null,
+        onError: widget.errorBuilder != null || kDebugMode
+            ? (Object error, StackTrace? stackTrace) {
+                setState(() {
+                  _lastException = error;
+                  _lastStack = stackTrace;
+                });
+                assert(() {
+                  if (widget.errorBuilder == null) {
+                    // ignore: only_throw_errors, since we're just proxying the error.
+                    throw error; // Ensures the error message is printed to the console.
+                  }
+                  return true;
+                }());
+              }
+            : null,
       );
     }
     return _imageStreamListener!;
@@ -1293,6 +1297,26 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _completerHandle = _imageStream!.completer!.keepAlive();
     }
 
+    // It's almost time to remove the last listener, which triggers the
+    // disposal. But before that, add an ephemeral listener to potentially
+    // suppress errors.
+    //
+    // Reason: When an app provides an `Image` widget with an `errorBuilder`, it
+    // expects the widget to never report errors through `FlutterError` in any
+    // cases. This is hard if the stream fails after the disposal, because an
+    // image stream must have no listeners to be disposed, which then has
+    // nothing to suppress the errors. This is solve with the help of an
+    // ephemeral listener, which also suppresses the error but does not hinder
+    // disposal. For more details, see
+    // https://github.com/flutter/flutter/issues/97077 .
+    if (_imageStream!.completer != null && widget.errorBuilder != null) {
+      _imageStream!.completer!.addEphemeralErrorListener((
+        Object exception,
+        StackTrace? stackTrace,
+      ) {
+        // Intentionally blank.
+      });
+    }
     _imageStream!.removeListener(_getListener());
     _isListeningToStream = false;
   }

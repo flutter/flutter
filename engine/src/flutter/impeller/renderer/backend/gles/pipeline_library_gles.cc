@@ -7,12 +7,12 @@
 #include <sstream>
 #include <string>
 
-#include "flutter/fml/container.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
 #include "impeller/base/promise.h"
 #include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/shader_function_gles.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
 
@@ -167,7 +167,10 @@ static bool LinkProgram(
 
   if (link_status != GL_TRUE) {
     VALIDATION_LOG << "Could not link shader program: "
-                   << gl.GetProgramInfoLogString(*program);
+                   << gl.GetProgramInfoLogString(*program)
+                   << "\nVertex Shader:\n"
+                   << GetShaderSource(gl, vert_shader) << "\nFragment Shader:\n"
+                   << GetShaderSource(gl, frag_shader);
     return false;
   }
   return true;
@@ -182,7 +185,8 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
     const std::weak_ptr<PipelineLibrary>& weak_library,
     const PipelineDescriptor& desc,
     const std::shared_ptr<const ShaderFunction>& vert_function,
-    const std::shared_ptr<const ShaderFunction>& frag_function) {
+    const std::shared_ptr<const ShaderFunction>& frag_function,
+    bool threadsafe) {
   auto strong_library = weak_library.lock();
 
   if (!strong_library) {
@@ -206,14 +210,22 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
 
   const auto has_cached_program = !!cached_program;
 
-  auto pipeline = std::shared_ptr<PipelineGLES>(new PipelineGLES(
-      reactor,       //
-      weak_library,  //
-      desc,          //
-      has_cached_program
-          ? std::move(cached_program)
-          : std::make_shared<UniqueHandleGLES>(UniqueHandleGLES::MakeUntracked(
-                reactor, HandleType::kProgram))));
+  std::shared_ptr<UniqueHandleGLES> program_handle = nullptr;
+  if (has_cached_program) {
+    program_handle = std::move(cached_program);
+  } else {
+    program_handle = threadsafe ? std::make_shared<UniqueHandleGLES>(
+                                      reactor, HandleType::kProgram)
+                                : std::make_shared<UniqueHandleGLES>(
+                                      UniqueHandleGLES::MakeUntracked(
+                                          reactor, HandleType::kProgram));
+  }
+
+  auto pipeline = std::shared_ptr<PipelineGLES>(
+      new PipelineGLES(reactor,       //
+                       weak_library,  //
+                       desc,          //
+                       std::move(program_handle)));
 
   auto program = reactor->GetGLHandle(pipeline->GetProgramHandle());
 
@@ -255,7 +267,8 @@ std::shared_ptr<PipelineGLES> PipelineLibraryGLES::CreatePipeline(
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     PipelineDescriptor descriptor,
-    bool async) {
+    bool async,
+    bool threadsafe) {
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;
   }
@@ -287,10 +300,11 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
                                               weak_this = weak_from_this(),  //
                                               descriptor,                    //
                                               vert_function,                 //
-                                              frag_function                  //
+                                              frag_function,                 //
+                                              threadsafe                     //
   ](const ReactorGLES& reactor) {
-    promise->set_value(
-        CreatePipeline(weak_this, descriptor, vert_function, frag_function));
+    promise->set_value(CreatePipeline(weak_this, descriptor, vert_function,
+                                      frag_function, threadsafe));
   });
   FML_CHECK(result);
 
@@ -315,10 +329,24 @@ bool PipelineLibraryGLES::HasPipeline(const PipelineDescriptor& descriptor) {
 // |PipelineLibrary|
 void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
-  fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
-  });
+  Lock lock(programs_mutex_);
+
+  PipelineMap::iterator it = pipelines_.begin();
+  while (it != pipelines_.end()) {
+    const PipelineDescriptor& desc = it->first;
+    if (desc.GetEntrypointForStage(function->GetStage())->IsEqual(*function)) {
+      const std::shared_ptr<const ShaderFunction>& vert_function =
+          desc.GetEntrypointForStage(ShaderStage::kVertex);
+      const std::shared_ptr<const ShaderFunction>& frag_function =
+          desc.GetEntrypointForStage(ShaderStage::kFragment);
+      ProgramKey program_key{vert_function, frag_function,
+                             desc.GetSpecializationConstants()};
+      programs_.erase(program_key);
+      it = pipelines_.erase(it);
+    } else {
+      it++;
+    }
+  }
 }
 
 // |PipelineLibrary|

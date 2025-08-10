@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
@@ -20,9 +21,11 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -39,11 +42,12 @@ import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
-const String kJITCrashFailureMessage =
+const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
 @visibleForTesting
-String jITCrashFailureInstructions(String deviceVersion) => '''
+String jITCrashFailureInstructions(String deviceVersion) =>
+    '''
 ════════════════════════════════════════════════════════════════════════════════
 A change to iOS has caused a temporary break in Flutter's debug mode on
 physical devices.
@@ -56,6 +60,15 @@ In the meantime, we recommend these temporary workarounds:
 * If you must use a device updated to $deviceVersion, use Flutter's release or
   profile mode via --release or --profile flags.
 ════════════════════════════════════════════════════════════════════════════════''';
+
+enum IOSDeploymentMethod {
+  iosDeployLaunch,
+  iosDeployLaunchAndAttach,
+  coreDeviceWithoutDebugger,
+  coreDeviceWithLLDB,
+  coreDeviceWithXcode,
+  coreDeviceWithXcodeFallback,
+}
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
@@ -91,7 +104,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   ///
   /// Separate from `deviceNotifier` since `deviceNotifier` should only contain
   /// connected devices.
-  final Map<String, IOSDevice> _cachedPolledDevices = <String, IOSDevice>{};
+  final _cachedPolledDevices = <String, IOSDevice>{};
 
   /// Maps device id to a map of the device's observed connections. When the
   /// mapped connection is `true`, that means that observed events indicated
@@ -107,8 +120,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   ///     wifi: false,
   ///   },
   /// }
-  final Map<String, Map<XCDeviceEventInterface, bool>> _observedConnectionsByDeviceId =
-      <String, Map<XCDeviceEventInterface, bool>>{};
+  final _observedConnectionsByDeviceId = <String, Map<XCDeviceEventInterface, bool>>{};
 
   @override
   Future<void> startPolling() async {
@@ -188,7 +200,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 
   /// Adds or updates devices in cache. Does not remove devices from cache.
   void _updateCachedDevices(List<Device> devices) {
-    for (final Device device in devices) {
+    for (final device in devices) {
       if (device is! IOSDevice) {
         continue;
       }
@@ -203,14 +215,13 @@ class IOSDevices extends PollingDeviceDiscovery {
 
     // Device is connected if it has either an observed usb or wifi connection
     // or it has not been observed but was found as connected in the cache.
-    final List<Device> connectedDevices =
-        _cachedPolledDevices.values.where((Device device) {
-          final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
-              _observedConnectionsByDeviceId[device.id];
-          return (deviceObservedConnections != null &&
-                  _deviceHasObservedConnection(deviceObservedConnections)) ||
-              (deviceObservedConnections == null && device.isConnected);
-        }).toList();
+    final List<Device> connectedDevices = _cachedPolledDevices.values.where((Device device) {
+      final Map<XCDeviceEventInterface, bool>? deviceObservedConnections =
+          _observedConnectionsByDeviceId[device.id];
+      return (deviceObservedConnections != null &&
+              _deviceHasObservedConnection(deviceObservedConnections)) ||
+          (deviceObservedConnections == null && device.isConnected);
+    }).toList();
 
     notifier.updateWithNewList(connectedDevices);
   }
@@ -280,17 +291,21 @@ class IOSDevice extends Device {
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
     required IOSCoreDeviceControl coreDeviceControl,
+    required IOSCoreDeviceLauncher coreDeviceLauncher,
     required XcodeDebug xcodeDebug,
     required IProxy iProxy,
     required super.logger,
+    required Analytics analytics,
   }) : _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
        _coreDeviceControl = coreDeviceControl,
+       _coreDeviceLauncher = coreDeviceLauncher,
        _xcodeDebug = xcodeDebug,
        _iproxy = iProxy,
        _fileSystem = fileSystem,
        _logger = logger,
+       _analytics = analytics,
        _platform = platform,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
@@ -301,11 +316,13 @@ class IOSDevice extends Device {
 
   final String? _sdkVersion;
   final IOSDeploy _iosDeploy;
+  final Analytics _analytics;
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
+  final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
   final IProxy _iproxy;
 
@@ -337,16 +354,16 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
-  bool devModeEnabled = false;
+  var devModeEnabled = false;
 
   /// Device has trusted this computer and paired.
-  bool isPaired = false;
+  var isPaired = false;
 
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
   final bool isCoreDevice;
 
-  final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
+  final _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
 
@@ -427,8 +444,9 @@ class IOSDevice extends Device {
     int uninstallationResult;
     try {
       if (isCoreDevice) {
-        uninstallationResult =
-            await _coreDeviceControl.uninstallApp(deviceId: id, bundleId: app.id) ? 0 : 1;
+        uninstallationResult = await _coreDeviceControl.uninstallApp(deviceId: id, bundleId: app.id)
+            ? 0
+            : 1;
       } else {
         uninstallationResult = await _iosDeploy.uninstallApp(deviceId: id, bundleId: app.id);
       }
@@ -445,7 +463,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  bool isSupported() => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -485,10 +503,10 @@ class IOSDevice extends Device {
         _logger.printError('Could not build the precompiled application for the device.');
         await diagnoseXcodeBuildFailure(
           buildResult,
-          analytics: globals.analytics,
+          analytics: _analytics,
           fileSystem: globals.fs,
           logger: globals.logger,
-          platform: SupportedPlatform.ios,
+          platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
         );
         _logger.printError('');
@@ -512,12 +530,13 @@ class IOSDevice extends Device {
       route,
       platformArgs,
       interfaceType: connectionInterface,
-      isCoreDevice: isCoreDevice,
     );
     Status startAppStatus = _logger.startProgress('Installing and launching...');
+
+    IOSDeploymentMethod? deploymentMethod;
     try {
       ProtocolDiscovery? vmServiceDiscovery;
-      int installationResult = 1;
+      var installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
         vmServiceDiscovery = _setupDebuggerAndVmServiceDiscovery(
@@ -530,18 +549,21 @@ class IOSDevice extends Device {
       }
 
       if (isCoreDevice) {
-        installationResult =
-            await _startAppOnCoreDevice(
-                  debuggingOptions: debuggingOptions,
-                  package: package,
-                  launchArguments: launchArguments,
-                  mainPath: mainPath,
-                  discoveryTimeout: discoveryTimeout,
-                  shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
-                )
-                ? 0
-                : 1;
+        final (
+          bool result,
+          IOSDeploymentMethod coreDeviceDeploymentMethod,
+        ) = await _startAppOnCoreDevice(
+          debuggingOptions: debuggingOptions,
+          package: package,
+          launchArguments: launchArguments,
+          mainPath: mainPath,
+          discoveryTimeout: discoveryTimeout,
+          shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
+        );
+        installationResult = result ? 0 : 1;
+        deploymentMethod = coreDeviceDeploymentMethod;
       } else if (iosDeployDebugger == null) {
+        deploymentMethod = IOSDeploymentMethod.iosDeployLaunch;
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
           bundlePath: bundle.path,
@@ -551,15 +573,30 @@ class IOSDevice extends Device {
           uninstallFirst: debuggingOptions.uninstallFirst,
         );
       } else {
+        deploymentMethod = IOSDeploymentMethod.iosDeployLaunchAndAttach;
         installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
       }
       if (installationResult != 0) {
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'launch failed',
+          ),
+        );
         _printInstallError(bundle);
         await dispose();
         return LaunchResult.failed();
       }
 
       if (!debuggingOptions.debuggingEnabled) {
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'release success',
+          ),
+        );
         return LaunchResult.succeeded();
       }
 
@@ -576,17 +613,10 @@ class IOSDevice extends Device {
         defaultTimeout = 30;
       }
 
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
+      final timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError(
           'The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...',
         );
-        if (isCoreDevice && debuggingOptions.debuggingEnabled) {
-          _logger.printError(
-            'Open the Xcode window the project is opened in to ensure the app '
-            'is running. If the app is not running, try selecting "Product > Run" '
-            'to fix the problem.',
-          );
-        }
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
         if (isWirelesslyConnected) {
@@ -625,6 +655,13 @@ class IOSDevice extends Device {
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
           await dispose();
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'ios-physical-deployment',
+              parameter: deploymentMethod.name,
+              result: 'wireless debugging failed',
+            ),
+          );
           return LaunchResult.failed();
         }
 
@@ -632,7 +669,7 @@ class IOSDevice extends Device {
         // change the status message to prompt users to click Allow. Wait 5 seconds because it
         // should only show this message if they have not already approved the permissions.
         // MDnsVmServiceDiscovery usually takes less than 5 seconds to find it.
-        final Timer mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
+        final mDNSLookupTimer = Timer(const Duration(seconds: 5), () {
           startAppStatus.stop();
           startAppStatus = _logger.startProgress(
             'Waiting for approval of local network permissions...',
@@ -681,13 +718,36 @@ class IOSDevice extends Device {
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
         await dispose();
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'debugging failed',
+          ),
+        );
         return LaunchResult.failed();
       }
+      _analytics.send(
+        Event.appleUsageEvent(
+          workflow: 'ios-physical-deployment',
+          parameter: deploymentMethod.name,
+          result: 'debugging success',
+        ),
+      );
       return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
       await dispose();
+      if (deploymentMethod != null) {
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: deploymentMethod.name,
+            result: 'process exception',
+          ),
+        );
+      }
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
@@ -724,7 +784,7 @@ class IOSDevice extends Device {
     IOSApp? package,
   }) async {
     Timer? maxWaitForCI;
-    final Completer<Uri?> cancelCompleter = Completer<Uri?>();
+    final cancelCompleter = Completer<Uri?>();
 
     // When testing in CI, wait a max of 10 minutes for the Dart VM to be found.
     // Afterwards, stop the app from running and upload DerivedData Logs to debug
@@ -768,18 +828,22 @@ class IOSDevice extends Device {
       debuggingOptions: debuggingOptions,
     );
 
+    final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
+
+    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
+      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
-    final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
+    final discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
-      if (vmServiceDiscovery != null && !isWirelesslyConnected) vmServiceDiscovery.uri,
+      if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
     Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
@@ -870,17 +934,25 @@ class IOSDevice extends Device {
     );
   }
 
+  /// Uses either `devicectl` or Xcode automation to install, launch, and debug
+  /// apps on physical iOS devices.
+  ///
   /// Starting with Xcode 15 and iOS 17, `ios-deploy` stopped working due to
   /// the new CoreDevice connectivity stack. Previously, `ios-deploy` was used
   /// to install the app, launch the app, and start `debugserver`.
+  ///
   /// Xcode 15 introduced a new command line tool called `devicectl` that
   /// includes much of the functionality supplied by `ios-deploy`. However,
-  /// `devicectl` lacks the ability to start a `debugserver` and therefore `ptrace`, which are needed
-  /// for debug mode due to using a JIT Dart VM.
+  /// `devicectl` lacked the ability to start a `debugserver` and therefore `ptrace`,
+  /// which are needed for debug mode due to using a JIT Dart VM.
+  ///
+  /// Xcode 16 introduced a command to lldb that allows you to start a debugserver, which
+  /// can be used in unison with `devicectl`.
   ///
   /// Therefore, when starting an app on a CoreDevice, use `devicectl` when
-  /// debugging is not enabled. Otherwise, use Xcode automation.
-  Future<bool> _startAppOnCoreDevice({
+  /// debugging is not enabled. If using Xcode 16, use `devicectl` and `lldb`.
+  /// Otherwise use Xcode automation.
+  Future<(bool, IOSDeploymentMethod)> _startAppOnCoreDevice({
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
     required List<String> launchArguments,
@@ -897,98 +969,140 @@ class IOSDevice extends Device {
         bundlePath: package.deviceBundlePath,
       );
       if (!installSuccess) {
-        return installSuccess;
+        return (installSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
       }
 
       // Launch app to device
-      final bool launchSuccess = await _coreDeviceControl.launchApp(
+      final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
         deviceId: id,
         bundleId: package.id,
         launchArguments: launchArguments,
       );
+      final bool launchSuccess = launchResult != null && launchResult.outcome == 'success';
 
-      return launchSuccess;
-    } else {
-      _logger.printStatus(
-        'You may be prompted to give access to control Xcode. Flutter uses Xcode '
-        'to run your app. If access is not allowed, you can change this through '
-        'your Settings > Privacy & Security > Automation.',
-      );
-      final int launchTimeout = isWirelesslyConnected ? 45 : 30;
-      final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
-        _logger.printError(
-          'Xcode is taking longer than expected to start debugging the app. '
-          'Ensure the project is opened in Xcode.',
-        );
-      });
+      return (launchSuccess, IOSDeploymentMethod.coreDeviceWithoutDebugger);
+    }
 
-      XcodeDebugProject debugProject;
-      final FlutterProject flutterProject = FlutterProject.current();
+    IOSDeploymentMethod? deploymentMethod;
 
-      if (package is PrebuiltIOSApp) {
-        debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
-          package.deviceBundlePath,
-          templateRenderer: globals.templateRenderer,
-          verboseLogging: _logger.isVerbose,
-        );
-      } else if (package is BuildableIOSApp) {
-        // Before installing/launching/debugging with Xcode, update the build
-        // settings to use a custom configuration build directory so Xcode
-        // knows where to find the app bundle to launch.
-        final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
-        await updateGeneratedXcodeProperties(
-          project: flutterProject,
-          buildInfo: debuggingOptions.buildInfo,
-          targetOverride: mainPath,
-          configurationBuildDir: bundle.parent.absolute.path,
-        );
-
-        final IosProject project = package.project;
-        final XcodeProjectInfo? projectInfo = await project.projectInfo();
-        if (projectInfo == null) {
-          globals.printError('Xcode project not found.');
-          return false;
-        }
-        if (project.xcodeWorkspace == null) {
-          globals.printError('Unable to get Xcode workspace.');
-          return false;
-        }
-        final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
-        if (scheme == null) {
-          projectInfo.reportFlavorNotFoundAndExit();
-        }
-
-        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
-
-        debugProject = XcodeDebugProject(
-          scheme: scheme,
-          xcodeProject: project.xcodeProject,
-          xcodeWorkspace: project.xcodeWorkspace!,
-          hostAppProjectName: project.hostAppProjectName,
-          expectedConfigurationBuildDir: bundle.parent.absolute.path,
-          verboseLogging: _logger.isVerbose,
-        );
-      } else {
-        // This should not happen. Currently, only PrebuiltIOSApp and
-        // BuildableIOSApp extend from IOSApp.
-        _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
-        return false;
-      }
-
-      final bool debugSuccess = await _xcodeDebug.debugApp(
-        project: debugProject,
+    // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
+    // However, it doesn't work reliably until Xcode 26.
+    // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+      final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
         deviceId: id,
+        bundlePath: package.deviceBundlePath,
+        bundleId: package.id,
         launchArguments: launchArguments,
       );
-      timer.cancel();
 
-      // Kill Xcode on shutdown when running from CI
-      if (debuggingOptions.usingCISystem) {
-        shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+      // If it succeeds to launch with LLDB, return, otherwise continue on to
+      // try launching with Xcode.
+      if (launchSuccess) {
+        return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
+      } else {
+        deploymentMethod = IOSDeploymentMethod.coreDeviceWithXcodeFallback;
+        _analytics.send(
+          Event.appleUsageEvent(
+            workflow: 'ios-physical-deployment',
+            parameter: IOSDeploymentMethod.coreDeviceWithLLDB.name,
+            result: 'launch failed',
+          ),
+        );
+      }
+    }
+
+    deploymentMethod ??= IOSDeploymentMethod.coreDeviceWithXcode;
+
+    // If LLDB is not available or fails, fallback to using Xcode.
+    _logger.printStatus(
+      'You may be prompted to give access to control Xcode. Flutter uses Xcode '
+      'to run your app. If access is not allowed, you can change this through '
+      'your Settings > Privacy & Security > Automation.',
+    );
+    final launchTimeout = isWirelesslyConnected ? 45 : 30;
+    final timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
+      _logger.printError(
+        'Xcode is taking longer than expected to start debugging the app. '
+        'If the issue persists, try closing Xcode and re-running your Flutter command.',
+      );
+    });
+
+    XcodeDebugProject debugProject;
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    if (package is PrebuiltIOSApp) {
+      debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
+        package.deviceBundlePath,
+        templateRenderer: globals.templateRenderer,
+        verboseLogging: _logger.isVerbose,
+      );
+    } else if (package is BuildableIOSApp) {
+      // Before installing/launching/debugging with Xcode, update the build
+      // settings to use a custom configuration build directory so Xcode
+      // knows where to find the app bundle to launch.
+      final Directory bundle = _fileSystem.directory(package.deviceBundlePath);
+      await updateGeneratedXcodeProperties(
+        project: flutterProject,
+        buildInfo: debuggingOptions.buildInfo,
+        targetOverride: mainPath,
+        configurationBuildDir: bundle.parent.absolute.path,
+      );
+
+      final IosProject project = package.project;
+      final XcodeProjectInfo? projectInfo = await project.projectInfo();
+      if (projectInfo == null) {
+        globals.printError('Xcode project not found.');
+        return (false, deploymentMethod);
+      }
+      if (project.xcodeWorkspace == null) {
+        globals.printError('Unable to get Xcode workspace.');
+        return (false, deploymentMethod);
+      }
+      final String? scheme = projectInfo.schemeFor(debuggingOptions.buildInfo);
+      if (scheme == null) {
+        projectInfo.reportFlavorNotFoundAndExit();
       }
 
-      return debugSuccess;
+      _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
+
+      debugProject = XcodeDebugProject(
+        scheme: scheme,
+        xcodeProject: project.xcodeProject,
+        xcodeWorkspace: project.xcodeWorkspace!,
+        hostAppProjectName: project.hostAppProjectName,
+        expectedConfigurationBuildDir: bundle.parent.absolute.path,
+        verboseLogging: _logger.isVerbose,
+      );
+    } else {
+      // This should not happen. Currently, only PrebuiltIOSApp and
+      // BuildableIOSApp extend from IOSApp.
+      _logger.printError('IOSApp type ${package.runtimeType} is not recognized.');
+      return (false, deploymentMethod);
     }
+
+    // Core Devices (iOS 17 devices) are debugged through Xcode so don't
+    // include these flags, which are used to check if the app was launched
+    // via Flutter CLI and `ios-deploy`.
+    final List<String> filteredLaunchArguments = launchArguments
+        .where((String arg) => arg != '--enable-checked-mode' && arg != '--verify-entry-points')
+        .toList();
+
+    final bool debugSuccess = await _xcodeDebug.debugApp(
+      project: debugProject,
+      deviceId: id,
+      launchArguments: filteredLaunchArguments,
+    );
+    timer.cancel();
+
+    // Kill Xcode on shutdown when running from CI
+    if (debuggingOptions.usingCISystem) {
+      shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+    }
+
+    return (debugSuccess, deploymentMethod);
   }
 
   @override
@@ -1001,7 +1115,7 @@ class IOSDevice extends Device {
     if (_xcodeDebug.debugStarted) {
       return _xcodeDebug.exit();
     }
-    return false;
+    return _coreDeviceLauncher.stopApp(deviceId: id);
   }
 
   @override
@@ -1034,13 +1148,12 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder =>
-      _portForwarder ??= IOSDevicePortForwarder(
-        logger: _logger,
-        iproxy: _iproxy,
-        id: id,
-        operatingSystemUtils: globals.os,
-      );
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
+    logger: _logger,
+    iproxy: _iproxy,
+    id: id,
+    operatingSystemUtils: globals.os,
+  );
 
   @visibleForTesting
   set portForwarder(DevicePortForwarder forwarder) {
@@ -1062,15 +1175,14 @@ class IOSDevice extends Device {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
-    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach =
-        MdnsVMServiceDiscoveryForAttach(
-          device: this,
-          appId: appId,
-          deviceVmservicePort: filterDevicePort,
-          hostVmservicePort: expectedHostPort,
-          usesIpv6: ipv6,
-          useDeviceIPAsHost: isWirelesslyConnected,
-        );
+    final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
 
     if (compatibleWithProtocolDiscovery) {
       return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -1133,13 +1245,13 @@ class IOSDevice extends Device {
 /// See: [vis(3) manpage](https://www.freebsd.org/cgi/man.cgi?query=vis&sektion=3)
 String decodeSyslog(String line) {
   // UTF-8 values for \, M, -, ^.
-  const int kBackslash = 0x5c;
-  const int kM = 0x4d;
-  const int kDash = 0x2d;
-  const int kCaret = 0x5e;
+  const kBackslash = 0x5c;
+  const kM = 0x4d;
+  const kDash = 0x2d;
+  const kCaret = 0x5e;
 
   // Mask for the UTF-8 digit range.
-  const int kNum = 0x30;
+  const kNum = 0x30;
 
   // Returns true when `byte` is within the UTF-8 7-bit digit range (0x30 to 0x39).
   bool isDigit(int byte) => (byte & 0xf0) == kNum;
@@ -1149,8 +1261,8 @@ String decodeSyslog(String line) {
 
   try {
     final List<int> bytes = utf8.encode(line);
-    final List<int> out = <int>[];
-    for (int i = 0; i < bytes.length;) {
+    final out = <int>[];
+    for (var i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);
@@ -1253,17 +1365,17 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Similar to above, but allows ~arbitrary components instead of "Runner"
   // and "Flutter". The regex tries to strike a balance between not producing
   // false positives and not producing false negatives.
-  final RegExp _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
+  final _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
 
   // Logging from native code/Flutter engine is prefixed by timestamp and process metadata:
   // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] Did finish launching.
   // 2020-09-15 19:15:10.931434-0700 Runner[541:226276] [Category] Did finish launching.
   //
   // Logging from the dart code has no prefixing metadata.
-  final RegExp _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
+  final _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
   @visibleForTesting
-  late final StreamController<String> linesController = StreamController<String>.broadcast(
+  late final linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
@@ -1282,10 +1394,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
   }
 
   /// Used to track messages prefixed with "flutter:" from the fallback log source.
-  final List<String> _fallbackStreamFlutterMessages = <String>[];
+  final _fallbackStreamFlutterMessages = <String>[];
 
   /// Used to track if a message prefixed with "flutter:" has been received from the primary log.
-  bool primarySourceFlutterLogReceived = false;
+  var primarySourceFlutterLogReceived = false;
 
   /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
   /// and Unified Logging (Dart VM). When using more than one of these logging
@@ -1331,7 +1443,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return false;
   }
 
-  final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
+  final _loggingSubscriptions = <StreamSubscription<void>>[];
 
   @override
   Stream<String> get logLines => linesController.stream;
@@ -1344,7 +1456,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _connectedVmService = connectedVmService;
   }
 
-  static const int minimumUniversalLoggingSdkVersion = 13;
+  static const minimumUniversalLoggingSdkVersion = 13;
 
   /// Determine the primary and fallback source for device logs.
   ///
@@ -1455,7 +1567,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
     ]);
   }
 
-  /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
+  /// Log reader will listen to [IOSDeployDebugger.logLines] and
+  /// will detach debugger on dispose.
   IOSDeployDebugger? get debuggerStream => _iosDeployDebugger;
 
   /// Send messages from ios-deploy debugger stream to device log reader stream.
@@ -1486,8 +1599,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
   String _debuggerLineHandler(String line) =>
       _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  /// Start and listen to idevicesyslog to get device logs for iOS versions
-  /// prior to 13 or if [useBothLogDeviceReaders] is true.
+  /// Start and listen to `idevicesyslog` to get device logs for iOS versions
+  /// prior to 13 or if [useSyslogLogging] and [useIOSDeployLogging] are `true`.
   void _listenToSysLog() {
     if (!useSyslogLogging) {
       return;
@@ -1528,7 +1641,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
   void Function(String line) _newSyslogLineHandler() {
-    bool printing = false;
+    var printing = false;
 
     return (String line) {
       if (printing) {
@@ -1618,14 +1731,14 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
+  var forwardedPorts = <ForwardedPort>[];
 
   @visibleForTesting
   void addForwardedPorts(List<ForwardedPort> ports) {
     ports.forEach(forwardedPorts.add);
   }
 
-  static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
+  static const _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
@@ -1638,13 +1751,15 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
     Process? process;
 
-    bool connected = false;
+    var connected = false;
     while (!connected) {
       _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       process = await _iproxy.forward(devicePort, hostPort!, _id);
       // TODO(ianh): This is a flaky race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
-      connected =
-          !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
+      connected = !await process.stdout.isEmpty.timeout(
+        _kiProxyPortForwardTimeout,
+        onTimeout: () => false,
+      );
       if (!connected) {
         process.kill();
         if (autoselect) {
@@ -1660,7 +1775,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     assert(connected);
     assert(process != null);
 
-    final ForwardedPort forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
+    final forwardedPort = ForwardedPort.withContext(hostPort!, devicePort, process);
     _logger.printTrace('Forwarded port $forwardedPort');
     forwardedPorts.add(forwardedPort);
     return hostPort;

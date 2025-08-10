@@ -35,6 +35,7 @@
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 namespace impeller {
 
@@ -124,7 +125,7 @@ class TestIOManager final : public IOManager {
  public:
   explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
-      : gl_surface_(SkISize::Make(1, 1)),
+      : gl_surface_(DlISize(1, 1)),
         impeller_context_(std::make_shared<impeller::TestImpellerContext>()),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(
@@ -442,8 +443,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
   auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 4);
   auto image = SkImages::RasterFromBitmap(bitmap);
   ASSERT_TRUE(image != nullptr);
-  ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
-  ASSERT_EQ(nullptr, image->colorSpace());
+  EXPECT_EQ(SkISize::Make(10, 10), image->dimensions());
+  EXPECT_EQ(nullptr, image->colorSpace());
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       std::move(data), image->imageInfo(), 10 * 4);
@@ -460,8 +461,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
           descriptor.get(), SkISize::Make(100, 100), {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(decompressed.has_value());
-  ASSERT_EQ(decompressed->image_info.colorType(), kRGBA_8888_SkColorType);
-  ASSERT_EQ(decompressed->image_info.colorSpace(), nullptr);
+  EXPECT_EQ(decompressed->image_info.colorType(), kRGBA_8888_SkColorType);
+  EXPECT_EQ(decompressed->image_info.colorSpace(),
+            SkColorSpace::MakeSRGB().get());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -472,9 +474,10 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
   bitmap.allocPixels(info, 10 * 16);
   auto data = SkData::MakeWithoutCopy(bitmap.getPixels(), 10 * 10 * 16);
   auto image = SkImages::RasterFromBitmap(bitmap);
+
   ASSERT_TRUE(image != nullptr);
-  ASSERT_EQ(SkISize::Make(10, 10), image->dimensions());
-  ASSERT_EQ(nullptr, image->colorSpace());
+  EXPECT_EQ(SkISize::Make(10, 10), image->dimensions());
+  EXPECT_EQ(nullptr, image->colorSpace());
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
       std::move(data), image->imageInfo(), 10 * 16);
@@ -492,8 +495,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
           /*supports_wide_gamut=*/true, capabilities, allocator);
 
   ASSERT_TRUE(decompressed.has_value());
-  ASSERT_EQ(decompressed->image_info.colorType(), kRGBA_F16_SkColorType);
-  ASSERT_EQ(decompressed->image_info.colorSpace(), nullptr);
+  EXPECT_EQ(decompressed->image_info.colorType(), kRGBA_F16_SkColorType);
+  EXPECT_EQ(decompressed->image_info.colorSpace(),
+            SkColorSpace::MakeSRGB().get());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -1020,4 +1024,5 @@ TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
 }  // namespace testing
 }  // namespace flutter
 
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

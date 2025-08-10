@@ -45,7 +45,7 @@ abstract class DoctorValidator {
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
 
-  static const Duration _slowWarningDuration = Duration(seconds: 10);
+  static const _slowWarningDuration = Duration(seconds: 10);
 
   /// Duration before the spinner should display [slowWarning].
   Duration get slowWarningDuration => _slowWarningDuration;
@@ -54,7 +54,7 @@ abstract class DoctorValidator {
   ///
   /// Tracks time taken to execute the validation step.
   Future<ValidationResult> validate() async {
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     final ValidationResult result = await validateImpl();
     stopwatch.stop();
     result._executionTime = stopwatch.elapsed;
@@ -74,7 +74,7 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
-  List<ValidationResult> _subResults = <ValidationResult>[];
+  var _subResults = <ValidationResult>[];
 
   /// Sub-validator results.
   ///
@@ -85,17 +85,17 @@ class GroupedValidator extends DoctorValidator {
 
   @override
   String get slowWarning => _currentSlowWarning;
-  String _currentSlowWarning = 'Initializing...';
+  var _currentSlowWarning = 'Initializing...';
 
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidatorTask> tasks = <ValidatorTask>[
+    final tasks = <ValidatorTask>[
       for (final DoctorValidator validator in subValidators)
         ValidatorTask(validator, asyncGuard<ValidationResult>(() => validator.validate())),
     ];
 
-    final List<ValidationResult> results = <ValidationResult>[];
-    for (final ValidatorTask subValidator in tasks) {
+    final results = <ValidationResult>[];
+    for (final subValidator in tasks) {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
@@ -111,10 +111,10 @@ class GroupedValidator extends DoctorValidator {
     assert(results.isNotEmpty, 'Validation results should not be empty');
     _subResults = results;
     ValidationType mergedType = results[0].type;
-    final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
+    final mergedMessages = <ValidationMessage>[];
     String? statusInfo;
 
-    for (final ValidationResult result in results) {
+    for (final result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
         case ValidationType.success:
@@ -138,7 +138,7 @@ class GroupedValidator extends DoctorValidator {
 }
 
 class ValidationResult {
-  /// [ValidationResult.type] should only equal [ValidationResult.success]
+  /// [ValidationResult.type] should only equal [ValidationType.success]
   /// if no [messages] are hints or errors.
   ValidationResult(this.type, this.messages, {this.statusInfo});
 

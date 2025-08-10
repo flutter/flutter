@@ -270,10 +270,13 @@ public class PlatformPlugin {
       // LEAN BACK
       // Available starting at Android SDK 4.1 (API 16).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, tap to reveal overlays, needs onChange callback
       // When the overlays come in on tap, the app does not receive the gesture and does not know
@@ -290,10 +293,13 @@ public class PlatformPlugin {
       // IMMERSIVE
       // Available starting at Android SDK 4.4 (API 19).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, swipe from edges to reveal overlays, needs onChange callback
       // When the overlays come in on swipe, the app does not receive the gesture and does not know
@@ -311,10 +317,13 @@ public class PlatformPlugin {
       // STICKY IMMERSIVE
       // Available starting at Android SDK 4.4 (API 19).
       //
-      // If the Flutter Android app targets Android SDK 15 (API 35) or later then the Android
+      // If the Flutter Android app targets Android SDK 15 (API 35), then the Android
       // system will ignore this value unless the app also follows the opt out
       // instructions found in
       // https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
+      //
+      // If the Flutter Android app targets Android SDK 16 (API 36) or later, then the Android
+      // system will ignore this value.
       //
       // Should not show overlays, swipe from edges to reveal overlays. The app will also receive
       // the swipe gesture. The overlays cannot be dismissed, so adding callback support will
@@ -403,7 +412,13 @@ public class PlatformPlugin {
     updateSystemUiOverlays();
   }
 
-  @SuppressWarnings("deprecation")
+  /**
+   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
+   *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
+   *     Android 15 and above. Consider using the new WindowInsetsController or other Android 15+
+   *     APIs for system UI styling.
+   */
+  @Deprecated
   private void setSystemChromeSystemUIOverlayStyle(
       PlatformChannel.SystemChromeStyle systemChromeStyle) {
     Window window = activity.getWindow();

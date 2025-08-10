@@ -22,7 +22,7 @@ sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
 
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
     sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
@@ -69,16 +69,8 @@ bool DlDeferredImageGPUImpeller::isUIThreadSafe() const {
 }
 
 // |DlImage|
-SkISize DlDeferredImageGPUImpeller::dimensions() const {
-  if (!wrapper_) {
-    return SkISize::MakeEmpty();
-  }
-  return wrapper_->size();
-}
-
-// |DlImage|
 DlISize DlDeferredImageGPUImpeller::GetSize() const {
-  return wrapper_ ? ToDlISize(wrapper_->size()) : DlISize();
+  return wrapper_ ? wrapper_->size() : DlISize();
 }
 
 // |DlImage|
@@ -90,7 +82,7 @@ size_t DlDeferredImageGPUImpeller::GetApproximateByteSize() const {
                   ->GetTextureDescriptor()
                   .GetByteSizeOfBaseMipLevel();
     } else {
-      size += wrapper_->size().width() * wrapper_->size().height() * 4;
+      size += wrapper_->size().Area() * 4;
     }
   }
   return size;
@@ -99,7 +91,7 @@ size_t DlDeferredImageGPUImpeller::GetApproximateByteSize() const {
 std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
     sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
@@ -115,15 +107,15 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
-      nullptr, ToSkISize(layer_tree->frame_size()),
-      std::move(snapshot_delegate), std::move(raster_task_runner)));
+      nullptr, layer_tree->frame_size(), std::move(snapshot_delegate),
+      std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
 }
 
 DlDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
     sk_sp<DisplayList> display_list,
-    const SkISize& size,
+    const DlISize& size,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
     : size_(size),
@@ -177,7 +169,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
 
         if (layer_tree) {
           wrapper->display_list_ = layer_tree->Flatten(
-              DlRect::MakeWH(wrapper->size_.width(), wrapper->size_.height()),
+              DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
               wrapper->texture_registry_);
         }
         auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(

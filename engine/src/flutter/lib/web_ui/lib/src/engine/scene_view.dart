@@ -9,8 +9,11 @@ import 'package:ui/ui.dart' as ui;
 
 const String kCanvasContainerTag = 'flt-canvas-container';
 
-typedef RenderResult =
-    ({List<DomImageBitmap> imageBitmaps, int rasterStartMicros, int rasterEndMicros});
+typedef RenderResult = ({
+  List<DomImageBitmap> imageBitmaps,
+  int rasterStartMicros,
+  int rasterEndMicros,
+});
 
 // This is an interface that renders a `ScenePicture` as a `DomImageBitmap`.
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
@@ -53,6 +56,9 @@ class EngineSceneView {
   _SceneRender? _currentRender;
   _SceneRender? _nextRender;
 
+  // Only populated in debug mode.
+  _SceneRender? _previousRender;
+
   Future<void> renderScene(EngineScene scene, FrameTimingRecorder? recorder) {
     if (_currentRender != null) {
       // If a scene is already queued up, drop it and queue this one up instead
@@ -71,7 +77,7 @@ class EngineSceneView {
   Future<void> _kickRenderLoop() async {
     final _SceneRender current = _currentRender!;
     await _renderScene(current.scene, current.recorder);
-    current.done();
+    _renderComplete(current);
     _currentRender = _nextRender;
     _nextRender = null;
     if (_currentRender == null) {
@@ -91,6 +97,7 @@ class EngineSceneView {
     final List<LayerSlice?> slices = scene.rootLayer.slices;
     final List<ScenePicture> picturesToRender = <ScenePicture>[];
     final List<ScenePicture> originalPicturesToRender = <ScenePicture>[];
+    final List<ScenePicture> picturesToFree = <ScenePicture>[];
     for (final LayerSlice? slice in slices) {
       if (slice == null) {
         continue;
@@ -105,7 +112,9 @@ class EngineSceneView {
         picturesToRender.add(slice.picture);
       } else {
         originalPicturesToRender.add(slice.picture);
-        picturesToRender.add(pictureRenderer.clipPicture(slice.picture, clippedRect));
+        final clippedPicture = pictureRenderer.clipPicture(slice.picture, clippedRect);
+        picturesToRender.add(clippedPicture);
+        picturesToFree.add(clippedPicture);
       }
     }
     final Map<ScenePicture, DomImageBitmap> renderMap;
@@ -123,6 +132,10 @@ class EngineSceneView {
       recorder?.recordRasterFinish();
     }
     recorder?.submitTimings();
+
+    for (final p in picturesToFree) {
+      p.dispose();
+    }
 
     final List<SliceContainer?> reusableContainers = List<SliceContainer?>.from(containers);
     final List<SliceContainer> newContainers = <SliceContainer>[];
@@ -194,6 +207,20 @@ class EngineSceneView {
       }
     }
   }
+
+  void _renderComplete(_SceneRender render) {
+    render.done();
+    if (kDebugMode) {
+      _previousRender = render;
+    }
+  }
+
+  Map<String, dynamic>? dumpDebugInfo() {
+    if (kDebugMode && _previousRender != null) {
+      return _previousRender!.scene.debugJsonDescription;
+    }
+    return null;
+  }
 }
 
 sealed class SliceContainer {
@@ -205,7 +232,7 @@ sealed class SliceContainer {
 final class PictureSliceContainer extends SliceContainer {
   factory PictureSliceContainer(ui.Rect bounds) {
     final DomElement container = domDocument.createElement(kCanvasContainerTag);
-    final DomCanvasElement canvas = createDomCanvasElement(
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
       width: bounds.width.toInt(),
       height: bounds.height.toInt(),
     );
@@ -254,13 +281,13 @@ final class PictureSliceContainer extends SliceContainer {
   }
 
   void renderBitmap(DomImageBitmap bitmap) {
-    final DomCanvasRenderingContextBitmapRenderer ctx = canvas.contextBitmapRenderer;
+    final DomImageBitmapRenderingContext ctx = canvas.contextBitmapRenderer;
     ctx.transferFromImageBitmap(bitmap);
   }
 
   @override
   final DomElement container;
-  final DomCanvasElement canvas;
+  final DomHTMLCanvasElement canvas;
 }
 
 final class PlatformViewContainer extends SliceContainer {

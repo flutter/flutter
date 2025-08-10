@@ -43,6 +43,14 @@ abstract class RenderProxySliver extends RenderSliver
   }
 
   @override
+  Rect get semanticBounds {
+    if (child != null) {
+      return child!.semanticBounds;
+    }
+    return super.semanticBounds;
+  }
+
+  @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalParentData) {
       child.parentData = SliverPhysicalParentData();
@@ -470,6 +478,33 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     final SliverGeometry childLayoutGeometry = child!.geometry!;
     geometry = childLayoutGeometry.copyWith(
       crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
+    );
+  }
+}
+
+/// Add annotations to the [SemanticsNode] for this subtree.
+class RenderSliverSemanticsAnnotations extends RenderProxySliver with SemanticsAnnotationsMixin {
+  /// Creates a render object that attaches a semantic annotation.
+  ///
+  /// If the [SemanticsProperties.attributedLabel] is not null, the [textDirection] must also not be null.
+  RenderSliverSemanticsAnnotations({
+    RenderSliver? child,
+    required SemanticsProperties properties,
+    bool container = false,
+    bool explicitChildNodes = false,
+    bool excludeSemantics = false,
+    bool blockUserActions = false,
+    Locale? localeForSubtree,
+    TextDirection? textDirection,
+  }) : super(child) {
+    initSemanticsAnnotations(
+      properties: properties,
+      container: container,
+      explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
+      localeForSubtree: localeForSubtree,
+      textDirection: textDirection,
     );
   }
 }

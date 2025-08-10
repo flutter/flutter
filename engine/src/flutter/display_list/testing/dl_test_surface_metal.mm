@@ -7,7 +7,6 @@
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -48,7 +47,7 @@ std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::MakeOffscreenSurface(
     size_t width,
     size_t height,
     PixelFormat format) const {
-  auto surface = TestMetalSurface::Create(*metal_context_, SkISize::Make(width, height));
+  auto surface = TestMetalSurface::Create(*metal_context_, DlISize(width, height));
   surface->GetSurface()->getCanvas()->clear(SK_ColorTRANSPARENT);
   return std::make_shared<DlMetalSurfaceInstance>(std::move(surface));
 }
@@ -91,7 +90,9 @@ sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(const sk_sp<DisplayList
 
 void DlMetalSurfaceProvider::InitScreenShotter() const {
   if (!snapshotter_) {
-    snapshotter_.reset(new MetalScreenshotter(/*enable_wide_gamut=*/false));
+    impeller::PlaygroundSwitches switches;
+    switches.enable_wide_gamut = false;
+    snapshotter_.reset(new MetalScreenshotter(switches));
     auto typographer = impeller::TypographerContextSkia::Make();
     aiks_context_.reset(
         new impeller::AiksContext(snapshotter_->GetPlayground().GetContext(), typographer));

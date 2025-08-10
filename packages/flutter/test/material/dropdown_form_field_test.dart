@@ -44,7 +44,7 @@ Widget buildFormFrame({
             key: buttonKey,
             autovalidateMode: autovalidateMode,
             elevation: elevation,
-            value: value,
+            initialValue: value,
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
@@ -55,14 +55,13 @@ Widget buildFormFrame({
             iconEnabledColor: iconEnabledColor,
             isDense: isDense,
             isExpanded: isExpanded,
-            items:
-                items?.map<DropdownMenuItem<String>>((String item) {
-                  return DropdownMenuItem<String>(
-                    key: ValueKey<String>(item),
-                    value: item,
-                    child: Text(item, key: ValueKey<String>('${item}Text')),
-                  );
-                }).toList(),
+            items: items?.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>('${item}Text')),
+              );
+            }).toList(),
             alignment: buttonAlignment,
           ),
         ),
@@ -145,7 +144,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             hint: const Text('Hint'),
             onChanged: (int? newValue) {
               value = newValue;
@@ -185,7 +184,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             onChanged: null, // this disables the menu and shows the disabledHint.
             disabledHint: const Text('disabledHint'),
             items: const <DropdownMenuItem<int?>>[
@@ -214,7 +213,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             disabledHint: const Text('disabledHint'),
             onChanged: (_) {},
             items: null,
@@ -239,7 +238,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             disabledHint: const Text('disabledHint'),
             onChanged: (_) {},
             items: const <DropdownMenuItem<int?>>[],
@@ -262,7 +261,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             hint: const Text('hint'),
             onChanged: (_) {},
             items: const <DropdownMenuItem<int?>>[],
@@ -287,7 +286,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             disabledHint: const Text('disabledHint'),
             onChanged: (_) {},
             items: const <DropdownMenuItem<int?>>[
@@ -316,7 +315,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             hint: const Text('hint'),
             onChanged: null, // disabled
             disabledHint: const Text('disabledHint'),
@@ -345,7 +344,7 @@ void main() {
         child: Material(
           child: DropdownButtonFormField<int?>(
             decoration: const InputDecoration(labelText: 'labelText'),
-            value: value,
+            initialValue: value,
             onChanged: (int? newValue) {
               value = newValue;
             },
@@ -385,13 +384,12 @@ void main() {
           return MaterialApp(
             home: Material(
               child: DropdownButtonFormField<String>(
-                value: value,
+                initialValue: value,
                 hint: const Text('Select Value'),
                 decoration: const InputDecoration(prefixIcon: Icon(Icons.fastfood)),
-                items:
-                    menuItems.map((String value) {
-                      return DropdownMenuItem<String>(value: value, child: Text(value));
-                    }).toList(),
+                items: menuItems.map((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
                     value = newValue;
@@ -469,14 +467,16 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    final List<RenderBox> itemBoxes =
-        tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderBox> itemBoxes = tester
+        .renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two')))
+        .toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final List<double> itemBoxesHeight =
-        itemBoxes.map<double>((RenderBox box) => box.size.height).toList();
+    final List<double> itemBoxesHeight = itemBoxes
+        .map<double>((RenderBox box) => box.size.height)
+        .toList();
     final double menuItemHeight = itemBoxesHeight.reduce(math.max);
     expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
 
@@ -496,14 +496,15 @@ void main() {
     const String value = 'two';
     const double scaleFactor = 3.0;
 
-    final List<DropdownMenuItem<String>> dropdownItems =
-        menuItems.map<DropdownMenuItem<String>>((String item) {
-          return DropdownMenuItem<String>(
-            key: ValueKey<String>(item),
-            value: item,
-            child: Text(item, key: ValueKey<String>('${item}Text')),
-          );
-        }).toList();
+    final List<DropdownMenuItem<String>> dropdownItems = menuItems.map<DropdownMenuItem<String>>((
+      String item,
+    ) {
+      return DropdownMenuItem<String>(
+        key: ValueKey<String>(item),
+        value: item,
+        child: Text(item, key: ValueKey<String>('${item}Text')),
+      );
+    }).toList();
 
     await tester.pumpWidget(
       TestApp(
@@ -517,7 +518,7 @@ void main() {
                 child: Center(
                   child: DropdownButtonFormField<String>(
                     key: buttonKey,
-                    value: value,
+                    initialValue: value,
                     onChanged: onChanged,
                     items: dropdownItems,
                   ),
@@ -552,29 +553,27 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Builder(
-          builder:
-              (BuildContext context) => MediaQuery.withClampedTextScaling(
-                minScaleFactor: scaleFactor,
-                maxScaleFactor: scaleFactor,
-                child: Material(
-                  child: Center(
-                    child: DropdownButtonFormField<String>(
-                      key: buttonKey,
-                      value: value,
-                      onChanged: onChanged,
-                      style: const TextStyle(fontSize: fontSize, height: fontHeight),
-                      items:
-                          menuItems.map<DropdownMenuItem<String>>((String item) {
-                            return DropdownMenuItem<String>(
-                              key: ValueKey<String>(item),
-                              value: item,
-                              child: Text(item, key: ValueKey<String>('${item}Text')),
-                            );
-                          }).toList(),
-                    ),
-                  ),
+          builder: (BuildContext context) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: scaleFactor,
+            maxScaleFactor: scaleFactor,
+            child: Material(
+              child: Center(
+                child: DropdownButtonFormField<String>(
+                  key: buttonKey,
+                  initialValue: value,
+                  onChanged: onChanged,
+                  style: const TextStyle(fontSize: fontSize, height: fontHeight),
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
+                    );
+                  }).toList(),
                 ),
               ),
+            ),
+          ),
         ),
       ),
     );
@@ -598,16 +597,15 @@ void main() {
           child: Center(
             child: DropdownButtonFormField<String>(
               key: buttonKey,
-              value: value,
+              initialValue: value,
               onChanged: onChanged,
-              items:
-                  menuItems.map<DropdownMenuItem<String>>((String item) {
-                    return DropdownMenuItem<String>(
-                      key: ValueKey<String>(item),
-                      value: item,
-                      child: Text(item, key: ValueKey<String>('${item}Text')),
-                    );
-                  }).toList(),
+              items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  key: ValueKey<String>(item),
+                  value: item,
+                  child: Text(item, key: ValueKey<String>('${item}Text')),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -627,7 +625,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: DropdownButtonFormField<String>(
-            value: value,
+            initialValue: value,
             items: <DropdownMenuItem<String>>[
               DropdownMenuItem<String>(key: itemKey, value: 'foo', child: const Text(value)),
             ],
@@ -833,8 +831,9 @@ void main() {
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
 
-    final Finder customPaint =
-        find.ancestor(of: find.text('one').last, matching: find.byType(CustomPaint)).last;
+    final Finder customPaint = find
+        .ancestor(of: find.text('one').last, matching: find.byType(CustomPaint))
+        .last;
 
     // Verifying whether or not default elevation(i.e. 8) paints desired shadow
     verifyPaintedShadow(customPaint, 8);
@@ -852,8 +851,9 @@ void main() {
     await tester.tap(find.byKey(buttonKeyOne));
     await tester.pumpAndSettle();
 
-    final Finder customPaintOne =
-        find.ancestor(of: find.text('one').last, matching: find.byType(CustomPaint)).last;
+    final Finder customPaintOne = find
+        .ancestor(of: find.text('one').last, matching: find.byType(CustomPaint))
+        .last;
 
     verifyPaintedShadow(customPaintOne, 16);
     await tester.tap(find.text('one').last);
@@ -863,8 +863,9 @@ void main() {
     await tester.tap(find.byKey(buttonKeyTwo));
     await tester.pumpAndSettle();
 
-    final Finder customPaintTwo =
-        find.ancestor(of: find.text('one').last, matching: find.byType(CustomPaint)).last;
+    final Finder customPaintTwo = find
+        .ancestor(of: find.text('one').last, matching: find.byType(CustomPaint))
+        .last;
 
     verifyPaintedShadow(customPaintTwo, 24);
     debugDisableShadows = true;
@@ -873,17 +874,18 @@ void main() {
   testWidgets('DropdownButtonFormField does not allow duplicate item values', (
     WidgetTester tester,
   ) async {
-    final List<DropdownMenuItem<String>> itemsWithDuplicateValues =
-        <String>['a', 'b', 'c', 'c'].map<DropdownMenuItem<String>>((String value) {
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'c']
+        .map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(value: value, child: Text(value));
-        }).toList();
+        })
+        .toList();
 
     await expectLater(
       () => tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DropdownButtonFormField<String>(
-              value: 'c',
+              initialValue: 'c',
               onChanged: (String? newValue) {},
               items: itemsWithDuplicateValues,
             ),
@@ -903,10 +905,11 @@ void main() {
   testWidgets('DropdownButtonFormField value should only appear in one menu item', (
     WidgetTester tester,
   ) async {
-    final List<DropdownMenuItem<String>> itemsWithDuplicateValues =
-        <String>['a', 'b', 'c', 'd'].map<DropdownMenuItem<String>>((String value) {
+    final List<DropdownMenuItem<String>> itemsWithDuplicateValues = <String>['a', 'b', 'c', 'd']
+        .map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(value: value, child: Text(value));
-        }).toList();
+        })
+        .toList();
 
     await expectLater(
       () => tester.pumpWidget(
@@ -942,7 +945,7 @@ void main() {
           return MaterialApp(
             home: Scaffold(
               body: DropdownButtonFormField<String>(
-                value: selectedItem,
+                initialValue: selectedItem,
                 onChanged: (String? string) => setState(() => selectedItem = string),
                 selectedItemBuilder: (BuildContext context) {
                   int index = 0;
@@ -951,10 +954,9 @@ void main() {
                     return Text('$string as an Arabic numeral: $index');
                   }).toList();
                 },
-                items:
-                    items.map((String string) {
-                      return DropdownMenuItem<String>(value: string, child: Text(string));
-                    }).toList(),
+                items: items.map((String string) {
+                  return DropdownMenuItem<String>(value: string, child: Text(string));
+                }).toList(),
               ),
             ),
           );
@@ -1015,7 +1017,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownButtonFormField should re-render if value param changes', (
+  testWidgets('DropdownButtonFormField should re-render if initialValue parameter changes', (
     WidgetTester tester,
   ) async {
     String currentValue = 'two';
@@ -1026,20 +1028,19 @@ void main() {
           return MaterialApp(
             home: Material(
               child: DropdownButtonFormField<String>(
-                value: currentValue,
+                initialValue: currentValue,
                 onChanged: onChanged,
-                items:
-                    menuItems.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                        onTap: () {
-                          setState(() {
-                            currentValue = value;
-                          });
-                        },
-                      );
-                    }).toList(),
+                items: menuItems.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                    onTap: () {
+                      setState(() {
+                        currentValue = value;
+                      });
+                    },
+                  );
+                }).toList(),
               ),
             ),
           );
@@ -1073,10 +1074,9 @@ void main() {
           child: Center(
             child: DropdownButtonFormField<String>(
               autovalidateMode: AutovalidateMode.always,
-              items:
-                  menuItems.map((String value) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              items: menuItems.map((String value) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
               onChanged: onChanged,
               validator: (String? value) {
                 validateCalled++;
@@ -1127,13 +1127,12 @@ void main() {
             key: formKey,
             child: DropdownButtonFormField<String>(
               key: stateKey,
-              value: 'One',
-              items:
-                  <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-                    String value,
-                  ) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              initialValue: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
+                String value,
+              ) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
               onChanged: (String? newValue) {
                 value = newValue;
               },
@@ -1175,13 +1174,12 @@ void main() {
             key: formKey,
             child: DropdownButtonFormField<String>(
               key: stateKey,
-              value: 'One',
-              items:
-                  <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-                    String value,
-                  ) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              initialValue: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
+                String value,
+              ) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
               onChanged: null,
             ),
           ),
@@ -1205,10 +1203,9 @@ void main() {
           child: Form(
             key: formKey,
             child: DropdownButtonFormField<String>(
-              items:
-                  menuItems.map((String value) {
-                    return DropdownMenuItem<String>(value: value, child: Text(value));
-                  }).toList(),
+              items: menuItems.map((String value) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
               onChanged: onChanged,
               validator: (String? v) => 'Required',
               onTap: () {
@@ -1236,10 +1233,9 @@ void main() {
       MaterialApp(
         home: Material(
           child: DropdownButtonFormField<String>(
-            items:
-                menuItems.map((String value) {
-                  return DropdownMenuItem<String>(value: value, child: Text(value));
-                }).toList(),
+            items: menuItems.map((String value) {
+              return DropdownMenuItem<String>(value: value, child: Text(value));
+            }).toList(),
             onChanged: onChanged,
             autovalidateMode: AutovalidateMode.always,
             validator: (String? v) => 'Required',
@@ -1265,11 +1261,10 @@ void main() {
             alignedDropdown: alignedDropdown,
             child: Material(
               child: DropdownButtonFormField<String>(
-                value: menuItems.first,
-                items:
-                    menuItems.map((String value) {
-                      return DropdownMenuItem<String>(value: value, child: Text(value));
-                    }).toList(),
+                initialValue: menuItems.first,
+                items: menuItems.map((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
                 onChanged: onChanged,
               ),
             ),
@@ -1293,5 +1288,175 @@ void main() {
     // When alignedDropdown is true, the content should be at the same position.
     await tester.pumpWidget(buildFrame(alignedDropdown: true, textDirection: TextDirection.rtl));
     expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
+  });
+
+  testWidgets('isValid returns false when forceErrorText is set and changes error display', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String forceErrorText = 'Forcing error.';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: ListView(
+                    children: <Widget>[
+                      DropdownButtonFormField<String>(
+                        key: fieldKey1,
+                        items: menuItems.map((String value) {
+                          return DropdownMenuItem<String>(value: value, child: Text(value));
+                        }).toList(),
+                        onChanged: null,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      DropdownButtonFormField<String>(
+                        key: fieldKey2,
+                        items: menuItems.map((String value) {
+                          return DropdownMenuItem<String>(value: value, child: Text(value));
+                        }).toList(),
+                        forceErrorText: forceErrorText,
+                        onChanged: onChanged,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(fieldKey1.currentState!.isValid, isTrue);
+    expect(fieldKey1.currentState!.hasError, isFalse);
+    expect(fieldKey2.currentState!.isValid, isFalse);
+    expect(fieldKey2.currentState!.hasError, isTrue);
+  });
+
+  testWidgets('forceErrorText overrides InputDecoration.error when both are provided', (
+    WidgetTester tester,
+  ) async {
+    const String forceErrorText = 'Forcing error';
+    const String decorationErrorText = 'Decoration';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: DropdownButtonFormField<String>(
+                    items: menuItems.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    }).toList(),
+                    decoration: const InputDecoration(errorText: decorationErrorText),
+                    forceErrorText: forceErrorText,
+                    onChanged: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(decorationErrorText), findsNothing);
+  });
+
+  testWidgets('dropdown closes when barrier is tapped by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButtonFormField<String>(
+            initialValue: 'first',
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should be closed, i.e., there should be no widget with 'second' text.
+    expect(find.text('second'), findsNothing);
+  });
+
+  testWidgets('dropdown does not close when barrier dismissible set to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownButtonFormField<String>(
+            initialValue: 'first',
+            barrierDismissible: false,
+            items: const <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(enabled: false, child: Text('disabled')),
+              DropdownMenuItem<String>(value: 'first', child: Text('first')),
+              DropdownMenuItem<String>(value: 'second', child: Text('second')),
+            ],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Open dropdown.
+    await tester.tap(find.text('first').hitTestable());
+    await tester.pumpAndSettle();
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(400, 400));
+    await tester.pumpAndSettle();
+
+    // The dropdown should still be open, i.e., there should be one widget with 'second' text.
+    expect(find.text('second'), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157074.
+  testWidgets('DropdownButtonFormField icon is aligned with label text', (
+    WidgetTester tester,
+  ) async {
+    const String labelText = 'Label Text';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: labelText),
+              items: <String>['One', 'Two'].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(value: value, child: Text(value));
+              }).toList(),
+              onChanged: (String? value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.text(labelText)).dy, tester.getCenter(find.byType(Icon).last).dy);
   });
 }

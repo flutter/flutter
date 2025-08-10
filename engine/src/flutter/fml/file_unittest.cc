@@ -36,7 +36,7 @@ static std::string ReadStringFromFile(const fml::UniqueFD& fd) {
   fml::FileMapping mapping(fd);
 
   if (mapping.GetMapping() == nullptr) {
-    return nullptr;
+    return {};
   }
 
   return {reinterpret_cast<const char*>(mapping.GetMapping()),

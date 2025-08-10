@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
 #include <memory>
+#include <utility>
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
@@ -12,6 +13,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -405,9 +407,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       return;
     }
 
-    resource_.Swap(ImageResource(ImageVMA{allocator, allocation, image},
-                                 std::move(image_view),
-                                 std::move(rt_image_view)));
+    resource_.Swap(ImageResource(
+        ImageVMA{allocator, allocation, image}, std::move(image_view),
+        std::move(rt_image_view), context.GetResourceAllocator(),
+        context.GetDeviceHolder()));
     is_valid_ = true;
   }
 
@@ -429,6 +432,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
  private:
   struct ImageResource {
+    std::shared_ptr<DeviceHolderVK> device_holder;
+    std::shared_ptr<Allocator> allocator;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
     vk::UniqueImageView rt_image_view;
@@ -437,8 +442,12 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
-                  vk::UniqueImageView p_rt_image_view)
-        : image(p_image),
+                  vk::UniqueImageView p_rt_image_view,
+                  std::shared_ptr<Allocator> allocator,
+                  std::shared_ptr<DeviceHolderVK> device_holder)
+        : device_holder(std::move(device_holder)),
+          allocator(std::move(allocator)),
+          image(p_image),
           image_view(std::move(p_image_view)),
           rt_image_view(std::move(p_rt_image_view)) {}
 
@@ -459,7 +468,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
 // |Allocator|
 std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
-    const TextureDescriptor& desc) {
+    const TextureDescriptor& desc,
+    bool threadsafe) {
   if (!IsValid()) {
     return nullptr;
   }

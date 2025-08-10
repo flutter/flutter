@@ -90,7 +90,8 @@ AndroidShellHolder::AndroidShellHolder(
   auto thread_label = std::to_string(thread_host_count++);
 
   auto mask = ThreadHost::Type::kRaster | ThreadHost::Type::kIo;
-  if (!settings.merged_platform_ui_thread) {
+  if (settings.merged_platform_ui_thread !=
+      Settings::MergedPlatformUIThread::kEnabled) {
     mask |= ThreadHost::Type::kUi;
   }
 
@@ -139,7 +140,8 @@ AndroidShellHolder::AndroidShellHolder(
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
   raster_runner = thread_host_->raster_thread->GetTaskRunner();
-  if (settings.merged_platform_ui_thread) {
+  if (settings.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kEnabled) {
     ui_runner = platform_runner;
   } else {
     ui_runner = thread_host_->ui_thread->GetTaskRunner();
@@ -306,8 +308,7 @@ Rasterizer::Screenshot AndroidShellHolder::Screenshot(
     Rasterizer::ScreenshotType type,
     bool base64_encode) {
   if (!IsValid()) {
-    return {nullptr, SkISize::MakeEmpty(), "",
-            Rasterizer::ScreenshotFormat::kUnknown};
+    return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
   }
   return shell_->Screenshot(type, base64_encode);
 }

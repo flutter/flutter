@@ -22,6 +22,37 @@ void main() {
     );
   });
 
+  test('nodesNeedingLayout updated with layout changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
+    renderObject.attach(owner);
+    expect(owner.needLayout, isEmpty);
+
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    renderObject.markNeedsLayout();
+    expect(owner.needLayout, contains(renderObject));
+
+    owner.flushLayout();
+    expect(owner.needLayout, isEmpty);
+  });
+
+  test('nodesNeedingPaint updated with paint changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true)
+      ..isRepaintBoundary = true;
+    final OffsetLayer layer = OffsetLayer();
+    layer.attach(owner);
+    renderObject.attach(owner);
+    expect(owner.needPaint, isEmpty);
+
+    renderObject.markNeedsPaint();
+    renderObject.scheduleInitialPaint(layer);
+    expect(owner.needPaint, contains(renderObject));
+
+    owner.flushPaint();
+    expect(owner.needPaint, isEmpty);
+  });
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
@@ -143,10 +174,9 @@ void main() {
   test('ContainerParentDataMixin requires nulled out pointers to siblings before detach', () {
     expect(() => TestParentData().detach(), isNot(throwsAssertionError));
 
-    final TestParentData data1 =
-        TestParentData()
-          ..nextSibling = RenderOpacity()
-          ..previousSibling = RenderOpacity();
+    final TestParentData data1 = TestParentData()
+      ..nextSibling = RenderOpacity()
+      ..previousSibling = RenderOpacity();
     expect(() => data1.detach(), throwsAssertionError);
 
     final TestParentData data2 = TestParentData()..previousSibling = RenderOpacity();
@@ -502,6 +532,11 @@ void main() {
       ),
     );
   });
+
+  test('PictureRecorder getter', () {
+    final PaintingContext context = PaintingContext(ContainerLayer(), Rect.zero);
+    expect(context.recorder.isRecording, isTrue);
+  });
 }
 
 class TestObservingRenderObject extends RenderBox {
@@ -685,4 +720,11 @@ class TestThrowingRenderObject extends RenderObject {
     assert(false); // The test shouldn't call this.
     return Rect.zero;
   }
+}
+
+final class _TestPipelineOwner extends PipelineOwner {
+  // Make these protected fields visible for testing.
+  Iterable<RenderObject> get needLayout => super.nodesNeedingLayout;
+
+  Iterable<RenderObject> get needPaint => super.nodesNeedingPaint;
 }

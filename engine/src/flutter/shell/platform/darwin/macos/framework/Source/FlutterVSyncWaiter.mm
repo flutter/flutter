@@ -1,10 +1,15 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-
-#include "flutter/fml/logging.h"
 
 #include <optional>
 #include <vector>
+
+#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
 
 #if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
 #define VSYNC_TRACING_ENABLED 1
@@ -37,7 +42,6 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   std::optional<std::uintptr_t> _pendingBaton;
   FlutterDisplayLink* _displayLink;
   void (^_block)(CFTimeInterval, CFTimeInterval, uintptr_t);
-  NSRunLoop* _runLoop;
   CFTimeInterval _lastTargetTimestamp;
   BOOL _warmUpFrame;
 }
@@ -59,77 +63,54 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   return self;
 }
 
-// Called on same thread as the vsync request (UI thread).
-- (void)processDisplayLink:(CFTimeInterval)timestamp
-           targetTimestamp:(CFTimeInterval)targetTimestamp {
-  FML_DCHECK([NSRunLoop currentRunLoop] == _runLoop);
-
-  _lastTargetTimestamp = targetTimestamp;
-
-  // CVDisplayLink callback is called one and a half frame before the target
-  // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
-  // it may also trigger frame start before events are processed.
-  CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
-  CFTimeInterval current = CACurrentMediaTime();
-  CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
-
-  TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
-
-  NSTimer* timer = [NSTimer
-      timerWithTimeInterval:remaining
-                    repeats:NO
-                      block:^(NSTimer* _Nonnull timer) {
-                        if (!_pendingBaton.has_value()) {
-                          TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-                          _displayLink.paused = YES;
-                          return;
-                        }
-                        TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-                        _block(minStart, targetTimestamp, *_pendingBaton);
-                        _pendingBaton = std::nullopt;
-                      }];
-  [_runLoop addTimer:timer forMode:NSRunLoopCommonModes];
-}
-
 // Called from display link thread.
 - (void)onDisplayLink:(CFTimeInterval)timestamp targetTimestamp:(CFTimeInterval)targetTimestamp {
-  @synchronized(self) {
-    if (_runLoop == nil) {
-      // Initial vsync - timestamp will be used to determine vsync phase.
-      _lastTargetTimestamp = targetTimestamp;
-      _displayLink.paused = YES;
-    } else {
-      [_runLoop performBlock:^{
-        [self processDisplayLink:timestamp targetTimestamp:targetTimestamp];
-      }];
-    }
+  if (_lastTargetTimestamp == 0) {
+    // Initial vsync - timestamp will be used to determine vsync phase.
+    _lastTargetTimestamp = targetTimestamp;
+    _displayLink.paused = YES;
+  } else {
+    _lastTargetTimestamp = targetTimestamp;
+
+    // CVDisplayLink callback is called one and a half frame before the target
+    // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
+    // it may also trigger frame start before events are processed.
+    CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
+    CFTimeInterval current = CACurrentMediaTime();
+    CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
+
+    TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
+
+    [FlutterRunLoop.mainRunLoop
+        performAfterDelay:remaining
+                    block:^{
+                      if (!_pendingBaton.has_value()) {
+                        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+                        _displayLink.paused = YES;
+                        return;
+                      }
+                      TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
+                      _block(minStart, targetTimestamp, *_pendingBaton);
+                      _pendingBaton = std::nullopt;
+                    }];
   }
 }
 
 // Called from UI thread.
 - (void)waitForVSync:(uintptr_t)baton {
+  FML_DCHECK([NSThread isMainThread]);
   // CVDisplayLink start -> callback latency is two frames, there is
   // no need to delay the warm-up frame.
   if (_warmUpFrame) {
     _warmUpFrame = NO;
     TRACE_VSYNC("WarmUpFrame", baton);
-    [[NSRunLoop currentRunLoop] performBlock:^{
-      CFTimeInterval now = CACurrentMediaTime();
-      _block(now, now, baton);
-    }];
+    CFTimeInterval now = CACurrentMediaTime();
+    _block(now, now, baton);
     return;
   }
 
-  // RunLoop is accessed both from main thread and from the display link thread.
-  @synchronized(self) {
-    if (_runLoop == nil) {
-      _runLoop = [NSRunLoop currentRunLoop];
-    }
-  }
-
-  FML_DCHECK(_runLoop == [NSRunLoop currentRunLoop]);
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Engine requested vsync while another was pending";
+    [FlutterLogger logWarning:@"Engine requested vsync while another was pending"];
     _block(0, 0, *_pendingBaton);
     _pendingBaton = std::nullopt;
   }
@@ -137,7 +118,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   TRACE_VSYNC("VSyncRequest", _pendingBaton.value_or(0));
 
   CFTimeInterval tick_interval = _displayLink.nominalOutputRefreshPeriod;
-  if (_displayLink.paused || tick_interval == 0) {
+  if (_displayLink.paused || tick_interval == 0 || _lastTargetTimestamp == 0) {
     // When starting display link the first notification will come in the middle
     // of next frame, which would incur a whole frame period of latency.
     // To avoid that, first vsync notification will be fired using a timer
@@ -161,26 +142,34 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
       delay = std::max(start - now - kTimerLatencyCompensation, 0.0);
     }
 
-    NSTimer* timer = [NSTimer timerWithTimeInterval:delay
-                                            repeats:NO
-                                              block:^(NSTimer* timer) {
-                                                CFTimeInterval targetTimestamp =
-                                                    start + tick_interval;
-                                                TRACE_VSYNC("SynthesizedInitialVSync", baton);
-                                                _block(start, targetTimestamp, baton);
-                                              }];
-    [_runLoop addTimer:timer forMode:NSRunLoopCommonModes];
+    [FlutterRunLoop.mainRunLoop performAfterDelay:delay
+                                            block:^{
+                                              CFTimeInterval targetTime = start + tick_interval;
+                                              TRACE_VSYNC("SynthesizedInitialVSync", baton);
+                                              _block(start, targetTime, baton);
+                                            }];
     _displayLink.paused = NO;
   } else {
     _pendingBaton = baton;
   }
 }
 
-- (void)dealloc {
+- (void)invalidate {
+  // It is possible that there is pending vsync request while the view for which
+  // this waiter belongs is being destroyed. In that case trigger the vsync
+  // immediately to avoid deadlock.
   if (_pendingBaton.has_value()) {
-    FML_LOG(WARNING) << "Deallocating FlutterVSyncWaiter with a pending vsync";
+    CFTimeInterval now = CACurrentMediaTime();
+    _block(now, now, _pendingBaton.value());
+    _pendingBaton = std::nullopt;
   }
+
   [_displayLink invalidate];
+  _displayLink = nil;
+}
+
+- (void)dealloc {
+  FML_DCHECK(_displayLink == nil);
 }
 
 @end

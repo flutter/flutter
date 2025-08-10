@@ -255,10 +255,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<AndroidDevice> allDevices =
-        (await discoverDevices())
-            .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
-            .toList();
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+        .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No Android devices detected');
@@ -501,10 +500,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   /// Picks the first connected Fuchsia device.
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<FuchsiaDevice> allDevices =
-        (await discoverDevices())
-            .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
-            .toList();
+    final List<FuchsiaDevice> allDevices = (await discoverDevices())
+        .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No Fuchsia devices detected');
@@ -930,8 +928,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<IosDevice> allDevices =
-        (await discoverDevices()).map<IosDevice>((String id) => IosDevice(deviceId: id)).toList();
+    final List<IosDevice> allDevices = (await discoverDevices())
+        .map<IosDevice>((String id) => IosDevice(deviceId: id))
+        .toList();
 
     if (allDevices.isEmpty) {
       throw const DeviceException('No iOS devices detected');
@@ -1046,8 +1045,9 @@ class IosDevice extends Device {
     final List<String> dylibsPaths = <String>[
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'openssl'),
-      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'usbmuxd'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libusbmuxd'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libplist'),
+      path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledeviceglue'),
     ];
     return dylibsPaths.join(':');
   }

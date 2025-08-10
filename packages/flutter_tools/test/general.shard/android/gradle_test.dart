@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const String kModulePubspec = '''
+const kModulePubspec = '''
 name: test
 flutter:
   module:
@@ -346,7 +346,7 @@ void main() {
     }
 
     testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -355,7 +355,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         treeShakeIcons: false,
@@ -370,7 +370,7 @@ flutter:
     });
 
     testUsingAndroidContext('extract build name from pubspec.yaml', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0
 dependencies:
@@ -378,7 +378,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         treeShakeIcons: false,
@@ -388,7 +388,7 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to override build name', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -396,7 +396,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -412,7 +412,7 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to override build number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -420,7 +420,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildNumber: '3',
@@ -436,7 +436,7 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to override build name and number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0+1
 dependencies:
@@ -444,7 +444,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -461,7 +461,7 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to override build name and set number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 version: 1.0.0
 dependencies:
@@ -469,7 +469,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -486,14 +486,14 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to set build name and number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(
+      const buildInfo = BuildInfo(
         BuildMode.release,
         null,
         buildName: '1.0.2',
@@ -510,7 +510,7 @@ flutter:
     });
 
     testUsingAndroidContext('allow build info to unset build name and number', () async {
-      const String manifest = '''
+      const manifest = '''
 name: test
 dependencies:
   flutter:
@@ -622,7 +622,9 @@ flutter:
       expect(gradle_utils.getGradleVersionFor('8.3'), '8.4');
       expect(gradle_utils.getGradleVersionFor('8.4'), '8.6');
       expect(gradle_utils.getGradleVersionFor('8.5'), '8.7');
-      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.9');
+      expect(gradle_utils.getGradleVersionFor('8.7'), '8.9');
+      expect(gradle_utils.getGradleVersionFor('8.8'), '8.10.2');
+      expect(gradle_utils.getGradleVersionFor(gradle_utils.maxKnownAgpVersion), '8.11.1');
     });
 
     testWithoutContext('throws on unsupported versions', () {

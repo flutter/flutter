@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

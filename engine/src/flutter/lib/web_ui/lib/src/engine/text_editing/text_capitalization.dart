@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import '../dom.dart';
 
 /// Controls the capitalization of the text.
@@ -35,14 +37,13 @@ class TextCapitalizationConfig {
     : textCapitalization = TextCapitalization.none;
 
   const TextCapitalizationConfig.fromInputConfiguration(String inputConfiguration)
-    : textCapitalization =
-          inputConfiguration == 'TextCapitalization.words'
-              ? TextCapitalization.words
-              : inputConfiguration == 'TextCapitalization.characters'
-              ? TextCapitalization.characters
-              : inputConfiguration == 'TextCapitalization.sentences'
-              ? TextCapitalization.sentences
-              : TextCapitalization.none;
+    : textCapitalization = inputConfiguration == 'TextCapitalization.words'
+          ? TextCapitalization.words
+          : inputConfiguration == 'TextCapitalization.characters'
+          ? TextCapitalization.characters
+          : inputConfiguration == 'TextCapitalization.sentences'
+          ? TextCapitalization.sentences
+          : TextCapitalization.none;
 
   final TextCapitalization textCapitalization;
 
@@ -68,10 +69,10 @@ class TextCapitalizationConfig {
       case TextCapitalization.none:
         autocapitalize = 'off';
     }
-    if (domInstanceOfString(domElement, 'HTMLInputElement')) {
+    if (domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.setAttribute('autocapitalize', autocapitalize);
-    } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.setAttribute('autocapitalize', autocapitalize);
     }

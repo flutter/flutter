@@ -11,12 +11,13 @@
 //
 // The code that performs the transformations lives in:
 //
-//  - https://github.com/flutter/engine/blob/main/web_sdk/sdk_rewriter.dart
+//  - https://github.com/flutter/flutter/blob/main/engine/src/flutter/web_sdk/sdk_rewriter.dart
 // ignore: unnecessary_library_directive
 library engine;
 
 export 'engine/alarm_clock.dart';
 export 'engine/app_bootstrap.dart';
+export 'engine/arena.dart';
 export 'engine/browser_detection.dart';
 export 'engine/canvaskit/canvas.dart';
 export 'engine/canvaskit/canvaskit_api.dart';
@@ -77,6 +78,7 @@ export 'engine/js_interop/js_typed_data.dart';
 export 'engine/key_map.g.dart';
 export 'engine/keyboard_binding.dart';
 export 'engine/layers.dart';
+export 'engine/lazy_path.dart';
 export 'engine/mouse/context_menu.dart';
 export 'engine/mouse/cursor.dart';
 export 'engine/mouse/prevent_default.dart';
@@ -98,7 +100,6 @@ export 'engine/pointer_converter.dart';
 export 'engine/profiler.dart';
 export 'engine/raw_keyboard.dart';
 export 'engine/renderer.dart';
-export 'engine/rrect_renderer.dart';
 export 'engine/safe_browser_api.dart';
 export 'engine/scene_builder.dart';
 export 'engine/scene_painting.dart';
@@ -109,11 +110,13 @@ export 'engine/semantics/checkable.dart';
 export 'engine/semantics/disable.dart';
 export 'engine/semantics/expandable.dart';
 export 'engine/semantics/focusable.dart';
+export 'engine/semantics/form.dart';
 export 'engine/semantics/header.dart';
 export 'engine/semantics/heading.dart';
 export 'engine/semantics/image.dart';
 export 'engine/semantics/incrementable.dart';
 export 'engine/semantics/label_and_value.dart';
+export 'engine/semantics/landmarks.dart';
 export 'engine/semantics/link.dart';
 export 'engine/semantics/list.dart';
 export 'engine/semantics/live_region.dart';
@@ -159,4 +162,10 @@ export 'engine/view_embedder/flutter_view_manager.dart';
 export 'engine/view_embedder/global_html_attributes.dart';
 export 'engine/view_embedder/hot_restart_cache_handler.dart';
 export 'engine/view_embedder/style_manager.dart';
+export 'engine/web_paragraph/code_unit_flags.dart';
+export 'engine/web_paragraph/debug.dart';
+export 'engine/web_paragraph/layout.dart';
+export 'engine/web_paragraph/paint.dart';
+export 'engine/web_paragraph/paragraph.dart';
+export 'engine/web_paragraph/wrapper.dart';
 export 'engine/window.dart';

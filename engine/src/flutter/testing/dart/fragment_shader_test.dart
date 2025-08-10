@@ -195,10 +195,6 @@ void main() async {
   });
 
   test('FragmentShader simple shader renders correctly', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('functions.frag.iplr');
     final FragmentShader shader = program.fragmentShader()..setFloat(0, 1.0);
     await _expectShaderRendersGreen(shader);
@@ -206,10 +202,6 @@ void main() async {
   });
 
   test('Reused FragmentShader simple shader renders correctly', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('functions.frag.iplr');
     final FragmentShader shader = program.fragmentShader()..setFloat(0, 1.0);
     await _expectShaderRendersGreen(shader);
@@ -221,10 +213,6 @@ void main() async {
   });
 
   test('FragmentShader blue-green image renders green', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
     final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
@@ -234,10 +222,6 @@ void main() async {
   });
 
   test('FragmentShader blue-green image renders green - GPU image', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = _createBlueGreenImageSync();
     final FragmentShader shader = program.fragmentShader()..setImageSampler(0, blueGreenImage);
@@ -247,21 +231,16 @@ void main() async {
   });
 
   test('FragmentShader with uniforms renders correctly', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
-    final FragmentShader shader =
-        program.fragmentShader()
-          ..setFloat(0, 0.0)
-          ..setFloat(1, 0.25)
-          ..setFloat(2, 0.75)
-          ..setFloat(3, 0.0)
-          ..setFloat(4, 0.0)
-          ..setFloat(5, 0.0)
-          ..setFloat(6, 1.0);
+    final FragmentShader shader = program.fragmentShader()
+      ..setFloat(0, 0.0)
+      ..setFloat(1, 0.25)
+      ..setFloat(2, 0.75)
+      ..setFloat(3, 0.0)
+      ..setFloat(4, 0.0)
+      ..setFloat(5, 0.0)
+      ..setFloat(6, 1.0);
 
     final ByteData renderedBytes = (await _imageByteDataFromShader(shader: shader))!;
 
@@ -274,10 +253,6 @@ void main() async {
   });
 
   test('FragmentShader shader with array uniforms renders correctly', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader();
@@ -305,10 +280,6 @@ void main() async {
   });
 
   test('FragmentShader Uniforms are sorted correctly', () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms_sorted.frag.iplr');
 
     // The shader will not render green if the compiler doesn't keep the
@@ -317,6 +288,24 @@ void main() async {
     for (int i = 0; i < 32; i++) {
       shader.setFloat(i, i.toDouble());
     }
+
+    await _expectShaderRendersGreen(shader);
+
+    shader.dispose();
+  });
+
+  test('FragmentShader Uniforms with interleaved textures are sorted ', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
+
+    // The shader will not render green if the compiler doesn't keep the
+    // uniforms in the right order.
+    final FragmentShader shader = program.fragmentShader();
+    shader.setFloat(0, 1);
+    shader.setFloat(1, 2);
+    shader.setFloat(2, 3);
+
+    final Image blueGreenImage = _createBlueGreenImageSync();
+    shader.setImageSampler(0, blueGreenImage);
 
     await _expectShaderRendersGreen(shader);
 
@@ -505,8 +494,10 @@ void _expectFragmentShadersRenderGreen(Map<String, FragmentProgram> programs) {
 }
 
 Future<void> _expectShaderRendersColor(Shader shader, Color color) async {
-  final ByteData renderedBytes =
-      (await _imageByteDataFromShader(shader: shader, imageDimension: _shaderImageDimension))!;
+  final ByteData renderedBytes = (await _imageByteDataFromShader(
+    shader: shader,
+    imageDimension: _shaderImageDimension,
+  ))!;
   for (final int c in renderedBytes.buffer.asUint32List()) {
     expect(toHexString(c), toHexString(color.value));
   }

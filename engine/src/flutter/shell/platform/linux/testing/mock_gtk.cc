@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <dlfcn.h>
+#include <gdk/gdkwayland.h>
 
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
@@ -47,17 +48,29 @@ guint gdk_keymap_lookup_key(GdkKeymap* keymap, const GdkKeymapKey* key) {
 }
 
 GdkDisplay* gdk_display_get_default() {
-  return GDK_DISPLAY(g_object_new(gdk_display_get_type(), nullptr));
+  return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
 }
 
 void gdk_display_beep(GdkDisplay* display) {}
+
+int gdk_window_get_width(GdkWindow* window) {
+  return 100;
+}
+
+int gdk_window_get_height(GdkWindow* window) {
+  return 100;
+}
+
+gint gdk_window_get_scale_factor(GdkWindow* window) {
+  return 1;
+}
 
 GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }
 
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
-  return GDK_DISPLAY(g_object_new(gdk_display_get_type(), nullptr));
+  return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
 }
 
 int gdk_display_get_n_monitors(GdkDisplay* display) {
@@ -123,6 +136,8 @@ void gtk_window_iconify(GtkWindow* window) {
 void gtk_window_deiconify(GtkWindow* window) {
   mock->gtk_window_deiconify(window);
 }
+
+void gtk_widget_realize(GtkWidget* widget) {}
 
 void gtk_widget_show(GtkWidget* widget) {}
 

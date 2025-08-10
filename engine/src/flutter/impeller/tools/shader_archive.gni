@@ -11,6 +11,7 @@ template("shader_archive") {
 
   output_file = "$target_gen_dir/$target_name.shar"
   compiled_action(target_name) {
+    mnemonic = "SHADER_ARCHIVE"
     tool = "//flutter/impeller/shader_archive:shader_archiver"
     inputs = invoker.shaders
     outputs = [ output_file ]

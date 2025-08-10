@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/flow/raster_cache_util.h"
 #include "flutter/fml/macros.h"
@@ -40,7 +41,7 @@ class RasterCacheResult {
                     bool preserve_rtree) const;
 
   virtual SkISize image_dimensions() const {
-    return image_ ? image_->dimensions() : SkISize::Make(0, 0);
+    return image_ ? ToSkISize(image_->GetSize()) : SkISize::Make(0, 0);
   };
 
   virtual int64_t image_bytes() const {

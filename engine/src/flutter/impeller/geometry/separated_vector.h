@@ -32,6 +32,9 @@ struct SeparatedVector2 {
   /// Returns the vector representation of the vector.
   Vector2 GetVector() const;
 
+  /// Returns just the normalized direction vector.
+  Vector2 GetDirection() const;
+
   /// Returns the scalar alignment of the two vectors.
   /// In other words, the dot product of the two normalized vectors.
   ///
@@ -44,6 +47,9 @@ struct SeparatedVector2 {
 
   /// Returns the scalar angle between the two rays.
   Radians AngleTo(const SeparatedVector2& other) const;
+
+  /// Returns the cross product of the two direction vectors.
+  Scalar Cross(const SeparatedVector2& other) const;
 };
 
 #endif  // FLUTTER_IMPELLER_GEOMETRY_SEPARATED_VECTOR_H_

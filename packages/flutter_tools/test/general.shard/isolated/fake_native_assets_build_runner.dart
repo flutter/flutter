@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
-export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
+export 'package:code_assets/code_assets.dart' show CodeAsset, DynamicLoadingBundled;
 
-/// Mocks all logic instead of using `package:native_assets_builder`, which
+/// Mocks all logic instead of using `package:hooks_runner`, which
 /// relies on doing process calls to `pub` and the local file system.
 class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunner {
   FakeFlutterNativeAssetsBuildRunner({
@@ -30,9 +31,9 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final CCompilerConfig? cCompilerConfigResult;
   final CCompilerConfig? ndkCCompilerConfigResult;
 
-  int buildInvocations = 0;
-  int linkInvocations = 0;
-  int packagesWithNativeAssetsInvocations = 0;
+  var buildInvocations = 0;
+  var linkInvocations = 0;
+  var packagesWithNativeAssetsInvocations = 0;
 
   @override
   Future<BuildResult?> build({
@@ -41,21 +42,19 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     BuildResult? result = buildResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final BuildInputBuilder input =
-          BuildInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupBuildInput()
-            ..config.setupBuild(linkingEnabled: linkingEnabled);
-      for (final ProtocolExtension extension in extensions) {
+      final input = BuildInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupBuildInput()
+        ..config.setupBuild(linkingEnabled: linkingEnabled);
+      for (final extension in extensions) {
         extension.setupBuildInput(input);
       }
-      final BuildInput buildConfig = BuildInput(input.json);
+      final buildConfig = BuildInput(input.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
@@ -71,20 +70,18 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
-      final LinkInputBuilder input =
-          LinkInputBuilder()
-            ..setupShared(
-              packageRoot: Uri.parse('$package/'),
-              packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
-              outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              outputFile: Uri.file('output.json'),
-            )
-            ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
-      for (final ProtocolExtension extension in extensions) {
+      final input = LinkInputBuilder()
+        ..setupShared(
+          packageRoot: Uri.parse('$package/'),
+          packageName: package,
+          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
+          outputFile: Uri.file('output.json'),
+        )
+        ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
+      for (final extension in extensions) {
         extension.setupLinkInput(input);
       }
-      final LinkInput buildConfig = LinkInput(input.json);
+      final buildConfig = LinkInput(input.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }

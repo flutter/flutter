@@ -66,7 +66,7 @@ static sk_sp<DlImage> CreateDeferredImage(
 #if IMPELLER_SUPPORTS_RENDERING
   if (impeller) {
     return DlDeferredImageGPUImpeller::Make(
-        std::move(display_list), SkISize::Make(width, height),
+        std::move(display_list), DlISize(width, height),
         std::move(snapshot_delegate), std::move(raster_task_runner));
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -197,6 +197,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
         // image_callback is associated with the Dart isolate and must be
         // deleted on the UI thread.
         image_callback.reset();
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       });
 
   // Kick things off on the raster rask runner.
@@ -215,7 +216,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                                   snapshot_delegate->GetGrContext());
         }
         snapshot_delegate->MakeRasterSnapshot(
-            snapshot_display_list, ToSkISize(picture_bounds),
+            snapshot_display_list, picture_bounds,
             [ui_task_runner, ui_task](const sk_sp<DlImage>& image) {
               fml::TaskRunner::RunNowOrPostTask(
                   ui_task_runner, [ui_task, image]() { ui_task(image); });
@@ -223,6 +224,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
       }));
 
   return Dart_Null();
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 }  // namespace flutter

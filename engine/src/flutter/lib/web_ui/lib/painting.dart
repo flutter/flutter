@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
+// For documentation see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/painting.dart
 part of ui;
 
 void _validateColorStops(List<Color> colors, List<double>? colorStops) {
@@ -531,35 +531,23 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
     -0.109450321455370, //
     0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631,
   ]);
-  switch (source) {
-    case ColorSpace.sRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return srgbToP3;
-      }
-    case ColorSpace.extendedSRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(_IdentityColorTransform());
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return const _ClampTransform(srgbToP3);
-      }
-    case ColorSpace.displayP3:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(p3ToSrgb);
-        case ColorSpace.extendedSRGB:
-          return p3ToSrgb;
-        case ColorSpace.displayP3:
-          return const _IdentityColorTransform();
-      }
-  }
+  return switch (source) {
+    ColorSpace.sRGB => switch (destination) {
+      ColorSpace.sRGB => const _IdentityColorTransform(),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => srgbToP3,
+    },
+    ColorSpace.extendedSRGB => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(_IdentityColorTransform()),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => const _ClampTransform(srgbToP3),
+    },
+    ColorSpace.displayP3 => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(p3ToSrgb),
+      ColorSpace.extendedSRGB => p3ToSrgb,
+      ColorSpace.displayP3 => const _IdentityColorTransform(),
+    },
+  };
 }
 
 // This needs to be kept in sync with the "_FilterQuality" enum in skwasm's canvas.cpp
@@ -642,39 +630,45 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
-  buffer._list!,
-  targetWidth: targetWidth,
-  targetHeight: targetHeight,
-  allowUpscaling: allowUpscaling,
-);
+}) {
+  try {
+    return engine.renderer.instantiateImageCodec(
+      buffer._list!,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      allowUpscaling: allowUpscaling,
+    );
+  } finally {
+    buffer.dispose();
+  }
+}
 
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
 }) async {
-  if (getTargetSize == null) {
-    return engine.renderer.instantiateImageCodec(buffer._list!);
-  } else {
-    final Codec codec = await engine.renderer.instantiateImageCodec(buffer._list!);
-    try {
-      final FrameInfo info = await codec.getNextFrame();
-      try {
-        final int width = info.image.width;
-        final int height = info.image.height;
-        final TargetImageSize targetSize = getTargetSize(width, height);
-        return engine.renderer.instantiateImageCodec(
-          buffer._list!,
-          targetWidth: targetSize.width,
-          targetHeight: targetSize.height,
-          allowUpscaling: false,
-        );
-      } finally {
-        info.image.dispose();
-      }
-    } finally {
-      codec.dispose();
+  Codec? codec;
+  FrameInfo? info;
+  try {
+    if (getTargetSize == null) {
+      return engine.renderer.instantiateImageCodec(buffer._list!);
+    } else {
+      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      info = await codec.getNextFrame();
+      final int width = info.image.width;
+      final int height = info.image.height;
+      final TargetImageSize targetSize = getTargetSize(width, height);
+      return engine.renderer.instantiateImageCodec(
+        buffer._list!,
+        targetWidth: targetSize.width,
+        targetHeight: targetSize.height,
+        allowUpscaling: false,
+      );
     }
+  } finally {
+    info?.image.dispose();
+    codec?.dispose();
+    buffer.dispose();
   }
 }
 
@@ -713,8 +707,9 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   final bool swapRedBlue = switch (format) {
     PixelFormat.bgra8888 => true,
     PixelFormat.rgba8888 => false,
-    PixelFormat.rgbaFloat32 =>
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+    PixelFormat.rgbaFloat32 => throw UnimplementedError(
+      'RGB conversion from rgbaFloat32 data is not implemented',
+    ),
   };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.

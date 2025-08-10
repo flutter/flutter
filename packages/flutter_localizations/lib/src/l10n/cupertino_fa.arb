@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "جستجو در وب",
   "shareButtonLabel": "هم‌رسانی…",
   "clearButtonLabel": "پاک کردن",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "لغو",
+  "backButtonLabel": "برگشتن"
 }

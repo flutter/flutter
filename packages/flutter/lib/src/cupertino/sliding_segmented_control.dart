@@ -52,6 +52,10 @@ const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth / 2);
 // amount of time.
 const double _kMinThumbScale = 0.95;
 
+// The peak scale factor of the thumb during the pressing animation of a
+// momentary variant.
+const double _kMaxThumbScaleForMomentary = 1.05;
+
 // The minimum horizontal distance between the edges of the separator and the
 // closest child.
 const double _kSegmentMinPadding = 10;
@@ -104,6 +108,7 @@ class _Segment<T> extends StatefulWidget {
     required this.isDragging,
     required this.enabled,
     required this.segmentLocation,
+    required this.isMomentary,
   }) : super(key: key);
 
   final Widget child;
@@ -112,13 +117,15 @@ class _Segment<T> extends StatefulWidget {
   final bool highlighted;
   final bool enabled;
   final _SegmentLocation segmentLocation;
+  final bool isMomentary;
 
   // Whether the thumb of the parent widget (CupertinoSlidingSegmentedControl)
   // is currently being dragged.
   final bool isDragging;
 
-  bool get shouldFadeoutContent => pressed && !highlighted && enabled;
-  bool get shouldScaleContent => pressed && highlighted && isDragging && enabled;
+  bool get shouldFadeoutContent => pressed && !highlighted && enabled && !isMomentary;
+  bool get shouldScaleContent => pressed && enabled && (highlighted && isDragging || isMomentary);
+  bool get shouldHighlightContent => highlighted && !isMomentary;
 
   @override
   _SegmentState<T> createState() => _SegmentState<T>();
@@ -148,12 +155,25 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
     assert(oldWidget.key == widget.key);
 
     if (oldWidget.shouldScaleContent != widget.shouldScaleContent) {
-      highlightPressScaleAnimation = highlightPressScaleController.drive(
-        Tween<double>(
-          begin: highlightPressScaleAnimation.value,
-          end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
-        ),
-      );
+      final Animatable<double> scaleAnimation = widget.isMomentary && widget.shouldScaleContent
+          ? TweenSequence<double>(<TweenSequenceItem<double>>[
+              TweenSequenceItem<double>(
+                tween: Tween<double>(
+                  begin: highlightPressScaleAnimation.value,
+                  end: _kMaxThumbScaleForMomentary,
+                ),
+                weight: 50,
+              ),
+              TweenSequenceItem<double>(
+                tween: Tween<double>(begin: _kMaxThumbScaleForMomentary, end: 1.0),
+                weight: 50,
+              ),
+            ])
+          : Tween<double>(
+              begin: highlightPressScaleAnimation.value,
+              end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
+            );
+      highlightPressScaleAnimation = highlightPressScaleController.drive(scaleAnimation);
       highlightPressScaleController.animateWith(_kThumbSpringAnimationSimulation);
     }
   }
@@ -185,7 +205,9 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
             child: AnimatedDefaultTextStyle(
               style: DefaultTextStyle.of(context).style.merge(
                 TextStyle(
-                  fontWeight: widget.highlighted ? _kHighlightedFontWeight : _kFontWeight,
+                  fontWeight: widget.shouldHighlightContent
+                      ? _kHighlightedFontWeight
+                      : _kFontWeight,
                   fontSize: _kFontSize,
                   color: widget.enabled ? null : _kDisabledContentColor,
                 ),
@@ -273,6 +295,8 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
               color: _kSeparatorColor.withOpacity(
                 _kSeparatorColor.opacity * separatorOpacityController.value,
               ),
+              // Use RRect instead of RSuperellipse here since the radius is too
+              // small to make enough visual difference.
               borderRadius: const BorderRadius.all(_kSeparatorRadius),
             ),
             child: child,
@@ -284,6 +308,8 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
 }
 
 /// An iOS 13 style segmented control.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=esnBf6V4C34}
 ///
 /// Displays the widgets provided in the [Map] of [children] in a horizontal list.
 /// It allows the user to select between a number of mutually exclusive options,
@@ -352,6 +378,7 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
     this.padding = _kHorizontalItemPadding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
     this.proportionalWidth = false,
+    this.isMomentary = false,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.contains(groupValue),
@@ -464,6 +491,23 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   ///
   /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
+
+  /// Determines whether segments provide only momentary feedback when pressed
+  /// rather than maintaining a persistent selected state.
+  ///
+  /// When true, segments behave more like buttons that trigger actions rather
+  /// than options that can be selected and remain in that state.
+  ///
+  /// Defaults to false.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSlidingSegmentedControl] with [isMomentary] set
+  /// to true, providing feedback to the user when the segment is selected with a
+  /// text scaling effect.
+  ///
+  /// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.0.dart **
+  /// {@end-tool}
+  final bool isMomentary;
 
   @override
   State<CupertinoSlidingSegmentedControl<T>> createState() => _SegmentedControlState<T>();
@@ -635,6 +679,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     if (isThumbDragging) {
       return;
     }
+
     final T segment = segmentForXPosition(details.localPosition.dx);
     onPressedChangedByGesture(null);
     if (segment != widget.groupValue && !widget.disabledChildren.contains(segment)) {
@@ -672,8 +717,9 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
       onPressedChangedByGesture(touchDownSegment);
       onHighlightChangedByGesture(touchDownSegment);
     } else {
-      final T? segment =
-          _hasDraggedTooFar(details) ? null : segmentForXPosition(details.localPosition.dx);
+      final T? segment = _hasDraggedTooFar(details)
+          ? null
+          : segmentForXPosition(details.localPosition.dx);
       onPressedChangedByGesture(segment);
     }
   }
@@ -769,6 +815,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
               isDragging: isThumbDragging,
               enabled: !widget.disabledChildren.contains(entry.key),
               segmentLocation: segmentLocation,
+              isMomentary: widget.isMomentary,
               child: entry.value,
             ),
           ),
@@ -798,8 +845,8 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         // behavior is eyeballed by the iOS 17.5 simulator.
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(_kCornerRadius),
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
         child: AnimatedBuilder(
@@ -807,7 +854,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
           builder: (BuildContext context, Widget? child) {
             return _SegmentedControlRenderWidget<T>(
               key: segmentedControlRenderWidgetKey,
-              highlightedIndex: highlightedIndex,
+              highlightedIndex: widget.isMomentary ? null : highlightedIndex,
               thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
               thumbScale: thumbScaleAnimation.value,
               proportionalWidth: widget.proportionalWidth,
@@ -1345,15 +1392,21 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       BoxShadow(color: Color(0x0A000000), offset: Offset(0, 3), blurRadius: 1),
     ];
 
-    final RRect thumbRRect = RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
+    final RSuperellipse thumbShape = RSuperellipse.fromRectAndRadius(
+      thumbRect.shift(offset),
+      _kThumbRadius,
+    );
 
     for (final BoxShadow shadow in thumbShadow) {
-      context.canvas.drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
+      context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
     }
 
-    context.canvas.drawRRect(thumbRRect.inflate(0.5), Paint()..color = const Color(0x0A000000));
+    context.canvas.drawRSuperellipse(
+      thumbShape.inflate(0.5),
+      Paint()..color = const Color(0x0A000000),
+    );
 
-    context.canvas.drawRRect(thumbRRect, Paint()..color = thumbColor);
+    context.canvas.drawRSuperellipse(thumbShape, Paint()..color = thumbColor);
   }
 
   @override

@@ -17,7 +17,7 @@ namespace testing {
 /// playground backend.
 class MetalScreenshotter : public Screenshotter {
  public:
-  explicit MetalScreenshotter(bool enable_wide_gamut);
+  explicit MetalScreenshotter(const PlaygroundSwitches& switches);
 
   std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,

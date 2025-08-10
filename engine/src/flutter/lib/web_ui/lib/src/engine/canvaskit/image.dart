@@ -215,10 +215,9 @@ void skiaDecodeImageFromPixels(
       SkImageInfo(
         width: width.toDouble(),
         height: height.toDouble(),
-        colorType:
-            format == ui.PixelFormat.rgba8888
-                ? canvasKit.ColorType.RGBA_8888
-                : canvasKit.ColorType.BGRA_8888,
+        colorType: format == ui.PixelFormat.rgba8888
+            ? canvasKit.ColorType.RGBA_8888
+            : canvasKit.ColorType.BGRA_8888,
         alphaType: canvasKit.AlphaType.Premul,
         colorSpace: SkColorSpaceSRGB,
       ),
@@ -401,14 +400,14 @@ Future<Uint8List> readChunked(
   int contentLength,
   ui_web.ImageCodecChunkCallback chunkCallback,
 ) async {
-  final JSUint8Array result = createUint8ArrayFromLength(contentLength);
+  final JSUint8Array result = JSUint8Array.withLength(contentLength);
   int position = 0;
   int cumulativeBytesLoaded = 0;
-  await payload.read<JSUint8Array>((JSUint8Array chunk) {
-    cumulativeBytesLoaded += chunk.length.toDartInt;
+  await payload.read((JSUint8Array chunk) {
+    cumulativeBytesLoaded += chunk.length;
     chunkCallback(cumulativeBytesLoaded, contentLength);
-    result.set(chunk, position.toJS);
-    position += chunk.length.toDartInt;
+    result.set(chunk, position);
+    position += chunk.length;
   });
   return result.toDart;
 }
@@ -533,8 +532,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
         return readPixelsFromDomImageSource(
           imageBitmap,
           format,
-          imageBitmap.width.toDartInt,
-          imageBitmap.height.toDartInt,
+          imageBitmap.width,
+          imageBitmap.height,
         );
       case VideoFrameImageSource():
         final VideoFrame videoFrame = (imageSource! as VideoFrameImageSource).videoFrame;
@@ -558,10 +557,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
   ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
 
   ByteData? _readPixelsFromSkImage(ui.ImageByteFormat format) {
-    final SkAlphaType alphaType =
-        format == ui.ImageByteFormat.rawStraightRgba
-            ? canvasKit.AlphaType.Unpremul
-            : canvasKit.AlphaType.Premul;
+    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
+        ? canvasKit.AlphaType.Unpremul
+        : canvasKit.AlphaType.Premul;
     final ByteData? data = _encodeImage(
       skImage: skImage,
       format: format,
@@ -725,10 +723,10 @@ class ImageBitmapImageSource extends ImageSource {
   }
 
   @override
-  int get height => imageBitmap.height.toDartInt;
+  int get height => imageBitmap.height;
 
   @override
-  int get width => imageBitmap.width.toDartInt;
+  int get width => imageBitmap.width;
 
   @override
   DomCanvasImageSource get canvasImageSource => imageBitmap;

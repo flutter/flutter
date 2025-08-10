@@ -162,6 +162,7 @@ class TextFormField extends FormField<String> {
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool? enableInteractiveSelection,
+    bool? selectAllOnFocus,
     TextSelectionControls? selectionControls,
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
@@ -177,8 +178,8 @@ class TextFormField extends FormField<String> {
     UndoHistoryController? undoController,
     AppPrivateCommandCallback? onAppPrivateCommand,
     bool? cursorOpacityAnimates,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? selectionHeightStyle,
+    ui.BoxWidthStyle? selectionWidthStyle,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ContentInsertionConfiguration? contentInsertionConfiguration,
     MaterialStatesController? statesController,
@@ -190,6 +191,7 @@ class TextFormField extends FormField<String> {
     bool scribbleEnabled = true,
     bool stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     bool canRequestFocus = true,
+    List<Locale>? hintLocales,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -215,10 +217,9 @@ class TextFormField extends FormField<String> {
 
            final String? errorText = field.errorText;
            if (errorText != null) {
-             effectiveDecoration =
-                 errorBuilder != null
-                     ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
-                     : effectiveDecoration.copyWith(errorText: errorText);
+             effectiveDecoration = errorBuilder != null
+                 ? effectiveDecoration.copyWith(error: errorBuilder(state.context, errorText))
+                 : effectiveDecoration.copyWith(errorText: errorText);
            }
 
            void onChangedHandler(String value) {
@@ -282,6 +283,7 @@ class TextFormField extends FormField<String> {
                keyboardAppearance: keyboardAppearance,
                enableInteractiveSelection:
                    enableInteractiveSelection ?? (!obscureText || !readOnly),
+               selectAllOnFocus: selectAllOnFocus,
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
@@ -294,14 +296,16 @@ class TextFormField extends FormField<String> {
                undoController: undoController,
                onAppPrivateCommand: onAppPrivateCommand,
                cursorOpacityAnimates: cursorOpacityAnimates,
-               selectionHeightStyle: selectionHeightStyle,
-               selectionWidthStyle: selectionWidthStyle,
+               selectionHeightStyle:
+                   selectionHeightStyle ?? EditableText.defaultSelectionHeightStyle,
+               selectionWidthStyle: selectionWidthStyle ?? EditableText.defaultSelectionWidthStyle,
                dragStartBehavior: dragStartBehavior,
                contentInsertionConfiguration: contentInsertionConfiguration,
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
                stylusHandwritingEnabled: stylusHandwritingEnabled,
                canRequestFocus: canRequestFocus,
+               hintLocales: hintLocales,
              ),
            );
          },
@@ -326,6 +330,9 @@ class TextFormField extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -358,10 +365,9 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller =
-        value == null
-            ? RestorableTextEditingController()
-            : RestorableTextEditingController.fromValue(value);
+    _controller = value == null
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }

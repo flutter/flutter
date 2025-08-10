@@ -55,7 +55,10 @@ void main() {
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Material(child: SearchBar(hintText: 'hint text'))),
+      MaterialApp(
+        theme: theme,
+        home: const Material(child: SearchBar(hintText: 'hint text')),
+      ),
     );
 
     final Finder searchBarMaterial = find.descendant(
@@ -72,7 +75,11 @@ void main() {
     final TextEditingController controller = TextEditingController(text: defaultText);
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(controller: controller))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(controller: controller)),
+      ),
+    );
 
     expect(controller.value.text, defaultText);
     expect(find.text(defaultText), findsOneWidget);
@@ -88,7 +95,11 @@ void main() {
     final FocusNode node = FocusNode();
     addTearDown(node.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node)),
+      ),
+    );
 
     expect(node.hasFocus, false);
 
@@ -105,7 +116,11 @@ void main() {
     final FocusNode node1 = FocusNode();
     addTearDown(node1.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node1))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node1)),
+      ),
+    );
 
     expect(node1.hasFocus, isFalse);
 
@@ -120,7 +135,11 @@ void main() {
     final FocusNode node2 = FocusNode();
     addTearDown(node2.dispose);
 
-    await tester.pumpWidget(MaterialApp(home: Material(child: SearchBar(focusNode: node2))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: SearchBar(focusNode: node2)),
+      ),
+    );
 
     expect(node1.hasFocus, isFalse);
     expect(node2.hasFocus, isFalse);
@@ -212,7 +231,9 @@ void main() {
   testWidgets('SearchBar respects hintText property', (WidgetTester tester) async {
     const String hintText = 'hint text';
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: SearchBar(hintText: hintText))),
+      const MaterialApp(
+        home: Material(child: SearchBar(hintText: hintText)),
+      ),
     );
 
     expect(find.text(hintText), findsOneWidget);
@@ -224,7 +245,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SearchBar(leading: IconButton(icon: const Icon(Icons.search), onPressed: () {})),
+          child: SearchBar(
+            leading: IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          ),
         ),
       ),
     );
@@ -328,7 +351,11 @@ void main() {
   testWidgets('SearchBar respects constraints property', (WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints(maxWidth: 350.0, minHeight: 80);
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: Material(child: SearchBar(constraints: constraints)))),
+      const MaterialApp(
+        home: Center(
+          child: Material(child: SearchBar(constraints: constraints)),
+        ),
+      ),
     );
 
     final Rect barRect = tester.getRect(find.byType(SearchBar));
@@ -752,7 +779,9 @@ void main() {
   testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
     Widget buildSearchBar(TextCapitalization textCapitalization) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(textCapitalization: textCapitalization))),
+        home: Center(
+          child: Material(child: SearchBar(textCapitalization: textCapitalization)),
+        ),
       );
     }
 
@@ -1327,9 +1356,8 @@ void main() {
     await tester.pumpWidget(Container());
     await tester.pumpWidget(
       buildAnchor(
-        viewBuilder:
-            (Iterable<Widget> suggestions) =>
-                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+        viewBuilder: (Iterable<Widget> suggestions) =>
+            GridView.count(crossAxisCount: 5, children: suggestions.toList()),
       ),
     );
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
@@ -1361,9 +1389,8 @@ void main() {
     await tester.pumpWidget(Container());
     await tester.pumpWidget(
       buildAnchor(
-        viewBuilder:
-            (Iterable<Widget> suggestions) =>
-                GridView.count(crossAxisCount: 5, children: suggestions.toList()),
+        viewBuilder: (Iterable<Widget> suggestions) =>
+            GridView.count(crossAxisCount: 5, children: suggestions.toList()),
       ),
     );
     await tester.tap(find.byIcon(Icons.search));
@@ -1781,8 +1808,9 @@ void main() {
     // Divider should not be shown if there are no suggestions
     expect(findDivider, findsNothing);
 
-    final Finder findMaterial =
-        find.descendant(of: findViewContent(), matching: find.byType(Material)).first;
+    final Finder findMaterial = find
+        .descendant(of: findViewContent(), matching: find.byType(Material))
+        .first;
     final Rect materialRectWithoutSuggestions = tester.getRect(findMaterial);
     expect(materialRectWithoutSuggestions, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
 
@@ -1890,8 +1918,9 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
 
-    final Finder findSearchBar =
-        find.descendant(of: findViewContent(), matching: find.byType(SearchBar)).first;
+    final Finder findSearchBar = find
+        .descendant(of: findViewContent(), matching: find.byType(SearchBar))
+        .first;
     final Padding padding = tester.widget<Padding>(
       find.descendant(of: findSearchBar, matching: find.byType(Padding)).first,
     );
@@ -2533,7 +2562,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
+          return Scaffold(
+            body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child),
+          );
         },
         home: Material(
           child: SearchAnchor(
@@ -2575,7 +2606,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child));
+          return Scaffold(
+            body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child),
+          );
         },
         home: Material(
           child: Align(
@@ -2776,8 +2809,8 @@ void main() {
   });
 
   // Regression tests for https://github.com/flutter/flutter/issues/126623
-  group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
-    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
+  group('Overall InputDecorationThemeData does not impact SearchBar and SearchView', () {
+    const InputDecorationThemeData inputDecorationTheme = InputDecorationThemeData(
       focusColor: Colors.green,
       hoverColor: Colors.blue,
       outlineBorder: BorderSide(color: Colors.pink, width: 10),
@@ -2817,12 +2850,14 @@ void main() {
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
     }
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgets('Overall InputDecorationThemeData does not override text field style'
         ' in SearchBar', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: const Center(child: Material(child: SearchBar(hintText: 'hint text'))),
+          home: const Center(
+            child: Material(child: SearchBar(hintText: 'hint text')),
+          ),
         ),
       );
 
@@ -2839,7 +2874,7 @@ void main() {
       checkSearchBarDefaults(tester, theme.colorScheme, material);
     });
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
+    testWidgets('Overall InputDecorationThemeData does not override text field style'
         ' in the search view route', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2870,13 +2905,12 @@ void main() {
       checkDecorationInSearchBar(tester);
 
       // Check search bar defaults in search view route.
-      final Finder searchBarMaterial =
-          find
-              .descendant(
-                of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
-                matching: find.byType(Material),
-              )
-              .first;
+      final Finder searchBarMaterial = find
+          .descendant(
+            of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
+            matching: find.byType(Material),
+          )
+          .first;
 
       final Material material = tester.widget<Material>(searchBarMaterial);
       expect(material.color, Colors.transparent);
@@ -2957,7 +2991,9 @@ void main() {
                   child: SearchAnchor.bar(
                     suggestionsBuilder: (BuildContext context, SearchController controller) {
                       return <Widget>[
-                        Card(child: ListTile(onTap: () {}, title: const Text('Item 1'))),
+                        Card(
+                          child: ListTile(onTap: () {}, title: const Text('Item 1')),
+                        ),
                       ];
                     },
                   ),
@@ -2999,7 +3035,9 @@ void main() {
   testWidgets('SearchBar respects keyboardType property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputType keyboardType) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(keyboardType: keyboardType))),
+        home: Center(
+          child: Material(child: SearchBar(keyboardType: keyboardType)),
+        ),
       );
     }
 
@@ -3091,7 +3129,9 @@ void main() {
   testWidgets('SearchBar respects textInputAction property', (WidgetTester tester) async {
     Widget buildSearchBar(TextInputAction textInputAction) {
       return MaterialApp(
-        home: Center(child: Material(child: SearchBar(textInputAction: textInputAction))),
+        home: Center(
+          child: Material(child: SearchBar(textInputAction: textInputAction)),
+        ),
       );
     }
 
@@ -3187,7 +3227,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: SearchBar(controller: controller, enabled: false)),
+        ),
       ),
     );
 
@@ -3223,7 +3265,7 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (
+  testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3232,17 +3274,41 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: SearchBar(controller: controller, enabled: false))),
+        home: Material(
+          child: Center(child: SearchBar(controller: controller, enabled: false)),
+        ),
       ),
     );
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[],
+        value: 'text',
+        inputType: SemanticsInputType.search,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: SearchBar())),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
   });
 
   testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SearchBar(enabled: false)))),
+      const MaterialApp(
+        home: Material(child: Center(child: SearchBar(enabled: false))),
+      ),
     );
 
     final Finder searchBarFinder = find.byType(SearchBar);
@@ -3478,10 +3544,9 @@ void main() {
                       suggestionsLoadingCount++;
                       return SingleChildScrollView(
                         child: Column(
-                          children:
-                              result.map((String text) {
-                                return ListTile(title: Text(text));
-                              }).toList(),
+                          children: result.map((String text) {
+                            return ListTile(title: Text(text));
+                          }).toList(),
                         ),
                       );
                     },
@@ -3599,7 +3664,9 @@ void main() {
   ) async {
     const EdgeInsets scrollPadding = EdgeInsets.zero;
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: SearchBar(scrollPadding: scrollPadding))),
+      const MaterialApp(
+        home: Material(child: SearchBar(scrollPadding: scrollPadding)),
+      ),
     );
 
     expect(find.byType(EditableText), findsOneWidget);
@@ -3687,6 +3754,46 @@ void main() {
 
       expect(find.byType(Placeholder), findsOneWidget);
     });
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: MaterialApp(
+              home: Material(child: TextField(controller: controller)),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   testWidgets('SearchAnchor does not dispose external SearchController', (
@@ -3820,7 +3927,10 @@ void main() {
     key.currentState!.pop();
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(navigatorKey: key, home: const Material(child: Text('disposed'))),
+      MaterialApp(
+        navigatorKey: key,
+        home: const Material(child: Text('disposed')),
+      ),
     );
     await tester.pump();
     expect(tester.takeException(), isNull);
@@ -4007,6 +4117,131 @@ void main() {
     await tester.pump();
     expect(searchViewState, 'Closed');
   });
+
+  testWidgets(
+    'The last element of the suggestion list should be visible when scrolling to the end of list',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(30, (int index) {
+                return ListTile(
+                  titleAlignment: ListTileTitleAlignment.center,
+                  title: Text('Item $index'),
+                );
+              });
+            },
+          ),
+        ),
+      );
+
+      // Open search view.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      const double fakeKeyboardHeight = 500.0;
+      final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
+
+      // Simulate the keyboard opening resizing the view.
+      tester.view.viewInsets = FakeViewPadding(bottom: physicalBottomPadding);
+      addTearDown(tester.view.reset);
+
+      // Scroll down to the end of the list.
+      expect(find.byType(ListView), findsOne);
+      await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
+      await tester.pumpAndSettle();
+
+      // The last item should not be hidden by the keyboard.
+      final double lastItemBottom = tester.getRect(find.text('Item 29')).bottom;
+      final double fakeKeyboardTop =
+          tester.getSize(find.byType(MaterialApp)).height - fakeKeyboardHeight;
+      expect(lastItemBottom, lessThanOrEqualTo(fakeKeyboardTop));
+    },
+  );
+
+  testWidgets(
+    'readOnly disallows SystemContextMenu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170521.
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      addTearDown(() {
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.view.reset();
+        controller.dispose();
+      });
+
+      bool readOnly = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
+        View(
+          view: tester.view,
+          child: MaterialApp(
+            home: Material(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return SearchBar(controller: controller, readOnly: readOnly);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
+
+      // Double tap to select the text.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // No error as in https://github.com/flutter/flutter/issues/170521.
+
+      // The Flutter-drawn context menu is shown. The SystemContextMenu is not
+      // shown because readOnly is true.
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Turn off readOnly and hide the context menu.
+      setState(() {
+        readOnly = false;
+      });
+      await tester.tap(find.text('Copy'));
+      await tester.pump(waitDuration);
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Double tap to show the context menu again.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // Now iOS is showing the SystemContextMenu while others continue to show
+      // the Flutter-drawn context menu.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
 }
 
 Future<void> checkSearchBarDefaults(

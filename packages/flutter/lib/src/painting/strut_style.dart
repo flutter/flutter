@@ -349,10 +349,9 @@ class StrutStyle with Diagnosticable {
   }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || fontFamily != null || fontFamilyFallback != null),
-       fontFamily =
-           fontFamily != null
-               ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
-               : textStyle.fontFamily,
+       fontFamily = fontFamily != null
+           ? (package == null ? fontFamily : 'packages/$package/$fontFamily')
+           : textStyle.fontFamily,
        _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
        height = height ?? textStyle.height,
        leadingDistribution = leadingDistribution ?? textStyle.leadingDistribution,
@@ -528,7 +527,8 @@ class StrutStyle with Diagnosticable {
         height != other.height ||
         leading != other.leading ||
         forceStrutHeight != other.forceStrutHeight ||
-        !listEquals(fontFamilyFallback, other.fontFamilyFallback)) {
+        (!listEquals(fontFamilyFallback, other.fontFamilyFallback)) ||
+        (height != null && leadingDistribution != other.leadingDistribution)) {
       return RenderComparison.layout;
     }
     return RenderComparison.identical;
@@ -547,16 +547,21 @@ class StrutStyle with Diagnosticable {
       return this;
     }
 
+    final double? effectiveHeight = height ?? other.height;
+
     return StrutStyle(
       fontFamily: fontFamily ?? other.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? other.fontFamilyFallback,
       fontSize: fontSize ?? other.fontSize,
-      height: height ?? other.height,
+      height: effectiveHeight,
       leading: leading, // No equivalent property in TextStyle yet.
       fontWeight: fontWeight ?? other.fontWeight,
       fontStyle: fontStyle ?? other.fontStyle,
       forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
       debugLabel: debugLabel ?? other.debugLabel,
+      leadingDistribution: effectiveHeight != null
+          ? (leadingDistribution ?? other.leadingDistribution)
+          : null,
       // Package is embedded within the getters for fontFamilyFallback.
     );
   }
@@ -576,7 +581,9 @@ class StrutStyle with Diagnosticable {
         other.fontStyle == fontStyle &&
         other.height == height &&
         other.leading == leading &&
-        other.forceStrutHeight == forceStrutHeight;
+        other.forceStrutHeight == forceStrutHeight &&
+        (height == null || leadingDistribution == other.leadingDistribution) &&
+        listEquals(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
@@ -623,6 +630,15 @@ class StrutStyle with Diagnosticable {
         ifFalse: '$prefix<strut height normal>',
       ),
     );
+    if (height != null) {
+      styles.add(
+        EnumProperty<TextLeadingDistribution>(
+          '${prefix}leadingDistribution',
+          leadingDistribution,
+          defaultValue: null,
+        ),
+      );
+    }
 
     final bool styleSpecified = styles.any(
       (DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info),

@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import androidx.annotation.VisibleForTesting
@@ -8,8 +12,13 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
-import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
+/**
+ * Warns or errors on version ranges of dependencies required to build a Flutter Android app.
+ *
+ * For code that evaluates if dependencies are compatible with each other see
+ * packages/flutter_tools/lib/src/android/gradle_utils.dart.
+ */
 object DependencyVersionChecker {
     // Logging constants.
     @VisibleForTesting internal const val GRADLE_NAME: String = "Gradle"
@@ -79,28 +88,31 @@ object DependencyVersionChecker {
     // Before updating any "error" version, ensure that you have updated the corresponding
     // "warn" version for a full release to provide advanced warning. See
     // flutter.dev/go/android-dependency-versions for more.
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(7, 4, 2)
+    // Advice for maintainers for other areas of code that are impacted are documented
+    // in packages/flutter_tools/lib/src/android/README.md.
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 7, 0)
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(7, 0, 2)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 3, 0)
 
-    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_11
+    @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
+    @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_11
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 0, 0)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 1, 1)
 
-    @VisibleForTesting internal val warnKGPVersion: Version = Version(1, 8, 10)
+    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 1, 0)
 
-    @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 7, 0)
+    @VisibleForTesting internal val errorKGPVersion: Version = Version(1, 8, 10)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
+    // Non inclusive.
     @VisibleForTesting
-    internal val warnMinSdkVersion: Int = 21
+    internal val warnMinSdkVersion: Int = 24
 
     @VisibleForTesting
-    internal val errorMinSdkVersion: Int = 1
+    internal val errorMinSdkVersion: Int = 23
 
     /**
      * Checks if the project's Android build time dependencies are each within the respective
@@ -110,12 +122,12 @@ object DependencyVersionChecker {
     @JvmStatic fun checkDependencyVersions(project: Project) {
         project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false)
 
-        checkGradleVersion(getGradleVersion(project), project)
-        checkJavaVersion(getJavaVersion(), project)
+        checkGradleVersion(VersionFetcher.getGradleVersion(project), project)
+        checkJavaVersion(VersionFetcher.getJavaVersion(), project)
 
         configureMinSdkCheck(project)
 
-        val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
+        val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
         if (agpVersion != null) {
             checkAGPVersion(agpVersion, project)
         } else {
@@ -125,7 +137,7 @@ object DependencyVersionChecker {
             )
         }
 
-        val kgpVersion: Version? = getKGPVersion(project)
+        val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
         if (kgpVersion != null) {
             checkKGPVersion(kgpVersion, project)
         }
@@ -172,59 +184,14 @@ object DependencyVersionChecker {
         project: Project,
         it: Variant
     ): MinSdkVersion {
-        val agpVersion: AndroidPluginVersion? = getAGPVersion(project)
+        val agpVersion: AndroidPluginVersion? = VersionFetcher.getAGPVersion(project)
+        // TODO(reidbaker): Remove version check as 8.3 is the minimum supported version.
+        // Keeping the check around so that users that bypass will get the error message and not
+        // a compile time error. See https://github.com/flutter/flutter/pull/171399
         return if (agpVersion != null && agpVersion.major >= 8 && agpVersion.minor >= 1) {
             MinSdkVersion(it.name, it.minSdk.apiLevel)
         } else {
             MinSdkVersion(it.name, it.minSdkVersion.apiLevel)
-        }
-    }
-
-    // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594
-    @VisibleForTesting internal fun getGradleVersion(project: Project): Version {
-        val untrimmedGradleVersion: String = project.gradle.gradleVersion
-        // Trim to handle candidate gradle versions (example 7.6-rc-4). This means we treat all
-        // candidate versions of gradle as the same as their base version
-        // (i.e., "7.6"="7.6-rc-4").
-        return Version.fromString(untrimmedGradleVersion.substringBefore('-'))
-    }
-
-    // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-    @VisibleForTesting internal fun getJavaVersion(): JavaVersion = JavaVersion.current()
-
-    @VisibleForTesting internal fun getAGPVersion(project: Project): AndroidPluginVersion? {
-        val androidPluginVersion: AndroidPluginVersion? =
-            project.extensions
-                .findByType(
-                    AndroidComponentsExtension::class.java
-                )?.pluginVersion
-        return androidPluginVersion
-    }
-
-    // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-    //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-    //                 those.
-    @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
-        val kotlinVersionProperty = "kotlin_version"
-        val firstKotlinVersionFieldName = "pluginVersion"
-        val secondKotlinVersionFieldName = "kotlinPluginVersion"
-        // This property corresponds to application of the Kotlin Gradle plugin in the
-        // top-level build.gradle file.
-        if (project.hasProperty(kotlinVersionProperty)) {
-            return Version.fromString(project.properties[kotlinVersionProperty] as String)
-        }
-        val kotlinPlugin =
-            project.plugins
-                .findPlugin(KotlinAndroidPluginWrapper::class.java)
-        val versionField =
-            kotlinPlugin?.javaClass?.kotlin?.members?.first {
-                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
-            }
-        val versionString = versionField?.call(kotlinPlugin)
-        return if (versionString == null) {
-            null
-        } else {
-            Version.fromString(versionString as String)
         }
     }
 
@@ -388,43 +355,6 @@ object DependencyVersionChecker {
             logger.error(warnMessage)
         }
     }
-}
-
-// Helper class to parse the versions that are provided as plain strings (Gradle, Kotlin) and
-// perform easy comparisons. All versions will have a major, minor, and patch value. These values
-// default to 0 when they are not provided or are otherwise unparseable.
-// For example the version strings "8.2", "8.2.2hfd", and "8.2.0" would parse to the same version.
-internal class Version(
-    val major: Int,
-    val minor: Int,
-    val patch: Int
-) : Comparable<Version> {
-    companion object {
-        fun fromString(version: String): Version {
-            val asList: List<String> = version.split(".")
-            val convertedToNumbers: List<Int> = asList.map { it.toIntOrNull() ?: 0 }
-            return Version(
-                major = convertedToNumbers.getOrElse(0) { 0 },
-                minor = convertedToNumbers.getOrElse(1) { 0 },
-                patch = convertedToNumbers.getOrElse(2) { 0 }
-            )
-        }
-    }
-
-    override fun compareTo(other: Version): Int {
-        if (major != other.major) {
-            return major - other.major
-        }
-        if (minor != other.minor) {
-            return minor - other.minor
-        }
-        if (patch != other.patch) {
-            return patch - other.patch
-        }
-        return 0
-    }
-
-    override fun toString(): String = "$major.$minor.$patch"
 }
 
 // Custom error for when the dependency_version_checker.kts script finds a dependency out of

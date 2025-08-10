@@ -24,9 +24,11 @@ import 'edge_insets.dart';
 /// interpolated or animated. The [Border] class cannot interpolate between
 /// different shapes.
 enum BoxShape {
-  /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
-  /// [BorderRadius]). The edges of the rectangle will match the edges of the box
-  /// into which the [Border] or [BoxDecoration] is painted.
+  /// An axis-aligned rectangle, optionally with rounded corners.
+  ///
+  /// The amount of corner rounding, if any, is determined by the border radius
+  /// specified by classes such as [BoxDecoration] or [Border]. The rectangle's
+  /// edges match those of the box in which it is painted.
   ///
   /// See also:
   ///
@@ -66,6 +68,48 @@ abstract class BoxBorder extends ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const BoxBorder();
+
+  /// Creates a [Border].
+  ///
+  /// All the sides of the border default to [BorderSide.none].
+  factory BoxBorder.fromLTRB({
+    BorderSide top = BorderSide.none,
+    BorderSide right = BorderSide.none,
+    BorderSide bottom = BorderSide.none,
+    BorderSide left = BorderSide.none,
+  }) => Border(top: top, right: right, bottom: bottom, left: left);
+
+  /// A uniform [Border] with all sides the same color and width.
+  ///
+  /// The sides default to black solid borders, one logical pixel wide.
+  factory BoxBorder.all({Color color, double width, BorderStyle style, double strokeAlign}) =
+      Border.all;
+
+  /// Creates a [Border] whose sides are all the same.
+  const factory BoxBorder.fromBorderSide(BorderSide side) = Border.fromBorderSide;
+
+  /// Creates a [Border] with symmetrical vertical and horizontal sides.
+  ///
+  /// The `vertical` argument applies to the [left] and [right] sides, and the
+  /// `horizontal` argument applies to the [top] and [bottom] sides.
+  ///
+  /// All arguments default to [BorderSide.none].
+  const factory BoxBorder.symmetric({BorderSide vertical, BorderSide horizontal}) =
+      Border.symmetric;
+
+  /// Creates a [BorderDirectional].
+  ///
+  /// The [start] and [end] sides represent the horizontal sides; the start side
+  /// is on the leading edge given the reading direction, and the end side is on
+  /// the trailing edge. They are resolved during [paint].
+  ///
+  /// All the sides of the border default to [BorderSide.none].
+  factory BoxBorder.fromSTEB({
+    BorderSide top = BorderSide.none,
+    BorderSide start = BorderSide.none,
+    BorderSide end = BorderSide.none,
+    BorderSide bottom = BorderSide.none,
+  }) => BorderDirectional(top: top, start: start, end: end, bottom: bottom);
 
   /// The top side of this border.
   ///
@@ -281,7 +325,7 @@ abstract class BoxBorder extends ShapeBorder {
       case BoxShape.circle:
         assert(
           borderRadius == null,
-          'A borderRadius cannot be given when shape is a BoxShape.circle.',
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
         );
         borderRect = RRect.fromRectAndRadius(
           Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0),
@@ -661,7 +705,7 @@ class Border extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:
@@ -1039,7 +1083,7 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:

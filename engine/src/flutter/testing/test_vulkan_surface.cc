@@ -23,7 +23,7 @@ TestVulkanSurface::TestVulkanSurface(TestVulkanImage&& image)
 
 std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
     const TestVulkanContext& context,
-    const SkISize& surface_size) {
+    const DlISize& surface_size) {
   auto image_result = context.CreateImage(surface_size);
 
   if (!image_result.has_value()) {
@@ -44,10 +44,11 @@ std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
       .fLevelCount = 1,
   };
   auto backend_texture = GrBackendTextures::MakeVk(
-      surface_size.width(), surface_size.height(), image_info);
+      surface_size.width, surface_size.height, image_info);
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   auto result = std::unique_ptr<TestVulkanSurface>(
       new TestVulkanSurface(std::move(image_result.value())));
   result->surface_ = SkSurfaces::WrapBackendTexture(
@@ -94,7 +95,7 @@ sk_sp<SkImage> TestVulkanSurface::GetSurfaceSnapshot() const {
     return nullptr;
   }
 
-  auto host_snapshot = device_snapshot->makeRasterImage();
+  auto host_snapshot = device_snapshot->makeRasterImage(nullptr);
 
   if (!host_snapshot) {
     FML_LOG(ERROR) << "Could not create the host snapshot while attempting to "

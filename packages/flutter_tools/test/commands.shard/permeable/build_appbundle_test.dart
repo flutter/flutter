@@ -6,6 +6,8 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart'
+    show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -72,7 +74,7 @@ void main() {
     );
 
     testUsingContext('alias aab', () async {
-      final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
+      final command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));
     });
 
@@ -290,13 +292,19 @@ void main() {
           testLogger.statusText,
           containsIgnoringWhitespace(
             'To avoid potential build failures, you can quickly migrate your app by '
-            'following the steps on https://goo.gl/CP92wY',
+            'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
           ),
         );
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-not-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -336,7 +344,13 @@ void main() {
 
         expect(
           analytics.sentEvents,
-          contains(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle')),
+          contains(
+            Event.flutterBuildInfo(
+              label: 'app-using-android-x',
+              buildType: 'gradle',
+              settings: 'androidGradlePluginVersion: $templateAndroidGradlePluginVersion',
+            ),
+          ),
         );
       },
       overrides: <Type, Generator>{
@@ -353,7 +367,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   List<String>? arguments,
 }) async {
-  final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',
@@ -373,5 +387,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  int maxRss = 123456789;
+  var maxRss = 123456789;
 }

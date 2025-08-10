@@ -4,6 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/navigator_utils.dart';
@@ -113,12 +115,11 @@ void main() {
     expect(pageOneOffset.dy, greaterThan(0.0));
     expect(pageOneOffset.dx, greaterThan(0.0));
     expect(find.text('Page 2'), findsOneWidget);
-    final double pageTwoYOffset =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoYOffset = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoYOffset, greaterThan(pageOneOffset.dy));
   });
 
@@ -189,12 +190,11 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
-    final double previousPageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double previousPageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
 
     await tester.tap(find.text('Push Page 3'));
     await tester.pumpAndSettle();
@@ -373,12 +373,11 @@ void main() {
     expect(find.text('Page 2'), findsOneWidget);
     expect(find.text('Page 3'), findsNothing);
 
-    final double pageTwoDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageTwoDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageTwoDY, greaterThan(0.0));
 
     await tester.tap(find.text('Push Page 3'));
@@ -388,12 +387,11 @@ void main() {
     expect(find.text('Page 3'), findsOneWidget);
 
     // New route should be at the same height as the previous route.
-    final double pageThreeDY =
-        tester
-            .getTopLeft(
-              find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
-            )
-            .dy;
+    final double pageThreeDY = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
     expect(pageThreeDY, greaterThan(0.0));
     expect(pageThreeDY, equals(pageTwoDY));
   });
@@ -620,16 +618,17 @@ void main() {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
             return PageRouteBuilder<void>(
-              pageBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return CupertinoPageScaffold(
-                  navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
-                  child: Container(),
-                );
-              },
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return CupertinoPageScaffold(
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
+                      child: Container(),
+                    );
+                  },
             );
           }
           return CupertinoSheetRoute<void>(
@@ -809,9 +808,74 @@ void main() {
     await tester.tap(find.byType(Icon));
     await tester.pumpAndSettle();
 
-    final Finder clipRRectFinder = find.byType(ClipRRect);
-    final Rect clipRect = tester.getRect(clipRRectFinder);
-    expect(clipRect.center, equals(const Offset(400, 300)));
+    expect(find.byType(ClipRSuperellipse), findsNothing);
+    expect(find.byType(ClipRRect), findsNothing);
+  });
+
+  testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
+    final GlobalKey homeKey = GlobalKey();
+    final GlobalKey sheetKey = GlobalKey();
+    final GlobalKey popupMenuButtonKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: CupertinoPageScaffold(
+          key: homeKey,
+          child: CupertinoListTile(
+            onTap: () {
+              showCupertinoSheet<void>(
+                context: homeKey.currentContext!,
+                pageBuilder: (BuildContext context) {
+                  return CupertinoPageScaffold(
+                    key: sheetKey,
+                    child: const Center(child: Text('Page 2')),
+                  );
+                },
+              );
+            },
+            title: const Text('ListItem 0'),
+            trailing: Material(
+              type: MaterialType.transparency,
+              child: PopupMenuButton<int>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(child: Text('Item 0')),
+                    const PopupMenuItem<int>(child: Text('Item 1')),
+                  ];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('ListItem 0'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+    await gesture.moveBy(const Offset(0, 350));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('ListItem 0'), findsOneWidget);
+
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   group('drag dismiss gesture', () {
@@ -1076,5 +1140,297 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     });
+
+    testWidgets('dragging does not move the sheet when enableDrag is false', (
+      WidgetTester tester,
+    ) async {
+      Widget nonDragGestureApp(GlobalKey homeScaffoldKey, GlobalKey sheetScaffoldKey) {
+        return CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: homeScaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: homeScaffoldKey.currentContext!,
+                        pageBuilder: (BuildContext context) {
+                          return CupertinoPageScaffold(
+                            key: sheetScaffoldKey,
+                            child: const Center(child: Text('Page 2')),
+                          );
+                        },
+                        enableDrag: false,
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(nonDragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      // Partial drag down
+      await gesture.moveBy(const Offset(0, 200));
+      await tester.pump();
+
+      // Release gesture. Sheet should not move.
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double middlePosition = box.localToGlobal(Offset.zero).dy;
+
+      expect(middlePosition, equals(initialPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalPosition = box.localToGlobal(Offset.zero).dy;
+
+      expect(finalPosition, equals(middlePosition));
+      expect(finalPosition, equals(initialPosition));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/163572.
+    testWidgets('showCupertinoSheet shows snackbar at bottom of screen', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+
+      void showSheet(BuildContext context) {
+        showCupertinoSheet<void>(
+          context: context,
+          pageBuilder: (BuildContext context) {
+            return Scaffold(
+              body: Column(
+                children: <Widget>[
+                  const Text('Cupertino Sheet'),
+                  CupertinoButton(
+                    onPressed: () {
+                      scaffoldKey.currentState?.showSnackBar(
+                        const SnackBar(content: Text('SnackBar'), backgroundColor: Colors.red),
+                      );
+                    },
+                    child: const Text('Show SnackBar'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          scaffoldMessengerKey: scaffoldKey,
+          home: Scaffold(
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  Builder(
+                    builder: (BuildContext context) {
+                      return CupertinoButton(
+                        onPressed: () {
+                          showSheet(context);
+                        },
+                        child: const Text('Show Cupertino Sheet'),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Page 1'), findsOneWidget);
+
+      await tester.tap(find.text('Show Cupertino Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .getTopLeft(
+              find.ancestor(of: find.text('Cupertino Sheet'), matching: find.byType(Scaffold)),
+            )
+            .dy,
+        greaterThan(0.0),
+      );
+
+      await tester.tap(find.text('Show SnackBar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsAtLeast(1));
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+
+      final TestGesture gesture = await tester.startGesture(const Offset(200, 400));
+      await tester.pump();
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        tester.getBottomLeft(find.byType(Scaffold).first).dy,
+        equals(tester.getBottomLeft(find.byType(SnackBar).first).dy),
+      );
+    });
   });
+
+  testWidgets('CupertinoSheet causes SystemUiOverlayStyle changes', (WidgetTester tester) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          navigationBar: const CupertinoNavigationBar(middle: Text('SystemUiOverlayStyle')),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
+
+    // Returning to the previous page reverts the system UI.
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.light);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.dark);
+  });
+
+  testWidgets(
+    'content placed in safe area of showCupertinoSheet is rendered within the safe area bounds',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      Widget sheetScaffoldContent(BuildContext context) {
+        return const SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              SizedBox(height: 80, width: double.infinity, child: Text('Top container')),
+              SizedBox(height: 80, width: double.infinity, child: Text('Bottom container')),
+            ],
+          ),
+        );
+      }
+
+      const double bottomPadding = 50;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+                viewPadding: const EdgeInsets.fromLTRB(0, 20, 0, bottomPadding),
+              ),
+              child: CupertinoApp(
+                home: CupertinoPageScaffold(
+                  key: scaffoldKey,
+                  child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 1'),
+                        CupertinoButton(
+                          onPressed: () {
+                            showCupertinoSheet<void>(
+                              context: scaffoldKey.currentContext!,
+                              pageBuilder: (BuildContext context) {
+                                return CupertinoPageScaffold(child: sheetScaffoldContent(context));
+                              },
+                            );
+                          },
+                          child: const Text('Push Page 2'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Page 1'), findsOneWidget);
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final double pageHeight = tester
+          .getRect(
+            find.ancestor(
+              of: find.text('Top container'),
+              matching: find.byType(CupertinoPageScaffold),
+            ),
+          )
+          .bottom;
+      expect(
+        pageHeight -
+            tester
+                .getBottomLeft(
+                  find
+                      .ancestor(of: find.text('Bottom container'), matching: find.byType(SizedBox))
+                      .first,
+                )
+                .dy,
+        bottomPadding,
+      );
+    },
+  );
 }

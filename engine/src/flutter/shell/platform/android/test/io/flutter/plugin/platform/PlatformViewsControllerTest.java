@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
-import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -42,8 +41,8 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
+import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
+import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -67,7 +66,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class PlatformViewsControllerTest {
   // An implementation of PlatformView that counts invocations of its lifecycle callbacks.
@@ -107,10 +105,13 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
+      minSdk = 35)
   public void itRemovesPlatformViewBeforeDiposeIsCalled() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     // Get the platform view registry.
     PlatformViewRegistry registry = platformViewsController.getRegistry();
@@ -127,8 +128,8 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -141,16 +142,22 @@ public class PlatformViewsControllerTest {
     assertTrue(pView instanceof CountingPlatformView);
     CountingPlatformView cpv = (CountingPlatformView) pView;
     platformViewsController.configureForTextureLayerComposition(pView, request);
+    verify(platformViewsController.textureRegistry, times(1))
+        .createSurfaceProducer(TextureRegistry.SurfaceLifecycle.manual);
     assertEquals(0, cpv.disposeCalls);
     platformViewsController.disposePlatformView(viewId);
     assertEquals(1, cpv.disposeCalls);
   }
 
   @Test
-  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void itNotifiesPlatformViewsOfEngineAttachmentAndDetachment() {
+  @Config(
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class},
+      minSdk = 29,
+      maxSdk = 34)
+  public void itPassesSurfaceLifecyleResetInBackgroundLeqApi34() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     // Get the platform view registry.
     PlatformViewRegistry registry = platformViewsController.getRegistry();
@@ -167,8 +174,48 @@ public class PlatformViewsControllerTest {
 
     // Create the platform view.
     int viewId = 0;
-    final PlatformViewsChannel.PlatformViewCreationRequest request =
-        new PlatformViewsChannel.PlatformViewCreationRequest(
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
+            viewId,
+            CountingPlatformView.VIEW_TYPE_ID,
+            0,
+            0,
+            128,
+            128,
+            View.LAYOUT_DIRECTION_LTR,
+            null);
+    PlatformView pView = platformViewsController.createPlatformView(request, true);
+    assertTrue(pView instanceof CountingPlatformView);
+    CountingPlatformView cpv = (CountingPlatformView) pView;
+    platformViewsController.configureForTextureLayerComposition(pView, request);
+    verify(platformViewsController.textureRegistry, times(1))
+        .createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void itNotifiesPlatformViewsOfEngineAttachmentAndDetachment() {
+    PlatformViewsController platformViewsController = new PlatformViewsController();
+    FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+    // Get the platform view registry.
+    PlatformViewRegistry registry = platformViewsController.getRegistry();
+
+    // Register a factory for our platform view.
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    // Create the platform view.
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        new PlatformViewCreationRequest(
             viewId,
             CountingPlatformView.VIEW_TYPE_ID,
             0,
@@ -225,6 +272,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.attachToView(fakeFlutterView);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     resize(jni, platformViewsController, platformViewId, 10.0, 20.0);
@@ -247,6 +295,7 @@ public class PlatformViewsControllerTest {
     VirtualDisplayController fakeVdController = mock(VirtualDisplayController.class);
     PlatformViewsController platformViewsController = new PlatformViewsController();
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
     platformViewsController.attachToView(fakeFlutterView);
 
@@ -457,6 +506,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -484,6 +535,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -508,6 +561,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -533,6 +587,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -544,6 +600,8 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
@@ -558,6 +616,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -584,6 +643,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -617,6 +677,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -641,6 +702,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -666,6 +728,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -696,6 +759,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -728,6 +792,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -756,6 +821,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -787,6 +853,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -816,6 +884,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     verify(androidView, never()).setLayoutDirection(anyInt());
@@ -851,6 +921,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -890,6 +961,8 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -929,6 +1002,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     // Simulate create call from the framework.
@@ -965,6 +1039,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1025,6 +1100,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1066,6 +1142,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
 
     final FlutterView flutterView = attach(jni, platformViewsController);
 
@@ -1108,6 +1185,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1159,6 +1237,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1197,6 +1276,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1235,6 +1315,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     attach(jni, platformViewsController);
 
     final FlutterView flutterView = mock(FlutterView.class);
@@ -1278,6 +1359,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     final FlutterView flutterView = attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1324,6 +1406,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
     final FlutterView flutterView = attach(jni, platformViewsController);
 
     jni.onFirstFrame();
@@ -1371,6 +1454,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    platformViewsController.setFlutterJNI(jni);
     FlutterView initFlutterView = mock(FlutterView.class);
     attachToFlutterView(jni, platformViewsController, initFlutterView);
 
@@ -1408,6 +1492,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterJNI jni = new FlutterJNI();
     jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
 
     final FlutterView flutterView = attach(jni, platformViewsController);
 
@@ -1572,100 +1657,107 @@ public class PlatformViewsControllerTest {
 
     final Context context = ApplicationProvider.getApplicationContext();
     final TextureRegistry registry =
-        new TextureRegistry() {
-          public void TextureRegistry() {}
+        spy(
+            new TextureRegistry() {
+              public void TextureRegistry() {}
 
-          @NonNull
-          @Override
-          public SurfaceTextureEntry createSurfaceTexture() {
-            return registerSurfaceTexture(mock(SurfaceTexture.class));
-          }
-
-          @NonNull
-          @Override
-          public SurfaceTextureEntry registerSurfaceTexture(
-              @NonNull SurfaceTexture surfaceTexture) {
-            return new SurfaceTextureEntry() {
               @NonNull
               @Override
-              public SurfaceTexture surfaceTexture() {
-                return mock(SurfaceTexture.class);
+              public SurfaceTextureEntry createSurfaceTexture() {
+                return registerSurfaceTexture(mock(SurfaceTexture.class));
               }
 
+              @NonNull
               @Override
-              public long id() {
-                return 0;
+              public SurfaceTextureEntry registerSurfaceTexture(
+                  @NonNull SurfaceTexture surfaceTexture) {
+                return new SurfaceTextureEntry() {
+                  @NonNull
+                  @Override
+                  public SurfaceTexture surfaceTexture() {
+                    return mock(SurfaceTexture.class);
+                  }
+
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
+
+                  @Override
+                  public void release() {}
+                };
               }
 
+              @NonNull
               @Override
-              public void release() {}
-            };
-          }
+              public ImageTextureEntry createImageTexture() {
+                return new ImageTextureEntry() {
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
 
-          @NonNull
-          @Override
-          public ImageTextureEntry createImageTexture() {
-            return new ImageTextureEntry() {
-              @Override
-              public long id() {
-                return 0;
+                  @Override
+                  public void release() {}
+
+                  @Override
+                  public void pushImage(Image image) {}
+                };
               }
 
+              @NonNull
               @Override
-              public void release() {}
+              public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
+                return new SurfaceProducer() {
+                  @Override
+                  public void setCallback(SurfaceProducer.Callback cb) {}
 
-              @Override
-              public void pushImage(Image image) {}
-            };
-          }
+                  @Override
+                  public long id() {
+                    return 0;
+                  }
 
-          @NonNull
-          @Override
-          public SurfaceProducer createSurfaceProducer() {
-            return new SurfaceProducer() {
-              @Override
-              public void setCallback(SurfaceProducer.Callback cb) {}
+                  @Override
+                  public void release() {}
 
-              @Override
-              public long id() {
-                return 0;
+                  @Override
+                  public int getWidth() {
+                    return 0;
+                  }
+
+                  @Override
+                  public int getHeight() {
+                    return 0;
+                  }
+
+                  @Override
+                  public void setSize(int width, int height) {}
+
+                  @Override
+                  public Surface getSurface() {
+                    return null;
+                  }
+
+                  @Override
+                  public Surface getForcedNewSurface() {
+                    return null;
+                  }
+
+                  @Override
+                  public boolean handlesCropAndRotation() {
+                    return false;
+                  }
+
+                  public void scheduleFrame() {}
+                };
               }
-
-              @Override
-              public void release() {}
-
-              @Override
-              public int getWidth() {
-                return 0;
-              }
-
-              @Override
-              public int getHeight() {
-                return 0;
-              }
-
-              @Override
-              public void setSize(int width, int height) {}
-
-              @Override
-              public Surface getSurface() {
-                return null;
-              }
-
-              @Override
-              public boolean handlesCropAndRotation() {
-                return false;
-              }
-
-              public void scheduleFrame() {}
-            };
-          }
-        };
-
-    platformViewsController.attach(context, registry, executor);
+            });
 
     PlatformViewsController2 secondController = new PlatformViewsController2();
     secondController.setRegistry(new PlatformViewRegistryImpl());
+
+    PlatformViewsControllerDelegator platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, secondController);
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
@@ -1675,12 +1767,14 @@ public class PlatformViewsControllerTest {
     when(engine.getScribeChannel()).thenReturn(mock(ScribeChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(platformViewsController);
     when(engine.getPlatformViewsController2()).thenReturn(secondController);
+    when(engine.getPlatformViewsControllerDelegator()).thenReturn(platformViewsControllerDelegator);
     when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
     when(engine.getAccessibilityChannel()).thenReturn(mock(AccessibilityChannel.class));
     when(engine.getDartExecutor()).thenReturn(executor);
 
     flutterView.attachToFlutterEngine(engine);
     platformViewsController.attachToView(flutterView);
+    platformViewsControllerDelegator.attach(context, registry, executor);
   }
 
   /**

@@ -52,17 +52,21 @@ void main() {
     }
   }
 
-  io.ProcessResult run(String executable, List<String> args) {
-    print('Running "$executable ${args.join(" ")}"');
+  io.ProcessResult run(String executable, List<String> args, {String? workingPath}) {
+    print('Running "$executable ${args.join(" ")}"${workingPath != null ? ' $workingPath' : ''}');
     final io.ProcessResult result = io.Process.runSync(
       executable,
       args,
       environment: environment,
-      workingDirectory: testRoot.root.absolute.path,
+      workingDirectory: workingPath ?? testRoot.root.absolute.path,
       includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
-      fail('Failed running "$executable $args" (exit code = ${result.exitCode})');
+      fail(
+        'Failed running "$executable $args" (exit code = ${result.exitCode}),'
+        '\nstdout: ${result.stdout}'
+        '\nstderr: ${result.stderr}',
+      );
     }
     printIfNotEmpty('stdout', (result.stdout as String).trim());
     printIfNotEmpty('stderr', (result.stderr as String).trim());
@@ -101,6 +105,11 @@ void main() {
       testRoot.binInternalUpdateEngineVersion.path,
     );
 
+    // Copy the content_aware_hash script and create a rough directory structure.
+    flutterRoot.binInternalContentAwareHash.copySyncRecursive(
+      testRoot.binInternalContentAwareHash.path,
+    );
+
     // Regression test for https://github.com/flutter/flutter/pull/164396;
     // on a fresh checkout bin/cache does not exist, so avoid trying to create
     // this folder.
@@ -128,16 +137,20 @@ void main() {
         'internal',
         localFs.path.basename(testRoot.binInternalUpdateEngineVersion.path),
       ),
+      localFs.path.join(
+        'bin',
+        'internal',
+        localFs.path.basename(testRoot.binInternalContentAwareHash.path),
+      ),
       localFs.path.join('bin', 'internal', 'engine.version'),
       localFs.path.join('engine', 'src', '.gn'),
       'DEPS',
     };
-    final Set<String> currentFiles =
-        tmpDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .map((File e) => localFs.path.relative(e.path, from: testRoot.root.path))
-            .toSet();
+    final Set<String> currentFiles = tmpDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((File e) => localFs.path.relative(e.path, from: testRoot.root.path))
+        .toSet();
 
     // If this test failed, print out the current directory structure.
     printOnFailure(
@@ -185,12 +198,22 @@ void main() {
   }
 
   /// Initializes a blank git repo in [testRoot.root].
-  void initGitRepoWithBlankInitialCommit() {
-    run('git', <String>['init', '--initial-branch', 'master']);
-    run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
-    run('git', <String>['config', '--local', 'user.name', 'Test User']);
-    run('git', <String>['add', '.']);
-    run('git', <String>['commit', '-m', 'Initial commit']);
+  void initGitRepoWithBlankInitialCommit({String? workingPath}) {
+    run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
+    run('git', <String>[
+      'config',
+      '--local',
+      'user.email',
+      'test@example.com',
+    ], workingPath: workingPath);
+    run('git', <String>['config', '--local', 'user.name', 'Test User'], workingPath: workingPath);
+    run('git', <String>['add', '.'], workingPath: workingPath);
+    run('git', <String>[
+      'commit',
+      '--allow-empty',
+      '-m',
+      'Initial commit',
+    ], workingPath: workingPath);
   }
 
   /// Creates a `bin/internal/engine.version` file in [testRoot].
@@ -207,20 +230,68 @@ void main() {
   /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root].
   ///
   /// The remote points at itself (`testRoot.root.path`) for ease of testing.
-  void setupRemote({required String remote}) {
-    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
-    run('git', <String>['fetch', remote]);
+  void setupRemote({required String remote, String? rootPath}) {
+    run('git', <String>[
+      'remote',
+      'add',
+      remote,
+      rootPath ?? testRoot.root.path,
+    ], workingPath: rootPath);
+    run('git', <String>['fetch', remote], workingPath: rootPath);
   }
 
-  /// Returns the SHA computed by `merge-base HEAD {{ref}}/master`.
-  String gitMergeBase({required String ref}) {
-    final io.ProcessResult mergeBaseHeadOrigin = run('git', <String>[
-      'merge-base',
-      'HEAD',
-      '$ref/master',
-    ]);
+  /// Returns the SHA computed by `content_aware_hash`.
+  String gitContentHash({required _FlutterRootUnderTest fileSystem}) {
+    final String executable;
+    final List<String> args;
+    final String script = fileSystem.binInternalContentAwareHash.path;
+    if (const LocalPlatform().isWindows) {
+      executable = 'powershell';
+      args = <String>[script];
+    } else if (usePowershellOnPosix) {
+      executable = 'pwsh';
+      args = <String>[script];
+    } else {
+      executable = script;
+      args = <String>[];
+    }
+    final io.ProcessResult mergeBaseHeadOrigin = run(executable, args);
     return mergeBaseHeadOrigin.stdout as String;
   }
+
+  group('GIT_DIR', () {
+    late Directory externalGit;
+    late String externalHead;
+    setUp(() {
+      externalGit = localFs.systemTempDirectory.createTempSync('GIT_DIR_test.');
+      initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
+      setupRemote(remote: 'upstream', rootPath: externalGit.path);
+
+      externalHead =
+          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
+                  as String)
+              .trim();
+    });
+
+    test('un-sets environment variables', () {
+      // Needs to happen before GIT_DIR is set
+      initGitRepoWithBlankInitialCommit();
+      setupRemote(remote: 'upstream');
+
+      environment['GIT_DIR'] = '${externalGit.path}/.git';
+      environment['GIT_INDEX_FILE'] = '${externalGit.path}/.git/index';
+      environment['GIT_WORK_TREE'] = externalGit.path;
+
+      runUpdateEngineVersion();
+
+      final String engineStamp = testRoot.binCacheEngineStamp.readAsStringSync().trim();
+      expect(engineStamp, isNot(equals(externalHead)));
+    });
+
+    tearDown(() {
+      externalGit.deleteSync(recursive: true);
+    });
+  });
 
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {
@@ -260,7 +331,10 @@ void main() {
       pinEngineVersionForReleaseBranch(engineHash: 'abc123', gitTrack: false);
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
+      expect(
+        testRoot.binCacheEngineStamp,
+        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
+      );
     });
   });
 
@@ -273,14 +347,20 @@ void main() {
       setupRemote(remote: 'upstream');
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'upstream')));
+      expect(
+        testRoot.binCacheEngineStamp,
+        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
+      );
     });
 
     test('fallsback to origin/master', () async {
       setupRemote(remote: 'origin');
       runUpdateEngineVersion();
 
-      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(gitMergeBase(ref: 'origin')));
+      expect(
+        testRoot.binCacheEngineStamp,
+        _hasFileContentsMatching(gitContentHash(fileSystem: testRoot)),
+      );
     });
   });
 
@@ -340,6 +420,13 @@ final class _FlutterRootUnderTest {
           'update_engine_version.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
         ),
       ),
+      binInternalContentAwareHash: root.childFile(
+        fileSystem.path.join(
+          'bin',
+          'internal',
+          'content_aware_hash.${platform.isWindows || forcePowershell ? 'ps1' : 'sh'}',
+        ),
+      ),
     );
   }
 
@@ -365,6 +452,7 @@ final class _FlutterRootUnderTest {
     required this.binInternalEngineVersion,
     required this.binCacheEngineRealm,
     required this.binInternalUpdateEngineVersion,
+    required this.binInternalContentAwareHash,
   });
 
   final Directory root;
@@ -395,6 +483,11 @@ final class _FlutterRootUnderTest {
   /// - [binInternalEngineVersion]
   /// - [binInternalEngineRealm]
   final File binInternalUpdateEngineVersion;
+
+  /// `bin/internal/content_aware_hash.{sh|ps1}`.
+  ///
+  /// This file contains a shell script that computes the content hash
+  final File binInternalContentAwareHash;
 }
 
 extension on File {

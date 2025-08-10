@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -112,7 +112,7 @@ void testMain() {
       final Surface surface = Surface(isDisplayCanvas: true);
 
       surface.createOrUpdateSurface(const BitmapSize(9, 19));
-      final DomCanvasElement original = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement original = getDisplayCanvas(surface);
       ui.Size canvasSize = getCssSize(surface);
 
       // Expect exact requested dimensions.
@@ -123,7 +123,7 @@ void testMain() {
 
       // Shrinking causes us to resize the canvas.
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final DomCanvasElement shrunk = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement shrunk = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
       expect(shrunk.width, 5);
       expect(shrunk.height, 15);
@@ -132,7 +132,7 @@ void testMain() {
 
       // Increasing the size causes us to resize the canvas.
       surface.createOrUpdateSurface(const BitmapSize(10, 20));
-      final DomCanvasElement firstIncrease = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement firstIncrease = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
 
       expect(firstIncrease, same(original));
@@ -145,7 +145,7 @@ void testMain() {
 
       // Subsequent increases also cause canvas resizing.
       surface.createOrUpdateSurface(const BitmapSize(11, 22));
-      final DomCanvasElement secondIncrease = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement secondIncrease = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
 
       expect(secondIncrease, same(firstIncrease));
@@ -156,7 +156,7 @@ void testMain() {
 
       // Increases beyond the 40% limit will cause a canvas resize.
       surface.createOrUpdateSurface(const BitmapSize(20, 40));
-      final DomCanvasElement huge = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement huge = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
 
       expect(huge, same(secondIncrease));
@@ -169,7 +169,7 @@ void testMain() {
 
       // Shrink again. Resize the canvas.
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final DomCanvasElement shrunk2 = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement shrunk2 = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
 
       expect(shrunk2, same(huge));
@@ -182,7 +182,7 @@ void testMain() {
       // This tests https://github.com/flutter/flutter/issues/77084
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       surface.createOrUpdateSurface(const BitmapSize(5, 15));
-      final DomCanvasElement dpr2Canvas = getDisplayCanvas(surface);
+      final DomHTMLCanvasElement dpr2Canvas = getDisplayCanvas(surface);
       canvasSize = getCssSize(surface);
 
       expect(dpr2Canvas, same(huge));
@@ -213,21 +213,19 @@ void testMain() {
 
         // Emulate WebGL context loss.
         final DomOffscreenCanvas canvas = surface.debugGetOffscreenCanvas()!;
-        final Object ctx = canvas.getContext('webgl2')!;
-        final Object loseContextExtension = js_util.callMethod(ctx, 'getExtension', <String>[
-          'WEBGL_lose_context',
-        ]);
-        js_util.callMethod<void>(loseContextExtension, 'loseContext', const <void>[]);
+        final WebGLContext ctx = canvas.getGlContext(2);
+        final WebGLLoseContextExtension loseContextExtension = ctx.loseContextExtension;
+        loseContextExtension.loseContext();
 
         // Pump a timer to allow the "lose context" event to propagate.
         await Future<void>.delayed(Duration.zero);
         // We don't create a new GL context until the context is restored.
         expect(surface.debugContextLost, isTrue);
-        final bool isContextLost = js_util.callMethod<bool>(ctx, 'isContextLost', const <void>[]);
+        final bool isContextLost = ctx.isContextLost();
         expect(isContextLost, isTrue);
 
         // Emulate WebGL context restoration.
-        js_util.callMethod<void>(loseContextExtension, 'restoreContext', const <void>[]);
+        loseContextExtension.restoreContext();
 
         // Pump a timer to allow the "restore context" event to propagate.
         await Future<void>.delayed(Duration.zero);
@@ -291,24 +289,13 @@ void testMain() {
       final Surface surface = Surface();
       surface.ensureSurface(const BitmapSize(10, 10));
       final DomOffscreenCanvas offscreenCanvas = surface.debugGetOffscreenCanvas()!;
-      final Object originalTransferToImageBitmap = js_util.getProperty(
-        offscreenCanvas,
-        'transferToImageBitmap',
-      );
-      js_util.setProperty(
-        offscreenCanvas,
-        'originalTransferToImageBitmap',
-        originalTransferToImageBitmap,
-      );
+      final JSFunction transferToImageBitmap =
+          offscreenCanvas['transferToImageBitmap']! as JSFunction;
       int transferToImageBitmapCalls = 0;
-      js_util.setProperty(
-        offscreenCanvas,
-        'transferToImageBitmap',
-        js_util.allowInterop(() {
-          transferToImageBitmapCalls++;
-          return js_util.callMethod<Object>(offscreenCanvas, 'originalTransferToImageBitmap', []);
-        }),
-      );
+      offscreenCanvas['transferToImageBitmap'] = () {
+        transferToImageBitmapCalls++;
+        return transferToImageBitmap.callAsFunction(offscreenCanvas);
+      }.toJS;
       final RenderCanvas renderCanvas = RenderCanvas();
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 10, 10));
@@ -323,18 +310,9 @@ void testMain() {
     }, skip: !Surface.offscreenCanvasSupported);
 
     test('throws error if CanvasKit.MakeGrContext returns null', () async {
-      final Object originalMakeGrContext = js_util.getProperty(canvasKit, 'MakeGrContext');
-      js_util.setProperty(canvasKit, 'originalMakeGrContext', originalMakeGrContext);
-      js_util.setProperty(
-        canvasKit,
-        'MakeGrContext',
-        js_util.allowInterop((int glContext) {
-          return null;
-        }),
-      );
+      canvasKit['MakeGrContext'] = ((int glContext) => null).toJS;
       final Surface surface = Surface();
       expect(() => surface.ensureSurface(const BitmapSize(10, 10)), throwsA(isA<CanvasKitError>()));
-      js_util.setProperty(canvasKit, 'MakeGrContext', originalMakeGrContext);
       // Skipping on Firefox for now since Firefox headless doesn't support WebGL
     }, skip: isFirefox);
 
@@ -363,15 +341,15 @@ void testMain() {
   });
 }
 
-DomCanvasElement getDisplayCanvas(Surface surface) {
+DomHTMLCanvasElement getDisplayCanvas(Surface surface) {
   assert(surface.isDisplayCanvas);
-  return surface.hostElement.children.first as DomCanvasElement;
+  return surface.hostElement.children.first as DomHTMLCanvasElement;
 }
 
 /// Extracts the CSS style values of 'width' and 'height' and returns them
 /// as a [ui.Size].
 ui.Size getCssSize(Surface surface) {
-  final DomCanvasElement canvas = getDisplayCanvas(surface);
+  final DomHTMLCanvasElement canvas = getDisplayCanvas(surface);
   final String cssWidth = canvas.style.width;
   final String cssHeight = canvas.style.height;
   // CSS width and height should be in the form 'NNNpx'. So cut off the 'px' and

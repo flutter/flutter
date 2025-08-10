@@ -7,22 +7,132 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('BottomAppBarTheme lerp special cases', () {
-    expect(BottomAppBarTheme.lerp(null, null, 0), const BottomAppBarTheme());
-    const BottomAppBarTheme data = BottomAppBarTheme();
-    expect(identical(BottomAppBarTheme.lerp(data, data, 0.5), data), true);
+  test('BottomAppBarThemeData copyWith, ==, hashCode, defaults', () {
+    expect(const BottomAppBarThemeData(), const BottomAppBarThemeData().copyWith());
+    expect(
+      const BottomAppBarThemeData().hashCode,
+      const BottomAppBarThemeData().copyWith().hashCode,
+    );
+    expect(const BottomAppBarThemeData().color, null);
+    expect(const BottomAppBarThemeData().elevation, null);
+    expect(const BottomAppBarThemeData().shadowColor, null);
+    expect(const BottomAppBarThemeData().shape, null);
+    expect(const BottomAppBarThemeData().height, null);
+    expect(const BottomAppBarThemeData().surfaceTintColor, null);
+    expect(const BottomAppBarThemeData().padding, null);
+  });
+
+  test('BottomAppBarThemeData lerp special cases', () {
+    const BottomAppBarThemeData theme = BottomAppBarThemeData();
+    expect(identical(BottomAppBarThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  testWidgets('Default BottomAppBarThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const BottomAppBarThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('BottomAppBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const BottomAppBarThemeData(
+      color: Color(0xffff0000),
+      elevation: 1.0,
+      shape: CircularNotchedRectangle(),
+      height: 1.0,
+      shadowColor: Color(0xff0000ff),
+      surfaceTintColor: Color(0xff00ff00),
+      padding: EdgeInsets.all(8),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'color: ${const Color(0xffff0000)}',
+      'elevation: 1.0',
+      "shape: Instance of 'CircularNotchedRectangle'",
+      'height: 1.0',
+      'surfaceTintColor: ${const Color(0xff00ff00)}',
+      'shadowColor: ${const Color(0xff0000ff)}',
+      'padding: EdgeInsets.all(8.0)',
+    ]);
+  });
+
+  testWidgets('Local BottomAppBarTheme overrides defaults', (WidgetTester tester) async {
+    const Color color = Colors.blueAccent;
+    const double elevation = 1.0;
+    const Color shadowColor = Colors.black87;
+    const double height = 100.0;
+    const Color surfaceTintColor = Colors.transparent;
+    const NotchedShape shape = CircularNotchedRectangle();
+    const EdgeInsetsGeometry padding = EdgeInsets.all(8);
+    const BottomAppBarThemeData themeData = BottomAppBarThemeData(
+      color: color,
+      elevation: elevation,
+      shadowColor: shadowColor,
+      shape: shape,
+      height: height,
+      surfaceTintColor: surfaceTintColor,
+      padding: padding,
+    );
+
+    await tester.pumpWidget(_withTheme(localBABTheme: themeData));
+
+    final PhysicalShape widget = _getBabRenderObject(tester);
+    expect(widget.color, themeData.color);
+    expect(widget.elevation, themeData.elevation);
+    expect(widget.shadowColor, themeData.shadowColor);
+
+    final RenderBox renderBox = tester.renderObject<RenderBox>(find.byType(BottomAppBar));
+    expect(renderBox.size.height, themeData.height);
+
+    final bool hasFab = Scaffold.of(
+      tester.element(find.byType(BottomAppBar)),
+    ).hasFloatingActionButton;
+    if (hasFab) {
+      expect(widget.clipper.toString(), '_BottomAppBarClipper');
+    } else {
+      expect(widget.clipper, isA<ShapeBorderClipper>());
+      final ShapeBorderClipper clipper = widget.clipper as ShapeBorderClipper;
+      expect(clipper.shape, isA<RoundedRectangleBorder>());
+    }
+
+    final Color effectiveColor = ElevationOverlay.applySurfaceTint(
+      themeData.color!,
+      themeData.surfaceTintColor,
+      themeData.elevation!,
+    );
+    expect(widget.color, effectiveColor);
+
+    // The BottomAppBar has two Padding widgets in its hierarchy:
+    // 1. The first Padding is from the SafeArea widget.
+    // 2. The second Padding is the one that applies the theme's padding.
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(of: find.byType(BottomAppBar), matching: find.byType(Padding).at(1)),
+    );
+    expect(paddingWidget.padding, padding);
   });
 
   group('Material 2 tests', () {
     testWidgets('Material2 - BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: themedColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: themedColor);
 
-      await tester.pumpWidget(_withTheme(theme, useMaterial3: false));
+      await tester.pumpWidget(_withTheme(babTheme: theme, useMaterial3: false));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, themedColor);
@@ -31,7 +141,7 @@ void main() {
     testWidgets('Material2 - BAB color - Widget', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -46,7 +156,7 @@ void main() {
 
     testWidgets('Material2 - BAB color - BabTheme', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -66,7 +176,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             useMaterial3: false,
-            bottomAppBarTheme: const BottomAppBarTheme(color: themeColor),
+            bottomAppBarTheme: const BottomAppBarThemeData(color: themeColor),
           ),
           home: const Scaffold(body: BottomAppBar()),
         ),
@@ -90,13 +200,13 @@ void main() {
     });
 
     testWidgets('Material2 - BAB theme customizes shape', (WidgetTester tester) async {
-      const BottomAppBarTheme theme = BottomAppBarTheme(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         color: Colors.white30,
         shape: CircularNotchedRectangle(),
         elevation: 1.0,
       );
 
-      await tester.pumpWidget(_withTheme(theme, useMaterial3: false));
+      await tester.pumpWidget(_withTheme(babTheme: theme, useMaterial3: false));
 
       await expectLater(
         find.byKey(_painterKey),
@@ -122,8 +232,8 @@ void main() {
   group('Material 3 tests', () {
     testWidgets('Material3 - BAB theme overrides color', (WidgetTester tester) async {
       const Color themedColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: themedColor, elevation: 0);
-      await tester.pumpWidget(_withTheme(theme, useMaterial3: true));
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: themedColor, elevation: 0);
+      await tester.pumpWidget(_withTheme(babTheme: theme));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, themedColor);
@@ -132,7 +242,7 @@ void main() {
     testWidgets('Material3 - BAB color - Widget', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -149,7 +259,7 @@ void main() {
 
     testWidgets('Material3 - BAB color - BabTheme', (WidgetTester tester) async {
       const Color babThemeColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(color: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -180,12 +290,12 @@ void main() {
     testWidgets('Material3 - BAB theme overrides surfaceTintColor', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         color: color,
         surfaceTintColor: babThemeSurfaceTintColor,
         elevation: 0,
       );
-      await tester.pumpWidget(_withTheme(theme, useMaterial3: true));
+      await tester.pumpWidget(_withTheme(babTheme: theme));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.color, ElevationOverlay.applySurfaceTint(color, babThemeSurfaceTintColor, 0));
@@ -193,11 +303,11 @@ void main() {
 
     testWidgets('Material3 - BAB theme overrides shadowColor', (WidgetTester tester) async {
       const Color babThemeShadowColor = Colors.yellow;
-      const BottomAppBarTheme theme = BottomAppBarTheme(
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
         shadowColor: babThemeShadowColor,
         elevation: 0,
       );
-      await tester.pumpWidget(_withTheme(theme, useMaterial3: true));
+      await tester.pumpWidget(_withTheme(babTheme: theme));
 
       final PhysicalShape widget = _getBabRenderObject(tester);
       expect(widget.shadowColor, babThemeShadowColor);
@@ -207,7 +317,9 @@ void main() {
       const Color color = Colors.white10; // base color that the surface tint will be applied to
       const Color babThemeSurfaceTintColor = Colors.black87;
       const Color babSurfaceTintColor = Colors.pink;
-      const BottomAppBarTheme theme = BottomAppBarTheme(surfaceTintColor: babThemeSurfaceTintColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(
+        surfaceTintColor: babThemeSurfaceTintColor,
+      );
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(bottomAppBarTheme: theme),
@@ -224,7 +336,7 @@ void main() {
     testWidgets('Material3 - BAB surfaceTintColor - BabTheme', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
       const Color babThemeColor = Colors.black87;
-      const BottomAppBarTheme theme = BottomAppBarTheme(surfaceTintColor: babThemeColor);
+      const BottomAppBarThemeData theme = BottomAppBarThemeData(surfaceTintColor: babThemeColor);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -247,20 +359,29 @@ PhysicalShape _getBabRenderObject(WidgetTester tester) {
 
 final Key _painterKey = UniqueKey();
 
-Widget _withTheme(BottomAppBarTheme theme, {required bool useMaterial3}) {
+Widget _withTheme({
+  BottomAppBarThemeData? babTheme,
+  BottomAppBarThemeData? localBABTheme,
+  bool useMaterial3 = true,
+}) {
+  Widget babWidget = const BottomAppBar(
+    child: Row(
+      children: <Widget>[
+        Icon(Icons.add),
+        Expanded(child: SizedBox()),
+        Icon(Icons.add),
+      ],
+    ),
+  );
+  if (localBABTheme != null) {
+    babWidget = BottomAppBarTheme(data: localBABTheme, child: babWidget);
+  }
   return MaterialApp(
-    theme: ThemeData(useMaterial3: useMaterial3, bottomAppBarTheme: theme),
+    theme: ThemeData(useMaterial3: useMaterial3, bottomAppBarTheme: babTheme),
     home: Scaffold(
       floatingActionButton: const FloatingActionButton(onPressed: null),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: RepaintBoundary(
-        key: _painterKey,
-        child: const BottomAppBar(
-          child: Row(
-            children: <Widget>[Icon(Icons.add), Expanded(child: SizedBox()), Icon(Icons.add)],
-          ),
-        ),
-      ),
+      bottomNavigationBar: RepaintBoundary(key: _painterKey, child: babWidget),
     ),
   );
 }

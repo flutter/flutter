@@ -8,14 +8,13 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -206,23 +205,21 @@ void _pathOpTests() {
   });
 
   test('Path.combine test', () {
-    final ui.Path path1 = ui.Path();
-    expect(path1, isA<CkPath>());
+    final CkPath path1 = CkPath();
     path1.addRect(const ui.Rect.fromLTRB(0, 0, 10, 10));
     path1.addOval(const ui.Rect.fromLTRB(10, 10, 100, 100));
 
-    final ui.Path path2 = ui.Path();
-    expect(path2, isA<CkPath>());
+    final CkPath path2 = CkPath();
     path2.addRect(const ui.Rect.fromLTRB(5, 5, 15, 15));
     path2.addOval(const ui.Rect.fromLTRB(15, 15, 105, 105));
 
-    final ui.Path union = ui.Path.combine(ui.PathOperation.union, path1, path2);
+    final ui.Path union = CkPath.combine(ui.PathOperation.union, path1, path2);
     expect(union, isA<CkPath>());
     expect(union.getBounds(), const ui.Rect.fromLTRB(0, 0, 105, 105));
 
     // Smoke-test other operations.
     for (final ui.PathOperation operation in ui.PathOperation.values) {
-      final ui.Path combined = ui.Path.combine(operation, path1, path2);
+      final ui.Path combined = CkPath.combine(operation, path1, path2);
       expect(combined, isA<CkPath>());
     }
   });
@@ -616,10 +613,9 @@ void _toSkColorStopsTests() {
 
 void _toSkMatrixFromFloat32Tests() {
   test('toSkMatrixFromFloat32', () {
-    final Matrix4 matrix =
-        Matrix4.identity()
-          ..translate(1, 2, 3)
-          ..rotateZ(4);
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
     expect(
       toSkMatrixFromFloat32(matrix.storage),
       Float32List.fromList(<double>[
@@ -639,10 +635,9 @@ void _toSkMatrixFromFloat32Tests() {
 
 void _toSkM44FromFloat32Tests() {
   test('toSkM44FromFloat32', () {
-    final Matrix4 matrix =
-        Matrix4.identity()
-          ..translate(1, 2, 3)
-          ..rotateZ(4);
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(1, 2, 3)
+      ..rotateZ(4);
     expect(
       toSkM44FromFloat32(matrix.storage),
       Float32List.fromList(<double>[
@@ -1485,49 +1480,45 @@ void _paragraphTests() {
     props.textHeightBehavior = canvasKit.TextHeightBehavior.All;
     props.maxLines = 4;
     props.ellipsis = '___';
-    props.textStyle =
-        SkTextStyleProperties()
-          ..backgroundColor = Float32List.fromList(<double>[0.2, 0, 0, 0.5])
-          ..color = Float32List.fromList(<double>[0, 1, 0, 1])
-          ..foregroundColor = Float32List.fromList(<double>[1, 0, 1, 1])
-          ..decoration = 0x2
-          ..decorationThickness = 2.0
-          ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
-          ..decorationStyle = canvasKit.DecorationStyle.Dotted
-          ..textBaseline = canvasKit.TextBaseline.Ideographic
-          ..fontSize = 48
-          ..letterSpacing = 5
-          ..wordSpacing = 10
-          ..heightMultiplier = 1.3
-          ..halfLeading = true
-          ..locale = 'en_CA'
-          ..fontFamilies = <String>['Roboto', 'serif']
-          ..fontStyle =
-              (SkFontStyle()
-                ..slant = canvasKit.FontSlant.Upright
-                ..weight = canvasKit.FontWeight.Normal)
-          ..shadows = <SkTextShadow>[]
-          ..fontFeatures = <SkFontFeature>[
-            SkFontFeature()
-              ..name = 'pnum'
-              ..value = 1,
-            SkFontFeature()
-              ..name = 'tnum'
-              ..value = 1,
-          ];
-    props.strutStyle =
-        SkStrutStyleProperties()
-          ..fontFamilies = <String>['Roboto', 'Noto']
-          ..fontStyle =
-              (SkFontStyle()
-                ..slant = canvasKit.FontSlant.Italic
-                ..weight = canvasKit.FontWeight.Bold)
-          ..fontSize = 72
-          ..heightMultiplier = 1.5
-          ..halfLeading = true
-          ..leading = 0
-          ..strutEnabled = true
-          ..forceStrutHeight = false;
+    props.textStyle = SkTextStyleProperties()
+      ..backgroundColor = Float32List.fromList(<double>[0.2, 0, 0, 0.5])
+      ..color = Float32List.fromList(<double>[0, 1, 0, 1])
+      ..foregroundColor = Float32List.fromList(<double>[1, 0, 1, 1])
+      ..decoration = 0x2
+      ..decorationThickness = 2.0
+      ..decorationColor = Float32List.fromList(<double>[13, 14, 15, 16])
+      ..decorationStyle = canvasKit.DecorationStyle.Dotted
+      ..textBaseline = canvasKit.TextBaseline.Ideographic
+      ..fontSize = 48
+      ..letterSpacing = 5
+      ..wordSpacing = 10
+      ..heightMultiplier = 1.3
+      ..halfLeading = true
+      ..locale = 'en_CA'
+      ..fontFamilies = <String>['Roboto', 'serif']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Upright
+        ..weight = canvasKit.FontWeight.Normal)
+      ..shadows = <SkTextShadow>[]
+      ..fontFeatures = <SkFontFeature>[
+        SkFontFeature()
+          ..name = 'pnum'
+          ..value = 1,
+        SkFontFeature()
+          ..name = 'tnum'
+          ..value = 1,
+      ];
+    props.strutStyle = SkStrutStyleProperties()
+      ..fontFamilies = <String>['Roboto', 'Noto']
+      ..fontStyle = (SkFontStyle()
+        ..slant = canvasKit.FontSlant.Italic
+        ..weight = canvasKit.FontWeight.Bold)
+      ..fontSize = 72
+      ..heightMultiplier = 1.5
+      ..halfLeading = true
+      ..leading = 0
+      ..strutEnabled = true
+      ..forceStrutHeight = false;
 
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
@@ -1573,7 +1564,7 @@ void _paragraphTests() {
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
-    final DomCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
     domDocument.body!.append(canvas);
 
     // TODO(yjbanov): WebGL screenshot tests do not work on Firefox - https://github.com/flutter/flutter/issues/109265
@@ -1614,10 +1605,9 @@ void _paragraphTests() {
     expectAlmost(paragraph.getMaxIntrinsicWidth(), 263);
     expectAlmost(paragraph.getMinIntrinsicWidth(), 135);
     expectAlmost(paragraph.getMaxWidth(), 500);
-    final SkRectWithDirection rectWithDirection =
-        paragraph
-            .getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max)
-            .single;
+    final SkRectWithDirection rectWithDirection = paragraph
+        .getRectsForRange(1, 3, canvasKit.RectHeightStyle.Tight, canvasKit.RectWidthStyle.Max)
+        .single;
     expect(rectWithDirection.rect, hasLength(4));
     expect(paragraph.getRectsForPlaceholders(), hasLength(1));
     expect(paragraph.getLineMetrics(), hasLength(1));
@@ -1659,19 +1649,17 @@ void _paragraphTests() {
     props.heightMultiplier = 3;
     props.textAlign = canvasKit.TextAlign.Start;
     props.textDirection = canvasKit.TextDirection.LTR;
-    props.textStyle =
-        SkTextStyleProperties()
-          ..fontSize = 25
-          ..fontFamilies = <String>['Roboto']
-          ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
-    props.strutStyle =
-        SkStrutStyleProperties()
-          ..strutEnabled = true
-          ..forceStrutHeight = true
-          ..fontSize = 25
-          ..fontFamilies = <String>['Roboto']
-          ..heightMultiplier = 3
-          ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    props.textStyle = SkTextStyleProperties()
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
+    props.strutStyle = SkStrutStyleProperties()
+      ..strutEnabled = true
+      ..forceStrutHeight = true
+      ..fontSize = 25
+      ..fontFamilies = <String>['Roboto']
+      ..heightMultiplier = 3
+      ..fontStyle = (SkFontStyle()..weight = canvasKit.FontWeight.Normal);
     final SkParagraphStyle paragraphStyle = canvasKit.ParagraphStyle(props);
     final SkParagraphBuilder builder = canvasKit.ParagraphBuilder.MakeFromFontCollection(
       paragraphStyle,
@@ -1721,7 +1709,7 @@ void _paragraphTests() {
   test(
     'MakeOnScreenGLSurface test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
       final WebGLContext gl = canvas.getGlContext(webGLVersion);
       final int sampleCount = gl.getParameter(gl.samples);
       final int stencilBits = gl.getParameter(gl.stencilBits);
@@ -1748,13 +1736,12 @@ void _paragraphTests() {
   test(
     'MakeRenderTarget test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
-      final int glContext =
-          canvasKit.GetWebGLContext(
-            canvas,
-            SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
-          ).toInt();
+      final int glContext = canvasKit.GetWebGLContext(
+        canvas,
+        SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
+      ).toInt();
       final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
       final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 

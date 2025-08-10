@@ -129,7 +129,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
 #undef IMPELLER_PROC
 
-  if (!description_->HasDebugExtension()) {
+  if (!IP_ENABLE_GLES_LABELING || !description_->HasDebugExtension()) {
     PushDebugGroupKHR.Reset();
     PopDebugGroupKHR.Reset();
     ObjectLabelKHR.Reset();
@@ -139,6 +139,10 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
   if (!description_->HasExtension("GL_EXT_discard_framebuffer")) {
     DiscardFramebufferEXT.Reset();
+  }
+
+  if (!description_->HasExtension("GL_ANGLE_framebuffer_blit")) {
+    BlitFramebufferANGLE.Reset();
   }
 
   capabilities_ = std::make_shared<CapabilitiesGLES>(*this);

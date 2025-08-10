@@ -91,13 +91,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     image_provider.NetworkImage key,
     image_provider.DecoderBufferCallback decode,
   ) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
     return _ForwardingImageStreamCompleter(
-      _loadAsync(key as NetworkImage, decode, chunkEvents),
+      _loadAsync(key as NetworkImage, decode),
       informationCollector: _imageStreamInformationCollector(key),
       debugLabel: key.url,
     );
@@ -108,13 +103,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     image_provider.NetworkImage key,
     image_provider.ImageDecoderCallback decode,
   ) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
     return _ForwardingImageStreamCompleter(
-      _loadAsync(key as NetworkImage, decode, chunkEvents),
+      _loadAsync(key as NetworkImage, decode),
       informationCollector: _imageStreamInformationCollector(key),
       debugLabel: key.url,
     );
@@ -123,31 +113,25 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
   }
 
-  Future<ImageStreamCompleter> _loadAsync(
-    NetworkImage key,
-    _SimpleDecoderCallback decode,
-    StreamController<ImageChunkEvent> chunkEvents,
-  ) async {
+  Future<ImageStreamCompleter> _loadAsync(NetworkImage key, _SimpleDecoderCallback decode) async {
     assert(key == this);
 
     Future<ImageStreamCompleter> loadViaDecode() async {
       // Resolve the Codec before passing it to
-      // [MultiFrameImageStreamCompleter] so any errors aren't reported
-      // twice (once from the MultiFrameImageStreamCompleter and again
-      // from the wrapping [ForwardingImageStreamCompleter]).
+      // `MultiFrameImageStreamCompleter` so any errors aren't reported
+      // twice (once from the `MultiFrameImageStreamCompleter` and again
+      // from the wrapping `_ForwardingImageStreamCompleter`).
       final ui.Codec codec = await _fetchImageBytes(decode);
       return MultiFrameImageStreamCompleter(
-        chunkEvents: chunkEvents.stream,
         codec: Future<ui.Codec>.value(codec),
         scale: key.scale,
         debugLabel: key.url,
@@ -236,9 +220,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     request.addEventListener(
       'error',
       ((JSObject e) => completer.completeError(
-            image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
-          ))
-          .toJS,
+        image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
+      )).toJS,
     );
 
     request.send();
@@ -259,15 +242,19 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage && other.url == url && other.scale == scale;
+    return other is NetworkImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.webHtmlElementStrategy == webHtmlElementStrategy &&
+        mapEquals(other.headers, headers);
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(url, scale, webHtmlElementStrategy, headers);
 
   @override
   String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)}, webHtmlElementStrategy: ${webHtmlElementStrategy.name}, headers: $headers)';
 }
 
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]
@@ -285,27 +272,11 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       (ImageStreamCompleter value) {
         resolved = true;
         if (_disposed) {
-          // Add a listener since the delegate completer won't dispose if it never
-          // had a listener.
-          value.addListener(ImageStreamListener((_, _) {}));
           value.maybeDispose();
           return;
         }
         completer = value;
-        handle = completer.keepAlive();
-        completer.addListener(
-          ImageStreamListener(
-            (ImageInfo image, bool synchronousCall) {
-              setImage(image);
-            },
-            onChunk: (ImageChunkEvent event) {
-              reportImageChunkEvent(event);
-            },
-            onError: (Object exception, StackTrace? stackTrace) {
-              reportError(exception: exception, stack: stackTrace);
-            },
-          ),
-        );
+        completer.addListener(listener);
       },
       onError: (Object error, StackTrace stack) {
         reportError(
@@ -322,14 +293,25 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   final Future<ImageStreamCompleter> task;
   bool resolved = false;
   late final ImageStreamCompleter completer;
-  late final ImageStreamCompleterHandle handle;
 
   bool _disposed = false;
+
+  late final ImageStreamListener listener = ImageStreamListener(
+    (ImageInfo image, bool synchronousCall) {
+      setImage(image);
+    },
+    onChunk: (ImageChunkEvent event) {
+      reportImageChunkEvent(event);
+    },
+    onError: (Object exception, StackTrace? stackTrace) {
+      reportError(exception: exception, stack: stackTrace);
+    },
+  );
 
   @override
   void onDisposed() {
     if (resolved) {
-      handle.dispose();
+      completer.removeListener(listener);
     }
     _disposed = true;
     super.onDisposed();

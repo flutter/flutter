@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -129,6 +131,47 @@ void main() {
     expect(find.text('Suggestions'), findsNothing);
 
     // Open search again
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+  });
+
+  testWidgets('Can close search with escape button and return null', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    addTearDown(() => delegate.dispose());
+    final List<String?> selectedResults = <String?>[];
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
+
+    // We are on the homepage.
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HomeBody'), findsNothing);
+    expect(find.text('HomeTitle'), findsNothing);
+    expect(find.text('Suggestions'), findsOneWidget);
+    expect(find.text('Bottom'), findsOneWidget);
+
+    // Simulate escape button.
+    await simulateKeyDownEvent(LogicalKeyboardKey.escape, platform: 'windows');
+    await tester.pumpAndSettle();
+
+    expect(selectedResults, <String?>[null]);
+
+    // We are on the homepage again.
+    expect(find.text('HomeBody'), findsOneWidget);
+    expect(find.text('HomeTitle'), findsOneWidget);
+    expect(find.text('Suggestions'), findsNothing);
+
+    // Open search again.
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
@@ -651,60 +694,65 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 9,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 9,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
+      final TestSemantics textField = kIsWeb
+          ? TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 9,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[
+                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  label: 'Search',
+                  currentValueLength: 0,
+                  inputType: SemanticsInputType.search,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                ),
+              ],
+            )
+          : TestSemantics(
+              id: 9,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              actions: <SemanticsAction>[
+                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                SemanticsAction.tap,
+                SemanticsAction.focus,
+                SemanticsAction.setSelection,
+                SemanticsAction.setText,
+                SemanticsAction.paste,
+              ],
+              label: 'Search',
+              currentValueLength: 0,
+              inputType: SemanticsInputType.search,
+              textDirection: TextDirection.ltr,
+              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            );
 
       return TestSemantics.root(
         children: <TestSemantics>[
@@ -851,60 +899,65 @@ void main() {
       final bool isCupertino =
           debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final TestSemantics textField =
-          kIsWeb
-              ? TestSemantics(
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 11,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isTextField,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                      SemanticsFlag.isFocused,
-                    ],
-                    actions: <SemanticsAction>[
-                      if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                      if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                      SemanticsAction.tap,
-                      SemanticsAction.focus,
-                      SemanticsAction.setSelection,
-                      SemanticsAction.setText,
-                      SemanticsAction.paste,
-                    ],
-                    label: 'Search',
-                    textDirection: TextDirection.ltr,
-                    textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                  ),
-                ],
-              )
-              : TestSemantics(
-                id: 11,
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocused,
-                  SemanticsFlag.isHeader,
-                  if (!isCupertino) SemanticsFlag.namesRoute,
-                ],
-                actions: <SemanticsAction>[
-                  if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                  if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                  SemanticsAction.tap,
-                  SemanticsAction.focus,
-                  SemanticsAction.setSelection,
-                  SemanticsAction.setText,
-                  SemanticsAction.paste,
-                ],
-                label: 'Search',
-                textDirection: TextDirection.ltr,
-                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              );
+      final TestSemantics textField = kIsWeb
+          ? TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 11,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                    SemanticsFlag.isFocusable,
+                  ],
+                  actions: <SemanticsAction>[
+                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  label: 'Search',
+                  inputType: SemanticsInputType.search,
+                  currentValueLength: 0,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                ),
+              ],
+            )
+          : TestSemantics(
+              id: 11,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isTextField,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocused,
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isHeader,
+                if (!isCupertino) SemanticsFlag.namesRoute,
+              ],
+              actions: <SemanticsAction>[
+                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
+                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
+                SemanticsAction.tap,
+                SemanticsAction.focus,
+                SemanticsAction.setSelection,
+                SemanticsAction.setText,
+                SemanticsAction.paste,
+              ],
+              label: 'Search',
+              inputType: SemanticsInputType.search,
+              currentValueLength: 0,
+              textDirection: TextDirection.ltr,
+              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+            );
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -1036,7 +1089,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final ThemeData textFieldTheme = Theme.of(tester.element(find.byType(TextField)));
-    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme);
+    expect(textFieldTheme.inputDecorationTheme, searchFieldDecorationTheme.data);
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/66781
@@ -1058,12 +1111,11 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground =
-        tester
-            .widgetList<Material>(
-              find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
-            )
-            .first;
+    final Material appBarBackground = tester
+        .widgetList<Material>(
+          find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+        )
+        .first;
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -1090,12 +1142,11 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground =
-        tester
-            .widgetList<Material>(
-              find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
-            )
-            .first;
+    final Material appBarBackground = tester
+        .widgetList<Material>(
+          find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
+        )
+        .first;
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -1178,28 +1229,27 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == 'nested') {
               return MaterialPageRoute<dynamic>(
-                builder:
-                    (BuildContext context) => Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: () async {
-                            await showSearch(
-                              context: context,
-                              delegate: delegate,
-                              useRootNavigator: true,
-                            );
-                          },
-                          child: const Text('showSearchRootNavigator'),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            await showSearch(context: context, delegate: delegate);
-                          },
-                          child: const Text('showSearchLocalNavigator'),
-                        ),
-                      ],
+                builder: (BuildContext context) => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () async {
+                        await showSearch(
+                          context: context,
+                          delegate: delegate,
+                          useRootNavigator: true,
+                        );
+                      },
+                      child: const Text('showSearchRootNavigator'),
                     ),
+                    TextButton(
+                      onPressed: () async {
+                        await showSearch(context: context, delegate: delegate);
+                      },
+                      child: const Text('showSearchLocalNavigator'),
+                    ),
+                  ],
+                ),
                 settings: settings,
               );
             }
@@ -1284,24 +1334,23 @@ void main() {
       MaterialApp(
         navigatorObservers: <NavigatorObserver>[navigationObserver],
         home: Builder(
-          builder:
-              (BuildContext context) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  TextButton(
-                    onPressed: () async {
-                      await showSearch(context: context, delegate: delegate);
-                    },
-                    child: const Text('showSearch'),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await showSearch(context: context, delegate: delegate, maintainState: true);
-                    },
-                    child: const Text('showSearchWithMaintainState'),
-                  ),
-                ],
+          builder: (BuildContext context) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextButton(
+                onPressed: () async {
+                  await showSearch(context: context, delegate: delegate);
+                },
+                child: const Text('showSearch'),
               ),
+              TextButton(
+                onPressed: () async {
+                  await showSearch(context: context, delegate: delegate, maintainState: true);
+                },
+                child: const Text('showSearchWithMaintainState'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1417,7 +1466,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return theme.copyWith(
       inputDecorationTheme:
           searchFieldDecorationTheme ??
-          InputDecorationTheme(
+          InputDecorationThemeData(
             hintStyle: searchFieldStyle ?? const TextStyle(color: hintTextColor),
           ),
     );

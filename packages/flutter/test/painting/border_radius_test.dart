@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -330,6 +331,56 @@ void main() {
     expect(BorderRadiusDirectional.circular(15.0) % 10.0, BorderRadiusDirectional.circular(5.0));
   });
 
+  test('BorderRadiusDirectional.resolve with null throws detailed error', () {
+    const BorderRadiusDirectional borderRadius = BorderRadiusDirectional.all(Radius.circular(1.0));
+    expect(
+      () => borderRadius.resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
+  // to test _MixedBorderRadius using `add()` and `subtract()` methods
+  test('resolve method throws detailed error when TextDirection is null', () {
+    const BorderRadius a = BorderRadius.only(
+      topLeft: Radius.elliptical(10.0, 20.0),
+      topRight: Radius.elliptical(30.0, 40.0),
+      bottomLeft: Radius.elliptical(50.0, 60.0),
+    );
+    const BorderRadiusDirectional b = BorderRadiusDirectional.only(
+      topEnd: Radius.elliptical(100.0, 110.0),
+      bottomStart: Radius.elliptical(120.0, 130.0),
+      bottomEnd: Radius.elliptical(140.0, 150.0),
+    );
+
+    expect(
+      () => a.add(b).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+
+    expect(
+      () => b.subtract(a).resolve(null),
+      throwsA(
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          allOf(contains('No TextDirection found.'), contains('without a Directionality ancestor')),
+        ),
+      ),
+    );
+  });
+
   test('BorderRadiusDirectional.lerp() invariants', () {
     final BorderRadiusDirectional a = BorderRadiusDirectional.circular(10.0);
     final BorderRadiusDirectional b = BorderRadiusDirectional.circular(20.0);
@@ -620,5 +671,69 @@ void main() {
       borderRadius.copyWith(bottomRight: Radius.zero).copyWith(bottomRight: radius),
       borderRadius,
     );
+  });
+
+  test('BorderRadiusGeometry factories', () {
+    const Radius radius5 = Radius.circular(5);
+    const Radius radius10 = Radius.circular(10);
+    const Radius radius15 = Radius.circular(15);
+    const Radius radius20 = Radius.circular(20);
+    expect(const BorderRadiusGeometry.all(radius10), const BorderRadius.all(radius10));
+    expect(BorderRadiusGeometry.circular(10), BorderRadius.circular(10));
+    expect(
+      BorderRadiusGeometry.horizontal(left: radius5, right: radius10),
+      const BorderRadius.horizontal(left: radius5, right: radius10),
+    );
+    expect(
+      BorderRadiusGeometry.horizontal(start: radius5, end: radius10),
+      const BorderRadiusDirectional.horizontal(start: radius5, end: radius10),
+    );
+    expect(() {
+      BorderRadiusGeometry.horizontal(start: radius5, left: radius10);
+    }, throwsAssertionError);
+    expect(() {
+      BorderRadiusGeometry.horizontal(end: radius5, right: radius10);
+    }, throwsAssertionError);
+    expect(() {
+      BorderRadiusGeometry.horizontal(
+        end: radius5,
+        right: radius10,
+        start: radius5,
+        left: radius10,
+      );
+    }, throwsAssertionError);
+    expect(
+      const BorderRadiusGeometry.only(
+        topLeft: radius5,
+        topRight: radius10,
+        bottomLeft: radius15,
+        bottomRight: radius20,
+      ),
+      const BorderRadius.only(
+        topLeft: radius5,
+        topRight: radius10,
+        bottomLeft: radius15,
+        bottomRight: radius20,
+      ),
+    );
+    expect(
+      const BorderRadiusGeometry.directional(
+        topStart: radius5,
+        topEnd: radius10,
+        bottomStart: radius15,
+        bottomEnd: radius20,
+      ),
+      const BorderRadiusDirectional.only(
+        topStart: radius5,
+        topEnd: radius10,
+        bottomStart: radius15,
+        bottomEnd: radius20,
+      ),
+    );
+    expect(
+      const BorderRadiusGeometry.vertical(top: radius5, bottom: radius10),
+      const BorderRadius.vertical(top: radius5, bottom: radius10),
+    );
+    expect(BorderRadiusGeometry.zero, BorderRadius.zero);
   });
 }

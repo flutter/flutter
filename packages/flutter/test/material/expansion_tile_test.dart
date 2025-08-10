@@ -660,7 +660,9 @@ void main() {
 
   testWidgets('ExpansionTile platform controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: ExpansionTile(title: Text('Title')))),
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Title'))),
+      ),
     );
 
     final ListTile listTile = tester.widget(find.byType(ListTile));
@@ -755,6 +757,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocused: true,
         isFocusable: true,
@@ -771,6 +774,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocusable: true,
         label: 'Second Expansion Tile',
@@ -1596,13 +1600,14 @@ void main() {
     expect(controller2, isNull);
   });
 
-  testWidgets('Check if dense, enableFeedback, visualDensity parameter is working', (
+  testWidgets('Check if dense, splashColor, enableFeedback, visualDensity parameter is working', (
     WidgetTester tester,
   ) async {
     final GlobalKey titleKey = GlobalKey();
     final GlobalKey nonDescendantKey = GlobalKey();
 
     const bool dense = true;
+    const Color splashColor = Colors.blue;
     const bool enableFeedback = false;
     const VisualDensity visualDensity = VisualDensity.compact;
 
@@ -1613,6 +1618,7 @@ void main() {
             children: <Widget>[
               ExpansionTile(
                 dense: dense,
+                splashColor: splashColor,
                 enableFeedback: enableFeedback,
                 visualDensity: visualDensity,
                 title: Text('Title', key: titleKey),
@@ -1628,6 +1634,7 @@ void main() {
     final Finder tileFinder = find.byType(ListTile);
     final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
     expect(tileWidget.dense, dense);
+    expect(tileWidget.splashColor, splashColor);
     expect(tileWidget.enableFeedback, enableFeedback);
     expect(tileWidget.visualDensity, visualDensity);
   });

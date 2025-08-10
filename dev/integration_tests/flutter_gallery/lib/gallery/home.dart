@@ -115,10 +115,9 @@ class _CategoriesPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
-                  final int columnCountForRow =
-                      rowIndex == rowCount - 1
-                          ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
-                          : columnCount;
+                  final int columnCountForRow = rowIndex == rowCount - 1
+                      ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
+                      : columnCount;
 
                   return Row(
                     children: List<Widget>.generate(columnCountForRow, (int columnIndex) {
@@ -236,10 +235,9 @@ class _DemosPage extends StatelessWidget {
           dragStartBehavior: DragStartBehavior.down,
           key: PageStorageKey<String>(category!.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
-          children:
-              kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
-                return _DemoItem(demo: demo);
-              }).toList(),
+          children: kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
+            return _DemoItem(demo: demo);
+          }).toList(),
         ),
       ),
     );
@@ -268,7 +266,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.topCenter,
-      children: <Widget>[...previousChildren, if (currentChild != null) currentChild],
+      children: <Widget>[...previousChildren, ?currentChild],
     );
   }
 
@@ -322,14 +320,13 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
-              child:
-                  _category == null
-                      ? const _FlutterLogo()
-                      : IconButton(
-                        icon: const BackButtonIcon(),
-                        tooltip: 'Back',
-                        onPressed: () => setState(() => _category = null),
-                      ),
+              child: _category == null
+                  ? const _FlutterLogo()
+                  : IconButton(
+                      icon: const BackButtonIcon(),
+                      tooltip: 'Back',
+                      onPressed: () => setState(() => _category = null),
+                    ),
             ),
             frontTitle: AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
@@ -341,15 +338,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
               switchOutCurve: switchOutCurve,
               switchInCurve: switchInCurve,
               layoutBuilder: centerHome ? _centerHomeLayout : _topHomeLayout,
-              child:
-                  _category != null
-                      ? _DemosPage(_category)
-                      : _CategoriesPage(
-                        categories: kAllGalleryDemoCategories,
-                        onCategoryTap: (GalleryDemoCategory category) {
-                          setState(() => _category = category);
-                        },
-                      ),
+              child: _category != null
+                  ? _DemosPage(_category)
+                  : _CategoriesPage(
+                      categories: kAllGalleryDemoCategories,
+                      onCategoryTap: (GalleryDemoCategory category) {
+                        setState(() => _category = category);
+                      },
+                    ),
             ),
           ),
         ),

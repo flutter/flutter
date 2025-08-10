@@ -11,8 +11,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../common/test_data.dart';
 import 'common.dart';
-import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -96,11 +96,11 @@ class BitmapTestCodec extends TestFileCodec {
   Future<ui.Codec> createCodecFromTestFile(String testFile) async {
     final DomHTMLImageElement imageElement = createDomHTMLImageElement();
     imageElement.src = testFile;
-    setJsProperty<String>(imageElement, 'decoding', 'async');
+    imageElement.decoding = 'async';
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement as JSObject, (
+    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
       x: 0,
       y: 0,
       width: imageElement.naturalWidth.toInt(),
@@ -138,7 +138,8 @@ class BitmapSingleFrameCodec implements ui.Codec {
 
 Future<void> testMain() async {
   final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-  final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+  final List<String> testFiles =
+      ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
 
   List<TestCodec> createTestCodecs({int testTargetWidth = 300, int testTargetHeight = 300}) {
     // Sanity-check the test file list. If suddenly test files are moved or

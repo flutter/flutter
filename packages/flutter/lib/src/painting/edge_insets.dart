@@ -12,6 +12,7 @@ import 'dart:ui' as ui show ViewPadding, lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [EdgeInsets] that allows for text-direction aware
 /// resolution.
@@ -31,6 +32,46 @@ abstract class EdgeInsetsGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const EdgeInsetsGeometry();
+
+  /// Creates insets where all the offsets are `value`.
+  const factory EdgeInsetsGeometry.all(double value) = EdgeInsets.all;
+
+  /// Creates [EdgeInsets] with only the given values non-zero.
+  const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
+      EdgeInsets.only;
+
+  /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
+  const factory EdgeInsetsGeometry.directional({
+    double start,
+    double end,
+    double top,
+    double bottom,
+  }) = EdgeInsetsDirectional.only;
+
+  /// Creates [EdgeInsets] with symmetrical vertical and horizontal offsets.
+  const factory EdgeInsetsGeometry.symmetric({double vertical, double horizontal}) =
+      EdgeInsets.symmetric;
+
+  /// Creates [EdgeInsets] from offsets from the left, top, right, and bottom.
+  const factory EdgeInsetsGeometry.fromLTRB(double left, double top, double right, double bottom) =
+      EdgeInsets.fromLTRB;
+
+  /// Creates [EdgeInsets] that match the given view padding.
+  ///
+  /// If you need the current system padding or view insets in the context of a
+  /// widget, consider using [MediaQuery.paddingOf] to obtain these values
+  /// rather than using the value from a [FlutterView] directly, so that you get
+  /// notified of changes.
+  factory EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio) =
+      EdgeInsets.fromViewPadding;
+
+  /// Creates [EdgeInsetsDirectional] from offsets from the start, top, end, and
+  /// bottom.
+  const factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) =
+      EdgeInsetsDirectional.fromSTEB;
+
+  /// An [EdgeInsets] with zero offsets in each direction.
+  static const EdgeInsetsGeometry zero = EdgeInsets.zero;
 
   double get _bottom;
   double get _end;
@@ -853,7 +894,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$EdgeInsetsDirectional'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(end, top, start, bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(start, top, end, bottom),
@@ -965,7 +1006,7 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection? direction) {
-    assert(direction != null);
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedEdgeInsets'));
     return switch (direction!) {
       TextDirection.rtl => EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom),
       TextDirection.ltr => EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom),

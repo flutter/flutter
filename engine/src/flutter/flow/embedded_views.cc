@@ -6,9 +6,9 @@
 
 namespace flutter {
 
-DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(SkRect view_bounds) {
+DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(DlRect view_bounds) {
   builder_ = std::make_unique<DisplayListBuilder>(
-      /*bounds=*/ToDlRect(view_bounds),
+      /*bounds=*/view_bounds,
       /*prepare_rtree=*/true);
 }
 
@@ -35,7 +35,7 @@ void DisplayListEmbedderViewSlice::dispatch(DlOpReceiver& receiver) {
 }
 
 bool DisplayListEmbedderViewSlice::is_empty() {
-  return display_list_->bounds().isEmpty();
+  return display_list_->GetBounds().IsEmpty();
 }
 
 bool DisplayListEmbedderViewSlice::recording_ended() {

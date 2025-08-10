@@ -40,7 +40,8 @@ ShellTestPlatformViewMetal::ShellTestPlatformViewMetal(
   id<MTLDevice> device = nil;
   if (GetSettings().enable_impeller) {
     impeller_context_ =
-        [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch];
+        [[FlutterDarwinContextMetalImpeller alloc] init:impeller::Flags {}
+                                  gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch];
     FML_CHECK(impeller_context_.context);
     device = impeller_context_.context->GetMTLDevice();
   } else {
@@ -96,7 +97,7 @@ std::shared_ptr<impeller::Context> ShellTestPlatformViewMetal::GetImpellerContex
 }
 
 // |GPUSurfaceMetalDelegate|
-GPUCAMetalLayerHandle ShellTestPlatformViewMetal::GetCAMetalLayer(const SkISize& frame_info) const {
+GPUCAMetalLayerHandle ShellTestPlatformViewMetal::GetCAMetalLayer(const DlISize& frame_info) const {
   FML_CHECK(false) << "A Metal Delegate configured with MTLRenderTargetType::kMTLTexture was asked "
                       "to acquire a layer.";
   return nullptr;
@@ -110,7 +111,7 @@ bool ShellTestPlatformViewMetal::PresentDrawable(GrMTLHandle drawable) const {
 }
 
 // |GPUSurfaceMetalDelegate|
-GPUMTLTextureInfo ShellTestPlatformViewMetal::GetMTLTexture(const SkISize& frame_info) const {
+GPUMTLTextureInfo ShellTestPlatformViewMetal::GetMTLTexture(const DlISize& frame_info) const {
   return {
       .texture_id = 0,
       .texture = (__bridge GPUMTLTextureHandle)offscreen_texture_,

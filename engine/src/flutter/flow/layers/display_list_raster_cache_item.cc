@@ -33,7 +33,7 @@ static bool IsDisplayListWorthRasterizing(
   }
 
   if (display_list == nullptr ||
-      !RasterCacheUtil::CanRasterizeRect(display_list->bounds())) {
+      !RasterCacheUtil::CanRasterizeRect(ToSkRect(display_list->GetBounds()))) {
     // No point in deciding whether the display list is worth rasterizing if it
     // cannot be rasterized at all.
     return false;
@@ -159,7 +159,8 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
       !context.raster_cache->GenerateNewCacheInThisFrame() || !id.has_value()) {
     return false;
   }
-  SkRect bounds = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
+  SkRect bounds =
+      ToSkRect(display_list_->GetBounds()).makeOffset(offset_.x(), offset_.y());
   RasterCache::Context r_context = {
       // clang-format off
       .gr_context         = context.gr_context,

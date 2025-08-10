@@ -9,19 +9,11 @@ import 'dart:_wasm';
 import 'dart:ffi';
 import 'dart:js_interop';
 
-@JS()
-@staticInterop
-class WebAssemblyMemory {}
-
-extension WebAssemblyMemoryExtension on WebAssemblyMemory {
+extension type WebAssemblyMemory._(JSObject _) implements JSObject {
   external JSArrayBuffer get buffer;
 }
 
-@JS()
-@staticInterop
-class SkwasmInstance {}
-
-extension SkwasmInstanceExtension on SkwasmInstance {
+extension type SkwasmInstance._(JSObject _) implements JSObject {
   external WebAssemblyMemory get wasmMemory;
 }
 
@@ -33,3 +25,9 @@ external WasmI32 addFunction(WasmFuncRef function);
 
 @Native<Bool Function()>(symbol: 'skwasm_isMultiThreaded', isLeaf: true)
 external bool skwasmIsMultiThreaded();
+
+@Native<Bool Function()>(symbol: 'skwasm_isHeavy', isLeaf: true)
+external bool skwasmIsHeavy();
+
+@Native<Void Function(Pointer<Uint32>)>(symbol: 'skwasm_getLiveObjectCounts', isLeaf: true)
+external void skwasmGetLiveObjectCounts(Pointer<Uint32> objectCounts);

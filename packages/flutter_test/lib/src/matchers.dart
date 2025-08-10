@@ -44,7 +44,7 @@ import 'widget_tester.dart' show WidgetTester;
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsNothing = _FindsCountMatcher(null, 0);
 
-/// Asserts that the [Finder] locates at least one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at least one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAny] method.
 ///
@@ -78,7 +78,7 @@ const Matcher findsWidgets = _FindsCountMatcher(1, null);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsAny = _FindsCountMatcher(1, null);
 
-/// Asserts that the [Finder] locates at exactly one widget in the widget tree.
+/// Asserts that the [FinderBase] locates at exactly one widget in the widget tree.
 ///
 /// This is equivalent to the preferred [findsOne] method.
 ///
@@ -112,7 +112,7 @@ const Matcher findsOneWidget = _FindsCountMatcher(1, 1);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 const Matcher findsOne = _FindsCountMatcher(1, 1);
 
-/// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates the specified number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsExactly] method.
 ///
@@ -146,7 +146,7 @@ Matcher findsNWidgets(int n) => _FindsCountMatcher(n, n);
 ///  * [findsAtLeast], when you want the finder to find at least a specific number of candidates.
 Matcher findsExactly(int n) => _FindsCountMatcher(n, n);
 
-/// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
+/// Asserts that the [FinderBase] locates at least a number of widgets in the widget tree.
 ///
 /// This is equivalent to the preferred [findsAtLeast] method.
 ///
@@ -258,9 +258,7 @@ Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
 ///
 /// If `withScaleFactor` is specified and non-null, this matcher also asserts
 /// that the [TextScaler]'s' `textScaleFactor` equals `withScaleFactor`.
-Matcher isSystemTextScaler({double? withScaleFactor}) {
-  return _IsSystemTextScaler(withScaleFactor);
-}
+Matcher isSystemTextScaler({double? withScaleFactor}) => _IsSystemTextScaler(withScaleFactor);
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -646,7 +644,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -685,13 +683,15 @@ Matcher matchesSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
   bool isCheckStateMixed = false,
   bool isSelected = false,
-  bool isButton = false,
   bool hasSelectedState = false,
+  bool isButton = false,
   bool isSlider = false,
   bool isKeyboardKey = false,
   bool isLink = false,
@@ -762,17 +762,18 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
+    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -839,7 +840,7 @@ Matcher matchesSemantics({
 /// cases that [SemanticsController.find] sometimes runs into.
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
-/// with a [Finder] that returns a single widget. Semantics must be enabled
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
 /// ## Sample code
@@ -878,11 +879,14 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
   bool? isCheckStateMixed,
   bool? isSelected,
+  bool? hasSelectedState,
   bool? isButton,
   bool? isSlider,
   bool? isKeyboardKey,
@@ -954,17 +958,18 @@ Matcher containsSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
-    elevation: elevation,
-    thickness: thickness,
     platformViewId: platformViewId,
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
+    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -1234,34 +1239,28 @@ class _IsSystemTextScaler extends Matcher {
 
   final double? expectedUserTextScaleFactor;
 
-  // TODO(LongCatIsLooong): update the runtime type after introducing _SystemTextScaler.
-  static final Type _expectedRuntimeType = (const TextScaler.linear(2)).runtimeType;
-
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is! TextScaler) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a TextScaler');
-    }
-    if (!identical(item.runtimeType, _expectedRuntimeType)) {
-      return failWithDescription(matchState, '${item.runtimeType} is not a system TextScaler');
-    }
-    final double actualTextScaleFactor = item.textScaleFactor;
-    if (expectedUserTextScaleFactor != null &&
-        expectedUserTextScaleFactor != actualTextScaleFactor) {
-      return failWithDescription(
-        matchState,
-        'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor',
-      );
-    }
-    return true;
+    return switch (item) {
+      SystemTextScaler(:final double textScaleFactor)
+          when expectedUserTextScaleFactor != null &&
+              expectedUserTextScaleFactor != textScaleFactor =>
+        failWithDescription(
+          matchState,
+          'expecting a scale factor of $expectedUserTextScaleFactor, but got $textScaleFactor',
+        ),
+      SystemTextScaler() => true,
+      _ => failWithDescription(matchState, '${item.runtimeType} is not a SystemTextScaler'),
+    };
   }
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation =
-        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
+    final String scaleFactorExpectation = expectedUserTextScaleFactor == null
+        ? ''
+        : '(${expectedUserTextScaleFactor}x)';
     return description.add(
-      'A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)',
+      'A SystemTextScaler that reflects the font scale settings in the system user preference $scaleFactorExpectation',
     );
   }
 
@@ -2390,16 +2389,17 @@ class _MatchesSemanticsData extends Matcher {
     required this.textDirection,
     required this.rect,
     required this.size,
-    required this.elevation,
-    required this.thickness,
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.validationResult,
+    required this.inputType,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
     required bool? isCheckStateMixed,
     required bool? isSelected,
+    required bool? hasSelectedState,
     required bool? isButton,
     required bool? isSlider,
     required bool? isKeyboardKey,
@@ -2455,74 +2455,66 @@ class _MatchesSemanticsData extends Matcher {
     required this.customActions,
     required this.children,
   }) : flags = <SemanticsFlag, bool>{
-         if (hasCheckedState != null) SemanticsFlag.hasCheckedState: hasCheckedState,
-         if (isChecked != null) SemanticsFlag.isChecked: isChecked,
-         if (isCheckStateMixed != null) SemanticsFlag.isCheckStateMixed: isCheckStateMixed,
-         if (isSelected != null) SemanticsFlag.isSelected: isSelected,
-         if (isButton != null) SemanticsFlag.isButton: isButton,
-         if (isSlider != null) SemanticsFlag.isSlider: isSlider,
-         if (isKeyboardKey != null) SemanticsFlag.isKeyboardKey: isKeyboardKey,
-         if (isLink != null) SemanticsFlag.isLink: isLink,
-         if (isTextField != null) SemanticsFlag.isTextField: isTextField,
-         if (isReadOnly != null) SemanticsFlag.isReadOnly: isReadOnly,
-         if (isFocused != null) SemanticsFlag.isFocused: isFocused,
-         if (isFocusable != null) SemanticsFlag.isFocusable: isFocusable,
-         if (hasEnabledState != null) SemanticsFlag.hasEnabledState: hasEnabledState,
-         if (isEnabled != null) SemanticsFlag.isEnabled: isEnabled,
-         if (isInMutuallyExclusiveGroup != null)
-           SemanticsFlag.isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
-         if (isHeader != null) SemanticsFlag.isHeader: isHeader,
-         if (isObscured != null) SemanticsFlag.isObscured: isObscured,
-         if (isMultiline != null) SemanticsFlag.isMultiline: isMultiline,
-         if (namesRoute != null) SemanticsFlag.namesRoute: namesRoute,
-         if (scopesRoute != null) SemanticsFlag.scopesRoute: scopesRoute,
-         if (isHidden != null) SemanticsFlag.isHidden: isHidden,
-         if (isImage != null) SemanticsFlag.isImage: isImage,
-         if (isLiveRegion != null) SemanticsFlag.isLiveRegion: isLiveRegion,
-         if (hasToggledState != null) SemanticsFlag.hasToggledState: hasToggledState,
-         if (isToggled != null) SemanticsFlag.isToggled: isToggled,
-         if (hasImplicitScrolling != null) SemanticsFlag.hasImplicitScrolling: hasImplicitScrolling,
-         if (isSlider != null) SemanticsFlag.isSlider: isSlider,
-         if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
-         if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
-         if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
-         if (isRequired != null) SemanticsFlag.isRequired: isRequired,
+         SemanticsFlag.hasCheckedState: ?hasCheckedState,
+         SemanticsFlag.isChecked: ?isChecked,
+         SemanticsFlag.isCheckStateMixed: ?isCheckStateMixed,
+         SemanticsFlag.isSelected: ?isSelected,
+         SemanticsFlag.hasSelectedState: ?hasSelectedState,
+         SemanticsFlag.isButton: ?isButton,
+         SemanticsFlag.isSlider: ?isSlider,
+         SemanticsFlag.isKeyboardKey: ?isKeyboardKey,
+         SemanticsFlag.isLink: ?isLink,
+         SemanticsFlag.isTextField: ?isTextField,
+         SemanticsFlag.isReadOnly: ?isReadOnly,
+         SemanticsFlag.isFocused: ?isFocused,
+         SemanticsFlag.isFocusable: ?isFocusable,
+         SemanticsFlag.hasEnabledState: ?hasEnabledState,
+         SemanticsFlag.isEnabled: ?isEnabled,
+         SemanticsFlag.isInMutuallyExclusiveGroup: ?isInMutuallyExclusiveGroup,
+         SemanticsFlag.isHeader: ?isHeader,
+         SemanticsFlag.isObscured: ?isObscured,
+         SemanticsFlag.isMultiline: ?isMultiline,
+         SemanticsFlag.namesRoute: ?namesRoute,
+         SemanticsFlag.scopesRoute: ?scopesRoute,
+         SemanticsFlag.isHidden: ?isHidden,
+         SemanticsFlag.isImage: ?isImage,
+         SemanticsFlag.isLiveRegion: ?isLiveRegion,
+         SemanticsFlag.hasToggledState: ?hasToggledState,
+         SemanticsFlag.isToggled: ?isToggled,
+         SemanticsFlag.hasImplicitScrolling: ?hasImplicitScrolling,
+         SemanticsFlag.hasExpandedState: ?hasExpandedState,
+         SemanticsFlag.isExpanded: ?isExpanded,
+         SemanticsFlag.hasRequiredState: ?hasRequiredState,
+         SemanticsFlag.isRequired: ?isRequired,
        },
        actions = <SemanticsAction, bool>{
-         if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
-         if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
-         if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
-         if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
-         if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
-         if (hasScrollUpAction != null) SemanticsAction.scrollUp: hasScrollUpAction,
-         if (hasScrollDownAction != null) SemanticsAction.scrollDown: hasScrollDownAction,
-         if (hasIncreaseAction != null) SemanticsAction.increase: hasIncreaseAction,
-         if (hasDecreaseAction != null) SemanticsAction.decrease: hasDecreaseAction,
-         if (hasShowOnScreenAction != null) SemanticsAction.showOnScreen: hasShowOnScreenAction,
-         if (hasMoveCursorForwardByCharacterAction != null)
-           SemanticsAction.moveCursorForwardByCharacter: hasMoveCursorForwardByCharacterAction,
-         if (hasMoveCursorBackwardByCharacterAction != null)
-           SemanticsAction.moveCursorBackwardByCharacter: hasMoveCursorBackwardByCharacterAction,
-         if (hasSetSelectionAction != null) SemanticsAction.setSelection: hasSetSelectionAction,
-         if (hasCopyAction != null) SemanticsAction.copy: hasCopyAction,
-         if (hasCutAction != null) SemanticsAction.cut: hasCutAction,
-         if (hasPasteAction != null) SemanticsAction.paste: hasPasteAction,
-         if (hasDidGainAccessibilityFocusAction != null)
-           SemanticsAction.didGainAccessibilityFocus: hasDidGainAccessibilityFocusAction,
-         if (hasDidLoseAccessibilityFocusAction != null)
-           SemanticsAction.didLoseAccessibilityFocus: hasDidLoseAccessibilityFocusAction,
-         if (customActions != null) SemanticsAction.customAction: customActions.isNotEmpty,
-         if (hasDismissAction != null) SemanticsAction.dismiss: hasDismissAction,
-         if (hasMoveCursorForwardByWordAction != null)
-           SemanticsAction.moveCursorForwardByWord: hasMoveCursorForwardByWordAction,
-         if (hasMoveCursorBackwardByWordAction != null)
-           SemanticsAction.moveCursorBackwardByWord: hasMoveCursorBackwardByWordAction,
-         if (hasSetTextAction != null) SemanticsAction.setText: hasSetTextAction,
+         SemanticsAction.tap: ?hasTapAction,
+         SemanticsAction.focus: ?hasFocusAction,
+         SemanticsAction.longPress: ?hasLongPressAction,
+         SemanticsAction.scrollLeft: ?hasScrollLeftAction,
+         SemanticsAction.scrollRight: ?hasScrollRightAction,
+         SemanticsAction.scrollUp: ?hasScrollUpAction,
+         SemanticsAction.scrollDown: ?hasScrollDownAction,
+         SemanticsAction.increase: ?hasIncreaseAction,
+         SemanticsAction.decrease: ?hasDecreaseAction,
+         SemanticsAction.showOnScreen: ?hasShowOnScreenAction,
+         SemanticsAction.moveCursorForwardByCharacter: ?hasMoveCursorForwardByCharacterAction,
+         SemanticsAction.moveCursorBackwardByCharacter: ?hasMoveCursorBackwardByCharacterAction,
+         SemanticsAction.setSelection: ?hasSetSelectionAction,
+         SemanticsAction.copy: ?hasCopyAction,
+         SemanticsAction.cut: ?hasCutAction,
+         SemanticsAction.paste: ?hasPasteAction,
+         SemanticsAction.didGainAccessibilityFocus: ?hasDidGainAccessibilityFocusAction,
+         SemanticsAction.didLoseAccessibilityFocus: ?hasDidLoseAccessibilityFocusAction,
+         SemanticsAction.customAction: ?customActions?.isNotEmpty,
+         SemanticsAction.dismiss: ?hasDismissAction,
+         SemanticsAction.moveCursorForwardByWord: ?hasMoveCursorForwardByWordAction,
+         SemanticsAction.moveCursorBackwardByWord: ?hasMoveCursorBackwardByWordAction,
+         SemanticsAction.setText: ?hasSetTextAction,
        },
-       hintOverrides =
-           onTapHint == null && onLongPressHint == null
-               ? null
-               : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
+       hintOverrides = onTapHint == null && onLongPressHint == null
+           ? null
+           : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
 
   final String? identifier;
   final String? label;
@@ -2541,12 +2533,12 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection? textDirection;
   final Rect? rect;
   final Size? size;
-  final double? elevation;
-  final double? thickness;
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
+  final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
+  final SemanticsValidationResult validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2592,17 +2584,18 @@ class _MatchesSemanticsData extends Matcher {
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
     }
+    if (inputType != null) {
+      description.add(' with inputType: $inputType');
+    }
     if (actions.isNotEmpty) {
-      final List<SemanticsAction> expectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
-      final List<SemanticsAction> notExpectedActions =
-          actions.entries
-              .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
-              .toList();
+      final List<SemanticsAction> expectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
+      final List<SemanticsAction> notExpectedActions = actions.entries
+          .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+          .toList();
 
       if (expectedActions.isNotEmpty) {
         description.add(' with actions: ${_createEnumsSummary(expectedActions)} ');
@@ -2612,16 +2605,14 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> expectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
-      final List<SemanticsFlag> notExpectedFlags =
-          flags.entries
-              .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-              .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
-              .toList();
+      final List<SemanticsFlag> expectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
+      final List<SemanticsFlag> notExpectedFlags = flags.entries
+          .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
+          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+          .toList();
 
       if (expectedFlags.isNotEmpty) {
         description.add(' with flags: ${_createEnumsSummary(expectedFlags)} ');
@@ -2639,12 +2630,6 @@ class _MatchesSemanticsData extends Matcher {
     if (size != null) {
       description.add(' with size: $size');
     }
-    if (elevation != null) {
-      description.add(' with elevation: $elevation');
-    }
-    if (thickness != null) {
-      description.add(' with thickness: $thickness');
-    }
     if (platformViewId != null) {
       description.add(' with platformViewId: $platformViewId');
     }
@@ -2659,6 +2644,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      description.add(' with validation result: $validationResult');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2781,12 +2769,6 @@ class _MatchesSemanticsData extends Matcher {
     if (size != null && size != data.rect.size) {
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
     }
-    if (elevation != null && elevation != data.elevation) {
-      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
-    }
-    if (thickness != null && thickness != data.thickness) {
-      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
-    }
     if (platformViewId != null && platformViewId != data.platformViewId) {
       return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
     }
@@ -2795,6 +2777,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
+    }
+    if (validationResult != data.validationResult) {
+      return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
+    }
+    if (inputType != null && inputType != data.inputType) {
+      return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];

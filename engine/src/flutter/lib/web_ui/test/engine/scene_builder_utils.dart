@@ -10,6 +10,8 @@ import 'package:ui/ui.dart' as ui;
 class StubPicture implements ScenePicture {
   StubPicture(this.cullRect);
 
+  bool _isDisposed = false;
+
   @override
   final ui.Rect cullRect;
 
@@ -17,10 +19,13 @@ class StubPicture implements ScenePicture {
   int get approximateBytesUsed => throw UnimplementedError();
 
   @override
-  bool get debugDisposed => throw UnimplementedError();
+  bool get debugDisposed => _isDisposed;
 
   @override
-  void dispose() {}
+  void dispose() {
+    assert(!_isDisposed);
+    _isDisposed = true;
+  }
 
   @override
   Future<ui.Image> toImage(int width, int height) {
@@ -90,7 +95,7 @@ class StubSceneCanvas implements SceneCanvas {
   void clipRRect(ui.RRect rrect, {bool doAntiAlias = true}) {}
 
   @override
-  void clipRSuperellipse(ui.RSuperellipse rse, {bool doAntiAlias = true}) {}
+  void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {}
 
   @override
   void clipRect(ui.Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {}
@@ -155,7 +160,7 @@ class StubSceneCanvas implements SceneCanvas {
   void drawRRect(ui.RRect rrect, ui.Paint paint) {}
 
   @override
-  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {}
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {}
 
   @override
   void drawRawAtlas(

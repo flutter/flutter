@@ -549,20 +549,19 @@ class _FilledButtonWithIcon extends FilledButton {
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
-    final EdgeInsetsGeometry scaledPadding =
-        useMaterial3
-            ? ButtonStyleButton.scaledPadding(
-              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-              effectiveTextScale,
-            )
-            : ButtonStyleButton.scaledPadding(
-              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-              const EdgeInsets.symmetric(horizontal: 8),
-              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-              effectiveTextScale,
-            );
+    final EdgeInsetsGeometry scaledPadding = useMaterial3
+        ? ButtonStyleButton.scaledPadding(
+            const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+            const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+            const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+            effectiveTextScale,
+          )
+        : ButtonStyleButton.scaledPadding(
+            const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+            const EdgeInsets.symmetric(horizontal: 8),
+            const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+            effectiveTextScale,
+          );
     return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
@@ -588,9 +587,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
         buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale =
         clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
-    // Adjust the gap based on the text scale factor. Start at 8, and lerp
-    // to 4 based on how large the text is.
-    final double gap = lerpDouble(8, 4, scale)!;
+
     final FilledButtonThemeData filledButtonTheme = FilledButtonTheme.of(context);
     final IconAlignment effectiveIconAlignment =
         iconAlignment ??
@@ -599,10 +596,10 @@ class _FilledButtonWithIconChild extends StatelessWidget {
         IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children:
-          effectiveIconAlignment == IconAlignment.start
-              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      spacing: lerpDouble(8, 4, scale)!,
+      children: effectiveIconAlignment == IconAlignment.start
+          ? <Widget>[icon, Flexible(child: label)]
+          : <Widget>[Flexible(child: label), icon],
     );
   }
 }

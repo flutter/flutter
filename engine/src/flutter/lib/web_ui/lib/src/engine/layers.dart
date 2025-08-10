@@ -41,6 +41,11 @@ class NoopOperation implements LayerOperation {
 
   @override
   String toString() => 'NoopOperation()';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{'type': 'noop'};
+  }
 }
 
 class BackdropFilterLayer with PictureEngineLayer implements ui.BackdropFilterEngineLayer {
@@ -80,6 +85,15 @@ class BackdropFilterOperation implements LayerOperation {
 
   @override
   String toString() => 'BackdropFilterOperation(filter: $filter, mode: $mode)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'backdropFilter',
+      'filter': filter.toString(),
+      'mode': mode.toString(),
+    };
+  }
 }
 
 class ClipPathLayer with PictureEngineLayer implements ui.ClipPathEngineLayer {
@@ -128,6 +142,21 @@ class ClipPathOperation implements LayerOperation {
 
   @override
   String toString() => 'ClipPathOperation(path: $path, clip: $clip)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    final ui.Rect bounds = path.getBounds();
+    return <String, Object>{
+      'type': 'clipPath',
+      'pathBounds': {
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+      'clip': clip.name,
+    };
+  }
 }
 
 class ClipRectLayer with PictureEngineLayer implements ui.ClipRectEngineLayer {
@@ -176,6 +205,15 @@ class ClipRectOperation implements LayerOperation {
 
   @override
   String toString() => 'ClipRectOperation(rect: $rect, clip: $clip)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'clipRect',
+      'rect': {'left': rect.left, 'top': rect.top, 'right': rect.right, 'bottom': rect.bottom},
+      'clip': clip.name,
+    };
+  }
 }
 
 class ClipRRectLayer with PictureEngineLayer implements ui.ClipRRectEngineLayer {
@@ -224,6 +262,28 @@ class ClipRRectOperation implements LayerOperation {
 
   @override
   String toString() => 'ClipRRectOperation(rrect: $rrect, clip: $clip)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'clipRRect',
+      'rrect': {
+        'left': rrect.left,
+        'top': rrect.top,
+        'right': rrect.right,
+        'bottom': rrect.bottom,
+        'tlRadiusX': rrect.tlRadiusX,
+        'tlRadiusY': rrect.tlRadiusY,
+        'trRadiusX': rrect.trRadiusX,
+        'trRadiusY': rrect.trRadiusY,
+        'brRadiusX': rrect.brRadiusX,
+        'brRadiusY': rrect.brRadiusY,
+        'blRadiusX': rrect.blRadiusX,
+        'blRadiusY': rrect.blRadiusY,
+      },
+      'clip': clip.name,
+    };
+  }
 }
 
 class ClipRSuperellipseLayer with PictureEngineLayer implements ui.ClipRSuperellipseEngineLayer {
@@ -237,20 +297,20 @@ class ClipRSuperellipseLayer with PictureEngineLayer implements ui.ClipRSuperell
 }
 
 class ClipRSuperellipseOperation implements LayerOperation {
-  const ClipRSuperellipseOperation(this.rse, this.clip);
+  const ClipRSuperellipseOperation(this.rsuperellipse, this.clip);
 
-  final ui.RSuperellipse rse;
+  final ui.RSuperellipse rsuperellipse;
   final ui.Clip clip;
 
   @override
-  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rse.outerRect);
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rsuperellipse.outerRect);
 
   @override
   void pre(SceneCanvas canvas) {
     canvas.save();
-    canvas.clipRSuperellipse(rse, doAntiAlias: clip != ui.Clip.hardEdge);
+    canvas.clipRSuperellipse(rsuperellipse, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
-      canvas.saveLayer(rse.outerRect, ui.Paint());
+      canvas.saveLayer(rsuperellipse.outerRect, ui.Paint());
     }
   }
 
@@ -264,16 +324,38 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    return PlatformViewStyling(clip: PlatformViewRRectClip(rse.toApproximateRRect()));
+    // RSuperellipse ops in PlatformView are approximated by RRect because they
+    // are expensive.
+    return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
   }
 
   @override
   bool get affectsBackdrop => false;
 
   @override
-  String toString() => 'ClipRSuperellipseOperation(rse: $rse, clip: $clip)';
+  String toString() => 'ClipRSuperellipseOperation(rsuperellipse: $rsuperellipse, clip: $clip)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'clipRSuperellipse',
+      'rsuperellipse': {
+        'left': rsuperellipse.left,
+        'top': rsuperellipse.top,
+        'right': rsuperellipse.right,
+        'bottom': rsuperellipse.bottom,
+        'tlRadiusX': rsuperellipse.tlRadiusX,
+        'tlRadiusY': rsuperellipse.tlRadiusY,
+        'trRadiusX': rsuperellipse.trRadiusX,
+        'trRadiusY': rsuperellipse.trRadiusY,
+        'brRadiusX': rsuperellipse.brRadiusX,
+        'brRadiusY': rsuperellipse.brRadiusY,
+        'blRadiusX': rsuperellipse.blRadiusX,
+        'blRadiusY': rsuperellipse.blRadiusY,
+      },
+      'clip': clip.name,
+    };
+  }
 }
 
 class ColorFilterLayer with PictureEngineLayer implements ui.ColorFilterEngineLayer {
@@ -312,6 +394,11 @@ class ColorFilterOperation implements LayerOperation {
 
   @override
   String toString() => 'ColorFilterOperation(filter: $filter)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{'type': 'colorFilter', 'filter': filter.toString()};
+  }
 }
 
 class ImageFilterLayer with PictureEngineLayer implements ui.ImageFilterEngineLayer {
@@ -371,6 +458,15 @@ class ImageFilterOperation implements LayerOperation {
 
   @override
   String toString() => 'ImageFilterOperation(filter: $filter)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'imageFilter',
+      'filter': filter.toString(),
+      'offset': {'x': offset.dx, 'y': offset.dy},
+    };
+  }
 }
 
 class OffsetLayer with PictureEngineLayer implements ui.OffsetEngineLayer {
@@ -412,6 +508,14 @@ class OffsetOperation implements LayerOperation {
 
   @override
   String toString() => 'OffsetOperation(dx: $dx, dy: $dy)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'offset',
+      'offset': {'x': dx, 'y': dy},
+    };
+  }
 }
 
 class OpacityLayer with PictureEngineLayer implements ui.OpacityEngineLayer {
@@ -452,10 +556,9 @@ class OpacityOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() => PlatformViewStyling(
-    position:
-        offset != ui.Offset.zero
-            ? PlatformViewPosition.offset(offset)
-            : const PlatformViewPosition.zero(),
+    position: offset != ui.Offset.zero
+        ? PlatformViewPosition.offset(offset)
+        : const PlatformViewPosition.zero(),
     opacity: alpha.toDouble() / 255.0,
   );
 
@@ -464,6 +567,15 @@ class OpacityOperation implements LayerOperation {
 
   @override
   String toString() => 'OpacityOperation(offset: $offset, alpha: $alpha)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'opacity',
+      'alpha': alpha,
+      'offset': {'x': offset.dx, 'y': offset.dy},
+    };
+  }
 }
 
 class TransformLayer with PictureEngineLayer implements ui.TransformEngineLayer {
@@ -508,6 +620,11 @@ class TransformOperation implements LayerOperation {
 
   @override
   String toString() => 'TransformOperation(matrix: $matrix)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{'type': 'transform', 'matrix': transform.toList()};
+  }
 }
 
 class ShaderMaskLayer with PictureEngineLayer implements ui.ShaderMaskEngineLayer {
@@ -558,6 +675,20 @@ class ShaderMaskOperation implements LayerOperation {
   @override
   String toString() =>
       'ShaderMaskOperation(shader: $shader, maskRect: $maskRect, blendMode: $blendMode)';
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'shaderMask',
+      'shader': shader.toString(),
+      'maskRect': {
+        'left': maskRect.left,
+        'top': maskRect.top,
+        'right': maskRect.right,
+        'bottom': maskRect.bottom,
+      },
+    };
+  }
 }
 
 class PlatformView {
@@ -614,6 +745,13 @@ mixin PictureEngineLayer implements ui.EngineLayer {
     return 'PictureEngineLayer($operation)';
   }
 
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'operation': operation.debugJsonDescription,
+      'commands': drawCommands.map((c) => c.debugJsonDescription).toList(),
+    };
+  }
+
   bool get isSimple {
     if (slices.length > 1) {
       return false;
@@ -643,9 +781,13 @@ abstract class LayerOperation {
   /// invoked even if it contains no pictures. (Most operations don't need to
   /// actually be performed at all if they don't contain any pictures.)
   bool get affectsBackdrop;
+
+  Map<String, Object> get debugJsonDescription;
 }
 
-sealed class LayerDrawCommand {}
+sealed class LayerDrawCommand {
+  Map<String, Object> get debugJsonDescription;
+}
 
 class PictureDrawCommand extends LayerDrawCommand {
   PictureDrawCommand(this.offset, this.picture, this.sliceIndex);
@@ -653,6 +795,22 @@ class PictureDrawCommand extends LayerDrawCommand {
   final int sliceIndex;
   final ui.Offset offset;
   final ScenePicture picture;
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    final bounds = picture.cullRect;
+    return <String, Object>{
+      'type': 'picture',
+      'sliceIndex': sliceIndex,
+      'offset': <String, Object>{'x': offset.dx, 'y': offset.dy},
+      'localBounds': <String, Object>{
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+    };
+  }
 }
 
 class PlatformViewDrawCommand extends LayerDrawCommand {
@@ -661,12 +819,32 @@ class PlatformViewDrawCommand extends LayerDrawCommand {
   final int sliceIndex;
   final int viewId;
   final ui.Rect bounds;
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{
+      'type': 'platformView',
+      'sliceIndex': sliceIndex,
+      'viewId': viewId,
+      'localBounds': <String, Object>{
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+    };
+  }
 }
 
 class RetainedLayerDrawCommand extends LayerDrawCommand {
   RetainedLayerDrawCommand(this.layer);
 
   final PictureEngineLayer layer;
+
+  @override
+  Map<String, Object> get debugJsonDescription {
+    return <String, Object>{'type': 'layer', 'layer': layer.debugJsonDescription};
+  }
 }
 
 // Represents how a platform view should be positioned in the scene.
@@ -777,7 +955,7 @@ class PlatformViewStyling {
   final PlatformViewClip clip;
 
   ui.Rect mapLocalToGlobal(ui.Rect rect) {
-    return position.mapLocalToGlobal(rect.intersect(clip.outerRect));
+    return position.mapLocalToGlobal(rect).intersect(clip.outerRect);
   }
 
   static PlatformViewStyling combine(PlatformViewStyling outer, PlatformViewStyling inner) {
@@ -883,10 +1061,15 @@ class PlatformViewNoClip implements PlatformViewClip {
 
   @override
   ui.Rect get outerRect => ui.Rect.largest;
+
+  @override
+  String toString() {
+    return 'PlatformViewClip(none)';
+  }
 }
 
 class PlatformViewRectClip implements PlatformViewClip {
-  PlatformViewRectClip(this.rect);
+  const PlatformViewRectClip(this.rect);
 
   final ui.Rect rect;
 
@@ -922,10 +1105,15 @@ class PlatformViewRectClip implements PlatformViewClip {
 
   @override
   ui.Rect get outerRect => rect;
+
+  @override
+  String toString() {
+    return 'PlatformViewRectClip($rect)';
+  }
 }
 
 class PlatformViewRRectClip implements PlatformViewClip {
-  PlatformViewRRectClip(this.rrect);
+  const PlatformViewRRectClip(this.rrect);
 
   final ui.RRect rrect;
 
@@ -961,6 +1149,11 @@ class PlatformViewRRectClip implements PlatformViewClip {
 
   @override
   ui.Rect get outerRect => rrect.outerRect;
+
+  @override
+  String toString() {
+    return 'PlatformViewRRectClip($rrect)';
+  }
 }
 
 class PlatformViewPathClip implements PlatformViewClip {
@@ -1001,6 +1194,11 @@ class PlatformViewPathClip implements PlatformViewClip {
 
   @override
   ui.Rect get outerRect => path.getBounds();
+
+  @override
+  String toString() {
+    return 'PlatformViewPathClip($path)';
+  }
 }
 
 class LayerSliceBuilder {
@@ -1158,8 +1356,9 @@ class LayerBuilder {
   }
 
   PictureEngineLayer sliceUp() {
-    final int sliceCount =
-        layer.operation.affectsBackdrop ? getCurrentSliceCount() : sliceBuilders.length;
+    final int sliceCount = layer.operation.affectsBackdrop
+        ? getCurrentSliceCount()
+        : sliceBuilders.length;
     final slices = <LayerSlice?>[];
     for (int i = 0; i < sliceCount; i++) {
       final ui.Rect? backdropRect;

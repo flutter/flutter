@@ -77,7 +77,7 @@ PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
   }
 
   auto context = ContextMTL::Create(
-      impeller::Flags{}, ShaderLibraryMappingsForPlayground(),
+      switches.flags, ShaderLibraryMappingsForPlayground(),
       is_gpu_disabled_sync_switch_, "Playground Library",
       switches.enable_wide_gamut
           ? std::optional<PixelFormat>(PixelFormat::kB10G10R10A10XR)
@@ -136,6 +136,10 @@ fml::Status PlaygroundImplMTL::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
   context_->SetCapabilities(capabilities);
   return fml::Status();
+}
+
+void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {
+  is_gpu_disabled_sync_switch_->SetSwitch(disabled);
 }
 
 }  // namespace impeller

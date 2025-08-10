@@ -156,8 +156,10 @@ void main() {
     });
 
     testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -182,19 +184,24 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
+
+      expect(find.text('Next'), findsNothing);
+      expect(find.text('Page 2'), findsOneWidget);
 
       await tester.pageBack();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration + const Duration(milliseconds: 1));
 
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);
     });
 
     testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+      final TransitionDurationObserver observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
+          navigatorObservers: <NavigatorObserver>[observer],
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -222,7 +229,7 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(observer.transitionDuration);
 
       await tester.pageBack();
       await tester.pump();
@@ -406,11 +413,91 @@ void main() {
       expect(result, isNull);
       expect(tester.takeException(), isNotNull);
     });
+
+    testWidgets('runs in original zone', (WidgetTester tester) async {
+      final Zone testZone = Zone.current;
+      Zone? runAsyncZone;
+      Zone? timerZone;
+      Zone? periodicTimerZone;
+      Zone? microtaskZone;
+
+      Zone? innerZone;
+      Zone? innerTimerZone;
+      Zone? innerPeriodicTimerZone;
+      Zone? innerMicrotaskZone;
+
+      await tester.binding.runAsync<void>(() async {
+        final Zone currentZone = Zone.current;
+        runAsyncZone = currentZone;
+
+        // Complete a future when all callbacks have completed.
+        int pendingCallbacks = 6;
+        final Completer<void> callbacksDone = Completer<void>();
+        void onCallback() {
+          if (--pendingCallbacks == 0) {
+            testZone.run(() {
+              callbacksDone.complete(null);
+            });
+          }
+        }
+
+        // On the runAsync zone itself.
+        currentZone.createTimer(Duration.zero, () {
+          timerZone = Zone.current;
+          onCallback();
+        });
+        currentZone.createPeriodicTimer(Duration.zero, (Timer timer) {
+          timer.cancel();
+          periodicTimerZone = Zone.current;
+          onCallback();
+        });
+        currentZone.scheduleMicrotask(() {
+          microtaskZone = Zone.current;
+          onCallback();
+        });
+
+        // On a nested user-created zone.
+        final Zone inner = runZoned(() => Zone.current);
+        innerZone = inner;
+        inner.createTimer(Duration.zero, () {
+          innerTimerZone = Zone.current;
+          onCallback();
+        });
+        inner.createPeriodicTimer(Duration.zero, (Timer timer) {
+          timer.cancel();
+          innerPeriodicTimerZone = Zone.current;
+          onCallback();
+        });
+        inner.scheduleMicrotask(() {
+          innerMicrotaskZone = Zone.current;
+          onCallback();
+        });
+
+        await callbacksDone.future;
+      });
+      expect(runAsyncZone, isNotNull);
+      expect(timerZone, same(runAsyncZone));
+      expect(periodicTimerZone, same(runAsyncZone));
+      expect(microtaskZone, same(runAsyncZone));
+
+      expect(innerZone, isNotNull);
+      expect(innerTimerZone, same(innerZone));
+      expect(innerPeriodicTimerZone, same(innerZone));
+      expect(innerMicrotaskZone, same(innerZone));
+
+      expect(runAsyncZone, isNot(same(testZone)));
+      expect(runAsyncZone, isNot(same(innerZone)));
+      expect(innerZone, isNot(same(testZone)));
+    });
   });
 
   group('showKeyboard', () {
     testWidgets('can be called twice', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: TextFormField()))));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(child: Center(child: TextFormField())),
+        ),
+      );
       await tester.showKeyboard(find.byType(TextField));
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
@@ -426,7 +513,9 @@ void main() {
       'can focus on offstage text input field if finder says not to skip offstage nodes',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: Offstage(child: TextFormField()))),
+          MaterialApp(
+            home: Material(child: Offstage(child: TextFormField())),
+          ),
         );
         await tester.showKeyboard(find.byType(TextField, skipOffstage: false));
       },

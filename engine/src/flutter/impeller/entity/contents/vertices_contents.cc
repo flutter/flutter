@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/geometry/color.h"
@@ -163,12 +164,10 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale = texture->GetYCoordScale();
     frame_info.mvp = geometry_result.transform;
 
-    frag_info.output_alpha = alpha_;
-    frag_info.input_alpha = 1.0;
-
-    // These values are ignored if the platform supports native decal mode.
-    frag_info.tmx = static_cast<int>(tile_mode_x_);
-    frag_info.tmy = static_cast<int>(tile_mode_y_);
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(1, alpha_, static_cast<int>(tile_mode_x_),
+                static_cast<int>(tile_mode_y_));
+    frag_info.use_strict_source_rect = 0.0;
 
     auto& host_buffer = renderer.GetTransientsBuffer();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
@@ -177,8 +176,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     return pass.Draw().ok();
   }
 
-  using VS = VerticesUberShader::VertexShader;
-  using FS = VerticesUberShader::FragmentShader;
+  using VS = VerticesUber1Shader::VertexShader;
+  using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
   pass.SetCommandLabel(SPrintF("DrawVertices Advanced Blend (%s)",
@@ -188,7 +187,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   options.primitive_type = geometry_result.type;
-  pass.SetPipeline(renderer.GetDrawVerticesUberShader(options));
+  pass.SetPipeline(renderer.GetDrawVerticesUberPipeline(blend_mode, options));
 
   FS::BindTextureSampler(pass, texture, dst_sampler);
 

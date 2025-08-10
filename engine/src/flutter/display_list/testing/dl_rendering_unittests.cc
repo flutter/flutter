@@ -10,6 +10,8 @@
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/color_filters/dl_matrix_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
@@ -646,7 +648,7 @@ class RenderEnvironment {
     auto surface = getSurface(info.width, info.height);
     FML_DCHECK(surface != nullptr);
     auto canvas = surface->getCanvas();
-    canvas->clear(ToSk(info.bg));
+    canvas->clear(ToSkColor4f(info.bg));
 
     int restore_count = canvas->save();
     canvas->scale(info.scale, info.scale);
@@ -1249,7 +1251,7 @@ class CanvasCompareTester {
                    "saveLayer with alpha, no bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(nullptr, &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -1263,7 +1265,7 @@ class CanvasCompareTester {
                    "saveLayer with peephole alpha, no bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(nullptr, &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -1277,7 +1279,7 @@ class CanvasCompareTester {
                    "saveLayer with alpha and bounds",
                    [=](const SkSetupContext& ctx) {
                      SkPaint save_p;
-                     save_p.setColor(ToSk(alpha_layer_color));
+                     save_p.setColor(ToSkColor4f(alpha_layer_color));
                      ctx.canvas->saveLayer(ToSkRect(layer_bounds), &save_p);
                    },
                    [=](const DlSetupContext& ctx) {
@@ -2223,9 +2225,10 @@ class CanvasCompareTester {
                    })
                    .with_diff_clip());
     DlPathBuilder path_builder;
+    path_builder.SetFillType(DlPathFillType::kOdd);
     path_builder.AddRect(r_clip);
     path_builder.AddCircle(DlPoint(kRenderCenterX, kRenderCenterY), 1.0f);
-    DlPath path_clip(path_builder, DlPathFillType::kOdd);
+    DlPath path_clip = path_builder.TakePath();
     RenderWith(testP, env, intersect_tolerance,
                CaseParameters(
                    "Hard ClipPath inset by 15.4",
@@ -3201,7 +3204,7 @@ TEST_F(DisplayListRendering, DrawPath) {
   }
   path_builder.Close();
 
-  DlPath path = DlPath(path_builder);
+  DlPath path = path_builder.TakePath();
 
   CanvasCompareTester::RenderAll(  //
       TestParameters(
@@ -3900,7 +3903,6 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
       // ~12 on top and ~8 on the bottom, so we add 33h & 13v allowed
       // padding to the tolerance
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(33, 13));
-  EXPECT_TRUE(blob->unique());
 #endif  // OS_FUCHSIA
 }
 
@@ -3910,7 +3912,7 @@ TEST_F(DisplayListRendering, DrawShadow) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3934,7 +3936,7 @@ TEST_F(DisplayListRendering, DrawShadowTransparentOccluder) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -3958,7 +3960,7 @@ TEST_F(DisplayListRendering, DrawShadowDpr) {
       DlRect::MakeLTRB(kRenderLeft + 10, kRenderTop,  //
                        kRenderRight - 10, kRenderBottom - 20),
       kRenderCornerRadius, kRenderCornerRadius));
-  DlPath path(path_builder);
+  DlPath path = path_builder.TakePath();
 
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
@@ -4569,7 +4571,7 @@ class DisplayListNopTest : public DisplayListRendering {
           int x = 0;
           for (DlColor color : test_dst_colors) {
             SkPaint paint;
-            paint.setColor(ToSk(color));
+            paint.setColor(ToSkColor4f(color));
             paint.setBlendMode(SkBlendMode::kSrc);
             canvas->drawRect(SkRect::MakeXYWH(x, 0, 1, 1), paint);
             x++;
@@ -4708,12 +4710,13 @@ class DisplayListNopTest : public DisplayListRendering {
     }
 
     auto sk_mode = static_cast<SkBlendMode>(mode);
-    auto sk_color_filter = SkColorFilters::Blend(ToSk(color), sk_mode);
+    auto sk_color_filter =
+        SkColorFilters::Blend(ToSkColor4f(color), nullptr, sk_mode);
     auto srgb = SkColorSpace::MakeSRGB();
     int all_flags = 0;
     if (sk_color_filter) {
       for (DlColor dst_color : test_dst_colors) {
-        SkColor4f dst_color_f = SkColor4f::FromColor(ToSk(dst_color));
+        SkColor4f dst_color_f = ToSkColor4f(dst_color);
         DlColor result = DlColor(
             sk_color_filter->filterColor4f(dst_color_f, srgb.get(), srgb.get())
                 .toSkColor());
@@ -4746,7 +4749,7 @@ class DisplayListNopTest : public DisplayListRendering {
     auto sk_mode = static_cast<SkBlendMode>(mode);
     SkPaint sk_paint;
     sk_paint.setBlendMode(sk_mode);
-    sk_paint.setColor(ToSk(color));
+    sk_paint.setColor(ToSkColor4f(color));
     for (auto& back_end : CanvasCompareTester::TestBackends) {
       auto provider = CanvasCompareTester::GetProvider(back_end);
       auto result_surface = provider->MakeOffscreenSurface(
@@ -4807,7 +4810,7 @@ class DisplayListNopTest : public DisplayListRendering {
     auto sk_mode = static_cast<SkBlendMode>(mode);
     SkPaint sk_paint;
     sk_paint.setBlendMode(sk_mode);
-    sk_paint.setColor(ToSk(color));
+    sk_paint.setColor(ToSkColor4f(color));
     sk_paint.setColorFilter(ToSk(color_filter));
     sk_paint.setImageFilter(ToSk(image_filter));
     for (auto& back_end : CanvasCompareTester::TestBackends) {

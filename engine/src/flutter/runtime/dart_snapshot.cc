@@ -211,6 +211,7 @@ fml::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromMappings(
     return snapshot;
   }
   return nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(

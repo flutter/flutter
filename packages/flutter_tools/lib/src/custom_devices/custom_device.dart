@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,6 +22,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -55,12 +57,12 @@ class CustomDeviceLogReader extends DeviceLogReader {
   final String name;
 
   @visibleForTesting
-  final StreamController<String> logLinesController = StreamController<String>.broadcast();
+  final logLinesController = StreamController<String>.broadcast();
 
   @visibleForTesting
-  final List<StreamSubscription<String>> subscriptions = <StreamSubscription<String>>[];
+  final subscriptions = <StreamSubscription<String>>[];
 
-  /// Listen to [process]' stdout and stderr, decode them using [SystemEncoding]
+  /// Listen to [process]' stdout and stderr, decode them using [encoding]
   /// and add each decoded line to [logLines].
   ///
   /// However, [logLines] will not be done when the [process]' stdout and stderr
@@ -101,7 +103,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[
+    final futures = <Future<void>>[
       for (final StreamSubscription<String> subscription in subscriptions) subscription.cancel(),
       logLinesController.close(),
     ];
@@ -139,7 +141,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   final ProcessUtils _processUtils;
   final int? numTries;
   final Map<String, String> _additionalReplacementValues;
-  final List<ForwardedPort> _forwardedPorts = <ForwardedPort>[];
+  final _forwardedPorts = <ForwardedPort>[];
 
   @override
   Future<void> dispose() async {
@@ -156,15 +158,14 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // launch the forwarding command
     final Process process = await _processUtils.start(interpolated);
 
-    final Completer<ForwardedPort?> completer = Completer<ForwardedPort?>();
+    final completer = Completer<ForwardedPort?>();
 
     // Read the outputs of the process; if we find a line that matches
     // the configs forwardPortSuccessRegex, we complete with a successfully
     // forwarded port.
     // If that regex never matches, this will potentially run forever
     // and the forwarding will never complete.
-    final CustomDeviceLogReader reader = CustomDeviceLogReader(_deviceName)
-      ..listenToProcessOutput(process);
+    final reader = CustomDeviceLogReader(_deviceName)..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
         completer.complete(ForwardedPort.withContext(hostPort, devicePort, process));
@@ -194,7 +195,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
     int actualHostPort = (hostPort == 0 || hostPort == null) ? devicePort : hostPort;
-    int tries = 0;
+    var tries = 0;
 
     while ((numTries == null) || (tries < numTries!)) {
       // when the desired host port is already forwarded by this Forwarder,
@@ -282,6 +283,7 @@ class CustomDeviceAppSession {
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
       if (debuggingOptions.enableDartProfiling) 'enable-dart-profiling=true',
+      if (debuggingOptions.profileStartup) 'profile-startup=true',
       if (debuggingOptions.enableSoftwareRendering) 'enable-software-rendering=true',
       if (debuggingOptions.skiaDeterministicRendering) 'skia-deterministic-rendering=true',
       if (debuggingOptions.traceSkia) 'trace-skia=true',
@@ -290,6 +292,7 @@ class CustomDeviceAppSession {
       if (debuggingOptions.traceSystrace) 'trace-systrace=true',
       if (debuggingOptions.traceToFile != null) 'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer) 'endless-trace-buffer=true',
+      if (debuggingOptions.profileMicrotasks) 'profile-microtasks=true',
       if (debuggingOptions.purgePersistentCache) 'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
@@ -329,11 +332,8 @@ class CustomDeviceAppSession {
   /// Start the app on the device.
   /// Needs the app to be installed on the device and not running already.
   ///
-  /// [mainPath], [route], [debuggingOptions], [platformArgs] and
-  /// [userIdentifier] may be null.
-  ///
-  /// [ipv6] may not be respected since it depends on the device config whether
-  /// it uses ipv6 or ipv4
+  /// ipv6 may not be respected since it depends on the device config whether
+  /// it uses ipv6 or ipv4.
   Future<LaunchResult> start({
     String? mainPath,
     String? route,
@@ -341,6 +341,7 @@ class CustomDeviceAppSession {
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     String? userIdentifier,
+    Map<String, String> additionalReplacementValues = const <String, String>{},
   }) async {
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     final String? packageName = _appPackage.name;
@@ -352,13 +353,13 @@ class CustomDeviceAppSession {
           'remotePath': '/tmp/',
           'appName': packageName,
           'engineOptions': _getEngineOptionsForCmdline(debuggingOptions, traceStartup, route),
-        });
+        }, additionalReplacementValues: additionalReplacementValues);
 
     final Process process = await _processUtils.start(interpolated);
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
+    final discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -433,16 +434,15 @@ class CustomDevice extends Device {
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _globalLogReader = CustomDeviceLogReader(config.label),
-       portForwarder =
-           config.usesPortForwarding
-               ? CustomDevicePortForwarder(
-                 deviceName: config.label,
-                 forwardPortCommand: config.forwardPortCommand!,
-                 forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-                 processManager: processManager,
-                 logger: logger,
-               )
-               : const NoOpDevicePortForwarder(),
+       portForwarder = config.usesPortForwarding
+           ? CustomDevicePortForwarder(
+               deviceName: config.label,
+               forwardPortCommand: config.forwardPortCommand!,
+               forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
+               processManager: processManager,
+               logger: logger,
+             )
+           : const NoOpDevicePortForwarder(),
        super(
          config.id,
          category: Category.mobile,
@@ -454,9 +454,9 @@ class CustomDevice extends Device {
   final Logger _logger;
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
-  final Map<ApplicationPackage, CustomDeviceAppSession> _sessions =
-      <ApplicationPackage, CustomDeviceAppSession>{};
+  final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
+  Process? _globalLogReaderProcess;
 
   @override
   final DevicePortForwarder portForwarder;
@@ -465,7 +465,7 @@ class CustomDevice extends Device {
     return _sessions.putIfAbsent(app, () {
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
-      final CustomDeviceAppSession session = CustomDeviceAppSession(
+      final session = CustomDeviceAppSession(
         name: name,
         device: this,
         appPackage: app,
@@ -485,11 +485,11 @@ class CustomDevice extends Device {
   ///
   /// If the process finishes with an exit code != 0, false will be returned and
   /// the error (with the process' stdout and stderr) will be logged using
-  /// [_logger.printError].
+  /// [Logger.printError].
   ///
   /// If [timeout] is not null and the process doesn't finish in time,
   /// it will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryPing({
     Duration? timeout,
@@ -522,7 +522,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> _tryPostBuild({
     required String appName,
@@ -553,7 +553,7 @@ class CustomDevice extends Device {
   ///
   /// If [timeout] is not null and the process doesn't finish in time, it
   /// will be killed with a SIGTERM, false will be returned and the timeout
-  /// will be reported in the log using [_logger.printError]. If [timeout]
+  /// will be reported in the log using [Logger.printError]. If [timeout]
   /// is null, it's treated as if it's an infinite timeout.
   Future<bool> tryUninstall({
     required String appName,
@@ -610,15 +610,26 @@ class CustomDevice extends Device {
     _sessions
       ..forEach((_, CustomDeviceAppSession session) => session.dispose())
       ..clear();
+    _globalLogReaderProcess?.kill();
+    _globalLogReaderProcess = null;
   }
 
   @override
   Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
+    }
+
+    if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
+      // launch the readLogs command
+      _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
+      _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
     return _globalLogReader;
@@ -668,7 +679,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     return true;
   }
 
@@ -700,6 +711,17 @@ class CustomDevice extends Device {
     String? userIdentifier,
     BundleBuilder? bundleBuilder,
   }) async {
+    final TargetPlatform platform = await targetPlatform;
+    final Artifacts artifacts = globals.artifacts!;
+
+    final additionalReplacementValues = <String, String>{
+      'buildMode': debuggingOptions.buildInfo.modeName,
+      'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
+      'engineRevision': artifacts.usesLocalArtifacts
+          ? 'local'
+          : globals.flutterVersion.engineRevision,
+    };
+
     if (!prebuiltApplication) {
       final String assetBundleDir = getAssetBuildDirectory();
 
@@ -707,7 +729,7 @@ class CustomDevice extends Device {
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`
       await bundleBuilder.build(
-        platform: await targetPlatform,
+        platform: platform,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
         depfilePath: defaultDepfilePath,
@@ -720,7 +742,11 @@ class CustomDevice extends Device {
         if (packageName == null) {
           throwToolExit('Could not start app, name for $package is unknown.');
         }
-        await _tryPostBuild(appName: packageName, localPath: assetBundleDir);
+        await _tryPostBuild(
+          appName: packageName,
+          localPath: assetBundleDir,
+          additionalReplacementValues: additionalReplacementValues,
+        );
       }
     }
 
@@ -736,6 +762,7 @@ class CustomDevice extends Device {
       platformArgs: platformArgs,
       prebuiltApplication: prebuiltApplication,
       userIdentifier: userIdentifier,
+      additionalReplacementValues: additionalReplacementValues,
     );
   }
 
@@ -809,7 +836,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     final List<CustomDevice> devices = _enabledCustomDevices;
 
     // maps any custom device to whether its reachable or not.
-    final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(
+    final pingedDevices = Map<CustomDevice, bool>.fromIterables(
       devices,
       await Future.wait(devices.map((CustomDevice e) => e.tryPing(timeout: timeout))),
     );

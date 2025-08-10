@@ -227,4 +227,9 @@ abstract class Renderer {
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
 
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view);
+
+  void dumpDebugInfo();
+
+  /// Clears the state of this renderer. Used in tests.
+  void debugClear();
 }

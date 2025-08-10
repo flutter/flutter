@@ -1,0 +1,20 @@
+name: keyboard_hot_restart
+description: A new Flutter project.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: h86dcv

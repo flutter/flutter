@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:meta/meta.dart';
 import 'package:test/bootstrap/browser.dart';
@@ -83,7 +84,7 @@ void testMain() {
 
   test('_PointerEventContext generates expected events', () {
     DomPointerEvent expectCorrectType(DomEvent e) {
-      expect(domInstanceOfString(e, 'PointerEvent'), isTrue);
+      expect(e.isA<DomPointerEvent>(), isTrue);
       return e as DomPointerEvent;
     }
 
@@ -2310,7 +2311,7 @@ void testMain() {
     expect(data[1].physicalDeltaY, equals(0));
     packets.clear();
 
-    // Pointer move with coaleasced events
+    // Pointer move with coalesced events
     context
         .multiTouchMove(const <_TouchDetails>[
           _TouchDetails(
@@ -2526,7 +2527,7 @@ void testMain() {
       Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler: (event) {
+        handler: (DomEvent event) {
           expect(event, expected);
           handled = true;
         },
@@ -2541,7 +2542,7 @@ void testMain() {
       final Listener listener = Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler: (event) {
+        handler: (DomEvent event) {
           handled = true;
         },
       );
@@ -2578,6 +2579,10 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   late List<CapturedSemanticsEvent> semanticsActions;
   late _PointerEventContext context;
   late PointerBinding binding;
+
+  Future<void> nextEventLoop() {
+    return Future.delayed(Duration.zero);
+  }
 
   void testWithSemantics(
     String description,
@@ -2634,6 +2639,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
+    await nextEventLoop();
     testElement.dispatchEvent(context.primaryUp());
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
@@ -2643,6 +2649,71 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       ui.PointerChange.up,
     ]);
     expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Does not start debouncing if reset before scheduled execution', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    // 1. Trigger _maybeStartDebouncing, which sets _isDebouncing = true and schedules _doStartDebouncing.
+    testElement.dispatchEvent(context.primaryDown());
+
+    // At this point, _isDebouncing is true, but _doStartDebouncing (which sets _state and creates the Timer)
+    // has not yet executed because it was scheduled with Timer.run().
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNull); // _state is still null
+
+    // 2. Simulate a scenario where reset() is called before _doStartDebouncing gets a chance to run.
+    // This could happen due to a hot restart or other lifecycle events.
+    PointerBinding.clickDebouncer.reset();
+
+    // After reset(), _isDebouncing should be false and _state should still be null.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
+
+    // 3. Allow the scheduled _doStartDebouncing to run. With the fix, it should now check
+    // `!isDebouncing` and return early.
+    await nextEventLoop();
+
+    // Verify that _doStartDebouncing did not proceed to set _state or create a Timer.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
+
+    // Ensure no events were sent to the framework as debouncing was effectively cancelled.
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, isEmpty);
+  });
+
+  testWithSemantics('Starts debouncing after event loop', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    testElement.dispatchEvent(context.primaryDown());
+    // ClickDebouncer does not start debouncing right away.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
+    // Instead, it waits until the end of the event loop.
+    await nextEventLoop();
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });
 
   testWithSemantics('Accumulates pointer events starting from pointerdown', () async {
@@ -2660,6 +2731,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       true,
     );
 
+    await nextEventLoop();
     testElement.dispatchEvent(context.primaryUp());
     expect(
       reason: 'Should still be debouncing after pointerup',
@@ -2708,6 +2780,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       true,
     );
 
+    await nextEventLoop();
     final DomElement newTarget = createDomElement('flt-semantics');
     newTarget.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(newTarget);
@@ -2758,6 +2831,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.dispatchEvent(context.primaryDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
+    await nextEventLoop();
     final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
       'clientX': testElement.getBoundingClientRect().x,
       'clientY': testElement.getBoundingClientRect().y,
@@ -2777,6 +2851,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.dispatchEvent(context.primaryDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
+    await nextEventLoop();
     final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
       'clientX': testElement.getBoundingClientRect().x,
       'clientY': testElement.getBoundingClientRect().y,
@@ -3054,13 +3129,13 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     bool ctrlKey = false,
   }) {
     final DomEvent event = createDomWheelEvent('wheel', <String, Object>{
-      if (buttons != null) 'buttons': buttons,
-      if (clientX != null) 'clientX': clientX,
-      if (clientY != null) 'clientY': clientY,
-      if (deltaX != null) 'deltaX': deltaX,
-      if (deltaY != null) 'deltaY': deltaY,
-      if (wheelDeltaX != null) 'wheelDeltaX': wheelDeltaX,
-      if (wheelDeltaY != null) 'wheelDeltaY': wheelDeltaY,
+      'buttons': ?buttons,
+      'clientX': ?clientX,
+      'clientY': ?clientY,
+      'deltaX': ?deltaX,
+      'deltaY': ?deltaY,
+      'wheelDeltaX': ?wheelDeltaX,
+      'wheelDeltaY': ?wheelDeltaY,
       'ctrlKey': ctrlKey,
       'cancelable': true,
       'bubbles': true,
@@ -3068,11 +3143,11 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     });
     // timeStamp can't be set in the constructor, need to override the getter.
     if (timeStamp != null) {
-      js_util.callMethod<void>(objectConstructor, 'defineProperty', <dynamic>[
+      objectConstructor.defineProperty(
         event,
         'timeStamp',
-        js_util.jsify(<String, dynamic>{'value': timeStamp, 'configurable': true}),
-      ]);
+        DomPropertyDataDescriptor(value: timeStamp, configurable: true),
+      );
     }
     return event;
   }
@@ -3252,27 +3327,20 @@ class _PointerEventContext extends _BasicEventContext
     if (coalescedEvents != null) {
       // There's no JS API for setting coalesced events, so we need to
       // monkey-patch the `getCoalescedEvents` method to return what we want.
-      final coalescedEventJs =
-          coalescedEvents
-              .map(
-                (_CoalescedTouchDetails details) => _moveWithFullDetails(
-                  pointer: details.pointer,
-                  button: button,
-                  buttons: buttons,
-                  clientX: details.clientX,
-                  clientY: details.clientY,
-                  pointerType: 'touch',
-                ),
-              )
-              .toJSAnyDeep;
+      final coalescedEventJs = coalescedEvents
+          .map(
+            (_CoalescedTouchDetails details) => _moveWithFullDetails(
+              pointer: details.pointer,
+              button: button,
+              buttons: buttons,
+              clientX: details.clientX,
+              clientY: details.clientY,
+              pointerType: 'touch',
+            ),
+          )
+          .toJSAnyDeep;
 
-      js_util.setProperty(
-        event,
-        'getCoalescedEvents',
-        js_util.allowInterop(() {
-          return coalescedEventJs;
-        }),
-      );
+      event['getCoalescedEvents'] = (() => coalescedEventJs).toJS;
     }
 
     return event;

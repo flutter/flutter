@@ -3,16 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/editable_text_utils.dart';
 
 void main() {
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(textAlign: alignment))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(textAlign: alignment)),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(CupertinoTextField);
@@ -47,7 +53,9 @@ void main() {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(scrollPhysics: scrollPhysics))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(scrollPhysics: scrollPhysics)),
+      ),
     );
 
     final Finder textFieldFinder = find.byType(CupertinoTextField);
@@ -292,7 +300,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue'))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue')),
+      ),
     );
 
     await tester.enterText(find.byType(CupertinoTextFormFieldRow), 'changedValue');
@@ -309,7 +319,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue'))),
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(initialValue: 'initialValue')),
+      ),
     );
 
     expect(find.text('initialValue'), findsOneWidget);
@@ -518,4 +530,126 @@ void main() {
     expect(stateKey.currentState!.value, 'initialValue');
     expect(value, 'initialValue');
   });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+        addTearDown(() {
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: CupertinoApp(home: CupertinoTextField(controller: controller)),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
+
+  testWidgets(
+    'readOnly disallows SystemContextMenu',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170521.
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+      final TextEditingController controller = TextEditingController(text: 'abcdefghijklmnopqr');
+      addTearDown(() {
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.view.reset();
+        controller.dispose();
+      });
+
+      bool readOnly = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
+        View(
+          view: tester.view,
+          child: CupertinoApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return CupertinoTextFormFieldRow(readOnly: readOnly, controller: controller);
+              },
+            ),
+          ),
+        ),
+      );
+
+      final Duration waitDuration = SelectionOverlay.fadeDuration > kDoubleTapTimeout
+          ? SelectionOverlay.fadeDuration
+          : kDoubleTapTimeout;
+
+      // Double tap to select the text.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // No error as in https://github.com/flutter/flutter/issues/170521.
+
+      // The Flutter-drawn context menu is shown. The SystemContextMenu is not
+      // shown because readOnly is true.
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Turn off readOnly and hide the context menu.
+      setState(() {
+        readOnly = false;
+      });
+      await tester.tap(find.text('Copy'));
+      await tester.pump(waitDuration);
+
+      expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      // Double tap to show the context menu again.
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(kDoubleTapTimeout ~/ 2);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pump(waitDuration);
+
+      // Now iOS is showing the SystemContextMenu while others continue to show
+      // the Flutter-drawn context menu.
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          expect(find.byType(SystemContextMenu), findsOneWidget);
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
 }

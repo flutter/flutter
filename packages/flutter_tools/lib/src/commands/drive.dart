@@ -29,6 +29,7 @@ import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
+import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -81,20 +82,20 @@ class DriveCommand extends RunCommandBase {
     addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
     argParser
       ..addFlag(
-        'keep-app-running',
+        _kKeepAppRunning,
         help:
             'Will keep the Flutter application running when done testing.\n'
             'By default, "flutter drive" stops the application after tests are finished, '
-            'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '
+            'and "--$_kKeepAppRunning" overrides this. On the other hand, if "--use-existing-app" '
             'is specified, then "flutter drive" instead defaults to leaving the application '
-            'running, and "--no-keep-app-running" overrides it.',
+            'running, and "--no-$_kKeepAppRunning" overrides it.',
       )
       ..addOption(
-        'use-existing-app',
+        _kUseExistingApp,
         help:
             'Connect to an already running instance via the given Dart VM Service URL. '
             'If this option is given, the application will not be automatically started, '
-            'and it will only be stopped if "--no-keep-app-running" is explicitly set.',
+            'and it will only be stopped if "--no-$_kKeepAppRunning" is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption(
@@ -140,11 +141,12 @@ class DriveCommand extends RunCommandBase {
       )
       ..addOption(
         'browser-dimension',
-        defaultsTo: '1600,1024',
+        defaultsTo: '1600x1024',
         help:
             'The dimension of the browser when running a Flutter Web test. '
-            'This will affect screenshot and all offset-related actions.',
-        valueHelp: 'width,height',
+            'Format is "width x height[@dpr]" where dpr is optional device pixel ratio. '
+            'This will affect screenshot dimensions and all offset-related actions.',
+        valueHelp: '1600x1024[@1]',
       )
       ..addFlag(
         'android-emulator',
@@ -185,6 +187,9 @@ class DriveCommand extends RunCommandBase {
       );
   }
 
+  static const _kKeepAppRunning = 'keep-app-running';
+  static const _kUseExistingApp = 'use-existing-app';
+
   final Signals signals;
 
   /// The [ProcessSignal]s that will lead to a screenshot being taken (if the option is provided).
@@ -212,10 +217,10 @@ class DriveCommand extends RunCommandBase {
   Map<ProcessSignal, Object>? screenshotTokens;
 
   @override
-  final String name = 'drive';
+  final name = 'drive';
 
   @override
-  final String description =
+  final description =
       'Builds and installs the app, and runs a Dart program that connects to '
       'the app, often to run externally facing integration tests, such as with '
       'package:test and package:flutter_driver.\n'
@@ -226,7 +231,7 @@ class DriveCommand extends RunCommandBase {
   String get category => FlutterCommandCategory.project;
 
   @override
-  final List<String> aliases = <String>['driver'];
+  final aliases = <String>['driver'];
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -299,8 +304,26 @@ class DriveCommand extends RunCommandBase {
     if (screenshot != null && !device.supportsScreenshot) {
       _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
 
-    final bool web = device is WebServerDevice || device is ChromiumDevice;
+    final WebDevServerConfig? fileConfig = (device is WebServerDevice || device is ChromiumDevice)
+        ? (await WebDevServerConfig.loadFromFile(fileSystem: globals.fs, logger: globals.logger))
+        : null;
+
+    final HttpsConfig? httpsConfig = fileConfig?.https?.copyWith(
+      certPath: stringArg('web-tls-cert-path'),
+      certKeyPath: stringArg('web-tls-cert-key-path'),
+    );
+
+    final WebDevServerConfig? webDevServerConfig = fileConfig?.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+    );
+    final web = webDevServerConfig != null;
+
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
@@ -320,13 +343,16 @@ class DriveCommand extends RunCommandBase {
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
-    final File? applicationBinary =
-        applicationBinaryPath == null ? null : _fileSystem.file(applicationBinaryPath);
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
+    final File? applicationBinary = applicationBinaryPath == null
+        ? null
+        : _fileSystem.file(applicationBinaryPath);
 
-    bool screenshotTaken = false;
+    var screenshotTaken = false;
     try {
-      if (stringArg('use-existing-app') == null) {
+      if (stringArg(_kUseExistingApp) == null) {
         await driverService.start(
           buildInfo,
           device,
@@ -341,9 +367,9 @@ class DriveCommand extends RunCommandBase {
           },
         );
       } else {
-        final Uri? uri = Uri.tryParse(stringArg('use-existing-app')!);
+        final Uri? uri = Uri.tryParse(stringArg(_kUseExistingApp)!);
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArg(_kUseExistingApp)}');
         }
         await driverService.reuseApplication(uri, device, debuggingOptions);
       }
@@ -355,10 +381,11 @@ class DriveCommand extends RunCommandBase {
         chromeBinary: stringArg('chrome-binary'),
         headless: boolArg('headless'),
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
-        browserDimension: stringArg('browser-dimension')!.split(','),
+        browserDimension: stringArg('browser-dimension')!.split(RegExp('[,x@]')),
         browserName: stringArg('browser-name'),
-        driverPort:
-            stringArg('driver-port') != null ? int.tryParse(stringArg('driver-port')!) : null,
+        driverPort: stringArg('driver-port') != null
+            ? int.tryParse(stringArg('driver-port')!)
+            : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
       );
@@ -381,7 +408,7 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArg('keep-app-running')) {
+      if (_keepAppRunningWhenComplete) {
         _logger.printStatus('Leaving the application running.');
       } else {
         await driverService.stop(userIdentifier: userIdentifier);
@@ -401,6 +428,23 @@ class DriveCommand extends RunCommandBase {
     return FlutterCommandResult.success();
   }
 
+  /// Whether, based on the arguments passed, the app should be stopped upon
+  /// completion.
+  ///
+  /// Interprets the results of `--keep-app-running` and `--use-existing-app`.
+  bool get _keepAppRunningWhenComplete {
+    if (boolArg(_kKeepAppRunning)) {
+      // --keep-app-running
+      return true;
+    } else if (argResults!.wasParsed(_kKeepAppRunning)) {
+      // --no-keep-app-running
+      return false;
+    } else {
+      // Default --keep-app-running to whether --use-existing-app was used.
+      return argResults!.wasParsed(_kUseExistingApp);
+    }
+  }
+
   int? get _timeoutSeconds {
     final String? timeoutString = stringArg('timeout');
     if (timeoutString == null) {
@@ -418,7 +462,7 @@ class DriveCommand extends RunCommandBase {
 
   void _registerScreenshotCallbacks(Device device, Directory screenshotDir) {
     _logger.printTrace('Registering signal handlers...');
-    final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
+    final tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(signal, (ProcessSignal signal) {
         _unregisterScreenshotCallbacks();

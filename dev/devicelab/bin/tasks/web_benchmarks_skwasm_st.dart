@@ -8,6 +8,11 @@ import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 /// Runs all Web benchmarks using the Skwasm rendering backend.
 Future<void> main() async {
   await task(() async {
-    return runWebBenchmark((useWasm: true, forceSingleThreadedSkwasm: true));
+    return runWebBenchmark((
+      useWasm: true,
+      forceSingleThreadedSkwasm: true,
+      useDdc: false,
+      withHotReload: false,
+    ));
   });
 }

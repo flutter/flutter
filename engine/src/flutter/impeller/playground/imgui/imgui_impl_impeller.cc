@@ -12,7 +12,6 @@
 #include "fml/mapping.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/platform.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/imgui/imgui_raster.frag.h"
@@ -254,7 +253,7 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
         render_pass.SetCommandLabel(impeller::SPrintF(
             "ImGui draw list %d (command %d)", draw_list_i, cmd_i));
         render_pass.SetViewport(viewport);
-        render_pass.SetScissor(impeller::IRect::RoundOut(clip_rect));
+        render_pass.SetScissor(impeller::IRect32::RoundOut(clip_rect));
         render_pass.SetPipeline(bd->pipeline);
         VS::BindUniformBuffer(render_pass, vtx_uniforms);
         FS::BindTex(render_pass, bd->font_texture, bd->sampler);

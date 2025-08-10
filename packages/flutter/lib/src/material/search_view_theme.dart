@@ -21,7 +21,7 @@ import 'theme.dart';
 /// widget.
 ///
 /// Descendant widgets obtain the current [SearchViewThemeData] object using
-/// `SearchViewTheme.of(context)`.
+/// [SearchViewTheme.of].
 ///
 /// Typically, a [SearchViewThemeData] is specified as part of the overall [Theme]
 /// with [ThemeData.searchViewTheme]. Otherwise, [SearchViewTheme] can be used
@@ -262,8 +262,8 @@ class SearchViewTheme extends InheritedTheme {
   /// SearchViewThemeData theme = SearchViewTheme.of(context);
   /// ```
   static SearchViewThemeData of(BuildContext context) {
-    final SearchViewTheme? searchViewTheme =
-        context.dependOnInheritedWidgetOfExactType<SearchViewTheme>();
+    final SearchViewTheme? searchViewTheme = context
+        .dependOnInheritedWidgetOfExactType<SearchViewTheme>();
     return searchViewTheme?.data ?? Theme.of(context).searchViewTheme;
   }
 

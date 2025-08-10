@@ -74,11 +74,11 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   context_settings.shader_libraries_data = ShaderLibraryMappings();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.enable_validation = enable_validation;
+  // Enable lazy shader mode for faster test execution as most tests
+  // will never render anything at all.
+  context_settings.flags.lazy_shader_mode = true;
 
-  context = impeller::ContextVK::Create(
-      // Enable lazy shader mode for faster test execution as most tests
-      // will never render anything at all.
-      impeller::Flags{.lazy_shader_mode = true}, std::move(context_settings));
+  context = impeller::ContextVK::Create(std::move(context_settings));
   if (!context || !context->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context.";
     return false;
@@ -156,7 +156,7 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
                       raster_thread_merger) override {}
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(SkISize frame_size,
+  void PrepareFlutterView(DlISize frame_size,
                           double device_pixel_ratio) override {}
 
   // |ExternalViewEmbedder|
@@ -227,16 +227,16 @@ class TesterPlatformView : public PlatformView,
   }
 
   // |GPUSurfaceSoftwareDelegate|
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override {
-    if (sk_surface_ != nullptr &&
-        SkISize::Make(sk_surface_->width(), sk_surface_->height()) == size) {
+  sk_sp<SkSurface> AcquireBackingStore(const DlISize& size) override {
+    if (sk_surface_ != nullptr &&  //
+        sk_surface_->width() == size.width &&
+        sk_surface_->height() == size.height) {
       // The old and new surface sizes are the same. Nothing to do here.
       return sk_surface_;
     }
 
-    SkImageInfo info =
-        SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType,
-                             SkColorSpace::MakeSRGB());
+    SkImageInfo info = SkImageInfo::MakeN32(
+        size.width, size.height, kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
     sk_surface_ = SkSurfaces::Raster(info, nullptr);
 
     if (sk_surface_ == nullptr) {
@@ -666,11 +666,15 @@ int main(int argc, char* argv[]) {
   };
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                               callback);
+    return queue_id;
   };
 
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
+    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                  key);
   };
 
   settings.unhandled_exception_callback = [](const std::string& error,

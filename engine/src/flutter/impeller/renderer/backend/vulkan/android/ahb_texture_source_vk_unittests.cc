@@ -34,7 +34,7 @@ std::shared_ptr<Context> CreateContext() {
   settings.enable_gpu_tracing = false;
   settings.enable_surface_control = false;
 
-  return ContextVK::Create(impeller::Flags{}, std::move(settings));
+  return ContextVK::Create(std::move(settings));
 }
 
 TEST(AndroidVulkanTest, CanImportRGBA) {

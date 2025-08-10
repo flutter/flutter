@@ -297,7 +297,10 @@ void main() {
         child: Semantics(
           container: true,
           child: Column(
-            children: <Widget>[Semantics(hint: 'hint one'), Semantics(hint: 'hint two')],
+            children: <Widget>[
+              Semantics(hint: 'hint one'),
+              Semantics(hint: 'hint two'),
+            ],
           ),
         ),
       ),
@@ -360,7 +363,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          child: Column(children: <Widget>[Semantics(hint: 'hint'), Semantics(value: 'value')]),
+          child: Column(
+            children: <Widget>[
+              Semantics(hint: 'hint'),
+              Semantics(value: 'value'),
+            ],
+          ),
         ),
       ),
     );
@@ -443,27 +451,26 @@ void main() {
         onCopy: () => performedActions.add(SemanticsAction.copy),
         onCut: () => performedActions.add(SemanticsAction.cut),
         onPaste: () => performedActions.add(SemanticsAction.paste),
-        onMoveCursorForwardByCharacter:
-            (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-        onMoveCursorBackwardByCharacter:
-            (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onMoveCursorForwardByCharacter: (bool _) =>
+            performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: (bool _) =>
+            performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
         onSetText: (String _) => performedActions.add(SemanticsAction.setText),
-        onDidGainAccessibilityFocus:
-            () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
-        onDidLoseAccessibilityFocus:
-            () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+        onDidGainAccessibilityFocus: () =>
+            performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+        onDidLoseAccessibilityFocus: () =>
+            performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
         onFocus: () => performedActions.add(SemanticsAction.focus),
       ),
     );
 
-    final Set<SemanticsAction> allActions =
-        SemanticsAction.values.toSet()
-          ..remove(SemanticsAction.moveCursorForwardByWord)
-          ..remove(SemanticsAction.moveCursorBackwardByWord)
-          ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
+      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -762,6 +769,47 @@ void main() {
         ],
       ),
     );
+    semantics.dispose();
+  });
+
+  testWidgets('MergeSemantics merges CustomSemanticsActions from its children', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MergeSemantics(
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action1'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+            Semantics(
+              container: true,
+              customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+                const CustomSemanticsAction(label: 'action2'): () {},
+              },
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(MergeSemantics)),
+      matchesSemantics(
+        customActions: <CustomSemanticsAction>[
+          const CustomSemanticsAction(label: 'action1'),
+          const CustomSemanticsAction(label: 'action2'),
+        ],
+      ),
+    );
+
     semantics.dispose();
   });
 
@@ -1575,7 +1623,10 @@ void main() {
     expect(
       node,
       matchesSemantics(
-        children: <Matcher>[containsSemantics(label: 'label1'), containsSemantics(label: 'label2')],
+        children: <Matcher>[
+          containsSemantics(label: 'label1'),
+          containsSemantics(label: 'label2'),
+        ],
       ),
     );
   });
@@ -1695,6 +1746,127 @@ void main() {
 
     final SemanticsNode notHeading = tester.getSemantics(find.text('This is not a heading'));
     expect(notHeading, isNot(contains('headingLevel')));
+
+    semantics.dispose();
+  });
+
+  testWidgets('RenderSemanticsAnnotations provides validation result', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
+      final ValueKey<String> key = ValueKey<String>('validation-$result');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          validationResult: result,
+          child: Text('Validation result $result', textDirection: TextDirection.ltr),
+        ),
+      );
+      final RenderSemanticsAnnotations object = tester.renderObject<RenderSemanticsAnnotations>(
+        find.byKey(key),
+      );
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      object.describeSemanticsConfiguration(config);
+      return config;
+    }
+
+    final SemanticsConfiguration noneResult = await pumpValidationResult(
+      SemanticsValidationResult.none,
+    );
+    expect(noneResult.validationResult, SemanticsValidationResult.none);
+
+    final SemanticsConfiguration validResult = await pumpValidationResult(
+      SemanticsValidationResult.valid,
+    );
+    expect(validResult.validationResult, SemanticsValidationResult.valid);
+
+    final SemanticsConfiguration invalidResult = await pumpValidationResult(
+      SemanticsValidationResult.invalid,
+    );
+    expect(invalidResult.validationResult, SemanticsValidationResult.invalid);
+
+    semantics.dispose();
+  });
+
+  testWidgets('validation result precedence', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<void> expectValidationResult({
+      required SemanticsValidationResult outer,
+      required SemanticsValidationResult inner,
+      required SemanticsValidationResult expected,
+    }) async {
+      const ValueKey<String> key = ValueKey<String>('validated-widget');
+      await tester.pumpWidget(
+        Semantics(
+          validationResult: outer,
+          child: Semantics(
+            validationResult: inner,
+            child: Text(
+              key: key,
+              'Outer = $outer; inner = $inner',
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode result = tester.getSemantics(find.byKey(key));
+      expect(
+        result,
+        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+      );
+    }
+
+    // Outer is none
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.none,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is valid
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is invalid
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
 
     semantics.dispose();
   });

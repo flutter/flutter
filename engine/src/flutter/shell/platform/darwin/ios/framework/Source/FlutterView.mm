@@ -5,6 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 
 FLUTTER_ASSERT_ARC
@@ -33,10 +34,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (UIScreen*)screen {
-  if (@available(iOS 13.0, *)) {
-    return self.window.windowScene.screen;
-  }
-  return UIScreen.mainScreen;
+  return self.window.windowScene.screen;
 }
 
 - (MTLPixelFormat)pixelFormat {
@@ -52,6 +50,12 @@ FLUTTER_ASSERT_ARC
 }
 - (BOOL)isWideGamutSupported {
   FML_DCHECK(self.screen);
+
+  // Wide Gamut is not supported for iOS Extensions due to memory limitations
+  // (see https://github.com/flutter/flutter/issues/165086).
+  if (FlutterSharedApplication.isAppExtension) {
+    return NO;
+  }
 
   // This predicates the decision on the capabilities of the iOS device's
   // display.  This means external displays will not support wide gamut if the
@@ -128,7 +132,7 @@ static void PrintWideGamutWarningOnce() {
   auto screenshot = [_delegate takeScreenshot:flutter::Rasterizer::ScreenshotType::UncompressedImage
                               asBase64Encoded:NO];
 
-  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {
+  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.IsEmpty()) {
     return;
   }
 
@@ -171,26 +175,26 @@ static void PrintWideGamutWarningOnce() {
   }
 
   fml::CFRef<CGImageRef> image(CGImageCreate(
-      screenshot.frame_size.width(),                             // size_t width
-      screenshot.frame_size.height(),                            // size_t height
-      bits_per_component,                                        // size_t bitsPerComponent
-      bits_per_pixel,                                            // size_t bitsPerPixel,
-      bytes_per_row_multiplier * screenshot.frame_size.width(),  // size_t bytesPerRow
-      colorspace,                                                // CGColorSpaceRef space
-      bitmap_info,                                               // CGBitmapInfo bitmapInfo
-      image_data_provider,                                       // CGDataProviderRef provider
-      nullptr,                                                   // const CGFloat* decode
-      false,                                                     // bool shouldInterpolate
-      kCGRenderingIntentDefault                                  // CGColorRenderingIntent intent
+      screenshot.frame_size.width,                             // size_t width
+      screenshot.frame_size.height,                            // size_t height
+      bits_per_component,                                      // size_t bitsPerComponent
+      bits_per_pixel,                                          // size_t bitsPerPixel,
+      bytes_per_row_multiplier * screenshot.frame_size.width,  // size_t bytesPerRow
+      colorspace,                                              // CGColorSpaceRef space
+      bitmap_info,                                             // CGBitmapInfo bitmapInfo
+      image_data_provider,                                     // CGDataProviderRef provider
+      nullptr,                                                 // const CGFloat* decode
+      false,                                                   // bool shouldInterpolate
+      kCGRenderingIntentDefault                                // CGColorRenderingIntent intent
       ));
 
   const CGRect frame_rect =
-      CGRectMake(0.0, 0.0, screenshot.frame_size.width(), screenshot.frame_size.height());
+      CGRectMake(0.0, 0.0, screenshot.frame_size.width, screenshot.frame_size.height);
   CGContextSaveGState(context);
   // If the CGContext is not a bitmap based context, this returns zero.
   CGFloat height = CGBitmapContextGetHeight(context);
   if (height == 0) {
-    height = CGFloat(screenshot.frame_size.height());
+    height = CGFloat(screenshot.frame_size.height);
   }
   CGContextTranslateCTM(context, 0.0, height);
   CGContextScaleCTM(context, 1.0, -1.0);

@@ -17,6 +17,10 @@ void main() {
     return iconRichText.text.style!;
   }
 
+  Color textColor(WidgetTester tester, String text) {
+    return tester.renderObject<RenderParagraph>(find.text(text)).text.style!.color!;
+  }
+
   testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
@@ -25,7 +29,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: FilledButton(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: FilledButton(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -36,7 +42,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -82,7 +88,7 @@ void main() {
 
     material = tester.widget<Material>(iconButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -108,7 +114,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -326,7 +332,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Center(child: FilledButton.tonal(onPressed: () {}, child: const Text('button'))),
+        home: Center(
+          child: FilledButton.tonal(onPressed: () {}, child: const Text('button')),
+        ),
       ),
     );
 
@@ -337,7 +345,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -383,7 +391,7 @@ void main() {
 
     material = tester.widget<Material>(iconButtonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -409,7 +417,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -620,8 +628,8 @@ void main() {
   testWidgets('FilledButton uses stateful color for text color in different states', (
     WidgetTester tester,
   ) async {
+    const String buttonText = 'FilledButton';
     final FocusNode focusNode = FocusNode();
-
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
     const Color focusedColor = Color(0x00000003);
@@ -655,7 +663,7 @@ void main() {
                   return FilledButton(
                     onPressed: () {},
                     focusNode: focusNode,
-                    child: const Text('FilledButton'),
+                    child: const Text(buttonText),
                   );
                 },
               ),
@@ -665,17 +673,13 @@ void main() {
       ),
     );
 
-    Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('FilledButton')).text.style!.color!;
-    }
-
     // Default, not disabled.
-    expect(textColor(), equals(defaultColor));
+    expect(textColor(tester, buttonText), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(textColor(), focusedColor);
+    expect(textColor(tester, buttonText), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(FilledButton));
@@ -683,7 +687,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(textColor(), hoverColor);
+    expect(textColor(tester, buttonText), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
@@ -691,7 +695,7 @@ void main() {
     await tester.pump(
       const Duration(milliseconds: 800),
     ); // Wait for splash and highlight to be well under way.
-    expect(textColor(), pressedColor);
+    expect(textColor(tester, buttonText), pressedColor);
     focusNode.dispose();
   });
 
@@ -1248,15 +1252,14 @@ void main() {
                 ),
                 key: key,
                 onPressed: () {},
-                child:
-                    useText
-                        ? const Text('Text', key: childKey)
-                        : Container(
-                          key: childKey,
-                          width: 100,
-                          height: 100,
-                          color: const Color(0xffff0000),
-                        ),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000),
+                      ),
               ),
             ),
           ),
@@ -1449,19 +1452,18 @@ void main() {
                         textDirection: textDirection,
                         child: Scaffold(
                           body: Center(
-                            child:
-                                icon == null
-                                    ? FilledButton(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      child: const Text('button', key: labelKey),
-                                    )
-                                    : FilledButton.icon(
-                                      key: buttonKey,
-                                      onPressed: () {},
-                                      icon: icon,
-                                      label: const Text('button', key: labelKey),
-                                    ),
+                            child: icon == null
+                                ? FilledButton(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    child: const Text('button', key: labelKey),
+                                  )
+                                : FilledButton.icon(
+                                    key: buttonKey,
+                                    onPressed: () {},
+                                    icon: icon,
+                                    label: const Text('button', key: labelKey),
+                                  ),
                           ),
                         ),
                       ),
@@ -1479,14 +1481,12 @@ void main() {
 
             // Compute expected padding, and check.
 
-            final double expectedStart =
-                icon != null
-                    ? paddingWithIconStart[textScaleFactor]!
-                    : paddingWithoutIconStart[textScaleFactor]!;
-            final double expectedEnd =
-                icon != null
-                    ? paddingWithIconEnd[textScaleFactor]!
-                    : paddingWithoutIconEnd[textScaleFactor]!;
+            final double expectedStart = icon != null
+                ? paddingWithIconStart[textScaleFactor]!
+                : paddingWithoutIconStart[textScaleFactor]!;
+            final double expectedEnd = icon != null
+                ? paddingWithIconEnd[textScaleFactor]!
+                : paddingWithoutIconEnd[textScaleFactor]!;
             final EdgeInsets expectedPadding = EdgeInsetsDirectional.fromSTEB(
               expectedStart,
               0,
@@ -1501,11 +1501,13 @@ void main() {
 
             final RenderBox labelRenderBox = tester.renderObject<RenderBox>(find.byKey(labelKey));
             final Rect labelBounds = globalBounds(labelRenderBox);
-            final RenderBox? iconRenderBox =
-                icon == null ? null : tester.renderObject<RenderBox>(find.byKey(iconKey));
+            final RenderBox? iconRenderBox = icon == null
+                ? null
+                : tester.renderObject<RenderBox>(find.byKey(iconKey));
             final Rect? iconBounds = icon == null ? null : globalBounds(iconRenderBox!);
-            final Rect childBounds =
-                icon == null ? labelBounds : labelBounds.expandToInclude(iconBounds!);
+            final Rect childBounds = icon == null
+                ? labelBounds
+                : labelBounds.expandToInclude(iconBounds!);
 
             // We measure the `InkResponse` descendant of the button
             // element, because the button has a larger `RenderBox`
@@ -1539,10 +1541,9 @@ void main() {
 
             // Check the gap between the icon and the label
             if (icon != null) {
-              final double gapWidth =
-                  textDirection == TextDirection.ltr
-                      ? labelBounds.left - iconBounds!.right
-                      : iconBounds!.left - labelBounds.right;
+              final double gapWidth = textDirection == TextDirection.ltr
+                  ? labelBounds.left - iconBounds!.right
+                  : iconBounds!.left - labelBounds.right;
               expect(gapWidth, paddingWithIconGap[textScaleFactor]);
             }
 
@@ -1602,7 +1603,9 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
-              body: Center(child: FilledButton(onPressed: () {}, child: const Text('text'))),
+              body: Center(
+                child: FilledButton(onPressed: () {}, child: const Text('text')),
+              ),
             );
           },
         ),
@@ -1773,7 +1776,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Center(child: FilledButton(onPressed: () {}, child: const Text('button'))),
+          home: Center(
+            child: FilledButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       );
 
@@ -2116,19 +2121,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? FilledButton(
-                    statesController: controller,
-                    onPressed: () {},
-                    child: const Text('button'),
-                  )
-                  : FilledButton.icon(
-                    statesController: controller,
-                    onPressed: () {},
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? FilledButton(
+                  statesController: controller,
+                  onPressed: () {},
+                  child: const Text('button'),
+                )
+              : FilledButton.icon(
+                  statesController: controller,
+                  onPressed: () {},
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2185,19 +2189,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child:
-              icon == null
-                  ? FilledButton(
-                    statesController: controller,
-                    onPressed: null,
-                    child: const Text('button'),
-                  )
-                  : FilledButton.icon(
-                    statesController: controller,
-                    onPressed: null,
-                    icon: icon,
-                    label: const Text('button'),
-                  ),
+          child: icon == null
+              ? FilledButton(
+                  statesController: controller,
+                  onPressed: null,
+                  child: const Text('button'),
+                )
+              : FilledButton.icon(
+                  statesController: controller,
+                  onPressed: null,
+                  icon: icon,
+                  label: const Text('button'),
+                ),
         ),
       ),
     );
@@ -2365,22 +2368,16 @@ void main() {
           body: Center(
             child: FilledButton(
               style: ButtonStyle(
-                backgroundBuilder: (
-                  BuildContext context,
-                  Set<MaterialState> states,
-                  Widget? child,
-                ) {
-                  backgroundStates = states;
-                  return child!;
-                },
-                foregroundBuilder: (
-                  BuildContext context,
-                  Set<MaterialState> states,
-                  Widget? child,
-                ) {
-                  foregroundStates = states;
-                  return child!;
-                },
+                backgroundBuilder:
+                    (BuildContext context, Set<MaterialState> states, Widget? child) {
+                      backgroundStates = states;
+                      return child!;
+                    },
+                foregroundBuilder:
+                    (BuildContext context, Set<MaterialState> states, Widget? child) {
+                      foregroundStates = states;
+                      return child!;
+                    },
               ),
               onPressed: () {},
               focusNode: focusNode,
@@ -2750,6 +2747,7 @@ void main() {
 
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
+    await tester.pumpAndSettle();
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
 
     final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
@@ -2789,5 +2787,79 @@ void main() {
     );
     expect(iconStyle(tester, Icons.add).color, foregroundColor);
     expect(iconStyle(tester, Icons.mail).color, foregroundColor);
+  });
+
+  testWidgets('FilledButton text and icon respect animation duration', (WidgetTester tester) async {
+    const String buttonText = 'Button';
+    const IconData buttonIcon = Icons.add;
+    const Color hoveredColor = Color(0xFFFF0000);
+    const Color idleColor = Color(0xFF000000);
+
+    Widget buildButton({Duration? animationDuration}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: FilledButton.icon(
+              style: ButtonStyle(
+                animationDuration: animationDuration,
+                iconColor: const WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
+                  WidgetState.hovered: hoveredColor,
+                  WidgetState.any: idleColor,
+                }),
+                foregroundColor: const WidgetStateProperty<Color>.fromMap(
+                  <WidgetStatesConstraint, Color>{
+                    WidgetState.hovered: hoveredColor,
+                    WidgetState.any: idleColor,
+                  },
+                ),
+              ),
+              onPressed: () {},
+              icon: const Icon(buttonIcon),
+              label: const Text(buttonText),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default animation duration.
+    await tester.pumpWidget(buildButton());
+
+    expect(textColor(tester, buttonText), idleColor);
+    expect(iconStyle(tester, buttonIcon).color, idleColor);
+
+    final Offset buttonCenter = tester.getCenter(find.text(buttonText));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(buttonCenter);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(textColor(tester, buttonText), hoveredColor.withValues(red: 0.5));
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor.withValues(red: 0.5));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(textColor(tester, buttonText), hoveredColor);
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+
+    await gesture.removePointer();
+
+    // Test custom animation duration.
+    await tester.pumpWidget(buildButton(animationDuration: const Duration(seconds: 2)));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(buttonCenter);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(textColor(tester, buttonText), hoveredColor.withValues(red: 0.5));
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor.withValues(red: 0.5));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(textColor(tester, buttonText), hoveredColor);
+    expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
 }

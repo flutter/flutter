@@ -14,7 +14,7 @@ import 'material_localizations.dart';
 import 'theme_data.dart';
 import 'typography.dart';
 
-export 'theme_data.dart' show Brightness, ThemeData;
+export 'theme_data.dart' show Brightness, MaterialTapTargetSize, ThemeData;
 
 /// The duration over which theme changes animate by default.
 const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
@@ -37,7 +37,7 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 /// from the nearest ancestor [CupertinoTheme] or if none exists, derived from the
 /// Material [data] for the [Theme]. The values in the Material derived [CupertinoThemeData]
 /// are overridable through [ThemeData.cupertinoOverrideTheme]. The values from an
-/// inherited [CupertinoThemeData] can be overriden by wrapping the desired subtree
+/// inherited [CupertinoThemeData] can be overridden by wrapping the desired subtree
 /// with a [CupertinoTheme].
 ///
 /// See also:
@@ -120,21 +120,21 @@ class Theme extends StatelessWidget {
   /// * [IconTheme.of], that returns [ThemeData.iconTheme] from the closest [Theme] or
   ///   [IconThemeData.fallback] if there is no [IconTheme] ancestor.
   static ThemeData of(BuildContext context) {
-    final _InheritedTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(
       context,
       MaterialLocalizations,
     );
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
-    final InheritedCupertinoTheme? inheritedCupertinoTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedCupertinoTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     final ThemeData theme =
         inheritedTheme?.theme.data ??
         (inheritedCupertinoTheme != null
             ? CupertinoBasedMaterialThemeData(
-              themeData: inheritedCupertinoTheme.theme.data,
-            ).materialTheme
+                themeData: inheritedCupertinoTheme.theme.data,
+              ).materialTheme
             : _kFallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
@@ -155,10 +155,46 @@ class Theme extends StatelessWidget {
   }
 
   CupertinoThemeData _inheritedCupertinoThemeData(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return (inheritedTheme?.theme.data ?? MaterialBasedCupertinoThemeData(materialTheme: data))
         .resolveFrom(context);
+  }
+
+  /// Retrieves the [Brightness] to use for descendant Material widgets, based
+  /// on the value of [ThemeData.brightness] in the given [context].
+  ///
+  /// If no [InheritedTheme] can be found in the given [context], or its `brightness`
+  /// is null, it will fall back to [MediaQueryData.platformBrightness].
+  ///
+  /// See also:
+  ///
+  /// * [maybeBrightnessOf], which returns null if no valid [InheritedTheme] or
+  ///   [MediaQuery] exists.
+  /// * [ThemeData.brightness], the property that takes precedence over
+  ///   [MediaQueryData.platformBrightness] for descendant Material widgets.
+  static Brightness brightnessOf(BuildContext context) {
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
+  }
+
+  /// Retrieves the [Brightness] to use for descendant Material widgets, based
+  /// on the value of [ThemeData.brightness] in the given [context].
+  ///
+  /// If no [InheritedTheme] or [MediaQuery] can be found in the given [context], it will
+  /// return null.
+  ///
+  /// See also:
+  ///
+  /// * [ThemeData.brightness], the property that takes precedence over
+  ///   [MediaQueryData.platformBrightness] for descendant Material widgets.
+  /// * [brightnessOf], which return a default value if no valid [InheritedTheme] or
+  ///   [MediaQuery] exists, instead of returning null.
+  static Brightness? maybeBrightnessOf(BuildContext context) {
+    final _InheritedTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
   @override

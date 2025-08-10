@@ -22,11 +22,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -70,11 +69,10 @@ void main() {
       year2023: false,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'trackHeight: 7.0',
@@ -139,12 +137,11 @@ void main() {
     try {
       double value = 0.45;
       Widget buildApp({int? divisions, bool enabled = true}) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -309,12 +306,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<double>? onChanged =
-            !enabled
-                ? null
-                : (double d) {
-                  value = d;
-                };
+        final ValueChanged<double>? onChanged = !enabled
+            ? null
+            : (double d) {
+                value = d;
+              };
         return MaterialApp(
           theme: theme,
           home: Directionality(
@@ -946,14 +942,13 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return Slider(
                   value: value,
-                  onChanged:
-                      enabled
-                          ? (double newValue) {
-                            setState(() {
-                              value = newValue;
-                            });
-                          }
-                          : null,
+                  onChanged: enabled
+                      ? (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        }
+                      : null,
                   autofocus: true,
                   focusNode: focusNode,
                 );
@@ -1855,7 +1850,7 @@ void main() {
           overlayShape: SliderComponentShape.noOverlay,
           thumbShape: SliderComponentShape.noThumb,
           tickMarkShape: SliderTickMarkShape.noTickMark,
-          showValueIndicator: ShowValueIndicator.always,
+          showValueIndicator: ShowValueIndicator.onDrag,
         ),
         value: 0.5,
         divisions: 4,
@@ -2141,15 +2136,17 @@ void main() {
           body: Center(
             child: SliderTheme(
               data: ThemeData().sliderTheme.copyWith(
-                allowedInteraction:
-                    isAllowedInteractionInThemeNull ? null : SliderInteraction.slideOnly,
+                allowedInteraction: isAllowedInteractionInThemeNull
+                    ? null
+                    : SliderInteraction.slideOnly,
               ),
               child: StatefulBuilder(
                 builder: (_, void Function(void Function()) setState) {
                   return Slider(
                     value: value,
-                    allowedInteraction:
-                        isAllowedInteractionInSliderNull ? null : SliderInteraction.tapOnly,
+                    allowedInteraction: isAllowedInteractionInSliderNull
+                        ? null
+                        : SliderInteraction.tapOnly,
                     onChanged: (double newValue) {
                       setState(() {
                         value = newValue;
@@ -2739,7 +2736,9 @@ void main() {
     const double startPadding = 100;
     const double endPadding = 20;
     await tester.pumpWidget(
-      buildSlider(padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding)),
+      buildSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -2779,7 +2778,154 @@ void main() {
     );
   });
 
-  testWidgets('Can customize track gap when year2023 is false', (WidgetTester tester) async {
+  testWidgets('SliderThemeData.padding can override the default RangeSlider padding', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({EdgeInsetsGeometry? padding}) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: RangeSlider(
+                values: const RangeValues(0, 1.0),
+                onChanged: (RangeValues values) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere(
+            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          as RenderBox;
+    }
+
+    // Test RangeSlider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildRangeSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            670.0,
+            8.0,
+            670.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 672.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byType(RangeSlider)),
+      const Size(800, topPadding + trackHeight + bottomPadding),
+    );
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+  });
+
+  testWidgets('Can customize Slider track gap when year2023 is false', (WidgetTester tester) async {
     Widget buildSlider({double? trackGap}) {
       return MaterialApp(
         theme: ThemeData(sliderTheme: SliderThemeData(trackGap: trackGap)),
@@ -2861,7 +3007,104 @@ void main() {
     );
   });
 
-  testWidgets('Can customize thumb size when year2023 is false', (WidgetTester tester) async {
+  testWidgets('Can customize RangeSlider track gap when year2023 is false', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({double? trackGap}) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(trackGap: trackGap)),
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              year2023: false,
+              values: const RangeValues(25, 75),
+              max: 100,
+              onChanged: (RangeValues value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRangeSlider(trackGap: 0));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0,
+            292.0,
+            212.0,
+            308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            588.0,
+            292.0,
+            776.0,
+            308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(rrect: RRect.fromLTRBR(212.0, 292.0, 588.0, 308.0, trackInnerCornerRadius)),
+    );
+
+    await tester.pumpWidget(buildRangeSlider(trackGap: 10));
+    await tester.pumpAndSettle();
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0,
+            292.0,
+            202.0,
+            308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            598.0,
+            292.0,
+            776.0,
+            308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(rrect: RRect.fromLTRBR(222.0, 292.0, 578.0, 308.0, trackInnerCornerRadius)),
+    );
+  });
+
+  testWidgets('Can customize Slider thumb size when year2023 is false', (
+    WidgetTester tester,
+  ) async {
     Widget buildSlider({WidgetStateProperty<Size?>? thumbSize}) {
       return MaterialApp(
         theme: ThemeData(sliderTheme: SliderThemeData(thumbSize: thumbSize)),
@@ -2915,6 +3158,72 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Can customize RangeSlider thumbs size when year2023 is false', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({WidgetStateProperty<Size?>? thumbSize}) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(thumbSize: thumbSize)),
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              year2023: false,
+              values: const RangeValues(25, 75),
+              max: 100,
+              onChanged: (RangeValues value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildRangeSlider(thumbSize: const WidgetStatePropertyAll<Size>(Size(20, 20))),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(rrect: RRect.fromLTRBR(202.0, 290.0, 222.0, 310.0, const Radius.circular(10.0)))
+        ..rrect(rrect: RRect.fromLTRBR(578.0, 290.0, 598.0, 310.0, const Radius.circular(10.0))),
+    );
+
+    await tester.pumpWidget(
+      buildRangeSlider(
+        thumbSize: const WidgetStateProperty<Size?>.fromMap(<WidgetStatesConstraint, Size>{
+          WidgetState.pressed: Size(20, 20),
+          WidgetState.any: Size(10, 10),
+        }),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(rrect: RRect.fromLTRBR(207.0, 295.0, 217.0, 305.0, const Radius.circular(5.0)))
+        ..rrect(rrect: RRect.fromLTRBR(583.0, 295.0, 593.0, 305.0, const Radius.circular(5.0))),
+    );
+
+    final Offset topRight = tester.getTopRight(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(topRight);
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(rrect: RRect.fromLTRBR(207.0, 295.0, 217.0, 305.0, const Radius.circular(5.0)))
+        ..rrect(rrect: RRect.fromLTRBR(583.0, 295.0, 593.0, 305.0, const Radius.circular(5.0))),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Opt into 2024 Slider appearance with SliderThemeData.year2023', (
     WidgetTester tester,
   ) async {
@@ -2926,7 +3235,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: Material(child: Center(child: Slider(value: value, onChanged: (double value) {}))),
+        home: Material(
+          child: Center(
+            child: Slider(value: value, onChanged: (double value) {}),
+          ),
+        ),
       ),
     );
 
@@ -2934,7 +3247,7 @@ void main() {
 
     // Test default track shape.
     const Radius trackOuterCornerRadius = Radius.circular(8.0);
-    const Radius trackInnerCornderRadius = Radius.circular(2.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -2946,8 +3259,8 @@ void main() {
             356.4,
             308.0,
             topLeft: trackOuterCornerRadius,
-            topRight: trackInnerCornderRadius,
-            bottomRight: trackInnerCornderRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
             bottomLeft: trackOuterCornerRadius,
           ),
           color: activeTrackColor,
@@ -2959,10 +3272,10 @@ void main() {
             292.0,
             776.0,
             308.0,
-            topLeft: trackInnerCornderRadius,
+            topLeft: trackInnerCornerRadius,
             topRight: trackOuterCornerRadius,
             bottomRight: trackOuterCornerRadius,
-            bottomLeft: trackInnerCornderRadius,
+            bottomLeft: trackInnerCornerRadius,
           ),
           color: inactiveTrackColor,
         ),
@@ -3026,7 +3339,10 @@ void main() {
         return MaterialApp(
           theme: theme,
           home: Material(
-            child: SizedBox(width: 300, child: Slider(value: value, onChanged: (double value) {})),
+            child: SizedBox(
+              width: 300,
+              child: Slider(value: value, onChanged: (double value) {}),
+            ),
           ),
         );
       }
@@ -3123,12 +3439,11 @@ void main() {
       try {
         double value = 0.45;
         Widget buildApp({int? divisions, bool enabled = true}) {
-          final ValueChanged<double>? onChanged =
-              !enabled
-                  ? null
-                  : (double d) {
-                    value = d;
-                  };
+          final ValueChanged<double>? onChanged = !enabled
+              ? null
+              : (double d) {
+                  value = d;
+                };
           return MaterialApp(
             theme: theme,
             home: Material(

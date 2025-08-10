@@ -38,8 +38,8 @@ TEST_F(DiffContextTest, DisjointDamage) {
   auto out_bounds_dl = CreateDisplayList(DlRect::MakeLTRB(100, 100, 120, 120));
 
   // We need both DisplayLists to be non-empty.
-  ASSERT_FALSE(in_bounds_dl->bounds().isEmpty());
-  ASSERT_FALSE(out_bounds_dl->bounds().isEmpty());
+  ASSERT_FALSE(in_bounds_dl->GetBounds().IsEmpty());
+  ASSERT_FALSE(out_bounds_dl->GetBounds().IsEmpty());
 
   // We need the in_bounds DisplayList to be inside the frame size.
   // We need the out_bounds DisplayList to be completely outside the frame.

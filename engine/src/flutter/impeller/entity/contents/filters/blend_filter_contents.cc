@@ -199,14 +199,9 @@ static std::optional<Entity> AdvancedBlend(
     typename FS::BlendInfo blend_info;
     typename VS::FrameInfo frame_info;
 
-    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_sampler_descriptor);
+            dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
@@ -222,14 +217,9 @@ static std::optional<Entity> AdvancedBlend(
       // binding.
       FS::BindTextureSamplerSrc(pass, dst_snapshot->texture, dst_sampler);
     } else {
-      auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
-      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-        src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-        src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-      }
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-              src_sampler_descriptor);
+              src_snapshot->sampler_descriptor);
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
       FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
@@ -253,9 +243,14 @@ static std::optional<Entity> AdvancedBlend(
   if (!command_buffer) {
     return std::nullopt;
   }
-  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Advanced Blend Filter", ISize(subpass_coverage.GetSize()),
-      command_buffer, callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("Advanced Blend Filter",            //
+                           ISize(subpass_coverage.GetSize()),  //
+                           command_buffer,                     //
+                           callback,                           //
+                           /*msaa_enabled=*/false,             //
+                           /*depth_stencil_enabled=*/false     //
+      );
   if (!render_target.ok()) {
     return std::nullopt;
   }
@@ -372,14 +367,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     FS::BlendInfo blend_info;
     VS::FrameInfo frame_info;
 
-    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_sampler_descriptor);
+            dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
@@ -479,23 +469,19 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         entity.GetShaderClipDepth(), pass,
         entity.GetTransform() * dst_snapshot->transform);
 
-    auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-      dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-      dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-    }
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            dst_sampler_descriptor);
+            dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
 
-    frag_info.input_alpha =
-        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
-            ? dst_snapshot->opacity * alpha.value_or(1.0)
-            : 1.0;
-    frag_info.output_alpha = 1.0;
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+                    ? dst_snapshot->opacity * alpha.value_or(1.0)
+                    : 1.0,
+                1, 0, 0);
+    frag_info.use_strict_source_rect = 0.0;
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
@@ -629,7 +615,7 @@ static std::optional<Entity> PipelineBlend(
 
     if (foreground_color.has_value()) {
       auto contents = std::make_shared<SolidColorContents>();
-      RectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
+      FillRectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
       contents->SetGeometry(&geom);
       contents->SetColor(foreground_color.value());
 
@@ -650,9 +636,14 @@ static std::optional<Entity> PipelineBlend(
     return std::nullopt;
   }
 
-  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Pipeline Blend Filter", ISize(subpass_coverage.GetSize()),
-      command_buffer, callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("Pipeline Blend Filter",            //
+                           ISize(subpass_coverage.GetSize()),  //
+                           command_buffer,                     //
+                           callback,                           //
+                           /*msaa_enabled=*/false,             //
+                           /*depth_stencil_enabled=*/false     //
+      );
 
   if (!render_target.ok()) {
     return std::nullopt;
@@ -747,6 +738,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       // Next, we render the second contents to a snapshot, or create a 1x1
       // texture for the foreground color.
       std::shared_ptr<Texture> src_texture;
+      SamplerDescriptor src_sampler_descriptor = SamplerDescriptor{};
       if (foreground_color.has_value()) {
         src_texture = foreground_texture;
       } else {
@@ -759,6 +751,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
         // different, but we only need to support blending two contents together
         // in limited circumstances (mask blur).
         src_texture = src_snapshot->texture;
+        src_sampler_descriptor = src_snapshot->sampler_descriptor;
       }
 
       std::array<VS::PerVertexData, 4> vertices = {
@@ -840,11 +833,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       VS::FrameInfo frame_info;
       FS::FragInfo frag_info;
 
-      auto src_sampler_descriptor = SamplerDescriptor{};
-      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-        src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-        src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-      }
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               src_sampler_descriptor);
@@ -879,7 +867,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     if (!foreground_texture) {
       return std::nullopt;
     }
-    auto blit_pass = cmd_buffer->CreateBlitPass();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
     auto buffer_view = renderer.GetTransientsBuffer().Emplace(
         foreground_color->Premultiply().ToR8G8B8A8(), /*alignment=*/4);
 
@@ -889,9 +877,14 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     }
   }
 
-  auto render_target =
-      renderer.MakeSubpass("FramebufferBlend", dst_snapshot->texture->GetSize(),
-                           cmd_buffer, subpass_callback);
+  fml::StatusOr<RenderTarget> render_target =
+      renderer.MakeSubpass("FramebufferBlend",                //
+                           dst_snapshot->texture->GetSize(),  //
+                           cmd_buffer,                        //
+                           subpass_callback,                  //
+                           /*msaa_enabled=*/true,             //
+                           /*depth_stencil_enabled=*/true     //
+      );
 
   if (!render_target.ok()) {
     return std::nullopt;

@@ -8,6 +8,7 @@ import("//flutter/web_sdk/web_sdk.gni")
 import("$dart_src/sdk/lib/_http/http_sources.gni")
 import("$dart_src/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
 import("$dart_src/sdk/lib/_internal/js_shared/js_types_sources.gni")
+import("$dart_src/sdk/lib/_internal/vm/bin/vm_internal_bin.gni")
 import("$dart_src/sdk/lib/_internal/vm/lib/vm_internal.gni")
 import("$dart_src/sdk/lib/_internal/vm_shared/lib/vm_shared_sources.gni")
 import("$dart_src/sdk/lib/async/async_sources.gni")
@@ -129,6 +130,12 @@ copy("vm_internal") {
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm/lib/{{source_file_part}}" ]
 }
 
+copy("vm_internal_bin") {
+  lib_path = rebase_path("_internal/vm/bin/", "", dart_sdk_lib_path)
+  sources = rebase_path(vm_internal_bin_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm/bin/{{source_file_part}}" ]
+}
+
 copy("vm_shared") {
   lib_path = rebase_path("_internal/vm_shared/lib/", "", dart_sdk_lib_path)
   sources = rebase_path(vm_shared_sdk_sources, "", lib_path)
@@ -246,6 +253,7 @@ group("copy_dart_sdk") {
     ":math",
     ":typed_data",
     ":vm_internal",
+    ":vm_internal_bin",
     ":vm_shared",
   ]
 }
@@ -293,9 +301,7 @@ generated_file("_embedder_yaml") {
 action("sky_engine") {
   package_name = "sky_engine"
   pkg_directory = rebase_path("$root_gen_dir/dart-pkg")
-  package_root = rebase_path("$root_gen_dir/dart-pkg/packages")
   stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
-  entries_file = "$root_gen_dir/dart-pkg/${package_name}.entries"
 
   sources = [
     "LICENSE",
@@ -322,12 +328,7 @@ action("sky_engine") {
     "$service_isolate_dir/vmservice_server.dart",
   ]
 
-  outputs = [
-    "$root_gen_dir/dart-pkg/${package_name}",
-    "$root_gen_dir/dart-pkg/${package_name}/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/packages/${package_name}",
-    stamp_file,
-  ]
+  outputs = [ stamp_file ]
 
   script = rebase_path("//flutter/build/dart/tools/dart_pkg.py", ".", "//")
 
@@ -340,12 +341,8 @@ action("sky_engine") {
            rebase_path(dart_sdk_root),
            "--pkg-directory",
            pkg_directory,
-           "--package-root",
-           package_root,
            "--stamp-file",
            rebase_path(stamp_file),
-           "--entries-file",
-           rebase_path(entries_file),
            "--package-sources",
          ] + rebase_path(sources) + [ "--sdk-ext-directories" ] +
          rebase_path(sdk_ext_directory) + [ "--sdk-ext-files" ] +

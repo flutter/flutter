@@ -93,6 +93,7 @@ TEST_F(SkiaGpuObjectTest, QueueSimple) {
   SkRefCnt* ref_object = new TestSkObject(latch, &dtor_task_queue_id);
 
   unref_queue()->Unref(ref_object);
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   latch->Wait();
   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
 }
@@ -107,6 +108,7 @@ TEST_F(SkiaGpuObjectTest, ObjectDestructor) {
     // Verify that the default SkiaGPUObject dtor queues and unref.
   }
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   latch->Wait();
   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
 }

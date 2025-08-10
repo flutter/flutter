@@ -55,17 +55,12 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
 }
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
-  Point corners[4]{
-      {center_.x, center_.y - radius_},
-      {center_.x + radius_, center_.y},
-      {center_.x, center_.y + radius_},
-      {center_.x - radius_, center_.y},
-  };
-
-  for (int i = 0; i < 4; i++) {
-    corners[i] = transform * corners[i];
-  }
-  return Rect::MakePointBounds(std::begin(corners), std::end(corners));
+  Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
+  Scalar outer_radius = radius_ + half_width;
+  return Rect::MakeLTRB(-outer_radius, -outer_radius,  //
+                        +outer_radius, +outer_radius)
+      .Shift(center_)
+      .TransformAndClipBounds(transform);
 }
 
 bool CircleGeometry::CoversArea(const Matrix& transform,

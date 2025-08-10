@@ -78,7 +78,10 @@ void main() {
             body: SelectionArea(
               child: SizedBox(
                 height: 100,
-                child: FittedBox(fit: BoxFit.fill, child: Text('test', key: textKey)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text('test', key: textKey),
+                ),
               ),
             ),
           ),
@@ -134,7 +137,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -171,12 +176,10 @@ void main() {
         MaterialApp(
           home: SelectionArea(
             focusNode: focusNode,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              return Placeholder(key: key);
-            },
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return Placeholder(key: key);
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -226,7 +229,9 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(home: SelectionArea(focusNode: focusNode, child: const Text('How are you?'))),
+        MaterialApp(
+          home: SelectionArea(focusNode: focusNode, child: const Text('How are you?')),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -363,5 +368,218 @@ void main() {
     },
     variant: TargetPlatformVariant.mobile(),
     skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on iOS',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection should not change when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets(
+    'Can only drag one selection handle at a time on Android web',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection should not change when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: !kIsWeb, // [intended] on native both selection handles can be dragged at a time.
+  );
+
+  testWidgets(
+    'Can drag both selection handles at a time on Android',
+    (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.only(top: 64),
+              child: Center(
+                child: SelectionArea(
+                  focusNode: focusNode,
+                  child: const Text('one two three four five'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('one two three four five'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 11),
+      ); // at the 'e'.
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+      expect(boxes.length, 1);
+      await tester.pumpAndSettle();
+      // There is a selection now.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 13));
+
+      // This is the position of the selection handle displayed at the end.
+      final Offset endHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomRight);
+      await gesture.down(endHandlePos);
+      await gesture.moveTo(
+        textOffsetToPosition(paragraph, 22) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pumpAndSettle();
+
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 22));
+
+      // Attempt to move the start handle while still touching the end handle.
+      final Offset startHandlePos = paragraph.localToGlobal(boxes[0].toRect().bottomLeft);
+      final TestGesture startHandleGesture = await tester.startGesture(startHandlePos);
+      addTearDown(startHandleGesture.removePointer);
+      await tester.pump();
+      await startHandleGesture.moveTo(
+        textOffsetToPosition(paragraph, 0) + Offset(0, paragraph.size.height / 2),
+      );
+      await tester.pump();
+      await gesture.up();
+      await startHandleGesture.up();
+      await tester.pumpAndSettle();
+      // Selection changes when dragging start handle.
+      expect(paragraph.selections.length, 1);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 22));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] on web only one selection handle can be dragged at a time.
   );
 }

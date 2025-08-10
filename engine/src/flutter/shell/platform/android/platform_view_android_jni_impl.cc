@@ -162,7 +162,7 @@ static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 static jmethodID g_mutators_stack_push_opacity_method = nullptr;
 static jmethodID g_mutators_stack_push_clippath_method = nullptr;
 
-// android.graphics.Path class and methods
+// android.graphics.Path class, methods, and nested classes.
 static fml::jni::ScopedJavaGlobalRef<jclass>* path_class = nullptr;
 static jmethodID path_constructor = nullptr;
 static jmethodID path_move_to_method = nullptr;
@@ -171,6 +171,11 @@ static jmethodID path_quad_to_method = nullptr;
 static jmethodID path_cubic_to_method = nullptr;
 static jmethodID path_conic_to_method = nullptr;
 static jmethodID path_close_method = nullptr;
+static jmethodID path_set_fill_type_method = nullptr;
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_path_fill_type_class = nullptr;
+static jfieldID g_path_fill_type_winding_field = nullptr;
+static jfieldID g_path_fill_type_even_odd_field = nullptr;
 
 // Called By Java
 static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
@@ -279,7 +284,7 @@ static void SurfaceChanged(JNIEnv* env,
                            jint width,
                            jint height) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
-      SkISize::Make(width, height));
+      DlISize(width, height));
 }
 
 static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -421,8 +426,7 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 
   auto bitmap = env->CallStaticObjectMethod(
       g_bitmap_class->obj(), g_bitmap_create_bitmap_method,
-      screenshot.frame_size.width(), screenshot.frame_size.height(),
-      bitmap_config);
+      screenshot.frame_size.width, screenshot.frame_size.height, bitmap_config);
 
   fml::jni::ScopedJavaLocalRef<jobject> buffer(
       env,
@@ -530,10 +534,16 @@ static void RegisterImageTexture(JNIEnv* env,
                                  jobject jcaller,
                                  jlong shell_holder,
                                  jlong texture_id,
-                                 jobject image_texture_entry) {
+                                 jobject image_texture_entry,
+                                 jboolean reset_on_background) {
+  ImageExternalTexture::ImageLifecycle lifecycle =
+      reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
+                          : ImageExternalTexture::ImageLifecycle::kKeepAlive;
+
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
-      static_cast<int64_t>(texture_id),                                 //
-      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry)  //
+      static_cast<int64_t>(texture_id),                                  //
+      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
+      lifecycle                                                          //
   );
 }
 
@@ -811,7 +821,7 @@ bool RegisterApi(JNIEnv* env) {
       {
           .name = "nativeRegisterImageTexture",
           .signature = "(JJLjava/lang/ref/"
-                       "WeakReference;)V",
+                       "WeakReference;Z)V",
           .fnPtr = reinterpret_cast<void*>(&RegisterImageTexture),
       },
       {
@@ -1228,6 +1238,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  path_set_fill_type_method = env->GetMethodID(
+      path_class->obj(), "setFillType", "(Landroid/graphics/Path$FillType;)V");
+  if (path_set_fill_type_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate android.graphics.Path.setFillType method";
+    return false;
+  }
+
   path_move_to_method = env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
   if (path_move_to_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate android.graphics.Path.moveTo method";
@@ -1262,6 +1280,29 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   path_close_method = env->GetMethodID(path_class->obj(), "close", "()V");
   if (path_close_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate android.graphics.Path.close method";
+    return false;
+  }
+
+  g_path_fill_type_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("android/graphics/Path$FillType"));
+  if (g_path_fill_type_class->is_null()) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path$FillType class";
+    return false;
+  }
+
+  g_path_fill_type_winding_field =
+      env->GetStaticFieldID(g_path_fill_type_class->obj(), "WINDING",
+                            "Landroid/graphics/Path$FillType;");
+  if (g_path_fill_type_winding_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate Path.FillType.WINDING field";
+    return false;
+  }
+
+  g_path_fill_type_even_odd_field =
+      env->GetStaticFieldID(g_path_fill_type_class->obj(), "EVEN_ODD",
+                            "Landroid/graphics/Path$FillType;");
+  if (g_path_fill_type_even_odd_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate Path.FillType.EVEN_ODD field";
     return false;
   }
 
@@ -2030,12 +2071,37 @@ class AndroidPathReceiver final : public DlPathReceiver {
       : env_(env),
         android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
 
-  void SetPathInfo(DlPathFillType type, bool is_convex) override {
-    // Need to convert the fill type to the Android enum and
-    // call setFillType on the path...
-    // see https://github.com/flutter/flutter/issues/164808
+  void SetFillType(DlPathFillType type) {
+    jfieldID fill_type_field_id;
+    switch (type) {
+      case DlPathFillType::kOdd:
+        fill_type_field_id = g_path_fill_type_even_odd_field;
+        break;
+      case DlPathFillType::kNonZero:
+        fill_type_field_id = g_path_fill_type_winding_field;
+        break;
+      default:
+        // DlPathFillType does not have corresponding kInverseEvenOdd or
+        // kInverseWinding fill types.
+        return;
+    }
+
+    // Get the static enum field value (Path.FillType.WINDING or
+    // Path.FillType.EVEN_ODD)
+    fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
+        fml::jni::ScopedJavaLocalRef<jobject>(
+            env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
+                                             fill_type_field_id));
+    FML_CHECK(fml::jni::CheckException(env_));
+    FML_CHECK(!fill_type_enum.is_null());
+
+    // Call Path.setFillType(Path.FillType)
+    env_->CallVoidMethod(android_path_, path_set_fill_type_method,
+                         fill_type_enum.obj());
+    FML_CHECK(fml::jni::CheckException(env_));
   }
-  void MoveTo(const DlPoint& p2) override {
+
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
     env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
   }
   void LineTo(const DlPoint& p2) override {
@@ -2063,7 +2129,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
     env_->CallVoidMethod(android_path_, path_close_method);
   }
 
-  jobject TakePath() { return android_path_; }
+  jobject TakePath() const { return android_path_; }
 
  private:
   JNIEnv* env_;
@@ -2181,7 +2247,11 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
 
         // Define and populate an Android Path with data from the DlPath
         AndroidPathReceiver receiver(env);
+        receiver.SetFillType(dlPath.GetFillType());
 
+        // TODO(flar): https://github.com/flutter/flutter/issues/164808
+        // Need to convert the fill type to the Android enum and
+        // call setFillType on the path...
         dlPath.Dispatch(receiver);
 
         env->CallVoidMethod(mutatorsStack,

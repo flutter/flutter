@@ -331,8 +331,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   // key reparenting in the same frame but N is usually a small number.
   void _add(_OverlayEntryLocation child) {
     assert(mounted);
-    final LinkedList<_OverlayEntryLocation> children =
-        _sortedTheaterSiblings ??= LinkedList<_OverlayEntryLocation>();
+    final LinkedList<_OverlayEntryLocation> children = _sortedTheaterSiblings ??=
+        LinkedList<_OverlayEntryLocation>();
     assert(!children.contains(child));
     _OverlayEntryLocation? insertPosition = children.isEmpty ? null : children.last;
     while (insertPosition != null && insertPosition._zOrderIndex > child._zOrderIndex) {
@@ -788,8 +788,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void rearrange(Iterable<OverlayEntry> newEntries, {OverlayEntry? below, OverlayEntry? above}) {
-    final List<OverlayEntry> newEntriesList =
-        newEntries is List<OverlayEntry> ? newEntries : newEntries.toList(growable: false);
+    final List<OverlayEntry> newEntriesList = newEntries is List<OverlayEntry>
+        ? newEntries
+        : newEntries.toList(growable: false);
     assert(_debugVerifyInsertPosition(above, below, newEntries: newEntriesList));
     assert(
       newEntriesList.every(
@@ -1060,10 +1061,9 @@ mixin _RenderTheaterMixin on RenderBox {
     TextBaseline baseline,
   ) {
     final StackParentData childParentData = child.parentData! as StackParentData;
-    final BoxConstraints childConstraints =
-        childParentData.isPositioned
-            ? childParentData.positionedChildConstraints(theaterSize)
-            : nonPositionedChildConstraints;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+        ? childParentData.positionedChildConstraints(theaterSize)
+        : nonPositionedChildConstraints;
     final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
     if (baselineOffset == null) {
       return null;
@@ -1338,10 +1338,9 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size =
-        constraints.biggest.isFinite
-            ? constraints.biggest
-            : _findSizeDeterminingChild().getDryLayout(constraints);
+    final Size size = constraints.biggest.isFinite
+        ? constraints.biggest
+        : _findSizeDeterminingChild().getDryLayout(constraints);
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
@@ -1629,10 +1628,9 @@ class OverlayPortalController {
   int? _zOrderIndex;
   final String? _debugLabel;
 
-  static int _wallTime =
-      kIsWeb
-          ? -9007199254740992 // -2^53
-          : -1 << 63;
+  static int _wallTime = kIsWeb
+      ? -9007199254740992 // -2^53
+      : -1 << 63;
 
   // Returns a unique and monotonically increasing timestamp that represents
   // now.
@@ -1920,7 +1918,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
 
   void _setupController(OverlayPortalController controller) {
     assert(
-      controller._attachTarget == null || controller._attachTarget == this,
+      controller._attachTarget == this ||
+          !((controller._attachTarget?.context as StatefulElement?)?.debugIsActive ?? false),
       'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.',
     );
     final int? controllerZOrderIndex = controller._zOrderIndex;
@@ -1951,8 +1950,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   @override
-  void dispose() {
+  void activate() {
     assert(widget.controller._attachTarget == this);
+    super.activate();
+  }
+
+  @override
+  void dispose() {
     widget.controller._attachTarget = null;
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
@@ -2164,10 +2168,9 @@ class _RenderTheaterMarker extends InheritedWidget {
         context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(),
       );
       assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
-      marker =
-          ancestor != null
-              ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
-              : null;
+      marker = ancestor != null
+          ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
+          : null;
     } else {
       marker = context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
     }
@@ -2541,7 +2544,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
-    transform.translate(offset.dx, offset.dy);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 }
 
@@ -2587,8 +2590,9 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
       final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize =
-          theaterConstraints.biggest.isFinite ? theaterConstraints.biggest : theater.size;
+      final Size boxSize = theaterConstraints.biggest.isFinite
+          ? theaterConstraints.biggest
+          : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
     }
   }
@@ -2626,7 +2630,10 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
 // layout algorithm so developers can use the Positioned widget.
 class _RenderLayoutBuilder extends RenderProxyBox
-    with _RenderTheaterMixin, RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
+    with
+        _RenderTheaterMixin,
+        RenderObjectWithLayoutCallbackMixin,
+        RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
     final RenderBox? child = this.child;
@@ -2654,7 +2661,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
-    transform.translate(offset.dx, offset.dy);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @protected
@@ -2703,19 +2710,25 @@ class _RenderLayoutBuilder extends RenderProxyBox
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
 
+  @override
+  @visibleForOverriding
+  void layoutCallback() {
+    _layoutInfo = _computeNewLayoutInfo();
+    super.layoutCallback();
+  }
+
   int? _callbackId;
   @override
   void performLayout() {
-    // The invokeLayoutCallback allows arbitrary access to the sizes of
-    // RenderBoxes the we know that have finished doing layout.
-    invokeLayoutCallback((_) => _layoutInfo = _computeNewLayoutInfo());
-    rebuildIfNecessary();
+    runLayoutCallback();
+    if (child case final RenderBox child?) {
+      layoutChild(child, constraints);
+    }
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
       _frameCallback,
       scheduleNewFrame: false,
     );
-    layoutChild(child!, constraints);
   }
 
   // This RenderObject is a child of _RenderDeferredLayouts which in turn is a

@@ -770,6 +770,94 @@ class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile {
   List<License> get licenses => _licenses;
 }
 
+class _RepositoryLlvmLibcLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryLlvmLibcLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static final RegExp _pattern = RegExp(
+    r'^'
+    r'==============================================================================\n'
+    r'The LLVM Project is under the Apache License v2\.0 with LLVM Exceptions:\n'
+    r'==============================================================================\n'
+    r'\n('
+    r' *Apache License\n'
+    r' *Version 2.0, January 2004\n'
+    r' *http://www.apache.org/licenses/\n'
+    r'\n'
+    r'.+?)\n+'
+    r'---- LLVM Exceptions to the Apache 2.0 License ----'
+    r'.+?'
+    r'==============================================================================\n'
+    r'Software from third parties included in the LLVM Project:\n'
+    r'==============================================================================\n'
+    r'The LLVM Project contains third party software which is under different license\n'
+    r'terms\. All such code will be identified clearly using at least one of two\n'
+    r'mechanisms:\n'
+    r'1\) It will be in a separate directory tree with its own `LICENSE\.txt` or\n'
+    r' *`LICENSE` file at the top containing the specific license and restrictions\n'
+    r' *which apply to that software, or\n'
+    r'2\) It will contain specific license and restriction terms at the top of every\n'
+    r' *file\.\n'
+    r'\n'
+    r'==============================================================================\n'
+    r'Legacy LLVM License \(https://llvm\.org/docs/DeveloperPolicy\.html#legacy\):\n'
+    r'==============================================================================\n'
+    r'University of Illinois/NCSA\n'
+    r'Open Source License\n'
+    r'\n'
+    r'(Copyright \(c\) 2007-2019 University of Illinois at Urbana-Champaign\.\n'
+    r'All rights reserved\.\n'
+    r'\n'
+    r'Developed by:\n'
+    r'\n'
+    r' *LLVM Team\n'
+    r'\n'
+    r' *University of Illinois at Urbana-Champaign\n'
+    r'\n'
+    r' *http://llvm\.org\n'
+    r'\n'
+    r'Permission is hereby granted, free of charge, to any person obtaining a copy of\n'
+    r'this software and associated documentation files \(the "Software"\), to deal with\n'
+    r'the Software without restriction, including without limitation the rights to\n'
+    r'use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\n'
+    r'of the Software, and to permit persons to whom the Software is furnished to do\n'
+    r'so, subject to the following conditions:\n'
+    r'\n'
+    r' *\* Redistributions of source code must retain the above copyright notice,\n'
+    r' *this list of conditions and the following disclaimers\.\n'
+    r'\n'
+    r' *\* Redistributions in binary form must reproduce the above copyright notice,\n'
+    r' *this list of conditions and the following disclaimers in the\n'
+    r' *documentation and/or other materials provided with the distribution\.\n'
+    r'\n'
+    r' *\* Neither the names of the LLVM Team, University of Illinois at\n'
+    r' *Urbana-Champaign, nor the names of its contributors may be used to\n'
+    r' *endorse or promote products derived from this Software without specific\n'
+    r' *prior written permission\.\n'
+    r'\n'
+    r'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n'
+    r'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\n'
+    r'FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\.  IN NO EVENT SHALL THE\n'
+    r'CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n'
+    r'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n'
+    r'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE\n'
+    r'SOFTWARE\.)\n*'
+    r'$',
+    dotAll: true,
+  );
+
+  static License _parseLicense(fs.TextFile io) {
+    final Match? match = _pattern.firstMatch(io.readString());
+    if (match == null) {
+      throw 'unexpected license file contents';
+    }
+    if (match.groupCount != 2) {
+      throw 'internal error; match count inconsistency\nRemainder:[[${match.input.substring(match.end)}]]';
+    }
+    return License.fromBodyAndType(match.group(2)!, LicenseType.bsd, origin: io.fullName);
+  }
+}
+
 class _RepositoryKhronosLicenseFile extends _RepositoryLicenseFile {
   _RepositoryKhronosLicenseFile(super.parent, super.io) : _licenses = _parseLicenses(io);
 
@@ -832,12 +920,11 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     r'(' // 2
     r' *Licenses for support code\n'
     r' *-------------------------\n+)'
-    r'(.+?)\n+' // 3
-    r'(BoringSSL uses the Chromium test infrastructure to run a continuous build,\n' // 4
-    r'trybots etc\. The scripts which manage this, and the script for generating build\n'
-    r'metadata, are under the Chromium license\. Distributing code linked against\n'
-    r'BoringSSL does not trigger this license\.)\n+'
-    r'(.+?)\n+$', // 5
+    r'\n'
+    r'Parts of the TLS test suite are under the Go license. This code is not included\n'
+    r'in BoringSSL \(i.e. libcrypto and libssl\) when compiled, however, so\n'
+    r'distributing code linked against BoringSSL does not trigger this license:\n'
+    r'(.+?)\n+$', // 3
     dotAll: true,
   );
 
@@ -846,7 +933,7 @@ class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
     if (match == null) {
       throw 'Failed to match BoringSSL license pattern.';
     }
-    assert(match.groupCount == 5);
+    assert(match.groupCount == 3);
     return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
   }
 }
@@ -1052,6 +1139,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
     '/flutter/third_party/libcxx/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
     '/flutter/third_party/libcxxabi/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
+    '/flutter/third_party/llvm_libc/LICENSE.TXT': _RepositoryLlvmLibcLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/README.ijg': _RepositoryReadmeIjgFile.new,
     '/flutter/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
@@ -1124,14 +1212,13 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
 
   /// Searches the current directory for licenses of the specified type.
   License? _localLicenseWithType(LicenseType type) {
-    final List<License> licenses =
-        _licenses.expand((_RepositoryLicenseFile license) {
-          final License? result = license.licenseOfType(type);
-          if (result != null) {
-            return <License>[result];
-          }
-          return const <License>[];
-        }).toList();
+    final List<License> licenses = _licenses.expand((_RepositoryLicenseFile license) {
+      final License? result = license.licenseOfType(type);
+      if (result != null) {
+        return <License>[result];
+      }
+      return const <License>[];
+    }).toList();
     if (licenses.length > 1) {
       print('unexpectedly found multiple matching licenses in $name of type $type');
       return null;
@@ -1432,16 +1519,15 @@ class _RepositoryInjaJsonFile extends _RepositorySourceFile {
         throw '${io.fullName} has changed contents.';
       }
       final String license = match.group(3)!;
-      _internalLicenses =
-          match.groups(const <int>[2, 6, 8]).map<License>((String? copyright) {
-            assert(copyright!.contains('Copyright'));
-            return License.fromCopyrightAndLicense(
-              copyright!,
-              license,
-              LicenseType.mit,
-              origin: io.fullName,
-            );
-          }).toList();
+      _internalLicenses = match.groups(const <int>[2, 6, 8]).map<License>((String? copyright) {
+        assert(copyright!.contains('Copyright'));
+        return License.fromCopyrightAndLicense(
+          copyright!,
+          license,
+          LicenseType.mit,
+          origin: io.fullName,
+        );
+      }).toList();
       assert(
         !match
             .groups(const <int>[1, 4, 5, 7, 9, 10, 11])
@@ -2051,8 +2137,9 @@ Future<void> _collectLicensesForComponent(
   }
   progress.label = 'Dumping results...';
   progress.flush();
-  final List<String> output =
-      licenses.map((GroupedLicense license) => license.toStringDebug()).toList();
+  final List<String> output = licenses
+      .map((GroupedLicense license) => license.toStringDebug())
+      .toList();
   for (int index = 0; index < output.length; index += 1) {
     // The strings we look for here are strings which we do not expect to see in
     // any of the licenses we use. They either represent examples of misparsing
@@ -2111,17 +2198,16 @@ Future<void> _collectLicensesForComponent(
 // MAIN
 
 Future<void> main(List<String> arguments) async {
-  final ArgParser parser =
-      ArgParser()
-        ..addOption('src', help: 'The root of the engine source.')
-        ..addOption(
-          'out',
-          help: 'The directory where output is written. (Ignored if used with --release.)',
-        )
-        ..addOption('golden', help: 'The directory containing golden results.')
-        ..addFlag('quiet', help: 'If set, the diagnostic output is much less verbose.')
-        ..addFlag('verbose', help: 'If set, print additional information to help with development.')
-        ..addFlag('release', help: 'Print output in the format used for product releases.');
+  final ArgParser parser = ArgParser()
+    ..addOption('src', help: 'The root of the engine source.')
+    ..addOption(
+      'out',
+      help: 'The directory where output is written. (Ignored if used with --release.)',
+    )
+    ..addOption('golden', help: 'The directory containing golden results.')
+    ..addFlag('quiet', help: 'If set, the diagnostic output is much less verbose.')
+    ..addFlag('verbose', help: 'If set, print additional information to help with development.')
+    ..addFlag('release', help: 'Print output in the format used for product releases.');
 
   final ArgResults argResults = parser.parse(arguments);
   final bool quiet = argResults['quiet'] as bool;
@@ -2236,12 +2322,10 @@ Future<void> main(List<String> arguments) async {
         system.exit(1);
       }
       // write to disk the list of files we did _not_ cover, so it's easier to catch in diffs
-      final String excluded = (_RepositoryDirectory._excluded
-              .map((fs.IoNode node) => node.fullName)
-              .toSet()
-              .toList()
-            ..sort())
-          .join('\n');
+      final String excluded =
+          (_RepositoryDirectory._excluded.map((fs.IoNode node) => node.fullName).toSet().toList()
+                ..sort())
+              .join('\n');
       system.File(
         path.join(argResults['out'] as String, 'excluded_files'),
       ).writeAsStringSync('$excluded\n');

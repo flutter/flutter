@@ -33,7 +33,6 @@ import 'src/commands/generate_localizations.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -66,10 +65,14 @@ Future<void> main(List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
-  // Support the -? Powershell help idiom.
+  // Support universal help idioms.
   final int powershellHelpIndex = args.indexOf('-?');
   if (powershellHelpIndex != -1) {
     args[powershellHelpIndex] = '-h';
+  }
+  final int slashQuestionHelpIndex = args.indexOf('/?');
+  if (slashQuestionHelpIndex != -1) {
+    args[slashQuestionHelpIndex] = '-h';
   }
 
   final bool doctor =
@@ -113,16 +116,15 @@ Future<void> main(List<String> args) async {
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       // The devtools launcher is not supported in google3 because it depends on
       // devtools source code.
-      DevtoolsLauncher:
-          () => DevtoolsServerLauncher(
-            processManager: globals.processManager,
-            artifacts: globals.artifacts!,
-            logger: globals.logger,
-            botDetector: globals.botDetector,
-          ),
+      DevtoolsLauncher: () => DevtoolsServerLauncher(
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        botDetector: globals.botDetector,
+      ),
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
-        final LoggerFactory loggerFactory = LoggerFactory(
+        final loggerFactory = LoggerFactory(
           outputPreferences: globals.outputPreferences,
           terminal: globals.terminal,
           stdio: globals.stdio,
@@ -171,6 +173,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
+            git: globals.git,
           ),
         ],
         suppressAnalytics: !globals.analytics.okToSend,
@@ -232,7 +235,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       ),
       InstallCommand(verboseHelp: verboseHelp),
       LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-      MakeHostAppEditableCommand(),
       PackagesCommand(),
       PrecacheCommand(
         verboseHelp: verboseHelp,
@@ -258,12 +260,14 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         platform: globals.platform,
         shutdownHooks: globals.shutdownHooks,
         os: globals.os,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
       ),
       UpgradeCommand(verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),
-      UpdatePackagesCommand(),
+      UpdatePackagesCommand(verboseHelp: verboseHelp),
     ];
 
 /// An abstraction for instantiation of the correct logger type.
@@ -319,7 +323,7 @@ class LoggerFactory {
       return NotifyingLogger(verbose: verbose, parent: logger);
     }
     if (machine) {
-      return AppRunLogger(parent: logger);
+      return MachineOutputLogger(parent: logger);
     }
     return logger;
   }

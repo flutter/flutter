@@ -1,4 +1,4 @@
-This is an index of team-facing documentation for the [flutter/engine repository](https://github.com/flutter/engine/).
+This is an index of team-facing documentation for the [flutter/engine team](https://github.com/flutter/flutter/tree/main/engine).
 
 - [Accessibility on Windows](https://github.com/flutter/flutter/blob/master/docs/platforms/desktop/windows/Accessibility-on-Windows.md)
 - [Code signing metadata](./release/Code-signing-metadata.md) for engine binaries
@@ -18,7 +18,6 @@ This is an index of team-facing documentation for the [flutter/engine repository
 - [Image Codecs in the Flutter Engine](Image-Codecs-in-the-Flutter-Engine.md)
 - [Impeller](./impeller/README.md) documentation index
 - [Life of a Flutter Frame](Life-of-a-Flutter-Frame.md)
-- [Reduce Flutter engine size with MLGO](Reduce-Flutter-engine-size-with-MLGO.md)
 - [Resolving common build failures](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Resolving-common-build-failures.md)
 - [Setting up the Engine development environment](./contributing/Setting-up-the-Engine-development-environment.md)
 - [Supporting legacy platforms](Supporting-legacy-platforms.md)

@@ -772,9 +772,8 @@ void main() {
 
   testWidgets(
     'remove and add listener ',
-    experimentalLeakTesting:
-        LeakTesting.settings
-            .withIgnoredAll(), // leaking by design because imageStream does not have a listener
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because imageStream does not have a listener
     (WidgetTester tester) async {
       final MockCodec mockCodec = MockCodec();
       mockCodec.frameCount = 3;
@@ -1107,6 +1106,27 @@ void main() {
     final FrameInfo frame = FakeFrameInfo(const Duration(milliseconds: 200), image20x10);
     mockCodec.completeNextFrame(frame);
     await tester.idle();
+    expect(mockCodec.disposed, true);
+  });
+
+  testWidgets('ImageStream that has never had any listeners can be disposed', (
+    WidgetTester tester,
+  ) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = -1;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    expect(mockCodec.disposed, false);
+    imageStream.maybeDispose();
     expect(mockCodec.disposed, true);
   });
 }

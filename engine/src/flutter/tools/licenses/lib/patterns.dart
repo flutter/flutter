@@ -217,16 +217,15 @@ final RegExp lrZlib = RegExp(
 // ASCII ART PATTERNS
 
 // If these images are found in a file, they are stripped before we look for license patterns.
-final List<List<String>> asciiArtImages =
-    <String>[
-      r'''
+final List<List<String>> asciiArtImages = <String>[
+  r'''
  ___        _
 |_ _|_ __  (_) __ _
  | || '_ \ | |/ _` |
  | || | | || | (_| |
 |___|_| |_|/ |\__,_|
          |__/''',
-    ].map((String image) => image.split('\n')).toList();
+].map((String image) => image.split('\n')).toList();
 
 // FORWARD REFERENCE
 
@@ -635,6 +634,10 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
   // used with _tryReferenceByIdentifyingReference
   LicenseReferencePattern(
     pattern: RegExp(kIndent + r'For terms of use, see ([^ \n]+)', multiLine: true),
+  ),
+
+  LicenseReferencePattern(
+    pattern: RegExp(kIndent + r'For terms of use and license, see ([^ \n]+)', multiLine: true),
   ),
 
   LicenseReferencePattern(
@@ -1437,6 +1440,52 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
             .replaceAll(' ', _linebreak)),
     multiLine: true,
     caseSensitive: false,
+  ),
+
+  // Seen in libcxx std::format headers
+  RegExp(
+    kIndent +
+        (r'Distributed under the Terms of Use in https://www\.unicode\.org/copyright\.html\. '
+                r'Permission is hereby granted, free of charge, to any person obtaining '
+                r'a copy of the Unicode data files and any associated documentation '
+                r'\(the "Data Files"\) or Unicode software and any associated documentation '
+                r'\(the "Software"\) to deal in the Data Files or Software '
+                r'without restriction, including without limitation the rights to use, '
+                r'copy, modify, merge, publish, distribute, and/or sell copies of '
+                r'the Data Files or Software, and to permit persons to whom the Data Files '
+                r'or Software are furnished to do so, provided that either '
+                r'\(a\) this copyright and permission notice appear with all copies '
+                r'of the Data Files or Software, or '
+                r'\(b\) this copyright and permission notice appear in associated '
+                r'Documentation\. '
+                r'THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF '
+                r'ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE '
+                r'WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND '
+                r'NONINFRINGEMENT OF THIRD PARTY RIGHTS\. '
+                r'IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS '
+                r'NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL '
+                r'DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, '
+                r'DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER '
+                r'TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR '
+                r'PERFORMANCE OF THE DATA FILES OR SOFTWARE\. '
+            .replaceAll(' ', _linebreak)),
+    multiLine: true,
+    caseSensitive: false,
+  ),
+
+  // Seen in re2 headers.
+  RegExp(
+    kIndent +
+        r'Permission to use, copy, modify, and distribute this software for any *\n'
+            r'^\1\2purpose without fee is hereby granted, provided that this entire notice *\n'
+            r'^\1\2is included in all copies of any software which is or includes a copy *\n'
+            r'^\1\2or modification of this software and in all copies of the supporting *\n'
+            r'^\1\2documentation for such software. *\n'
+            r'^\1\2THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED *\n'
+            r'^\1\2WARRANTY.  IN PARTICULAR, NEITHER THE AUTHORS NOR LUCENT TECHNOLOGIES MAKE ANY *\n'
+            r'^\1\2REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY *\n'
+            r'^\1\2OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE. *\n',
+    multiLine: true,
   ),
 ];
 

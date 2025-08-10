@@ -207,6 +207,49 @@ void testMain() {
       expect(slices[1], layerSlice(withPictureRect: const ui.Rect.fromLTRB(200, 200, 300, 300)));
     });
 
+    test('nested offset and clip', () {
+      final EngineSceneBuilder builder = EngineSceneBuilder();
+      {
+        builder.pushOffset(16, 43);
+        {
+          builder.pushClipRect(
+            const ui.Rect.fromLTRB(0, 0, 1007, 1122),
+            clipBehavior: ui.Clip.hardEdge,
+          );
+          {
+            builder.pushOffset(1, 214);
+            builder.addPlatformView(1, width: 1005, height: 907);
+            builder.pop();
+          }
+          builder.pop();
+        }
+        builder.pop();
+      }
+
+      const ui.Rect pictureRect = ui.Rect.fromLTRB(16, 198, 310, 280);
+      builder.addPicture(ui.Offset.zero, StubPicture(pictureRect));
+
+      final EngineScene scene = builder.build() as EngineScene;
+      final List<LayerSlice?> slices = scene.rootLayer.slices;
+      expect(slices.length, 2);
+      expect(
+        slices[0],
+        layerSlice(
+          withPlatformViews: <PlatformView>[
+            PlatformView(
+              1,
+              const ui.Rect.fromLTRB(0, 0, 1005, 907),
+              const PlatformViewStyling(
+                position: PlatformViewPosition.offset(ui.Offset(17, 257)),
+                clip: PlatformViewRectClip(ui.Rect.fromLTRB(16.0, 43.0, 1023.0, 1165.0)),
+              ),
+            ),
+          ],
+        ),
+      );
+      expect(slices[1], layerSlice(withPictureRect: pictureRect));
+    });
+
     test('grid view test', () {
       // This test case covers a grid of elements, where each element is a platform
       // view that has flutter content underneath it and on top of it.

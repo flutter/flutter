@@ -469,8 +469,9 @@ ComponentV2::ComponentV2(
       std::bind(&fml::CurrentMessageLoopAddAfterTaskObserver,
                 std::placeholders::_1, std::placeholders::_2);
 
-  settings_.task_observer_remove = std::bind(
-      &fml::CurrentMessageLoopRemoveAfterTaskObserver, std::placeholders::_1);
+  settings_.task_observer_remove =
+      std::bind(&fml::CurrentMessageLoopRemoveAfterTaskObserver,
+                std::placeholders::_1, std::placeholders::_2);
 
   settings_.log_message_callback = [](const std::string& tag,
                                       const std::string& message) {

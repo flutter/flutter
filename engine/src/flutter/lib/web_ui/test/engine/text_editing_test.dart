@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -364,17 +364,13 @@ Future<void> testMain() async {
       final ui.PlatformMessageCallback? savedCallback = dispatcher.onPlatformMessage;
 
       bool markTextEventHandled = false;
-      dispatcher.onPlatformMessage = (
-        String channel,
-        ByteData? data,
-        ui.PlatformMessageResponseCallback? callback,
-      ) {
-        final ByteData response =
-            const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      dispatcher.onPlatformMessage =
+          (String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
+            final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{
               'handled': markTextEventHandled,
             })!;
-        callback!(response);
-      };
+            callback!(response);
+          };
       RawKeyboard.initialize();
 
       final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
@@ -584,6 +580,134 @@ Future<void> testMain() async {
       expect(editingStrategy.domElement!.style.width, '10px');
       expect(editingStrategy.domElement!.style.height, '10px');
     });
+
+    test('does not blur input when size is updated', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      editingStrategy!.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategy!.isEnabled, isTrue);
+
+      final inputElement = editingStrategy!.domElement!;
+      expect(domDocument.activeElement, inputElement);
+
+      int blurCount = 0;
+      final blurListener = createDomEventListener((_) {
+        blurCount++;
+      });
+      inputElement.addEventListener('blur', blurListener);
+
+      final sizeCompleter = Completer<void>();
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 240,
+            height: 60,
+            globalTransform: Matrix4.translationValues(11, 12, 0).storage,
+          ),
+        ),
+        sizeCompleter.complete,
+      );
+      await sizeCompleter.future;
+
+      expect(blurCount, isZero);
+      // `TextInputClient.onConnectionClosed` shouldn't have been called.
+      expect(spy.messages, isEmpty);
+
+      inputElement.removeEventListener('blur', blurListener);
+      spy.tearDown();
+    });
+
+    test('closes input connection when window/iframe loses focus', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
+
+      spy.tearDown();
+    });
+
+    test(
+      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome and Firefox but not Safari',
+      () async {
+        final PlatformMessagesSpy spy = PlatformMessagesSpy();
+        spy.setUp();
+
+        textEditing.configuration = singlelineConfig;
+
+        final showCompleter = Completer<void>();
+        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+        await showCompleter.future;
+
+        // The "setSizeAndTransform" message has to be here before we call
+        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+        // we don't put the input element into the DOM until we get its correct
+        // dimensions from the framework.
+        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        );
+        textEditing.channel.handleTextInput(
+          codec.encodeMethodCall(setSizeAndTransform),
+          (ByteData? data) {},
+        );
+
+        expect(textEditing.isEditing, isTrue);
+
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+        final flutterView = EnginePlatformDispatcher.instance.viewManager.findViewForElement(
+          textEditing.strategy.domElement,
+        )!;
+
+        flutterView.dom.rootElement.focusWithoutScroll();
+        expect(spy.messages, isEmpty);
+
+        if (isSafari) {
+          // In Safari the web engine does not respond to blur, so there's no
+          // expectation that the input element keep focus.
+          expect(domDocument.activeElement, flutterView.dom.rootElement);
+        } else if (isFirefox) {
+          // This is a mysterious behavior in Firefox. Even though the engine does
+          // call <input>.focus() the browser doesn't move focus to the target
+          // element. This only happens in the test harness. When testing
+          // manually, Firefox happily moves focus to the input element.
+          //
+          // We've seen cases in LUCI where Firefox behaves like Chrome (sets focus on the input
+          // element). But when running locally, we are seeing the wrong behavior explained in the
+          // comment above. To work around this, the test will accept both behaviors for now.
+          expect(
+            domDocument.activeElement,
+            anyOf(textEditing.strategy.domElement, flutterView.dom.rootElement),
+          );
+        } else {
+          expect(domDocument.activeElement, textEditing.strategy.domElement);
+        }
+
+        spy.tearDown();
+      },
+    );
   });
 
   group('$HybridTextEditing', () {
@@ -608,6 +732,7 @@ Future<void> testMain() async {
       bool decimal = false,
       bool isMultiline = false,
       bool autofillEnabled = true,
+      bool enableInteractiveSelection = true,
     }) {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         ++clientId,
@@ -618,6 +743,7 @@ Future<void> testMain() async {
           decimal: decimal,
           isMultiline: isMultiline,
           autofillEnabled: autofillEnabled,
+          enableInteractiveSelection: enableInteractiveSelection,
         ),
       ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -690,6 +816,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -721,6 +849,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -791,7 +921,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -814,6 +950,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -839,6 +977,58 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
+    test('Does not align content in autofill group elements', () {
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        createFlutterConfig('text'),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // Form elements
+      {
+        final formElement = textEditing!.configuration!.autofillGroup!.formElement;
+        expect(formElement.style.alignContent, isEmpty);
+
+        // Should contain one <input type="text"> and one <input type="submit">
+        expect(formElement.children, hasLength(2));
+
+        final inputElement = formElement.children.first;
+        expect(inputElement.style.alignContent, isEmpty);
+
+        final submitElement = formElement.children.last;
+        expect(submitElement.style.alignContent, isEmpty);
+      }
+
+      // Active element
+      {
+        final DomHTMLElement activeElement = textEditing!.strategy.activeDomElement;
+        expect(activeElement.style.alignContent, isEmpty);
+      }
+    });
+
     test('focus and connection with blur', () async {
       // In all the desktop browsers we are keeping the connection
       // open, keep the text editing element focused if it receives a blur
@@ -853,6 +1043,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -898,7 +1090,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -951,6 +1149,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1004,6 +1204,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1056,6 +1258,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1108,6 +1312,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1151,7 +1357,9 @@ Future<void> testMain() async {
 
     test('Moves the focus across input elements', () async {
       final List<DomEvent> focusinEvents = <DomEvent>[];
-      final DomEventListener handleFocusIn = createDomEventListener(focusinEvents.add);
+      final DomEventListener handleFocusIn = createDomEventListener((DomEvent event) {
+        focusinEvents.add(event);
+      });
 
       final MethodCall setClient1 = MethodCall('TextInput.setClient', <dynamic>[
         123,
@@ -1165,6 +1373,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
         150,
@@ -1211,6 +1421,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1268,6 +1480,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1289,6 +1503,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': 0,
         'selectionExtent': 2,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState2));
 
@@ -1319,6 +1535,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1371,6 +1589,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1444,6 +1664,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1492,6 +1714,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1528,6 +1752,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1561,6 +1787,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1599,7 +1827,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1660,7 +1894,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1728,7 +1968,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1790,6 +2036,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': 1,
         'selectionExtent': 2,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1814,6 +2062,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': -1,
         'selectionExtent': -1,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState2));
 
@@ -1834,6 +2084,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1897,6 +2149,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': -1,
         'selectionExtent': -1,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1954,6 +2208,8 @@ Future<void> testMain() async {
         'text': 'Hello world',
         'selectionBase': 9,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -2019,6 +2275,8 @@ Future<void> testMain() async {
         'text': 'Hello world',
         'selectionBase': 9,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -2100,6 +2358,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -2194,8 +2454,8 @@ Future<void> testMain() async {
         'text': 'foo\nbar',
         'selectionBase': 2,
         'selectionExtent': 3,
-        'composingBase': null,
-        'composingExtent': null,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, 'foo\nbar', 2, 3);
@@ -2423,8 +2683,8 @@ Future<void> testMain() async {
         'text': '1\n2\n3\n4\n',
         'selectionBase': 8,
         'selectionExtent': 8,
-        'composingBase': null,
-        'composingExtent': null,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, '1\n2\n3\n4\n', 8, 8);
@@ -2695,6 +2955,77 @@ Future<void> testMain() async {
       //                https://github.com/flutter/flutter/issues/145101
     }, skip: true);
 
+    test('Collapses selections if interactive selection disabled', () {
+      final int clientId = showKeyboard(inputType: 'text', enableInteractiveSelection: false);
+
+      // The Safari strategy doesn't insert the input element into the DOM until
+      // it has received the geometry information.
+      final List<double> transform = Matrix4.identity().storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        10,
+        10,
+        transform,
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DomHTMLInputElement input = textEditing!.strategy.domElement! as DomHTMLInputElement;
+
+      input.value = 'something';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      spy.messages.clear();
+
+      // Forward selection collapses at the end.
+      input.setSelectionRange(2, 5, 'forward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 5,
+          'selectionExtent': 5,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      // Backward selection collapses at the start.
+      input.setSelectionRange(2, 5, 'backward');
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
+        final DomEvent keyup = createDomEvent('Event', 'keyup');
+        textEditing!.strategy.domElement!.dispatchEvent(keyup);
+      } else {
+        domDocument.dispatchEvent(createDomEvent('Event', 'selectionchange'));
+      }
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingState');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': 'something',
+          'selectionBase': 2,
+          'selectionExtent': 2,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
+      ]);
+      spy.messages.clear();
+
+      hideKeyboard();
+    });
+
     tearDown(() {
       clearForms();
     });
@@ -2706,12 +3037,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // Number of elements if number of fields sent to the constructor minus
       // one (for the focused text element).
@@ -2764,12 +3094,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['zzyyxx', 'aabbcc', 'jjkkll'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.formIdentifier, 'aabbcc*jjkkll*zzyyxx');
     });
@@ -2781,12 +3110,11 @@ Future<void> testMain() async {
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       autofillForm.placeForm(testInputElement);
@@ -2808,12 +3136,11 @@ Future<void> testMain() async {
 
     test('Validate single element form', () {
       final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('username', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // The focused element is the only field. Form should be empty after
       // the initialization (focus element is appended later).
@@ -2848,12 +3175,11 @@ Future<void> testMain() async {
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('email', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.elements, hasLength(2));
 
@@ -2888,12 +3214,11 @@ Future<void> testMain() async {
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
-        final EngineAutofillForm autofillForm =
-            EngineAutofillForm.fromFrameworkMessage(
-              kImplicitViewId,
-              createAutofillInfo('email', 'field1'),
-              fields,
-            )!;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          createAutofillInfo('email', 'field1'),
+          fields,
+        )!;
         final List<DomHTMLInputElement> formChildNodes =
             autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement username = formChildNodes[0];
@@ -2917,12 +3242,11 @@ Future<void> testMain() async {
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
-      final EngineAutofillForm autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(
-            kImplicitViewId,
-            createAutofillInfo('email', 'field1'),
-            fields,
-          )!;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
       final List<DomHTMLInputElement> formChildNodes =
           autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
       final DomHTMLInputElement username = formChildNodes[0];
@@ -2945,12 +3269,11 @@ Future<void> testMain() async {
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
-        final EngineAutofillForm autofillForm =
-            EngineAutofillForm.fromFrameworkMessage(
-              kImplicitViewId,
-              createAutofillInfo('email', 'field1'),
-              fields,
-            )!;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          createAutofillInfo('email', 'field1'),
+          fields,
+        )!;
 
         final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
         testInputElement.name = 'email';
@@ -3117,18 +3440,24 @@ Future<void> testMain() async {
 
     test('Fix flipped base and extent offsets', () {
       expect(
-        EditingState(baseOffset: 10, extentOffset: 4),
-        EditingState(baseOffset: 4, extentOffset: 10),
+        EditingState(text: '', baseOffset: 10, extentOffset: 4),
+        EditingState(text: '', baseOffset: 4, extentOffset: 10),
       );
 
       expect(
         EditingState.fromFrameworkMessage(<String, dynamic>{
+          'text': '',
           'selectionBase': 10,
           'selectionExtent': 4,
+          'composingBase': -1,
+          'composingExtent': -1,
         }),
         EditingState.fromFrameworkMessage(<String, dynamic>{
+          'text': '',
           'selectionBase': 4,
           'selectionExtent': 10,
+          'composingBase': -1,
+          'composingExtent': -1,
         }),
       );
     });
@@ -3136,7 +3465,13 @@ Future<void> testMain() async {
     test('Sets default composing offsets if none given', () {
       final EditingState editingState = EditingState(text: 'Test', baseOffset: 2, extentOffset: 4);
       final EditingState editingStateFromFrameworkMsg = EditingState.fromFrameworkMessage(
-        <String, dynamic>{'selectionBase': 10, 'selectionExtent': 4},
+        <String, dynamic>{
+          'text': '',
+          'selectionBase': 10,
+          'selectionExtent': 4,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
       );
 
       expect(editingState.composingBaseOffset, -1);
@@ -3147,8 +3482,16 @@ Future<void> testMain() async {
     });
 
     test('Correctly identifies min and max offsets', () {
-      final EditingState flippedEditingState = EditingState(baseOffset: 10, extentOffset: 4);
-      final EditingState normalEditingState = EditingState(baseOffset: 2, extentOffset: 6);
+      final EditingState flippedEditingState = EditingState(
+        text: '',
+        baseOffset: 10,
+        extentOffset: 4,
+      );
+      final EditingState normalEditingState = EditingState(
+        text: '',
+        baseOffset: 2,
+        extentOffset: 6,
+      );
 
       expect(flippedEditingState.minOffset, 4);
       expect(flippedEditingState.maxOffset, 10);
@@ -3260,8 +3603,16 @@ Future<void> testMain() async {
       });
 
       test('Takes flipped base and extent offsets into account', () {
-        final EditingState flippedEditingState = EditingState(baseOffset: 10, extentOffset: 4);
-        final EditingState normalEditingState = EditingState(baseOffset: 4, extentOffset: 10);
+        final EditingState flippedEditingState = EditingState(
+          text: '',
+          baseOffset: 10,
+          extentOffset: 4,
+        );
+        final EditingState normalEditingState = EditingState(
+          text: '',
+          baseOffset: 4,
+          extentOffset: 10,
+        );
 
         expect(normalEditingState, flippedEditingState);
 
@@ -3270,14 +3621,23 @@ Future<void> testMain() async {
 
       test('takes composition range into account', () {
         final EditingState editingState1 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 1,
           composingExtentOffset: 2,
         );
         final EditingState editingState2 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 1,
           composingExtentOffset: 2,
         );
         final EditingState editingState3 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 4,
           composingExtentOffset: 8,
         );
@@ -3582,19 +3942,24 @@ Future<void> testMain() async {
       // though it supports forced-colors. Safari doesn't support forced-colors
       // so this isn't a problem there.
     }, skip: isFirefox || isSafari);
+
+    test('Multi-line text area scrollbars are zero-width', () {
+      final allowedScrollbarWidthValues = <String>[
+        'none',
+        // Safari introduced scrollbarWidth support in 18.2. Older Safari versions
+        // return empty string instead of 'none'.
+        if (isSafari) '',
+      ];
+      expect(allowedScrollbarWidthValues, contains(createMultilineTextArea().style.scrollbarWidth));
+    });
   });
 }
 
 DomKeyboardEvent dispatchKeyboardEvent(DomEventTarget target, String type, {required int keyCode}) {
-  final Object jsKeyboardEvent = js_util.getProperty<Object>(domWindow, 'KeyboardEvent');
-  final List<dynamic> eventArgs = <dynamic>[
-    type,
-    js_util.jsify(<String, dynamic>{'keyCode': keyCode, 'cancelable': true}),
-  ];
-  final DomKeyboardEvent event = js_util.callConstructor<DomKeyboardEvent>(
-    jsKeyboardEvent,
-    eventArgs,
-  );
+  final DomKeyboardEvent event = createDomKeyboardEvent(type, <String, Object>{
+    'keyCode': keyCode,
+    'cancelable': true,
+  });
   target.dispatchEvent(event);
 
   return event;
@@ -3640,8 +4005,8 @@ void cleanTestFlags() {
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {
   expect(element, isNotNull);
-  expect(domInstanceOfString(element, 'HTMLInputElement'), true);
-  final DomHTMLInputElement input = element! as DomHTMLInputElement;
+  expect(element!.isA<DomHTMLInputElement>(), true);
+  final DomHTMLInputElement input = element as DomHTMLInputElement;
   expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);
@@ -3690,6 +4055,7 @@ Map<String, dynamic> createFlutterConfig(
   bool decimal = false,
   bool enableDeltaModel = false,
   bool isMultiline = false,
+  bool enableInteractiveSelection = true,
 }) {
   return <String, dynamic>{
     'inputType': <String, dynamic>{
@@ -3697,7 +4063,7 @@ Map<String, dynamic> createFlutterConfig(
       if (decimal) 'decimal': true,
       if (isMultiline) 'isMultiline': true,
     },
-    if (viewId != null) 'viewId': viewId,
+    'viewId': ?viewId,
     'readOnly': readOnly,
     'obscureText': obscureText,
     'autocorrect': autocorrect,
@@ -3712,6 +4078,7 @@ Map<String, dynamic> createFlutterConfig(
     if (autofillEnabled && autofillHintsForFields != null)
       'fields': createFieldValues(autofillHintsForFields, autofillHintsForFields),
     'enableDeltaModel': enableDeltaModel,
+    'enableInteractiveSelection': enableInteractiveSelection,
   };
 }
 
@@ -3719,7 +4086,7 @@ Map<String, dynamic> createAutofillInfo(String? hint, String uniqueId, {String? 
     <String, dynamic>{
       'uniqueIdentifier': uniqueId,
       if (hint != null) 'hints': <String>[hint],
-      if (placeholder != null) 'hintText': placeholder,
+      'hintText': ?placeholder,
       'editingValue': <String, dynamic>{
         'text': 'Test',
         'selectionBase': 0,

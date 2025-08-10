@@ -6,16 +6,21 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
 #include "flutter/fml/status.h"
-#include "impeller/base/thread.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
+
+// These methods should only be used by render_pass_vk.h
+struct FramebufferAndRenderPass {
+  SharedHandleVK<vk::Framebuffer> framebuffer = nullptr;
+  SharedHandleVK<vk::RenderPass> render_pass = nullptr;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      Abstract base class that represents a vkImage and an
@@ -127,29 +132,21 @@ class TextureSourceVK {
 
   // These methods should only be used by render_pass_vk.h
 
-  /// Store the last framebuffer object used with this texture.
+  /// Store the last framebuffer and render pass object used with this texture.
   ///
-  /// This field is only set if this texture is used as the resolve texture
+  /// This method is only called if this texture is used as the resolve texture
   /// of a render pass. By construction, this framebuffer should be compatible
   /// with any future render passes.
-  void SetCachedFramebuffer(const SharedHandleVK<vk::Framebuffer>& framebuffer);
+  void SetCachedFrameData(const FramebufferAndRenderPass& data,
+                          SampleCount sample_count);
 
-  /// Store the last render pass object used with this texture.
+  /// Retrieve the last framebuffer and render pass object used with this
+  /// texture for a given sample count.
   ///
-  /// This field is only set if this texture is used as the resolve texture
-  /// of a render pass. By construction, this framebuffer should be compatible
-  /// with any future render passes.
-  void SetCachedRenderPass(const SharedHandleVK<vk::RenderPass>& render_pass);
-
-  /// Retrieve the last framebuffer object used with this texture.
-  ///
-  /// May be nullptr if no previous framebuffer existed.
-  SharedHandleVK<vk::Framebuffer> GetCachedFramebuffer() const;
-
-  /// Retrieve the last render pass object used with this texture.
-  ///
-  /// May be nullptr if no previous render pass existed.
-  SharedHandleVK<vk::RenderPass> GetCachedRenderPass() const;
+  /// An empty FramebufferAndRenderPass is returned if there is no cached data
+  /// for a particular sample count.
+  const FramebufferAndRenderPass& GetCachedFrameData(
+      SampleCount sample_count) const;
 
  protected:
   const TextureDescriptor desc_;
@@ -157,11 +154,8 @@ class TextureSourceVK {
   explicit TextureSourceVK(TextureDescriptor desc);
 
  private:
-  SharedHandleVK<vk::Framebuffer> framebuffer_;
-  SharedHandleVK<vk::RenderPass> render_pass_;
-  mutable RWMutex layout_mutex_;
-  mutable vk::ImageLayout layout_ IPLR_GUARDED_BY(layout_mutex_) =
-      vk::ImageLayout::eUndefined;
+  std::array<FramebufferAndRenderPass, 2> frame_data_;
+  mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 
 }  // namespace impeller

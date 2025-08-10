@@ -24,7 +24,10 @@ void main() {
 
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: Center(child: Icon(null))),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Icon(null)),
+      ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(Icon));
@@ -47,7 +50,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconTheme(data: IconThemeData(size: 36.0), child: Icon(null))),
+        child: Center(
+          child: IconTheme(data: IconThemeData(size: 36.0), child: Icon(null)),
+        ),
       ),
     );
 
@@ -73,7 +78,9 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: IconTheme(data: IconThemeData(), child: Icon(null))),
+        child: Center(
+          child: IconTheme(data: IconThemeData(), child: Icon(null)),
+        ),
       ),
     );
 
@@ -165,7 +172,9 @@ void main() {
         data: MediaQueryData(textScaler: _TextDoubler()),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Center(child: IconTheme(data: IconThemeData(), child: Icon(null))),
+          child: Center(
+            child: IconTheme(data: IconThemeData(), child: Icon(null)),
+          ),
         ),
       ),
     );
@@ -184,6 +193,18 @@ void main() {
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style!.fontFamily, equals('Roboto'));
+  });
+
+  testWidgets('Icon with custom font weight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Icon(IconData(0x41), fontWeight: FontWeight.bold)),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style!.fontWeight, equals(FontWeight.bold));
   });
 
   testWidgets("Icon's TextStyle makes sure the font body is vertically center-aligned", (

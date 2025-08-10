@@ -2,22 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@JS()
-library js_app;
-
 import 'dart:js_interop';
 import 'package:ui/src/engine.dart';
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].
-@JS()
-@anonymous
-@staticInterop
-class JsFlutterViewOptions {
-  external factory JsFlutterViewOptions();
-}
+extension type JsFlutterViewOptions._primary(JSObject _) implements JSObject {
+  factory JsFlutterViewOptions({
+    required DomElement hostElement,
+    JsViewConstraints? viewConstraints,
+    Object? initialData,
+  }) => JsFlutterViewOptions._(
+    hostElement: hostElement,
+    viewConstraints: viewConstraints,
+    initialData: initialData?.toJSAnyDeep,
+  );
+  external factory JsFlutterViewOptions._({
+    required DomElement hostElement,
+    JsViewConstraints? viewConstraints,
+    JSAny? initialData,
+  });
 
-/// The attributes of the [JsFlutterViewOptions] object.
-extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
   @JS('hostElement')
   external DomElement? get _hostElement;
   DomElement get hostElement {
@@ -25,32 +29,21 @@ extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
     return _hostElement!;
   }
 
-  @JS('viewConstraints')
-  external JsViewConstraints? get _viewConstraints;
-  JsViewConstraints? get viewConstraints {
-    return _viewConstraints;
-  }
-
+  external JsViewConstraints? get viewConstraints;
   external JSAny? get initialData;
 }
 
 /// The JS bindings for a [ViewConstraints] object.
-@JS()
-@anonymous
-@staticInterop
-class JsViewConstraints {
+///
+/// Attributes are expressed in *logical* pixels.
+extension type JsViewConstraints._(JSObject _) implements JSObject {
   external factory JsViewConstraints({
     double? minWidth,
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
   });
-}
 
-/// The attributes of a [JsViewConstraints] object.
-///
-/// These attributes are expressed in *logical* pixels.
-extension JsViewConstraintsExtension on JsViewConstraints {
   external double? get maxHeight;
   external double? get maxWidth;
   external double? get minHeight;
@@ -58,18 +51,18 @@ extension JsViewConstraintsExtension on JsViewConstraints {
 }
 
 /// The public JS API of a running Flutter Web App.
-@JS()
-@anonymous
-@staticInterop
-abstract class FlutterApp {
+extension type FlutterApp._primary(JSObject _) implements JSObject {
   factory FlutterApp({
     required AddFlutterViewFn addView,
     required RemoveFlutterViewFn removeView,
-  }) => FlutterApp._(
-    addView: addView.toJS,
-    removeView: ((JSNumber id) => removeView(id.toDartInt)).toJS,
-  );
+  }) => FlutterApp._(addView: addView.toJS, removeView: ((int id) => removeView(id)).toJS);
   external factory FlutterApp._({required JSFunction addView, required JSFunction removeView});
+
+  @JS('addView')
+  external int addView(JsFlutterViewOptions options);
+
+  @JS('removeView')
+  external JsFlutterViewOptions? removeView(int id);
 }
 
 /// Typedef for the function that adds a new view to the app.

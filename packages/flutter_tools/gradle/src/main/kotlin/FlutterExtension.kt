@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import org.gradle.api.GradleException
@@ -13,12 +17,13 @@ import org.gradle.api.GradleException
  * Learn more about extensions in Gradle:
  *  * https://docs.gradle.org/8.0.2/userguide/custom_plugins.html#sec:getting_input_from_the_build
  */
+@Suppress("unused") // The values in this class are used in Flutter developers app-level build.gradle file.
 open class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    val compileSdkVersion: Int = 35
+    val compileSdkVersion: Int = 36
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    val minSdkVersion: Int = 21
+    val minSdkVersion: Int = 24
 
     /**
      * Sets the targetSdkVersion used by default in Flutter app projects.
@@ -26,14 +31,15 @@ open class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    val targetSdkVersion: Int = 35
+    val targetSdkVersion: Int = 36
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below as found in
+     * Chosen as default version of the AGP version found in packages/flutter_tools/gradle/build.gradle.kts
+     * and in packages/flutter_tools/gradle/build.gradle.kts as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    val ndkVersion: String = "26.3.11579264"
+    val ndkVersion: String = "27.0.12077973"
 
     /**
      * Specifies the relative directory to the Flutter project directory.

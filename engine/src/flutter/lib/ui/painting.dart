@@ -32,8 +32,8 @@ bool _rrectIsValid(RRect rrect) {
   return true;
 }
 
-bool _rseIsValid(RSuperellipse rse) {
-  assert(!rse.hasNaN, 'RSuperellipse argument contained a NaN value.');
+bool _rsuperellipseIsValid(RSuperellipse rsuperellipse) {
+  assert(!rsuperellipse.hasNaN, 'RSuperellipse argument contained a NaN value.');
   return true;
 }
 
@@ -215,7 +215,7 @@ class Color {
   final ColorSpace colorSpace;
 
   static int _floatToInt8(double x) {
-    return (x * 255.0).round() & 0xff;
+    return (x * 255.0).round().clamp(0, 255);
   }
 
   /// A 32 bit value representing this color.
@@ -233,7 +233,7 @@ class Color {
   ///
   /// Unlike accessing the floating point equivalent channels individually
   /// ([a], [r], [g], [b]), this method is intentionally _lossy_, and scales
-  /// each channel using `(channel * 255.0).round() & 0xff`.
+  /// each channel using `(channel * 255.0).round().clamp(0, 255)`.
   ///
   /// While useful for storing a 32-bit integer value, prefer accessing the
   /// individual channels (and storing the double equivalent) where higher
@@ -263,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use (*.a * 255.0).round() & 0xff')
+  @Deprecated('Use (*.a * 255.0).round().clamp(0, 255)')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -274,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use (*.r * 255.0).round() & 0xff')
+  @Deprecated('Use (*.r * 255.0).round().clamp(0, 255)')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use (*.g * 255.0).round() & 0xff')
+  @Deprecated('Use (*.g * 255.0).round().clamp(0, 255)')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use (*.b * 255.0).round() & 0xff')
+  @Deprecated('Use (*.b * 255.0).round().clamp(0, 255)')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
@@ -3033,6 +3033,10 @@ abstract class Path {
   /// argument.
   void addRRect(RRect rrect);
 
+  /// Adds a new sub-path that consists of curves needed to form the rounded
+  /// superellipse described by the argument.
+  void addRSuperellipse(RSuperellipse rsuperellipse);
+
   /// Adds the sub-paths of `path`, offset by `offset`, to this path.
   ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
@@ -3374,6 +3378,15 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Path::addRRect')
   external void _addRRect(Float32List rrect);
+
+  @override
+  void addRSuperellipse(RSuperellipse rsuperellipse) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _addRSuperellipse(rsuperellipse._native());
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'Path::addRSuperellipse')
+  external void _addRSuperellipse(_NativeRSuperellipse rsuperellipse);
 
   @override
   void addPath(Path path, Offset offset, {Float64List? matrix4}) {
@@ -4229,6 +4242,10 @@ abstract class ImageFilter {
   /// also be at least one sampler2D uniform, the first of which will be set by
   /// the engine to contain the filter input.
   ///
+  /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
+  /// reversed. Custom fragment shaders must invert the y-axis on
+  /// GLES or they will render upside-down.
+  ///
   /// For example, the following is a valid fragment shader that can be used
   /// with this API. Note that the uniform names are not required to have any
   /// particular value.
@@ -4244,7 +4261,12 @@ abstract class ImageFilter {
   /// out vec4 frag_color;
   ///
   /// void main() {
-  ///   frag_color = texture(u_texture_input, FlutterFragCoord().xy / u_size) * u_time;
+  ///   vec2 uv = FlutterFragCoord().xy / u_size;
+  /// // Reverse y axis for OpenGL backend.
+  /// #ifdef IMPELLER_TARGET_OPENGLES
+  ///   uv.y = 1.0 - uv.y
+  /// #endif
+  ///   frag_color = texture(u_texture_input, uv) * u_time;
   ///
   /// }
   ///
@@ -4479,7 +4501,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
         _equals(nativeFilter, other.nativeFilter);
   }
 
-  @Native<Bool Function(Handle, Handle)>(symbol: 'ImageFilter::equal')
+  @Native<Bool Function(Handle, Handle)>(symbol: 'ImageFilter::equals')
   external static bool _equals(_ImageFilter a, _ImageFilter b);
 
   @override
@@ -4811,8 +4833,9 @@ base class Gradient extends Shader {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
   }
@@ -4864,8 +4887,9 @@ base class Gradient extends Shader {
        assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
 
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
@@ -4946,8 +4970,9 @@ base class Gradient extends Shader {
        super._() {
     _validateColorStops(colors, colorStops);
     final Float32List colorsBuffer = _encodeWideColorList(colors);
-    final Float32List? colorStopsBuffer =
-        colorStops == null ? null : Float32List.fromList(colorStops);
+    final Float32List? colorStopsBuffer = colorStops == null
+        ? null
+        : Float32List.fromList(colorStops);
     _constructor();
     _initSweep(
       center.dx,
@@ -5445,8 +5470,9 @@ base class Vertices extends NativeFieldWrapperClass1 {
       return true;
     }());
     final Float32List encodedPositions = _encodePointList(positions);
-    final Float32List? encodedTextureCoordinates =
-        (textureCoordinates != null) ? _encodePointList(textureCoordinates) : null;
+    final Float32List? encodedTextureCoordinates = (textureCoordinates != null)
+        ? _encodePointList(textureCoordinates)
+        : null;
     final Int32List? encodedColors = colors != null ? _encodeColorList(colors) : null;
     final Uint16List? encodedIndices = indices != null ? Uint16List.fromList(indices) : null;
 
@@ -5894,7 +5920,7 @@ abstract class Canvas {
   /// If multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that and some examples of using [clipRSuperellipse].
-  void clipRSuperellipse(RSuperellipse rse, {bool doAntiAlias = true});
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true});
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -6024,7 +6050,7 @@ abstract class Canvas {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-dark-mode-only)
-  void drawRSuperellipse(RSuperellipse rse, Paint paint);
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint);
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -6638,13 +6664,13 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   external void _clipRRect(Float32List rrect, bool doAntiAlias);
 
   @override
-  void clipRSuperellipse(RSuperellipse rse, {bool doAntiAlias = true}) {
-    assert(_rseIsValid(rse));
-    _clipRSuperellipse(rse._getValue32(), doAntiAlias);
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Bool)>(symbol: 'Canvas::clipRSuperellipse')
-  external void _clipRSuperellipse(Float32List rse, bool doAntiAlias);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Bool)>(symbol: 'Canvas::clipRSuperellipse')
+  external void _clipRSuperellipse(_NativeRSuperellipse rsuperellipse, bool doAntiAlias);
 
   @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
@@ -6757,14 +6783,16 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   );
 
   @override
-  void drawRSuperellipse(RSuperellipse rse, Paint paint) {
-    assert(_rseIsValid(rse));
-    _drawRSuperellipse(rse._getValue32(), paint._objects, paint._data);
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRSuperellipse')
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+    symbol: 'Canvas::drawRSuperellipse',
+  )
   external void _drawRSuperellipse(
-    Float32List rse,
+    _NativeRSuperellipse rsuperellipse,
     List<Object?>? paintObjects,
     ByteData paintData,
   );
@@ -7097,8 +7125,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       rectBuffer[index3] = rect.bottom;
     }
 
-    final Int32List? colorBuffer =
-        (colors == null || colors.isEmpty) ? null : _encodeColorList(colors);
+    final Int32List? colorBuffer = (colors == null || colors.isEmpty)
+        ? null
+        : _encodeColorList(colors);
     final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 

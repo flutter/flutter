@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -21,7 +20,7 @@ void main() {
 }
 
 class StubPictureRenderer implements PictureRenderer {
-  final DomCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
+  final DomHTMLCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
 
   @override
   Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
@@ -29,7 +28,7 @@ class StubPictureRenderer implements PictureRenderer {
     final List<DomImageBitmap> bitmaps = await Future.wait(
       pictures.map((ScenePicture picture) {
         final ui.Rect cullRect = picture.cullRect;
-        final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement as JSObject, (
+        final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement, (
           x: 0,
           y: 0,
           width: cullRect.width.toInt(),
@@ -44,10 +43,13 @@ class StubPictureRenderer implements PictureRenderer {
   @override
   ScenePicture clipPicture(ScenePicture picture, ui.Rect clip) {
     clipRequests[picture] = clip;
-    return picture;
+    final clippedRect = clip.intersect(picture.cullRect);
+    final clippedPicture = StubPicture(clippedRect);
+    return clippedPicture;
   }
 
   List<ScenePicture> renderedPictures = <ScenePicture>[];
+  List<StubPicture> clippedPictures = <StubPicture>[];
   Map<ScenePicture, ui.Rect> clipRequests = <ScenePicture, ui.Rect>{};
 }
 
@@ -231,6 +233,9 @@ class StubPath implements ScenePath {
   void addRRect(ui.RRect rrect) => throw UnimplementedError();
 
   @override
+  void addRSuperellipse(ui.RSuperellipse rsuperellipse) => throw UnimplementedError();
+
+  @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) =>
       throw UnimplementedError();
 
@@ -275,6 +280,13 @@ void testMain() {
   setUp(() {
     stubPictureRenderer = StubPictureRenderer();
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView());
+  });
+
+  tearDown(() {
+    expect(
+      stubPictureRenderer.clippedPictures.every((StubPicture picture) => picture.debugDisposed),
+      true,
+    );
   });
 
   test('SceneView places canvas according to device-pixel ratio', () async {
@@ -384,11 +396,10 @@ void testMain() {
     const int expectedPlatformViewId = 1234;
 
     int? injectedViewId;
-    final DomManager stubDomManager =
-        StubDomManager()
-          ..injectPlatformViewOverride = (int viewId) {
-            injectedViewId = viewId;
-          };
+    final DomManager stubDomManager = StubDomManager()
+      ..injectPlatformViewOverride = (int viewId) {
+        injectedViewId = viewId;
+      };
     sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView()..dom = stubDomManager);
 
     final PlatformView platformView = PlatformView(

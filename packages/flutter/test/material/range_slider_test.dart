@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1117,12 +1118,11 @@ void main() {
     bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged =
-        !enabled
-            ? null
-            : (RangeValues newValues) {
-              values = newValues;
-            };
+    final ValueChanged<RangeValues>? onChanged = !enabled
+        ? null
+        : (RangeValues newValues) {
+            values = newValues;
+          };
     return MaterialApp(
       home: Directionality(
         textDirection: TextDirection.ltr,
@@ -1418,12 +1418,11 @@ void main() {
         int? divisions,
         bool enabled = true,
       }) {
-        final ValueChanged<RangeValues>? onChanged =
-            !enabled
-                ? null
-                : (RangeValues newValues) {
-                  values = newValues;
-                };
+        final ValueChanged<RangeValues>? onChanged = !enabled
+            ? null
+            : (RangeValues newValues) {
+                values = newValues;
+              };
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
@@ -1929,6 +1928,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1940,6 +1940,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1987,6 +1988,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -1998,6 +2000,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2071,6 +2074,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2081,6 +2085,7 @@ void main() {
               matchesSemantics(
                 isEnabled: true,
                 isSlider: true,
+                isFocusable: true,
                 hasEnabledState: true,
                 hasIncreaseAction: true,
                 hasDecreaseAction: true,
@@ -2134,11 +2139,10 @@ void main() {
       values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -2174,8 +2178,12 @@ void main() {
         ),
       );
 
-      // _RenderRangeSlider is the last render object in the tree.
-      final RenderObject renderObject = tester.allRenderObjects.last;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       expect(
         renderObject,
@@ -2234,8 +2242,12 @@ void main() {
         ),
       );
 
-      // _RenderRangeSlider is the last render object in the tree.
-      final RenderObject renderObject = tester.allRenderObjects.last;
+      final RenderObject renderObject = tester.allRenderObjects
+          .where(
+            (RenderObject renderObject) =>
+                renderObject.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          .first;
 
       //There should no gap between the inactive track and active track.
       expect(
@@ -2275,8 +2287,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame(10));
 
-    // _RenderRangeSlider is the last render object in the tree.
-    final RenderObject renderObject = tester.allRenderObjects.last;
+    final RenderObject renderObject = tester.allRenderObjects
+        .where(
+          (RenderObject renderObject) =>
+              renderObject.runtimeType.toString() == '_RenderRangeSlider',
+        )
+        .first;
 
     // Update the divisions from 10 to 15, the thumbs should be paint at the correct position.
     await tester.pumpWidget(buildFrame(15));
@@ -2416,14 +2432,13 @@ void main() {
                       }),
                       values: values,
                       max: 100.0,
-                      onChanged:
-                          enabled
-                              ? (RangeValues newValues) {
-                                setState(() {
-                                  values = newValues;
-                                });
-                              }
-                              : null,
+                      onChanged: enabled
+                          ? (RangeValues newValues) {
+                              setState(() {
+                                values = newValues;
+                              });
+                            }
+                          : null,
                       onChangeStart: enabled ? (RangeValues newValues) {} : null,
                       onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                     ),
@@ -2446,11 +2461,6 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
     await tester.pumpWidget(buildFrame(enabled: true));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.none,
-    );
-
     await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
@@ -2481,14 +2491,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2529,6 +2538,164 @@ void main() {
     );
   });
 
+  testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(20, 80);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // Focus on the start thumb
+    final Finder rangeSliderFinder = find.byType(RangeSlider);
+    expect(rangeSliderFinder, findsOneWidget);
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+  });
+
+  testWidgets('Keyboard focus also changes semantics focus', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: RangeSlider(
+                values: const RangeValues(10.0, 30.0),
+                max: 100.0,
+                onChanged: (RangeValues v) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final FocusNode startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final FocusNode endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    // Focus on the start thumb
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    final SemanticsNode semanticsNode = tester.getSemantics(find.byType(RangeSlider));
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+
+    expect(
+      semanticsNode,
+      matchesSemantics(
+        scopesRoute: true,
+        children: <Matcher>[
+          matchesSemantics(
+            children: <Matcher>[
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '10%',
+                increasedValue: '15%',
+                decreasedValue: '5%',
+                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+              ),
+              matchesSemantics(
+                isEnabled: true,
+                isSlider: true,
+                isFocusable: true,
+                isFocused: true,
+                hasEnabledState: true,
+                hasIncreaseAction: true,
+                hasDecreaseAction: true,
+                value: '30%',
+                increasedValue: '35%',
+                decreasedValue: '25%',
+                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  });
+
   testWidgets('RangeSlider is draggable and has correct dragged color', (
     WidgetTester tester,
   ) async {
@@ -2547,14 +2714,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                   ),
                 ),
               );
@@ -2619,14 +2785,13 @@ void main() {
 
                       return null;
                     }),
-                    onChanged:
-                        enabled
-                            ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                            : null,
+                    onChanged: enabled
+                        ? (RangeValues newValues) {
+                            setState(() {
+                              values = newValues;
+                            });
+                          }
+                        : null,
                     onChangeStart: enabled ? (RangeValues newValues) {} : null,
                     onChangeEnd: enabled ? (RangeValues newValues) {} : null,
                   ),
@@ -2786,11 +2951,13 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          child: RangeSlider(
-            values: const RangeValues(40, 80),
-            max: 100,
-            onChanged: (RangeValues newValue) {},
+        child: MaterialApp(
+          home: Scaffold(
+            body: RangeSlider(
+              values: const RangeValues(40, 80),
+              max: 100,
+              onChanged: (RangeValues newValue) {},
+            ),
           ),
         ),
       ),
@@ -2810,4 +2977,821 @@ void main() {
 
     semantics.dispose();
   }, semanticsEnabled: false);
+
+  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+    final ThemeData baseTheme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
+    RangeValues value = const RangeValues(1, 5);
+    Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
+      final ValueChanged<RangeValues>? onChanged = enabled ? (RangeValues d) => value = d : null;
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: baseTheme,
+              child: SliderTheme(
+                data: sliderTheme,
+                child: RangeSlider(
+                  values: value,
+                  max: 10,
+                  labels: RangeLabels(value.start.toString(), value.end.toString()),
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> expectValueIndicator({
+      required bool isVisible,
+      required SliderThemeData theme,
+      int? divisions,
+      bool enabled = true,
+      bool dragged = true,
+    }) async {
+      // Discrete enabled widget.
+      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
+      final Offset center = tester.getCenter(find.byType(RangeSlider));
+      TestGesture? gesture;
+      if (dragged) {
+        gesture = await tester.startGesture(center);
+      }
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+
+      // _RenderValueIndicator is the last render object in the tree.
+      final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
+      expect(
+        valueIndicatorBox,
+        isVisible
+            ? (paints
+                ..path(color: theme.valueIndicatorColor)
+                ..paragraph())
+            : isNot(
+                paints
+                  ..path(color: theme.valueIndicatorColor)
+                  ..paragraph(),
+              ),
+      );
+      if (dragged) {
+        await gesture!.up();
+      }
+    }
+
+    // Default (showValueIndicator set to onlyForDiscrete).
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 10);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+
+    // With showValueIndicator set to onlyForContinuous.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+
+    // discrete enabled widget with showValueIndicator set to onDrag.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 10);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+
+    // discrete enabled widget with showValueIndicator set to never.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 10, dragged: false);
+    await expectValueIndicator(
+      isVisible: false,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+
+    // discrete enabled widget with showValueIndicator set to alwaysVisible.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, dragged: false);
+    await expectValueIndicator(
+      isVisible: true,
+      theme: theme,
+      divisions: 3,
+      enabled: false,
+      dragged: false,
+    );
+    await expectValueIndicator(isVisible: true, theme: theme, dragged: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: false, dragged: false);
+  });
+
+  testWidgets('RangeSlider overlay appears correctly for specific thumb interactions', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    RangeValues values = const RangeValues(50, 70);
+    const Color hoverColor = Color(0xffff0000);
+    const Color dragColor = Color(0xff0000ff);
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100.0,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                      Set<WidgetState> states,
+                    ) {
+                      if (states.contains(WidgetState.hovered)) {
+                        return hoverColor;
+                      }
+                      if (states.contains(WidgetState.dragged)) {
+                        return dragColor;
+                      }
+
+                      return null;
+                    }),
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Initial state - no overlay.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Drag start thumb to left.
+    final Offset topThumbLocation = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture dragStartThumb = await tester.startGesture(topThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragStartThumb.moveBy(const Offset(-20.0, 0));
+    await tester.pumpAndSettle();
+
+    // Verify overlay is visible and shadow is visible on single thumb.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: dragColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 12.0),
+    );
+
+    // Move back and release.
+    await dragStartThumb.moveBy(const Offset(20.0, 0));
+    await dragStartThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay and shadow disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(
+        paints
+          ..circle(color: dragColor)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+      ),
+    );
+
+    // Drag end thumb and return to original position.
+    final Offset bottomThumbLocation = tester
+        .getCenter(find.byType(RangeSlider))
+        .translate(220.0, 0.0);
+    final TestGesture dragEndThumb = await tester.startGesture(bottomThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(20.0, 0));
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(-20.0, 0));
+    await dragEndThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Hover on start thumb.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(topThumbLocation);
+    await tester.pumpAndSettle();
+
+    // Verify overlay appears only for start thumb and no shadow is visible.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: hoverColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
+    // 2 thumbs and 1 overlay.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
+
+    // Move away from thumb
+    await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: hoverColor)),
+    );
+  });
+
+  testWidgets('RangeSlider.padding can override the default RangeSlider padding', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({EdgeInsetsGeometry? padding}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: RangeSlider(
+                padding: padding,
+                values: const RangeValues(0, 1.0),
+                onChanged: (RangeValues values) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere(
+            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          as RenderBox;
+    }
+
+    // Test RangeSlider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildRangeSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            670.0,
+            8.0,
+            670.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 672.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byType(RangeSlider)),
+      const Size(800, topPadding + trackHeight + bottomPadding),
+    );
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+  });
+
+  // Regression test for hhttps://github.com/flutter/flutter/issues/161805
+  testWidgets('Discrete RangeSlider does not apply thumb padding in a non-rounded track shape', (
+    WidgetTester tester,
+  ) async {
+    // The default track left and right padding.
+    const double sliderPadding = 24.0;
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        // Thumb padding is applied based on the track height.
+        trackHeight: 100,
+        rangeTrackShape: RectangularRangeSliderTrackShape(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: SizedBox(
+            width: 300,
+            child: RangeSlider(
+              values: const RangeValues(0, 100),
+              max: 100,
+              divisions: 100,
+              onChanged: (RangeValues value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
+
+    expect(
+      material,
+      paints
+        // Start thumb.
+        ..circle(x: sliderPadding, y: 300.0, color: theme.colorScheme.primary)
+        // End thumb.
+        ..circle(x: 800.0 - sliderPadding, y: 300.0, color: theme.colorScheme.primary),
+    );
+  });
+
+  testWidgets('Default RangeSlider when year2023 is false', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color activeTrackColor = colorScheme.primary;
+    final Color inactiveTrackColor = colorScheme.secondaryContainer;
+    final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
+    final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
+    final Color activeTickMarkColor = colorScheme.onPrimary;
+    final Color inactiveTickMarkColor = colorScheme.onSecondaryContainer;
+    final Color disabledActiveTickMarkColor = colorScheme.onInverseSurface;
+    final Color disabledInactiveTickMarkColor = colorScheme.onSurface;
+    final Color thumbColor = colorScheme.primary;
+    final Color disabledThumbColor = colorScheme.onSurface.withOpacity(0.38);
+    final Color valueIndicatorColor = colorScheme.inverseSurface;
+    RangeValues values = const RangeValues(25.0, 75.0);
+    Widget buildApp({int? divisions, bool enabled = true}) {
+      final ValueChanged<RangeValues>? onChanged = !enabled
+          ? null
+          : (RangeValues newValues) {
+              values = newValues;
+            };
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: theme,
+              child: RangeSlider(
+                year2023: false,
+                values: values,
+                max: 100,
+                labels: RangeLabels(values.start.round().toString(), values.end.round().toString()),
+                divisions: divisions,
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0,
+            292.0,
+            206.0,
+            308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+          color: inactiveTrackColor,
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            594.0,
+            292.0,
+            776.0,
+            308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+          color: inactiveTrackColor,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(218.0, 292.0, 582.0, 308.0, trackInnerCornerRadius),
+          color: activeTrackColor,
+        ),
+    );
+
+    // Test default colors for enabled slider.
+    expect(
+      material,
+      paints
+        ..circle()
+        ..circle()
+        ..rrect(color: thumbColor)
+        ..rrect(color: thumbColor),
+    );
+    expect(
+      material,
+      isNot(
+        paints
+          ..circle()
+          ..circle()
+          ..rrect(color: disabledThumbColor)
+          ..rrect(color: disabledThumbColor),
+      ),
+    );
+    expect(material, isNot(paints..rrect(color: disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: disabledInactiveTrackColor)));
+
+    // Test defaults colors for discrete slider.
+    await tester.pumpWidget(buildApp(divisions: 4));
+    expect(
+      material,
+      paints
+        ..rrect(color: inactiveTrackColor)
+        ..rrect(color: inactiveTrackColor)
+        ..rrect(color: activeTrackColor)
+        ..circle(color: inactiveTickMarkColor)
+        ..circle(color: activeTickMarkColor)
+        ..circle(color: inactiveTickMarkColor),
+    );
+    expect(material, isNot(paints..rrect(color: disabledThumbColor)));
+    expect(material, isNot(paints..rrect(color: disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: disabledInactiveTrackColor)));
+
+    // Test defaults colors for disabled slider.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      material,
+      paints
+        ..rrect(color: disabledInactiveTrackColor)
+        ..rrect(color: disabledInactiveTrackColor)
+        ..rrect(color: disabledActiveTrackColor)
+        ..rrect(color: disabledThumbColor)
+        ..rrect(color: disabledThumbColor),
+    );
+    expect(
+      material,
+      isNot(
+        paints
+          ..rrect(color: thumbColor)
+          ..rrect(color: thumbColor),
+      ),
+    );
+    expect(material, isNot(paints..rrect(color: activeTrackColor)));
+    expect(material, isNot(paints..rrect(color: inactiveTrackColor)));
+
+    // Test defaults colors for disabled discrete slider.
+    await tester.pumpWidget(buildApp(divisions: 4, enabled: false));
+    expect(
+      material,
+      paints
+        ..rrect(color: disabledInactiveTrackColor)
+        ..rrect(color: disabledInactiveTrackColor)
+        ..rrect(color: disabledActiveTrackColor)
+        ..circle(color: disabledInactiveTickMarkColor)
+        ..circle(color: disabledActiveTickMarkColor)
+        ..circle(color: disabledInactiveTickMarkColor)
+        ..rrect(color: disabledThumbColor)
+        ..rrect(color: disabledThumbColor),
+    );
+    expect(
+      material,
+      isNot(
+        paints
+          ..rrect(color: thumbColor)
+          ..rrect(color: thumbColor),
+      ),
+    );
+    expect(material, isNot(paints..rrect(color: activeTrackColor)));
+    expect(material, isNot(paints..rrect(color: inactiveTrackColor)));
+
+    await tester.pumpWidget(buildApp(divisions: 4));
+    await tester.pumpAndSettle();
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(topLeft);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..scale()
+        ..rrect(color: valueIndicatorColor),
+    );
+    await gesture.up();
+  });
+
+  testWidgets('RangeSlider value indicator text when year2023 is false', (
+    WidgetTester tester,
+  ) async {
+    const RangeValues values = RangeValues(25.0, 75.0);
+    final List<InlineSpan> log = <InlineSpan>[];
+    final LoggingRangeSliderValueIndicatorShape loggingValueIndicatorShape =
+        LoggingRangeSliderValueIndicatorShape(log);
+    final ThemeData theme = ThemeData(
+      sliderTheme: SliderThemeData(rangeValueIndicatorShape: loggingValueIndicatorShape),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              year2023: false,
+              values: values,
+              max: 100,
+              labels: RangeLabels(values.start.round().toString(), values.end.round().toString()),
+              divisions: 4,
+              onChanged: (RangeValues value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(topLeft);
+    await tester.pumpAndSettle();
+
+    expect(log.last.toPlainText(), '25');
+    expect(log.last.style!.fontSize, 14.0);
+    expect(log.last.style!.color, theme.colorScheme.onInverseSurface);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('RangeSlider supports DropRangeSliderValueIndicatorShape', (
+    WidgetTester tester,
+  ) async {
+    const RangeValues values = RangeValues(25.0, 75.0);
+    const Color valueIndicatorColor = Color(0XFFFF0000);
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(
+        rangeValueIndicatorShape: DropRangeSliderValueIndicatorShape(),
+        valueIndicatorColor: valueIndicatorColor,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: RangeSlider(
+              year2023: false,
+              values: values,
+              max: 100,
+              labels: RangeLabels(values.start.round().toString(), values.end.round().toString()),
+              divisions: 4,
+              onChanged: (RangeValues value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final TestGesture gesture = await tester.startGesture(topLeft);
+    await tester.pumpAndSettle();
+
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(valueIndicatorBox, paints..path(color: valueIndicatorColor));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Value indicator appears on tap', (WidgetTester tester) async {
+    final ThemeData theme = buildTheme();
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    const RangeValues discreteValues = RangeValues(20, 40);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: RangeSlider(
+            labels: RangeLabels(
+              discreteValues.start.round().toString(),
+              discreteValues.end.round().toString(),
+            ),
+            values: discreteValues,
+            divisions: 5,
+            max: 100,
+            onChanged: (RangeValues values) {},
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(RangeSlider));
+    await tester.pumpAndSettle();
+    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints
+        ..path(color: Colors.black) // shadow
+        ..path(color: Colors.black) // shadow
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..paragraph(),
+    );
+  });
+}
+
+// A value indicator shape to log labelPainter text.
+class LoggingRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
+  LoggingRangeSliderValueIndicatorShape(this.logLabel);
+
+  final List<InlineSpan> logLabel;
+
+  @override
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    required TextPainter labelPainter,
+    required double textScaleFactor,
+  }) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    bool? isDiscrete,
+    bool? isOnTop,
+    required TextPainter labelPainter,
+    double? textScaleFactor,
+    Size? sizeWithOverflow,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    TextDirection? textDirection,
+    double? value,
+    Thumb? thumb,
+  }) {
+    logLabel.add(labelPainter.text!);
+  }
 }

@@ -12,18 +12,23 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
+#include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/matrix.h"
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/vector.h"
@@ -136,7 +141,7 @@ class Canvas {
                   const RenderTarget& render_target,
                   bool is_onscreen,
                   bool requires_readback,
-                  IRect cull_rect);
+                  IRect32 cull_rect);
 
   ~Canvas() = default;
 
@@ -186,7 +191,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const Path& path, const Paint& paint);
+  void DrawPath(const flutter::DlPath& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 
@@ -195,11 +200,23 @@ class Canvas {
                 const Paint& paint,
                 bool reuse_depth = false);
 
+  void DrawDashedLine(const Point& p0,
+                      const Point& p1,
+                      Scalar on_length,
+                      Scalar off_length,
+                      const Paint& paint);
+
   void DrawRect(const Rect& rect, const Paint& paint);
 
   void DrawOval(const Rect& rect, const Paint& paint);
 
+  void DrawArc(const Arc& arc, const Paint& paint);
+
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
+
+  void DrawDiffRoundRect(const RoundRect& outer,
+                         const RoundRect& inner,
+                         const Paint& paint);
 
   void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
 
@@ -268,6 +285,32 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
+  class RRectLikeBlurShape {
+   public:
+    virtual ~RRectLikeBlurShape() = default;
+    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
+    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+  };
+
+  class RRectBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
+  };
+
+  class RSuperellipseBlurShape : public RRectLikeBlurShape {
+   public:
+    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
+    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
+
+   private:
+    std::optional<RoundSuperellipseGeometry>
+        geom_;  // optional stack allocation
+  };
+
   ContentContext& renderer_;
   RenderTarget render_target_;
   const bool is_onscreen_;
@@ -336,7 +379,8 @@ class Canvas {
   /// supports framebuffer fetch.
   std::shared_ptr<Texture> FlipBackdrop(Point global_pass_position,
                                         bool should_remove_texture = false,
-                                        bool should_use_onscreen = false);
+                                        bool should_use_onscreen = false,
+                                        bool post_depth_increment = false);
 
   bool BlitToOnscreen(bool is_onscreen = false);
 
@@ -356,6 +400,32 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
+                                       Size corner_radii,
+                                       const Paint& paint);
+
+  bool AttemptDrawBlurredRRectLike(const Rect& rect,
+                                   Size corner_radii,
+                                   const Paint& paint,
+                                   RRectLikeBlurShape& shape);
+
+  /// For simple DrawImageRect calls, optimize any draws with a color filter
+  /// into the corresponding atlas draw.
+  ///
+  /// Returns whether not the optimization was applied.
+  bool AttemptColorFilterOptimization(const std::shared_ptr<Texture>& image,
+                                      Rect source,
+                                      Rect dest,
+                                      const Paint& paint,
+                                      const SamplerDescriptor& sampler,
+                                      SourceRectConstraint src_rect_constraint);
+
+  bool AttemptBlurredTextOptimization(
+      const std::shared_ptr<TextFrame>& text_frame,
+      const std::shared_ptr<TextContents>& text_contents,
+      Entity& entity,
+      const Paint& paint);
 
   RenderPass& GetCurrentRenderPass() const;
 

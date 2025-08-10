@@ -605,7 +605,12 @@ class _BottomNavigationTile extends StatelessWidget {
       selected: selected,
       button: true,
       container: true,
-      child: Stack(children: <Widget>[result, Semantics(label: indexLabel)]),
+      child: Stack(
+        children: <Widget>[
+          result,
+          Semantics(label: indexLabel),
+        ],
+      ),
     );
 
     return Expanded(flex: size, child: result);
@@ -631,9 +636,9 @@ class _Tile extends StatelessWidget {
         heightFactor: 1,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: 8,
           children: <Widget>[
             icon,
-            const SizedBox(width: 8),
             // Flexible lets the overflow property of
             // label to work and IntrinsicWidth gives label a
             // reasonable width preventing extra space before it.
@@ -711,8 +716,11 @@ class _Label extends StatelessWidget {
     final double? selectedFontSize = selectedLabelStyle.fontSize;
     final double? unselectedFontSize = unselectedLabelStyle.fontSize;
 
-    final TextStyle customStyle =
-        TextStyle.lerp(unselectedLabelStyle, selectedLabelStyle, animation.value)!;
+    final TextStyle customStyle = TextStyle.lerp(
+      unselectedLabelStyle,
+      selectedLabelStyle,
+      animation.value,
+    )!;
     Widget text = DefaultTextStyle.merge(
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
@@ -1053,14 +1061,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           _animations[i],
           widget.iconSize,
           key: widget.items[i].key,
-          selectedIconTheme:
-              widget.useLegacyColorScheme
-                  ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme
-                  : effectiveSelectedIconTheme,
-          unselectedIconTheme:
-              widget.useLegacyColorScheme
-                  ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme
-                  : effectiveUnselectedIconTheme,
+          selectedIconTheme: widget.useLegacyColorScheme
+              ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme
+              : effectiveSelectedIconTheme,
+          unselectedIconTheme: widget.useLegacyColorScheme
+              ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme
+              : effectiveUnselectedIconTheme,
           selectedLabelStyle: effectiveSelectedLabelStyle,
           unselectedLabelStyle: effectiveUnselectedLabelStyle,
           enableFeedback: widget.enableFeedback ?? bottomTheme.enableFeedback ?? true,
@@ -1167,7 +1173,7 @@ class _Bar extends StatelessWidget {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
-        child: SizedBox(width: MediaQuery.sizeOf(context).height, child: child),
+        child: SizedBox(width: MediaQuery.heightOf(context), child: child),
       );
     }
     return Material(elevation: elevation, color: color, child: alignedChild);

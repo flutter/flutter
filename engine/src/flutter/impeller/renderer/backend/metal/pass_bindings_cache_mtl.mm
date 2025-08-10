@@ -135,7 +135,7 @@ void PassBindingsCacheMTL::SetViewport(const Viewport& viewport) {
   viewport_ = viewport;
 }
 
-void PassBindingsCacheMTL::SetScissor(const IRect& scissor) {
+void PassBindingsCacheMTL::SetScissor(const IRect32& scissor) {
   if (scissor_.has_value() && scissor_.value() == scissor) {
     return;
   }
@@ -147,6 +147,14 @@ void PassBindingsCacheMTL::SetScissor(const IRect& scissor) {
                          .height = static_cast<NSUInteger>(scissor.GetHeight()),
                      }];
   scissor_ = scissor;
+}
+
+void PassBindingsCacheMTL::SetStencilRef(uint32_t stencil_ref) {
+  if (stencil_ref_.has_value() && stencil_ref_.value() == stencil_ref) {
+    return;
+  }
+  [encoder_ setStencilReferenceValue:stencil_ref];
+  stencil_ref_ = stencil_ref;
 }
 
 }  // namespace impeller

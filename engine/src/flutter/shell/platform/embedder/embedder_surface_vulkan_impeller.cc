@@ -71,8 +71,7 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
   }
   settings.embedder_data = data;
 
-  context_ =
-      impeller::ContextVK::Create(impeller::Flags{}, std::move(settings));
+  context_ = impeller::ContextVK::Create(std::move(settings));
   if (!context_) {
     FML_LOG(ERROR) << "Failed to initialize Vulkan Context.";
     return;
@@ -97,7 +96,7 @@ const vulkan::VulkanProcTable& EmbedderSurfaceVulkanImpeller::vk() {
 
 // |GPUSurfaceVulkanDelegate|
 FlutterVulkanImage EmbedderSurfaceVulkanImpeller::AcquireImage(
-    const SkISize& size) {
+    const DlISize& size) {
   return vulkan_dispatch_table_.get_next_image(size);
 }
 

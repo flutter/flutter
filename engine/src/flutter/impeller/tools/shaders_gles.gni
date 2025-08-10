@@ -39,8 +39,10 @@ template("impeller_shaders_gles") {
     if (impeller_enable_metal || impeller_enable_vulkan) {
       if (is_300) {
         intermediates_subdir = "gles3"
+        mnemonic = "IMPELLERC_GLES3"
       } else {
         intermediates_subdir = "gles"
+        mnemonic = "IMPELLERC_GLES2"
       }
     }
     shader_target_flags = [ "--opengl-es" ]

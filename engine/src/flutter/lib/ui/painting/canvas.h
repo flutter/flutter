@@ -62,7 +62,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                 DlClipOp clipOp,
                 bool doAntiAlias = true);
   void clipRRect(const RRect& rrect, bool doAntiAlias = true);
-  void clipRSuperellipse(const RSuperellipse& rse, bool doAntiAlias = true);
+  void clipRSuperellipse(const RSuperellipse* rse, bool doAntiAlias = true);
   void clipPath(const CanvasPath* path, bool doAntiAlias = true);
   void getDestinationClipBounds(Dart_Handle rect_handle);
   void getLocalClipBounds(Dart_Handle rect_handle);
@@ -94,7 +94,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                   Dart_Handle paint_objects,
                   Dart_Handle paint_data);
 
-  void drawRSuperellipse(const RSuperellipse& rse,
+  void drawRSuperellipse(const RSuperellipse* rse,
                          Dart_Handle paint_objects,
                          Dart_Handle paint_data);
 

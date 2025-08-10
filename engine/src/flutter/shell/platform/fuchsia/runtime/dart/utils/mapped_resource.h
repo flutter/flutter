@@ -8,7 +8,7 @@
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
 
-#include "third_party/dart/runtime/bin/elf_loader.h"
+#include "flutter/fml/unique_fd.h"
 
 namespace dart_utils {
 
@@ -33,9 +33,9 @@ class ElfSnapshot {
   const uint8_t* IsolateInstrs() const { return isolate_instrs_; }
 
  private:
-  bool Load(int fd);
+  bool Load(const fml::UniqueFD& fd);
 
-  Dart_LoadedElf* handle_ = nullptr;
+  void* handle_ = nullptr;
 
   const uint8_t* vm_data_ = nullptr;
   const uint8_t* vm_instrs_ = nullptr;

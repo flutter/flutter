@@ -41,8 +41,14 @@ impeller_component("interop_base") {
     "dl_builder.h",
     "formats.cc",
     "formats.h",
+    "fragment_program.cc",
+    "fragment_program.h",
+    "glyph_info.cc",
+    "glyph_info.h",
     "image_filter.cc",
     "image_filter.h",
+    "line_metrics.cc",
+    "line_metrics.h",
     "mask_filter.cc",
     "mask_filter.h",
     "object.cc",
@@ -215,7 +221,7 @@ zip_bundle("sdk") {
         destination = "lib/libimpeller.dylib"
       },
     ]
-  } else if (is_linux || is_android) {
+  } else if (is_linux || is_android || is_qnx) {
     files += [
       {
         source = "$root_build_dir/libimpeller.so"

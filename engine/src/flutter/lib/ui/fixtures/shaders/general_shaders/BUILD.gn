@@ -16,6 +16,7 @@ if (enable_unittests) {
     "simple.frag",
     "uniforms.frag",
     "uniforms_sorted.frag",
+    "uniform_ordering.frag",
     "uniform_arrays.frag",
     "filter_shader.frag",
     "missing_size.frag",
@@ -29,6 +30,7 @@ if (enable_unittests) {
   }
 
   impellerc("compile_general_shaders") {
+    mnemonic = "IMPELLERC_SKSL"
     shaders = test_shaders
     shader_target_flags = [ "--sksl" ]
     intermediates_subdir = "iplr"

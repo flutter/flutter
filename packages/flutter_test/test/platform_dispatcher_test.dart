@@ -83,6 +83,21 @@ void main() {
     );
   });
 
+  testWidgets('TestPlatformDispatcher can fake supportsShowingSystemContextMenu', (
+    WidgetTester tester,
+  ) async {
+    verifyPropertyFaked<bool>(
+      tester: tester,
+      realValue: PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      fakeValue: !PlatformDispatcher.instance.supportsShowingSystemContextMenu,
+      propertyRetriever: () =>
+          WidgetsBinding.instance.platformDispatcher.supportsShowingSystemContextMenu,
+      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+        binding.platformDispatcher.supportsShowingSystemContextMenu = fakeValue;
+      },
+    );
+  });
+
   testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (WidgetTester tester) async {
     verifyPropertyFaked<bool>(
       tester: tester,
@@ -144,8 +159,9 @@ void main() {
   ) async {
     final Locale originalLocale = PlatformDispatcher.instance.locale;
     final double originalTextScaleFactor = PlatformDispatcher.instance.textScaleFactor;
-    final TestPlatformDispatcher testPlatformDispatcher =
-        retrieveTestBinding(tester).platformDispatcher;
+    final TestPlatformDispatcher testPlatformDispatcher = retrieveTestBinding(
+      tester,
+    ).platformDispatcher;
 
     // Set fake values for window properties.
     testPlatformDispatcher.localeTestValue = const Locale('foobar');
