@@ -370,16 +370,17 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
-    final double? result = child.getDryBaseline(constraints, baseline);
+    // Use loosened constraints for the child, just like in performLayout
+    final BoxConstraints childConstraints = constraints.loosen();
+    final double? result = child.getDryBaseline(childConstraints, baseline);
     if (result == null) {
       return null;
     }
     // Get the child's dry layout to calculate the offset
-    final Size childSize = child.getDryLayout(constraints);
+    final Size childSize = child.getDryLayout(childConstraints);
     final Size size = computeDryLayout(constraints);
-    // Calculate the offset similar to how computeDistanceToActualBaseline works
-    // but using dry layout. We need to account for the child's position within
-    // the parent's coordinate space.
+    // Calculate the offset similar to how alignChild() works
+    // This must match the logic in alignChild() method
     final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
 
     return result + childOffset.dy;
