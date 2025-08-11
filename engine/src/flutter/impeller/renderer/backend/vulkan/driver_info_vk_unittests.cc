@@ -304,5 +304,4 @@ TEST(DriverInfoVKTest, PowerVRBSeries) {
             std::optional<PowerVRGPU>(PowerVRGPU::kBXM));
 }
 
-
 }  // namespace impeller::testing
