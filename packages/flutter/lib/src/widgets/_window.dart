@@ -18,14 +18,9 @@ import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/_features.dart';
-import 'binding.dart';
-import 'framework.dart';
-import 'inherited_model.dart';
-import 'view.dart';
 import '_window_win32.dart';
 
 const String _kWindowingDisabledErrorMessage = '''
@@ -243,12 +238,17 @@ abstract class RegularWindowController extends BaseWindowController {
     );
   }
 
-  /// Creates an empty [RegularWindowController] for testing purposes.
+  /// Creates an empty [RegularWindowController].
+  ///
+  /// This method is only intended to be used by subclasses of the
+  /// [RegularWindowController].
+  ///
+  /// Users who want to instantiate a new [RegularWindowController] should
+  /// always use the factory method to create a controller that is valid
+  /// for their particular platform.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  @protected
-  @visibleForTesting
   RegularWindowController.empty();
 
   /// The current title of the window.
@@ -514,7 +514,6 @@ class RegularWindow extends StatelessWidget {
         child: View(view: controller.rootView, child: child),
       ),
     );
-    ;
   }
 }
 
