@@ -94,7 +94,7 @@ typedef ExpansionTileController = ExpansibleController;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates how an [ExpansionTileController] can be used to
+/// This example demonstrates how an [ExpansibleController] can be used to
 /// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
@@ -398,7 +398,7 @@ class ExpansionTile extends StatefulWidget {
   /// In cases where control over the tile's state is needed from a callback
   /// triggered by a widget within the tile, [ExpansibleController.of] may be
   /// more convenient than supplying a controller.
-  final ExpansionTileController? controller;
+  final ExpansibleController? controller;
 
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
@@ -497,7 +497,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
-  late ExpansionTileController _tileController;
+  late ExpansibleController _tileController;
   Timer? _timer;
   late Curve _curve;
   late Curve? _reverseCurve;
@@ -508,7 +508,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
     super.initState();
     _curve = Curves.easeIn;
     _duration = _kExpand;
-    _tileController = widget.controller ?? ExpansionTileController();
+    _tileController = widget.controller ?? ExpansibleController();
     if (widget.initiallyExpanded) {
       _tileController.expand();
     }
@@ -717,6 +717,15 @@ class _ExpansionTileState extends State<ExpansionTile> {
     if (widget.expansionAnimationStyle != oldWidget.expansionAnimationStyle) {
       _updateAnimationDuration();
       _updateHeightFactorCurve();
+    }
+    if (widget.controller != oldWidget.controller) {
+      _tileController.removeListener(_onExpansionChanged);
+      if (oldWidget.controller == null) {
+        _tileController.dispose();
+      }
+
+      _tileController = widget.controller ?? ExpansibleController();
+      _tileController.addListener(_onExpansionChanged);
     }
   }
 
