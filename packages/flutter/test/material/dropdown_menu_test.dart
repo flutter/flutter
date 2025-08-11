@@ -4347,8 +4347,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(tester.getSize(findMenuItemButton(shortLabel)).width, 200);
 
-      // Using expandedInsets to anchor the TextField to the same size as the parent,
-      // 390 as the physicalSize width specified
+      // Use expandedInsets to anchor the TextField to the same size as the parent.
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
