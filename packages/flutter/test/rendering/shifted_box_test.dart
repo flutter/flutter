@@ -12,7 +12,7 @@ void main() {
 
   group('RenderAligningShiftedBox', () {
     test('RenderAligningShiftedBox has computeDryBaseline method implemented', () {
-      final RenderPositionedBox positionedBox = RenderPositionedBox(alignment: Alignment.center);
+      final RenderPositionedBox positionedBox = RenderPositionedBox();
 
       // Verify the method exists and can be called
       expect(
@@ -44,10 +44,7 @@ void main() {
 
     test('computeDryBaseline returns null when child has no baseline', () {
       final MockRenderBoxNoBaseline child = MockRenderBoxNoBaseline();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.center,
-        child: child,
-      );
+      final RenderPositionedBox positioner = RenderPositionedBox(child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
@@ -59,10 +56,7 @@ void main() {
 
     test('computeDryBaseline works with center alignment', () {
       final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.center,
-        child: child,
-      );
+      final RenderPositionedBox positioner = RenderPositionedBox(child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
