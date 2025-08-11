@@ -76,9 +76,11 @@ Future<List<int>> launch({required bool isFirstRun}) async {
             // non-dwds builds do not know when the browser is loaded so keep trying
             // until this succeeds.
             if (line.contains('Ignoring terminal input')) {
-              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
-                process.stdin.write(restarted ? 'q' : 'r');
-              });
+              unawaited(
+                Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
+                  process.stdin.write(restarted ? 'q' : 'r');
+                }),
+              );
               return;
             }
             if (line.contains('Hot restart')) {
