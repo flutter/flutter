@@ -25,11 +25,13 @@ abstract class FlutterTask : BaseFlutterTask() {
     val outputDirectory: File?
         get() = FlutterTaskHelper.getOutputDirectory(flutterTask = this)
 
-    @get:Internal
+    // Warning assetsDirectory assets appear to return different contents.
+    @get:OutputDirectory
     val assetsDirectory: String
         get() = FlutterTaskHelper.getAssetsDirectory(flutterTask = this)
 
-    @get:Internal
+    // Warning assetsDirectory assets appear to return different contents.
+    @get:OutputFiles
     val assets: CopySpec
         get() = FlutterTaskHelper.getAssets(project, flutterTask = this)
 
