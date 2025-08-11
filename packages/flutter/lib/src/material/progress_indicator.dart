@@ -183,89 +183,122 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double effectiveTrackGap = switch (value) {
-      null || 1.0 => 0.0,
-      _ => trackGap ?? 0.0,
-    };
+    final double effectiveTrackGap = trackGap ?? 0.0;
 
-    final Rect trackRect;
-    if (value != null && effectiveTrackGap > 0) {
-      trackRect = switch (textDirection) {
-        TextDirection.ltr => Rect.fromLTRB(
-          math.min(clampDouble(value!, 0.0, 1.0) * size.width + effectiveTrackGap, size.width),
-          0,
-          size.width,
-          size.height,
-        ),
-        TextDirection.rtl => Rect.fromLTRB(
-          0,
-          0,
-          math.max(size.width - clampDouble(value!, 0.0, 1.0) * size.width - effectiveTrackGap, 0),
-          size.height,
-        ),
-      };
-    } else {
-      trackRect = Offset.zero & size;
-    }
+    void drawLinearIndicator({
+      required double startFraction,
+      required double endFraction,
+      required Color color,
+    }) {
+      if (endFraction - startFraction <= 0) {
+        return;
+      }
 
-    // Draw the track.
-    if (trackRect.width > 0) {
-      final Paint trackPaint = Paint()..color = trackColor;
+      final bool isLtr = textDirection == TextDirection.ltr;
+      final double left = (isLtr ? startFraction : 1 - endFraction) * size.width;
+      final double right = (isLtr ? endFraction : 1 - startFraction) * size.width;
+
+      final Rect rect = Rect.fromLTRB(left, 0, right, size.height);
+      final Paint paint = Paint()..color = color;
+
       if (indicatorBorderRadius != null) {
-        final RRect trackRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(trackRect);
-        canvas.drawRRect(trackRRect, trackPaint);
+        final RRect rrect = indicatorBorderRadius!.resolve(textDirection).toRRect(rect);
+        canvas.drawRRect(rrect, paint);
       } else {
-        canvas.drawRect(trackRect, trackPaint);
+        canvas.drawRect(rect, paint);
       }
     }
 
     void drawStopIndicator() {
-      // Limit the stop indicator radius to the height of the indicator.
-      final double radius = math.min(stopIndicatorRadius!, size.height / 2);
+      // Limit the stop indicator to the height of the indicator.
+      final double maxRadius = size.height / 2;
+      final double radius = math.min(stopIndicatorRadius!, maxRadius);
       final Paint indicatorPaint = Paint()..color = stopIndicatorColor!;
       final Offset position = switch (textDirection) {
-        TextDirection.rtl => Offset(size.height / 2, size.height / 2),
-        TextDirection.ltr => Offset(size.width - size.height / 2, size.height / 2),
+        TextDirection.rtl => Offset(maxRadius, maxRadius),
+        TextDirection.ltr => Offset(size.width - maxRadius, maxRadius),
       };
       canvas.drawCircle(position, radius, indicatorPaint);
     }
 
-    // Draw the stop indicator.
-    if (value != null && stopIndicatorRadius != null && stopIndicatorRadius! > 0) {
-      drawStopIndicator();
+    final double trackGapFraction = effectiveTrackGap / size.width;
+    final double? effectiveValue = value == null ? null : clampDouble(value!, 0.0, 1.0);
+
+    if (effectiveValue != null) {
+      final double trackStartFraction = trackGapFraction > 0
+          ? effectiveValue + math.min(effectiveValue, trackGapFraction)
+          : 0;
+
+      // Draw the track.
+      if (trackStartFraction <= 1) {
+        drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
+      }
+
+      // Draw the stop indicator.
+      if (stopIndicatorRadius != null && stopIndicatorRadius! > 0) {
+        drawStopIndicator();
+      }
+
+      // Draw the active indicator.
+      if (effectiveValue > 0) {
+        drawLinearIndicator(startFraction: 0, endFraction: effectiveValue, color: valueColor);
+      }
+
+      return;
     }
 
-    void drawActiveIndicator(double x, double width) {
-      if (width <= 0.0) {
-        return;
-      }
-      final Paint activeIndicatorPaint = Paint()..color = valueColor;
-      final double left = switch (textDirection) {
-        TextDirection.rtl => size.width - width - x,
-        TextDirection.ltr => x,
-      };
+    final double firstLineHead = line1Head.transform(animationValue);
+    final double firstLineTail = line1Tail.transform(animationValue);
+    final double secondLineHead = line2Head.transform(animationValue);
+    final double secondLineTail = line2Tail.transform(animationValue);
 
-      final Rect activeRect = Offset(left, 0.0) & Size(width, size.height);
-      if (indicatorBorderRadius != null) {
-        final RRect activeRRect = indicatorBorderRadius!.resolve(textDirection).toRRect(activeRect);
-        canvas.drawRRect(activeRRect, activeIndicatorPaint);
-      } else {
-        canvas.drawRect(activeRect, activeIndicatorPaint);
-      }
+    // Draw the track before line 1.
+    if (firstLineHead < 1 - trackGapFraction) {
+      final double trackStartFraction = firstLineHead > 0
+          ? firstLineHead + math.min(firstLineHead, trackGapFraction)
+          : 0;
+      drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
     }
 
-    // Draw the active indicator.
-    if (value != null) {
-      drawActiveIndicator(0.0, clampDouble(value!, 0.0, 1.0) * size.width);
-    } else {
-      final double x1 = size.width * line1Tail.transform(animationValue);
-      final double width1 = size.width * line1Head.transform(animationValue) - x1;
+    // Draw the line 1.
+    if (firstLineHead - firstLineTail > 0) {
+      drawLinearIndicator(
+        startFraction: firstLineTail,
+        endFraction: firstLineHead,
+        color: valueColor,
+      );
+    }
 
-      final double x2 = size.width * line2Tail.transform(animationValue);
-      final double width2 = size.width * line2Head.transform(animationValue) - x2;
+    // Draw the track between line 1 and line 2.
+    if (firstLineTail > trackGapFraction) {
+      final double trackStartFraction = secondLineHead > 0
+          ? secondLineHead + math.min(secondLineHead, trackGapFraction)
+          : 0;
+      final double trackEndFraction = firstLineTail < 1
+          ? firstLineTail - math.min(1 - firstLineTail, trackGapFraction)
+          : 1;
+      drawLinearIndicator(
+        startFraction: trackStartFraction,
+        endFraction: trackEndFraction,
+        color: trackColor,
+      );
+    }
 
-      drawActiveIndicator(x1, width1);
-      drawActiveIndicator(x2, width2);
+    // Draw the line 2.
+    if (secondLineHead - secondLineTail > 0) {
+      drawLinearIndicator(
+        startFraction: secondLineTail,
+        endFraction: secondLineHead,
+        color: valueColor,
+      );
+    }
+
+    // Draw the track after line 2.
+    if (secondLineTail > trackGapFraction) {
+      final double trackEndFraction = secondLineTail < 1
+          ? secondLineTail - math.min(1 - secondLineTail, trackGapFraction)
+          : 1;
+      drawLinearIndicator(startFraction: 0, endFraction: trackEndFraction, color: trackColor);
     }
   }
 
