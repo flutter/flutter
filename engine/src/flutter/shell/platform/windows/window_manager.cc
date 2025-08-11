@@ -137,16 +137,7 @@ HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
 
 flutter::ActualWindowSize
 InternalFlutterWindows_WindowManager_GetWindowContentSize(HWND hwnd) {
-  RECT rect;
-  GetClientRect(hwnd, &rect);
-  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
-                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-  double const width = rect.right / dpr;
-  double const height = rect.bottom / dpr;
-  return {
-      .width = rect.right / dpr,
-      .height = rect.bottom / dpr,
-  };
+  return flutter::HostWindow::GetWindowContentSize(hwnd);
 }
 
 void InternalFlutterWindows_WindowManager_SetWindowSize(

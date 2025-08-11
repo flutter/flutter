@@ -500,12 +500,28 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
 }
 
 void HostWindow::SetContentSize(const WindowSizeRequest& size) {
-  if (GetFullscreen()) {
-    FML_LOG(ERROR) << "Cannot set content size while fullscreen";
+  if (!size.has_preferred_view_size) {
     return;
   }
 
-  if (size.has_preferred_view_size) {
+  if (GetFullscreen()) {
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(),
+        Size(size.preferred_view_width, size.preferred_view_height),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        saved_window_info_.style, saved_window_info_.ex_style, nullptr);
+    if (!window_size) {
+      return;
+    }
+
+    saved_window_info_.client_size =
+        ActualWindowSize{.width = size.preferred_view_width,
+                         .height = size.preferred_view_height};
+    saved_window_info_.rect.right =
+        saved_window_info_.rect.left + static_cast<LONG>(window_size->width());
+    saved_window_info_.rect.bottom =
+        saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
+  } else {
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
 
@@ -515,39 +531,53 @@ void HostWindow::SetContentSize(const WindowSizeRequest& size) {
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
-    if (window_size) {
-      SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
-                   window_size->height(),
-                   SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    if (!window_size) {
+      return;
     }
+
+    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+                 window_size->height(),
+                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
   }
 }
 
 void HostWindow::SetConstraints(const WindowConstraints& constraints) {
-  if (GetFullscreen()) {
-    FML_LOG(ERROR) << "Cannot set constraints while fullscreen";
-    return;
-  }
-
   box_constraints_ = FromWindowConstraints(constraints);
 
-  RECT rect;
-  GetClientRect(window_handle_, &rect);
-  const double dpr = FlutterDesktopGetDpiForHWND(window_handle_) /
-                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-  const Size current_size(rect.right / dpr, rect.bottom / dpr);
-  WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
-  GetWindowInfo(window_handle_, &window_info);
-  std::optional<Size> const window_size = GetWindowSizeForClientSize(
-      *engine_->windows_proc_table(),
-      Size(current_size.width(), current_size.height()),
-      box_constraints_.smallest(), box_constraints_.biggest(),
-      window_info.dwStyle, window_info.dwExStyle, nullptr);
+  if (GetFullscreen()) {
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(),
+        Size(saved_window_info_.client_size.width,
+             saved_window_info_.client_size.height),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        saved_window_info_.style, saved_window_info_.ex_style, nullptr);
+    if (!window_size) {
+      return;
+    }
 
-  if (window_size && current_size != window_size) {
-    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
-                 window_size->height(),
-                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    saved_window_info_.rect.right =
+        saved_window_info_.rect.left + static_cast<LONG>(window_size->width());
+    saved_window_info_.rect.bottom =
+        saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
+  } else {
+    RECT rect;
+    GetClientRect(window_handle_, &rect);
+    const double dpr = FlutterDesktopGetDpiForHWND(window_handle_) /
+                       static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+    const Size current_size(rect.right / dpr, rect.bottom / dpr);
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(),
+        Size(current_size.width(), current_size.height()),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        window_info.dwStyle, window_info.dwExStyle, nullptr);
+
+    if (window_size && current_size != window_size) {
+      SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+                   window_size->height(),
+                   SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    }
   }
 }
 
@@ -563,12 +593,15 @@ void HostWindow::SetFullscreen(
     return;
   }
 
-  if (!is_fullscreen_) {
-    saved_window_info_.style = GetWindowLong(window_handle_, GWL_STYLE);
-    saved_window_info_.ex_style = GetWindowLong(window_handle_, GWL_EXSTYLE);
+  if (fullscreen) {
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+    saved_window_info_.style = window_info.dwStyle;
+    saved_window_info_.ex_style = window_info.dwExStyle;
     // Store the original window rect, DPI, and monitor info to detect changes
     // and more accurately restore window placements when exiting fullscreen.
     ::GetWindowRect(window_handle_, &saved_window_info_.rect);
+    saved_window_info_.client_size = GetWindowContentSize(window_handle_);
     saved_window_info_.dpi = GetDpiForHWND(window_handle_);
     saved_window_info_.monitor =
         MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
@@ -671,6 +704,7 @@ void HostWindow::SetFullscreen(
         window_rect.bottom = window_rect.top + height;
         window_rect = AdjustToFit(window_rect, monitor_info.rcWork);
       }
+
       SetWindowPos(window_handle_, nullptr, window_rect.left, window_rect.top,
                    RectWidth(window_rect), RectHeight(window_rect),
                    SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
@@ -700,5 +734,18 @@ void HostWindow::SetFullscreen(
 
 bool HostWindow::GetFullscreen() const {
   return is_fullscreen_;
+}
+
+ActualWindowSize HostWindow::GetWindowContentSize(HWND hwnd) {
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
+                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+  double const width = rect.right / dpr;
+  double const height = rect.bottom / dpr;
+  return {
+      .width = rect.right / dpr,
+      .height = rect.bottom / dpr,
+  };
 }
 }  // namespace flutter

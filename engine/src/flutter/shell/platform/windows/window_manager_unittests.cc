@@ -252,5 +252,66 @@ TEST_F(WindowManagerTest, CanUnfullscreenWindow) {
       InternalFlutterWindows_WindowManager_GetFullscreen(window_handle));
 }
 
+TEST_F(WindowManagerTest, CanSetWindowSizeWhileFullscreen) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FullscreenRequest request{.fullscreen = true, .has_display_id = false};
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  WindowSizeRequest requestedSize{
+
+      .has_preferred_view_size = true,
+      .preferred_view_width = 500,
+      .preferred_view_height = 500,
+  };
+  InternalFlutterWindows_WindowManager_SetWindowSize(window_handle,
+                                                     &requestedSize);
+
+  request.fullscreen = false;
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(actual_size.width, 500);
+  EXPECT_EQ(actual_size.height, 500);
+}
+
+TEST_F(WindowManagerTest, CanSetWindowConstraintsWhileFullscreen) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FullscreenRequest request{.fullscreen = true, .has_display_id = false};
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  WindowConstraints constraints{.has_view_constraints = true,
+                                .view_min_width = 0,
+                                .view_min_height = 0,
+                                .view_max_width = 500,
+                                .view_max_height = 500};
+  InternalFlutterWindows_WindowManager_SetWindowConstraints(window_handle,
+                                                            &constraints);
+
+  request.fullscreen = false;
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(actual_size.width, 500);
+  EXPECT_EQ(actual_size.height, 500);
+}
+
 }  // namespace testing
 }  // namespace flutter
