@@ -366,7 +366,8 @@ class CupertinoDatePicker extends StatefulWidget {
          'showTimeSeparator is only supported in time or dateAndTime modes',
        ),
        assert(
-         selectableDatePredicate == null || selectableDatePredicate(initialDateTime ?? DateTime.now()),
+         selectableDatePredicate == null ||
+             selectableDatePredicate(initialDateTime ?? DateTime.now()),
          '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
        );
 
@@ -900,7 +901,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               ? localizations.todayLabel
               : localizations.datePickerMediumDate(rangeStart);
 
-          return itemPositioningBuilder(context, Text(dateText, style: _themeTextStyle(context, isValid: isValidDate)));
+          return itemPositioningBuilder(
+            context,
+            Text(dateText, style: _themeTextStyle(context, isValid: isValidDate)),
+          );
         },
         selectionOverlay: selectionOverlay,
       ),
