@@ -127,7 +127,6 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsHotRestart: _cast<bool>(capabilities['hotRestart']),
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
-      supportsFastStart: _cast<bool>(capabilities['fastStart']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
       logger: _logger,
       fileTransfer: _fileTransfer,

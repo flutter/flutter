@@ -269,11 +269,7 @@ void main() {
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(
-          BuildInfo.debug,
-          fastStart: true,
-          startPaused: true,
-        ),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
         analytics: globals.analytics,

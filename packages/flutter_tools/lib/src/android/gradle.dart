@@ -570,9 +570,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
-    if (androidBuildInfo.fastStart) {
-      options.add('-Pfast-start=true');
-    }
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
       assembleTask,

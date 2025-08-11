@@ -111,7 +111,7 @@ object BaseFlutterTaskHelper {
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=$it")
             }
-            if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
+            if (baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
                 args(

@@ -874,7 +874,6 @@ abstract class Device {
         'hotReload': supportsHotReload,
         'hotRestart': supportsHotRestart,
         'screenshot': supportsScreenshot,
-        'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
         'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
         'startPaused': supportsStartPaused,

@@ -364,10 +364,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
-        fastStart:
-            argParser.options.containsKey('fast-start') &&
-            boolArg('fast-start') &&
-            !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
