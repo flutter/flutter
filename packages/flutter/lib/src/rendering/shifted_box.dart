@@ -378,7 +378,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     }
     // Get the child's dry layout to calculate the offset
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = computeDryLayout(constraints);
+    final Size size = getDryLayout(constraints);
     // Calculate the offset similar to how alignChild() works
     // This must match the logic in alignChild() method
     final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
