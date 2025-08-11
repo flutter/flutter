@@ -66,7 +66,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Launch app to device
-    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchAppInternal(
+    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
       deviceId: deviceId,
       bundleId: bundleId,
       launchArguments: launchArguments,
@@ -99,7 +99,7 @@ class IOSCoreDeviceLauncher {
     }
 
     // Launch app on device, but start it stopped so it will wait until the debugger is attached before starting.
-    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchAppInternal(
+    final IOSCoreDeviceLaunchResult? launchResult = await _coreDeviceControl.launchApp(
       deviceId: deviceId,
       bundleId: bundleId,
       launchArguments: launchArguments,
@@ -532,66 +532,11 @@ class IOSCoreDeviceControl {
     }
   }
 
-  Future<bool> launchApp({
-    required String deviceId,
-    required String bundleId,
-    List<String> launchArguments = const <String>[],
-  }) async {
-    if (!_xcode.isDevicectlInstalled) {
-      _logger.printError('devicectl is not installed.');
-      return false;
-    }
-
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
-    final File output = tempDirectory.childFile('launch_results.json');
-    output.createSync();
-
-    final command = <String>[
-      ..._xcode.xcrunCommand(),
-      'devicectl',
-      'device',
-      'process',
-      'launch',
-      '--device',
-      deviceId,
-      bundleId,
-      if (launchArguments.isNotEmpty) ...launchArguments,
-      '--json-output',
-      output.path,
-    ];
-
-    try {
-      await _processUtils.run(command, throwOnError: true);
-      final String stringOutput = output.readAsStringSync();
-
-      try {
-        final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['info'];
-        if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
-          return true;
-        }
-        _logger.printError('devicectl returned unexpected JSON response: $stringOutput');
-        return false;
-      } on FormatException {
-        // We failed to parse the devicectl output, or it returned junk.
-        _logger.printError('devicectl returned non-JSON response: $stringOutput');
-        return false;
-      }
-    } on ProcessException catch (err) {
-      _logger.printError('Error executing devicectl: $err');
-      return false;
-    } finally {
-      tempDirectory.deleteSync(recursive: true);
-    }
-  }
-
   /// Launches the app on the device.
   ///
   /// If [startStopped] is true, the app will be launched and paused, waiting
   /// for a debugger to attach.
-  // TODO(vashworth): Rename this method to launchApp and replace old version.
-  // See https://github.com/flutter/flutter/issues/173416.
-  @visibleForTesting
-  Future<IOSCoreDeviceLaunchResult?> launchAppInternal({
+  Future<IOSCoreDeviceLaunchResult?> launchApp({
     required String deviceId,
     required String bundleId,
     List<String> launchArguments = const <String>[],

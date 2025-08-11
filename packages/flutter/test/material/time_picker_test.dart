@@ -1552,6 +1552,7 @@ void main() {
             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+              SemanticsFlag.isFocusable,
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
               SemanticsFlag.isMultiline,
@@ -1566,6 +1567,7 @@ void main() {
             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
+              SemanticsFlag.isFocusable,
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
               SemanticsFlag.isMultiline,

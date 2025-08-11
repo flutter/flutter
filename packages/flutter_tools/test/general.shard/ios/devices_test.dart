@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -79,6 +80,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
@@ -101,6 +103,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -125,6 +128,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -148,6 +152,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -171,6 +176,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -194,6 +200,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -217,6 +224,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -242,6 +250,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -267,6 +276,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -292,6 +302,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -317,6 +328,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -342,6 +354,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -363,6 +376,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -387,6 +401,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -412,6 +427,7 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
         logger: logger,
+        analytics: FakeAnalytics(),
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
@@ -444,6 +460,7 @@ void main() {
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               fileSystem: fileSystem,
               logger: logger,
+              analytics: FakeAnalytics(),
               platform: platform,
               iosDeploy: iosDeploy,
               iMobileDevice: iMobileDevice,
@@ -533,6 +550,7 @@ void main() {
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
           logger: logger,
+          analytics: FakeAnalytics(),
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
@@ -609,6 +627,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
@@ -630,6 +649,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
@@ -939,6 +959,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
+        analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
@@ -1108,3 +1129,5 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
+
+class FakeAnalytics extends Fake implements Analytics {}
