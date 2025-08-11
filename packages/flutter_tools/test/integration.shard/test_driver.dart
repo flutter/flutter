@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
-import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice, WebServerDevice;
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -568,7 +568,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
-      waitForDebugPort: device != WebServerDevice.kWebServerDeviceId,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
       verbose: verbose,
@@ -609,7 +608,6 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool waitForDebugPort = false,
     bool verbose = false,
     int? attachPort,
   }) async {
@@ -650,11 +648,12 @@ final class FlutterRunTestDriver extends FlutterTestDriver {
           event: 'app.started',
           timeout: appStartTimeout,
         );
-        late final Map<String, Object?> debugPort;
-        if (waitForDebugPort || withDebugger) {
-          debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
-        }
+
         if (withDebugger) {
+          final Map<String, Object?> debugPort = await _waitFor(
+            event: 'app.debugPort',
+            timeout: appStartTimeout,
+          );
           final wsUriString = (debugPort['params']! as Map<String, Object?>)['wsUri']! as String;
           _vmServiceWsUri = Uri.parse(wsUriString);
           await connectToVmService(pauseOnExceptions: pauseOnExceptions);

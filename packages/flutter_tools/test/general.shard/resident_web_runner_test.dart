@@ -1665,9 +1665,7 @@ flutter:
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-      expect(await residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
-      await connectionInfoCompleter.future;
+      expect(await residentWebRunner.run(), 0);
       final File generatedLocalizationsFile = globals.fs
           .directory('lib')
           .childDirectory('l10n')
@@ -2056,9 +2054,6 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   PackageConfig? lastPackageConfig = PackageConfig.empty;
-
-  @override
-  var useDwdsWebSocketConnection = false;
 
   @override
   Future<Uri> create() async {
