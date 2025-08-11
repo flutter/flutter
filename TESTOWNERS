@@ -191,8 +191,6 @@
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imitation_game_flutter__compile.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imitation_game_swiftui__compile.dart @louisehsu @flutter/tool
-# TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/142305 is fixed.
-/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark_no_dds.dart @louisehsu @flutter/tool
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @louisehsu @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @LongCatIsLooong @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart LongCatIsLooong @flutter/tool
