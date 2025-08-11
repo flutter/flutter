@@ -101,7 +101,7 @@ class TextButton extends ButtonStyleButton {
   /// The icon and label are arranged in a row and padded by 8 logical pixels
   /// at the ends, with an 8 pixel gap in between.
   ///
-  /// If [icon] is null, will create a [TextButton] instead.
+  /// [icon] can be null, this is useful when the icon visibility is conditional.
   ///
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
   ///
@@ -120,21 +120,6 @@ class TextButton extends ButtonStyleButton {
     required Widget label,
     IconAlignment? iconAlignment,
   }) {
-    if (icon == null) {
-      return TextButton(
-        key: key,
-        onPressed: onPressed,
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus ?? false,
-        clipBehavior: clipBehavior ?? Clip.none,
-        statesController: statesController,
-        child: label,
-      );
-    }
     return _TextButtonWithIcon(
       key: key,
       onPressed: onPressed,
@@ -464,10 +449,11 @@ class _TextButtonWithIcon extends TextButton {
     bool? autofocus,
     super.clipBehavior,
     super.statesController,
-    required Widget icon,
+    Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
-  }) : super(
+  }) : hasIcon = icon != null,
+       super(
          autofocus: autofocus ?? false,
          child: _TextButtonWithIconChild(
            icon: icon,
@@ -476,6 +462,8 @@ class _TextButtonWithIcon extends TextButton {
            iconAlignment: iconAlignment,
          ),
        );
+
+  final bool hasIcon;
 
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
@@ -486,7 +474,9 @@ class _TextButtonWithIcon extends TextButton {
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
-      useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
+      useMaterial3
+          ? EdgeInsetsDirectional.fromSTEB(12, 8, hasIcon ? 16 : 12, 8)
+          : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
       effectiveTextScale,
@@ -506,12 +496,15 @@ class _TextButtonWithIconChild extends StatelessWidget {
   });
 
   final Widget label;
-  final Widget icon;
+  final Widget? icon;
   final ButtonStyle? buttonStyle;
   final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
+    if (icon == null) {
+      return label;
+    }
     final double defaultFontSize =
         buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale =
@@ -526,8 +519,8 @@ class _TextButtonWithIconChild extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: lerpDouble(8, 4, scale)!,
       children: effectiveIconAlignment == IconAlignment.start
-          ? <Widget>[icon, Flexible(child: label)]
-          : <Widget>[Flexible(child: label), icon],
+          ? <Widget>[icon!, Flexible(child: label)]
+          : <Widget>[Flexible(child: label), icon!],
     );
   }
 }
