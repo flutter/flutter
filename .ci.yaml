@@ -5481,9 +5481,10 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
 
-  - name: Mac_ios hot_mode_dev_cycle_ios_xcode_debug
+  - name: Mac_ios ios_debug_workflow
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       tags: >

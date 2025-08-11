@@ -16,22 +16,8 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     deviceOperatingSystem = DeviceOperatingSystem.ios;
-    try {
-      return await createIosWorkflowTest()();
-    } finally {
-      await enableLLDBDebugging();
-    }
+    return createIosWorkflowTest()();
   });
-}
-
-Future<void> disableLLDBDebugging() async {
-  final int configResult = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
-    'config',
-    '--no-enable-lldb-debugging',
-  ]);
-  if (configResult != 0) {
-    print('Failed to disable configuration, tasks may not run.');
-  }
 }
 
 Future<void> enableLLDBDebugging() async {
