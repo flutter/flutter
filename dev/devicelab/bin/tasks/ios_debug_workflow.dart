@@ -75,16 +75,8 @@ TaskFunction createIosWorkflowTest({String? deviceIdOverride}) {
       return lldbResult;
     }
 
-    // Test Xcode workflow
-    await disableLLDBDebugging();
-    final TaskResult xcodeResult = await _validateWorkflow(
-      workflow: IosDebugWorkflow.xcode,
-      deviceId: deviceIdOverride!,
-      appDirectoryPath: appDirectory.path,
-    );
-    if (xcodeResult.failed) {
-      return xcodeResult;
-    }
+    // TODO(vashworth): Also test Xcode workflow once
+    // https://github.com/flutter/flutter/issues/173573 is fixed.
 
     return TaskResult.success(null);
   };
