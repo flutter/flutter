@@ -361,6 +361,82 @@ void main() {
       expect(rule.replace('/assets/images/image.jpg'), '/static');
     });
 
+    test('replaces with glob `*` (asterisk) wildcard', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/img/*.jpg'),
+        target: 'http://localhost:8080',
+        replacement: '/static/images/placeholder.jpg',
+      );
+      expect(rule.replace('/assets/img/photo1.jpg'), '/static/images/placeholder.jpg');
+      expect(rule.replace('/assets/img/photo_test.jpg'), '/static/images/placeholder.jpg');
+      expect(rule.replace('/assets/img/photo_test.png'), '/assets/img/photo_test.png'); 
+    });
+
+    test('replaces with glob `?` (question mark) wildcard', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/file?.txt'),
+        target: 'http://localhost:8080',
+        replacement: '/docs/backup.txt',
+      );
+      expect(rule.replace('/assets/file1.txt'), '/docs/backup.txt');
+      expect(rule.replace('/assets/fileA.txt'), '/docs/backup.txt');
+      expect(rule.replace('/assets/file10.txt'), '/assets/file10.txt'); 
+    });
+
+    test('replaces with glob `**` (double asterisk) for recursive matching', () {
+      final rule = SourceProxyRule(
+        source: Glob('**/templates/*.html'),
+        target: 'http://localhost:8080',
+        replacement: '/views/default.html',
+      );
+      expect(rule.replace('src/web/templates/home.html'), '/views/default.html');
+      expect(rule.replace('/templates/about.html'), '/views/default.html');
+      expect(rule.replace('/templates/js/script.js'), '/templates/js/script.js');
+    });
+
+    test('replaces with glob `[]` (character class) for specific character matching', () {
+      final rule = SourceProxyRule(
+        source: Glob('/data/[a-z].log'),
+        target: 'http://localhost:8080',
+        replacement: '/logs/debug.log',
+      );
+      expect(rule.replace('/data/a.log'), '/logs/debug.log');
+      expect(rule.replace('/data/z.log'), '/logs/debug.log');
+      expect(rule.replace('/data/1.log'), '/data/1.log'); 
+    });
+
+    test('replaces with glob `{}` (brace expansion) for multiple patterns', () {
+      final rule = SourceProxyRule(
+        source: Glob('/src/{styles,scripts}/**'),
+        target: 'http://localhost:8080',
+        replacement: '/dist/assets',
+      );
+      expect(rule.replace('/src/styles/main.css'), '/dist/assets');
+      expect(rule.replace('/src/scripts/app.js'), '/dist/assets');
+      expect(rule.replace('/src/images/logo.png'), '/src/images/logo.png'); 
+    });
+
+    test('replaces with a combination of glob syntaxes', () {
+      final rule = SourceProxyRule(
+        source: Glob('**/[a-c]*.{js,css}'),
+        target: 'http://localhost:8080',
+        replacement: '/bundle/vendor.min',
+      );
+      expect(rule.replace('lib/core/a_module.js'), '/bundle/vendor.min');
+      expect(rule.replace('styles/components/c_button.css'), '/bundle/vendor.min');
+      expect(rule.replace('utils/d_helper.js'), 'utils/d_helper.js'); 
+    });
+
+
+    test('replace correctly replaces all occurrences', () {
+      final rule = SourceProxyRule(
+        source: Glob('/image'),
+        target: 'http://localhost:8080',
+        replacement: '/picture',
+      );
+      expect(rule.replace('/my/image/folder/image.jpg'), '/my/picture/folder/picture.jpg');
+    });
+
     test('replace returns original path for no replacement', () {
       final rule = SourceProxyRule(source: Glob('/assets/**'), target: 'http://localhost:8080');
       expect(rule.replace('/assets/images/image.jpg'), '/assets/images/image.jpg');
