@@ -733,9 +733,6 @@ class AndroidDevice extends Device {
   bool get supportsHotRestart => true;
 
   @override
-  bool get supportsFastStart => true;
-
-  @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     if (app == null) {
       return false;

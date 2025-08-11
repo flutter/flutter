@@ -33,10 +33,8 @@ void main() {
       print('run: starting...');
       final Process run = await startFlutter(
         'run',
-        // --fast-start does not support routes.
         options: <String>[
           '--disable-service-auth-codes',
-          '--no-fast-start',
           '--no-publish-port',
           '-d',
           device.deviceId,

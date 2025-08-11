@@ -2417,7 +2417,6 @@ class ReportedDurationTest {
         options: <String>[
           '--verbose',
           '--no-publish-port',
-          '--no-fast-start',
           '--${_reportedDurationTestToString(flavor)}',
           '--no-resident',
           '-d',

@@ -768,9 +768,6 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
-  /// Whether the device supports the '--fast-start' development mode.
-  bool get supportsFastStart => false;
-
   /// Whether the Flavors feature ('--flavor') is supported for this device.
   bool get supportsFlavors => false;
 
@@ -960,7 +957,6 @@ class DebuggingOptions {
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
-    this.fastStart = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableFlutterGpu = false,
@@ -1026,7 +1022,6 @@ class DebuggingOptions {
        ddsPort = null,
        devToolsServerAddress = null,
        vmserviceOutFile = null,
-       fastStart = false,
        webEnableExpressionEvaluation = false,
        nativeNullAssertions = false,
        enableDevTools = false,
@@ -1073,7 +1068,6 @@ class DebuggingOptions {
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
-    required this.fastStart,
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableFlutterGpu,
@@ -1167,7 +1161,6 @@ class DebuggingOptions {
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
-  final bool fastStart;
 
   /// Additional null runtime checks inserted for web applications.
   ///
@@ -1265,7 +1258,6 @@ class DebuggingOptions {
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
-    'fastStart': fastStart,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableFlutterGpu': enableFlutterGpu,
@@ -1330,7 +1322,6 @@ class DebuggingOptions {
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
-        fastStart: json['fastStart']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
         enableFlutterGpu: json['enableFlutterGpu']! as bool,
