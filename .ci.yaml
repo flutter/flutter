@@ -5488,7 +5488,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: hot_mode_dev_cycle_ios_xcode_debug
+      task_name: ios_debug_workflow
       os: Mac-15
       $flutter/osx_sdk : >-
         {
