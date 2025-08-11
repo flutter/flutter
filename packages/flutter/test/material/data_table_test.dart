@@ -2316,13 +2316,17 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('DataTable renders at zero area', (WidgetTester tester) async {
+  testWidgets('DataTable, DataColumn, DataRow, and DataCell render at zero area', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox.shrink(
           child: DataTable(
             columns: const <DataColumn>[DataColumn(label: Text('X'))],
-            rows: const <DataRow>[],
+            rows: const <DataRow>[
+              DataRow(cells: <DataCell>[DataCell(Text('X'))]),
+            ],
           ),
         ),
       ),
