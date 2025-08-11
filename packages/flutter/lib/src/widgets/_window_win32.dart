@@ -567,72 +567,60 @@ class _NativeWin32PlatformInterface extends Win32PlatformInterface {
   )
   external static int _createWindow(int engineId, Pointer<WindowCreationRequest> request);
 
-  @Native<Pointer<Void> Function(Int64, Int64)>(
+  @Native<HWND Function(Int64, Int64)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle',
   )
-  external static Pointer<Void> _getWindowHandle(int engineId, int viewId);
+  external static HWND _getWindowHandle(int engineId, int viewId);
 
-  @Native<Void Function(Pointer<Void>)>(symbol: 'DestroyWindow')
-  external static void _destroyWindow(Pointer<Void> windowHandle);
+  @Native<Void Function(HWND)>(symbol: 'DestroyWindow')
+  external static void _destroyWindow(HWND windowHandle);
 
-  @Native<ActualContentSize Function(Pointer<Void>)>(
+  @Native<ActualContentSize Function(HWND)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetWindowContentSize',
   )
   external static ActualContentSize _getWindowContentSize(HWND windowHandle);
 
-  @Native<Void Function(Pointer<Void>, Pointer<ffi.Utf16>)>(symbol: 'SetWindowTextW')
-  external static void _setWindowTitle(Pointer<Void> windowHandle, Pointer<ffi.Utf16> title);
+  @Native<Void Function(HWND, Pointer<ffi.Utf16>)>(symbol: 'SetWindowTextW')
+  external static void _setWindowTitle(HWND windowHandle, Pointer<ffi.Utf16> title);
 
-  @Native<Void Function(Pointer<Void>, Pointer<WindowSizeRequest>)>(
+  @Native<Void Function(HWND, Pointer<WindowSizeRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowSize',
   )
-  external static void _setWindowContentSize(
-    Pointer<Void> windowHandle,
-    Pointer<WindowSizeRequest> size,
-  );
+  external static void _setWindowContentSize(HWND windowHandle, Pointer<WindowSizeRequest> size);
 
-  @Native<Void Function(Pointer<Void>, Pointer<WindowConstraintsRequest>)>(
+  @Native<Void Function(HWND, Pointer<WindowConstraintsRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowConstraints',
   )
   external static void _setWindowConstraints(
-    Pointer<Void> windowHandle,
+    HWND windowHandle,
     Pointer<WindowConstraintsRequest> constraints,
   );
 
-  @Native<Void Function(Pointer<Void>, Int32)>(symbol: 'ShowWindow')
-  external static void _showWindow(Pointer<Void> windowHandle, int command);
+  @Native<Void Function(HWND, Int32)>(symbol: 'ShowWindow')
+  external static void _showWindow(HWND windowHandle, int command);
 
-  @Native<Int32 Function(Pointer<Void>)>(symbol: 'IsIconic')
-  external static int _isIconic(Pointer<Void> windowHandle);
+  @Native<Int32 Function(HWND)>(symbol: 'IsIconic')
+  external static int _isIconic(HWND windowHandle);
 
-  @Native<Int32 Function(Pointer<Void>)>(symbol: 'IsZoomed')
-  external static int _isZoomed(Pointer<Void> windowHandle);
+  @Native<Int32 Function(HWND)>(symbol: 'IsZoomed')
+  external static int _isZoomed(HWND windowHandle);
 
-  @Native<Void Function(Pointer<Void>, Pointer<WindowFullscreenRequest>)>(
+  @Native<Void Function(HWND, Pointer<WindowFullscreenRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetFullscreen',
   )
-  external static void _setFullscreen(
-    Pointer<Void> windowHandle,
-    Pointer<WindowFullscreenRequest> request,
-  );
+  external static void _setFullscreen(HWND windowHandle, Pointer<WindowFullscreenRequest> request);
 
-  @Native<Bool Function(Pointer<Void>)>(
-    symbol: 'InternalFlutterWindows_WindowManager_GetFullscreen',
-  )
-  external static bool _getFullscreen(Pointer<Void> windowHandle);
+  @Native<Bool Function(HWND)>(symbol: 'InternalFlutterWindows_WindowManager_GetFullscreen')
+  external static bool _getFullscreen(HWND windowHandle);
 
-  @Native<Int32 Function(Pointer<Void>)>(symbol: 'GetWindowTextLengthW')
-  external static int _getWindowTextLength(Pointer<Void> windowHandle);
+  @Native<Int32 Function(HWND)>(symbol: 'GetWindowTextLengthW')
+  external static int _getWindowTextLength(HWND windowHandle);
 
-  @Native<Int32 Function(Pointer<Void>, Pointer<ffi.Utf16>, Int32)>(symbol: 'GetWindowTextW')
-  external static int _getWindowText(
-    Pointer<Void> windowHandle,
-    Pointer<ffi.Utf16> lpString,
-    int maxLength,
-  );
+  @Native<Int32 Function(HWND, Pointer<ffi.Utf16>, Int32)>(symbol: 'GetWindowTextW')
+  external static int _getWindowText(HWND windowHandle, Pointer<ffi.Utf16> lpString, int maxLength);
 
-  @Native<Pointer<Void> Function()>(symbol: 'GetForegroundWindow')
-  external static Pointer<Void> _getForegroundWindow();
+  @Native<HWND Function()>(symbol: 'GetForegroundWindow')
+  external static HWND _getForegroundWindow();
 }
 
 /// Payload for the creation method used by [Win32PlatformInterface.createWindow].
@@ -719,7 +707,7 @@ final class WindowsMessage extends Struct {
   @Int64()
   external int viewId;
 
-  external Pointer<Void> windowHandle;
+  external HWND windowHandle;
 
   @Int32()
   external int message;
