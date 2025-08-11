@@ -70,7 +70,7 @@ abstract class WindowsMessageHandler {
 
 /// [WindowingOwner] implementation for Windows.
 ///
-///  If [Platform.isWindows] is false, then the constructor will throw an
+/// If [Platform.isWindows] is false, then the constructor will throw an
 /// [UnsupportedError].
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -235,9 +235,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
 
 /// Implementation of [RegularWindowController] for the Windows platform.
 ///
-/// If [Platform.isWindows] is false, then the constructor will throw an
-/// [UnsupportedError].
-///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
 /// See also:
@@ -246,9 +243,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
 class RegularWindowControllerWin32 extends RegularWindowController
     implements WindowsMessageHandler {
   /// Creates a new regular window controller for Win32.
-  ///
-  /// If [Platform.isWindows] is false, then this constructor will throw an
-  /// [UnsupportedError].
   ///
   /// When this constructor completes the native window has been created and
   /// has a view associated with it.
