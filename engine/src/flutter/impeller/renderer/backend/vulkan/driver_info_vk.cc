@@ -107,12 +107,14 @@ const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
 };
 
 constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
-    {{{"DXT", PowerVRGPU::kDXT},
-      {"CXT", PowerVRGPU::kCXT},
-      {"BXE", PowerVRGPU::kBXE},
-      {"BXM", PowerVRGPU::kBXM},
-      {"BXS", PowerVRGPU::kBXS},
-      {"BXT", PowerVRGPU::kBXT}}};
+    {{
+        {"BXE", PowerVRGPU::kBXE},
+        {"BXM", PowerVRGPU::kBXM},
+        {"BXS", PowerVRGPU::kBXS},
+        {"BXT", PowerVRGPU::kBXT},
+        {"CXT", PowerVRGPU::kCXT},
+        {"DXT", PowerVRGPU::kDXT},
+    }};
 }  // namespace
 
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
