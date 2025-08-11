@@ -158,13 +158,13 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
     // Should not change the image. Tests the Convex short-cut code.
 
     // To avoid simplification, construct an explicit circle using conics.
-    const float circle_weight = 0.707106781f;
+    constexpr float kConicWeight = 0.707106781f; // sqrt(2)/2
     const DlPath path = DlPathBuilder()
         .MoveTo({150, 300})
-        .ConicCurveTo({300, 300}, {300, 450}, circle_weight)
-        .ConicCurveTo({300, 600}, {150, 600}, circle_weight)
-        .ConicCurveTo({  0, 600}, {  0, 450}, circle_weight)
-        .ConicCurveTo({  0, 300}, {150, 300}, circle_weight)
+        .ConicCurveTo({300, 300}, {300, 450}, kConicWeight)
+        .ConicCurveTo({300, 600}, {150, 600}, kConicWeight)
+        .ConicCurveTo({  0, 600}, {  0, 450}, kConicWeight)
+        .ConicCurveTo({  0, 300}, {150, 300}, kConicWeight)
         .Close()
         .TakePath();
 
