@@ -110,6 +110,7 @@ class Context {
     List<String> args, {
     bool verbose = false,
     bool allowFail = false,
+    bool skipErrorLog = false,
     String? workingDirectory,
   }) {
     if (verbose) {
@@ -120,11 +121,13 @@ class Context {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
-    if (resultStderr.isNotEmpty) {
+    // If skipErrorLog flag is set, do not log stderr of the process.
+    // An example is on macOS 26, plutil reports NSBonjourServices key not found
+    // via stderr (rather than stdout on older macOS), and logging the message
+    // would be confusing (for either stdout or stderr), since not having the
+    // key is one of the expected states.
+    if (!skipErrorLog && resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
-      // If allowFail, do not fail Xcode build. An example is on macOS 26,
-      // plutil reports NSBonjourServices key not found via stderr (rather than
-      // stdout on older macOS), and it should not cause compile failure.
       if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
@@ -426,14 +429,12 @@ class Context {
 
     // If there are already NSBonjourServices specified by the app (uncommon),
     // insert the vmService service name to the existing list.
-    ProcessResult result = runSync('plutil', <String>[
-      '-extract',
-      'NSBonjourServices',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    ProcessResult result = runSync(
+      'plutil',
+      <String>['-extract', 'NSBonjourServices', 'xml1', '-o', '-', builtProductsPlist],
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode == 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -458,14 +459,12 @@ class Context {
     // specified (uncommon). This text will appear below the "Your app would
     // like to find and connect to devices on your local network" permissions
     // popup.
-    result = runSync('plutil', <String>[
-      '-extract',
-      'NSLocalNetworkUsageDescription',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    result = runSync(
+      'plutil',
+      <String>['-extract', 'NSLocalNetworkUsageDescription', 'xml1', '-o', '-', builtProductsPlist],
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode != 0) {
       runSync('plutil', <String>[
         '-insert',
