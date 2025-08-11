@@ -704,10 +704,10 @@ class FlutterPlugin : Plugin<Project> {
                     validateDeferredComponents = validateDeferredComponentsValue
                     flavor = flavorValue
                 }
-            val compileTask: FlutterTask = compileTaskProvider.get()
+            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val libJar: File =
                 project.file(
-                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
+                    project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar"),
                 )
             val packJniLibsTaskProvider: TaskProvider<Jar> =
                 project.tasks.register(
@@ -716,10 +716,10 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     destinationDirectory.set(libJar.parentFile)
                     archiveFileName.set(libJar.name)
-                    dependsOn(compileTask)
+                    dependsOn(flutterCompileTask)
                     targetPlatforms.forEach { targetPlatform ->
                         val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                        from("${compileTask.intermediateDir}/$abi") {
+                        from("${flutterCompileTask.intermediateDir}/$abi") {
                             include("*.so")
                             // Move `app.so` to `lib/<abi>/libapp.so`
                             rename { filename: String -> "lib/$abi/lib$filename" }
