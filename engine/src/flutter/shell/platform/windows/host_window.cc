@@ -560,16 +560,12 @@ void HostWindow::SetConstraints(const WindowConstraints& constraints) {
     saved_window_info_.rect.bottom =
         saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
   } else {
-    RECT rect;
-    GetClientRect(window_handle_, &rect);
-    const double dpr = FlutterDesktopGetDpiForHWND(window_handle_) /
-                       static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-    const Size current_size(rect.right / dpr, rect.bottom / dpr);
+    auto const client_size = GetWindowContentSize(window_handle_);
+    auto const current_size = Size(client_size.width, client_size.height);
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        *engine_->windows_proc_table(),
-        Size(current_size.width(), current_size.height()),
+        *engine_->windows_proc_table(), current_size,
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
@@ -636,17 +632,6 @@ void HostWindow::SetFullscreen(
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
 
-    std::optional<Size> const window_size = GetWindowSizeForClientSize(
-        *engine_->windows_proc_table(), Size(width, height),
-        box_constraints_.smallest(), box_constraints_.biggest(),
-        window_info.dwStyle, window_info.dwExStyle, nullptr);
-
-    if (window_size != Size(width, height)) {
-      FML_LOG(ERROR) << "Setting this window to fullscreen would make it no "
-                        "longer satisfy its constraints";
-      return;
-    }
-
     // Set new window style and size.
     SetWindowLong(window_handle_, GWL_STYLE,
                   saved_window_info_.style & ~(WS_CAPTION | WS_THICKFRAME));
@@ -654,6 +639,12 @@ void HostWindow::SetFullscreen(
         window_handle_, GWL_EXSTYLE,
         saved_window_info_.ex_style & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
                                         WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+    // We call SetWindowPos first to set the window flags immediately. This
+    // makes it so that the WM_GETMINMAXINFO gets called with the correct window
+    // and content sizes.
+    SetWindowPos(window_handle_, NULL, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
     SetWindowPos(window_handle_, nullptr, monitor_info.rcMonitor.left,
                  monitor_info.rcMonitor.top, width, height,
@@ -666,6 +657,13 @@ void HostWindow::SetFullscreen(
     SetWindowLong(window_handle_, GWL_STYLE,
                   saved_window_info_.style | WS_VISIBLE);
     SetWindowLong(window_handle_, GWL_EXSTYLE, saved_window_info_.ex_style);
+
+    // We call SetWindowPos first to set the window flags immediately. This
+    // makes it so that the WM_GETMINMAXINFO gets called with the correct window
+    // and content sizes.
+    SetWindowPos(window_handle_, NULL, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
     HMONITOR monitor =
         MonitorFromRect(&saved_window_info_.rect, MONITOR_DEFAULTTONEAREST);
     MONITORINFO monitor_info;
