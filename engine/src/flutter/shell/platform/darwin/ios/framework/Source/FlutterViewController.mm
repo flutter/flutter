@@ -1613,8 +1613,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  CGFloat maxWidth = superview.bounds.size.width;
-  CGFloat maxHeight = superview.bounds.size.height;
+  CGFloat origWidth = superview.bounds.size.width;
+  CGFloat origHeight = superview.bounds.size.height;
+
+  CGFloat maxWidth = origWidth;
+  CGFloat maxHeight = origHeight;
 
   for (NSLayoutConstraint* constraint in superview.constraints) {
     if (constraint.firstItem == self.view) {
@@ -1634,8 +1637,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
   }
 
-  _viewportMetrics.width_constraint = maxWidth;
-  _viewportMetrics.height_constraint = maxHeight;
+  _viewportMetrics.min_width_constraint = 0;
+  _viewportMetrics.max_width_constraint = maxWidth * _viewportMetrics.device_pixel_ratio;
+  _viewportMetrics.min_height_constraint = 0;
+  _viewportMetrics.max_height_constraint = maxHeight * _viewportMetrics.device_pixel_ratio;
 
   NSLog(@"Updated auto-resize constraints: maxWidth = %f, maxHeight = %f", maxWidth, maxHeight);
 }

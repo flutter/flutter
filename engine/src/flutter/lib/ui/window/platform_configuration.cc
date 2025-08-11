@@ -109,8 +109,6 @@ bool PlatformConfiguration::AddView(int64_t view_id,
           tonic::ToDart(view_metrics.device_pixel_ratio),
           tonic::ToDart(view_metrics.physical_width),
           tonic::ToDart(view_metrics.physical_height),
-          tonic::ToDart(view_metrics.width_constraint),
-          tonic::ToDart(view_metrics.height_constraint),
           tonic::ToDart(view_metrics.physical_padding_top),
           tonic::ToDart(view_metrics.physical_padding_right),
           tonic::ToDart(view_metrics.physical_padding_bottom),
@@ -128,6 +126,10 @@ bool PlatformConfiguration::AddView(int64_t view_id,
           tonic::ToDart(view_metrics.physical_display_features_type),
           tonic::ToDart(view_metrics.physical_display_features_state),
           tonic::ToDart(view_metrics.display_id),
+          tonic::ToDart(view_metrics.min_width_constraint),
+          tonic::ToDart(view_metrics.max_width_constraint),
+          tonic::ToDart(view_metrics.min_height_constraint),
+          tonic::ToDart(view_metrics.max_height_constraint),
       }));
   return true;
 }
@@ -209,8 +211,6 @@ bool PlatformConfiguration::UpdateViewMetrics(
           tonic::ToDart(view_metrics.device_pixel_ratio),
           tonic::ToDart(view_metrics.physical_width),
           tonic::ToDart(view_metrics.physical_height),
-          tonic::ToDart(view_metrics.width_constraint),
-          tonic::ToDart(view_metrics.height_constraint),
           tonic::ToDart(view_metrics.physical_padding_top),
           tonic::ToDart(view_metrics.physical_padding_right),
           tonic::ToDart(view_metrics.physical_padding_bottom),
@@ -228,6 +228,10 @@ bool PlatformConfiguration::UpdateViewMetrics(
           tonic::ToDart(view_metrics.physical_display_features_type),
           tonic::ToDart(view_metrics.physical_display_features_state),
           tonic::ToDart(view_metrics.display_id),
+          tonic::ToDart(view_metrics.min_width_constraint),
+          tonic::ToDart(view_metrics.max_width_constraint),
+          tonic::ToDart(view_metrics.min_height_constraint),
+          tonic::ToDart(view_metrics.max_height_constraint),
       }));
   return true;
 }

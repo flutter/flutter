@@ -1631,6 +1631,10 @@ MakeViewportMetricsFromWindowMetrics(
   metrics.physical_view_inset_left =
       SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
   metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
+  metrics.min_width_constraint = SAFE_ACCESS(flutter_metrics, width_min, 0.0);
+  metrics.max_width_constraint = SAFE_ACCESS(flutter_metrics, width_max, 0.0);
+  metrics.min_height_constraint = SAFE_ACCESS(flutter_metrics, height_min, 0.0);
+  metrics.max_height_constraint = SAFE_ACCESS(flutter_metrics, height_max, 0.0);
 
   if (metrics.device_pixel_ratio <= 0.0) {
     return "Device pixel ratio was invalid. It must be greater than zero.";

@@ -1071,7 +1071,6 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
 
   if (metrics.device_pixel_ratio <= 0 || metrics.physical_width <= 0 ||
       metrics.physical_height <= 0) {
-    // Ignore invalid view-port metrics.
     return;
   }
 
@@ -1099,15 +1098,17 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
-    bool has_given_constraints = (metrics.width_constraint != 0.0 ||
-                                  metrics.height_constraint != 0.0);
+    bool has_given_constraints = (metrics.min_width_constraint != 0.0 ||
+                                  metrics.max_width_constraint != 0.0 ||
+                                  metrics.min_height_constraint != 0.0 ||
+                                  metrics.max_height_constraint != 0.0);
 
     if (has_given_constraints) {
       expected_frame_constraints_[view_id] = {
-          .min_width = 0,
-          .max_width = metrics.width_constraint,
-          .min_height = 0,
-          .max_height = metrics.height_constraint,
+          .min_width = metrics.min_width_constraint,
+          .max_width = metrics.max_width_constraint,
+          .min_height = metrics.min_height_constraint,
+          .max_height = metrics.max_height_constraint,
 
       };
     } else {
@@ -1118,6 +1119,7 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
           .max_height = metrics.physical_height,
       };
     }
+
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1751,8 +1753,10 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-  return false;
-
+    auto expected_frame_constraints = ExpectedFrameSize(view_id);
+    return !isSizeWithinConstraints(tree.frame_size(),
+                                    expected_frame_constraints);
+}
 
 // |ServiceProtocol::Handler|
 fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(

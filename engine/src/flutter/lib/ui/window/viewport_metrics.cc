@@ -25,8 +25,10 @@ ViewportMetrics::ViewportMetrics(
     double p_device_pixel_ratio,
     double p_physical_width,
     double p_physical_height,
-    double p_width_constraint,
-    double p_height_constraint,
+    double p_min_width_constraint,
+    double p_max_width_constraint,
+    double p_min_height_constraint,
+    double p_max_height_constraint,
     double p_physical_padding_top,
     double p_physical_padding_right,
     double p_physical_padding_bottom,
@@ -47,8 +49,10 @@ ViewportMetrics::ViewportMetrics(
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
-      width_constraint(p_width_constraint),
-      height_constraint(p_height_constraint),
+      min_width_constraint(p_min_width_constraint),
+      max_width_constraint(p_max_width_constraint),
+      min_height_constraint(p_min_height_constraint),
+      max_height_constraint(p_max_height_constraint),
       physical_padding_top(p_physical_padding_top),
       physical_padding_right(p_physical_padding_right),
       physical_padding_bottom(p_physical_padding_bottom),
@@ -73,8 +77,10 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
          a.physical_width == b.physical_width &&
          a.physical_height == b.physical_height &&
-         a.width_constraint == b.width_constraint &&
-         a.height_constraint == b.height_constraint &&
+         a.min_width_constraint == b.min_width_constraint &&
+         a.max_width_constraint == b.max_width_constraint &&
+         a.min_height_constraint == b.min_height_constraint &&
+         a.max_height_constraint == b.max_height_constraint &&
          a.physical_padding_top == b.physical_padding_top &&
          a.physical_padding_right == b.physical_padding_right &&
          a.physical_padding_bottom == b.physical_padding_bottom &&
