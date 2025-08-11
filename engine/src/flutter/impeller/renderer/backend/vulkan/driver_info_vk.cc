@@ -13,6 +13,7 @@
 
 namespace impeller {
 
+namespace {
 const std::unordered_map<std::string_view, AdrenoGPU> kAdrenoVersions = {
     // X
     // Note: I don't know if these strings actually match as there don't seem to
@@ -104,6 +105,7 @@ const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
     {"T820", MaliGPU::kT820},
     {"T760", MaliGPU::kT760},
 };
+}  // namespace
 
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
   /// The format that Adreno names follow is "Adreno (TM) VERSION".
@@ -121,12 +123,38 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
 
 PowerVRGPU GetPowerVRVersion(std::string_view version) {
   // We don't really care about the specific model, just the series.
-  if (version.find("DXT") != std::string::npos) {
-    return PowerVRGPU::kDXT;
+  if (version.size() >= 2) {
+    for (size_t i = 0; i < version.size() - 2; ++i) {
+      std::string_view view = version.substr(i, 3);
+      switch (view[0]) {
+        case 'D':
+          if ("DXT" == view) {
+            return PowerVRGPU::kDXT;
+          }
+          break;
+        case 'C':
+          if ("CXT" == view) {
+            return PowerVRGPU::kCXT;
+          }
+          break;
+        case 'B':
+          if ("BXE" == view) {
+            return PowerVRGPU::kBXE;
+          }
+          if ("BXM" == view) {
+            return PowerVRGPU::kBXM;
+          }
+          if ("BXS" == view) {
+            return PowerVRGPU::kBXS;
+          }
+          if ("BXT" == view) {
+            return PowerVRGPU::kBXT;
+          }
+          break;
+      }
+    }
   }
-  if (version.find("CXT") != std::string::npos) {
-    return PowerVRGPU::kCXT;
-  }
+
   return PowerVRGPU::kUnknown;
 }
 
@@ -370,7 +398,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kBXE) {
     return true;
   }
   return false;
