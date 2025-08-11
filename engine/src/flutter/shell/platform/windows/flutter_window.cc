@@ -530,6 +530,7 @@ FlutterWindow::HandleMessage(UINT const message,
       break;
     case WM_POINTERDOWN:
     case WM_POINTERUPDATE:
+    case WM_POINTERUP:
     case WM_POINTERLEAVE: {
       xPos = GET_X_LPARAM(lparam);
       yPos = GET_Y_LPARAM(lparam);
@@ -537,12 +538,12 @@ FlutterWindow::HandleMessage(UINT const message,
       auto y = static_cast<double>(yPos);
       auto pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
-      if (GetPointerInfo(pointerId, &pointerInfo)) {
+      if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
         UINT32 pressure = 0;
         UINT32 rotation = 0;
         if (pointerInfo.pointerType == PT_PEN) {
           POINTER_PEN_INFO penInfo;
-          if (GetPointerPenInfo(pointerId, &penInfo)) {
+          if (windows_proc_table_->GetPointerPenInfo(pointerId, &penInfo)) {
             pressure = penInfo.pressure;
             rotation = penInfo.rotation;
           }
@@ -563,11 +564,15 @@ FlutterWindow::HandleMessage(UINT const message,
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, WM_LBUTTONDOWN, rotation,
                         pressure);
-        } else if (message == WM_POINTERUPDATE &&
-                   pointerInfo.pointerFlags & POINTER_FLAG_INCONTACT) {
+        } else if (message == WM_POINTERUPDATE) {
+          // POINTER_FLAG_INCONTACT indicates the stylus is touching the screen
+          // When not set, it means the stylus is hovering
           OnPointerMove(x, y, device_kind, touch_id, rotation, pressure, 0);
-        } else if (message == WM_POINTERLEAVE) {
+        } else if (message == WM_POINTERUP) {
           OnPointerUp(x, y, device_kind, touch_id, WM_LBUTTONUP);
+          // keep tracking the pointer (especially important for stylus)
+          // This allows a stylus to "hover" over the window
+        } else if (message == WM_POINTERLEAVE) {
           OnPointerLeave(x, y, device_kind, touch_id);
           touch_id_generator_.ReleaseNumber(pointerId);
         }
