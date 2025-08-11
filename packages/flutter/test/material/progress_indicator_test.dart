@@ -171,8 +171,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)),
+        ..rect(rect: Rect.fromLTRB(animationValue * 200.0, 0.0, 200.0, 4.0)) // Track
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 4.0)), // Active indicator
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -199,7 +199,7 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0 - animationValue * 200.0, 4.0))
         ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 4.0)),
     );
 
@@ -1358,11 +1358,13 @@ void main() {
     );
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/173096.
   testWidgets(
-    'LinearProgressIndicator does not paint track outside the bounds when year2023 is false',
+    'Determinate LinearProgressIndicator when year2023 is false',
     (WidgetTester tester) async {
-      Future<ui.Image> getGoldenImage({required TextDirection textDirection}) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
         final ValueNotifier<double> value = ValueNotifier<double>(0);
         addTearDown(value.dispose);
 
@@ -1383,7 +1385,7 @@ void main() {
                     return LinearProgressIndicator(
                       year2023: false,
                       value: value,
-                      trackGap: 20, // Increase trackGap to make regressions more noticeable.
+                      trackGap: trackGap,
                     );
                   },
                 ),
@@ -1402,12 +1404,72 @@ void main() {
 
       await expectLater(
         await getGoldenImage(textDirection: TextDirection.ltr),
-        matchesGoldenFile('m3_linear_progress_indicator.determinate.bounds.ltr.png'),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.png'),
       );
 
       await expectLater(
         await getGoldenImage(textDirection: TextDirection.rtl),
-        matchesGoldenFile('m3_linear_progress_indicator.determinate.bounds.rtl.png'),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.determinate.rtl.custom_track_gap.png'),
+      );
+    },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  );
+
+  testWidgets(
+    'Indeterminate LinearProgressIndicator when year2023 is false',
+    (WidgetTester tester) async {
+      Future<ui.Image> getGoldenImage({
+        required TextDirection textDirection,
+        double? trackGap,
+      }) async {
+        final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
+          frameSize: const Size(250, 30),
+        );
+        addTearDown(animationSheet.dispose);
+
+        final Widget target = Material(
+          child: Directionality(
+            textDirection: textDirection,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Center(child: LinearProgressIndicator(year2023: false, trackGap: trackGap)),
+            ),
+          ),
+        );
+
+        await tester.pumpFrames(animationSheet.record(target), const Duration(milliseconds: 1800));
+
+        return animationSheet.collate(3);
+      }
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.ltr, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.ltr.custom_track_gap.png'),
+      );
+
+      await expectLater(
+        await getGoldenImage(textDirection: TextDirection.rtl, trackGap: 20),
+        matchesGoldenFile('m3_linear_progress_indicator.indeterminate.rtl.custom_track_gap.png'),
       );
     },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
