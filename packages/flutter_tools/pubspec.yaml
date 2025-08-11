@@ -23,13 +23,13 @@ dependencies:
   file: 7.0.1
   flutter_template_images: 5.0.0
   html: 0.15.6
-  http: 1.4.0
+  http: 1.5.0
   intl: 0.20.2
   meta: 1.17.0
   multicast_dns: 0.3.3
   mustache_template: 2.0.0
   package_config: 2.2.0
-  process: 5.0.4
+  process: 5.0.5
   fake_async: 1.3.3
   stack_trace: 1.12.1
   usage: 4.1.1
@@ -79,12 +79,12 @@ dependencies:
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.11.0
+  built_value: 8.11.1
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
   dap: 1.4.0
-  dds_service_extensions: 2.0.2
+  dds_service_extensions: 2.1.0
   devtools_shared: 12.0.0
   dtd: 4.0.0
   extension_discovery: 2.1.0
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: 932agm
+# PUBSPEC CHECKSUM: 60uo1l
