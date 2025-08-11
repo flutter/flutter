@@ -59,7 +59,7 @@ class ChromeOptions {
   /// Whether to enable experimental WasmGC flags
   final bool enableWasmGC;
 
-  /// Disables '[CHROME STDERR]' outputs.
+  /// Disables Chrome stdio outputs.
   final bool silent;
 }
 
