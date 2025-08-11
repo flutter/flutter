@@ -141,7 +141,7 @@ Future<List<int>> launch({required bool isFirstRun}) async {
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   await process.exitCode;
-  chrome!.stop();
+  chrome?.stop();
   return measurements;
 }
 
