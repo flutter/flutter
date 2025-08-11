@@ -8835,15 +8835,19 @@ void main() {
           'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
       Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(borderSide: BorderSide(color: Colors.greenAccent)),
-                suffixIcon: const Icon(Icons.arrow_drop_down),
-                floatingLabelBehavior: floatingLabelBehavior,
-                labelText: labelText,
+        home: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: TextField(
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.greenAccent),
+                  ),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
+                  floatingLabelBehavior: floatingLabelBehavior,
+                  labelText: labelText,
+                ),
               ),
             ),
           ),
