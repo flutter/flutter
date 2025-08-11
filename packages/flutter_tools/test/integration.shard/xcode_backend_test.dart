@@ -132,7 +132,7 @@ void main() {
     });
 
     for (final buildConfiguration in <String>['Debug', 'Profile']) {
-      test('add keys in $buildConfiguration', () async {
+      test('add keys in $buildConfiguration without verbose mode', () async {
         infoPlist.writeAsStringSync(emptyPlist);
 
         final ProcessResult result = await Process.run(
@@ -155,6 +155,33 @@ void main() {
             'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
         expect(result.stderr, isNot(contains(plutilErrorMessage)));
         expect(result.stdout, isNot(contains(plutilErrorMessage)));
+        expect(result, const ProcessResultMatcher());
+      });
+
+      test('add keys in $buildConfiguration under verbose mode', () async {
+        infoPlist.writeAsStringSync(emptyPlist);
+
+        final ProcessResult result = await Process.run(
+          xcodeBackendPath,
+          <String>['test_vm_service_bonjour_service'],
+          environment: <String, String>{
+            'CONFIGURATION': buildConfiguration,
+            'BUILT_PRODUCTS_DIR': buildDirectory.path,
+            'INFOPLIST_PATH': 'Info.plist',
+            'VERBOSE_SCRIPT_LOGGING': 'YES',
+          },
+        );
+
+        final String actualInfoPlist = infoPlist.readAsStringSync();
+        expect(actualInfoPlist, contains('NSBonjourServices'));
+        expect(actualInfoPlist, contains('dartVmService'));
+        expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
+
+        expect(result.stderr, isNot(startsWith('error:')));
+        const plutilErrorMessage =
+            'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+        expect(result.stderr, isNot(contains(plutilErrorMessage)));
+        expect(result.stdout, contains(plutilErrorMessage));
         expect(result, const ProcessResultMatcher());
       });
     }

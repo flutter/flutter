@@ -121,19 +121,24 @@ class Context {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
-    // If skipErrorLog flag is set, do not log stderr of the process.
-    // An example is on macOS 26, plutil reports NSBonjourServices key not found
-    // via stderr (rather than stdout on older macOS), and logging the message
-    // would be confusing (for either stdout or stderr), since not having the
-    // key is one of the expected states.
-    if (!skipErrorLog && resultStderr.isNotEmpty) {
+    if (resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
       if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
       errorOutput.write(resultStderr);
-      echoError(errorOutput.toString());
+      if (skipErrorLog) {
+        // Pipe stderr to stdout under verbose mode.
+        // An example is on macOS 26, plutil reports NSBonjourServices key not found
+        // via stderr (rather than stdout on older macOS), and logging the message
+        // in stderr would be confusing, since not having the key is one of the expected states.
+        if (verbose) {
+          echo(errorOutput.toString());
+        }
+      } else {
+        echoError(errorOutput.toString());
+      }
 
       // Stream stderr to the Flutter build process.
       // When in verbose mode, `echoError` above will show the logs. So only
@@ -427,11 +432,14 @@ class Context {
       return;
     }
 
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+
     // If there are already NSBonjourServices specified by the app (uncommon),
     // insert the vmService service name to the existing list.
     ProcessResult result = runSync(
       'plutil',
       <String>['-extract', 'NSBonjourServices', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
       allowFail: true,
       skipErrorLog: true,
     );
@@ -462,6 +470,7 @@ class Context {
     result = runSync(
       'plutil',
       <String>['-extract', 'NSLocalNetworkUsageDescription', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
       allowFail: true,
       skipErrorLog: true,
     );
