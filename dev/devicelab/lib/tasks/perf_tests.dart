@@ -1002,8 +1002,6 @@ class StartupTest {
             );
             final String buildRoot = path.join(testDirectory, 'build');
             applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
-          case DeviceOperatingSystem.webServer:
-            break;
           case DeviceOperatingSystem.windows:
             await flutter(
               'build',
@@ -1155,7 +1153,6 @@ class DevtoolsStartupTest {
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
-        case DeviceOperatingSystem.webServer:
         case DeviceOperatingSystem.windows:
           break;
       }
@@ -1496,7 +1493,6 @@ class PerfTest {
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
-        case DeviceOperatingSystem.webServer:
         case DeviceOperatingSystem.windows:
           recordGPU = false;
       }
@@ -2015,8 +2011,6 @@ class CompileTest {
         throw Exception('Unsupported option for Fuchsia devices');
       case DeviceOperatingSystem.linux:
         throw Exception('Unsupported option for Linux devices');
-      case DeviceOperatingSystem.webServer:
-        throw Exception('Unsupported option for Web Server devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -2084,8 +2078,6 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         unawaited(stderr.flush());
         options.insert(0, 'macos');
-      case DeviceOperatingSystem.webServer:
-        throw Exception('Unsupported option for Web Server devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -2118,7 +2110,6 @@ class CompileTest {
       case DeviceOperatingSystem.fake:
       case DeviceOperatingSystem.fuchsia:
       case DeviceOperatingSystem.linux:
-      case DeviceOperatingSystem.webServer:
       case DeviceOperatingSystem.windows:
         throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
     }
