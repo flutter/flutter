@@ -4369,6 +4369,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+      // Default width is 800, so the expected width is 800 - padding (20 + 20).
       expect(tester.getSize(findMenuItemButton(shortLabel)).width, 760.0);
     },
   );
