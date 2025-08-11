@@ -556,12 +556,12 @@ void main() {
 
     bool action1Called = false;
     bool action2Called = false;
-    
+
     final SystemContextMenuController controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
-    
+
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Action 1',
@@ -576,27 +576,27 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect, items);
-    
+
     expect(controller.isVisible, isTrue);
-    
-    // Get the actual callback IDs from the items
+
+    // Get the actual callback IDs from the items.
     final String callbackId1 = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
     final String callbackId2 = (items[1] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
+
     controller.handleCustomContextMenuAction(callbackId1);
     expect(action1Called, isTrue);
     expect(action2Called, isFalse);
-    
+
     controller.handleCustomContextMenuAction(callbackId2);
     expect(action1Called, isTrue);
     expect(action2Called, isTrue);
-    
+
     controller.hide();
     expect(controller.isVisible, isFalse);
-    
+
     expect(
       () => controller.handleCustomContextMenuAction(callbackId1),
       throwsAssertionError,
@@ -612,14 +612,14 @@ void main() {
 
     bool controller1ActionCalled = false;
     bool controller2ActionCalled = false;
-    
+
     final SystemContextMenuController controller1 = SystemContextMenuController();
     final SystemContextMenuController controller2 = SystemContextMenuController();
     addTearDown(() {
       controller1.dispose();
       controller2.dispose();
     });
-    
+
     final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Controller 1 Action',
@@ -628,7 +628,7 @@ void main() {
         },
       ),
     ];
-    
+
     final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Controller 2 Action',
@@ -637,27 +637,27 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     const Rect rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
-    
+
     controller1.showWithItems(rect1, items1);
     expect(controller1.isVisible, isTrue);
-    
+
     controller2.showWithItems(rect2, items2);
     expect(controller2.isVisible, isTrue);
     expect(controller1.isVisible, isFalse);
-    
-    // Get the actual callback ID from the items
+
+    // Get the actual callback ID from the items.
     final String callbackId2 = (items2[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
+
     controller2.handleCustomContextMenuAction(callbackId2);
     expect(controller2ActionCalled, isTrue);
     expect(controller1ActionCalled, isFalse);
-    
-    // Get the actual callback ID from controller1's items
+
+    // Get the actual callback ID from controller1's items.
     final String callbackId1 = (items1[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
+
     expect(
       () => controller1.handleCustomContextMenuAction(callbackId1),
       throwsAssertionError,
@@ -672,12 +672,12 @@ void main() {
     });
 
     bool actionCalled = false;
-    
+
     final SystemContextMenuController controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
-    
+
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Test Action',
@@ -686,17 +686,17 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect, items);
     expect(controller.isVisible, isTrue);
-    
+
     controller.handleSystemHide();
     expect(controller.isVisible, isFalse);
-    
-    // Get the actual callback ID from the item
+
+    // Get the actual callback ID from the item.
     final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
+
     expect(
       () => controller.handleCustomContextMenuAction(callbackId),
       throwsAssertionError,
@@ -705,9 +705,9 @@ void main() {
   });
 
   test('calling handleCustomContextMenuAction with no systemContextMenuClient', () {
-    // Don't create a controller or set any client
+    // Don't create a controller or set any client.
     ServicesBinding.systemContextMenuClient = null;
-    
+
     expect(() async {
       final ByteData message = const StandardMethodCodec().encodeMethodCall(
         const MethodCall('SystemContextMenu.onPerformCustomAction', 'test-id'),
@@ -731,18 +731,18 @@ void main() {
     addTearDown(() {
       controller.dispose();
     });
-    
+
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Test Action',
         onPressed: () {},
       ),
     ];
-    
+
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect, items);
     expect(controller.isVisible, isTrue);
-    
+
     expect(
       () => controller.handleCustomContextMenuAction('non-existent-id'),
       throwsAssertionError,
@@ -757,12 +757,12 @@ void main() {
     });
 
     bool actionCalled = false;
-    
+
     final SystemContextMenuController controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
-    
+
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Test Action',
@@ -771,21 +771,21 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect, items);
     expect(controller.isVisible, isTrue);
-    
+
     final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
-    // Test that it works before hiding
+
+    // Test that it works before hiding.
     controller.handleCustomContextMenuAction(callbackId);
     expect(actionCalled, isTrue);
     actionCalled = false;
-    
+
     controller.hide();
     expect(controller.isVisible, isFalse);
-    
+
     expect(
       () => controller.handleCustomContextMenuAction(callbackId),
       throwsAssertionError,
@@ -802,13 +802,13 @@ void main() {
 
     bool oldActionCalled = false;
     bool newActionCalled = false;
-    
+
     final SystemContextMenuController controller = SystemContextMenuController();
     addTearDown(() {
       controller.dispose();
     });
-    
-    // First menu with old action
+
+    // First menu with old action.
     final List<IOSSystemContextMenuItemData> oldItems = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'Old Action',
@@ -817,14 +817,14 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect1, oldItems);
     expect(controller.isVisible, isTrue);
-    
+
     final String oldCallbackId = (oldItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
-    // Show new menu with new action
+
+    // Show new menu with new action.
     final List<IOSSystemContextMenuItemData> newItems = <IOSSystemContextMenuItemData>[
       IOSSystemContextMenuItemDataCustom(
         title: 'New Action',
@@ -833,21 +833,21 @@ void main() {
         },
       ),
     ];
-    
+
     const Rect rect2 = Rect.fromLTWH(100.0, 100.0, 100.0, 100.0);
     controller.showWithItems(rect2, newItems);
     expect(controller.isVisible, isTrue);
-    
+
     final String newCallbackId = (newItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
-    
-    // Old callback should not work
+
+    // Old callback should not work.
     expect(
       () => controller.handleCustomContextMenuAction(oldCallbackId),
       throwsAssertionError,
     );
     expect(oldActionCalled, isFalse);
-    
-    // New callback should work
+
+    // New callback should work.
     controller.handleCustomContextMenuAction(newCallbackId);
     expect(newActionCalled, isTrue);
     expect(oldActionCalled, isFalse);

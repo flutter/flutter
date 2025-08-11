@@ -2666,11 +2666,11 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   }
 
   @override
-  void handleCustomContextMenuAction(String actionId) {
-    final VoidCallback? callback = _customActionCallbacks[actionId];
+  void handleCustomContextMenuAction(String callbackId) {
+    final VoidCallback? callback = _customActionCallbacks[callbackId];
     assert(
       callback != null,
-      'Custom action callback not found for id: $actionId. '
+      'Custom action callback not found for id: $callbackId. '
       'This may indicate that the menu item was not properly registered.',
     );
     callback?.call();
@@ -3107,7 +3107,7 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 
 /// An [IOSSystemContextMenuItemData] for custom action buttons defined by the developer.
 ///
-/// Must specify a [title] and [callbackId].
+/// Must specify a [title] and [onPressed].
 ///
 /// Only supported on iOS 16.0 and above.
 ///
