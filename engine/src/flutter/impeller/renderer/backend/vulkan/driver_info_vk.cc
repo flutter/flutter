@@ -105,6 +105,14 @@ const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
     {"T820", MaliGPU::kT820},
     {"T760", MaliGPU::kT760},
 };
+
+constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
+    {{{"DXT", PowerVRGPU::kDXT},
+      {"CXT", PowerVRGPU::kCXT},
+      {"BXE", PowerVRGPU::kBXE},
+      {"BXM", PowerVRGPU::kBXM},
+      {"BXS", PowerVRGPU::kBXS},
+      {"BXT", PowerVRGPU::kBXT}}};
 }  // namespace
 
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
@@ -122,36 +130,9 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
 }
 
 PowerVRGPU GetPowerVRVersion(std::string_view version) {
-  // We don't really care about the specific model, just the series.
-  if (version.size() >= 2) {
-    for (size_t i = 0; i < version.size() - 2; ++i) {
-      std::string_view view = version.substr(i, 3);
-      switch (view[0]) {
-        case 'D':
-          if ("DXT" == view) {
-            return PowerVRGPU::kDXT;
-          }
-          break;
-        case 'C':
-          if ("CXT" == view) {
-            return PowerVRGPU::kCXT;
-          }
-          break;
-        case 'B':
-          if ("BXE" == view) {
-            return PowerVRGPU::kBXE;
-          }
-          if ("BXM" == view) {
-            return PowerVRGPU::kBXM;
-          }
-          if ("BXS" == view) {
-            return PowerVRGPU::kBXS;
-          }
-          if ("BXT" == view) {
-            return PowerVRGPU::kBXT;
-          }
-          break;
-      }
+  for (const auto& entry : kGpuSeriesMap) {
+    if (version.find(entry.first) != std::string::npos) {
+      return entry.second;
     }
   }
 
