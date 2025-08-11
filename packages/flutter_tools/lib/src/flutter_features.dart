@@ -57,6 +57,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isWindowingEnabled => isEnabled(windowingFeature);
+
+  @override
+  bool get isLLDBDebuggingEnabled => isEnabled(lldbDebugging);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
