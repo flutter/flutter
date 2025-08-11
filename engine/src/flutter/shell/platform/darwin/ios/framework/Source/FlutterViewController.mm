@@ -38,7 +38,6 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
-
 FLUTTER_ASSERT_ARC
 
 static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
@@ -169,96 +168,114 @@ typedef struct MouseState {
 #pragma mark - Helper Functions for Formatting
 
 // Helper to get a readable name for a view
-static NSString * viewNameForView(UIView *view) {
-    if (view.accessibilityIdentifier) {
-        return view.accessibilityIdentifier;
-    }
-    return NSStringFromClass([view class]);
+static NSString* viewNameForView(UIView* view) {
+  if (view.accessibilityIdentifier) {
+    return view.accessibilityIdentifier;
+  }
+  return NSStringFromClass([view class]);
 }
 
 // Helper to convert NSLayoutAttribute to a string
-static NSString * stringFromAttribute(NSLayoutAttribute attribute) {
-    switch (attribute) {
-        case NSLayoutAttributeLeft: return @"left";
-        case NSLayoutAttributeRight: return @"right";
-        case NSLayoutAttributeTop: return @"top";
-        case NSLayoutAttributeBottom: return @"bottom";
-        case NSLayoutAttributeLeading: return @"leading";
-        case NSLayoutAttributeTrailing: return @"trailing";
-        case NSLayoutAttributeWidth: return @"width";
-        case NSLayoutAttributeHeight: return @"height";
-        case NSLayoutAttributeCenterX: return @"centerX";
-        case NSLayoutAttributeCenterY: return @"centerY";
-        case NSLayoutAttributeLastBaseline: return @"lastBaseline";
-        case NSLayoutAttributeFirstBaseline: return @"firstBaseline";
-        case NSLayoutAttributeNotAnAttribute: return @"notAnAttribute";
-        default: return @"unknown"; // Handles margin cases and future attributes
-    }
+static NSString* stringFromAttribute(NSLayoutAttribute attribute) {
+  switch (attribute) {
+    case NSLayoutAttributeLeft:
+      return @"left";
+    case NSLayoutAttributeRight:
+      return @"right";
+    case NSLayoutAttributeTop:
+      return @"top";
+    case NSLayoutAttributeBottom:
+      return @"bottom";
+    case NSLayoutAttributeLeading:
+      return @"leading";
+    case NSLayoutAttributeTrailing:
+      return @"trailing";
+    case NSLayoutAttributeWidth:
+      return @"width";
+    case NSLayoutAttributeHeight:
+      return @"height";
+    case NSLayoutAttributeCenterX:
+      return @"centerX";
+    case NSLayoutAttributeCenterY:
+      return @"centerY";
+    case NSLayoutAttributeLastBaseline:
+      return @"lastBaseline";
+    case NSLayoutAttributeFirstBaseline:
+      return @"firstBaseline";
+    case NSLayoutAttributeNotAnAttribute:
+      return @"notAnAttribute";
+    default:
+      return @"unknown";  // Handles margin cases and future attributes
+  }
 }
 
 // Helper to convert NSLayoutRelation to a string
-static NSString * stringFromRelation(NSLayoutRelation relation) {
-    switch (relation) {
-        case NSLayoutRelationEqual: return @"==";
-        case NSLayoutRelationLessThanOrEqual: return @"<=";
-        case NSLayoutRelationGreaterThanOrEqual: return @">=";
-        default: return @"unknown";
-    }
+static NSString* stringFromRelation(NSLayoutRelation relation) {
+  switch (relation) {
+    case NSLayoutRelationEqual:
+      return @"==";
+    case NSLayoutRelationLessThanOrEqual:
+      return @"<=";
+    case NSLayoutRelationGreaterThanOrEqual:
+      return @">=";
+    default:
+      return @"unknown";
+  }
 }
-
 
 #pragma mark - NSLayoutConstraint (PrettyDescription)
 
 // A private category on NSLayoutConstraint to provide the pretty description
 @interface NSLayoutConstraint (PrettyDescription)
-- (NSString *)prettyDescription;
+- (NSString*)prettyDescription;
 @end
 
 @implementation NSLayoutConstraint (PrettyDescription)
-- (NSString *)prettyDescription {
-    NSMutableString *description = [NSMutableString string];
+- (NSString*)prettyDescription {
+  NSMutableString* description = [NSMutableString string];
 
-    if (self.identifier) {
-        [description appendFormat:@"[%@] ", self.identifier];
-    }
+  if (self.identifier) {
+    [description appendFormat:@"[%@] ", self.identifier];
+  }
 
-    // First item
-    if (self.firstItem) {
-        [description appendFormat:@"%@.%@", viewNameForView(self.firstItem), stringFromAttribute(self.firstAttribute)];
-    }
+  // First item
+  if (self.firstItem) {
+    [description appendFormat:@"%@.%@", viewNameForView(self.firstItem),
+                              stringFromAttribute(self.firstAttribute)];
+  }
 
-    // Relation
-    [description appendFormat:@" %@ ", stringFromRelation(self.relation)];
+  // Relation
+  [description appendFormat:@" %@ ", stringFromRelation(self.relation)];
 
-    // Second item
-    if (self.secondItem) {
-        [description appendFormat:@"%@.%@", viewNameForView(self.secondItem), stringFromAttribute(self.secondAttribute)];
-    }
+  // Second item
+  if (self.secondItem) {
+    [description appendFormat:@"%@.%@", viewNameForView(self.secondItem),
+                              stringFromAttribute(self.secondAttribute)];
+  }
 
-    // Multiplier
-    if (self.multiplier != 1.0) {
-        [description appendFormat:@" * %g", self.multiplier];
-    }
+  // Multiplier
+  if (self.multiplier != 1.0) {
+    [description appendFormat:@" * %g", self.multiplier];
+  }
 
-    // Constant
-    if (self.constant != 0.0) {
-        [description appendFormat:@" %c %g", self.constant > 0 ? '+' : '-', fabs(self.constant)];
-    }
+  // Constant
+  if (self.constant != 0.0) {
+    [description appendFormat:@" %c %g", self.constant > 0 ? '+' : '-', fabs(self.constant)];
+  }
 
-    // Priority
-    if (self.priority != UILayoutPriorityRequired) {
-        [description appendFormat:@" @%g", self.priority];
-    }
+  // Priority
+  if (self.priority != UILayoutPriorityRequired) {
+    [description appendFormat:@" @%g", self.priority];
+  }
 
-    // Active state
-    if (!self.active) {
-        [description appendString:@" (inactive)"];
-    }
+  // Active state
+  if (!self.active) {
+    [description appendString:@" (inactive)"];
+  }
 
-    return [description copy];
+  return [description copy];
 }
 @end
-
 
 #pragma mark - UIView (ConstraintDebugger)
 
@@ -269,32 +286,32 @@ static NSString * stringFromRelation(NSLayoutRelation relation) {
 @implementation UIView (ConstraintDebugger)
 
 - (void)printAllConstraints {
-    NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray array];
-    UIView *currentView = self;
+  NSMutableArray<NSLayoutConstraint*>* constraints = [NSMutableArray array];
+  UIView* currentView = self;
 
-    // Traverse up the view hierarchy to find all constraints affecting this view
-    while (currentView) {
-        for (NSLayoutConstraint *constraint in currentView.constraints) {
-            // Check if the constraint involves the original view (self)
-            if (constraint.firstItem == self || constraint.secondItem == self) {
-                if (![constraints containsObject:constraint]) {
-                    [constraints addObject:constraint];
-                }
-            }
+  // Traverse up the view hierarchy to find all constraints affecting this view
+  while (currentView) {
+    for (NSLayoutConstraint* constraint in currentView.constraints) {
+      // Check if the constraint involves the original view (self)
+      if (constraint.firstItem == self || constraint.secondItem == self) {
+        if (![constraints containsObject:constraint]) {
+          [constraints addObject:constraint];
         }
-        currentView = currentView.superview;
+      }
     }
+    currentView = currentView.superview;
+  }
 
-    // Log the findings
-    NSLog(@"--- CONSTRAINTS AFFECTING [%@] ---", viewNameForView(self));
-    if (constraints.count == 0) {
-        NSLog(@"No constraints found.");
-    } else {
-        for (NSLayoutConstraint *constraint in constraints) {
-            NSLog(@"%@", [constraint prettyDescription]);
-        }
+  // Log the findings
+  NSLog(@"--- CONSTRAINTS AFFECTING [%@] ---", viewNameForView(self));
+  if (constraints.count == 0) {
+    NSLog(@"No constraints found.");
+  } else {
+    for (NSLayoutConstraint* constraint in constraints) {
+      NSLog(@"%@", [constraint prettyDescription]);
     }
-    NSLog(@"------------------------------------");
+  }
+  NSLog(@"------------------------------------");
 }
 @end
 
@@ -1563,7 +1580,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     [self.engine updateViewportMetrics:_viewportMetrics];
   }
 }
-
 
 - (void)viewDidLayoutSubviews {
   CGRect viewBounds = self.view.bounds;
@@ -2873,5 +2889,3 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 @end
-
-

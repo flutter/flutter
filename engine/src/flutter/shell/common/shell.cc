@@ -1753,9 +1753,9 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-    auto expected_frame_constraints = ExpectedFrameSize(view_id);
-    return !isSizeWithinConstraints(tree.frame_size(),
-                                    expected_frame_constraints);
+  auto expected_frame_constraints = ExpectedFrameSize(view_id);
+  return !isSizeWithinConstraints(tree.frame_size(),
+                                  expected_frame_constraints);
 }
 
 // |ServiceProtocol::Handler|

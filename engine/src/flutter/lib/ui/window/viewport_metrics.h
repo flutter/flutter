@@ -40,8 +40,7 @@ struct ViewportMetrics {
                   const std::vector<double>& p_physical_display_features_bounds,
                   const std::vector<int>& p_physical_display_features_type,
                   const std::vector<int>& p_physical_display_features_state,
-                  size_t p_display_id
-                  );
+                  size_t p_display_id);
   double device_pixel_ratio = 1.0;
   double physical_width = 0;
   double physical_height = 0;

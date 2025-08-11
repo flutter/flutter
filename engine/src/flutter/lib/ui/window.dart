@@ -390,9 +390,11 @@ class FlutterView {
     var width = size?.width ?? physicalSize.width;
     var height = size?.height ?? physicalSize.height;
     print("window render called: $width x $height");
-    _render(viewId, scene as _NativeScene,
-        size?.width ?? _viewConfiguration.viewConstraints.maxWidth,
-        size?.height ?? _viewConfiguration.viewConstraints.maxHeight
+    _render(
+      viewId,
+      scene as _NativeScene,
+      size?.width ?? _viewConfiguration.viewConstraints.maxWidth,
+      size?.height ?? _viewConfiguration.viewConstraints.maxHeight,
     );
   }
 
