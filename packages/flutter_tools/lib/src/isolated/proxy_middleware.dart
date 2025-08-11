@@ -4,7 +4,6 @@
 
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
-
 import '../base/logger.dart';
 import '../web/devfs_proxy.dart';
 

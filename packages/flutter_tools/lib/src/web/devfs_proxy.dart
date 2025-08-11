@@ -100,12 +100,7 @@ class RegexProxyRule implements ProxyRule {
   }
 
   @override
-  Map<String, String> get proxyHeaders {
-    if (_headers == null) {
-      return <String, String>{};
-    }
-    return _headers;
-  }
+  Map<String, String> get proxyHeaders => _headers ?? const <String, String>{};
 
   @override
   String toString() {
@@ -172,7 +167,7 @@ class PrefixProxyRule extends RegexProxyRule {
   @override
   String toString() {
     return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, '
-        '${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: ${_headers?.toString() ?? 'null'}}';
+        '${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: ${_headers ?? 'null'}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
