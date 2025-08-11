@@ -75,6 +75,90 @@ void main() {
       expect(hasCreated, true);
     });
 
+    testWidgets('Sending WM_SIZE to WindowingOwner32 notifies listeners', (
+      WidgetTester tester,
+    ) async {
+      const int WM_SIZE = 0x0005;
+      late void Function(Pointer<WindowsMessage>) messageFunc;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onInitialize: (WindowingInitRequest request) {
+            messageFunc = request.onMessage.asFunction();
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      bool listenerTriggered = false;
+      controller.addListener(() => listenerTriggered = true);
+      final Pointer<WindowsMessage> message = ffi.calloc<WindowsMessage>();
+      message.ref.viewId = 0;
+      message.ref.message = WM_SIZE;
+      messageFunc(message);
+
+      expect(listenerTriggered, true);
+    });
+
+    testWidgets('Sending WM_ACTIVATE to WindowingOwner32 notifies listeners', (
+      WidgetTester tester,
+    ) async {
+      const int WM_ACTIVATE = 0x0006;
+      late void Function(Pointer<WindowsMessage>) messageFunc;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onInitialize: (WindowingInitRequest request) {
+            messageFunc = request.onMessage.asFunction();
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      final RegularWindowController controller = owner.createRegularWindowController(
+        delegate: RegularWindowControllerDelegate(),
+      );
+
+      bool listenerTriggered = false;
+      controller.addListener(() => listenerTriggered = true);
+      final Pointer<WindowsMessage> message = ffi.calloc<WindowsMessage>();
+      message.ref.viewId = 0;
+      message.ref.message = WM_ACTIVATE;
+      messageFunc(message);
+
+      expect(listenerTriggered, true);
+    });
+
+    testWidgets('Sending WM_CLOSE message to WindowingOwner32 results in window being destroyed', (
+      WidgetTester tester,
+    ) async {
+      const int WM_CLOSE = 0x0010;
+      bool hasDestroyed = false;
+      late void Function(Pointer<WindowsMessage>) messageFunc;
+      final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
+        win32PlatformInterface: _MockWin32PlatformInterface(
+          onInitialize: (WindowingInitRequest request) {
+            messageFunc = request.onMessage.asFunction();
+          },
+          onDestroyWindow: (HWND hwnd) {
+            hasDestroyed = true;
+          },
+        ),
+        platformDispatcher: tester.platformDispatcher,
+      );
+
+      owner.createRegularWindowController(delegate: RegularWindowControllerDelegate());
+
+      final Pointer<WindowsMessage> message = ffi.calloc<WindowsMessage>();
+      message.ref.viewId = 0;
+      message.ref.message = WM_CLOSE;
+      messageFunc(message);
+
+      expect(hasDestroyed, true);
+    });
+
     testWidgets('WindowingOwner32 can destroy a regular window', (WidgetTester tester) async {
       bool hasDestroyed = false;
       final WindowingOwnerWin32 owner = WindowingOwnerWin32.test(
