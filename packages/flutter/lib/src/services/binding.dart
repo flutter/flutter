@@ -426,13 +426,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         if (_systemContextMenuClient == null) {
           assert(
             false,
-            'Platform sent onPerformCustomAction when no SystemContextMenuClient was registered.',
+            'Platform sent onPerformCustomAction when no SystemContextMenuClient was registered. '
+            'ServicesBinding.systemContextMenuClient shouldn\'t be cleared unless the menu is hidden.',
           );
           return;
         }
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
-        final String actionId = args[1] as String;
-        _systemContextMenuClient!.handleCustomContextMenuAction(actionId);
+        final String callbackId = args[1] as String;
+        _systemContextMenuClient!.handleCustomContextMenuAction(callbackId);
       case 'SystemChrome.systemUIChange':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         if (_systemUiChangeCallback != null) {

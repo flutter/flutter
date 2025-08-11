@@ -53,6 +53,7 @@ void main() {
 
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         expect(find.byType(SystemContextMenu), findsOneWidget);
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
         expect(itemsReceived.length, greaterThanOrEqualTo(3));
         
         final List<Map<String, dynamic>> customItems = itemsReceived
@@ -113,6 +114,9 @@ void main() {
 
       expect(controller.text, '');
       expect(find.text('Text cleared'), findsOneWidget);
+      
+      // Verify menu auto-closes after custom action (iOS behavior).
+      expect(find.byType(SystemContextMenu), findsNothing);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     skip: kIsWeb, // [intended]
