@@ -214,7 +214,28 @@ public class FlutterLoader {
                     // https://github.com/flutter/flutter/issues/151638,
                     // log the contents of the split libraries directory as well.
 
-                    List<String> splitAndSourceDirs = getSplitApkSourceDirectories(appContext);
+                    List<String> splitAndSourceDirs = new ArrayList<>();
+                    // Get supported ABI and prepare path suffix for lib directories
+                    String[] abis = Build.SUPPORTED_ABIS;
+                    for (String abi : abis) {
+                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
+
+                      // Get split APK lib paths
+                      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
+                      List<String> splitLibPaths = new ArrayList<>();
+                      if (splitSourceDirs != null) {
+                        for (String splitSourceDir : splitSourceDirs) {
+                          splitLibPaths.add(splitSourceDir + libPathSuffix);
+                        }
+                        splitAndSourceDirs.addAll(splitLibPaths);
+                      }
+
+                      String baseApkPath = appContext.getApplicationInfo().sourceDir;
+                      if (baseApkPath != null && !baseApkPath.isEmpty()) {
+                        String baseApkLibDir = baseApkPath + libPathSuffix;
+                        splitAndSourceDirs.add(baseApkLibDir);
+                      }
+                    }
 
                     throw new UnsupportedOperationException(
                         "Could not load libflutter.so this is possibly because the application"
@@ -261,35 +282,6 @@ public class FlutterLoader {
           };
       initResultFuture = executorService.submit(initTask);
     }
-  }
-
-  private List<String> getSplitApkSourceDirectories(@NonNull Context appContext) {
-    List<String> splitAndSourceDirs = new ArrayList<>();
-    // Get supported ABI and prepare path suffix for lib directories
-    String[] abis = Build.SUPPORTED_ABIS;
-    for (String abi : abis) {
-      // TODO(camsim99): Figure out if the ! is important for the other use case.
-      // String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
-      String libPathSuffix = File.separator + "lib" + File.separator + abi;
-
-      // Get split APK lib paths
-      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
-      List<String> splitLibPaths = new ArrayList<>();
-      if (splitSourceDirs != null) {
-        for (String splitSourceDir : splitSourceDirs) {
-          splitLibPaths.add(splitSourceDir + libPathSuffix);
-        }
-        splitAndSourceDirs.addAll(splitLibPaths);
-      }
-
-      String baseApkPath = appContext.getApplicationInfo().sourceDir;
-      if (baseApkPath != null && !baseApkPath.isEmpty()) {
-        String baseApkLibDir = baseApkPath + libPathSuffix;
-        splitAndSourceDirs.add(baseApkLibDir);
-      }
-    }
-
-    return splitAndSourceDirs;
   }
 
   /**
