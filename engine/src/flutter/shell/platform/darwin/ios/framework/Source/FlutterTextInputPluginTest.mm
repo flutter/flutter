@@ -69,6 +69,7 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
+@property(nonatomic, readonly) BOOL pendingInputHiderRemoval;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
@@ -168,6 +169,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
       [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
                                         arguments:@[ [NSNumber numberWithInt:clientId], config ]];
   [textInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+}
+
+- (void)setClientClear {
+  FlutterMethodCall* clearClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.clearClient" arguments:@[]];
+  [textInputPlugin handleMethodCall:clearClientCall
                              result:^(id _Nullable result){
                              }];
 }
@@ -972,6 +981,21 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(selectedTextRange.location, 5ul);
   XCTAssertEqual(selectedTextRange.length, 0ul);
   XCTAssertEqual(inputView.markedTextRange, nil);
+}
+
+- (void)testFlutterTextInputViewIsNotClearWhenKeyboardShowAndHide {
+  // Regression test for https://github.com/flutter/flutter/issues/172250.
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
+  XCTAssertEqualObjects(inputView.text, @"test text");
+
+  // Showing keyboard does not trigger clearing of marked text.
+  [self setTextInputShow];
+  XCTAssertEqualObjects(inputView.text, @"test text");
+
+  // Hiding keyboard does not trigger clearing of marked text.
+  [self setTextInputHide];
+  XCTAssertEqualObjects(inputView.text, @"test text");
 }
 
 - (void)testFlutterTextInputViewOnlyRespondsToInsertionPointColorBelowIOS17 {
@@ -2676,6 +2700,42 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                  withTag:@"field2"]);
 }
 
+- (void)testAutofillContextPersistsAfterClearClient {
+  NSMutableDictionary* field1 = self.mutableTemplateCopy;
+  [field1 setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"username" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+            forKey:@"autofill"];
+
+  NSMutableDictionary* field2 = self.mutablePasswordTemplateCopy;
+  [field2 setValue:@{
+    @"uniqueIdentifier" : @"field2",
+    @"hints" : @[ @"password" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+            forKey:@"autofill"];
+
+  NSMutableDictionary* config = [field1 mutableCopy];
+  [config setValue:@[ field1, field2 ] forKey:@"fields"];
+
+  // Verify initial state.
+  [self setClientId:123 configuration:config];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
+  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+
+  // Retain autofill context.
+  [self setClientClear];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
+  XCTAssertTrue(textInputPlugin.pendingInputHiderRemoval);
+
+  // Consume autofill context.
+  [self commitAutofillContextAndVerify];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
+  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+}
+
 - (void)testPasswordAutofillHack {
   NSDictionary* config = self.mutableTemplateCopy;
   [config setValue:@"YES" forKey:@"obscureText"];
@@ -2812,21 +2872,55 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertNil(textInputPlugin.activeView.textInputDelegate);
 }
 
+- (void)testAutoFillDoesNotTriggerOnShowAndHideKeyboard {
+  // Regression test for https://github.com/flutter/flutter/issues/145681.
+  NSMutableDictionary* configuration = self.mutableTemplateCopy;
+  [configuration setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ UITextContentTypePassword ],
+    @"editingValue" : @{@"text" : @""}
+  }
+                   forKey:@"autofill"];
+  [configuration setValue:@[ [configuration copy] ] forKey:@"fields"];
+  [self setClientId:123 configuration:configuration];
+
+  [self setTextInputShow];
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
+
+  // Hiding keyboard does not trigger showing autofill prompt.
+  [self setTextInputHide];
+  XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
+
+  [self commitAutofillContextAndVerify];
+}
+
 #pragma mark - Accessibility - Tests
 
-- (void)testUITextInputAccessibilityNotHiddenWhenShowed {
+- (void)testUITextInputAccessibilityNotHiddenWhenKeyboardIsShownAndHidden {
   [self setClientId:123 configuration:self.mutableTemplateCopy];
 
-  // Send show text input method call.
-  [self setTextInputShow];
   // Find all the FlutterTextInputViews we created.
   NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
 
   // The input view should not be hidden.
   XCTAssertEqual([inputFields count], 1u);
 
+  // Send show text input method call.
+  [self setTextInputShow];
+
+  inputFields = self.installedInputViews;
+
+  XCTAssertEqual([inputFields count], 1u);
+
   // Send hide text input method call.
   [self setTextInputHide];
+
+  inputFields = self.installedInputViews;
+
+  XCTAssertEqual([inputFields count], 1u);
+
+  // Send clear text client method call.
+  [self setClientClear];
 
   inputFields = self.installedInputViews;
 
