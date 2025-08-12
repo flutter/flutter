@@ -56,23 +56,23 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) async {
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) async {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
     final RenderResult renderResult = await rasterizer.offscreenSurface.renderPictures(
       pictures.cast<SkwasmPicture>(),
     );
+    recorder?.recordRasterStart(renderResult.rasterStartMicros);
+    recorder?.recordRasterFinish(renderResult.rasterEndMicros);
     for (int i = 0; i < displayCanvases.length; i++) {
       final RenderCanvas renderCanvas = displayCanvases[i] as RenderCanvas;
       final DomImageBitmap bitmap = renderResult.imageBitmaps[i];
       renderCanvas.render(bitmap);
     }
-    return Future<void>.value();
-  }
-
-  @override
-  Map<String, dynamic>? dumpDebugInfo() {
-    return null;
   }
 }

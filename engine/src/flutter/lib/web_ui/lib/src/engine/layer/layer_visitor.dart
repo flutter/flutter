@@ -7,21 +7,21 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class LayerVisitor {
-  void visitRoot(RootLayer root);
-  void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter);
-  void visitClipPath(ClipPathEngineLayer clipPath);
-  void visitClipRect(ClipRectEngineLayer clipRect);
-  void visitClipRRect(ClipRRectEngineLayer clipRRect);
-  void visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse);
-  void visitOpacity(OpacityEngineLayer opacity);
-  void visitTransform(TransformEngineLayer transform);
-  void visitOffset(OffsetEngineLayer offset);
-  void visitImageFilter(ImageFilterEngineLayer imageFilter);
-  void visitShaderMask(ShaderMaskEngineLayer shaderMask);
-  void visitPicture(PictureLayer picture);
-  void visitColorFilter(ColorFilterEngineLayer colorFilter);
-  void visitPlatformView(PlatformViewLayer platformView);
+abstract class LayerVisitor<R> {
+  R visitRoot(RootLayer root);
+  R visitBackdropFilter(BackdropFilterEngineLayer backdropFilter);
+  R visitClipPath(ClipPathEngineLayer clipPath);
+  R visitClipRect(ClipRectEngineLayer clipRect);
+  R visitClipRRect(ClipRRectEngineLayer clipRRect);
+  R visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse);
+  R visitOpacity(OpacityEngineLayer opacity);
+  R visitTransform(TransformEngineLayer transform);
+  R visitOffset(OffsetEngineLayer offset);
+  R visitImageFilter(ImageFilterEngineLayer imageFilter);
+  R visitShaderMask(ShaderMaskEngineLayer shaderMask);
+  R visitPicture(PictureLayer picture);
+  R visitColorFilter(ColorFilterEngineLayer colorFilter);
+  R visitPlatformView(PlatformViewLayer platformView);
 }
 
 /// Pre-process the layer tree before painting.
@@ -29,7 +29,7 @@ abstract class LayerVisitor {
 /// In this step, we compute the estimated [paintBounds] as well as
 /// apply heuristics to prepare the render cache for pictures that
 /// should be cached.
-class PrerollVisitor extends LayerVisitor {
+class PrerollVisitor extends LayerVisitor<void> {
   PrerollVisitor(this.viewEmbedder);
 
   final MutatorsStack mutatorsStack = MutatorsStack();
@@ -216,7 +216,7 @@ class PrerollVisitor extends LayerVisitor {
 
 /// A layer visitor which measures the pictures that make up the scene and
 /// prepares for them to be optimized into few canvases.
-class MeasureVisitor extends LayerVisitor {
+class MeasureVisitor extends LayerVisitor<void> {
   MeasureVisitor(BitmapSize size, this.viewEmbedder)
     : measuringRecorder = ui.PictureRecorder() as LayerPictureRecorder {
     measuringCanvas = ui.Canvas(measuringRecorder, ui.Offset.zero & size.toSize()) as LayerCanvas;
@@ -460,7 +460,7 @@ class MeasureVisitor extends LayerVisitor {
 ///
 /// The canvases are the optimized canvases that were created when the view
 /// embedder optimized the canvases after the measure step.
-class PaintVisitor extends LayerVisitor {
+class PaintVisitor extends LayerVisitor<void> {
   PaintVisitor(this.nWayCanvas, PlatformViewEmbedder this.viewEmbedder) : toImageCanvas = null;
 
   PaintVisitor.forToImage(this.nWayCanvas, this.toImageCanvas) : viewEmbedder = null;
@@ -715,5 +715,206 @@ class PaintVisitor extends LayerVisitor {
   void visitPlatformView(PlatformViewLayer platformView) {
     // Do nothing. The platform view was already measured and placed in the
     // optimized rendering in the measure step.
+  }
+}
+
+class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
+  List<Map<String, dynamic>> debugChildren(ContainerLayer container) {
+    final List<Map<String, dynamic>> children = <Map<String, dynamic>>[];
+
+    for (final Layer layer in container.children) {
+      children.add(layer.accept(this));
+    }
+    return children;
+  }
+
+  @override
+  Map<String, dynamic> visitRoot(RootLayer root) {
+    return <String, dynamic>{'type': 'root', 'children': debugChildren(root)};
+  }
+
+  @override
+  Map<String, dynamic> visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
+    return <String, dynamic>{
+      'type': 'backdropFilter',
+      'filter': backdropFilter.filter.toString(),
+      'blendMode': backdropFilter.blendMode.toString(),
+      'children': debugChildren(backdropFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipPath(ClipPathEngineLayer clipPath) {
+    final ui.Rect bounds = clipPath.clipPath.getBounds();
+    return <String, dynamic>{
+      'type': 'clipPath',
+      'pathBounds': {
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+      'clip': clipPath.clipBehavior.name,
+      'children': debugChildren(clipPath),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRect(ClipRectEngineLayer clipRect) {
+    final ui.Rect rect = clipRect.clipRect;
+    return <String, dynamic>{
+      'type': 'clipRect',
+      'rect': {'left': rect.left, 'top': rect.top, 'right': rect.right, 'bottom': rect.bottom},
+      'clip': clipRect.clipBehavior.name,
+      'children': debugChildren(clipRect),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRRect(ClipRRectEngineLayer clipRRect) {
+    final ui.RRect rrect = clipRRect.clipRRect;
+    return <String, dynamic>{
+      'type': 'clipRRect',
+      'rrect': {
+        'left': rrect.left,
+        'top': rrect.top,
+        'right': rrect.right,
+        'bottom': rrect.bottom,
+        'tlRadiusX': rrect.tlRadiusX,
+        'tlRadiusY': rrect.tlRadiusY,
+        'trRadiusX': rrect.trRadiusX,
+        'trRadiusY': rrect.trRadiusY,
+        'brRadiusX': rrect.brRadiusX,
+        'brRadiusY': rrect.brRadiusY,
+        'blRadiusX': rrect.blRadiusX,
+        'blRadiusY': rrect.blRadiusY,
+      },
+      'clip': clipRRect.clipBehavior?.name,
+      'children': debugChildren(clipRRect),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitClipRSuperellipse(ClipRSuperellipseEngineLayer clipRSuperellipse) {
+    final ui.RSuperellipse rsuperellipse = clipRSuperellipse.clipRSuperellipse;
+    return <String, dynamic>{
+      'type': 'clipRSuperellipse',
+      'rsuperellipse': {
+        'left': rsuperellipse.left,
+        'top': rsuperellipse.top,
+        'right': rsuperellipse.right,
+        'bottom': rsuperellipse.bottom,
+        'tlRadiusX': rsuperellipse.tlRadiusX,
+        'tlRadiusY': rsuperellipse.tlRadiusY,
+        'trRadiusX': rsuperellipse.trRadiusX,
+        'trRadiusY': rsuperellipse.trRadiusY,
+        'brRadiusX': rsuperellipse.brRadiusX,
+        'brRadiusY': rsuperellipse.brRadiusY,
+        'blRadiusX': rsuperellipse.blRadiusX,
+        'blRadiusY': rsuperellipse.blRadiusY,
+      },
+      'clip': clipRSuperellipse.clipBehavior?.name,
+      'children': debugChildren(clipRSuperellipse),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitOpacity(OpacityEngineLayer opacity) {
+    return <String, dynamic>{
+      'type': 'opacity',
+      'alpha': opacity.alpha,
+      'offset': {'x': opacity.offset.dx, 'y': opacity.offset.dy},
+      'children': debugChildren(opacity),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitTransform(TransformEngineLayer transform) {
+    return <String, dynamic>{
+      'type': 'transform',
+      'matrix': transform.transform.storage.toList(),
+      'children': debugChildren(transform),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitOffset(OffsetEngineLayer offset) {
+    final translation = offset.transform.getTranslation();
+    return <String, dynamic>{
+      'type': 'offset',
+      'offset': {'x': translation.x, 'y': translation.y},
+      'children': debugChildren(offset),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitImageFilter(ImageFilterEngineLayer imageFilter) {
+    return <String, dynamic>{
+      'type': 'imageFilter',
+      'filter': imageFilter.filter.toString(),
+      'offset': {'x': imageFilter.offset.dx, 'y': imageFilter.offset.dy},
+      'children': debugChildren(imageFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitShaderMask(ShaderMaskEngineLayer shaderMask) {
+    final ui.Rect maskRect = shaderMask.maskRect;
+    return <String, dynamic>{
+      'type': 'shaderMask',
+      'shader': shaderMask.shader.toString(),
+      'maskRect': {
+        'left': maskRect.left,
+        'top': maskRect.top,
+        'right': maskRect.right,
+        'bottom': maskRect.bottom,
+      },
+      'blendMode': shaderMask.blendMode.toString(),
+      'children': debugChildren(shaderMask),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitPicture(PictureLayer picture) {
+    final ui.Rect cullRect = picture.picture.cullRect;
+    return <String, dynamic>{
+      'type': 'picture',
+      'offset': {'x': picture.offset.dx, 'y': picture.offset.dy},
+      'localBounds': {
+        'left': cullRect.left,
+        'top': cullRect.top,
+        'right': cullRect.right,
+        'bottom': cullRect.bottom,
+      },
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitColorFilter(ColorFilterEngineLayer colorFilter) {
+    return <String, dynamic>{
+      'type': 'colorFilter',
+      'filter': colorFilter.filter.toString(),
+      'children': debugChildren(colorFilter),
+    };
+  }
+
+  @override
+  Map<String, dynamic> visitPlatformView(PlatformViewLayer platformView) {
+    final ui.Rect bounds = ui.Rect.fromLTWH(
+      platformView.offset.dx,
+      platformView.offset.dy,
+      platformView.width,
+      platformView.height,
+    );
+    return <String, dynamic>{
+      'type': 'platformView',
+      'localBounds': {
+        'left': bounds.left,
+        'top': bounds.top,
+        'right': bounds.right,
+        'bottom': bounds.bottom,
+      },
+      'viewId': platformView.viewId,
+    };
   }
 }

@@ -62,7 +62,11 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures) {
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) async {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
@@ -70,11 +74,8 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     for (int i = 0; i < displayCanvases.length; i++) {
       rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
     }
-    return Future.wait<void>(rasterizeFutures);
-  }
-
-  @override
-  Map<String, dynamic>? dumpDebugInfo() {
-    return null;
+    recorder?.recordRasterStart();
+    await Future.wait<void>(rasterizeFutures);
+    recorder?.recordRasterFinish();
   }
 }

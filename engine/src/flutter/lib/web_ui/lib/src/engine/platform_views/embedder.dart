@@ -294,7 +294,7 @@ class PlatformViewEmbedder {
     return _context.pictureToOptimizedCanvasMap![picture]!;
   }
 
-  Future<void> submitFrame() async {
+  Future<void> submitFrame(FrameTimingRecorder? recorder) async {
     final Composition composition = _context.optimizedComposition!;
     _updateDomForNewComposition(composition);
     if (composition.equalsForCompositing(_activeComposition)) {
@@ -312,7 +312,7 @@ class PlatformViewEmbedder {
     final List<ui.Picture> picturesToRasterize = _context.optimizedCanvasRecorders!
         .map((ui.PictureRecorder recorder) => recorder.endRecording())
         .toList();
-    await rasterizer.rasterize(displayCanvases, picturesToRasterize);
+    await rasterizer.rasterize(displayCanvases, picturesToRasterize, recorder);
     for (final picture in picturesToRasterize) {
       picture.dispose();
     }
@@ -350,6 +350,7 @@ class PlatformViewEmbedder {
       await rasterizer.rasterize(
         <DisplayCanvas>[debugBoundsCanvas!],
         <ui.Picture>[boundsRecorder.endRecording()],
+        null
       );
       sceneHost.append(debugBoundsCanvas!.hostElement);
     }

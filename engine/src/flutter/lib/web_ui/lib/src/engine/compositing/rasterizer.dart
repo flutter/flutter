@@ -47,9 +47,12 @@ abstract class ViewRasterizer {
   /// The DOM element which this rasterizer should raster into.
   final DomElement sceneElement = domDocument.createElement('flt-scene');
 
+  /// The last layer tree that was rendered. Only non-null if in debug mode.
+  LayerTree? _lastRenderedLayerTree;
+
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.
-  Future<void> draw(LayerTree layerTree) async {
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
@@ -69,9 +72,10 @@ abstract class ViewRasterizer {
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
-    compositorFrame.raster(layerTree, currentFrameSize, ignoreRasterCache: true);
+    compositorFrame.raster(layerTree, currentFrameSize, recorder);
+    _lastRenderedLayerTree = layerTree;
 
-    await viewEmbedder.submitFrame();
+    await viewEmbedder.submitFrame(recorder);
   }
 
   /// Do some initialization to prepare to draw a frame.
@@ -84,7 +88,11 @@ abstract class ViewRasterizer {
   ///
   /// Throws an [ArgumentError] if [displayCanvases] and [pictures] are not
   /// the same length.
-  Future<void> rasterize(List<DisplayCanvas> displayCanvases, List<ui.Picture> pictures);
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  );
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -118,7 +126,14 @@ abstract class ViewRasterizer {
   }
 
   /// Returns helpful debug information.
-  Map<String, dynamic>? dumpDebugInfo();
+  Map<String, dynamic>? dumpDebugInfo() {
+    if (kDebugMode) {
+      if (_lastRenderedLayerTree != null) {
+        return _lastRenderedLayerTree!.dumpDebugInfo();
+      }
+    }
+    return null;
+  }
 }
 
 /// A [DisplayCanvas] is an abstraction for a canvas element which displays

@@ -66,10 +66,10 @@ void testMain() {
         createDomElement('multi-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(view);
-      expect(CanvasKitRenderer.instance.debugGetRasterizerForView(view), isNotNull);
+      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNotNull);
 
       EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(view.viewId);
-      expect(CanvasKitRenderer.instance.debugGetRasterizerForView(view), isNull);
+      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNull);
     });
 
     // Issue https://github.com/flutter/flutter/issues/142094
@@ -81,10 +81,10 @@ void testMain() {
         createDomElement('multi-view'),
       );
       EnginePlatformDispatcher.instance.viewManager.registerView(view);
-      expect(CanvasKitRenderer.instance.debugGetRasterizerForView(view), isNotNull);
+      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNotNull);
 
       EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(view.viewId);
-      expect(CanvasKitRenderer.instance.debugGetRasterizerForView(view), isNull);
+      expect(CanvasKitRenderer.instance.rasterizers[view.viewId], isNull);
 
       expect(
         PlatformViewManager.instance.knowsViewType(
