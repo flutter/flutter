@@ -2236,7 +2236,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int? hostVmServicePort,
     bool? ipv6 = false,
     bool enableDevTools = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override
