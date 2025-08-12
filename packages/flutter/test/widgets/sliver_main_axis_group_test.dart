@@ -1149,6 +1149,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('1')), const Offset(0.0, 50.0));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/173274
+  testWidgets(
+    'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do not overscroll.',
+    (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+      final Key key = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      const PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
+                    ],
+                  ),
+                  const SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(70);
+      await tester.pumpAndSettle();
+      final Offset offset = tester.getBottomRight(find.byKey(key));
+      controller.jumpTo(80);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 10.0));
+      controller.jumpTo(90);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 20.0));
+    },
+  );
 }
 
 Widget _buildSliverList({

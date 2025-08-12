@@ -287,4 +287,21 @@ TEST(DriverInfoVKTest, NewPowerVREnabled) {
                   .input_attachment_self_dependency_broken);
 }
 
+TEST(DriverInfoVKTest, PowerVRBSeries) {
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x1010;
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+                std::string name = "PowerVR BXM-8-256";
+                name.copy(prop->deviceName, name.size());
+              })
+          .Build();
+
+  EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
+  EXPECT_EQ(context->GetDriverInfo()->GetPowerVRGPUInfo(),
+            std::optional<PowerVRGPU>(PowerVRGPU::kBXM));
+}
+
 }  // namespace impeller::testing
