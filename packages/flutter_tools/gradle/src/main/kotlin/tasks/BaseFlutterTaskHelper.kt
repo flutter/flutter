@@ -111,21 +111,7 @@ object BaseFlutterTaskHelper {
             baseFlutterTask.performanceMeasurementFile?.let {
                 args("--performance-measurement-file=$it")
             }
-            if (baseFlutterTask.buildMode != "debug") {
-                args("-dTargetFile=${baseFlutterTask.targetPath}")
-            } else {
-                args(
-                    "-dTargetFile=${
-                        Paths.get(
-                            baseFlutterTask.flutterRoot!!.absolutePath,
-                            "examples",
-                            "splash",
-                            "lib",
-                            "main.dart"
-                        )
-                    }"
-                )
-            }
+            args("-dTargetFile=${baseFlutterTask.targetPath}")
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
             baseFlutterTask.trackWidgetCreation?.let {
