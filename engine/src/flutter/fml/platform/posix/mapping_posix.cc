@@ -29,8 +29,8 @@ static int ToPosixProtectionFlags(
         flags |= PROT_WRITE;
         break;
       case FileMapping::Protection::kExecute:
-        flags |= PROT_READ | PROT_EXEC;
-        break;
+        // Do not combine write flags with execute flags.
+        return PROT_READ | PROT_EXEC;
     }
   }
   return flags;
