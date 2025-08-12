@@ -197,7 +197,7 @@ class WebTestsSuite {
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('profile'),
       () => _runGalleryE2eWebTest('release'),
-      () => runServiceWorkerCleanupTest(headless: true),
+      () => runCleanupVerificationTest(headless: true),
       () => runWebCanvasKitUnitTests(),
       () => runWebSkwasmUnitTests(),
       () => _runWebStackTraceTest('debug', 'lib/stack_trace.dart'),
