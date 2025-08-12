@@ -20,7 +20,7 @@ final String _target = path.join('lib', 'service_worker_test.dart');
 final Map<String, int> _requestedPathCounts = <String, int>{};
 
 Future<void> main() async {
-  await runCleanupVerificationTest(headless: false);
+  await runServiceWorkerCleanupTest(headless: false);
 
   if (hasError) {
     reportErrorsAndExit('${bold}Cleanup test FAILED.$reset');
@@ -28,7 +28,7 @@ Future<void> main() async {
   reportSuccessAndExit('${bold}Cleanup test PASSED successfully.$reset');
 }
 
-Future<void> runCleanupVerificationTest({required bool headless}) async {
+Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
   print('${bold}BEGIN: Service Worker Cleanup Verification Test$reset');
   final String cleanupWorkerSourcePath = path.join(
     _testAppDirectory,
@@ -39,66 +39,71 @@ Future<void> runCleanupVerificationTest({required bool headless}) async {
 
   const String cleanupWorkerContent = '''
 'use strict';
-const OLD_CACHE_PREFIX = 'flutter-';
-self.addEventListener('install', (event) => {
+
+const OLD_CACHE_NAMES = ['flutter-app-manifest', 'flutter-app-cache', 'flutter-temp-cache'];
+
+self.addEventListener('install', () => {
   self.skipWaiting();
+  console.log('Deprecated service worker installed. It will not be used.');
 });
+
+// remove old caches and unregister the service worker
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       try {
-        const cacheKeys = await self.caches.keys();
-        const oldCacheKeys = cacheKeys.filter(key => key.startsWith(OLD_CACHE_PREFIX));
-        const deletePromises = oldCacheKeys.map(key => self.caches.delete(key));
+        const deletePromises = OLD_CACHE_NAMES.map((key) => self.caches.delete(key));
         await Promise.all(deletePromises);
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to delete old service worker caches:', e);
       }
+
       try {
         await self.registration.unregister();
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to unregister service worker:', e);
       }
+
       try {
         const clients = await self.clients.matchAll({
           type: 'window',
           includeUncontrolled: true,
         });
+        // Reload clients to ensure they are not using the old service worker.
         clients.forEach((client) => {
           if (client.url && 'navigate' in client) {
             client.navigate(client.url);
           }
         });
       } catch (e) {
-        // Ignore errors.
+        console.warn('Failed to navigate service worker clients:', e);
       }
     })()
   );
 });
+
 ''';
 
   AppServer? server;
 
   const String oldCachingWorkerContent = '''
-  'use strict';
-  const CACHE_NAME = 'flutter-test-cache-v1';
-  self.addEventListener('install', (event) => {
-    event.waitUntil(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.addAll(['/', 'index.html', 'main.dart.js']);
-      }).then(() => self.skipWaiting())
-    );
-  });
-  self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
-  });
-  self.addEventListener('fetch', (event) => {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
-  });
+  export class FlutterServiceWorkerLoader {
+  /**
+   * default Flutter service worker resolves immediately.
+   * @param {import("./types").ServiceWorkerSettings} settings Service worker settings
+   * @returns {Promise<void>} that resolves immediately
+   */
+  loadServiceWorker(settings) {
+    if (settings) {
+      console.warn(`Service worker registration has been disabled in flutter.js.
+        The 'serviceWorkerSettings' option is no longer used.
+        To install a service worker, you must now do so manually in your index.html.
+        For more information, see: https://flutter.dev/go/web-cleanup-service-worker`);
+    }
+    return Promise.resolve();
+  }
+};
+
   ''';
 
   final File serviceWorkerBuildFile = File(
