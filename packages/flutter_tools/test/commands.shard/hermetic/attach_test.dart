@@ -135,7 +135,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -212,7 +211,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async {
                 appStartedCompleter?.complete();
@@ -294,7 +292,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -370,7 +367,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -451,7 +447,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -537,7 +532,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -636,7 +630,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -829,7 +822,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -937,7 +929,6 @@ void main() {
               (
                 Completer<DebugConnectionInfo>? connectionInfoCompleter,
                 Completer<void>? appStartedCompleter,
-                bool allowExistingDdsInstance,
                 bool enableDevTools,
               ) async => 0;
           hotRunner.exited = false;
@@ -1327,7 +1318,6 @@ void main() {
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
               Completer<void>? appStartedCompleter,
-              bool allowExistingDdsInstance,
               bool enableDevTools,
             ) async {
               await null;
@@ -1375,7 +1365,6 @@ void main() {
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
               Completer<void>? appStartedCompleter,
-              bool allowExistingDdsInstance,
               bool enableDevTools,
             ) async {
               await null;
@@ -1423,7 +1412,6 @@ void main() {
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
               Completer<void>? appStartedCompleter,
-              bool allowExistingDdsInstance,
               bool enableDevTools,
             ) async {
               await null;
@@ -1472,7 +1460,6 @@ void main() {
             (
               Completer<DebugConnectionInfo>? connectionInfoCompleter,
               Completer<void>? appStartedCompleter,
-              bool allowExistingDdsInstance,
               bool enableDevTools,
             ) async {
               await null;
@@ -1557,7 +1544,7 @@ void main() {
 }
 
 class FakeHotRunner extends Fake implements HotRunner {
-  late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool, bool) onAttach;
+  late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool) onAttach;
 
   @override
   var exited = false;
@@ -1569,16 +1556,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool enableDevTools = false,
     bool needsFullRestart = true,
   }) {
-    return onAttach(
-      connectionInfoCompleter,
-      appStartedCompleter,
-      allowExistingDdsInstance,
-      enableDevTools,
-    );
+    return onAttach(connectionInfoCompleter, appStartedCompleter, enableDevTools);
   }
 
   @override

@@ -765,7 +765,6 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     Future<ConnectionResult?>? connectDebug,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {

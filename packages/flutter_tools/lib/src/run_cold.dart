@@ -67,7 +67,7 @@ class ColdRunner extends ResidentRunner {
     // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol(allowExistingDdsInstance: false);
+        await connectToServiceProtocol();
       } on Exception catch (exception) {
         globals.printError(exception.toString());
         appFailedToStart();
@@ -138,12 +138,11 @@ class ColdRunner extends ResidentRunner {
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
-      await connectToServiceProtocol(allowExistingDdsInstance: allowExistingDdsInstance);
+      await connectToServiceProtocol();
     } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       return 2;

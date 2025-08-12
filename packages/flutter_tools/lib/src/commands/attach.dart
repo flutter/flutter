@@ -370,7 +370,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               return runner.attach(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
-                allowExistingDdsInstance: true,
               );
             },
             device,
@@ -411,10 +410,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                   ..setupTerminal();
           }),
         );
-        result = await runner.attach(
-          appStartedCompleter: onAppStart,
-          allowExistingDdsInstance: true,
-        );
+        result = await runner.attach(appStartedCompleter: onAppStart);
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
