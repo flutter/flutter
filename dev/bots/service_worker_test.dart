@@ -136,10 +136,7 @@ self.addEventListener('activate', (event) => {
     serviceWorkerBuildFile.writeAsStringSync(cleanupWorkerContent);
 
     server = await _startServer(headless: headless);
-    await Future<void>.delayed(const Duration(seconds: 2));
-    await server.chrome.reloadPage(ignoreCache: true);
     await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
-    _requestedPathCounts.clear();
     await server.chrome.reloadPage();
     await _waitForAppToLoad(server, waitForCounts: <String, int>{'main.dart.js': 1});
 
