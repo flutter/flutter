@@ -6923,7 +6923,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
         ]
       tags: >
         ["devicelab", "android", "windows", "mokey"]
