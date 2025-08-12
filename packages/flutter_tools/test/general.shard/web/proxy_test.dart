@@ -369,7 +369,7 @@ void main() {
       );
       expect(rule.replace('/assets/img/photo1.jpg'), '/static/images/placeholder.jpg');
       expect(rule.replace('/assets/img/photo_test.jpg'), '/static/images/placeholder.jpg');
-      expect(rule.replace('/assets/img/photo_test.png'), '/assets/img/photo_test.png'); 
+      expect(rule.replace('/assets/img/photo_test.png'), '/assets/img/photo_test.png');
     });
 
     test('replaces with glob `?` (question mark) wildcard', () {
@@ -380,7 +380,7 @@ void main() {
       );
       expect(rule.replace('/assets/file1.txt'), '/docs/backup.txt');
       expect(rule.replace('/assets/fileA.txt'), '/docs/backup.txt');
-      expect(rule.replace('/assets/file10.txt'), '/assets/file10.txt'); 
+      expect(rule.replace('/assets/file10.txt'), '/assets/file10.txt');
     });
 
     test('replaces with glob `**` (double asterisk) for recursive matching', () {
@@ -402,7 +402,7 @@ void main() {
       );
       expect(rule.replace('/data/a.log'), '/logs/debug.log');
       expect(rule.replace('/data/z.log'), '/logs/debug.log');
-      expect(rule.replace('/data/1.log'), '/data/1.log'); 
+      expect(rule.replace('/data/1.log'), '/data/1.log');
     });
 
     test('replaces with glob `{}` (brace expansion) for multiple patterns', () {
@@ -413,7 +413,7 @@ void main() {
       );
       expect(rule.replace('/src/styles/main.css'), '/dist/assets');
       expect(rule.replace('/src/scripts/app.js'), '/dist/assets');
-      expect(rule.replace('/src/images/logo.png'), '/src/images/logo.png'); 
+      expect(rule.replace('/src/images/logo.png'), '/src/images/logo.png');
     });
 
     test('replaces with a combination of glob syntaxes', () {
@@ -424,18 +424,8 @@ void main() {
       );
       expect(rule.replace('lib/core/a_module.js'), '/bundle/vendor.min');
       expect(rule.replace('styles/components/c_button.css'), '/bundle/vendor.min');
-      expect(rule.replace('utils/d_helper.js'), 'utils/d_helper.js'); 
-    });
-
-
-    test('replace correctly replaces all occurrences', () {
-      final rule = SourceProxyRule(
-        source: Glob('/image'),
-        target: 'http://localhost:8080',
-        replacement: '/picture',
-      );
-      expect(rule.replace('/my/image/folder/image.jpg'), '/my/picture/folder/picture.jpg');
-    });
+      expect(rule.replace('utils/d_helper.js'), 'utils/d_helper.js');
+    }); 
 
     test('replace returns original path for no replacement', () {
       final rule = SourceProxyRule(source: Glob('/assets/**'), target: 'http://localhost:8080');

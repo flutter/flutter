@@ -54,7 +54,7 @@ RegExp _globToRegex(String pattern) {
   }
 
   return RegExp(rc.toString());
-} 
+}
 
 
 /// Represents a rule for proxying requests based on a specific pattern.
@@ -250,19 +250,7 @@ class SourceProxyRule extends RegexProxyRule {
   bool matches(String path) {
     return _source.matches(path);
   }
-
-  @override
-  String replace(String path) {
-    if (_replacement == null) {
-      return path;
-    }
-    if (!RegExp(r'[*?\[\]{}]').hasMatch(_source.pattern)) {
-      return path.replaceAll(_source.pattern, _replacement);
-    }
-    return super.replace(path);
-  }
   
-
   @override
   String toString() {
     return '{${ProxyRule._kSource}: ${_source.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
