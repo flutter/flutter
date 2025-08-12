@@ -17,10 +17,8 @@ import 'utils/preview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-WidgetPreviewSourceFile withUpdatedSource(WidgetPreviewSourceFile original, String source) => (
-  path: original.path,
-  source: source,
-);
+WidgetPreviewSourceFile withUpdatedSource(WidgetPreviewSourceFile original, String source) =>
+    (path: original.path, source: source);
 
 void main() {
   initializeTestPreviewDetectorState();
@@ -31,9 +29,10 @@ void main() {
     late PreviewDetector previewDetector;
     late WidgetPreviewProject project;
 
-    setUp(() {
+    setUp(() async {
       previewDetector = createTestPreviewDetector();
       project = WidgetPreviewProject(projectRoot: previewDetector.projectRoot);
+      await project.initializePubspec();
     });
 
     tearDown(() async {
@@ -48,7 +47,7 @@ void main() {
       ].forEach(project.writeFile);
       final PreviewDependencyGraph graph = await previewDetector.initialize();
       expect(graph.keys, containsAll(project.paths));
-      expectPreviewDependencyGraphIsWellFormed(graph);
+      expectPreviewDependencyGraphIsWellFormed(project: project, graph: graph);
     });
 
     group('library parts', () {
@@ -95,26 +94,28 @@ part of 'lib.dart';
             project.toPreviewPath(lib.path),
           }),
         );
-        expectPreviewDependencyGraphIsWellFormed(initialGraph);
+        expectPreviewDependencyGraphIsWellFormed(project: project, graph: initialGraph);
         expect(initialGraph[project.toPreviewPath(lib.path)]!.files, hasLength(3));
       });
 
       testUsingContext('with errors in parts', () async {
         final PreviewDependencyGraph initialGraph = await previewDetector.initialize();
-        expectPreviewDependencyGraphIsWellFormed(initialGraph);
+        expectPreviewDependencyGraphIsWellFormed(project: project, graph: initialGraph);
 
         // Introduce a compilation error into one of the library parts and verify that the library
         // and libraries that depend on it have errors.
         await expectHasErrors(
-          changeOperation:
-              () => project.writeFile(
-                withUpdatedSource(libPart1, '${libPart1.source}\ninvalid-symbol;'),
-              ),
+          project: project,
+          changeOperation: () =>
+              project.writeFile(withUpdatedSource(libPart1, '${libPart1.source}\ninvalid-symbol;')),
           filesWithErrors: <WidgetPreviewSourceFile>{main, lib},
         );
 
         // Fix the compilation error and verify that there's no longer any errors.
-        await expectHasNoErrors(changeOperation: () => project.writeFile(libPart1));
+        await expectHasNoErrors(
+          project: project,
+          changeOperation: () => project.writeFile(libPart1),
+        );
       });
     });
 
@@ -172,6 +173,7 @@ void bar() => null;
 
         // Validate the files in dir/ all have transistive errors.
         await expectHasErrors(
+          project: project,
           changeOperation: () => project.writeFile(toInvalidSource(c)),
           filesWithErrors: <WidgetPreviewSourceFile>{a, b, c},
         );
@@ -185,7 +187,7 @@ void bar() => null;
         );
 
         // Verify the graph is well formed once the deletion events have been processed.
-        expectPreviewDependencyGraphIsWellFormed(initialGraph);
+        expectPreviewDependencyGraphIsWellFormed(project: project, graph: initialGraph);
       });
 
       testUsingContext('smoke test', () async {
@@ -201,12 +203,13 @@ void bar() => null;
         // Introduce an error into bar.dart and verify files that have transitive dependencies on
         // bar.dart are marked as having errors.
         await expectHasErrors(
+          project: project,
           changeOperation: () => project.writeFile(toInvalidSource(bar)),
           filesWithErrors: project.currentSources,
         );
 
         // Remove the error from bar.dart and ensure no files have errors.
-        await expectHasNoErrors(changeOperation: () => project.writeFile(bar));
+        await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(bar));
       });
 
       testUsingContext('file with error added and removed', () async {
@@ -223,6 +226,7 @@ void bar() => null;
         // the only file with errors.
         const WidgetPreviewSourceFile baz = (path: 'baz.dart', source: 'invalid.symbol');
         await expectHasErrors(
+          project: project,
           changeOperation: () => project.writeFile(baz),
           filesWithErrors: <WidgetPreviewSourceFile>{baz},
         );
@@ -230,22 +234,21 @@ void bar() => null;
         // Update main.dart to import baz.dart. All files in the project should now have transitive
         // errors.
         await expectHasErrors(
-          changeOperation:
-              () => project.writeFile((
-                path: main.path,
-                source: "import '${baz.path}';\n${main.source}",
-              )),
+          project: project,
+          changeOperation: () =>
+              project.writeFile((path: main.path, source: "import '${baz.path}';\n${main.source}")),
           filesWithErrors: <WidgetPreviewSourceFile>{main, baz},
         );
 
         // Delete baz.dart. main.dart should continue to have an error.
         await expectHasErrors(
+          project: project,
           changeOperation: () => project.removeFile(baz),
           filesWithErrors: <WidgetPreviewSourceFile>{main},
         );
 
         // Restore main.dart to remove the baz.dart import and clear the errors.
-        await expectHasNoErrors(changeOperation: () => project.writeFile(main));
+        await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(main));
       });
 
       testUsingContext(
@@ -263,12 +266,13 @@ void bar() => null;
           // Add baz.dart, which contains errors. Since no other files import baz.dart, it should be
           // the only file with errors.
           await expectHasErrors(
+            project: project,
             changeOperation: () => project.writeFile(toInvalidSource(foo)),
             filesWithErrors: <WidgetPreviewSourceFile>{foo, main},
           );
 
           // Delete baz.dart. main.dart should continue to have an error.
-          await expectHasNoErrors(changeOperation: () => project.writeFile(foo));
+          await expectHasNoErrors(project: project, changeOperation: () => project.writeFile(foo));
         },
       );
     });

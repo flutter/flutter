@@ -32,7 +32,7 @@ class Context {
   final List<String> arguments;
   RandomAccessFile? scriptOutputStream;
 
-  static const String incompatibleErrorMessage =
+  static const incompatibleErrorMessage =
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
@@ -96,7 +96,7 @@ class Context {
   }
 
   bool existsFile(String path) {
-    final File file = File(path);
+    final file = File(path);
     return file.existsSync();
   }
 
@@ -115,14 +115,17 @@ class Context {
     if (verbose) {
       print('♦ $bin ${args.join(' ')}');
     }
-    final ProcessResult result = Process.runSync(bin, args, workingDirectory: workingDirectory);
+    final ProcessResult result = runSyncProcess(bin, args, workingDirectory: workingDirectory);
     if (verbose) {
       print((result.stdout as String).trim());
     }
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
-      final StringBuffer errorOutput = StringBuffer();
-      if (result.exitCode != 0) {
+      final errorOutput = StringBuffer();
+      // If allowFail, do not fail Xcode build. An example is on macOS 26,
+      // plutil reports NSBonjourServices key not found via stderr (rather than
+      // stdout on older macOS), and it should not cause compile failure.
+      if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
@@ -142,6 +145,13 @@ class Context {
       throw Exception('Command "$bin ${args.join(' ')}" exited with code ${result.exitCode}');
     }
     return result;
+  }
+
+  // TODO(hellohuanlin): Instead of using inheritance to stub the function in
+  // the subclass, we should favor composition by injecting the dependencies.
+  // See: https://github.com/flutter/flutter/issues/173133
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
+    return Process.runSync(bin, args, workingDirectory: workingDirectory);
   }
 
   /// Log message to stderr.
@@ -197,8 +207,8 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
-    final String? buildMode =
-        (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])?.toLowerCase();
+    final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
+        ?.toLowerCase();
 
     if (buildMode != null) {
       if (buildMode.contains('release')) {
@@ -255,7 +265,7 @@ class Context {
   void embedFlutterFrameworks(TargetPlatform platform) {
     // Embed App.framework from Flutter into the app (after creating the Frameworks directory
     // if it doesn't already exist).
-    final String xcodeFrameworksDir =
+    final xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
     runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
@@ -309,12 +319,12 @@ class Context {
   }) {
     // Copy the native assets.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
+    var projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
+    final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
     if (!nativeAssetsDir.existsSync()) {
@@ -400,7 +410,7 @@ class Context {
       return;
     }
 
-    final String builtProductsPlist =
+    final builtProductsPlist =
         '${environment['BUILT_PRODUCTS_DIR'] ?? ''}/${environment['INFOPLIST_PATH'] ?? ''}';
 
     if (!existsFile(builtProductsPlist)) {
@@ -563,10 +573,10 @@ class Context {
     // Also fail the build if ACTION=install, which indicates the app is being
     // built for distribution.
     final String? action = environment['ACTION'];
-    final bool fatal = action == 'install';
+    final fatal = action == 'install';
 
     if (buildModeCLILastUsed == null) {
-      final String message =
+      final message =
           'Your Flutter build settings are outdated. Please run '
           '"flutter build ${platform.name} --config-only --$currentBuildMode" in your Flutter '
           'project and try again.\n';
@@ -579,7 +589,7 @@ class Context {
       }
     }
     if (currentBuildMode != buildModeCLILastUsed) {
-      final String message =
+      final message =
           'Your Flutter project is currently configured for $buildModeCLILastUsed mode. '
           'Please run `flutter build ${platform.name} --config-only --$currentBuildMode` '
           'in your Flutter project to update your settings.\n';
@@ -599,7 +609,7 @@ class Context {
     required TargetPlatform platform,
     required bool verbose,
   }) {
-    String targetPath = 'lib/main.dart';
+    var targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
     }
@@ -614,7 +624,7 @@ class Context {
       );
     }
 
-    final List<String> flutterArgs = <String>[];
+    final flutterArgs = <String>[];
 
     if (verbose) {
       flutterArgs.add('--verbose');
@@ -696,9 +706,9 @@ class Context {
       }
     }
     if (platform == TargetPlatform.macos && command == 'build') {
-      final String ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
-      final String buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
-      final String buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
+      final ephemeralDirectory = '$sourceRoot/Flutter/ephemeral';
+      final buildInputsPath = '$ephemeralDirectory/FlutterInputs.xcfilelist';
+      final buildOutputsPath = '$ephemeralDirectory/FlutterOutputs.xcfilelist';
       flutterArgs.addAll(<String>[
         '--build-inputs=$buildInputsPath',
         '--build-outputs=$buildOutputsPath',

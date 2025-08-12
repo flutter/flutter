@@ -28,7 +28,10 @@ Widget boilerplate({
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: Directionality(textDirection: textDirection, child: Material(child: child)),
+      child: Directionality(
+        textDirection: textDirection,
+        child: Material(child: child),
+      ),
     ),
   );
 }
@@ -110,7 +113,10 @@ Widget buildLeftRightApp({
           ),
         ),
         body: const TabBarView(
-          children: <Widget>[Center(child: Text('LEFT CHILD')), Center(child: Text('RIGHT CHILD'))],
+          children: <Widget>[
+            Center(child: Text('LEFT CHILD')),
+            Center(child: Text('RIGHT CHILD')),
+          ],
         ),
       ),
     ),
@@ -173,7 +179,9 @@ void main() {
   testWidgets('Tab sizing - icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0)))),
+        home: Center(
+          child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))),
+        ),
       ),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
@@ -182,7 +190,9 @@ void main() {
   testWidgets('Tab sizing - child', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Center(child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0)))),
+        home: Center(
+          child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0))),
+        ),
       ),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
@@ -192,7 +202,12 @@ void main() {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(text: 'x')))),
+      MaterialApp(
+        theme: theme,
+        home: const Center(
+          child: Material(child: Tab(text: 'x')),
+        ),
+      ),
     );
     expect(
       tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily,
@@ -211,7 +226,9 @@ void main() {
       MaterialApp(
         theme: theme,
         home: const Center(
-          child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')),
+          child: Material(
+            child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x'),
+          ),
         ),
       ),
     );
@@ -254,7 +271,9 @@ void main() {
       MaterialApp(
         theme: theme,
         home: const Center(
-          child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))),
+          child: Material(
+            child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x')),
+          ),
         ),
       ),
     );
@@ -272,7 +291,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: const Material(child: Tab(icon: Icon(Icons.house), text: 'x')),
+        home: const Material(
+          child: Tab(icon: Icon(Icons.house), text: 'x'),
+        ),
       ),
     );
 
@@ -287,7 +308,11 @@ void main() {
 
   testWidgets('Material3 - Default Tab iconMargin', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Tab(icon: Icon(Icons.house), text: 'x'))),
+      const MaterialApp(
+        home: Material(
+          child: Tab(icon: Icon(Icons.house), text: 'x'),
+        ),
+      ),
     );
 
     double getIconMargin() {
@@ -306,7 +331,12 @@ void main() {
       tabs: const <Widget>[SizedBox.shrink()],
       controller: createTabController(length: 1, vsync: tester),
     );
-    await tester.pumpWidget(MaterialApp(theme: theme, home: Material(child: tabBar)));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(child: tabBar),
+      ),
+    );
     expect(
       find.byType(TabBar),
       paints..line(color: material3 ? theme.colorScheme.outlineVariant : Colors.blue[500]),
@@ -321,7 +351,10 @@ void main() {
       controller: createTabController(length: 1, vsync: tester),
     );
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: Material(color: const Color(0xff2196f3), child: tabBar)),
+      MaterialApp(
+        theme: theme,
+        home: Material(color: const Color(0xff2196f3), child: tabBar),
+      ),
     );
     expect(
       find.byType(TabBar),
@@ -337,7 +370,10 @@ void main() {
       controller: createTabController(length: 1, vsync: tester),
     );
     await tester.pumpWidget(
-      MaterialApp(theme: theme, home: Material(type: MaterialType.transparency, child: tabBar)),
+      MaterialApp(
+        theme: theme,
+        home: Material(type: MaterialType.transparency, child: tabBar),
+      ),
     );
     expect(
       find.byType(TabBar),
@@ -1044,10 +1080,9 @@ void main() {
           initialIndex: tabs.indexOf(value),
           length: tabs.length,
           child: TabBarView(
-            children:
-                tabs.map<Widget>((String name) {
-                  return TabStateMarker(child: Text(name));
-                }).toList(),
+            children: tabs.map<Widget>((String name) {
+              return TabStateMarker(child: Text(name));
+            }).toList(),
           ),
         ),
       );
@@ -1838,7 +1873,10 @@ void main() {
 
     Widget builder() {
       return boilerplate(
-        child: DefaultTabController(length: tabs.length, child: TabBarView(children: tabs)),
+        child: DefaultTabController(
+          length: tabs.length,
+          child: TabBarView(children: tabs),
+        ),
       );
     }
 
@@ -2203,7 +2241,10 @@ void main() {
               height: 400.0,
               child: TabBarView(
                 controller: tabController,
-                children: const <Widget>[Center(child: Text('0')), Center(child: Text('1'))],
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                ],
               ),
             ),
           ],
@@ -2296,7 +2337,13 @@ void main() {
           length: 3,
           child: Scaffold(
             appBar: AppBar(
-              bottom: const TabBar(tabs: <Widget>[Tab(text: 'A'), Tab(text: 'B'), Tab(text: 'C')]),
+              bottom: const TabBar(
+                tabs: <Widget>[
+                  Tab(text: 'A'),
+                  Tab(text: 'B'),
+                  Tab(text: 'C'),
+                ],
+              ),
               title: const Text('Tabs Test'),
             ),
             body: TabBarView(
@@ -2526,7 +2573,10 @@ void main() {
                   children: <Widget>[
                     TabBar(
                       controller: nestedTabController,
-                      tabs: const <Tab>[Tab(text: 'Yellow'), Tab(text: 'Grey')],
+                      tabs: const <Tab>[
+                        Tab(text: 'Yellow'),
+                        Tab(text: 'Grey'),
+                      ],
                     ),
                     Expanded(
                       child: TabBarView(
@@ -2699,7 +2749,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      boilerplate(child: TabBar(isScrollable: true, controller: controller, tabs: tabs)),
+      boilerplate(
+        child: TabBar(isScrollable: true, controller: controller, tabs: tabs),
+      ),
     );
 
     // The initialIndex tab should be visible and right justified
@@ -2715,7 +2767,10 @@ void main() {
   testWidgets('Indicator elastic animation', (WidgetTester tester) async {
     const double indicatorWidth = 50.0;
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(key: ValueKey<int>(index), child: const SizedBox(width: indicatorWidth));
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
     });
 
     final TabController controller = createTabController(
@@ -4039,7 +4094,9 @@ void main() {
         child: Column(
           children: <Widget>[
             TabBar(controller: controller, tabs: const <Widget>[]),
-            Flexible(child: TabBarView(controller: controller, children: const <Widget>[])),
+            Flexible(
+              child: TabBarView(controller: controller, children: const <Widget>[]),
+            ),
           ],
         ),
       ),
@@ -4067,7 +4124,10 @@ void main() {
       boilerplate(
         child: Column(
           children: <Widget>[
-            TabBar(controller: controller, tabs: const <Widget>[Tab(text: 'TAB')]),
+            TabBar(
+              controller: controller,
+              tabs: const <Widget>[Tab(text: 'TAB')],
+            ),
             Flexible(
               child: TabBarView(controller: controller, children: const <Widget>[Text('PAGE')]),
             ),
@@ -4118,7 +4178,10 @@ void main() {
             TabBar(
               controller: controller,
               indicatorWeight: 30.0,
-              tabs: const <Widget>[Tab(text: 'TAB1'), Tab(text: 'TAB2')],
+              tabs: const <Widget>[
+                Tab(text: 'TAB1'),
+                Tab(text: 'TAB2'),
+              ],
             ),
             Flexible(
               child: TabBarView(
@@ -4373,7 +4436,10 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             controller: controller,
-            tabs: const <Tab>[Tab(text: 'LEFT'), Tab(text: 'RIGHT')],
+            tabs: const <Tab>[
+              Tab(text: 'LEFT'),
+              Tab(text: 'RIGHT'),
+            ],
           ),
         ),
       );
@@ -4564,7 +4630,10 @@ void main() {
             child: TabBar(
               controller: controller,
               isScrollable: isScrollable,
-              tabs: const <Tab>[Tab(text: 'LEFT'), Tab(text: 'RIGHT')],
+              tabs: const <Tab>[
+                Tab(text: 'LEFT'),
+                Tab(text: 'RIGHT'),
+              ],
             ),
           ),
         );
@@ -4636,7 +4705,10 @@ void main() {
     testWidgets('Tab feedback is enabled (default)', (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
-          child: const DefaultTabController(length: 1, child: TabBar(tabs: <Tab>[Tab(text: 'A')])),
+          child: const DefaultTabController(
+            length: 1,
+            child: TabBar(tabs: <Tab>[Tab(text: 'A')]),
+          ),
         ),
       );
       await tester.tap(find.byType(InkWell), pointer: 1);
@@ -4986,10 +5058,14 @@ void main() {
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    final TextStyle selectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    final TextStyle unselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    final TextStyle selectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(tab1))
+        .text
+        .style!;
+    final TextStyle unselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(tab2))
+        .text
+        .style!;
 
     expect(selectedTabIcon.color, selectedColor);
     expect(unselectedTabIcon.color, unselectedColor);
@@ -5035,8 +5111,10 @@ void main() {
     IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
     TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    TextStyle unselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    TextStyle unselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(tab2))
+        .text
+        .style!;
 
     expect(selectedTabIcon.color, selectedStateColor);
     expect(unselectedTabIcon.color, unselectedStateColor);
@@ -5131,26 +5209,22 @@ void main() {
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Default TabBar Preview'),
-                  bottom:
-                      tabTextContent.isNotEmpty
-                          ? TabBar(
-                            isScrollable: true,
-                            tabs:
-                                tabTextContent
-                                    .map((String textContent) => Tab(text: textContent))
-                                    .toList(),
-                          )
-                          : null,
-                ),
-                body:
-                    tabTextContent.isNotEmpty
-                        ? TabBarView(
-                          children:
-                              tabTextContent
-                                  .map((String textContent) => Tab(text: "$textContent's view"))
-                                  .toList(),
+                  bottom: tabTextContent.isNotEmpty
+                      ? TabBar(
+                          isScrollable: true,
+                          tabs: tabTextContent
+                              .map((String textContent) => Tab(text: textContent))
+                              .toList(),
                         )
-                        : const Center(child: Text('No tabs')),
+                      : null,
+                ),
+                body: tabTextContent.isNotEmpty
+                    ? TabBarView(
+                        children: tabTextContent
+                            .map((String textContent) => Tab(text: "$textContent's view"))
+                            .toList(),
+                      )
+                    : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -5372,10 +5446,9 @@ void main() {
             ),
             body: TabBarView(
               controller: controller,
-              children:
-                  tabs.map((Tab tab) {
-                    return Center(child: Text(tab.text!));
-                  }).toList(),
+              children: tabs.map((Tab tab) {
+                return Center(child: Text(tab.text!));
+              }).toList(),
             ),
           ),
         );
@@ -5447,18 +5520,17 @@ void main() {
     late Color secondColor;
 
     Widget buildTabBar({bool stateColor = false}) {
-      final Color labelColor =
-          stateColor
-              ? MaterialStateColor.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected)) {
-                  return Colors.white;
-                } else {
-                  // this is a third color to also test if unselectedLabelColor
-                  // is ignored when labelColor is MaterialStateColor
-                  return Colors.transparent;
-                }
-              })
-              : Colors.white;
+      final Color labelColor = stateColor
+          ? MaterialStateColor.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return Colors.white;
+              } else {
+                // this is a third color to also test if unselectedLabelColor
+                // is ignored when labelColor is MaterialStateColor
+                return Colors.transparent;
+              }
+            })
+          : Colors.white;
 
       return boilerplate(
         child: TabBar(
@@ -5688,8 +5760,9 @@ void main() {
                     ],
                   ),
                   body: TabBarView(
-                    children:
-                        tabs.map<Widget>((String tab) => Tab(text: 'Tab child $tab')).toList(),
+                    children: tabs
+                        .map<Widget>((String tab) => Tab(text: 'Tab child $tab'))
+                        .toList(),
                   ),
                 ),
               );
@@ -5991,7 +6064,10 @@ void main() {
             TabBar(
               controller: controller,
               indicatorWeight: 30.0,
-              tabs: const <Widget>[Tab(text: 'TAB1'), Tab(text: 'TAB2')],
+              tabs: const <Widget>[
+                Tab(text: 'TAB1'),
+                Tab(text: 'TAB2'),
+              ],
             ),
             Flexible(
               child: TabBarView(
@@ -6351,26 +6427,23 @@ void main() {
                 child: Scaffold(
                   appBar: AppBar(
                     title: const Text('Default TabBar Preview'),
-                    bottom:
-                        tabTextContent.isNotEmpty
-                            ? TabBar(
-                              isScrollable: true,
-                              tabs:
-                                  tabTextContent
-                                      .map((String textContent) => Tab(text: textContent))
-                                      .toList(),
-                            )
-                            : null,
+                    bottom: tabTextContent.isNotEmpty
+                        ? TabBar(
+                            isScrollable: true,
+                            tabs: tabTextContent
+                                .map((String textContent) => Tab(text: textContent))
+                                .toList(),
+                          )
+                        : null,
                   ),
                   body: LayoutBuilder(
                     builder: (_, _) {
                       return tabTextContent.isNotEmpty
                           ? TabBarView(
-                            children:
-                                tabTextContent
-                                    .map((String textContent) => Tab(text: "$textContent's view"))
-                                    .toList(),
-                          )
+                              children: tabTextContent
+                                  .map((String textContent) => Tab(text: "$textContent's view"))
+                                  .toList(),
+                            )
                           : const Center(child: Text('No tabs'));
                     },
                   ),
@@ -6503,7 +6576,9 @@ void main() {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(
-      MaterialApp(home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3)),
+      MaterialApp(
+        home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -6529,7 +6604,9 @@ void main() {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(
-      MaterialApp(home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3)),
+      MaterialApp(
+        home: buildFrame(tabs: tabs, value: 'B', useMaterial3: theme.useMaterial3),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -6915,7 +6992,11 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               controller: createTabController(length: 3, vsync: const TestVSync()),
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -6944,7 +7025,10 @@ void main() {
                   child: const TabBar.secondary(
                     tabAlignment: TabAlignment.start,
                     isScrollable: true,
-                    tabs: <Widget>[Tab(text: 'Test 1'), Tab(text: 'Test 2')],
+                    tabs: <Widget>[
+                      Tab(text: 'Test 1'),
+                      Tab(text: 'Test 2'),
+                    ],
                   ),
                 ),
               ),
@@ -6980,7 +7064,10 @@ void main() {
           child: TabBar(
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
-            tabs: <Widget>[Tab(text: tab1), Tab(text: tab2)],
+            tabs: <Widget>[
+              Tab(text: tab1),
+              Tab(text: tab2),
+            ],
           ),
         ),
       ),
@@ -6988,10 +7075,14 @@ void main() {
 
     final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
     final IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-    final TextStyle selectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-    final TextStyle unselectedTextStyle =
-        tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+    final TextStyle selectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(tab1))
+        .text
+        .style!;
+    final TextStyle unselectedTextStyle = tester
+        .renderObject<RenderParagraph>(find.text(tab2))
+        .text
+        .style!;
 
     // Selected tab should use the labelStyle color.
     expect(selectedTabIcon.color, labelStyle.color);
@@ -7026,7 +7117,10 @@ void main() {
               unselectedLabelColor: unselectedLabelColor,
               labelStyle: labelStyle,
               unselectedLabelStyle: unselectedLabelStyle,
-              tabs: const <Widget>[Tab(text: tab1), Tab(text: tab2)],
+              tabs: const <Widget>[
+                Tab(text: tab1),
+                Tab(text: tab2),
+              ],
             ),
           ),
         );
@@ -7037,10 +7131,14 @@ void main() {
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));
       IconThemeData unselectedTabIcon = IconTheme.of(tester.element(find.text(tab2)));
-      TextStyle selectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(tab1)).text.style!;
-      TextStyle unselectedTextStyle =
-          tester.renderObject<RenderParagraph>(find.text(tab2)).text.style!;
+      TextStyle selectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(tab1))
+          .text
+          .style!;
+      TextStyle unselectedTextStyle = tester
+          .renderObject<RenderParagraph>(find.text(tab2))
+          .text
+          .style!;
 
       // Selected tab should use labelStyle color.
       expect(selectedTabIcon.color, labelStyle.color);
@@ -7087,7 +7185,11 @@ void main() {
               dividerHeight: dividerHeight,
               tabAlignment: tabAlignment,
               isScrollable: true,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -7394,7 +7496,12 @@ void main() {
       final List<String> tabs = <String>['A', 'B'];
 
       // Test TabAlignment.fill (default) when isScrollable is false.
-      await tester.pumpWidget(MaterialApp(theme: theme, home: buildFrame(tabs: tabs, value: 'B')));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: buildFrame(tabs: tabs, value: 'B'),
+        ),
+      );
 
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -7656,7 +7763,11 @@ void main() {
               dividerColor: dividerColor,
               tabAlignment: tabAlignment,
               isScrollable: true,
-              tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
             ),
           ),
         ),
@@ -7690,7 +7801,10 @@ void main() {
   ) async {
     const double indicatorWidth = 50.0;
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
-      return Tab(key: ValueKey<int>(index), child: const SizedBox(width: indicatorWidth));
+      return Tab(
+        key: ValueKey<int>(index),
+        child: const SizedBox(width: indicatorWidth),
+      );
     });
 
     final TabController controller = createTabController(
@@ -8882,7 +8996,11 @@ void main() {
                 onHover: (bool value, int index) {
                   hoverEvents.add((hover: value, index: index));
                 },
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
             body: const TabBarView(
@@ -8951,7 +9069,11 @@ void main() {
                 onHover: (bool value, int index) {
                   hoverEvents.add((hover: value, index: index));
                 },
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
             body: const TabBarView(
@@ -9018,7 +9140,11 @@ void main() {
                 onFocusChange: (bool value, int index) {
                   focusEvents.add((focus: value, index: index));
                 },
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
             body: const TabBarView(
@@ -9089,7 +9215,11 @@ void main() {
                 onFocusChange: (bool value, int index) {
                   focusEvents.add((focus: value, index: index));
                 },
-                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
               ),
             ),
             body: const TabBarView(

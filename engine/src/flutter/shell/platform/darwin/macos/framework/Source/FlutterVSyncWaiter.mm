@@ -1,3 +1,6 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 
 #include <optional>
@@ -115,7 +118,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   TRACE_VSYNC("VSyncRequest", _pendingBaton.value_or(0));
 
   CFTimeInterval tick_interval = _displayLink.nominalOutputRefreshPeriod;
-  if (_displayLink.paused || tick_interval == 0) {
+  if (_displayLink.paused || tick_interval == 0 || _lastTargetTimestamp == 0) {
     // When starting display link the first notification will come in the middle
     // of next frame, which would incur a whole frame period of latency.
     // To avoid that, first vsync notification will be fired using a timer
@@ -151,16 +154,22 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   }
 }
 
-- (void)dealloc {
+- (void)invalidate {
+  // It is possible that there is pending vsync request while the view for which
+  // this waiter belongs is being destroyed. In that case trigger the vsync
+  // immediately to avoid deadlock.
   if (_pendingBaton.has_value()) {
-    [FlutterLogger logWarning:@"Deallocating FlutterVSyncWaiter with a pending vsync"];
+    CFTimeInterval now = CACurrentMediaTime();
+    _block(now, now, _pendingBaton.value());
+    _pendingBaton = std::nullopt;
   }
-  // It is possible that block running on UI thread held the last reference to
-  // the waiter, in which case reschedule to main thread.
-  FlutterDisplayLink* link = _displayLink;
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [link invalidate];
-  });
+
+  [_displayLink invalidate];
+  _displayLink = nil;
+}
+
+- (void)dealloc {
+  FML_DCHECK(_displayLink == nil);
 }
 
 @end
