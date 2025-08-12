@@ -172,9 +172,8 @@ static thread_local std::unique_ptr<CommandPoolMap> tls_command_pool_map;
 static Mutex g_all_pools_map_mutex;
 static std::unordered_map<
     uint64_t,
-    std::unordered_map<std::thread::id,
-                       std::weak_ptr<CommandPoolVK>>> g_all_pools_map
-    IPLR_GUARDED_BY(g_all_pools_map_mutex);
+    std::unordered_map<std::thread::id, std::weak_ptr<CommandPoolVK>>>
+    g_all_pools_map IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
 CommandPoolRecyclerVK::CommandPoolRecyclerVK(
     const std::shared_ptr<ContextVK>& context)
