@@ -1,4 +1,0 @@
-name: platform_integration
-
-environment:
-  sdk: ^3.7.0-0
