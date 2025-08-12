@@ -20,7 +20,7 @@ final String _target = path.join('lib', 'service_worker_test.dart');
 final Map<String, int> _requestedPathCounts = <String, int>{};
 
 Future<void> main() async {
-  await runServiceWorkerCleanupTest(headless: false);
+  await runCleanupVerificationTest(headless: false);
 
   if (hasError) {
     reportErrorsAndExit('${bold}Cleanup test FAILED.$reset');
@@ -28,7 +28,7 @@ Future<void> main() async {
   reportSuccessAndExit('${bold}Cleanup test PASSED successfully.$reset');
 }
 
-Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
+Future<void> runCleanupVerificationTest({required bool headless}) async {
   print('${bold}BEGIN: Service Worker Cleanup Verification Test$reset');
   final String cleanupWorkerSourcePath = path.join(
     _testAppDirectory,
