@@ -475,7 +475,7 @@ public class FlutterLoader {
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
       throws IOException {
     // Isolate AOT shared library path.
-    String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(?<path>.*)$";
+    String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(.*)$";
     Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
     Matcher aotSharedLibraryNameMatcher =
         aotSharedLibraryNamePattern.matcher(aotSharedLibraryNameArg);
@@ -486,7 +486,7 @@ public class FlutterLoader {
               + aotSharedLibraryNameArg
               + "is invalid. Please provide a valid path name.");
     }
-    String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group("path");
+    String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group(1);
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = new File(aotSharedLibraryPath);
