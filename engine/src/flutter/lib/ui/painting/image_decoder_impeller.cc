@@ -390,8 +390,17 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
-
-  if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+  if (!context->GetCommandQueue()
+           ->Submit(
+               {command_buffer},
+               [](impeller::CommandBuffer::Status status) {
+                 if (status == impeller::CommandBuffer::Status::kError) {
+                   FML_LOG(ERROR)
+                       << "GPU Error submitting image decoding command buffer.";
+                 }
+               },
+               /*block_on_schedule=*/true)
+           .ok()) {
     std::string decode_error("Failed to submit image decoding command buffer.");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);

@@ -336,12 +336,12 @@ Future<void> testMain() async {
           <Object?, Object?>{'data': newComposingText},
         ),
       );
-      // On Chrome and Safari, a `compositionupdate` event automatically
+      // On Chrome, a `compositionupdate` event automatically
       // triggers a `selectionchange` event, which leads to triggering
       // `DefaultTextEditingStrategy.handleChange`.
       //
-      // But in Firefox, `selectionchange` event is not triggered, so we need to
-      // manually dispatch an `input` event to trigger
+      // But in Firefox and Safari, `selectionchange` event is not triggered,
+      // so we need to manually dispatch an `input` event to trigger
       // `DefaultTextEditingStrategy.handleChange`.
       _inputElement.dispatchEvent(createDomInputEvent('input'));
 
@@ -394,6 +394,14 @@ Future<void> testMain() async {
               <Object?, Object?>{'data': currComposingSubstr},
             ),
           );
+          // On Chrome, a `compositionupdate` event automatically
+          // triggers a `selectionchange` event, which leads to triggering
+          // `DefaultTextEditingStrategy.handleChange`.
+          //
+          // But in Firefox and Safari, `selectionchange` event is not triggered,
+          // so we need to manually dispatch an `input` event to trigger
+          // `DefaultTextEditingStrategy.handleChange`.
+          _inputElement.dispatchEvent(createDomInputEvent('input'));
 
           await containExpect;
         }

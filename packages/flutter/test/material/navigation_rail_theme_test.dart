@@ -327,8 +327,8 @@ Material _railMaterial(WidgetTester tester) {
 
 ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Ink>(
-            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
+          .firstWidget<Container>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;

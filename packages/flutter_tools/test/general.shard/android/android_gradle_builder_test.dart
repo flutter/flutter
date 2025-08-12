@@ -853,6 +853,16 @@ void main() {
 /BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.sym
 ''';
 
+      // Output from `<android_sdk_root>/tools/bin/apkanalyzer files list <aab>`
+      // on an aab containing the debug info and symbol tables.
+      const String apkanalyzerOutputWithDebugInfoAndSymFiles =
+          apkanalyzerOutputWithoutSymFiles +
+          r'''
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/
+/BUNDLE-METADATA/com.android.tools.build.debugsymbols/arm64-v8a/libflutter.so.dbg
+''';
+
       void createSharedGradleFiles() {
         fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
 
@@ -908,6 +918,71 @@ void main() {
                 aabFile.path,
               ],
               stdout: apkanalyzerOutputWithSymFiles,
+            ),
+          );
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              targetArchs: <AndroidArch>[
+                AndroidArch.arm64_v8a,
+                AndroidArch.armeabi_v7a,
+                AndroidArch.x86_64,
+              ],
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: true,
+            configOnly: false,
+            localGradleErrors: <GradleHandledError>[],
+          );
+        },
+        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+      );
+
+      testUsingContext(
+        'build succeeds when debug info and symbol tables present for at least one architecture',
+        () async {
+          final AndroidGradleBuilder builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+          );
+
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+
+          processManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                'files',
+                'list',
+                aabFile.path,
+              ],
+              stdout: apkanalyzerOutputWithDebugInfoAndSymFiles,
             ),
           );
 

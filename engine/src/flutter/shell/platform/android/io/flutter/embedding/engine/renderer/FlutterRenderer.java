@@ -831,6 +831,12 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    public Surface getForcedNewSurface() {
+      createNewReader = true;
+      return getSurface();
+    }
+
+    @Override
     public void scheduleFrame() {
       if (VERBOSE_LOGS) {
         long now = System.nanoTime();

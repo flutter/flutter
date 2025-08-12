@@ -526,4 +526,8 @@ Playground::VKProcAddressResolver Playground::CreateVKProcAddressResolver()
   return impl_->CreateVKProcAddressResolver();
 }
 
+void Playground::SetGPUDisabled(bool value) const {
+  impl_->SetGPUDisabled(value);
+}
+
 }  // namespace impeller

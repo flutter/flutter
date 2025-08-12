@@ -9,6 +9,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -992,5 +993,27 @@ public class FlutterRendererTest {
     // The dequeue should not call scheduleEngineFrame because the queue
     // is now empty.
     verify(flutterRenderer, times(3)).scheduleEngineFrame();
+  }
+
+  @Test
+  public void getForcedNewSurface_returnsNewSurface() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    Surface firstSurface = producer.getSurface();
+    Surface secondSurface = producer.getForcedNewSurface();
+
+    assertNotEquals(firstSurface, secondSurface);
+  }
+
+  @Test
+  public void getSurface_doesNotReturnNewSurface() {
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+
+    Surface firstSurface = producer.getSurface();
+    Surface secondSurface = producer.getSurface();
+
+    assertEquals(firstSurface, secondSurface);
   }
 }

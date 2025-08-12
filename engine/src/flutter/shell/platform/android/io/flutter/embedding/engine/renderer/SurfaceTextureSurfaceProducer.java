@@ -99,6 +99,12 @@ final class SurfaceTextureSurfaceProducer
   }
 
   @Override
+  public Surface getForcedNewSurface() {
+    surface = null;
+    return getSurface();
+  }
+
+  @Override
   public void scheduleFrame() {
     flutterJNI.markTextureFrameAvailable(id);
   }
