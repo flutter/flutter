@@ -67,7 +67,9 @@ if (is_android) {
 
   zipalign_path = "$android_sdk_build_tools/zipalign"
 
-  if (current_cpu != "x64" && current_cpu != "arm64") {
+  if (current_cpu == "riscv64") {
+    android_api_level = 35
+  } else if (current_cpu != "x64" && current_cpu != "arm64") {
     android_api_level = 21
   }
 
@@ -101,6 +103,9 @@ if (is_android) {
   } else if (current_cpu == "arm64") {
     android_app_abi = "arm64-v8a"
     _android_lib_dir = "aarch64-linux-android"
+  } else if (current_cpu == "riscv64") {
+    android_app_abi = "riscv64"
+    _android_lib_dir = "riscv64-linux-android"
   } else {
     assert(false, "Unknown Android ABI: " + current_cpu)
   }
