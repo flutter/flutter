@@ -2762,14 +2762,14 @@ void main() {
     testWidgets(
       'Focus traversal with horizontal scrollables inside a vertical scrollable handles vertical navigation correctly',
       (WidgetTester tester) async {
-        // Tester view size is 800x600
+        // Tester view size is 800x600.
 
         const double cellHeight = 100;
 
         const int rowCount = 10;
         const int buttonsPerRow = 5;
 
-        // Create focus nodes for all elements
+        // Create focus nodes for all elements.
         final FocusNode stickyButtonNode = FocusNode(debugLabel: 'Sticky Button');
         addTearDown(stickyButtonNode.dispose);
 
@@ -2839,16 +2839,16 @@ void main() {
           ),
         );
 
-        // Start by focusing the sticky button
+        // Start by focusing the sticky button.
         stickyButtonNode.requestFocus();
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
 
-        // Navigate down to the first row - should focus one of the widgets in the first row
+        // Navigate down to the first row - should focus one of the widgets in the first row.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
         await tester.pump();
 
-        // Find which column in the first row got focused
+        // Find which column in the first row got focused.
         int focusedColumn = -1;
         for (int col = 0; col < buttonsPerRow; col++) {
           if (gridNodes[0][col].hasPrimaryFocus) {
@@ -2856,27 +2856,27 @@ void main() {
             break;
           }
         }
-        expect(focusedColumn, greaterThanOrEqualTo(0)); // Ensure something in first row is focused
+        expect(focusedColumn, greaterThanOrEqualTo(0)); // Ensure something in first row is focused.
 
-        // Navigate down through the rows
+        // Navigate down through the rows.
         for (int row = 1; row < rowCount; row++) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
           await tester.pump();
           expect(gridNodes[row][focusedColumn].hasPrimaryFocus, isTrue);
-          // Verify vertical scroll happened from the 5th row onwards (500px)
+          // Verify vertical scroll happened from the 5th row onwards (500px).
           if (row >= 5) {
             expect(verticalController.offset, greaterThan(0));
           }
         }
 
-        // Navigate back up - should go to previous rows, not sticky button
+        // Navigate back up - should go to previous rows, not sticky button.
         for (int row = rowCount - 2; row >= 0; row--) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
           await tester.pump();
           expect(gridNodes[row][focusedColumn].hasPrimaryFocus, isTrue);
         }
 
-        // Only now should we reach the sticky button
+        // Only now should we reach the sticky button.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
@@ -2887,14 +2887,14 @@ void main() {
     testWidgets(
       'Focus traversal with vertical scrollables inside a horizontal scrollable handles horizontal navigation correctly',
       (WidgetTester tester) async {
-        // Tester view size is 800x600
+        // Tester view size is 800x600.
 
         const double cellWidth = 100;
 
         const int columnCount = 10;
         const int buttonsPerColumn = 10;
 
-        // Create focus nodes for all elements
+        // Create focus nodes for all elements.
         final FocusNode stickyButtonNode = FocusNode(debugLabel: 'Sticky Button');
         addTearDown(stickyButtonNode.dispose);
 
@@ -2964,16 +2964,16 @@ void main() {
           ),
         );
 
-        // Start by focusing the sticky button
+        // Start by focusing the sticky button.
         stickyButtonNode.requestFocus();
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
 
-        // Navigate right to the first column - should focus one of the widgets in the first column
+        // Navigate right to the first column - should focus one of the widgets in the first column.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pump();
 
-        // Find which row in the first column got focused
+        // Find which row in the first column got focused.
         int focusedRow = -1;
         for (int row = 0; row < buttonsPerColumn; row++) {
           if (gridNodes[0][row].hasPrimaryFocus) {
@@ -2981,27 +2981,27 @@ void main() {
             break;
           }
         }
-        expect(focusedRow, greaterThanOrEqualTo(0)); // Ensure something in first column is focused
+        expect(focusedRow, greaterThanOrEqualTo(0)); // Ensure something in first column is focused.
 
-        // Navigate right through the columns
+        // Navigate right through the columns.
         for (int column = 1; column < columnCount; column++) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
           await tester.pump();
           expect(gridNodes[column][focusedRow].hasPrimaryFocus, isTrue);
-          // Verify horizontal scroll happened from the 7th column onwards (700px)
+          // Verify horizontal scroll happened from the 7th column onwards (700px).
           if (column >= 6) {
             expect(horizontalController.offset, greaterThan(0));
           }
         }
 
-        // Navigate back left - should go to previous columns, not sticky button
+        // Navigate back left - should go to previous columns, not sticky button.
         for (int column = columnCount - 2; column >= 0; column--) {
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
           await tester.pump();
           expect(gridNodes[column][focusedRow].hasPrimaryFocus, isTrue);
         }
 
-        // Only now should we reach the sticky button
+        // Only now should we reach the sticky button.
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
