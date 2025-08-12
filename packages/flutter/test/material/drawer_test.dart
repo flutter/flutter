@@ -19,7 +19,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -58,7 +60,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -179,31 +183,28 @@ void main() {
       );
     }
 
+    Future<void> checkScrim(Color color) async {
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      ColoredBox scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color.withValues(alpha: 0)));
+
+      await tester.pumpAndSettle();
+      scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color));
+
+      await tester.tap(find.byType(Drawer));
+      await tester.pumpAndSettle();
+      expect(find.byType(Drawer), findsNothing);
+    }
+
     // Default drawerScrimColor
-
     await tester.pumpWidget(buildFrame());
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    ColoredBox scrim = getScrim() as ColoredBox;
-    expect(scrim.color, Colors.black54);
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(Colors.black54);
 
     // Specific drawerScrimColor
-
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    scrim = getScrim() as ColoredBox;
-    expect(scrim.color, const Color(0xFF323232));
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(const Color(0xFF323232));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
@@ -249,7 +250,12 @@ void main() {
 
   testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
     final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
-    await tester.pumpWidget(MaterialApp(theme: draggable, home: const Scaffold(drawer: Drawer())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: draggable,
+        home: const Scaffold(drawer: Drawer()),
+      ),
+    );
 
     final TestGesture gesture = await tester.createGesture();
     final Finder finder = find.byType(Drawer);
@@ -603,7 +609,11 @@ void main() {
   testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
     const double smallWidth = 200;
 
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer(width: smallWidth))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(width: smallWidth)),
+      ),
+    );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
@@ -750,7 +760,9 @@ void main() {
 
     // Provide a custom clip behavior.
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias))),
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias)),
+      ),
     );
 
     // Open the drawer again.
@@ -936,7 +948,10 @@ void main() {
 
     testWidgets('Material2 - Drawer clip behavior', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(useMaterial3: false), home: const Scaffold(drawer: Drawer())),
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(drawer: Drawer()),
+        ),
       );
 
       final Finder drawerMaterial = find.descendant(

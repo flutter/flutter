@@ -13,6 +13,12 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
+REM Ensure we are runnng on 64-bit windows (32-bit is not supported)
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
+  ECHO Flutter requires 64-bit versions of Windows
+  EXIT 1
+)
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
@@ -181,6 +187,11 @@ GOTO :after_subroutine
         ECHO Error: 'pub upgrade' still failing after %total_tries% tries. 1>&2
         GOTO final_exit
       :upgrade_succeeded
+        REM Ensure that pubspec.lock has a >= MTIME to pubspec.yaml at this point
+        REM https://github.com/flutter/flutter/issues/171024
+        SET "PUBSPEC_LOCK_FILE=%FLUTTER_TOOLS_DIR%\pubspec.lock"
+        COPY /B "%PUBSPEC_LOCK_FILE%"+,, "%PUBSPEC_LOCK_FILE%" >NUL
+
     ENDLOCAL
 
     POPD

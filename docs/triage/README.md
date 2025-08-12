@@ -69,7 +69,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 
 - If it's about the flutter/news_toolkit repository, add `team-news`.
 - If it's about a codelab, add `team-codelab`.
-- If it's about the release process or tooling (e.g., `conductor`), add `team-infra` and `infra: release`.
+- If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
@@ -228,6 +228,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ecosystem%2Cfyi-ecosystem+-label%3Atriaged-ecosystem+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ecosystem+label%3AP0+sort%3Aupdated-asc)
 - [PR list](https://github.com/flutter/packages/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-asc+-label%3A%22p%3A+go_router%22+-label%3A%22p%3A+go_router_builder%22)
+  - Make sure that any PR that still needs review by a platform team has the appropriate `triage-<platform>` label(s) on it, so that it shows up in the regular platform team triages. This is separate from `platform-*` because a multi-platform PR may have sign-off from some platforms, and still need review from others.
 
 In addition, consider these issues that fall under another team's triage, but are things the ecosystem team might want to be aware of:
  * [`a: plugins` issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22a%3A+plugins%22+-label%3Ateam-ecosystem+-label%3Atriaged-ecosystem)

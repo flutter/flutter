@@ -850,8 +850,8 @@ class HeroControllerScope extends InheritedWidget {
   /// * [HeroControllerScope.of], which is similar to this method, but asserts
   ///   if no [HeroControllerScope] ancestor is found.
   static HeroController? maybeOf(BuildContext context) {
-    final HeroControllerScope? host =
-        context.dependOnInheritedWidgetOfExactType<HeroControllerScope>();
+    final HeroControllerScope? host = context
+        .dependOnInheritedWidgetOfExactType<HeroControllerScope>();
     return host?.controller;
   }
 
@@ -1051,8 +1051,8 @@ abstract class TransitionDelegate<T> {
     //     results = [A, B, C ,E] is invalid because results must include D.
     assert(() {
       final List<RouteTransitionRecord> resultsToVerify = results.toList(growable: false);
-      final Set<RouteTransitionRecord> exitingPageRoutes =
-          locationToExitingPageRoute.values.toSet();
+      final Set<RouteTransitionRecord> exitingPageRoutes = locationToExitingPageRoute.values
+          .toSet();
       // Firstly, verifies all exiting routes have been marked.
       for (final RouteTransitionRecord exitingPageRoute in exitingPageRoutes) {
         assert(!exitingPageRoute.isWaitingForExitingDecision);
@@ -2925,10 +2925,9 @@ class Navigator extends StatefulWidget {
       navigator = state;
     }
 
-    navigator =
-        rootNavigator
-            ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
-            : navigator ?? context.findAncestorStateOfType<NavigatorState>();
+    navigator = rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
 
     assert(() {
       if (navigator == null) {
@@ -3881,14 +3880,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                   route,
                   pageBased: false,
                   initialState: _RouteLifecycle.add,
-                  restorationInformation:
-                      route.settings.name != null
-                          ? _RestorationInformation.named(
-                            name: route.settings.name!,
-                            arguments: null,
-                            restorationScopeId: _nextPagelessRestorationScopeId,
-                          )
-                          : null,
+                  restorationInformation: route.settings.name != null
+                      ? _RestorationInformation.named(
+                          name: route.settings.name!,
+                          arguments: null,
+                          restorationScopeId: _nextPagelessRestorationScopeId,
+                        )
+                      : null,
                 ),
               ),
         );
@@ -3985,10 +3983,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                 final bool hasHeroControllerOwnerShip = _heroControllerFromScope!.navigator == this;
                 if (!hasHeroControllerOwnerShip ||
                     previousOwner._heroControllerFromScope == newHeroController) {
-                  final NavigatorState otherOwner =
-                      hasHeroControllerOwnerShip
-                          ? previousOwner
-                          : _heroControllerFromScope!.navigator!;
+                  final NavigatorState otherOwner = hasHeroControllerOwnerShip
+                      ? previousOwner
+                      : _heroControllerFromScope!.navigator!;
                   FlutterError.reportError(
                     FlutterErrorDetails(
                       exception: FlutterError(
@@ -4403,14 +4400,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     needsExplicitDecision = needsExplicitDecision || locationToExitingPageRoute.isNotEmpty;
     Iterable<_RouteEntry> results = newHistory;
     if (needsExplicitDecision) {
-      results =
-          widget.transitionDelegate
-              ._transition(
-                newPageRouteHistory: newHistory,
-                locationToExitingPageRoute: locationToExitingPageRoute,
-                pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
-              )
-              .cast<_RouteEntry>();
+      results = widget.transitionDelegate
+          ._transition(
+            newPageRouteHistory: newHistory,
+            locationToExitingPageRoute: locationToExitingPageRoute,
+            pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
+          )
+          .cast<_RouteEntry>();
     }
     _history.clear();
     // Adds the leading pageless routes if there is any.
@@ -5862,8 +5858,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
-      final RenderAbsorbPointer? absorber =
-          _overlayKey.currentContext?.findAncestorRenderObjectOfType<RenderAbsorbPointer>();
+      final RenderAbsorbPointer? absorber = _overlayKey.currentContext
+          ?.findAncestorRenderObjectOfType<RenderAbsorbPointer>();
       setState(() {
         absorber?.absorbing = true;
         // We do this in setState so that we'll reset the absorbing value back
@@ -5936,10 +5932,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                   child: Overlay(
                     key: _overlayKey,
                     clipBehavior: widget.clipBehavior,
-                    initialEntries:
-                        overlay == null
-                            ? _allRouteOverlayEntries.toList(growable: false)
-                            : const <OverlayEntry>[],
+                    initialEntries: overlay == null
+                        ? _allRouteOverlayEntries.toList(growable: false)
+                        : const <OverlayEntry>[],
                   ),
                 ),
               ),
@@ -6041,8 +6036,7 @@ class _NamedRestorationInformation extends _RestorationInformation {
 
   @override
   List<Object> computeSerializableData() {
-    return super.computeSerializableData()
-      ..addAll(<Object>[restorationScopeId, name, if (arguments != null) arguments!]);
+    return super.computeSerializableData()..addAll(<Object>[restorationScopeId, name, ?arguments]);
   }
 
   @override
@@ -6084,11 +6078,8 @@ class _AnonymousRestorationInformation extends _RestorationInformation {
     assert(isRestorable);
     final ui.CallbackHandle? handle = ui.PluginUtilities.getCallbackHandle(routeBuilder);
     assert(handle != null);
-    return super.computeSerializableData()..addAll(<Object>[
-      restorationScopeId,
-      handle!.toRawHandle(),
-      if (arguments != null) arguments!,
-    ]);
+    return super.computeSerializableData()
+      ..addAll(<Object>[restorationScopeId, handle!.toRawHandle(), ?arguments]);
   }
 
   @override

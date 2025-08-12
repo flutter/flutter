@@ -34,7 +34,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (isFlutterRepo) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies = PackageDependencyTracker();
+      final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
@@ -50,10 +50,10 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Nothing to analyze.', exitCode: 0);
     }
 
-    final Completer<void> analysisCompleter = Completer<void>();
-    final List<AnalysisError> errors = <AnalysisError>[];
+    final analysisCompleter = Completer<void>();
+    final errors = <AnalysisError>[];
 
-    final AnalysisServer server = AnalysisServer(
+    final server = AnalysisServer(
       sdkPath,
       items.toList(),
       fileSystem: fileSystem,
@@ -107,12 +107,12 @@ class AnalyzeOnce extends AnalyzeBase {
 
       // collect results
       timer = Stopwatch()..start();
-      final String message =
-          items.length > 1
-              ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
-              : fileSystem.path.basename(items.first);
-      progress =
-          argResults['preamble'] == true ? logger.startProgress('Analyzing $message...') : null;
+      final String message = items.length > 1
+          ? '${items.length} ${items.length == 1 ? 'item' : 'items'}'
+          : fileSystem.path.basename(items.first);
+      progress = argResults['preamble'] == true
+          ? logger.startProgress('Analyzing $message...')
+          : null;
 
       await analysisCompleter.future;
     } finally {
@@ -134,7 +134,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger.printStatus('');
     }
     errors.sort();
-    for (final AnalysisError error in errors) {
+    for (final error in errors) {
       logger.printStatus(error.toString(), hangingIndent: 7);
     }
 
@@ -160,7 +160,7 @@ class AnalyzeOnce extends AnalyzeBase {
   }
 
   bool _isFatal(List<AnalysisError> errors) {
-    for (final AnalysisError error in errors) {
+    for (final error in errors) {
       final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
       if (severityLevel == AnalysisSeverity.error) {
         return true;

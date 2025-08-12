@@ -34,7 +34,8 @@ class PipelineLibraryMTL final : public PipelineLibrary {
 
   // |PipelineLibrary|
   PipelineFuture<PipelineDescriptor> GetPipeline(PipelineDescriptor descriptor,
-                                                 bool async) override;
+                                                 bool async,
+                                                 bool threadsafe) override;
 
   // |PipelineLibrary|
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(

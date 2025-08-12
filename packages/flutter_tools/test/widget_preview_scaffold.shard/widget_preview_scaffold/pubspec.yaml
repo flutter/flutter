@@ -14,8 +14,9 @@ dependencies:
   # These will be replaced with proper constraints after the template is hydrated.
   dtd: 2.5.1
   flutter_lints: 6.0.0
+  google_fonts: 6.2.1
   stack_trace: 1.12.1
-  url_launcher: 6.3.1
+  url_launcher: 6.3.2
 
   async: 2.13.0
   boolean_selector: 2.1.2
@@ -35,14 +36,14 @@ dependencies:
   lints: 6.0.0
   matcher: 0.12.17
   material_color_utilities: 0.11.1
-  meta: 1.16.0
+  meta: 1.17.0
   path: 1.9.1
   plugin_platform_interface: 2.1.8
   source_span: 1.10.1
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.6
+  test_api: 0.7.7
   typed_data: 1.4.0
   unified_analytics: 8.0.1
   url_launcher_android: 6.3.16
@@ -61,4 +62,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: qqjk1
+# PUBSPEC CHECKSUM: patulg

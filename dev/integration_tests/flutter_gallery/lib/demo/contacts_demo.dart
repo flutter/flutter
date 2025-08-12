@@ -16,7 +16,9 @@ class _ContactCategory extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: themeData.dividerColor))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: themeData.dividerColor)),
+      ),
       child: DefaultTextStyle(
         style: Theme.of(context).textTheme.titleMedium!,
         child: SafeArea(
@@ -133,25 +135,24 @@ class ContactsDemoState extends State<ContactsDemo> {
                       _appBarBehavior = value;
                     });
                   },
-                  itemBuilder:
-                      (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.normal,
-                          child: Text('App bar scrolls away'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.pinned,
-                          child: Text('App bar stays put'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.floating,
-                          child: Text('App bar floats'),
-                        ),
-                        const PopupMenuItem<AppBarBehavior>(
-                          value: AppBarBehavior.snapping,
-                          child: Text('App bar snaps'),
-                        ),
-                      ],
+                  itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.normal,
+                      child: Text('App bar scrolls away'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.pinned,
+                      child: Text('App bar stays put'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.floating,
+                      child: Text('App bar floats'),
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.snapping,
+                      child: Text('App bar snaps'),
+                    ),
+                  ],
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
@@ -180,8 +181,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle.dark,
                   child: _ContactCategory(
@@ -305,7 +306,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                     _ContactItem(lines: const <String>['Last day in office', 'August 9th, 2018']),
                   ],
                 ),
-              ]),
+              ],
             ),
           ],
         ),

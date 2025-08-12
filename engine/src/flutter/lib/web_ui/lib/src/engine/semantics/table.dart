@@ -34,7 +34,10 @@ class SemanticCell extends SemanticRole {
     : super.withBasics(
         EngineSemanticsRole.cell,
         semanticsObject,
-        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+        // Prefer sized span because if this is a leaf with aria-label the label
+        // will be ignored, Dom text can focus on the text but the rect is wrong.
+        // Sized span works best.
+        preferredLabelRepresentation: LabelRepresentation.sizedSpan,
       ) {
     setAriaRole('cell');
   }
