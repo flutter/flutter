@@ -53,11 +53,11 @@ SKWASM_EXPORT void paragraph_layout(Paragraph* paragraph, SkScalar width) {
   paragraph->skiaParagraph->layout(width);
 }
 
-SKWASM_EXPORT int32_t paragraph_getPositionForOffset(
-    Paragraph* paragraph,
-    SkScalar offsetX,
-    SkScalar offsetY,
-    skia::textlayout::Affinity* outAffinity) {
+SKWASM_EXPORT int32_t
+paragraph_getPositionForOffset(Paragraph* paragraph,
+                               SkScalar offsetX,
+                               SkScalar offsetY,
+                               skia::textlayout::Affinity* outAffinity) {
   auto position =
       paragraph->skiaParagraph->getGlyphPositionAtCoordinate(offsetX, offsetY);
   if (outAffinity) {

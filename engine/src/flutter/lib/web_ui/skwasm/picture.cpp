@@ -16,7 +16,7 @@ using namespace flutter;
 
 class PictureRecorder {
  public:
-  PictureRecorder(){};
+  PictureRecorder() {};
 
   DisplayListBuilder* beginRecording(const DlRect& cullRect) {
     assert(!_builder);
