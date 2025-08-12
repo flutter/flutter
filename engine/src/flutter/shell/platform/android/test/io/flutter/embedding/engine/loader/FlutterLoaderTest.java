@@ -30,6 +30,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -408,20 +410,21 @@ public class FlutterLoaderTest {
   public void itSetsAotSharedLibraryNameIfPathIsInApk() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
-    String nativeLibraryDirPath = "/native/library/dir";
+    Path nativeLibraryDir = Paths.get(File.separator, "native", "lib", "dir");
+    String nativeLibraryDirPath = nativeLibraryDir.toString();
 
     assertFalse(flutterLoader.initialized());
     ctx.getApplicationInfo().nativeLibraryDir = nativeLibraryDirPath;
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within application APK.
-    String pathWithDirectApkPath = nativeLibraryDirPath + "/library.so";
-    String pathWithNestedApkPath = nativeLibraryDirPath + "/some/directories/library.so";
-    String pathWithIndirectApkPath1 = nativeLibraryDirPath + "/someDirectory/../library.so";
-    String pathWithIndirectApkPath2 = nativeLibraryDirPath + "/some/directory/../../library.so";
-    String pathWithIndirectApkPath3 = nativeLibraryDirPath + "/some/directory/../library.so";
+    Path pathWithDirectApkPath = nativeLibraryDir.resolve("library.so");
+    Path pathWithNestedApkPath = nativeLibraryDir.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectApkPath1 = nativeLibraryDir.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectApkPath2 = nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectApkPath3 = nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "library.so"));
 
-    String[] pathsToTest = {
+    Path[] pathsToTest = {
       pathWithDirectApkPath,
       pathWithNestedApkPath,
       pathWithIndirectApkPath1,
@@ -430,7 +433,8 @@ public class FlutterLoaderTest {
     };
     String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
-    for (String path : pathsToTest) {
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
       String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
@@ -465,24 +469,24 @@ public class FlutterLoaderTest {
   public void itDoesNotSetAotSharedLibraryNameIfPathOutsideApk() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
-    String nativeLibraryDirPath = "/native/library/dir";
+    Path nativeLibraryDir = Paths.get(File.separator, "native", "lib", "dir");
+    String nativeLibraryDirPath = nativeLibraryDir.toString();
 
     assertFalse(flutterLoader.initialized());
     ctx.getApplicationInfo().nativeLibraryDir = nativeLibraryDirPath;
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within application APK.
-    String pathWithIndirectOutsideApkPath = nativeLibraryDirPath + "/../library.so";
-    String pathWithMoreIndirectOutsideApkPath =
-        nativeLibraryDirPath + "/some/directories/../../../library.so";
-    String pathWithoutSoFile = nativeLibraryDirPath + "/library.somethingElse";
-    String pathWithPartialNativeLibraryPath1 = "/native/library.so";
-    String pathWithPartialNativeLibraryPath2 = "/native/dir/library.so";
-    String pathWithPartialNativeLibraryPath3 = "/native/library/library.so";
-    String pathWithPartialNativeLibraryPath4 = "/library/dir/library.so";
-    String pathWithPartialNativeLibraryPath5 = "/dir/library.so";
+    Path pathWithIndirectOutsideApkPath = nativeLibraryDir.resolve(Paths.get("..", "library.so"));
+    Path pathWithMoreIndirectOutsideApkPath = nativeLibraryDir.resolve(Paths.get("some", "directories", "..", "..", "..", "library.so"));
+    Path pathWithoutSoFile = nativeLibraryDir.resolve(Paths.get("library.somethingElse"));
+    Path pathWithPartialNativeLibraryPath1 = Paths.get(File.separator, "native", "library.so");
+    Path pathWithPartialNativeLibraryPath2 = Paths.get(File.separator, "native", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath3 = Paths.get(File.separator, "native", "library", "library.so");
+    Path pathWithPartialNativeLibraryPath4 = Paths.get(File.separator, "library", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath5 = Paths.get(File.separator, "dir", "library.so");
 
-    String[] pathsToTest = {
+    Path[] pathsToTest = {
       pathWithIndirectOutsideApkPath,
       pathWithMoreIndirectOutsideApkPath,
       pathWithoutSoFile,
@@ -494,7 +498,8 @@ public class FlutterLoaderTest {
     };
     String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
-    for (String path : pathsToTest) {
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
       String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
@@ -530,24 +535,21 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
     Context mockApplicationContext = mock(Context.class);
     File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
     String internalStorageDirPath = internalStorageDir.getCanonicalPath();
 
-    ctx.getApplicationInfo().nativeLibraryDir = "some/path/doesnt/matter";
+    ctx.getApplicationInfo().nativeLibraryDir = Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
 
-    // Test paths for library living within application APK.
-    String pathWithDirectInternalStoragePath = internalStorageDirPath + "/library.so";
-    String pathWithNestedInternalStoragePath =
-        internalStorageDirPath + "/some/directories/library.so";
-    String pathWithIndirectInternalStoragePath1 =
-        internalStorageDirPath + "/someDirectory/../library.so";
-    String pathWithIndirectInternalStoragePath2 =
-        internalStorageDirPath + "/some/directory/../../library.so";
-    String pathWithIndirectInternalStoragePath3 =
-        internalStorageDirPath + "/some/directory/../library.so";
+    // Test paths for library living within internal storage.
+    Path pathWithDirectInternalStoragePath = internalStorageDirAsPathObj.resolve("library.so");
+    Path pathWithNestedInternalStoragePath = internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectInternalStoragePath1 = internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath2 = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath3 = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "library.so"));
 
-    String[] pathsToTest = {
+    Path[] pathsToTest = {
       pathWithDirectInternalStoragePath,
       pathWithNestedInternalStoragePath,
       pathWithIndirectInternalStoragePath1,
@@ -556,7 +558,8 @@ public class FlutterLoaderTest {
     };
     String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
-    for (String path : pathsToTest) {
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
       String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
@@ -593,20 +596,20 @@ public class FlutterLoaderTest {
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
     Context mockApplicationContext = mock(Context.class);
     File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
     String internalStorageDirPath = internalStorageDir.getCanonicalPath();
 
-    ctx.getApplicationInfo().nativeLibraryDir = "some/path/doesnt/matter";
+    ctx.getApplicationInfo().nativeLibraryDir = Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
 
-    // Test paths for library living within application APK.
-    String pathWithIndirectOutsideInternalStorage = internalStorageDirPath + "/../library.so";
-    String pathWithMoreIndirectOutsideInternalStorage =
-        internalStorageDirPath + "/some/directory/../../../library.so";
-    String pathWithoutSoFile = internalStorageDirPath + "/library.somethingElse";
-    String pathWithPartialInternalStoragePath = internalStorageDir.getParent() + "/library.so";
+    // Test paths for library living within internal storage.
+    Path pathWithIndirectOutsideInternalStorage = internalStorageDirAsPathObj.resolve(Paths.get("..", "library.so"));
+    Path pathWithMoreIndirectOutsideInternalStorage = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "..", "..", "library.so"));
+    Path pathWithoutSoFile = internalStorageDirAsPathObj.resolve(Paths.get("library.somethingElse"));
+    Path pathWithPartialInternalStoragePath = internalStorageDirAsPathObj.getParent().resolve("library.so");
 
-    String[] pathsToTest = {
+    Path[] pathsToTest = {
       pathWithIndirectOutsideInternalStorage,
       pathWithMoreIndirectOutsideInternalStorage,
       pathWithoutSoFile,
@@ -614,7 +617,8 @@ public class FlutterLoaderTest {
     };
     String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
-    for (String path : pathsToTest) {
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
       String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
