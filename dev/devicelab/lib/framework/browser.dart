@@ -129,7 +129,7 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -150,7 +150,7 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -284,12 +284,12 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(int port) async {
+Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
   final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
   final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith('http://localhost');
+    return tab.url.startsWith(tabUrl ?? 'http://localhost');
   });
   final ChromeTab tab = tabs.single;
   final WipConnection debugConnection = await tab.connect();
