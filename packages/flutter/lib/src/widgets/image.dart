@@ -905,11 +905,15 @@ class Image extends StatefulWidget {
   /// and height if the exact image dimensions are not known in advance.
   final double? height;
 
-  /// When set, the image is clipped to a rounded rectangle with the given radius.
+  /// When set, clips the image to a rounded rectangle with the specified radius.
   ///
-  /// This provides a shortcut for rounding image corners without having to wrap
-  /// the widget in a separate [ClipRRect]. If `null`, the image is displayed
-  /// without clipping.
+  /// This is a convenient way to apply rounded corners without needing to wrap
+  /// the `Image` widget in a separate [ClipRRect]. If `null`, no clipping is applied.
+  ///
+  /// **Note:** This property has no effect when the image is created with
+  /// [Image.network] using a `webHtmlElementStrategy` other than
+  /// [WebHtmlElementStrategy.never], because platform views used in that mode
+  /// cannot be clipped by [ClipRRect].
   final BorderRadius? borderRadius;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -1420,8 +1424,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (widget.loadingBuilder != null) {
       result = widget.loadingBuilder!(context, result, _loadingProgress);
     }
-    // If a borderRadius was provided, clip the image to rounded rect.
-    if (widget.borderRadius != null) {
+    // If a non-null and non-zero borderRadius is provided, clip the image to a rounded rectangle.
+    // Skips clipping when borderRadius is null or zero for better performance.
+    if (widget.borderRadius != null &&
+        widget.borderRadius != BorderRadius.zero &&
+        _imageInfo is! WebImageInfo) {
       result = ClipRRect(borderRadius: widget.borderRadius!, child: result);
     }
 

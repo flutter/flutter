@@ -175,6 +175,23 @@ void main() {
 
     expect(find.byType(ClipRRect), findsNothing);
   });
+  testWidgets('Image does not insert ClipRRect when borderRadius is BorderRadius.zero', (
+    WidgetTester tester,
+  ) async {
+    final TestImageProvider provider = TestImageProvider(image10x10);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Image(image: provider, borderRadius: BorderRadius.zero),
+      ),
+    );
+
+    provider.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ClipRRect), findsNothing);
+  });
 
   testWidgets(
     "Verify Image doesn't reset its RenderImage when changing providers if it has gaplessPlayback set",
