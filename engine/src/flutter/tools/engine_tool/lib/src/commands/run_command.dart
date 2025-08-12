@@ -234,6 +234,7 @@ final class RunTarget {
       TargetPlatform.androidX86 => 'android_${mode}_x86',
       TargetPlatform.androidX64 => 'android_${mode}_x64',
       TargetPlatform.androidArm64 => 'android_${mode}_arm64',
+      TargetPlatform.androidRiscv64 => 'android_${mode}_riscv64',
 
       // DESKTOP (MacOS, Linux, Windows)
       // We do not support cross-builds, so implicitly assume the host platform.
@@ -291,6 +292,7 @@ final class RunTarget {
       TargetPlatform.androidUnspecified ||
       TargetPlatform.androidX86 ||
       TargetPlatform.androidX64 ||
+      TargetPlatform.androidRiscv64 ||
       TargetPlatform.androidArm64 => [
         Label.parseGn('//flutter/shell/platform/android:android_jar'),
       ],
