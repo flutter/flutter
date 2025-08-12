@@ -1005,9 +1005,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                               suggestedMenu:suggestedMenu];
       }
     } else if ([type isEqualToString:@"custom"]) {
-      NSString* customId = encodedItem[@"id"];
+      NSString* callbackId = encodedItem[@"id"];
       NSString* title = encodedItem[@"title"];
-      if (customId && title) {
+      if (callbackId && title) {
         __weak FlutterTextInputView* weakSelf = self;
         UIAction* action = [UIAction actionWithTitle:title
                                                image:nil
@@ -1016,7 +1016,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
           FlutterTextInputView* strongSelf = weakSelf;
           if (strongSelf) {
             [strongSelf.textInputDelegate flutterTextInputView:strongSelf
-                performPlatformChannelContextMenuCustomAction:customId
+                performPlatformChannelContextMenuCustomAction:callbackId
                                                    withClient:strongSelf->_textInputClient];
           }
         }];
