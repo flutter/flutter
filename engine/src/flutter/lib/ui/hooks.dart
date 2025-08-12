@@ -203,10 +203,10 @@ _ViewConfiguration _buildViewConfiguration(
     ),
     displayId: displayId,
     viewConstraints: ViewConstraints(
-      minWidth: width,
-      maxWidth: width,
-      minHeight: height,
-      maxHeight: height,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
     ),
   );
 }

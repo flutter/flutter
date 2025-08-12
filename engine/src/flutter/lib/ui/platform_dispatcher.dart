@@ -1877,6 +1877,7 @@ class _ViewConfiguration {
     ),
   });
 
+  /// The sizing constraints for the view.
   final ViewConstraints viewConstraints;
 
   /// The identifier for a display for this view, in
