@@ -148,6 +148,69 @@ void main() {
       );
     });
 
+    testUsingContext(
+      'schemeForBuildInfo succeeds',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const BuildInfo buildInfo = BuildInfo.debug;
+        expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
+      },
+      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo returns null if unable to find project',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        const BuildInfo buildInfo = BuildInfo.debug;
+        expect(await project.schemeForBuildInfo(buildInfo), isNull);
+      },
+      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo succeeds with flavor',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const buildInfo = BuildInfo(
+          BuildMode.debug,
+          'my_flavor',
+          treeShakeIcons: true,
+          packageConfigPath: '',
+        );
+        expect(await project.schemeForBuildInfo(buildInfo), 'my_flavor');
+      },
+      overrides: <Type, Generator>{
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      },
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo throws error if flavor is not found',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const buildInfo = BuildInfo(
+          BuildMode.debug,
+          'invalid_flavor',
+          treeShakeIcons: true,
+          packageConfigPath: '',
+        );
+        await expectLater(project.schemeForBuildInfo(buildInfo), throwsToolExit());
+      },
+      overrides: <Type, Generator>{
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      },
+    );
+
     group('usesSwiftPackageManager', () {
       testUsingContext(
         'is true when iOS project exists',

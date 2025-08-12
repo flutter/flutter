@@ -240,6 +240,7 @@ std::vector<LineMetrics>& ParagraphSkia::GetLineMetrics() {
                         }));
 
     for (const skt::LineMetrics& skm : metrics) {
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       LineMetrics& txtm = line_metrics_->emplace_back(
           skm.fStartIndex, skm.fEndIndex, skm.fEndExcludingWhitespaces,
           skm.fEndIncludingNewline, skm.fHardBreak);
@@ -263,6 +264,7 @@ std::vector<LineMetrics>& ParagraphSkia::GetLineMetrics() {
     }
   }
 
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return line_metrics_.value();
 }
 

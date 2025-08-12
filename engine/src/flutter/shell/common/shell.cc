@@ -474,12 +474,17 @@ Shell::Shell(DartVMRef vm,
   FML_CHECK(!settings.enable_software_rendering || !settings.enable_impeller)
       << "Software rendering is incompatible with Impeller.";
   if (!settings.enable_impeller && settings.warn_on_impeller_opt_out) {
-    FML_LOG(IMPORTANT)
-        << "[Action Required] The application opted out of Impeller by either "
-           "using the --no-enable-impeller flag or FLTEnableImpeller=false "
-           "plist flag. This option is going to go away in an upcoming Flutter "
-           "release. Remove the explicit opt-out. If you need to opt-out, "
-           "report a bug describing the issue.";
+    FML_LOG(IMPORTANT) <<  //
+        R"warn([Action Required]: Impeller opt-out deprecated.
+    The application opted out of Impeller by either using the
+    `--no-enable-impeller` flag or the
+    `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+    These options are going to go away in an upcoming Flutter release. Remove
+    the explicit opt-out. If you need to opt-out, please report a bug describing
+    the issue.
+
+    https://github.com/flutter/flutter/issues/new?template=02_bug.yml
+)warn";
   }
   FML_CHECK(vm_) << "Must have access to VM to create a shell.";
   FML_DCHECK(task_runners_.IsValid());

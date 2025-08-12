@@ -708,6 +708,7 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
     // revisit all of the RTree rects accumulated during the current layer
     // (indicated by rtree_rects_start_index) and expand them by the filter.
 
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     if (AdjustRTreeRects(rtree_data_.value(), *filter, matrix, clip,
                          current_layer().rtree_rects_start_index)) {
       parent_is_flooded = true;

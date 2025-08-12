@@ -247,4 +247,120 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('ExpansionTile can accept a new controller', (WidgetTester tester) async {
+    final ExpansibleController controller1 = ExpansibleController();
+    final ExpansibleController controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Expansible(
+            controller: controller1,
+            headerBuilder: (_, _) => const Text('Header'),
+            bodyBuilder: (_, _) => const Text('Body'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    expect(controller1.isExpanded, isFalse);
+
+    controller1.expand();
+    expect(controller1.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOne);
+
+    controller1.collapse();
+    expect(controller1.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Expansible(
+            controller: controller2,
+            headerBuilder: (_, _) => const Text('Header'),
+            bodyBuilder: (_, _) => const Text('Body'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    expect(controller2.isExpanded, isFalse);
+
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOne);
+
+    controller2.collapse();
+    expect(controller2.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+  });
+
+  testWidgets('Expansible can accept a new controller with a different state', (
+    WidgetTester tester,
+  ) async {
+    final ExpansibleController controller1 = ExpansibleController();
+    final ExpansibleController controller2 = ExpansibleController();
+    addTearDown(() {
+      controller1.dispose();
+      controller2.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Expansible(
+            controller: controller1,
+            headerBuilder: (_, _) => const Text('Header'),
+            bodyBuilder: (_, _) => const Text('Body'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    expect(controller1.isExpanded, isFalse);
+
+    controller1.expand();
+    expect(controller1.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOne);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Expansible(
+            controller: controller2,
+            headerBuilder: (_, _) => const Text('Header'),
+            bodyBuilder: (_, _) => const Text('Body'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller2.isExpanded, isFalse);
+    expect(find.text('Body'), findsNothing);
+
+    controller2.expand();
+    expect(controller2.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOne);
+
+    controller2.collapse();
+    expect(controller2.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+  });
 }

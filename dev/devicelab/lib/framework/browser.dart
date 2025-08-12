@@ -26,6 +26,7 @@ class ChromeOptions {
     this.headless,
     this.debugPort,
     this.enableWasmGC = false,
+    this.silent = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -57,6 +58,9 @@ class ChromeOptions {
 
   /// Whether to enable experimental WasmGC flags
   final bool enableWasmGC;
+
+  /// Disables Chrome stdio outputs.
+  final bool silent;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -119,6 +123,7 @@ class Chrome {
     final io.Process chromeProcess = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
+      silent: options.silent,
       workingDirectory: workingDirectory,
     );
 
@@ -610,6 +615,7 @@ const String _kGlibcError = 'Inconsistency detected by ld.so';
 Future<io.Process> _spawnChromiumProcess(
   String executable,
   List<String> args, {
+  required bool silent,
   String? workingDirectory,
 }) async {
   // Keep attempting to launch the browser until one of:
@@ -623,7 +629,9 @@ Future<io.Process> _spawnChromiumProcess(
     );
 
     process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-      print('[CHROME STDOUT]: $line');
+      if (!silent) {
+        print('[CHROME STDOUT]: $line');
+      }
     });
 
     // Wait until the DevTools are listening before trying to connect. This is
@@ -633,7 +641,9 @@ Future<io.Process> _spawnChromiumProcess(
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .map((String line) {
-          print('[CHROME STDERR]:$line');
+          if (!silent) {
+            print('[CHROME STDERR]:$line');
+          }
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
           }

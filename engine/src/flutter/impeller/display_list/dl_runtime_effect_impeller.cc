@@ -20,7 +20,7 @@ DlRuntimeEffectImpeller::~DlRuntimeEffectImpeller() = default;
 
 DlRuntimeEffectImpeller::DlRuntimeEffectImpeller(
     std::shared_ptr<impeller::RuntimeStage> runtime_stage)
-    : runtime_stage_(std::move(runtime_stage)){};
+    : runtime_stage_(std::move(runtime_stage)) {};
 
 sk_sp<SkRuntimeEffect> DlRuntimeEffectImpeller::skia_runtime_effect() const {
   return nullptr;
