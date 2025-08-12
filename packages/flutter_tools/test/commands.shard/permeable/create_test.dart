@@ -5049,6 +5049,19 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       Logger: () => logger,
     },
   );
+
+  testUsingContext('generated pubspec uses default build number (+1) for standard app', () async {
+    await projectDir.create(recursive: true);
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=app'],
+      <String>['lib/main.dart', 'pubspec.yaml'],
+    );
+
+    final String pubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    expect(pubspec, contains(RegExp(r'^version:\s*1\.0\.0\+1\s*$', multiLine: true)));
+  });
 }
 
 Future<void> _createProject(
