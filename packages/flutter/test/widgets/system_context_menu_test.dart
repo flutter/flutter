@@ -1084,9 +1084,16 @@ void main() {
       
       expect(customActionCalled, isTrue);
       
-      // iOS system menus auto-close after custom actions on real devices,
-      // but in tests we need to manually call hideToolbar() to simulate this.
-      state.hideToolbar();
+      // iOS system menus auto-close after custom actions on real devices.
+      // Simulate this by sending the platform dismiss message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes,
+        (_) {},
+      );
       await tester.pump();
       
       expect(find.byType(SystemContextMenu), findsNothing);
@@ -1260,7 +1267,14 @@ void main() {
       expect(field1ActionCalled, isTrue);
       expect(field2ActionCalled, isFalse);
       
-      state1.hideToolbar();
+      final ByteData? messageBytes1 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes1,
+        (_) {},
+      );
       await tester.pump();
       
       field1ActionCalled = false;
@@ -1285,8 +1299,17 @@ void main() {
       expect(field1ActionCalled, isFalse);
       expect(field2ActionCalled, isTrue);
       
-      state2.hideToolbar();
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes2,
+        (_) {},
+      );
       await tester.pump();
+      
+      expect(find.byType(SystemContextMenu), findsNothing);
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
