@@ -99,6 +99,7 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
 
+// Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
@@ -251,6 +252,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
+  // Perform the redraw in the GTK thead.
   g_idle_add(redraw_cb, self);
 }
 
