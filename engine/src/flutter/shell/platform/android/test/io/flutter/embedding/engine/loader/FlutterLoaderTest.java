@@ -419,10 +419,14 @@ public class FlutterLoaderTest {
 
     // Test paths for library living within application APK.
     Path pathWithDirectApkPath = nativeLibraryDir.resolve("library.so");
-    Path pathWithNestedApkPath = nativeLibraryDir.resolve(Paths.get("some", "directories", "library.so"));
-    Path pathWithIndirectApkPath1 = nativeLibraryDir.resolve(Paths.get("someDirectory", "..", "library.so"));
-    Path pathWithIndirectApkPath2 = nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
-    Path pathWithIndirectApkPath3 = nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "library.so"));
+    Path pathWithNestedApkPath =
+        nativeLibraryDir.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectApkPath1 =
+        nativeLibraryDir.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectApkPath2 =
+        nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectApkPath3 =
+        nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "library.so"));
 
     Path[] pathsToTest = {
       pathWithDirectApkPath,
@@ -478,12 +482,16 @@ public class FlutterLoaderTest {
 
     // Test paths for library living within application APK.
     Path pathWithIndirectOutsideApkPath = nativeLibraryDir.resolve(Paths.get("..", "library.so"));
-    Path pathWithMoreIndirectOutsideApkPath = nativeLibraryDir.resolve(Paths.get("some", "directories", "..", "..", "..", "library.so"));
+    Path pathWithMoreIndirectOutsideApkPath =
+        nativeLibraryDir.resolve(Paths.get("some", "directories", "..", "..", "..", "library.so"));
     Path pathWithoutSoFile = nativeLibraryDir.resolve(Paths.get("library.somethingElse"));
     Path pathWithPartialNativeLibraryPath1 = Paths.get(File.separator, "native", "library.so");
-    Path pathWithPartialNativeLibraryPath2 = Paths.get(File.separator, "native", "dir", "library.so");
-    Path pathWithPartialNativeLibraryPath3 = Paths.get(File.separator, "native", "library", "library.so");
-    Path pathWithPartialNativeLibraryPath4 = Paths.get(File.separator, "library", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath2 =
+        Paths.get(File.separator, "native", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath3 =
+        Paths.get(File.separator, "native", "library", "library.so");
+    Path pathWithPartialNativeLibraryPath4 =
+        Paths.get(File.separator, "library", "dir", "library.so");
     Path pathWithPartialNativeLibraryPath5 = Paths.get(File.separator, "dir", "library.so");
 
     Path[] pathsToTest = {
@@ -538,16 +546,22 @@ public class FlutterLoaderTest {
     Path internalStorageDirAsPathObj = internalStorageDir.toPath();
     String internalStorageDirPath = internalStorageDir.getCanonicalPath();
 
-    ctx.getApplicationInfo().nativeLibraryDir = Paths.get("some", "path", "doesnt", "matter").toString();
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within internal storage.
     Path pathWithDirectInternalStoragePath = internalStorageDirAsPathObj.resolve("library.so");
-    Path pathWithNestedInternalStoragePath = internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", "library.so"));
-    Path pathWithIndirectInternalStoragePath1 = internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", "library.so"));
-    Path pathWithIndirectInternalStoragePath2 = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
-    Path pathWithIndirectInternalStoragePath3 = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "library.so"));
+    Path pathWithNestedInternalStoragePath =
+        internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectInternalStoragePath1 =
+        internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath2 =
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath3 =
+        internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "library.so"));
 
     Path[] pathsToTest = {
       pathWithDirectInternalStoragePath,
@@ -599,15 +613,21 @@ public class FlutterLoaderTest {
     Path internalStorageDirAsPathObj = internalStorageDir.toPath();
     String internalStorageDirPath = internalStorageDir.getCanonicalPath();
 
-    ctx.getApplicationInfo().nativeLibraryDir = Paths.get("some", "path", "doesnt", "matter").toString();
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within internal storage.
-    Path pathWithIndirectOutsideInternalStorage = internalStorageDirAsPathObj.resolve(Paths.get("..", "library.so"));
-    Path pathWithMoreIndirectOutsideInternalStorage = internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "..", "..", "library.so"));
-    Path pathWithoutSoFile = internalStorageDirAsPathObj.resolve(Paths.get("library.somethingElse"));
-    Path pathWithPartialInternalStoragePath = internalStorageDirAsPathObj.getParent().resolve("library.so");
+    Path pathWithIndirectOutsideInternalStorage =
+        internalStorageDirAsPathObj.resolve(Paths.get("..", "library.so"));
+    Path pathWithMoreIndirectOutsideInternalStorage =
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("some", "directory", "..", "..", "..", "library.so"));
+    Path pathWithoutSoFile =
+        internalStorageDirAsPathObj.resolve(Paths.get("library.somethingElse"));
+    Path pathWithPartialInternalStoragePath =
+        internalStorageDirAsPathObj.getParent().resolve("library.so");
 
     Path[] pathsToTest = {
       pathWithIndirectOutsideInternalStorage,
