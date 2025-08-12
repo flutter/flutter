@@ -102,7 +102,14 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
-  /// Run given command in a synchronous subprocess.
+  /// Run given command ([bin]) in a synchronous subprocess.
+  ///
+  /// If [allowFail] is true, an exception will not be thrown even if the process returns a
+  /// non-zero exit code. Also, `error:` will not be prefixed to the output to prevent Xcode
+  /// complication failures.
+  ///
+  /// If [skipErrorLog] is true, `stderr` from the process will not be output unless in [verbose]
+  /// mode. If in [verbose], pipes `stderr` to `stdout`.
   ///
   /// Will throw [Exception] if the exit code is not 0.
   ProcessResult runSync(
@@ -110,6 +117,7 @@ class Context {
     List<String> args, {
     bool verbose = false,
     bool allowFail = false,
+    bool skipErrorLog = false,
     String? workingDirectory,
   }) {
     if (verbose) {
@@ -122,15 +130,22 @@ class Context {
     final String resultStderr = result.stderr.toString().trim();
     if (resultStderr.isNotEmpty) {
       final errorOutput = StringBuffer();
-      // If allowFail, do not fail Xcode build. An example is on macOS 26,
-      // plutil reports NSBonjourServices key not found via stderr (rather than
-      // stdout on older macOS), and it should not cause compile failure.
       if (!allowFail && result.exitCode != 0) {
         // "error:" prefix makes this show up as an Xcode compilation error.
         errorOutput.write('error: ');
       }
       errorOutput.write(resultStderr);
-      echoError(errorOutput.toString());
+      if (skipErrorLog) {
+        // Pipe stderr to stdout under verbose mode.
+        // An example is on macOS 26, plutil reports NSBonjourServices key not found
+        // via stderr (rather than stdout on older macOS), and logging the message
+        // in stderr would be confusing, since not having the key is one of the expected states.
+        if (verbose) {
+          echo(errorOutput.toString());
+        }
+      } else {
+        echoError(errorOutput.toString());
+      }
 
       // Stream stderr to the Flutter build process.
       // When in verbose mode, `echoError` above will show the logs. So only
@@ -424,16 +439,17 @@ class Context {
       return;
     }
 
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+
     // If there are already NSBonjourServices specified by the app (uncommon),
     // insert the vmService service name to the existing list.
-    ProcessResult result = runSync('plutil', <String>[
-      '-extract',
-      'NSBonjourServices',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    ProcessResult result = runSync(
+      'plutil',
+      <String>['-extract', 'NSBonjourServices', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode == 0) {
       runSync('plutil', <String>[
         '-insert',
@@ -458,14 +474,13 @@ class Context {
     // specified (uncommon). This text will appear below the "Your app would
     // like to find and connect to devices on your local network" permissions
     // popup.
-    result = runSync('plutil', <String>[
-      '-extract',
-      'NSLocalNetworkUsageDescription',
-      'xml1',
-      '-o',
-      '-',
-      builtProductsPlist,
-    ], allowFail: true);
+    result = runSync(
+      'plutil',
+      <String>['-extract', 'NSLocalNetworkUsageDescription', 'xml1', '-o', '-', builtProductsPlist],
+      verbose: verbose,
+      allowFail: true,
+      skipErrorLog: true,
+    );
     if (result.exitCode != 0) {
       runSync('plutil', <String>[
         '-insert',
