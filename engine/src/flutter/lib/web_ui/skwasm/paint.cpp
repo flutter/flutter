@@ -46,6 +46,7 @@ SKWASM_EXPORT void paint_setShader(DlPaint* paint,
 }
 
 SKWASM_EXPORT void paint_setDither(DlPaint* paint, bool isDither) {
+  // TODO(jacksongardner): maybe just remove this?
   // paint->setDither(isDither);
 }
 

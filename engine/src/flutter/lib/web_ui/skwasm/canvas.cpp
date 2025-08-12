@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "text/text_types.h"
 #include "wrappers.h"
 
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
@@ -11,46 +12,106 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_text_skia.h"
 
-using namespace skia::textlayout;
 using namespace Skwasm;
 using namespace flutter;
 
 namespace {
-// TODO(jacksongardner): Implement this properly
-class SkwasmParagraphPainter : public ParagraphPainter {
+class SkwasmParagraphPainter : public skia::textlayout::ParagraphPainter {
  public:
-  SkwasmParagraphPainter(DisplayListBuilder& builder) : _builder(builder) {}
+  SkwasmParagraphPainter(DisplayListBuilder& builder,
+                         const std::vector<DlPaint>& paints)
+      : _builder(builder), _paints(paints) {}
 
   virtual void drawTextBlob(const sk_sp<SkTextBlob>& blob,
                             SkScalar x,
                             SkScalar y,
-                            const SkPaintOrID& paint) {
-    _builder.DrawText(DlTextSkia::Make(blob), x, y, flutter::DlPaint());
+                            const SkPaintOrID& paint) override {
+    if (!blob) {
+      return;
+    }
+
+    const int* paintID = std::get_if<PaintID>(&paint);
+    auto dlPaint = paintID ? _paints[*paintID] : DlPaint();
+    _builder.DrawText(DlTextSkia::Make(blob), x, y, dlPaint);
   }
 
   virtual void drawTextShadow(const sk_sp<SkTextBlob>& blob,
                               SkScalar x,
                               SkScalar y,
                               SkColor color,
-                              SkScalar blurSigma) {}
-  virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) {}
-  virtual void drawFilledRect(const SkRect& rect,
-                              const DecorationStyle& decorStyle) {}
-  virtual void drawPath(const SkPath& path, const DecorationStyle& decorStyle) {
+                              SkScalar blurSigma) override {
+    if (!blob) {
+      return;
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor(color));
+    if (blurSigma > 0.0) {
+      DlBlurMaskFilter filter(DlBlurStyle::kNormal, blurSigma, false);
+      paint.setMaskFilter(&filter);
+    }
+    _builder.DrawText(DlTextSkia::Make(blob), x, y, paint);
   }
+
+  virtual void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
+    const int* paintID = std::get_if<PaintID>(&paint);
+    auto dlPaint = paintID ? _paints[*paintID] : DlPaint();
+    _builder.DrawRect(ToDlRect(rect), dlPaint);
+  }
+
+  virtual void drawFilledRect(const SkRect& rect,
+                              const DecorationStyle& decorStyle) override {
+    DlPaint paint = toDlPaint(decorStyle, DlDrawStyle::kFill);
+    _builder.DrawRect(ToDlRect(rect), paint);
+  }
+
+  virtual void drawPath(const SkPath& path,
+                        const DecorationStyle& decorStyle) override {
+    _builder.DrawPath(DlPath(path), toDlPaint(decorStyle));
+  }
+
   virtual void drawLine(SkScalar x0,
                         SkScalar y0,
                         SkScalar x1,
                         SkScalar y1,
-                        const DecorationStyle& decorStyle) {}
-  virtual void clipRect(const SkRect& rect) {}
-  virtual void translate(SkScalar dx, SkScalar dy) {}
+                        const DecorationStyle& decorStyle) override {
+    auto paint = toDlPaint(decorStyle);
+    auto dashPathEffect = decorStyle.getDashPathEffect();
 
-  virtual void save() {}
-  virtual void restore() {}
+    if (dashPathEffect) {
+      _builder.DrawDashedLine(DlPoint(x0, y0), DlPoint(x1, y1),
+                              dashPathEffect->fOnLength,
+                              dashPathEffect->fOffLength, paint);
+    } else {
+      _builder.DrawLine(DlPoint(x0, y0), DlPoint(x1, y1), paint);
+    }
+  }
+
+  virtual void clipRect(const SkRect& rect) override {
+    _builder.ClipRect(ToDlRect(rect));
+  }
+
+  virtual void translate(SkScalar dx, SkScalar dy) override {
+    _builder.Translate(dx, dy);
+  }
+
+  virtual void save() override { _builder.Save(); }
+
+  virtual void restore() override { _builder.Restore(); }
 
  private:
   DisplayListBuilder& _builder;
+  const std::vector<DlPaint>& _paints;
+
+  DlPaint toDlPaint(const DecorationStyle& decor_style,
+                    DlDrawStyle draw_style = DlDrawStyle::kStroke) {
+    DlPaint paint;
+    paint.setDrawStyle(draw_style);
+    paint.setAntiAlias(true);
+    paint.setColor(DlColor(decor_style.getColor()));
+    paint.setStrokeWidth(decor_style.getStrokeWidth());
+    return paint;
+  }
 };
 }  // namespace
 
@@ -130,7 +191,6 @@ SKWASM_EXPORT void canvas_clipRRect(DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_clipPath(DisplayListBuilder* canvas,
                                    SkPath* path,
                                    bool antialias) {
-  // TODO(jacksongardner): probably use DlPath directly everywhere?
   canvas->ClipPath(DlPath(*path), DlClipOp::kIntersect, antialias);
 }
 
@@ -221,9 +281,8 @@ SKWASM_EXPORT void canvas_drawParagraph(DisplayListBuilder* canvas,
                                         Paragraph* paragraph,
                                         DlScalar x,
                                         DlScalar y) {
-  // TODO(jacksongardner): Paint the paragraph
-  auto painter = SkwasmParagraphPainter(*canvas);
-  paragraph->paint(&painter, x, y);
+  auto painter = SkwasmParagraphPainter(*canvas, paragraph->paints);
+  paragraph->skiaParagraph->paint(&painter, x, y);
 }
 
 SKWASM_EXPORT void canvas_drawPicture(DisplayListBuilder* canvas,

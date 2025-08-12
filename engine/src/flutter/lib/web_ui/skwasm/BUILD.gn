@@ -32,6 +32,7 @@ template("skwasm_variant") {
       "text/paragraph_style.cpp",
       "text/strut_style.cpp",
       "text/text_style.cpp",
+      "text/text_types.h",
       "vertices.cpp",
       "wrappers.h",
     ]
@@ -82,8 +83,6 @@ template("skwasm_variant") {
       "//flutter/skia",
       "//flutter/skia/modules/skparagraph",
       "//flutter/skia/modules/skunicode",
-
-      # "//flutter/txt",
     ]
   }
 }
