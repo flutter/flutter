@@ -19,13 +19,18 @@ struct TextStyle {
   std::optional<flutter::DlPaint> background;
 
   void populatePaintIds(std::vector<flutter::DlPaint>& paints) {
-    if (foreground) {
-      skiaStyle.setForegroundPaintID(paints.size());
-      paints.push_back(*foreground);
-    }
     if (background) {
       skiaStyle.setBackgroundPaintID(paints.size());
       paints.push_back(*background);
+    }
+    if (foreground) {
+      skiaStyle.setForegroundPaintID(paints.size());
+      paints.push_back(*foreground);
+    } else {
+      flutter::DlPaint paint;
+      paint.setColor(flutter::DlColor(skiaStyle.getColor()));
+      skiaStyle.setForegroundPaintID(paints.size());
+      paints.push_back(std::move(paint));
     }
   }
 };
