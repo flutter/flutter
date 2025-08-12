@@ -293,6 +293,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
     double layoutOffset = 0;
     double maxPaintExtent = 0;
     double paintOffset = constraints.overlap;
+    double maxScrollObstructionExtent = 0;
 
     final (
       RenderSliver? leadingChild,
@@ -335,6 +336,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
       scrollOffset += childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
       maxPaintExtent += childLayoutGeometry.maxPaintExtent;
+      maxScrollObstructionExtent += childLayoutGeometry.maxScrollObstructionExtent;
       paintOffset = math.max(childPaintOffset + childLayoutGeometry.paintExtent, paintOffset);
       child = advance(child);
       assert(() {
@@ -357,7 +359,10 @@ class RenderSliverMainAxisGroup extends RenderSliver
       child = firstChild;
       while (child != null) {
         final SliverGeometry childLayoutGeometry = child.geometry!;
-        if (childLayoutGeometry.paintExtent > 0) {
+        final bool childIsTooLarge = childLayoutGeometry.paintExtent > remainingExtent;
+        final bool pinnedHeadersOverflow = maxScrollObstructionExtent > remainingExtent;
+        final bool childIsPinnedHeader = childLayoutGeometry.maxScrollObstructionExtent > 0;
+        if (childIsTooLarge || (pinnedHeadersOverflow && childIsPinnedHeader)) {
           final SliverPhysicalParentData childParentData =
               child.parentData! as SliverPhysicalParentData;
           childParentData.paintOffset = switch (constraints.axis) {
