@@ -450,14 +450,12 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       // This check works because the tests run in debug mode. If run in release (or JIT release)
-      // mode,
-      // actualArgs would contain the default arguments for AOT shared library name on top of
-      // aotSharedLibraryNameArg.
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
       assertTrue(actualArgs.contains(aotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
-      // FlutterLoader.ensureInitialized
-      // /mockFlutterJNI.init and for testing.
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
     }
@@ -516,13 +514,11 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       // This check works because the tests run in debug mode. If run in release (or JIT release)
-      // mode,
-      // actualArgs would contain  the default arguments for AOT shared library name.
+      // mode, actualArgs would contain the default arguments for AOT shared library name.
       assertFalse(actualArgs.contains(aotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
-      // FlutterLoader.ensureInitialized
-      // /mockFlutterJNI.init and for testing.
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
     }
@@ -580,21 +576,19 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       // This check works because the tests run in debug mode. If run in release (or JIT release)
-      // mode,
-      // actualArgs would contain the default arguments for AOT shared library name on top of
-      // aotSharedLibraryNameArg.
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
       assertTrue(actualArgs.contains(aotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
-      // FlutterLoader.ensureInitialized
-      // /mockFlutterJNI.init and for testing.
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
     }
   }
 
   @Test
-  public void itDoesNotSetAotSharedLibraryNameIfPathOutsideInternalStorage() {
+  public void itDoesNotSetAotSharedLibraryNameIfPathOutsideInternalStorage() throws IOException {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
     Context mockApplicationContext = mock(Context.class);
@@ -606,9 +600,18 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within application APK.
-    String pathWithDirectInternalStoragePath = internalStorageDirPath + "/library.so"; // here :)
+    String pathWithIndirectOutsideInternalStorage = internalStorageDirPath + "/../library.so";
+    String pathWithMoreIndirectOutsideInternalStorage =
+        internalStorageDirPath + "/some/directory/../../../library.so";
+    String pathWithoutSoFile = internalStorageDirPath + "/library.somethingElse";
+    String pathWithPartialInternalStoragePath = internalStorageDir.getParent() + "/library.so";
 
-    String[] pathsToTest = {};
+    String[] pathsToTest = {
+      pathWithIndirectOutsideInternalStorage,
+      pathWithMoreIndirectOutsideInternalStorage,
+      pathWithoutSoFile,
+      pathWithPartialInternalStoragePath
+    };
     String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
     for (String path : pathsToTest) {
@@ -631,14 +634,12 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       // This check works because the tests run in debug mode. If run in release (or JIT release)
-      // mode,
-      // actualArgs would contain the default arguments for AOT shared library name on top of
-      // aotSharedLibraryNameArg.
-      assertTrue(actualArgs.contains(aotSharedLibraryNameArg));
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
+      assertFalse(actualArgs.contains(aotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
-      // FlutterLoader.ensureInitialized
-      // /mockFlutterJNI.init and for testing.
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
     }

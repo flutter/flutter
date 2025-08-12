@@ -479,11 +479,9 @@ public class FlutterLoader {
    * directory, we will warn the application developer to ensure they have vetted the library they
    * wish to use.
    */
-  // TODO(camsim99): check on file separators (File.separator) instead of /
   private boolean shouldAddAotSharedLibraryNameFlag(
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
       throws IOException {
-    System.out.println("shouldAddAotSharedLibraryNameFlag called!");
     // Isolate AOT shared library path.
     String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(?<path>.*)$";
     Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
@@ -497,35 +495,38 @@ public class FlutterLoader {
               + "is invalid. Please provide a valid path name.");
     }
     String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group("path");
-    System.out.println("aotSharedLibraryPath " + aotSharedLibraryPath);
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = new File(aotSharedLibraryPath);
     String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
-    System.out.println("aotSharedLibraryPathCanonicalPath:" + aotSharedLibraryPathCanonicalPath);
 
     // Check if library lives within application's native code directory.
     String nativeCodeDirectoryPath = flutterApplicationInfo.nativeLibraryDir;
-    System.out.println("nativeCodeDirectoryPath: " + nativeCodeDirectoryPath);
     Pattern aotSharedLibraryInNativeCodeDirPattern =
-        Pattern.compile("^" + Pattern.quote(nativeCodeDirectoryPath) + "(?:/.*)?\\.so$");
+        Pattern.compile(
+            "^"
+                + Pattern.quote(nativeCodeDirectoryPath)
+                + "(?:"
+                + Pattern.quote(File.separator)
+                + ".*?)?"
+                + "\\.so$");
     Matcher aotSharedLibraryInNativeCodeDirMatcher =
         aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInNativeCodeDirMatcher.find()) {
-      System.out.println("APK path found!");
       return true;
     }
 
     // Check if library lives within application's internal storage.
-    // TODO(camsim99): figure out if I need to expand my check here since this may not be an
-    // absolute path.
     File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();
     String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
     Pattern aotSharedLibraryInInternalStoragePattern =
         Pattern.compile(
             "^"
                 + Pattern.quote(internalStorageDirectoryPathCanonicalPath)
-                + "/((?:[^/]+/)*)([^/]+\\.so)$");
+                + "(?:"
+                + Pattern.quote(File.separator)
+                + ".*?)?"
+                + "\\.so$");
     Matcher aotSharedLibraryInInternalStorageMatcher =
         aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryPathCanonicalPath);
     if (aotSharedLibraryInInternalStorageMatcher.find()) {
