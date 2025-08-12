@@ -3070,6 +3070,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: linux_chrome_dev_mode
@@ -5247,6 +5251,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -5260,6 +5265,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -6915,6 +6921,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
       tags: >
         ["devicelab", "android", "windows", "mokey"]
       task_name: windows_chrome_dev_mode
