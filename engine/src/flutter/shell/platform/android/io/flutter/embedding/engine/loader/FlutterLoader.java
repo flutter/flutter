@@ -525,6 +525,11 @@ public class FlutterLoader {
       return true;
     }
 
+    Log.e(
+        TAG,
+        "Failed to set AOT shared library name to path "
+            + aotSharedLibraryPath
+            + " because it does not point to the native code directory inside your application's APK nor your application's internal storage.");
     return false;
   }
 

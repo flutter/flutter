@@ -109,11 +109,11 @@ static std::shared_ptr<const fml::Mapping> ResolveVMData(
   );
 #else   // DART_SNAPSHOT_STATIC_LINK
   return SearchMapping(
-      settings.vm_snapshot_data,          // embedder_mapping_callback
-      settings.vm_snapshot_data_path,     // file_path
-      settings.application_library_paths, // native_library_paths
-      DartSnapshot::kVMDataSymbol,        // native_library_symbol_name
-      false                               // is_executable
+      settings.vm_snapshot_data,           // embedder_mapping_callback
+      settings.vm_snapshot_data_path,      // file_path
+      settings.application_library_paths,  // native_library_paths
+      DartSnapshot::kVMDataSymbol,         // native_library_symbol_name
+      false                                // is_executable
   );
 #endif  // DART_SNAPSHOT_STATIC_LINK
 }
