@@ -88,9 +88,9 @@ void testAll({List<String> additionalCommandArgs = const <String>[]}) {
           debugPrint('✓ DWDS debug service available at: $debugUrl');
 
           // Step 3: Launch headless Chrome to connect to DWDS
-          /*debugPrint('Step 3: Launching headless Chrome to connect to DWDS...');
+          debugPrint('Step 3: Launching headless Chrome to connect to DWDS...');
           chromeProcess = await _launchHeadlessChrome(debugUrl);
-          debugPrint('✓ Headless Chrome launched and connecting to DWDS');*/
+          debugPrint('✓ Headless Chrome launched and connecting to DWDS');
 
           // Step 4: Wait for app to start (Chrome connection established)
           debugPrint('Step 4: Waiting for Flutter app to start after Chrome connection...');
