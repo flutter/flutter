@@ -2881,6 +2881,8 @@ void main() {
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
       },
+      // https://github.com/flutter/flutter/issues/35347
+      skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
@@ -3006,6 +3008,8 @@ void main() {
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
       },
+      // https://github.com/flutter/flutter/issues/35347
+      skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
