@@ -15,7 +15,7 @@ self.addEventListener('activate', (event) => {
         const deletePromises = OLD_CACHE_NAMES.map((key) => self.caches.delete(key));
         await Promise.all(deletePromises);
       } catch (e) {
-        console.warn('Failed to delete old service worker caches:', e);
+        console.warn('Failed to delete old caches:', e);
       }
 
       try {
@@ -29,14 +29,14 @@ self.addEventListener('activate', (event) => {
           type: 'window',
           includeUncontrolled: true,
         });
-        // Reload all clients to ensure they are not using the old service worker.
+
         clients.forEach((client) => {
           if (client.url && 'navigate' in client) {
             client.navigate(client.url);
           }
         });
       } catch (e) {
-        console.warn('Failed to navigate service worker clients:', e);
+        console.warn('Failed to navigate clients:', e);
       }
     })()
   );
