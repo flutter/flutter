@@ -557,7 +557,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // one that is currently available in the semantics tree.  However, we also want
     // to set it if we're exiting a list to a non-list, so that we can get the "out of list"
     // announcement when A11y focus moves out of a list and not into another list.
-    return semanticsNode.scrollChildren > 0
+    // Adding check for at least 1 scrollChild because we don't want a list with a single item.
+    return semanticsNode.scrollChildren > 1
         && (SemanticsNode.nullableHasAncestor(
                 accessibilityFocusedSemanticsNode, o -> o == semanticsNode)
             || !SemanticsNode.nullableHasAncestor(
@@ -845,57 +846,44 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         || semanticsNode.hasAction(Action.SCROLL_RIGHT)
         || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
       result.setScrollable(true);
-
       // This tells Android's a11y to send scroll events when reaching the end of
       // the visible viewport of a scrollable, unless the node itself does not
       // allow implicit scrolling - then we leave the className as view.View.
-      //
-      // We should prefer setCollectionInfo to the class names, as this way we get "In List"
-      // and "Out of list" announcements.  But we don't always know the counts, so we
-      // can fallback to the generic scroll view class names.
-      //
-      // On older APIs, we always fall back to the generic scroll view class names here.
-      //
-      // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
-      // lists, e.g.
-      // GridView.  Right now, we're only supporting ListViews and only if they have scroll
-      // children.
-      if (semanticsNode.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
-        if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-            || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
-          if (shouldSetCollectionInfo(semanticsNode)) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    1, // rows
-                    semanticsNode.scrollChildren, // columns
-                    false // hierarchical
-                    ));
-          } else {
-            result.setClassName("android.widget.HorizontalScrollView");
-          }
-        } else {
-          if (shouldSetCollectionInfo(semanticsNode)) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    semanticsNode.scrollChildren, // rows
-                    1, // columns
-                    false // hierarchical
-                    ));
-          } else {
-            result.setClassName("android.widget.ScrollView");
-          }
-        }
-      }
-      // TODO(ianh): Once we're on SDK v23+, call addAction to
-      // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
-      // _UP, and _DOWN when appropriate.
+    }
+    // We should prefer setCollectionInfo to the class names, as this way we get "In List"
+    // and "Out of list" announcements.  But we don't always know the counts, so we
+    // can fallback to the generic scroll view class names.
+    //
+    // On older APIs, we always fall back to the generic scroll view class names here.
+    //
+    // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
+    // lists, e.g.
+    // GridView.  Right now, we're only supporting ListViews and only if they have scroll
+    // children.
+    if (shouldSetCollectionInfo(semanticsNode)) {
       if (semanticsNode.hasAction(Action.SCROLL_LEFT)
-          || semanticsNode.hasAction(Action.SCROLL_UP)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+        result.setCollectionInfo(
+            new AccessibilityNodeInfo.CollectionInfo(
+                1, // row count
+                semanticsNode.childrenInTraversalOrder.size(), // column count
+                false // hierarchical
+                ));
+      } else {
+        result.setCollectionInfo(
+            new AccessibilityNodeInfo.CollectionInfo(
+                semanticsNode.childrenInTraversalOrder.size(), // row count
+                1, // column count
+                false // hierarchical
+                ));
       }
-      if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
-          || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+    }
+    if (semanticsNode.scrollChildren > 0 && !shouldSetCollectionInfo(semanticsNode)) {
+      if (semanticsNode.hasAction(Action.SCROLL_LEFT)
+          || semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
+        result.setClassName("android.widget.HorizontalScrollView");
+      } else {
+        result.setClassName("android.widget.ScrollView");
       }
     }
     if (shouldSetCollectionItemInfo(semanticsNode)) {
@@ -923,6 +911,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 semanticsNode.hasFlag(Flag.IS_HEADER) // is heading
                 ));
       }
+    }
+    // TODO(ianh): Once we're on SDK v23+, call addAction to
+    // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
+    // _UP, and _DOWN when appropriate.
+    if (semanticsNode.hasAction(Action.SCROLL_LEFT) || semanticsNode.hasAction(Action.SCROLL_UP)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+    }
+    if (semanticsNode.hasAction(Action.SCROLL_RIGHT)
+        || semanticsNode.hasAction(Action.SCROLL_DOWN)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
     if (semanticsNode.hasAction(Action.INCREASE) || semanticsNode.hasAction(Action.DECREASE)) {
       // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
