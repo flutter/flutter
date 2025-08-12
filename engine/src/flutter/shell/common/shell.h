@@ -45,12 +45,12 @@
 
 namespace flutter {
 
-typedef struct {
+struct SizeConstraints {
   double min_width = 0.0;
   double max_width = 0.0;
   double min_height = 0.0;
   double max_height = 0.0;
-} SizeConstraints;
+};
 
 /// Error exit codes for the Dart isolate.
 enum class DartErrorCode {

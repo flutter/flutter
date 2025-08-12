@@ -1878,8 +1878,7 @@ class _ViewConfiguration {
   /// [PlatformDispatcher._displays].
   final int displayId;
 
-  /// The identifier for a display for this view, in
-  /// [PlatformDispatcher._displays].
+  /// The sizing constraints for this view.
   final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
