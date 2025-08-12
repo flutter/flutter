@@ -145,7 +145,7 @@ class FlutterView {
   ///
   /// The view can take on any [Size] that fulfills these constraints. These
   /// constraints are typically used by an UI framework as the input for its
-  /// layout algorithm to determine an approrpiate size for the view. To size
+  /// layout algorithm to determine an appropriate size for the view. To size
   /// the view, the selected size must be provided to the [render] method and it
   /// must satisfy the constraints.
   ///
@@ -166,8 +166,20 @@ class FlutterView {
   ///  * [physicalSize], which returns the current size of the view.
   // TODO(goderbauer): Wire this up so embedders can configure it. This will
   //   also require to message the size provided to the render call back to the
-  //   embedder.
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  //   embedder. Change this from ViewConstraints.tight to a lookup of the
+  //   stored view constraints on the FlutterView object.
+  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
+
+  double _computeMinConstraintValue(double? desired, double available) {
+    assert(desired == null || desired >= 0, 'Minimum constraint must be >= 0 if set.');
+    assert(desired == null || desired.isFinite, 'Minimum constraint must be finite.');
+    return desired ?? available;
+  }
+
+  double _computeMaxConstraintValue(double? desired, double available) {
+    assert(desired == null || desired >= 0, 'Maximum constraint must be >= 0 if set.');
+    return desired ?? available;
+  }
 
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
@@ -375,11 +387,14 @@ class FlutterView {
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
   void render(Scene scene, {Size? size}) {
+    var width = size?.width ?? physicalSize.width;
+    var height = size?.height ?? physicalSize.height;
+    print("window render called: $width x $height");
     _render(
       viewId,
       scene as _NativeScene,
-      size?.width ?? physicalSize.width,
-      size?.height ?? physicalSize.height,
+      size?.width ?? _viewConfiguration.viewConstraints.maxWidth,
+      size?.height ?? _viewConfiguration.viewConstraints.maxHeight,
     );
   }
 
@@ -969,25 +984,19 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
-  /// Whether the platform supports accessibility  announcement API,
-  /// i.e. [SemanticsService.announce].
-  ///
-  /// Some platforms do not support or discourage the use of
-  /// announcement. Using [SemanticsService.announce] on those platform
-  /// may be ignored. Consider using other way to convey message to the
-  /// user. For example, Android discourages the uses of direct message
-  /// announcement, and rather encourages using other semantic
-  /// properties such as [SemanticsProperties.liveRegion] to convey
-  /// message to the user.
+  /// Whether accessibility announcements (like [SemanticsService.announce])
+  /// are supported on the current platform.
   ///
   /// Returns `false` on platforms where announcements are deprecated or
   /// unsupported by the underlying platform.
   ///
   /// Returns `true` on platforms where such announcements are
   /// generally supported without discouragement. (iOS, web etc)
+  ///
+  /// Use this flag to conditionally avoid making announcements on Android.
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // "announce" than discourage it.
-  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
+  bool get announce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -1013,8 +1022,8 @@ class AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (supportsAnnounce) {
-      features.add('supportsAnnounce');
+    if (announce) {
+      features.add('announce');
     }
     return 'AccessibilityFeatures$features';
   }
