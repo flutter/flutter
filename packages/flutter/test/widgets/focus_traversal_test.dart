@@ -2881,7 +2881,6 @@ void main() {
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
       },
-      skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
@@ -3007,7 +3006,6 @@ void main() {
         await tester.pump();
         expect(stickyButtonNode.hasPrimaryFocus, isTrue);
       },
-      skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
