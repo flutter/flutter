@@ -4234,7 +4234,7 @@ void main() {
     },
   );
 
-  testWidgets('Setting dismissible to false prevents timeout', (WidgetTester tester) async {
+  testWidgets('Setting persist to true prevents timeout', (WidgetTester tester) async {
     const String buttonText = 'Show snackbar';
     const String snackbarContent = 'Snackbar';
 
@@ -4248,7 +4248,7 @@ void main() {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       duration: Duration(seconds: 1),
-                      dismissible: false,
+                      persist: true,
                       showCloseIcon: true,
                       content: Text(snackbarContent),
                     ),
