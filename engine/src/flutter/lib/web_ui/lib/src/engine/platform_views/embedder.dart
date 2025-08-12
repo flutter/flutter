@@ -350,7 +350,7 @@ class PlatformViewEmbedder {
       await rasterizer.rasterize(
         <DisplayCanvas>[debugBoundsCanvas!],
         <ui.Picture>[boundsRecorder.endRecording()],
-        null
+        null,
       );
       sceneHost.append(debugBoundsCanvas!.hostElement);
     }

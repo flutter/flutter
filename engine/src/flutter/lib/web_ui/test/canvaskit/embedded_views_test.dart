@@ -893,9 +893,8 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView, _platformView]);
 
       expect(() {
-        final PlatformViewEmbedder embedder = (renderer as CanvasKitRenderer)
-            .rasterizers[implicitView.viewId]!
-            .viewEmbedder;
+        final PlatformViewEmbedder embedder =
+            (renderer as CanvasKitRenderer).rasterizers[implicitView.viewId]!.viewEmbedder;
         // The following line used to cause a "Concurrent modification during iteration"
         embedder.dispose();
       }, returnsNormally);
@@ -1070,7 +1069,8 @@ void testMain() {
       await renderScene(scene);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView, _platformView, _overlay]);
 
-      final Composition composition = CanvasKitRenderer.instance
+      final Composition composition = CanvasKitRenderer
+          .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
           .debugActiveComposition;
@@ -1306,7 +1306,8 @@ void testMain() {
       ]);
 
       // The second-to-last canvas should have all the extra pictures.
-      final Composition composition = CanvasKitRenderer.instance
+      final Composition composition = CanvasKitRenderer
+          .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
           .debugActiveComposition;
@@ -1367,7 +1368,8 @@ void testMain() {
       ]);
 
       // The last canvas should have all the pictures.
-      final Composition secondComposition = CanvasKitRenderer.instance
+      final Composition secondComposition = CanvasKitRenderer
+          .instance
           .rasterizers[implicitView.viewId]!
           .viewEmbedder
           .debugActiveComposition;

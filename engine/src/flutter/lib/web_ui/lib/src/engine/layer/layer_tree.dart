@@ -4,7 +4,8 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show BitmapSize, FrameTimingRecorder, kProfileApplyFrame, kProfilePrerollFrame;
+import '../../engine.dart'
+    show BitmapSize, FrameTimingRecorder, kProfileApplyFrame, kProfilePrerollFrame;
 import '../platform_views/embedder.dart';
 import '../profiler.dart';
 import 'layer.dart';
