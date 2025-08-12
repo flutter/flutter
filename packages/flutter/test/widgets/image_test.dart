@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
+import '../painting/image_test_utils.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -125,6 +126,54 @@ void main() {
 
     renderImage = key.currentContext!.findRenderObject()! as RenderImage;
     expect(renderImage.image, isNull);
+  });
+
+  testWidgets('Image wraps content with ClipRRect when borderRadius provided', (
+    WidgetTester tester,
+  ) async {
+    final TestImageProvider provider = TestImageProvider(image10x10);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Image(
+            image: provider,
+            width: 50,
+            height: 50,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      ),
+    );
+
+    // Complete the image stream and settle.
+    provider.complete();
+    await tester.pumpAndSettle();
+
+    // Expect a ClipRRect in the tree and that it receives the borderRadius.
+    final Finder clipFinder = find.byType(ClipRRect);
+    expect(clipFinder, findsOneWidget);
+    final ClipRRect clip = tester.widget<ClipRRect>(clipFinder);
+    expect(clip.borderRadius, equals(BorderRadius.circular(8.0)));
+  });
+
+  testWidgets('Image does not insert ClipRRect when borderRadius is null', (
+    WidgetTester tester,
+  ) async {
+    final TestImageProvider provider = TestImageProvider(image10x10);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Image(image: provider),
+      ),
+    );
+
+    provider.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ClipRRect), findsNothing);
   });
 
   testWidgets(

@@ -351,6 +351,7 @@ class Image extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.width,
     this.height,
+    this.borderRadius,
     this.color,
     this.opacity,
     this.colorBlendMode,
@@ -438,6 +439,7 @@ class Image extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.width,
     this.height,
+    this.borderRadius,
     this.color,
     this.opacity,
     this.colorBlendMode,
@@ -508,6 +510,7 @@ class Image extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.width,
     this.height,
+    this.borderRadius,
     this.color,
     this.opacity,
     this.colorBlendMode,
@@ -670,6 +673,7 @@ class Image extends StatefulWidget {
     double? scale,
     this.width,
     this.height,
+    this.borderRadius,
     this.color,
     this.opacity,
     this.colorBlendMode,
@@ -733,6 +737,7 @@ class Image extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.width,
     this.height,
+    this.borderRadius,
     this.color,
     this.opacity,
     this.colorBlendMode,
@@ -899,6 +904,13 @@ class Image extends StatefulWidget {
   /// Consider using [fit] to adapt the image's rendering to fit the given width
   /// and height if the exact image dimensions are not known in advance.
   final double? height;
+
+  /// When set, the image is clipped to a rounded rectangle with the given radius.
+  ///
+  /// This provides a shortcut for rounding image corners without having to wrap
+  /// the widget in a separate [ClipRRect]. If `null`, the image is displayed
+  /// without clipping.
+  final BorderRadius? borderRadius;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color? color;
@@ -1407,6 +1419,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     if (widget.loadingBuilder != null) {
       result = widget.loadingBuilder!(context, result, _loadingProgress);
+    }
+    // If a borderRadius was provided, clip the image to rounded rect.
+    if (widget.borderRadius != null) {
+      result = ClipRRect(borderRadius: widget.borderRadius!, child: result);
     }
 
     return result;
