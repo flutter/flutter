@@ -591,9 +591,9 @@ Shell::~Shell() {
         std::weak_ptr<ShellIOManager> weak_io_manager(io_manager);
         io_manager.reset();
 
-       // If the IO manager is not being used by any other spawned shells,
-       // then detach the resource context from the IO thread.
-       if (platform_view && weak_io_manager.expired()) {
+        // If the IO manager is not being used by any other spawned shells,
+        // then detach the resource context from the IO thread.
+        if (platform_view && weak_io_manager.expired()) {
           platform_view->ReleaseResourceContext();
         }
         io_latch.Signal();
