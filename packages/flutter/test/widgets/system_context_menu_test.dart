@@ -895,4 +895,57 @@ void main() {
     },
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
+
+  testWidgets('Default iOS SystemContextMenu includes Share for non-empty selection',
+      (WidgetTester tester) async {
+    final controller = TextEditingController(text: 'Hello world');
+
+    // Force iOS + tell Flutter we support the iOS system context menu path.
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(supportsShowingSystemContextMenu: true),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: _HostEditable(), // minimal EditableText wrapper
+          ),
+        ),
+      ),
+    );
+
+    // Setup selection so sharing is meaningful.
+    final state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.widget.controller.text = controller.text;
+    state.widget.controller.selection =
+        const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
+    state.widget.focusNode.requestFocus();
+    await tester.pump();
+
+    // Get iOS SYSTEM menu defaults and assert Share is present.
+    final items = SystemContextMenu.getDefaultItems(state);
+    expect(items.any((e) => e is IOSSystemContextMenuItemShare), isTrue);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+}
+
+class _HostEditable extends StatelessWidget {
+  const _HostEditable();
+
+  @override
+  Widget build(BuildContext context) {
+    return EditableText(
+      controller: TextEditingController(),
+      focusNode: FocusNode(),
+      style: const TextStyle(fontSize: 14),
+      cursorColor: Colors.blue,
+      backgroundCursorColor: Colors.grey,
+      // Use the system context menu pipeline on iOS.
+      contextMenuBuilder: (BuildContext _, EditableTextState s) {
+        return SystemContextMenu.editableText(editableTextState: s);
+      },
+    );
+  }
 }
