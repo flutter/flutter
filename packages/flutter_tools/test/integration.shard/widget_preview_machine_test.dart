@@ -93,8 +93,12 @@ void main() {
   }
 
   group('flutter widget-preview start --machine', () {
-    testWithoutContext('smoke test', () async {
+    testWithoutContext('launches in browser', () async {
       await runWidgetPreviewMachineMode(expectedEvents: launchEvents);
+    });
+
+    testWithoutContext('launches web server', () async {
+      await runWidgetPreviewMachineMode(expectedEvents: launchEvents, useWebServer: true);
     });
   });
 }
