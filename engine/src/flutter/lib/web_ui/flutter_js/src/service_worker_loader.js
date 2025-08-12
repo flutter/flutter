@@ -22,4 +22,4 @@ export class FlutterServiceWorkerLoader {
     }
     return Promise.resolve();
   }
-};
+}
