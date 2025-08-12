@@ -23,7 +23,9 @@ FlutterSemanticsNode2 CreateSemanticsNode(
     const std::vector<int32_t>* children = nullptr) {
   return {
       .id = id,
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .flags__deprecated__ = static_cast<FlutterSemanticsFlag>(0),
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .actions = static_cast<FlutterSemanticsAction>(0),
       .text_selection_base = -1,
       .text_selection_extent = -1,

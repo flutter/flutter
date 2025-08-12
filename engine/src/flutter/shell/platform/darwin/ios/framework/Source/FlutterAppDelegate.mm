@@ -224,9 +224,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 // This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:
-          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
-              restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
   if ([self.lifeCycleDelegate application:application
                      continueUserActivity:userActivity
                        restorationHandler:restorationHandler]) {

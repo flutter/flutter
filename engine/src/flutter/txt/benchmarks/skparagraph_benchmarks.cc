@@ -147,6 +147,7 @@ BENCHMARK_F(SkParagraphFixture, ManyStylesLayout)(benchmark::State& state) {
 
 BENCHMARK_DEFINE_F(SkParagraphFixture, TextBigO)(benchmark::State& state) {
   std::vector<uint16_t> text;
+  text.reserve(state.range(0));
   for (uint16_t i = 0; i < state.range(0); ++i) {
     text.push_back(i % 5 == 0 ? ' ' : i);
   }
@@ -263,6 +264,7 @@ BENCHMARK_F(SkParagraphFixture, PaintDecoration)(benchmark::State& state) {
   sktxt::TextStyle text_style;
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   text_style.setDecoration(static_cast<sktxt::TextDecoration>(
       sktxt::TextDecoration::kLineThrough | sktxt::TextDecoration::kOverline |
       sktxt::TextDecoration::kUnderline));

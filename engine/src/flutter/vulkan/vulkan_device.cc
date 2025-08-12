@@ -76,6 +76,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   std::vector<const char*> layers;
 
+  layers.reserve(enabled_layers.size());
   for (size_t i = 0; i < enabled_layers.size(); i++) {
     layers.push_back(enabled_layers[i].c_str());
   }

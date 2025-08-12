@@ -18,6 +18,7 @@ void Add(TrieNodePtr* trie, const char* entry) {
     if (!*trie) {
       *trie = std::make_unique<TrieNode>();
     }
+    // NOLINTNEXTLINE(clang-analyzer-security.ArrayBound)
     Add(&(*trie)->children[ch], entry + 1);
   }
 }

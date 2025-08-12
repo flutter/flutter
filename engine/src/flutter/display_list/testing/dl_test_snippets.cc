@@ -642,26 +642,11 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawLine",
        {
-           {1, 24, 1,
-            [](DlOpReceiver& r) {
-              r.drawLine({0, 0}, {10, 10});
-            }},
-           {1, 24, 1,
-            [](DlOpReceiver& r) {
-              r.drawLine({1, 0}, {10, 10});
-            }},
-           {1, 24, 1,
-            [](DlOpReceiver& r) {
-              r.drawLine({0, 1}, {10, 10});
-            }},
-           {1, 24, 1,
-            [](DlOpReceiver& r) {
-              r.drawLine({0, 0}, {20, 10});
-            }},
-           {1, 24, 1,
-            [](DlOpReceiver& r) {
-              r.drawLine({0, 0}, {10, 20});
-            }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {10, 10}); }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({1, 0}, {10, 10}); }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 1}, {10, 10}); }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {20, 10}); }},
+           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {10, 20}); }},
        }},
       {"DrawDashedLine",
        {
@@ -734,18 +719,9 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawCircle",
        {
-           {1, 16, 1,
-            [](DlOpReceiver& r) {
-              r.drawCircle({0, 0}, 10);
-            }},
-           {1, 16, 1,
-            [](DlOpReceiver& r) {
-              r.drawCircle({0, 5}, 10);
-            }},
-           {1, 16, 1,
-            [](DlOpReceiver& r) {
-              r.drawCircle({0, 0}, 20);
-            }},
+           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 0}, 10); }},
+           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 5}, 10); }},
+           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 0}, 20); }},
        }},
       {"DrawRRect",
        {

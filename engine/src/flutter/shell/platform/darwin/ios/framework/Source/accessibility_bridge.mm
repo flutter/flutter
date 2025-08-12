@@ -21,8 +21,6 @@ FLUTTER_ASSERT_ARC
 namespace flutter {
 namespace {
 
-constexpr int32_t kSemanticObjectIdInvalid = -1;
-
 class DefaultIosDelegate : public AccessibilityBridge::IosDelegate {
  public:
   bool IsFlutterViewControllerPresentingModalViewController(
@@ -49,7 +47,6 @@ AccessibilityBridge::AccessibilityBridge(
     : view_controller_(view_controller),
       platform_view_(platform_view),
       platform_views_controller_(platform_views_controller),
-      last_focused_semantics_object_id_(kSemanticObjectIdInvalid),
       objects_([[NSMutableDictionary alloc] init]),
       previous_routes_({}),
       ios_delegate_(ios_delegate ? std::move(ios_delegate)

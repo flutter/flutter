@@ -80,7 +80,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   }
 
   void UpdateResourceContext(sk_sp<ResourceContext> context) {
-    context_ = context;
+    context_ = std::move(context);
   }
 
  private:
@@ -104,7 +104,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
              bool drain_immediate = false)
       : task_runner_(std::move(task_runner)),
         drain_delay_(delay),
-        context_(context),
+        context_(std::move(context)),
         drain_immediate_(drain_immediate) {}
 
   ~UnrefQueue() {
@@ -133,7 +133,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
 #if !SLIMPELLER
                       const std::deque<GrBackendTexture>& textures,
 #endif  //  !SLIMPELLER
-                      sk_sp<ResourceContext> context) {
+                      const sk_sp<ResourceContext>& context) {
     for (SkRefCnt* skia_object : skia_objects) {
       skia_object->unref();
     }

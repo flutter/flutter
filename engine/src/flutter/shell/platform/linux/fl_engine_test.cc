@@ -989,6 +989,7 @@ TEST(FlEngineTest, SendKeyEventError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   g_autoptr(GError) error = nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 

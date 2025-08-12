@@ -19,7 +19,7 @@
 namespace flutter::testing {
 
 TestVulkanSurface::TestVulkanSurface(TestVulkanImage&& image)
-    : image_(std::move(image)){};
+    : image_(std::move(image)) {};
 
 std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
     const TestVulkanContext& context,
