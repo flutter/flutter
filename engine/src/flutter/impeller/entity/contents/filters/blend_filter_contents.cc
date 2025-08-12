@@ -706,7 +706,8 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
 
       VS::FrameInfo frame_info;
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.texture_sampler_y_coord_scale = 1.0;
+      frame_info.texture_sampler_y_coord_scale =
+          dst_snapshot->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
       frag_info.alpha = 1.0;
