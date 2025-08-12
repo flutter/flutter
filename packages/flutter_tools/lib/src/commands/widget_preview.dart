@@ -496,9 +496,8 @@ final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
 /// A custom logger for the widget-preview commands that disables non-event output to stdio when
 /// machine mode is enabled.
 final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
-  WidgetPreviewMachineAwareLogger(super.delegate) : _delegate = delegate;
+  WidgetPreviewMachineAwareLogger(super.delegate);
 
-  final Logger _delegate;
   var machine = false;
 
   @override
@@ -514,7 +513,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return;
     }
-    _delegate.printError(
+    super.printError(
       message,
       stackTrace: stackTrace,
       emphasis: emphasis,
@@ -538,7 +537,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return;
     }
-    _delegate.printWarning(
+    super.printWarning(
       message,
       emphasis: emphasis,
       color: color,
@@ -562,7 +561,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return;
     }
-    _delegate.printStatus(
+    super.printStatus(
       message,
       emphasis: emphasis,
       color: color,
@@ -578,7 +577,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return;
     }
-    _delegate.printBox(message, title: title);
+    super.printBox(message, title: title);
   }
 
   @override
@@ -586,7 +585,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return;
     }
-    _delegate.printTrace(message);
+    super.printTrace(message);
   }
 
   @override
@@ -610,7 +609,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return SilentStatus(stopwatch: Stopwatch());
     }
-    return _delegate.startProgress(
+    return super.startProgress(
       message,
       progressId: progressId,
       progressIndicatorPadding: progressIndicatorPadding,
@@ -627,7 +626,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (machine) {
       return SilentStatus(stopwatch: Stopwatch());
     }
-    return _delegate.startSpinner(
+    return super.startSpinner(
       onFinish: onFinish,
       timeout: timeout,
       slowWarningCallback: slowWarningCallback,
