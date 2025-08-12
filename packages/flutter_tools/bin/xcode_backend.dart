@@ -102,16 +102,16 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
-  /// Run given command in a synchronous subprocess.
+  /// Run given command ([bin]) in a synchronous subprocess.
   ///
-  /// @param bin The command to run.
-  /// @param args Args to pass into the command.
-  /// @param verbose Verbose mode.
-  /// @param allowFail If set, will not throw exceptions or result in xcode failure.
-  /// @param skipErrorLog If set, will skip stderr in non-verbose mode, and pipe
-  ///     stderr to stdout in verbose mode.
-  /// @param workingDirectory The current working directory to run the command.
-  /// @throws [Exception] if the exit code is not 0.
+  /// If [allowFail] is true, an exception will not be thrown even if the process returns a
+  /// non-zero exit code. Also, `error:` will not be prefixed to the output to prevent Xcode
+  /// complication failures.
+  ///
+  /// If [skipErrorLog] is true, `stderr` from the process will not be output unless in [verbose]
+  /// mode. If in [verbose], pipes `stderr` to `stdout`.
+  ///
+  /// Will throw [Exception] if the exit code is not 0.
   ProcessResult runSync(
     String bin,
     List<String> args, {
