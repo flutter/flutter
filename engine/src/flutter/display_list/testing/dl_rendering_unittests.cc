@@ -4152,7 +4152,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then Opacity should always work.
   // The reverse sometimes works.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    auto color_filter = color_filters[cfi];
+    const auto& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
@@ -4182,7 +4182,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
     DlPaint nested_paint1 = DlPaint().setOpacity(opacity);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      auto image_filter = image_filters[ifi];
+      const auto& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
@@ -4198,12 +4198,12 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then IF should always work.
   // The reverse might work, but we lack the infrastructure to check it.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    auto color_filter = color_filters[cfi];
+    const auto& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      auto image_filter = image_filters[ifi];
+      const auto& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
