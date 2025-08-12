@@ -104,7 +104,14 @@ class Context {
 
   /// Run given command in a synchronous subprocess.
   ///
-  /// Will throw [Exception] if the exit code is not 0.
+  /// @param bin The command to run.
+  /// @param args Args to pass into the command.
+  /// @param verbose Verbose mode.
+  /// @param allowFail If set, will not throw exceptions or result in xcode failure.
+  /// @param skipErrorLog If set, will skip stderr in non-verbose mode, and pipe
+  ///     stderr to stdout in verbose mode.
+  /// @param workingDirectory The current working directory to run the command.
+  /// @throws [Exception] if the exit code is not 0.
   ProcessResult runSync(
     String bin,
     List<String> args, {
