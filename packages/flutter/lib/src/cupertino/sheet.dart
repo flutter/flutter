@@ -733,6 +733,12 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _stretchDragController = _StretchDragControllerProvider.maybeOf(context);
+  }
+
+  @override
   void dispose() {
     _recognizer.dispose();
 
@@ -757,12 +763,19 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
+    if (_stretchDragController == null) {
+      return;
+    }
     _dragGestureController!.dragUpdate(details.primaryDelta!, _stretchDragController!.controller);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_dragGestureController != null);
+    if (_stretchDragController == null) {
+      _dragGestureController = null;
+      return;
+    }
     _dragGestureController!.dragEnd(
       details.velocity.pixelsPerSecond.dy / context.size!.height,
       _stretchDragController!.controller,
@@ -774,6 +787,10 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     assert(mounted);
     // This can be called even if start is not called, paired with the "down" event
     // that we don't consider here.
+    if (_stretchDragController == null) {
+      _dragGestureController = null;
+      return;
+    }
     _dragGestureController?.dragEnd(0.0, _stretchDragController!.controller);
     _dragGestureController = null;
   }
