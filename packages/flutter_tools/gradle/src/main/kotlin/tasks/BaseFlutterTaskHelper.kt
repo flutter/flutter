@@ -13,7 +13,6 @@ import org.gradle.api.tasks.OutputFiles
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
-import java.nio.file.Paths
 
 /**
  * Stateless object to contain the logic used in [BaseFlutterTask]. Any required state should be stored

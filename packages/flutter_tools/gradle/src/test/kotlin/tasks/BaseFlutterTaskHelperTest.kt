@@ -177,6 +177,8 @@ class BaseFlutterTaskHelperTest {
             baseFlutterTask.flutterExecutable!!.absolutePath
         } returns BaseFlutterTaskPropertiesTest.FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST
 
+        every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_FILE_PATH
+
         every { baseFlutterTask.localEngine } returns BaseFlutterTaskPropertiesTest.LOCAL_ENGINE_TEST
         every { baseFlutterTask.localEngineSrcPath } returns BaseFlutterTaskPropertiesTest.LOCAL_ENGINE_SRC_PATH_TEST
 
@@ -275,6 +277,8 @@ class BaseFlutterTaskHelperTest {
         every {
             baseFlutterTask.flutterExecutable!!.absolutePath
         } returns BaseFlutterTaskPropertiesTest.FLUTTER_EXECUTABLE_ABSOLUTE_PATH_TEST
+
+        every { baseFlutterTask.targetPath } returns BaseFlutterTaskPropertiesTest.FLUTTER_TARGET_FILE_PATH
 
         every { baseFlutterTask.localEngine } returns null
         every { baseFlutterTask.localEngineSrcPath } returns null
