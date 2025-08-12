@@ -170,17 +170,6 @@ class FlutterView {
   //   stored view constraints on the FlutterView object.
   ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
 
-  double _computeMinConstraintValue(double? desired, double available) {
-    assert(desired == null || desired >= 0, 'Minimum constraint must be >= 0 if set.');
-    assert(desired == null || desired.isFinite, 'Minimum constraint must be finite.');
-    return desired ?? available;
-  }
-
-  double _computeMaxConstraintValue(double? desired, double available) {
-    assert(desired == null || desired >= 0, 'Maximum constraint must be >= 0 if set.');
-    return desired ?? available;
-  }
-
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
   ///
@@ -387,9 +376,6 @@ class FlutterView {
   /// * [RendererBinding], the Flutter framework class which manages layout and
   ///   painting.
   void render(Scene scene, {Size? size}) {
-    var width = size?.width ?? physicalSize.width;
-    var height = size?.height ?? physicalSize.height;
-    print("window render called: $width x $height");
     _render(
       viewId,
       scene as _NativeScene,
@@ -1000,7 +986,6 @@ class AccessibilityFeatures {
   ///
   /// Returns `true` on platforms where such announcements are
   /// generally supported without discouragement. (iOS, web etc)
-
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // "announce" than discourage it.
   bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
