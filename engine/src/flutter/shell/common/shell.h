@@ -39,18 +39,12 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/platform/common/geometry.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/context.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
 namespace flutter {
-
-struct SizeConstraints {
-  double min_width = 0.0;
-  double max_width = 0.0;
-  double min_height = 0.0;
-  double max_height = 0.0;
-};
 
 /// Error exit codes for the Dart isolate.
 enum class DartErrorCode {
@@ -524,8 +518,7 @@ class Shell final : public PlatformView::Delegate,
 
   // used to discard wrong size layer tree produced during interactive
   // resizing
-
-  std::unordered_map<int64_t, SizeConstraints> expected_frame_constraints_;
+  std::unordered_map<int64_t, BoxConstraints> expected_frame_constraints_;
 
   // Used to communicate the right frame bounds via service protocol.
   double device_pixel_ratio_ = 0.0;
@@ -809,10 +802,10 @@ class Shell final : public PlatformView::Delegate,
   // directory.
   std::unique_ptr<DirectoryAssetBundle> RestoreOriginalAssetResolver();
 
-  SizeConstraints ExpectedFrameSize(int64_t view_id);
+  BoxConstraints ExpectedFrameSize(int64_t view_id);
 
-  bool isSizeWithinConstraints(const DlISize& size,
-                               const SizeConstraints& constraints);
+  bool IsSizeWithinConstraints(const DlISize& size,
+                               const BoxConstraints& constraints);
 
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
