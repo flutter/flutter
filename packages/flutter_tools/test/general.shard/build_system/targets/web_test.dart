@@ -254,6 +254,45 @@ name: foo
     }),
   );
 
+  group('--static-assets-url', () {
+    test(
+      'WebTemplatedFiles replaces placeholder with given value',
+      () => testbed.run(() async {
+        environment.defines[kStaticAssetsUrl] = 'https://static.example.com/example-app/';
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('https://static.example.com/example-app/'),
+        );
+      }),
+    );
+
+    test(
+      'WebTemplatedFiles replaces placeholder with / when not set',
+      () => testbed.run(() async {
+        final Directory webResources = environment.projectDir.childDirectory('web');
+        webResources.childFile('index.html').createSync(recursive: true);
+        webResources.childFile('index.html').writeAsStringSync('''
+<!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
+    ''');
+        environment.buildDir.childFile('main.dart.js').createSync();
+        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+
+        expect(
+          environment.outputDir.childFile('index.html').readAsStringSync(),
+          contains('staticAssetsUrl = "/"'),
+        );
+      }),
+    );
+  });
+
   test(
     'WebReleaseBundle copies dart2js output and resource files to output directory',
     () => testbed.run(() async {

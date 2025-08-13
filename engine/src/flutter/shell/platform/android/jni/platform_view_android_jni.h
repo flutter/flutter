@@ -186,7 +186,7 @@ class PlatformViewAndroidJNI {
   ///
   struct OverlayMetadata {
     OverlayMetadata(int id, fml::RefPtr<AndroidNativeWindow> window)
-        : id(id), window(std::move(window)){};
+        : id(id), window(std::move(window)) {};
 
     ~OverlayMetadata() = default;
 

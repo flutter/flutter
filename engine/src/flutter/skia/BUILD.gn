@@ -242,6 +242,7 @@ optional("fontmgr_android") {
   ]
   public = skia_ports_fontmgr_android_public
   sources = skia_ports_fontmgr_android_sources
+  sources += skia_ports_fontmgr_android_parser_sources
 }
 
 optional("fontmgr_custom") {
