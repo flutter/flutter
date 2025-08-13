@@ -1518,7 +1518,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       final Version? xcodeVersion = _xcode?.currentVersion;
       if (xcodeVersion != null && xcodeVersion.major >= 26) {
         return _IOSDeviceLogSources(
-          primarySource: IOSDeviceLogSource.devivectlAndLldb,
+          primarySource: IOSDeviceLogSource.devicectlAndLldb,
           fallbackSource: IOSDeviceLogSource.unifiedLogging,
         );
       }
@@ -1592,8 +1592,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// Whether `devicectl` and `lldb` are used as the primary or fallback source for device logs.
   @visibleForTesting
   bool get useCoreDeviceLogging {
-    return logSources.primarySource == IOSDeviceLogSource.devivectlAndLldb ||
-        logSources.fallbackSource == IOSDeviceLogSource.devivectlAndLldb;
+    return logSources.primarySource == IOSDeviceLogSource.devicectlAndLldb ||
+        logSources.fallbackSource == IOSDeviceLogSource.devicectlAndLldb;
   }
 
   /// Listen to Dart VM for logs on iOS 13 or greater.
@@ -1746,7 +1746,7 @@ enum IOSDeviceLogSource {
   unifiedLogging,
 
   /// Gets logs from `devicectl` and `lldb`
-  devivectlAndLldb,
+  devicectlAndLldb,
 }
 
 class _IOSDeviceLogSources {
@@ -1770,7 +1770,7 @@ class CoreDeviceLoggingSource {
       _loggingSubscriptions.add(
         debugger.logLines.listen(
           (String line) =>
-              onLogMessage(_debuggerLineHandler(line), IOSDeviceLogSource.devivectlAndLldb),
+              onLogMessage(_debuggerLineHandler(line), IOSDeviceLogSource.devicectlAndLldb),
           onError: linesController.addError,
           onDone: linesController.close,
           cancelOnError: true,
@@ -1783,7 +1783,7 @@ class CoreDeviceLoggingSource {
       _loggingSubscriptions.add(
         lldbLogForwarder.logLines.listen(
           (String line) =>
-              onLogMessage(_debuggerLineHandler(line), IOSDeviceLogSource.devivectlAndLldb),
+              onLogMessage(_debuggerLineHandler(line), IOSDeviceLogSource.devicectlAndLldb),
           onError: linesController.addError,
           onDone: linesController.close,
           cancelOnError: true,

@@ -255,6 +255,8 @@ class IOSCoreDeviceLauncher {
 
 /// This class is used to forward logs from devicectl to any active listeners.
 class IOSCoreDeviceLogForwarder {
+
+  /// The `devicectl` process that launched the app and is streaming the logs.
   Process? launchProcess;
 
   final _streamController = StreamController<String>.broadcast();

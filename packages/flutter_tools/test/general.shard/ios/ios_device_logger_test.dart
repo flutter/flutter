@@ -613,7 +613,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
       expect(logReader.useCoreDeviceLogging, isTrue);
-      expect(logReader.logSources.primarySource, IOSDeviceLogSource.devivectlAndLldb);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.devicectlAndLldb);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
     });
 
@@ -1179,35 +1179,9 @@ class FakeXcode extends Fake implements Xcode {
 }
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
-  // @override
-  // final FakeIOSCoreDeviceLogForwarder coreDeviceLogForwarder = FakeIOSCoreDeviceLogForwarder();
-
-  // @override
-  // final FakeLLDBLogForwarder lldbLogForwarder = FakeLLDBLogForwarder();
+  @override
+  final coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
 
   @override
-  final IOSCoreDeviceLogForwarder coreDeviceLogForwarder = IOSCoreDeviceLogForwarder();
-
-  @override
-  final LLDBLogForwarder lldbLogForwarder = LLDBLogForwarder();
+  final lldbLogForwarder = LLDBLogForwarder();
 }
-
-// class FakeIOSCoreDeviceLogForwarder extends Fake implements IOSCoreDeviceLogForwarder {
-//   @override
-//   var logLines = const Stream<String>.empty();
-
-//   @override
-//   Future<bool> exit() async {
-//     return true;
-//   }
-// }
-
-// class FakeLLDBLogForwarder extends Fake implements LLDBLogForwarder {
-//   @override
-//   var logLines = const Stream<String>.empty();
-
-//   @override
-//   Future<bool> exit() async {
-//     return true;
-//   }
-// }
