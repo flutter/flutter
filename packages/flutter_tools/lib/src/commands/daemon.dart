@@ -1824,7 +1824,7 @@ final class MachineOutputLogger extends DelegatingLogger {
       final event = <String, Object?>{
         'id': eventId,
         'progressId': eventType,
-        if (message != null) 'message': message,
+        'message': ?message,
         'finished': finished,
       };
 

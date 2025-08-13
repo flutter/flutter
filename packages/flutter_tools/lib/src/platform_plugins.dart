@@ -166,12 +166,12 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (package != null) 'package': package,
-      if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (dartFileName != null) kDartFileName: dartFileName,
+      'package': ?package,
+      'class': ?pluginClass,
+      kDartPluginClass: ?dartPluginClass,
+      kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      kDefaultPackage: ?defaultPackage,
       // Mustache doesn't support complex types.
       'supportsEmbeddingV1': _supportedEmbeddings.contains('1'),
       'supportsEmbeddingV2': _supportedEmbeddings.contains('2'),
@@ -326,12 +326,12 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     return <String, dynamic>{
       'name': name,
       'prefix': classPrefix,
-      if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (dartFileName != null) kDartFileName: dartFileName,
+      'class': ?pluginClass,
+      kDartPluginClass: ?dartPluginClass,
+      kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -413,12 +413,12 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (dartFileName != null) kDartFileName: dartFileName,
+      'class': ?pluginClass,
+      kDartPluginClass: ?dartPluginClass,
+      kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
       if (sharedDarwinSource) kSharedDarwinSource: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -513,12 +513,12 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
+      'class': ?pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (dartFileName != null) kDartFileName: dartFileName,
+      kDartPluginClass: ?dartPluginClass,
+      kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      kDefaultPackage: ?defaultPackage,
     };
   }
 }
@@ -596,12 +596,12 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      if (pluginClass != null) 'class': pluginClass,
+      'class': ?pluginClass,
       if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass!),
-      if (dartPluginClass != null) kDartPluginClass: dartPluginClass,
-      if (dartFileName != null) kDartFileName: dartFileName,
+      kDartPluginClass: ?dartPluginClass,
+      kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,
-      if (defaultPackage != null) kDefaultPackage: defaultPackage,
+      kDefaultPackage: ?defaultPackage,
     };
   }
 }

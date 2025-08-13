@@ -734,7 +734,7 @@ class SpawnPlugin extends PlatformPlugin {
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': FontConfigManager().fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && globals.platform.isWindows)
         'PATH':
             '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
