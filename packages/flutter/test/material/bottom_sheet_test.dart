@@ -2904,7 +2904,7 @@ void main() {
       ),
     );
     final Finder xText = find.text('X');
-    expect(tester.getSize(xText), Size.zero);
+    expect(tester.getSize(xText).isEmpty, isTrue);
   });
 }
 
