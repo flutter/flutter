@@ -1,5 +1,7 @@
 package com.flutter.gradle.tasks
 
+import com.flutter.gradle.FlutterPluginUtils
+import groovy.util.Node
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -14,9 +16,9 @@ abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
     @get:InputFile
     abstract val manifestFile: RegularFileProperty
 
-    // Example: A property to hold a custom value to add to the manifest
+    // In the past for this task namespace was the ApplicationId.
     @get:Input
-    abstract val customManifestValue: Property<String>
+    abstract val namespace: Property<String>
 
     // Does not need to transform manifest at all but there does not appear to be another dsl
     // supported way to depend on the merged manifest.
@@ -28,32 +30,17 @@ abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
 
     @TaskAction
     fun processManifest() {
-        val manifest = manifestFile.get().asFile
-        logger.lifecycle("Processing manifest: ${manifest.absolutePath}")
+        val manifestFile = manifestFile.get().asFile
+        logger.lifecycle("DeepLinkJsonFromManifestTask start.")
+        updatedManifest.asFile.get().writeText(manifestFile.readText())
+        val manifestNode: Node =
+            groovy.xml
+                .XmlParser(false, false)
+                .parse(manifestFile)
 
-        // Example: Read and print existing content
-        manifest.readLines().forEach { line ->
-            logger.lifecycle("Manifest line: $line")
-        }
+        val appLinkSettings = FlutterPluginUtils.createAppLinkSettings(namespace.get(), manifestNode)
+        deepLinkJson.asFile.get().writeText(appLinkSettings.toJson().toString())
 
-        // Example: Modify the manifest (e.g., add a custom attribute)
-        // This would involve XML parsing and manipulation,
-        // which is beyond a simple example, but illustrates the concept.
-        // For actual modification, you'd use an XML library.
-        val modifiedContent =
-            """
-            <manifest ...>
-                <application ...>
-                    <meta-data android:name="com.example.CUSTOM_VALUE" android:value="${customManifestValue.get()}"/>
-                </application>
-            </manifest>
-            """.trimIndent()
-        updatedManifest.asFile.get().writeText(manifest.readText())
-        deepLinkJson.asFile.get().writeText(modifiedContent)
-
-        // For this example, we're just logging, but in a real scenario,
-        // you'd write the modified content back to the manifestFile or a new output file.
-        // manifest.writeText(modifiedContent)
-        logger.lifecycle("Manifest processing complete (simulated modification).")
+        logger.lifecycle("DeepLinkJsonFromManifestTask complete.")
     }
 }

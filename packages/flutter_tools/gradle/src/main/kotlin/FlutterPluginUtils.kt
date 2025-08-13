@@ -8,7 +8,6 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
@@ -844,7 +843,8 @@ object FlutterPluginUtils {
         androidComponents.onVariants { variant ->
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    customManifestValue.set("com.hi.reid.you.did.it.2")
+                    namespace.set(variant.namespace)
+                    // TODO convert to project.property("outputPath")?
                     deepLinkJson.set(
                         project.layout.buildDirectory
                             .file("deeplink.json")
@@ -887,7 +887,7 @@ object FlutterPluginUtils {
         return createAppLinkSettings(variant.applicationId, manifest)
     }
 
-    private fun createAppLinkSettings(
+    public fun createAppLinkSettings(
         applicationId: String,
         manifest: Node,
     ): AppLinkSettings {
