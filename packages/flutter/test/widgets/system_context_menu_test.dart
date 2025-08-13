@@ -896,56 +896,70 @@ void main() {
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
 
-  testWidgets('Default iOS SystemContextMenu includes Share for non-empty selection',
-      (WidgetTester tester) async {
-    final controller = TextEditingController(text: 'Hello world');
+  testWidgets(
+    'Default iOS SystemContextMenu includes Share for non-empty selection',
+    (WidgetTester tester) async {
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
+            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+            final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return systemContextMenuItemDataFromJson(itemJson);
+            }).toList();
+            itemsReceived.add(lastItems);
+          }
+          return;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
 
-    // Force iOS + tell Flutter we support the iOS system context menu path.
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(supportsShowingSystemContextMenu: true),
-        child: const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: _HostEditable(), // minimal EditableText wrapper
+      final TextEditingController controller = TextEditingController(text: 'Hello world');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(supportsShowingSystemContextMenu: true),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: TextField(
+                  controller: controller,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(editableTextState: editableTextState);
+                  },
+                ),
+              ),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Setup selection so sharing is meaningful.
-    final state = tester.state<EditableTextState>(find.byType(EditableText));
-    state.widget.controller.text = controller.text;
-    state.widget.controller.selection =
-        const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
-    state.widget.focusNode.requestFocus();
-    await tester.pump();
+      // Focus the field first (this establishes the TextInputConnection).
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 
-    // Get iOS SYSTEM menu defaults and assert Share is present.
-    final items = SystemContextMenu.getDefaultItems(state);
-    expect(items.any((e) => e is IOSSystemContextMenuItemShare), isTrue);
+      // Set a non-empty selection to enable sharing.
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
+      await tester.pump();
 
-    debugDefaultTargetPlatformOverride = null;
-  });
-}
+      // Show the context menu.
+      expect(state.showToolbar(), true);
+      await tester.pump();
 
-class _HostEditable extends StatelessWidget {
-  const _HostEditable();
-
-  @override
-  Widget build(BuildContext context) {
-    return EditableText(
-      controller: TextEditingController(),
-      focusNode: FocusNode(),
-      style: const TextStyle(fontSize: 14),
-      cursorColor: Colors.blue,
-      backgroundCursorColor: Colors.grey,
-      // Use the system context menu pipeline on iOS.
-      contextMenuBuilder: (BuildContext _, EditableTextState s) {
-        return SystemContextMenu.editableText(editableTextState: s);
-      },
-    );
-  }
+      // Assert that the platform message included a Share item.
+      expect(itemsReceived, isNotEmpty);
+      expect(itemsReceived.last.any((e) => e is IOSSystemContextMenuItemDataShare), isTrue);
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
