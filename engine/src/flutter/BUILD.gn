@@ -78,10 +78,12 @@ group("flutter") {
 
   if (!is_qnx) {
     public_deps = [
-      ":unittests",
       "//flutter/shell/platform/embedder:flutter_engine",
       "//flutter/sky",
     ]
+    if (enable_unittests) {
+      public_deps += [ ":unittests" ]
+    }
   }
 
   # Ensure the example for a sample embedder compiles.
