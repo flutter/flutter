@@ -160,22 +160,21 @@ class _MyRouterDelegate extends RouterDelegate<_MyNavigationConfiguration>
         assert(!_pages.contains(myPage) || _pages.length > 1);
         _pages.remove(myPage);
       },
-      pages:
-          _pages
-              .map(
-                (_MyPage myPage) => switch (myPage) {
-                  _MyPage.unknown => _MyUnknownPage(),
-                  _MyPage.home => _MyHomePage(onNavigateToLeaf: _onNavigateToLeaf),
-                  _MyPage.leaf => _MyLeafPage(
-                    onNavigateToHome: _onNavigateToHome,
-                    onNavigateToNested: _onNavigateToNested,
-                  ),
-                  _MyPage.nestedNavigator => _MyNestedNavigatorPage(
-                    onNavigateToRootNavigator: _onNavigateToLeaf,
-                  ),
-                },
-              )
-              .toList(),
+      pages: _pages
+          .map(
+            (_MyPage myPage) => switch (myPage) {
+              _MyPage.unknown => _MyUnknownPage(),
+              _MyPage.home => _MyHomePage(onNavigateToLeaf: _onNavigateToLeaf),
+              _MyPage.leaf => _MyLeafPage(
+                onNavigateToHome: _onNavigateToHome,
+                onNavigateToNested: _onNavigateToNested,
+              ),
+              _MyPage.nestedNavigator => _MyNestedNavigatorPage(
+                onNavigateToRootNavigator: _onNavigateToLeaf,
+              ),
+            },
+          )
+          .toList(),
     );
   }
 }
@@ -326,19 +325,18 @@ class _MyNestedNavigatorState extends State<_MyNestedNavigator> with Restoration
         assert(nextPages.length < _pages.value.length);
         _pages.value = nextPages;
       },
-      pages:
-          _pages.value
-              .map(
-                (_MyNestedPage page) => switch (page) {
-                  _MyNestedPage.unknown => _MyUnknownPage(),
-                  _MyNestedPage.home => _MyNestedHomePage(
-                    onNavigateToLeaf: _onNavigateToLeaf,
-                    onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
-                  ),
-                  _MyNestedPage.leaf => _MyNestedLeafPage(onNavigateToHome: _onNavigateToHome),
-                },
-              )
-              .toList(),
+      pages: _pages.value
+          .map(
+            (_MyNestedPage page) => switch (page) {
+              _MyNestedPage.unknown => _MyUnknownPage(),
+              _MyNestedPage.home => _MyNestedHomePage(
+                onNavigateToLeaf: _onNavigateToLeaf,
+                onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
+              ),
+              _MyNestedPage.leaf => _MyNestedLeafPage(onNavigateToHome: _onNavigateToHome),
+            },
+          )
+          .toList(),
     );
   }
 }
