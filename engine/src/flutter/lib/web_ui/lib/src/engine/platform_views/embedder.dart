@@ -65,7 +65,7 @@ class PlatformViewEmbedder {
   /// Returns a list of canvases for the optimized rendering. These are used in
   /// the paint step.
   Iterable<LayerCanvas> getOptimizedCanvases() {
-    return _context.pictureToOptimizedCanvasMap!.values;
+    return _context.optimizedCanvases!;
   }
 
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
@@ -272,6 +272,7 @@ class PlatformViewEmbedder {
     // Create new picture recorders for the optimized render canvases and record
     // which pictures go in which canvas.
     final List<LayerPictureRecorder> optimizedCanvasRecorders = <LayerPictureRecorder>[];
+    final List<LayerCanvas> optimizedCanvases = <LayerCanvas>[];
     final Map<PictureLayer, LayerCanvas> pictureToOptimizedCanvasMap =
         <PictureLayer, LayerCanvas>{};
     for (final CompositionCanvas canvas in composition.canvases) {
@@ -279,11 +280,13 @@ class PlatformViewEmbedder {
       optimizedCanvasRecorders.add(pictureRecorder);
       final LayerCanvas layerCanvas =
           ui.Canvas(pictureRecorder, ui.Offset.zero & _frameSize.toSize()) as LayerCanvas;
+      optimizedCanvases.add(layerCanvas);
       for (final PictureLayer picture in canvas.pictures) {
         pictureToOptimizedCanvasMap[picture] = layerCanvas;
       }
     }
     _context.optimizedCanvasRecorders = optimizedCanvasRecorders;
+    _context.optimizedCanvases = optimizedCanvases;
     _context.pictureToOptimizedCanvasMap = pictureToOptimizedCanvasMap;
   }
 
@@ -820,6 +823,10 @@ class EmbedderFrameContext {
   /// The picture recorders for the optimized composition. This is set by
   /// calling [optimizeComposition].
   List<LayerPictureRecorder>? optimizedCanvasRecorders;
+
+  /// The Canvases which will be drawn into in the optimized composition. This
+  /// is set by calling [optimizeComposition].
+  List<LayerCanvas>? optimizedCanvases;
 
   /// A map from the original PictureLayer to the Canvas it should be drawn
   /// into in the optimized composition. This is set by calling
