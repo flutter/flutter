@@ -80,13 +80,14 @@ static void SetClipScissor(std::optional<Rect> clip_coverage,
                            Point global_pass_position) {
   // Set the scissor to the clip coverage area. We do this prior to rendering
   // the clip itself and all its contents.
-  IRect scissor;
+  IRect32 scissor;
   if (clip_coverage.has_value()) {
     clip_coverage = clip_coverage->Shift(-global_pass_position);
-    scissor = IRect::RoundOut(clip_coverage.value());
+    scissor = IRect32::RoundOut(clip_coverage.value());
     // The scissor rect must not exceed the size of the render target.
-    scissor = scissor.Intersection(IRect::MakeSize(pass.GetRenderTargetSize()))
-                  .value_or(IRect());
+    scissor =
+        scissor.Intersection(IRect32::MakeSize(pass.GetRenderTargetSize()))
+            .value_or(IRect32());
   }
   pass.SetScissor(scissor);
 }
@@ -227,7 +228,7 @@ Canvas::Canvas(ContentContext& renderer,
                const RenderTarget& render_target,
                bool is_onscreen,
                bool requires_readback,
-               IRect cull_rect)
+               IRect32 cull_rect)
     : renderer_(renderer),
       render_target_(render_target),
       is_onscreen_(is_onscreen),
@@ -1088,6 +1089,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
           Rect::MakeOriginSize(texture_coverage->GetOrigin(),
                                texture_coverage->GetSize().Max({1, 1}));
     } else {
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       src_coverage = cvg.value();
     }
   }
@@ -1204,20 +1206,26 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
     return std::nullopt;
   }
 
-  auto maybe_current_clip_coverage = clip_coverage_stack_.CurrentClipCoverage();
+  std::optional<Rect> maybe_current_clip_coverage =
+      clip_coverage_stack_.CurrentClipCoverage();
   if (!maybe_current_clip_coverage.has_value()) {
     return std::nullopt;
   }
 
-  auto current_clip_coverage = maybe_current_clip_coverage.value();
+  Rect current_clip_coverage = maybe_current_clip_coverage.value();
+
+  FML_CHECK(!render_passes_.empty());
+  const LazyRenderingConfig& back_render_pass = render_passes_.back();
+  std::shared_ptr<Texture> back_texture =
+      back_render_pass.inline_pass_context->GetTexture();
+  FML_CHECK(back_texture) << "Context is valid:"
+                          << back_render_pass.inline_pass_context->IsValid();
 
   // The maximum coverage of the subpass. Subpasses textures should never
   // extend outside the parent pass texture or the current clip coverage.
   std::optional<Rect> maybe_coverage_limit =
       Rect::MakeOriginSize(GetGlobalPassPosition(),
-                           Size(render_passes_.back()
-                                    .inline_pass_context->GetTexture()
-                                    ->GetSize()))
+                           Size(back_texture->GetSize()))
           .Intersection(current_clip_coverage);
 
   if (!maybe_coverage_limit.has_value() || maybe_coverage_limit->IsEmpty()) {
@@ -1398,7 +1406,7 @@ void Canvas::SaveLayer(const Paint& paint,
       std::optional<Snapshot> maybe_snapshot =
           backdrop_data->shared_filter_snapshot;
       if (maybe_snapshot.has_value()) {
-        Snapshot snapshot = maybe_snapshot.value();
+        const Snapshot& snapshot = maybe_snapshot.value();
         std::shared_ptr<TextureContents> contents = TextureContents::MakeRect(
             subpass_coverage.Shift(-GetGlobalPassPosition()));
         auto scaled =
