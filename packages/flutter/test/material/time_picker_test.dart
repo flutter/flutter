@@ -2273,28 +2273,28 @@ void main() {
     });
 
     group('Time picker - emptyInitialInput (${materialType.name})', () {
-      testWidgets(
-        'Fields are empty and show correct hints when emptyInitialInput is true',
-        (WidgetTester tester) async {
-          await startPicker(
-            tester,
-            (_) {},
-            entryMode: TimePickerEntryMode.input,
-            materialType: materialType,
-            emptyInitialInput: true,
-          );
-          await tester.pump();
+      testWidgets('Fields are empty and show correct hints when emptyInitialInput is true', (
+        WidgetTester tester,
+      ) async {
+        await startPicker(
+          tester,
+          (_) {},
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+          emptyInitialInput: true,
+        );
+        await tester.pump();
 
-          final List<TextField> textFields =
-              tester.widgetList<TextField>(find.byType(TextField)).toList();
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
 
-          expect(textFields[0].controller?.text, isEmpty); // hour
-          expect(textFields[1].controller?.text, isEmpty); // minute
-          expect(textFields[0].decoration?.hintText, isNull);
-          expect(textFields[1].decoration?.hintText, isNull);
-          await finishPicker(tester);
-        },
-      );
+        expect(textFields[0].controller?.text, isEmpty); // hour
+        expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
+        await finishPicker(tester);
+      });
 
       testWidgets('User sets hour/minute after initially empty fields', (
         WidgetTester tester,
@@ -2310,8 +2310,9 @@ void main() {
           emptyInitialInput: true,
         );
 
-        final List<TextField> textFields =
-            tester.widgetList<TextField>(find.byType(TextField)).toList();
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
 
         expect(textFields[0].controller?.text, isEmpty); // hour
         expect(textFields[1].controller?.text, isEmpty); // minute
@@ -2338,8 +2339,9 @@ void main() {
           materialType: materialType,
         );
 
-        final List<TextField> textFields =
-            tester.widgetList<TextField>(find.byType(TextField)).toList();
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
 
         expect(textFields[0].controller?.text, '7'); // hour
         expect(textFields[1].controller?.text, '00'); // minute
