@@ -8560,7 +8560,7 @@ void main() {
       );
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
-      const int lines = 2;
+      const double lines = 2;
       await tester.pumpWidget(
         MaterialApp(
           home: Align(
@@ -8568,7 +8568,7 @@ void main() {
             child: SizedBox(
               width: 400,
               child: EditableText(
-                minLines: lines,
+                minLines: lines.floor(),
                 maxLines: lines,
                 controller: controller,
                 scrollController: scrollController,
