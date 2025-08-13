@@ -482,6 +482,7 @@ Shell::Shell(DartVMRef vm,
     These options are going to go away in an upcoming Flutter release. Remove
     the explicit opt-out. If you need to opt-out, please report a bug describing
     the issue.
+
     https://github.com/flutter/flutter/issues/new?template=02_bug.yml
 )warn";
   }
@@ -1077,8 +1078,18 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  if (metrics.device_pixel_ratio <= 0 || metrics.physical_width <= 0 ||
-      metrics.physical_height <= 0) {
+  if (metrics.device_pixel_ratio <= 0) {
+    return;
+  }
+
+  if (metrics.physical_width == 0 &&
+      !(metrics.min_width_constraint > 0 || metrics.max_width_constraint > 0)) {
+    FML_LOG(ERROR) << "Ignoring invalid viewport metrics width!";
+    return;
+  }
+  if (metrics.physical_height == 0 && !(metrics.min_height_constraint > 0 ||
+                                        metrics.max_height_constraint > 0)) {
+    FML_LOG(ERROR) << "Ignoring invalid viewport metrics height!";
     return;
   }
 
@@ -1106,28 +1117,9 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
-    bool has_given_constraints = (metrics.min_width_constraint != 0.0 ||
-                                  metrics.max_width_constraint != 0.0 ||
-                                  metrics.min_height_constraint != 0.0 ||
-                                  metrics.max_height_constraint != 0.0);
-
-    if (has_given_constraints) {
-      expected_frame_constraints_[view_id] = {
-          .min_width = metrics.min_width_constraint,
-          .max_width = metrics.max_width_constraint,
-          .min_height = metrics.min_height_constraint,
-          .max_height = metrics.max_height_constraint,
-
-      };
-    } else {
-      expected_frame_constraints_[view_id] = {
-          .min_width = metrics.physical_width,
-          .max_width = metrics.physical_width,
-          .min_height = metrics.physical_height,
-          .max_height = metrics.physical_height,
-      };
-    }
-
+    expected_frame_constraints_[view_id] = BoxConstraints(
+        Size(metrics.min_width_constraint, metrics.min_height_constraint),
+        Size(metrics.max_width_constraint, metrics.max_height_constraint));
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
@@ -1762,7 +1754,7 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_constraints = ExpectedFrameSize(view_id);
-  return !isSizeWithinConstraints(tree.frame_size(),
+  return !IsSizeWithinConstraints(tree.frame_size(),
                                   expected_frame_constraints);
 }
 
@@ -2366,7 +2358,7 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-SizeConstraints Shell::ExpectedFrameSize(int64_t view_id) {
+BoxConstraints Shell::ExpectedFrameSize(int64_t view_id) {
   auto found = expected_frame_constraints_.find(view_id);
 
   if (found == expected_frame_constraints_.end()) {
@@ -2376,21 +2368,25 @@ SizeConstraints Shell::ExpectedFrameSize(int64_t view_id) {
   return found->second;
 }
 
-bool Shell::isSizeWithinConstraints(const DlISize& size,
-                                    const SizeConstraints& constraints) {
-  if (constraints.min_width > 0.0 && size.width < constraints.min_width) {
+bool Shell::IsSizeWithinConstraints(const DlISize& size,
+                                    const BoxConstraints& constraints) {
+  if (constraints.smallest().width() > 0.0 &&
+      size.width < constraints.smallest().width()) {
     return false;
   }
 
-  if (constraints.max_width > 0.0 && size.width > constraints.max_width) {
+  if (constraints.biggest().width() > 0.0 &&
+      size.width > constraints.biggest().width()) {
     return false;
   }
 
-  if (constraints.min_height > 0.0 && size.height < constraints.min_height) {
+  if (constraints.smallest().height() > 0.0 &&
+      size.height < constraints.smallest().height()) {
     return false;
   }
 
-  if (constraints.max_height > 0.0 && size.height > constraints.max_height) {
+  if (constraints.biggest().height() > 0.0 &&
+      size.height > constraints.biggest().height()) {
     return false;
   }
 

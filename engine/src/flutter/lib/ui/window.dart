@@ -164,10 +164,6 @@ class FlutterView {
   /// See also:
   ///
   ///  * [physicalSize], which returns the current size of the view.
-  // TODO(goderbauer): Wire this up so embedders can configure it. This will
-  //   also require to message the size provided to the render call back to the
-  //   embedder. Change this from ViewConstraints.tight to a lookup of the
-  //   stored view constraints on the FlutterView object.
   ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
 
   /// The current dimensions of the rectangle as last reported by the platform
