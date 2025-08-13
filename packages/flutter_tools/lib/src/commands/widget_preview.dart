@@ -25,7 +25,6 @@ import '../isolated/resident_web_runner.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -139,6 +138,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             'Serve the widget preview environment using the web-server device instead of the '
             'browser.',
       )
+      ..addOption(
+        kDtdUrl,
+        help:
+            'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+        hide: !verbose,
+      )
       ..addFlag(
         kLaunchPreviewer,
         defaultsTo: true,
@@ -156,6 +161,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
   }
 
+  static const kDtdUrl = 'dtd-url';
   static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const kLaunchPreviewer = 'launch-previewer';
   static const kHeadless = 'headless';
@@ -342,7 +348,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   ///
   /// If --dtd-uri is not provided, a DTD instance managed by the tool will be started.
   Future<void> configureDtd() async {
-    final String? existingDtdUriStr = stringArg(FlutterGlobalOptions.kDtdUrl, global: true);
+    final String? existingDtdUriStr = stringArg(kDtdUrl);
     Uri? existingDtdUri;
     try {
       if (existingDtdUriStr != null) {
