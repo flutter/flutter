@@ -147,7 +147,7 @@ name: my_app
   }
 
   testUsingContext(
-    'runner with web server device does not support debugging without --start-paused',
+    'runner with web server device supports debugging without --start-paused',
     () {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
       flutterDevice.device = WebServerDevice(logger: BufferLogger.test());
@@ -165,7 +165,7 @@ name: my_app
         systemClock: globals.systemClock,
       );
 
-      expect(profileResidentWebRunner.debuggingEnabled, false);
+      expect(profileResidentWebRunner.debuggingEnabled, true);
 
       flutterDevice.device = chromeDevice;
 
@@ -1104,7 +1104,12 @@ name: my_app
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
       );
-      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: [
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
       setupMocks();
       flutterDevice.device = webServerDevice;
       webDevFS.report = UpdateFSReport(success: true);
@@ -1117,8 +1122,16 @@ name: my_app
       expect(logger.statusText, contains('Restarted application in'));
       expect(result.code, 0);
 
-      // web-server device does not send restart analytics
-      expect(fakeAnalytics.sentEvents, isEmpty);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.timing(
+            workflow: 'hot',
+            variableName: 'web-incremental-restart',
+            elapsedMilliseconds: 0,
+          ),
+        ),
+      );
     },
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
@@ -1581,7 +1594,7 @@ name: my_app
     'Sends unlaunched app.webLaunchUrl event for Web Server device',
     () async {
       final logger = BufferLogger.test();
-      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
       setupMocks();
       flutterDevice.device = WebServerDevice(logger: logger);
       webDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
@@ -1665,7 +1678,9 @@ flutter:
         mainLibName: 'my_app',
         packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
       );
-      expect(await residentWebRunner.run(), 0);
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      expect(await residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+      await connectionInfoCompleter.future;
       final File generatedLocalizationsFile = globals.fs
           .directory('lib')
           .childDirectory('l10n')
@@ -2056,6 +2071,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
+  var useDwdsWebSocketConnection = false;
+
+  @override
   Future<Uri> create() async {
     return baseUri;
   }
@@ -2236,7 +2254,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     int? hostVmServicePort,
     bool? ipv6 = false,
     bool enableDevTools = false,
-    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override
