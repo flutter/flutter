@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
@@ -74,7 +73,7 @@ void main() {
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
-      if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
+      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
