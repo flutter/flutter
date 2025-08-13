@@ -15,7 +15,7 @@ const bool _debugLogHistoryActions = false;
 class TestHistoryEntry {
   const TestHistoryEntry(this.state, this.title, this.url);
 
-  final dynamic state;
+  final Object? state;
   final String? title;
   final String url;
 
@@ -45,7 +45,7 @@ class TestUrlStrategy implements ui_web.UrlStrategy {
   String getPath() => currentEntry.url;
 
   @override
-  dynamic getState() => currentEntry.state;
+  Object? getState() => currentEntry.state;
 
   int _currentEntryIndex;
   int get currentEntryIndex => _currentEntryIndex;
