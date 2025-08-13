@@ -282,11 +282,7 @@ class DaemonConnection {
     final id = '${++_outgoingRequestId}';
     final completer = Completer<Object?>();
     _outgoingRequestCompleters[id] = completer;
-    final data = <String, Object?>{
-      'id': id,
-      'method': method,
-      if (params != null) 'params': params,
-    };
+    final data = <String, Object?>{'id': id, 'method': method, 'params': ?params};
     _logger.printTrace('-> Sending to daemon, id = $id, method = $method');
     _daemonStreams.send(data, binary);
     return completer.future;
@@ -294,7 +290,7 @@ class DaemonConnection {
 
   /// Sends a response to the other end of the connection.
   void sendResponse(Object id, [Object? result]) {
-    _daemonStreams.send(<String, Object?>{'id': id, if (result != null) 'result': result});
+    _daemonStreams.send(<String, Object?>{'id': id, 'result': ?result});
   }
 
   /// Sends an error response to the other end of the connection.
@@ -304,10 +300,7 @@ class DaemonConnection {
 
   /// Sends an event to the client.
   void sendEvent(String name, [Object? params, List<int>? binary]) {
-    _daemonStreams.send(<String, Object?>{
-      'event': name,
-      if (params != null) 'params': params,
-    }, binary);
+    _daemonStreams.send(<String, Object?>{'event': name, 'params': ?params}, binary);
   }
 
   /// Handles the input from the stream.

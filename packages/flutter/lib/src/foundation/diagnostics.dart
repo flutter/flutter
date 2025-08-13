@@ -1647,11 +1647,11 @@ abstract class DiagnosticsNode {
       result = <String, Object?>{
         'description': toDescription(),
         'type': runtimeType.toString(),
-        if (name != null) 'name': name,
+        'name': ?name,
         if (!showSeparator) 'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info) 'level': level.name,
         if (!showName) 'showName': showName,
-        if (emptyBodyDescription != null) 'emptyBodyDescription': emptyBodyDescription,
+        'emptyBodyDescription': ?emptyBodyDescription,
         if (style != DiagnosticsTreeStyle.sparse) 'style': style!.name,
         if (allowTruncate) 'allowTruncate': allowTruncate,
         if (hasChildren) 'hasChildren': hasChildren,

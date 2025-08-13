@@ -726,7 +726,7 @@ class FakeJava extends Fake implements Java {
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
-         if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+         Java.javaHomeEnvironmentVariable: ?javaHome,
          'PATH': '/android-studio/jbr/bin',
        },
        _canRun = canRun;
