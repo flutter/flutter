@@ -7,7 +7,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
-import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
@@ -307,16 +306,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    try {
-      _layout.performLayout(constraints.width);
-    } catch (e) {
-      printWarning(
-        'Canvas 2D threw an exception while laying '
-        'out the paragraph. '
-        'Exception:\n$e',
-      );
-      rethrow;
-    }
+    _layout.performLayout(constraints.width);
   }
 
   /// Paints this paragraph instance on a [canvas] at the given [offset].
