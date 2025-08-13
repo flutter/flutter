@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(SkISize)frameSize;
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -109,7 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// @brief Pushes backdrop filter mutation to the mutator stack of each visited platform view.
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
-                                withRect:(const SkRect&)filterRect;
+                                withRect:(const flutter::DlRect&)filterRect;
 
 /// @brief Pushes the view id of a visted platform view to the list of visied platform views.
 - (void)pushVisitedPlatformViewId:(int64_t)viewId;

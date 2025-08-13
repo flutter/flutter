@@ -141,10 +141,19 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 ///
 /// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
+/// {@tool dartpad}
+///
+/// This example shows a [SliverList] with a dynamic number of items.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://docs.flutter.dev/ui/layout/scrolling/slivers>, a description
 ///    of what slivers are and how to use them.
+///  * [CustomScrollView], which accepts slivers like [SliverList]
+///    to create custom scroll effects.
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
@@ -668,23 +677,21 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
 /// list, shows twenty boxes in a pretty teal grid:
 ///
 /// ```dart
-/// SliverGrid(
+/// SliverGrid.builder(
 ///   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
 ///     crossAxisSpacing: 10.0,
 ///     childAspectRatio: 4.0,
 ///   ),
-///   delegate: SliverChildBuilderDelegate(
-///     (BuildContext context, int index) {
-///       return Container(
-///         alignment: Alignment.center,
-///         color: Colors.teal[100 * (index % 9)],
-///         child: Text('grid item $index'),
-///       );
-///     },
-///     childCount: 20,
-///   ),
+///   itemCount: 20,
+///   itemBuilder: (BuildContext context, int index) {
+///     return Container(
+///       alignment: Alignment.center,
+///       color: Colors.teal[100 * (index % 9)],
+///       child: Text('grid item $index'),
+///     );
+///   },
 /// )
 /// ```
 /// {@end-tool}

@@ -1312,11 +1312,11 @@ abstract class _AndroidViewControllerInternals {
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
       if (hybrid) 'hybrid': hybrid,
-      if (size != null) 'width': size.width,
-      if (size != null) 'height': size.height,
+      'width': ?size?.width,
+      'height': ?size?.height,
       if (hybridFallback) 'hybridFallback': hybridFallback,
-      if (position != null) 'left': position.dx,
-      if (position != null) 'top': position.dy,
+      'left': ?position?.dx,
+      'top': ?position?.dy,
     };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParams.codec.encodeMessage(creationParams.data)!;

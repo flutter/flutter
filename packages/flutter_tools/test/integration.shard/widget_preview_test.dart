@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
@@ -23,6 +22,13 @@ import 'test_utils.dart';
 const firstLaunchMessagesWeb = <String>[
   'Creating widget preview scaffolding at:',
   'Launching the Widget Preview Scaffold...',
+  'Done loading previews.',
+];
+
+const firstLaunchMessagesWebServer = <String>[
+  'Creating widget preview scaffolding at:',
+  'Launching the Widget Preview Scaffold...',
+  'main.dart is being served at',
   'Done loading previews.',
 ];
 
@@ -53,7 +59,11 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> runWidgetPreview({required List<String> expectedMessages, Uri? dtdUri}) async {
+  Future<void> runWidgetPreview({
+    required List<String> expectedMessages,
+    Uri? dtdUri,
+    bool useWebServer = false,
+  }) async {
     expect(expectedMessages, isNotEmpty);
     var i = 0;
     process = await processManager.start(<String>[
@@ -62,7 +72,8 @@ void main() {
       'start',
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
-      if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
+      if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
+      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
@@ -99,6 +110,10 @@ void main() {
   group('flutter widget-preview start', () {
     testWithoutContext('smoke test', () async {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+    });
+
+    testWithoutContext('--web-server starts a web server instance', () async {
+      await runWidgetPreview(expectedMessages: firstLaunchMessagesWebServer, useWebServer: true);
     });
 
     testWithoutContext('does not recreate project on subsequent runs', () async {
