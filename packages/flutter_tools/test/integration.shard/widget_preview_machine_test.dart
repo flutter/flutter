@@ -9,13 +9,30 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
+import 'package:http/http.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const launchEvents = <String>['widget_preview.started'];
+typedef ExpectedEvent = ({String event, FutureOr<void> Function(Map<String, Object?>)? validator});
+
+final launchEvents = <ExpectedEvent>[
+  (
+    event: 'widget_preview.started',
+    validator: (Map<String, Object?> params) async {
+      if (params case {'uri': final String uri}) {
+        try {
+          final Response response = await get(Uri.parse(uri));
+          expect(response.statusCode, HttpStatus.ok, reason: 'Failed to retrieve widget previewer');
+        } catch (e) {
+          fail('Failed to access widget previewer: $e');
+        }
+      }
+    },
+  ),
+];
 
 void main() {
   late Directory tempDir;
@@ -38,11 +55,10 @@ void main() {
   });
 
   Future<void> runWidgetPreviewMachineMode({
-    required List<String> expectedEvents,
+    required List<ExpectedEvent> expectedEvents,
     bool useWebServer = false,
   }) async {
     expect(expectedEvents, isNotEmpty);
-    var i = 0;
     process = await processManager.start(<String>[
       flutterBin,
       'widget-preview',
@@ -53,21 +69,24 @@ void main() {
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
+    var nextExpectationIndex = 0;
     process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
       String message,
-    ) {
+    ) async {
       printOnFailure('STDOUT: $message');
       if (completer.isCompleted) {
         return;
       }
       try {
         final Object? event = json.decode(message);
-        if (event case [{'event': final String event}]) {
-          if (expectedEvents[i] == event) {
-            ++i;
+        if (event case [final Map<String, Object?> eventObject]) {
+          final ExpectedEvent expectation = expectedEvents[nextExpectationIndex];
+          if (expectation.event == eventObject['event']) {
+            await expectation.validator?.call(eventObject);
+            ++nextExpectationIndex;
           }
         }
-        if (i == expectedEvents.length) {
+        if (nextExpectationIndex == expectedEvents.length) {
           completer.complete();
         }
       } on FormatException {
