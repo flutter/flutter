@@ -1534,6 +1534,39 @@ void main() {
         },
       );
 
+      testWidgets(
+        'TimePicker dialog displays centered separator between hour and minute inputs for non-english locale',
+        (WidgetTester tester) async {
+          tester.view.physicalSize = const Size(400, 800);
+          tester.view.devicePixelRatio = 1.0;
+          addTearDown(tester.view.reset);
+
+          await tester.pumpWidget(
+            const MaterialApp(
+              localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: <Locale>[Locale('en'), Locale('es')],
+              locale: Locale('es'),
+              home: Material(
+                child: TimePickerDialog(
+                  initialTime: TimeOfDay(hour: 12, minute: 0),
+                  initialEntryMode: TimePickerEntryMode.input,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(
+            find.byType(Dialog),
+            matchesGoldenFile('non_english_locale.time_picker.dialog.separator.alignment.png'),
+          );
+        },
+      );
+
       testWidgets('provides semantics information for text fields', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await mediaQueryBoilerplate(
