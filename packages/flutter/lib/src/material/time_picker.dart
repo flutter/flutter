@@ -518,8 +518,9 @@ class _TimeSelectorSeparator extends StatelessWidget {
 
     return ExcludeSemantics(
       child: Container(
-        width: 36.0,
+        width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
         alignment: Alignment.center,
+        height: height,
         child: Text(
           _timeSelectorSeparatorValue(timeOfDayFormat),
           style: effectiveStyle,
@@ -1866,7 +1867,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                             ],
                           ),
                           Row(
-                            spacing: 36.0,
+                            spacing: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
                             children: <Widget>[
                               Expanded(
                                 child: (hourHasError.value || minuteHasError.value)

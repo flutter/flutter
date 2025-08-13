@@ -2068,7 +2068,6 @@ void main() {
         await finishPicker(tester);
         expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
       });
-
       // This test was failing and contained errors, so it has been commented out.
       // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
       // testWidgets('Ensure hour/minute fields are top-aligned with the separator', (
@@ -2373,13 +2372,13 @@ void main() {
   testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
     await startPicker(entryMode: TimePickerEntryMode.input, tester, (TimeOfDay? value) {});
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+    expect(tester.getSize(findBorderPainter().first), const Size(90.0, 70.0));
 
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+    expect(tester.getSize(findBorderPainter().first), const Size(90.0, 70.0));
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/153549.
@@ -2393,13 +2392,13 @@ void main() {
       materialType: MaterialType.material2,
     );
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+    expect(tester.getSize(findBorderPainter().first), const Size(90.0, 70.0));
 
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+    expect(tester.getSize(findBorderPainter().first), const Size(90.0, 70.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/162229.
