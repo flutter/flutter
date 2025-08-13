@@ -8,23 +8,18 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import groovy.lang.Closure
 import groovy.util.Node
-import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Properties
@@ -848,61 +843,22 @@ object FlutterPluginUtils {
 
         androidComponents.onVariants { variant ->
             val manifestUpdater =
-                project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", CustomManifestTask::class.java) {
-                    customManifestValue.set("com.hi.reid.you.did.it")
+                project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
+                    customManifestValue.set("com.hi.reid.you.did.it.2")
+                    deepLinkJson.set(
+                        project.layout.buildDirectory
+                            .file("deeplink.json")
+                            .get(),
+                    )
                 }
             // (1) Register the TaskProvider w.
             variant.artifacts
                 .use(manifestUpdater)
                 // (2) Connect the input and output files.
                 .wiredWithFiles(
-                    CustomManifestTask::manifestFile,
-                    CustomManifestTask::updatedManifest,
+                    DeepLinkJsonFromManifestTask::manifestFile,
+                    DeepLinkJsonFromManifestTask::updatedManifest,
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
-        }
-    }
-
-    // TODO(reidbaker): rename task
-    abstract class CustomManifestTask : DefaultTask() {
-        // Input property to receive the manifest file
-        @get:InputFile
-        abstract val manifestFile: RegularFileProperty
-
-        // Example: A property to hold a custom value to add to the manifest
-        @get:Input
-        abstract val customManifestValue: Property<String>
-
-        @get:OutputFile
-        abstract val updatedManifest: RegularFileProperty
-
-        @TaskAction
-        fun processManifest() {
-            val manifest = manifestFile.get().asFile
-            logger.lifecycle("Processing manifest: ${manifest.absolutePath}")
-
-            // Example: Read and print existing content
-            manifest.readLines().forEach { line ->
-                logger.lifecycle("Manifest line: $line")
-            }
-
-            // Example: Modify the manifest (e.g., add a custom attribute)
-            // This would involve XML parsing and manipulation,
-            // which is beyond a simple example, but illustrates the concept.
-            // For actual modification, you'd use an XML library.
-            val modifiedContent =
-                """
-                <manifest ...>
-                    <application ...>
-                        <meta-data android:name="com.example.CUSTOM_VALUE" android:value="${customManifestValue.get()}"/>
-                    </application>
-                </manifest>
-                """.trimIndent()
-            updatedManifest.asFile.get().writeText(manifest.readText())
-
-            // For this example, we're just logging, but in a real scenario,
-            // you'd write the modified content back to the manifestFile or a new output file.
-            // manifest.writeText(modifiedContent)
-            logger.lifecycle("Manifest processing complete (simulated modification).")
         }
     }
 
@@ -920,8 +876,6 @@ object FlutterPluginUtils {
         @Suppress("DEPRECATION") variant: com.android.build.gradle.api.ApplicationVariant,
         @Suppress("DEPRECATION") baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput,
     ): AppLinkSettings {
-        val appLinkSettings = AppLinkSettings(variant.applicationId)
-
         // XmlParser is not namespace aware because it makes querying nodes cumbersome.
         // TODO(gmackall): Migrate to AGPs variant api.
         //    https://github.com/flutter/flutter/issues/166550
@@ -930,6 +884,14 @@ object FlutterPluginUtils {
             groovy.xml
                 .XmlParser(false, false)
                 .parse(findProcessResources(baseVariantOutput).manifestFile)
+        return createAppLinkSettings(variant.applicationId, manifest)
+    }
+
+    private fun createAppLinkSettings(
+        applicationId: String,
+        manifest: Node,
+    ): AppLinkSettings {
+        val appLinkSettings = AppLinkSettings(applicationId)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
@@ -949,9 +911,9 @@ object FlutterPluginUtils {
                 }
             metaDataItems.forEach { metaDataItem ->
                 val nameAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
+                    metaDataItem.attribute(FlutterPluginUtils.MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
                 val valueAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_VALUE_KEY) == MANIFEST_VALUE_TRUE
+                    metaDataItem.attribute(FlutterPluginUtils.MANIFEST_VALUE_KEY) == FlutterPluginUtils.MANIFEST_VALUE_TRUE
                 if (nameAttribute && valueAttribute) {
                     appLinkSettings.deeplinkingFlagEnabled = true
                 }
@@ -966,7 +928,7 @@ object FlutterPluginUtils {
                 val hosts: MutableSet<String?> = mutableSetOf()
                 val paths: MutableSet<String?> = mutableSetOf()
                 val intentFilterCheck = IntentFilterCheck()
-                if (appLinkIntent.attribute("android:autoVerify") == MANIFEST_VALUE_TRUE) {
+                if (appLinkIntent.attribute("android:autoVerify") == FlutterPluginUtils.MANIFEST_VALUE_TRUE) {
                     intentFilterCheck.hasAutoVerify = true
                 }
 
@@ -978,7 +940,7 @@ object FlutterPluginUtils {
                 // and we keep looping instead of exiting out early.
                 // TODO: Exit out early per intent filter action view.
                 actionItems.forEach { action ->
-                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
+                    if (action.attribute(FlutterPluginUtils.MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
                         intentFilterCheck.hasActionView = true
                     }
                 }
@@ -988,11 +950,11 @@ object FlutterPluginUtils {
                     }
                 categoryItems.forEach { category ->
                     // TODO: Exit out early per intent filter default category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
+                    if (category.attribute(FlutterPluginUtils.MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
                         intentFilterCheck.hasDefaultCategory = true
                     }
                     // TODO: Exit out early per intent filter browsable category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
+                    if (category.attribute(FlutterPluginUtils.MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
                         intentFilterCheck.hasBrowsableCategory =
                             true
                     }
