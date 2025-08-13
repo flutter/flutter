@@ -128,9 +128,7 @@ void main() {
     expect(renderImage.image, isNull);
   });
 
-  testWidgets('Image wraps content with ClipRRect when borderRadius provided', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Image clips with borderRadius when provided', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider(image10x10);
 
     await tester.pumpWidget(
@@ -147,20 +145,16 @@ void main() {
       ),
     );
 
-    // Complete the image stream and settle.
+    // Complete the image load
     provider.complete();
     await tester.pumpAndSettle();
 
-    // Expect a ClipRRect in the tree and that it receives the borderRadius.
-    final Finder clipFinder = find.byType(ClipRRect);
-    expect(clipFinder, findsOneWidget);
-    final ClipRRect clip = tester.widget<ClipRRect>(clipFinder);
-    expect(clip.borderRadius, equals(BorderRadius.circular(8.0)));
+    // Verify the RenderImage has the correct borderRadius
+    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderImage.borderRadius, equals(BorderRadius.circular(8.0)));
   });
 
-  testWidgets('Image does not insert ClipRRect when borderRadius is null', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Image does not clip when borderRadius is null', (WidgetTester tester) async {
     final TestImageProvider provider = TestImageProvider(image10x10);
 
     await tester.pumpWidget(
@@ -173,9 +167,11 @@ void main() {
     provider.complete();
     await tester.pumpAndSettle();
 
-    expect(find.byType(ClipRRect), findsNothing);
+    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderImage.borderRadius, isNull);
   });
-  testWidgets('Image does not insert ClipRRect when borderRadius is BorderRadius.zero', (
+
+  testWidgets('Image does not clip when borderRadius is BorderRadius.zero', (
     WidgetTester tester,
   ) async {
     final TestImageProvider provider = TestImageProvider(image10x10);
@@ -190,7 +186,8 @@ void main() {
     provider.complete();
     await tester.pumpAndSettle();
 
-    expect(find.byType(ClipRRect), findsNothing);
+    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderImage.borderRadius, equals(BorderRadius.zero));
   });
 
   testWidgets(

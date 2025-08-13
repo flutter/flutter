@@ -905,15 +905,18 @@ class Image extends StatefulWidget {
   /// and height if the exact image dimensions are not known in advance.
   final double? height;
 
-  /// When set, clips the image to a rounded rectangle with the specified radius.
+  /// The radii for rounding the image's corners.
   ///
-  /// This is a convenient way to apply rounded corners without needing to wrap
-  /// the `Image` widget in a separate [ClipRRect]. If `null`, no clipping is applied.
+  /// When non-null and not [BorderRadius.zero], the image will be clipped
+  /// to a rounded rectangle during painting. This allows applying rounded
+  /// corners without wrapping the `Image` in a separate [ClipRRect].
   ///
-  /// **Note:** This property has no effect when the image is created with
-  /// [Image.network] using a `webHtmlElementStrategy` other than
-  /// [WebHtmlElementStrategy.never], because platform views used in that mode
-  /// cannot be clipped by [ClipRRect].
+  /// Defaults to null, which means no clipping is applied.
+  ///
+  /// **Note:** On the web, this property has no effect when the image is
+  /// created with [Image.network] using a `webHtmlElementStrategy` other
+  /// than [WebHtmlElementStrategy.never], because platform views in that
+  /// mode cannot be clipped.
   final BorderRadius? borderRadius;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -1100,6 +1103,9 @@ class Image extends StatefulWidget {
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(
+      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null),
+    );
   }
 }
 
@@ -1405,6 +1411,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         invertColors: _invertColors,
         isAntiAlias: widget.isAntiAlias,
         filterQuality: widget.filterQuality,
+        borderRadius: widget.borderRadius,
       );
     }
 
@@ -1423,13 +1430,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     if (widget.loadingBuilder != null) {
       result = widget.loadingBuilder!(context, result, _loadingProgress);
-    }
-    // If a non-null and non-zero borderRadius is provided, clip the image to a rounded rectangle.
-    // Skips clipping when borderRadius is null or zero for better performance.
-    if (widget.borderRadius != null &&
-        widget.borderRadius != BorderRadius.zero &&
-        _imageInfo is! WebImageInfo) {
-      result = ClipRRect(borderRadius: widget.borderRadius!, child: result);
     }
 
     return result;

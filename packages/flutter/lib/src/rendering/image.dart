@@ -42,6 +42,7 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.medium,
+    BorderRadius? borderRadius,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -57,7 +58,8 @@ class RenderImage extends RenderBox {
        _invertColors = invertColors,
        _textDirection = textDirection,
        _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+       _filterQuality = filterQuality,
+       _borderRadius = borderRadius {
     _updateColorFilter();
   }
 
@@ -195,6 +197,24 @@ class RenderImage extends RenderBox {
     }
     _filterQuality = value;
     markNeedsPaint();
+  }
+
+  /// The radii for rounding the image's corners.
+  ///
+  /// When non-null and not [BorderRadius.zero], the image will be clipped
+  /// to this border radius during painting. Clipping is performed at the
+  /// render layer to avoid the overhead of wrapping the image in an extra
+  /// [ClipRRect] widget.
+  ///
+  /// Defaults to null, which means no clipping is applied.
+  BorderRadius? get borderRadius => _borderRadius;
+  BorderRadius? _borderRadius;
+  set borderRadius(BorderRadius? value) {
+    if (value == _borderRadius) {
+      return;
+    }
+    _borderRadius = value;
+    markNeedsPaint(); // Only affects visuals, not layout.
   }
 
   /// Used to combine [color] with this image.
@@ -424,8 +444,18 @@ class RenderImage extends RenderBox {
     _resolve();
     assert(_resolvedAlignment != null);
     assert(_flipHorizontally != null);
+
+    final Canvas canvas = context.canvas;
+
+    // Clip with border radius if provided and not zero.
+    if (_borderRadius != null && _borderRadius != BorderRadius.zero) {
+      final RRect rrect = _borderRadius!.toRRect(offset & size);
+      canvas.save();
+      canvas.clipRRect(rrect);
+    }
+
     paintImage(
-      canvas: context.canvas,
+      canvas: canvas,
       rect: offset & size,
       image: _image!,
       debugImageLabel: debugImageLabel,
@@ -441,6 +471,10 @@ class RenderImage extends RenderBox {
       filterQuality: _filterQuality,
       isAntiAlias: _isAntiAlias,
     );
+
+    if (_borderRadius != null && _borderRadius != BorderRadius.zero) {
+      canvas.restore();
+    }
   }
 
   @override
@@ -472,5 +506,8 @@ class RenderImage extends RenderBox {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(
+      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null),
+    );
   }
 }

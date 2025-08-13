@@ -6721,6 +6721,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.invertColors = false,
     this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
+    this.borderRadius,
   });
 
   /// The image to display.
@@ -6855,6 +6856,16 @@ class RawImage extends LeafRenderObjectWidget {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   final bool isAntiAlias;
 
+  /// The radii for rounding the image's corners.
+  ///
+  /// When non-null and not [BorderRadius.zero], the image will be clipped to
+  /// this border radius during painting in the render layer. This avoids the
+  /// need to wrap the image in an extra [ClipRRect] widget, reducing widget
+  /// tree depth and potential compositing overhead.
+  ///
+  /// Defaults to null, which means the image is not clipped.
+  final BorderRadius? borderRadius;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -6871,6 +6882,7 @@ class RawImage extends LeafRenderObjectWidget {
       scale: scale,
       color: color,
       opacity: opacity,
+
       colorBlendMode: colorBlendMode,
       fit: fit,
       alignment: alignment,
@@ -6883,6 +6895,7 @@ class RawImage extends LeafRenderObjectWidget {
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
+      borderRadius: borderRadius,
     );
   }
 
@@ -6912,7 +6925,8 @@ class RawImage extends LeafRenderObjectWidget {
           : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
-      ..filterQuality = filterQuality;
+      ..filterQuality = filterQuality
+      ..borderRadius = borderRadius;
   }
 
   @override
@@ -6942,6 +6956,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(
+      DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null),
+    );
   }
 }
 
