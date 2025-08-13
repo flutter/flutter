@@ -363,28 +363,6 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
-
-  @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return null;
-    }
-    // Use loosened constraints for the child, just like in performLayout.
-    final BoxConstraints childConstraints = constraints.loosen();
-    final double? result = child.getDryBaseline(childConstraints, baseline);
-    if (result == null) {
-      return null;
-    }
-    // Get the child's dry layout to calculate the offset.
-    final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = computeDryLayout(constraints);
-    // Calculate the offset similar to how alignChild() works.
-    // This must match the logic in alignChild() method.
-    final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
-
-    return result + childOffset.dy;
-  }
 }
 
 /// Positions its child using an [AlignmentGeometry].
@@ -562,6 +540,23 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     properties.add(DoubleProperty('widthFactor', _widthFactor, ifNull: 'expand'));
     properties.add(DoubleProperty('heightFactor', _heightFactor, ifNull: 'expand'));
   }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final Size size = computeDryLayout(constraints);
+    final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
+    return result + childOffset.dy;
+  }
 }
 
 /// How much space should be occupied by the [OverflowBox] if there is no
@@ -729,7 +724,10 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = computeDryLayout(constraints);
+    final Size size = switch (fit) {
+      OverflowBoxFit.max => constraints.biggest,
+      OverflowBoxFit.deferToChild => childSize,
+    };
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1076,7 +1074,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    final Size size = computeDryLayout(constraints);
+    final Size size = constraints.constrain(_requestedSize);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1256,7 +1254,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = computeDryLayout(constraints);
+    final Size size = constraints.constrain(childSize);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
