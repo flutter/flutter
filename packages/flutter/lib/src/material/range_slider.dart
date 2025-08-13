@@ -632,17 +632,11 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         return Thumb.end;
       }
     } else {
-      // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget) {
+      // Choose the closest thumb and snap position.
+      if (tapValue * 2 < values.start + values.end) {
         return Thumb.start;
       }
-      if (tapValue > values.end || inEndTouchTarget) {
-        return Thumb.end;
-      }
-      // choose the closest thumb and snap position.
-      if (tapValue - values.start < values.end - tapValue) {
-        return Thumb.start;
-      } else {
+      else {
         return Thumb.end;
       }
     }
