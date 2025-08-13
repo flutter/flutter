@@ -1375,8 +1375,14 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   List<String>? get argumentsUsedForLaunch => _launchArguments;
 
   @override
-  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
-    return installSuccess;
+  Future<(bool, IOSCoreDeviceInstallResult?)> installApp({
+    required String deviceId,
+    required String bundlePath,
+  }) async {
+    final result = IOSCoreDeviceInstallResult.fromJson(<String, Object?>{
+      'info': <String, Object?>{'outcome': installSuccess ? 'success' : 'failure'},
+    });
+    return (installSuccess, result);
   }
 
   @override
