@@ -203,8 +203,7 @@ class RenderImage extends RenderBox {
   ///
   /// When non-null and not [BorderRadius.zero], the image will be clipped
   /// to this border radius during painting. Clipping is performed at the
-  /// render layer to avoid the overhead of wrapping the image in an extra
-  /// [ClipRRect] widget.
+  /// render layer.
   ///
   /// Defaults to null, which means no clipping is applied.
   BorderRadius? get borderRadius => _borderRadius;

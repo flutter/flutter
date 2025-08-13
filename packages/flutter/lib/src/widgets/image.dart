@@ -907,16 +907,10 @@ class Image extends StatefulWidget {
 
   /// The radii for rounding the image's corners.
   ///
-  /// When non-null and not [BorderRadius.zero], the image will be clipped
-  /// to a rounded rectangle during painting. This allows applying rounded
-  /// corners without wrapping the `Image` in a separate [ClipRRect].
+  /// When non-null and not [BorderRadius.zero], the image is clipped
+  /// to a rounded rectangle at the render layer.
   ///
   /// Defaults to null, which means no clipping is applied.
-  ///
-  /// **Note:** On the web, this property has no effect when the image is
-  /// created with [Image.network] using a `webHtmlElementStrategy` other
-  /// than [WebHtmlElementStrategy.never], because platform views in that
-  /// mode cannot be clipped.
   final BorderRadius? borderRadius;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].

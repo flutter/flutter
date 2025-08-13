@@ -6859,9 +6859,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// The radii for rounding the image's corners.
   ///
   /// When non-null and not [BorderRadius.zero], the image will be clipped to
-  /// this border radius during painting in the render layer. This avoids the
-  /// need to wrap the image in an extra [ClipRRect] widget, reducing widget
-  /// tree depth and potential compositing overhead.
+  /// this border radius during painting in the render layer.
   ///
   /// Defaults to null, which means the image is not clipped.
   final BorderRadius? borderRadius;
