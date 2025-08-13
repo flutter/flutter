@@ -370,17 +370,17 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
-    // Use loosened constraints for the child, just like in performLayout
+    // Use loosened constraints for the child, just like in performLayout.
     final BoxConstraints childConstraints = constraints.loosen();
     final double? result = child.getDryBaseline(childConstraints, baseline);
     if (result == null) {
       return null;
     }
-    // Get the child's dry layout to calculate the offset
+    // Get the child's dry layout to calculate the offset.
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = getDryLayout(constraints);
-    // Calculate the offset similar to how alignChild() works
-    // This must match the logic in alignChild() method
+    final Size size = computeDryLayout(constraints);
+    // Calculate the offset similar to how alignChild() works.
+    // This must match the logic in alignChild() method.
     final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
 
     return result + childOffset.dy;
@@ -729,7 +729,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = getDryLayout(constraints);
+    final Size size = computeDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1076,7 +1076,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    final Size size = getDryLayout(constraints);
+    final Size size = computeDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1256,7 +1256,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = getDryLayout(constraints);
+    final Size size = computeDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
