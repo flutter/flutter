@@ -375,7 +375,7 @@ void main() {
           );
         }
 
-        // Check that ColoredBox is not used for non-opaque route
+        // Check that ColoredBox is not used for non-opaque route.
         findColoredBox();
 
         await tester.pumpAndSettle();
