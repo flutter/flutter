@@ -59,7 +59,8 @@ struct WindowingInitRequest {
   void (*on_message)(WindowsMessage*);
 };
 
-// Returned when
+// Returned from |InternalFlutterWindows_WindowManager_GetWindowContentSize|.
+// This represents the current content size of the window.
 struct ActualWindowSize {
   double width;
   double height;

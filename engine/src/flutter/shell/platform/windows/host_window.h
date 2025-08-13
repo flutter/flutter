@@ -66,6 +66,10 @@ class HostWindow {
   // Returns |true| if this window is fullscreen, otherwise |false|.
   bool GetFullscreen() const;
 
+  // Given a window identifier, returns the window content size of the
+  // window.
+  static ActualWindowSize GetWindowContentSize(HWND hwnd);
+
  private:
   friend WindowManager;
 
@@ -75,6 +79,7 @@ class HostWindow {
     LONG style;
     LONG ex_style;
     RECT rect;
+    ActualWindowSize client_size;
     int dpi;
     HMONITOR monitor;
     MONITORINFO monitor_info;
