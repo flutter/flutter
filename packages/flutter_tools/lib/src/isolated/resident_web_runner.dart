@@ -152,29 +152,21 @@ class ResidentWebRunner extends ResidentRunner {
 
   // Only non-wasm debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol =>
-      !debuggingOptions.webUseWasm && isRunningDebug && deviceIsDebuggable;
-
-  @override
-  bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
+  late final bool supportsServiceProtocol =
+      !debuggingOptions.webUseWasm && isRunningDebug && _deviceIsDebuggable;
 
   /// Device is debuggable if not a WebServer device, or if running with
   /// --start-paused or using DWDS WebSocket connection (WebServer device).
-  bool get deviceIsDebuggable =>
+  late final bool _deviceIsDebuggable =
       device!.device is! WebServerDevice ||
       debuggingOptions.startPaused ||
-      _useDwdsWebSocketConnection;
+      useDwdsWebSocketConnection;
 
-  bool get _useDwdsWebSocketConnection {
-    final DevFS? devFS = device?.devFS;
-    return devFS is WebDevFS && devFS.useDwdsWebSocketConnection;
-  }
+  late final useDwdsWebSocketConnection = device!.device is! ChromiumDevice;
 
   @override
   // Web uses a different plugin registry.
   bool get generateDartPluginRegistry => false;
-
-  bool get _enableDwds => debuggingEnabled;
 
   @override
   bool get reloadIsRestart =>
@@ -295,24 +287,6 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
             : null;
 
-        // Retrieve connected web devices, excluding the web server device.
-        final List<Device>? devices = await globals.deviceManager?.getAllDevices();
-        final nonWebServerConnectedDeviceIds = <String>{
-          for (final Device d in devices!.where(
-            (Device d) =>
-                d.platformType == PlatformType.web &&
-                d.isConnected &&
-                d.id != WebServerDevice.kWebServerDeviceId,
-          ))
-            d.id,
-        };
-
-        // Use Chrome-based connection only if we have a connected ChromiumDevice
-        // Otherwise, use DWDS WebSocket connection
-        final bool useDwdsWebSocketConnection =
-            !(_chromiumLauncher != null &&
-                nonWebServerConnectedDeviceIds.contains(device!.device!.id));
-
         device!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
@@ -321,7 +295,7 @@ class ResidentWebRunner extends ResidentRunner {
           useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
           useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
-          enableDwds: _enableDwds,
+          enableDwds: supportsServiceProtocol,
           enableDds: debuggingOptions.enableDds,
           entrypoint: _fileSystem.file(target).uri,
           expressionCompiler: expressionCompiler,
@@ -515,7 +489,7 @@ class ResidentWebRunner extends ResidentRunner {
     Duration? reloadDuration;
     Duration? reassembleDuration;
     try {
-      if (!deviceIsDebuggable) {
+      if (!_deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
         if (fullRestart) {
@@ -584,7 +558,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
 
     // Don't track restart times for dart2js builds or web-server devices.
-    if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
+    if (debuggingOptions.buildInfo.isDebug && _deviceIsDebuggable) {
       if (fullRestart) {
         _analytics.send(
           Event.timing(
@@ -774,7 +748,6 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     Future<ConnectionResult?>? connectDebug,
-    bool allowExistingDdsInstance = false,
     bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
