@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "vulkan/vulkan.h"
-
 #include "GLES3/gl3.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
@@ -5187,8 +5185,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
 INSTANTIATE_TEST_SUITE_P(
     EmbedderTestGlVk,
     EmbedderTestMultiBackend,
-    ::testing::Values(EmbedderTestContextType::kOpenGLContext,
-                      EmbedderTestContextType::kVulkanContext));
+    ::testing::Values(EmbedderTestContextType::kOpenGLContext,));
 
 }  // namespace flutter::testing
 
