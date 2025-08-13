@@ -19,11 +19,11 @@ class SnapshotControllerSkia : public SnapshotController {
 
   void MakeRasterSnapshot(
       sk_sp<DisplayList> display_list,
-      SkISize picture_size,
+      DlISize picture_size,
       std::function<void(const sk_sp<DlImage>&)> callback) override;
 
   sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        SkISize size) override;
+                                        DlISize size) override;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
@@ -32,7 +32,7 @@ class SnapshotControllerSkia : public SnapshotController {
 
  private:
   sk_sp<DlImage> DoMakeRasterSnapshot(
-      SkISize size,
+      DlISize size,
       std::function<void(SkCanvas*)> draw_callback);
 
   FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerSkia);
