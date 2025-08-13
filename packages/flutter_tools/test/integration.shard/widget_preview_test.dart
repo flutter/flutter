@@ -74,7 +74,7 @@ void main() {
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
-      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUri}=$dtdUri',
+      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();

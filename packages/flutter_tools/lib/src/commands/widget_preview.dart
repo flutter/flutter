@@ -140,7 +140,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             'browser.',
       )
       ..addOption(
-        kDtdUri,
+        kDtdUrl,
         help:
             'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
         hide: !verbose,
@@ -162,7 +162,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
   }
 
-  static const kDtdUri = 'dtd-uri';
+  static const kDtdUrl = 'dtd-url';
   static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const kLaunchPreviewer = 'launch-previewer';
   static const kHeadless = 'headless';
@@ -349,7 +349,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   ///
   /// If --dtd-uri is not provided, a DTD instance managed by the tool will be started.
   Future<void> configureDtd() async {
-    final String? existingDtdUriStr = stringArg(kDtdUri);
+    final String? existingDtdUriStr = stringArg(kDtdUrl);
     Uri? existingDtdUri;
     try {
       if (existingDtdUriStr != null) {
