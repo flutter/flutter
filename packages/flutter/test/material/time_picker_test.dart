@@ -1562,7 +1562,7 @@ void main() {
 
           await expectLater(
             find.byType(Dialog),
-            matchesGoldenFile('non_english_locale.time_picker.dialog.separator.alignment.png'),
+            matchesGoldenFile('time_picker.dialog.separator.alignment.non_english_locale.png'),
           );
         },
       );
