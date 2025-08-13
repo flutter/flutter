@@ -189,13 +189,14 @@ TaskFunction dartDefinesTask() {
 }
 
 TaskFunction featureFlagsTask() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/feature_flags.dart',
-    // TODO(loic-sharma): Turn on a framework feature flag once one exists.
-    // https://github.com/flutter/flutter/issues/167668
-    environment: const <String, String>{},
-  ).call;
+  return () async {
+    await flutter('config', options: const <String>['--enable-windowing']);
+
+    return DriverTest(
+      '${flutterDirectory.path}/dev/integration_tests/ui',
+      'lib/feature_flags.dart',
+    ).call();
+  };
 }
 
 TaskFunction createEndToEndIntegrationTest() {
