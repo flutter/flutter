@@ -12,6 +12,9 @@
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
+// vulkan.hpp generates some clang-tidy warnings.
+// NOLINTBEGIN(clang-analyzer-security.PointerSub)
+
 namespace impeller {
 
 static constexpr const char* kInstanceLayer = "ImpellerInstance";
@@ -826,3 +829,5 @@ bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(clang-analyzer-security.PointerSub)
