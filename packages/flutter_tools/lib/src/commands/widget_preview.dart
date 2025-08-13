@@ -16,9 +16,11 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
@@ -116,7 +118,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
     this.verbose = false,
-    required this.logger,
+    required Logger logger,
     required this.fs,
     required this.projectFactory,
     required this.cache,
@@ -126,11 +128,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.processManager,
     required this.artifacts,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
-  }) {
+  }) : logger = WidgetPreviewMachineAwareLogger(logger) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
     addPubOptions();
+    addMachineOutputFlag(verboseHelp: verbose);
     argParser
       ..addFlag(
         kWebServer,
@@ -189,7 +192,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final FileSystem fs;
 
   @override
-  final Logger logger;
+  final WidgetPreviewMachineAwareLogger logger;
 
   @override
   final FlutterProjectFactory projectFactory;
@@ -254,6 +257,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
+
+    final bool machine = boolArg(FlutterGlobalOptions.kMachineFlag);
+    logger.machine = machine;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
@@ -444,6 +450,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         );
         unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
         await appStarted.future;
+        logger.sendEvent('started', {'url': flutterDevice.devFS!.baseUri.toString()});
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -489,5 +496,147 @@ final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
       logger.printStatus('Nothing to clean up.');
     }
     return FlutterCommandResult.success();
+  }
+}
+
+/// A custom logger for the widget-preview commands that disables non-event output to stdio when
+/// machine mode is enabled.
+final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
+  WidgetPreviewMachineAwareLogger(super.delegate);
+
+  var machine = false;
+
+  @override
+  void printError(
+    String message, {
+    StackTrace? stackTrace,
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    if (machine) {
+      return;
+    }
+    super.printError(
+      message,
+      stackTrace: stackTrace,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printWarning(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+    bool fatal = true,
+  }) {
+    if (machine) {
+      return;
+    }
+    super.printWarning(
+      message,
+      emphasis: emphasis,
+      color: color,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+      fatal: fatal,
+    );
+  }
+
+  @override
+  void printStatus(
+    String message, {
+    bool? emphasis,
+    TerminalColor? color,
+    bool? newline,
+    int? indent,
+    int? hangingIndent,
+    bool? wrap,
+  }) {
+    if (machine) {
+      return;
+    }
+    super.printStatus(
+      message,
+      emphasis: emphasis,
+      color: color,
+      newline: newline,
+      indent: indent,
+      hangingIndent: hangingIndent,
+      wrap: wrap,
+    );
+  }
+
+  @override
+  void printBox(String message, {String? title}) {
+    if (machine) {
+      return;
+    }
+    super.printBox(message, title: title);
+  }
+
+  @override
+  void printTrace(String message) {
+    if (machine) {
+      return;
+    }
+    super.printTrace(message);
+  }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic>? args]) {
+    if (!machine) {
+      return;
+    }
+    super.printStatus(
+      json.encode([
+        {'event': 'widget_preview.$name', 'params': ?args},
+      ]),
+    );
+  }
+
+  @override
+  Status startProgress(
+    String message, {
+    String? progressId,
+    int progressIndicatorPadding = kDefaultStatusPadding,
+  }) {
+    if (machine) {
+      return SilentStatus(stopwatch: Stopwatch());
+    }
+    return super.startProgress(
+      message,
+      progressId: progressId,
+      progressIndicatorPadding: progressIndicatorPadding,
+    );
+  }
+
+  @override
+  Status startSpinner({
+    VoidCallback? onFinish,
+    Duration? timeout,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
+  }) {
+    if (machine) {
+      return SilentStatus(stopwatch: Stopwatch());
+    }
+    return super.startSpinner(
+      onFinish: onFinish,
+      timeout: timeout,
+      slowWarningCallback: slowWarningCallback,
+      warningColor: warningColor,
+    );
   }
 }
