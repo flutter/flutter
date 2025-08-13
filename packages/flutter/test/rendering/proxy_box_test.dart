@@ -651,11 +651,8 @@ void main() {
   test('RenderFittedBox computeDryBaseline works with different BoxFit values', () {
     final MockRenderBoxWithBaseline child1 = MockRenderBoxWithBaseline();
 
-    // Test with BoxFit.contain
-    final RenderFittedBox containBox = RenderFittedBox(
-      fit: BoxFit.contain,
-      child: child1,
-    );
+    // Test with BoxFit.contain (default)
+    final RenderFittedBox containBox = RenderFittedBox(child: child1);
 
     final double? containBaseline = containBox.computeDryBaseline(
       const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -665,10 +662,7 @@ void main() {
     final MockRenderBoxWithBaseline child2 = MockRenderBoxWithBaseline();
 
     // Test with BoxFit.fill
-    final RenderFittedBox fillBox = RenderFittedBox(
-      fit: BoxFit.fill,
-      child: child2,
-    );
+    final RenderFittedBox fillBox = RenderFittedBox(fit: BoxFit.fill, child: child2);
 
     final double? fillBaseline = fillBox.computeDryBaseline(
       const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -1226,11 +1220,13 @@ class MockRenderBoxWithBaseline extends RenderBox {
 
   @override
   void performLayout() {
+    super.performLayout();
     size = constraints.constrain(const Size(50.0, 50.0));
   }
 
   @override
   double? getDistanceToActualBaseline(TextBaseline baseline) {
+    super.getDistanceToActualBaseline(baseline);
     return 40.0;
   }
 }
@@ -1249,11 +1245,13 @@ class MockRenderBoxNoBaseline extends RenderBox {
 
   @override
   void performLayout() {
+    super.performLayout();
     size = constraints.constrain(const Size(50.0, 50.0));
   }
 
   @override
   double? getDistanceToActualBaseline(TextBaseline baseline) {
+    super.getDistanceToActualBaseline(baseline);
     return null;
   }
 }

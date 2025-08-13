@@ -553,7 +553,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    
+
     // Calculate size using the same logic as computeDryLayout
     final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
     final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
@@ -563,7 +563,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity,
       ),
     );
-    
+
     final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
     return result + childOffset.dy;
   }

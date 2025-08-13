@@ -152,7 +152,7 @@ void main() {
       );
 
       final double? baseline = positioner.computeDryBaseline(
-        const BoxConstraints(maxWidth: double.infinity, maxHeight: double.infinity),
+        const BoxConstraints(),
         TextBaseline.alphabetic,
       );
 
