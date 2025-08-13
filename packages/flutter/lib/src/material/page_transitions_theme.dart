@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'theme.dart';
 
@@ -805,38 +806,43 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Color? backgroundColor,
     Widget? child,
-  ) => DualTransitionBuilder(
-    animation: ReverseAnimation(secondaryAnimation),
-    forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color: animation.isAnimating
-            ? backgroundColor ?? Theme.of(context).colorScheme.surface
-            : Colors.transparent,
-        child: FadeTransition(
+  ) {
+    final Widget builder = DualTransitionBuilder(
+      animation: ReverseAnimation(secondaryAnimation),
+      forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
           opacity: _fadeInTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryForwardTranslationTween.animate(animation),
             child: child,
           ),
-        ),
-      );
-    },
-    reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color: animation.isAnimating
-            ? backgroundColor ?? Theme.of(context).colorScheme.surface
-            : Colors.transparent,
-        child: FadeTransition(
+        );
+      },
+      reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
+        return FadeTransition(
           opacity: _fadeOutTransition.animate(animation),
           child: SlideTransition(
             position: _secondaryBackwardTranslationTween.animate(animation),
             child: child,
           ),
-        ),
-      );
-    },
-    child: child,
-  );
+        );
+      },
+      child: child,
+    );
+
+    final bool isOpaque = ModalRoute.opaqueOf(context) ?? true;
+
+    if (!isOpaque) {
+      return builder;
+    }
+
+    return ColoredBox(
+      color: secondaryAnimation.isAnimating
+          ? backgroundColor ?? ColorScheme.of(context).surface
+          : Colors.transparent,
+      child: builder,
+    );
+  }
 
   @override
   Widget buildTransitions<T>(
