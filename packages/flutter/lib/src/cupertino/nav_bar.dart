@@ -643,12 +643,12 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   @override
   Size get preferredSize {
-    final double heightForDrawer = bottom?.preferredSize.height ?? 0.0;
+    final double bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
     final double effectiveLargeHeight =
         largeTitle != null ? _kNavBarLargeTitleHeightExtension : 0.0;
 
-    return Size.fromHeight(_kNavBarPersistentHeight + heightForDrawer + effectiveLargeHeight);
+    return Size.fromHeight(_kNavBarPersistentHeight + bottomHeight + effectiveLargeHeight);
   }
 
   @override
