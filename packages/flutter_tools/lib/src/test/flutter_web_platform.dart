@@ -57,7 +57,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
     return shelf.Response.ok(
       file.openRead(),
       headers: <String, String>{
-        if (contentType != null) 'Content-Type': contentType,
+        'Content-Type': ?contentType,
         if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
