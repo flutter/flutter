@@ -195,6 +195,21 @@ void SetChildContent(HWND content, HWND window) {
              client_rect.bottom - client_rect.top, true);
 }
 
+// Adjusts a 1D segment (defined by origin and size) to fit entirely within
+// a destination segment. If the segment is larger than the destination, it is
+// first shrunk to fit. Then, it's shifted to be within the bounds.
+//
+// Let the destination be "{...}" and the segment to adjust be "[...]".
+//
+// Case 1: The segment sticks out to the right.
+//
+//   Before:      {------[----}------]
+//   After:       {------[----]}
+//
+// Case 2: The segment sticks out to the left.
+//
+//   Before: [------{----]------}
+//   After:        {[----]------}
 void AdjustAlongAxis(LONG dst_origin, LONG dst_size, LONG* origin, LONG* size) {
   *size = std::min(dst_size, *size);
   if (*origin < dst_origin)
@@ -203,13 +218,13 @@ void AdjustAlongAxis(LONG dst_origin, LONG dst_size, LONG* origin, LONG* size) {
     *origin = std::min(dst_origin + dst_size, *origin + *size) - *size;
 }
 
-RECT AdjustToFit(const RECT& container, const RECT& inside) {
-  auto new_x = container.left;
-  auto new_y = container.top;
-  auto new_width = flutter::RectWidth(container);
-  auto new_height = flutter::RectHeight(container);
-  AdjustAlongAxis(inside.left, flutter::RectWidth(inside), &new_x, &new_width);
-  AdjustAlongAxis(inside.top, flutter::RectHeight(inside), &new_y, &new_height);
+RECT AdjustToFit(const RECT& parent, const RECT& child) {
+  auto new_x = child.left;
+  auto new_y = child.top;
+  auto new_width = flutter::RectWidth(child);
+  auto new_height = flutter::RectHeight(child);
+  AdjustAlongAxis(parent.left, flutter::RectWidth(parent), &new_x, &new_width);
+  AdjustAlongAxis(parent.top, flutter::RectHeight(parent), &new_y, &new_height);
   RECT result;
   result.left = new_x;
   result.right = new_x + new_width;
@@ -677,7 +692,7 @@ void HostWindow::SetFullscreen(
     if (monitor != saved_window_info_.monitor ||
         !AreRectsEqual(saved_window_info_.monitor_info.rcWork,
                        monitor_info.rcWork)) {
-      window_rect = AdjustToFit(window_rect, monitor_info.rcWork);
+      window_rect = AdjustToFit(monitor_info.rcWork, window_rect);
     }
 
     auto const fullscreen_dpi = GetDpiForHWND(window_handle_);
@@ -700,7 +715,7 @@ void HostWindow::SetFullscreen(
         auto const height = static_cast<LONG>(scale * RectHeight(window_rect));
         window_rect.right = window_rect.left + width;
         window_rect.bottom = window_rect.top + height;
-        window_rect = AdjustToFit(window_rect, monitor_info.rcWork);
+        window_rect = AdjustToFit(monitor_info.rcWork, window_rect);
       }
 
       SetWindowPos(window_handle_, nullptr, window_rect.left, window_rect.top,
