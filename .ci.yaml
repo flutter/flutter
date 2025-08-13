@@ -3066,6 +3066,7 @@ targets:
       task_name: large_image_changer_perf_android
 
   - name: Linux_pixel_7pro linux_chrome_dev_mode
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
