@@ -2318,7 +2318,7 @@ void main() {
 
   testWidgets('DataTable sortIconWidget displays custom icon', (WidgetTester tester) async {
     const Widget customSortIcon = Icon(Icons.star, key: Key('custom-sort-icon'));
-    
+
     Widget buildTable() {
       return DataTable(
         sortColumnIndex: 0,
@@ -2337,17 +2337,16 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
-    
+
     // Verify that the custom sort icon is displayed
     expect(find.byKey(const Key('custom-sort-icon')), findsOneWidget);
-    
     // Verify that the default arrow icon is not displayed
     expect(find.widgetWithIcon(Transform, Icons.arrow_upward), findsNothing);
   });
 
   testWidgets('DataTable sortIconWidget receives proper rotation for descending sort', (WidgetTester tester) async {
     const Widget customSortIcon = Icon(Icons.star, key: Key('custom-sort-icon'));
-    
+
     Widget buildTable({bool sortAscending = true}) {
       return DataTable(
         sortColumnIndex: 0,
@@ -2367,25 +2366,25 @@ void main() {
 
     // Test ascending sort (no rotation)
     await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
-    
+
     final Finder customIconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.byKey(const Key('custom-sort-icon')),
     );
-    
+
     // Find the Transform widget that wraps the custom icon
     final Finder transformFinder = find.ancestor(
       of: customIconFinder,
       matching: find.byType(Transform),
     );
-    
+
     Transform transformOfCustomIcon = tester.widget<Transform>(transformFinder);
     expect(transformOfCustomIcon.transform.getRotation(), equals(Matrix3.identity()));
 
     // Test descending sort (180-degree rotation)
     await tester.pumpWidget(MaterialApp(home: Material(child: buildTable(sortAscending: false))));
     await tester.pumpAndSettle();
-    
+
     transformOfCustomIcon = tester.widget<Transform>(transformFinder);
     expect(transformOfCustomIcon.transform.getRotation(), equals(Matrix3.rotationZ(math.pi)));
   });
@@ -2409,7 +2408,7 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
-    
+
     // Verify that the default arrow icon is displayed
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
@@ -2421,7 +2420,7 @@ void main() {
   testWidgets('DataTable sortIconWidget works with different custom widgets', (WidgetTester tester) async {
     const Widget customIcon1 = Icon(Icons.keyboard_arrow_up, key: Key('custom-icon-1'));
     const Widget customIcon2 = Text('↑', key: Key('custom-text-icon'));
-    
+
     Widget buildTable({Widget? sortIcon}) {
       return DataTable(
         sortColumnIndex: 0,
@@ -2452,7 +2451,7 @@ void main() {
 
   testWidgets('DataTable sortIconWidget only appears on sortable columns', (WidgetTester tester) async {
     const Widget customSortIcon = Icon(Icons.star, key: Key('custom-sort-icon'));
-    
+
     Widget buildTable() {
       return DataTable(
         sortColumnIndex: 1, // Second column is sortable
@@ -2478,7 +2477,7 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(home: Material(child: buildTable())));
-    
+
     // Should find exactly one custom sort icon (only on the sortable column)
     expect(find.byKey(const Key('custom-sort-icon')), findsOneWidget);
   });
