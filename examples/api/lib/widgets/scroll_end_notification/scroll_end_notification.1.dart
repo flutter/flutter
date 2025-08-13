@@ -165,8 +165,9 @@ class ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
           child: SizedBox(
@@ -177,7 +178,7 @@ class ItemList extends StatelessWidget {
             ),
           ),
         );
-      }, childCount: itemCount),
+      },
     );
   }
 }

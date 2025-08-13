@@ -15,7 +15,7 @@ namespace fml {
 /// unique values. Any two consecutive invocations must be ordered.
 class TimestampProvider {
  public:
-  virtual ~TimestampProvider(){};
+  virtual ~TimestampProvider() {};
 
   // Returns the number of ticks elapsed by a monotonic clock since epoch.
   virtual fml::TimePoint Now() = 0;

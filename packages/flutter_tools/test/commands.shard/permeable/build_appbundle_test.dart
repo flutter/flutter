@@ -292,7 +292,7 @@ void main() {
           testLogger.statusText,
           containsIgnoringWhitespace(
             'To avoid potential build failures, you can quickly migrate your app by '
-            'following the steps on https://goo.gl/CP92wY',
+            'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
           ),
         );
 

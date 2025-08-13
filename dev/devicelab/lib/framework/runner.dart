@@ -199,7 +199,7 @@ Future<TaskResult> runTask(
       taskExecutable,
       ...?taskArgs,
     ],
-    environment: <String, String>{if (deviceId != null) DeviceIdEnvName: deviceId},
+    environment: <String, String>{DeviceIdEnvName: ?deviceId},
   );
 
   bool runnerFinished = false;
