@@ -33,8 +33,7 @@ RSTransform MakeTranslation(Scalar tx, Scalar ty) {
 
 std::tuple<std::vector<DlRect>,       //
            std::vector<RSTransform>,  //
-           sk_sp<DlImageImpeller>>
-CreateTestData(const AiksTest* test) {
+           sk_sp<DlImageImpeller>> CreateTestData(const AiksTest* test) {
   // Draws the image as four squares stiched together.
   auto atlas =
       DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
