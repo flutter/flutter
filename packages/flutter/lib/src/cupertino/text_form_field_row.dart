@@ -131,7 +131,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     bool enableSuggestions = true,
-    int? maxLines = 1,
+    double? maxLines = 1.0,
     int? minLines,
     bool expands = false,
     int? maxLength,
@@ -165,7 +165,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     super.restorationId,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
-       assert(maxLines == null || maxLines > 0),
+       assert(maxLines == null || maxLines > 0.0),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -175,7 +175,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(!obscureText || maxLines == 1.0, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),
        super(
          initialValue: controller?.text ?? initialValue ?? '',
