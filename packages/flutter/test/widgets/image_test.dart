@@ -150,7 +150,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify the RenderImage has the correct borderRadius
-    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    final Finder imageFinder = find.byType(Image);
+    final RenderImage renderImage = tester.renderObject<RenderImage>(
+      find.descendant(of: imageFinder, matching: find.byType(RawImage)),
+    );
     expect(renderImage.borderRadius, equals(BorderRadius.circular(8.0)));
   });
 
@@ -167,7 +170,10 @@ void main() {
     provider.complete();
     await tester.pumpAndSettle();
 
-    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    final Finder imageFinder = find.byType(Image);
+    final RenderImage renderImage = tester.renderObject<RenderImage>(
+      find.descendant(of: imageFinder, matching: find.byType(RawImage)),
+    );
     expect(renderImage.borderRadius, isNull);
   });
 
@@ -186,7 +192,10 @@ void main() {
     provider.complete();
     await tester.pumpAndSettle();
 
-    final RenderImage renderImage = tester.renderObject<RenderImage>(find.byType(Image));
+    final Finder imageFinder = find.byType(Image);
+    final RenderImage renderImage = tester.renderObject<RenderImage>(
+      find.descendant(of: imageFinder, matching: find.byType(RawImage)),
+    );
     expect(renderImage.borderRadius, equals(BorderRadius.zero));
   });
 
