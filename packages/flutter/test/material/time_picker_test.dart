@@ -2069,8 +2069,7 @@ void main() {
         expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
       });
 
-      // ""This test was failing and contained errors, so it has been commented out.""
-      //
+      // This test was failing and contained errors, so it has been commented out.
       // Fixes regression that was reverted in https://github.com/flutter/flutter/pull/64094#pullrequestreview-469836378.
       // testWidgets('Ensure hour/minute fields are top-aligned with the separator', (
       //   WidgetTester tester,
@@ -2081,40 +2080,23 @@ void main() {
       //     entryMode: TimePickerEntryMode.input,
       //     materialType: materialType,
       //   );
-
-      //   // Get top positions of hour, minute, and separator widgets
       //   final double hourFieldTop = tester
       //       .getTopLeft(
       //         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField'),
       //       )
       //       .dy;
-
       //   final double minuteFieldTop = tester
       //       .getTopLeft(
       //         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField'),
       //       )
       //       .dy;
-
       //   final double separatorTop = tester
       //       .getTopLeft(
       //         find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       //       )
       //       .dy;
-
-      //   // Allow a small tolerance for alignment differences
-      //   const double tolerance = 2.0;
-
-      //   expect(
-      //     hourFieldTop,
-      //     inInclusiveRange(separatorTop - tolerance, separatorTop + tolerance),
-      //     reason: 'Hour field is not vertically aligned with separator',
-      //   );
-
-      //   expect(
-      //     minuteFieldTop,
-      //     inInclusiveRange(separatorTop - tolerance, separatorTop + tolerance),
-      //     reason: 'Minute field is not vertically aligned with separator',
-      //   );
+      //   expect(hourFieldTop, separatorTop);
+      //   expect(minuteFieldTop, separatorTop);
       // });
 
       testWidgets('Can switch between hour/minute fields using keyboard input action', (
