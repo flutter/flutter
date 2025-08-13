@@ -983,13 +983,13 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+    expect(tester.getSize(findBorderPainter().first), const  Size(90.0, 70.0));
 
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text('OK'));
 
-    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+    expect(tester.getSize(findBorderPainter().first), const  Size(90.0, 70.0));
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/153549.
