@@ -517,15 +517,14 @@ class _TimeSelectorSeparator extends StatelessWidget {
     }
 
     return ExcludeSemantics(
-      child: SizedBox(
-        width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
-        height: height,
-        child: Center(
-          child: Text(
-            _timeSelectorSeparatorValue(timeOfDayFormat),
-            style: effectiveStyle,
-            textScaler: TextScaler.noScaling,
-          ),
+      child: Container(
+        width: 36.0,
+        alignment: Alignment.center,
+        child: Text(
+          _timeSelectorSeparatorValue(timeOfDayFormat),
+          style: effectiveStyle,
+          textScaler: TextScaler.noScaling,
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -1820,14 +1819,11 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
             ),
           ),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12.0,
             children: <Widget>[
               if (!use24HourDials &&
                   timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 12),
-                  child: _DayPeriodControl(onPeriodChanged: _handleDayPeriodChanged),
-                ),
+                _DayPeriodControl(onPeriodChanged: _handleDayPeriodChanged),
               ],
               Expanded(
                 child: Row(
@@ -1838,64 +1834,72 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _HourTextField(
-                              restorationId: 'hour_text_field',
-                              selectedTime: _selectedTime.value,
-                              style: hourMinuteStyle,
-                              autofocus: widget.autofocusHour,
-                              inputAction: TextInputAction.next,
-                              validator: _validateHour,
-                              onSavedSubmitted: _handleHourSavedSubmitted,
-                              onChanged: _handleHourChanged,
-                              hourLabelText: widget.hourLabelText,
-                            ),
-                          ),
-                          if (!hourHasError.value && !minuteHasError.value)
-                            ExcludeSemantics(
-                              child: Text(
-                                widget.hourLabelText ??
-                                    MaterialLocalizations.of(context).timePickerHourLabel,
-                                style: theme.textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: _HourTextField(
+                                  restorationId: 'hour_text_field',
+                                  selectedTime: _selectedTime.value,
+                                  style: hourMinuteStyle,
+                                  autofocus: widget.autofocusHour,
+                                  inputAction: TextInputAction.next,
+
+                                  validator: _validateHour,
+                                  onSavedSubmitted: _handleHourSavedSubmitted,
+                                  onChanged: _handleHourChanged,
+                                  hourLabelText: widget.hourLabelText,
+                                ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _MinuteTextField(
-                              restorationId: 'minute_text_field',
-                              selectedTime: _selectedTime.value,
-                              style: hourMinuteStyle,
-                              autofocus: widget.autofocusMinute,
-                              inputAction: TextInputAction.done,
-                              validator: _validateMinute,
-                              onSavedSubmitted: _handleMinuteSavedSubmitted,
-                              minuteLabelText: widget.minuteLabelText,
-                            ),
-                          ),
-                          if (!hourHasError.value && !minuteHasError.value)
-                            ExcludeSemantics(
-                              child: Text(
-                                widget.minuteLabelText ??
-                                    MaterialLocalizations.of(context).timePickerMinuteLabel,
-                                style: theme.textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              _TimeSelectorSeparator(timeOfDayFormat: timeOfDayFormat),
+                              Expanded(
+                                child: _MinuteTextField(
+                                  restorationId: 'minute_text_field',
+                                  selectedTime: _selectedTime.value,
+                                  style: hourMinuteStyle,
+                                  autofocus: widget.autofocusMinute,
+                                  inputAction: TextInputAction.done,
+                                  validator: _validateMinute,
+                                  onSavedSubmitted: _handleMinuteSavedSubmitted,
+                                  minuteLabelText: widget.minuteLabelText,
+                                ),
                               ),
-                            ),
+                            ],
+                          ),
+                          Row(
+                            spacing: 36.0,
+                            children: <Widget>[
+                              Expanded(
+                                child: (hourHasError.value || minuteHasError.value)
+                                    ? const SizedBox()
+                                    : ExcludeSemantics(
+                                        child: Text(
+                                          widget.minuteLabelText ??
+                                              MaterialLocalizations.of(
+                                                context,
+                                              ).timePickerMinuteLabel,
+                                          style: theme.textTheme.bodySmall,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                              ),
+                              Expanded(
+                                child: (hourHasError.value || minuteHasError.value)
+                                    ? const SizedBox()
+                                    : ExcludeSemantics(
+                                        child: Text(
+                                          widget.hourLabelText ??
+                                              MaterialLocalizations.of(context).timePickerHourLabel,
+                                          style: theme.textTheme.bodySmall,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
