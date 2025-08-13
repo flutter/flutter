@@ -256,8 +256,7 @@ class SingleEntryBrowserHistory extends BrowserHistory {
 
     _setupStrategy(strategy);
 
-    final String path = currentPath;
-    _currentRouteName = path;
+    _currentRouteName = currentPath;
     if (!_isFlutterEntry(currentState)) {
       // An entry may not have come from Flutter, for example, when the user
       // refreshes the page. They land directly on the "flutter" entry, so
