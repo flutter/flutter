@@ -36,7 +36,6 @@ abstract final class FlutterGlobalOptions {
   static const kMachineFlag = 'machine';
   static const kPackagesOption = 'packages';
   static const kPrefixedErrorsFlag = 'prefixed-errors';
-  static const kDtdUrl = 'dtd-url';
   static const kPrintDtd = 'print-dtd';
   static const kQuietFlag = 'quiet';
   static const kShowTestDeviceFlag = 'show-test-device';

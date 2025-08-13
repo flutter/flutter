@@ -139,6 +139,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             'Serve the widget preview environment using the web-server device instead of the '
             'browser.',
       )
+      ..addOption(
+        kDtdUri,
+        help:
+            'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+        hide: !verbose,
+      )
       ..addFlag(
         kLaunchPreviewer,
         defaultsTo: true,
@@ -156,6 +162,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
   }
 
+  static const kDtdUri = 'dtd-uri';
   static const kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const kLaunchPreviewer = 'launch-previewer';
   static const kHeadless = 'headless';
@@ -342,7 +349,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   ///
   /// If --dtd-uri is not provided, a DTD instance managed by the tool will be started.
   Future<void> configureDtd() async {
-    final String? existingDtdUriStr = stringArg(FlutterGlobalOptions.kDtdUrl, global: true);
+    final String? existingDtdUriStr = stringArg(kDtdUri);
     Uri? existingDtdUri;
     try {
       if (existingDtdUriStr != null) {
