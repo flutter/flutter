@@ -151,12 +151,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
       help: 'Path to your "package_config.json" file.',
     );
-    argParser.addOption(
-      FlutterGlobalOptions.kDtdUrl,
-      help:
-          'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
-      hide: !verboseHelp,
-    );
     argParser.addFlag(
       FlutterGlobalOptions.kPrintDtd,
       negatable: false,
