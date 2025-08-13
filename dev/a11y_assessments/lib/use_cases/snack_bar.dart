@@ -34,11 +34,12 @@ class MainWidgetState extends State<MainWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        action: onAction != null ? SnackBarAction(label: 'Action', onPressed: onAction) : null,
+        action: onAction != null
+            ? SnackBarAction(label: 'Action', onPressed: onAction)
+            : null,
       ),
     );
 
-    // Slight delay ensures announcement happens AFTER snackbar shows
     Future<void>.delayed(const Duration(milliseconds: 100), () {
       debugPrint('Announcing: $message');
       SemanticsService.announce(message, TextDirection.ltr);
@@ -54,6 +55,7 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
               child: const Text('Show Snackbar'),
@@ -62,12 +64,13 @@ class MainWidgetState extends State<MainWidget> {
               },
             ),
             ElevatedButton(
-              child: const Text('Show Snackbar with action '),
+              child: const Text('Show Snackbar with action'),
               onPressed: () {
                 showAccessibleSnackBar(
                   'Awesome Snackbar!',
                   onAction: () {
-                    SnackBarAction(label: 'Action', onPressed: () {});
+                    // TODO: Replace with actual logic if needed.
+                    debugPrint('Snackbar action clicked!');
                   },
                 );
               },
