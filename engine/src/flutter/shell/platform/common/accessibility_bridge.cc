@@ -334,15 +334,16 @@ void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
     return;
   }
 
-  if (flags->is_in_mutually_exclusive_group && flags->has_checked_state) {
+  if (flags->is_in_mutually_exclusive_group &&
+      flags->is_checked != FlutterCheckState::kFlutterCheckStateNone) {
     node_data.role = ax::mojom::Role::kRadioButton;
     return;
   }
-  if (flags->has_checked_state) {
+  if (flags->is_checked != FlutterCheckState::kFlutterCheckStateNone) {
     node_data.role = ax::mojom::Role::kCheckBox;
     return;
   }
-  if (flags->has_toggled_state) {
+  if (flags->is_toggled != FlutterTristate::kFlutterTristateNone) {
     node_data.role = ax::mojom::Role::kSwitch;
     return;
   }
@@ -363,9 +364,9 @@ void AccessibilityBridge::SetStateFromFlutterUpdate(ui::AXNodeData& node_data,
                                                     const SemanticsNode& node) {
   const FlutterSemanticsFlags* flags = node.flags;
   FlutterSemanticsAction actions = node.actions;
-  if (flags->has_expanded_state && flags->is_expanded) {
+  if (flags->is_expanded == FlutterTristate::kFlutterTristateTrue) {
     node_data.AddState(ax::mojom::State::kExpanded);
-  } else if (flags->has_expanded_state) {
+  } else if (flags->is_expanded == FlutterTristate::kFlutterTristateFalse) {
     node_data.AddState(ax::mojom::State::kCollapsed);
   }
   if (flags->is_text_field && !flags->is_read_only) {
@@ -474,15 +475,18 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
         static_cast<int32_t>(
-            flags->is_check_state_mixed ? ax::mojom::CheckedState::kMixed
-            : flags->is_checked         ? ax::mojom::CheckedState::kTrue
-                                        : ax::mojom::CheckedState::kFalse));
+            (flags->is_checked == FlutterCheckState::kFlutterCheckStateMixed)
+                ? ax::mojom::CheckedState::kMixed
+            : (flags->is_checked == FlutterCheckState::kFlutterCheckStateTrue)
+                ? ax::mojom::CheckedState::kTrue
+                : ax::mojom::CheckedState::kFalse));
   } else if (node_data.role == ax::mojom::Role::kSwitch) {
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
-        static_cast<int32_t>(flags->is_toggled
-                                 ? ax::mojom::CheckedState::kTrue
-                                 : ax::mojom::CheckedState::kFalse));
+        static_cast<int32_t>(
+            (flags->is_toggled == FlutterTristate::kFlutterTristateTrue)
+                ? ax::mojom::CheckedState::kTrue
+                : ax::mojom::CheckedState::kFalse));
   }
 }
 
@@ -492,6 +496,7 @@ void AccessibilityBridge::SetIntListAttributesFromFlutterUpdate(
   FlutterSemanticsAction actions = node.actions;
   if (actions & FlutterSemanticsAction::kFlutterSemanticsActionCustomAction) {
     std::vector<int32_t> custom_action_ids;
+    custom_action_ids.reserve(node.custom_accessibility_actions.size());
     for (size_t i = 0; i < node.custom_accessibility_actions.size(); i++) {
       custom_action_ids.push_back(node.custom_accessibility_actions[i]);
     }
@@ -537,11 +542,12 @@ void AccessibilityBridge::SetTooltipFromFlutterUpdate(
 void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
                                       ui::AXTreeUpdate& tree_update) {
   const FlutterSemanticsFlags* flags = node.flags;
-  //  Set selection of the focused node if:
-  //  1. this text field has a valid selection
-  //  2. this text field doesn't have a valid selection but had selection stored
-  //     in the tree.
-  if (flags->is_text_field && flags->is_focused) {
+  // Set selection of the focused node if:
+  // 1. this text field has a valid selection
+  // 2. this text field doesn't have a valid selection but had selection stored
+  //    in the tree.
+  if (flags->is_text_field &&
+      flags->is_focused == FlutterTristate::kFlutterTristateTrue) {
     if (node.text_selection_base != -1) {
       tree_update.tree_data.sel_anchor_object_id = node.id;
       tree_update.tree_data.sel_anchor_offset = node.text_selection_base;
@@ -557,10 +563,12 @@ void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
     }
   }
 
-  if (flags->is_focused && tree_update.tree_data.focus_id != node.id) {
+  if (flags->is_focused == FlutterTristate::kFlutterTristateTrue &&
+      tree_update.tree_data.focus_id != node.id) {
     tree_update.tree_data.focus_id = node.id;
     tree_update.has_tree_data = true;
-  } else if (!flags->is_focused && tree_update.tree_data.focus_id == node.id) {
+  } else if (flags->is_focused != FlutterTristate::kFlutterTristateTrue &&
+             tree_update.tree_data.focus_id == node.id) {
     tree_update.tree_data.focus_id = ui::AXNode::kInvalidAXID;
     tree_update.has_tree_data = true;
   }

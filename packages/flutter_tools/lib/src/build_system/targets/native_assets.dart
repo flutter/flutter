@@ -39,8 +39,10 @@ abstract class DartBuild extends Target {
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
-      final String? runPackageName =
-          packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String? runPackageName = packageConfig.packages
+          .where((Package p) => p.root == projectUri)
+          .firstOrNull
+          ?.name;
       if (runPackageName == null) {
         throw StateError(
           'Could not determine run package name. '
@@ -51,6 +53,12 @@ abstract class DartBuild extends Target {
         );
       }
       final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+      final String? buildModeEnvironment = environment.defines[kBuildMode];
+      if (buildModeEnvironment == null) {
+        throw MissingDefineException(kBuildMode, name);
+      }
+      final buildMode = BuildMode.fromCliName(buildModeEnvironment);
+      final bool includeDevDependencies = !buildMode.isRelease;
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -59,7 +67,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName,
-            includeDevDependencies: false,
+            includeDevDependencies: includeDevDependencies,
             pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
@@ -77,7 +85,7 @@ abstract class DartBuild extends Target {
     }
     dartBuildResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
       <File>[fileSystem.file(dartBuildResultJsonFile)],
     );
@@ -123,8 +131,8 @@ abstract class DartBuild extends Target {
     );
   }
 
-  static const String dartBuildResultFilename = 'dart_build_result.json';
-  static const String depFilename = 'dart_build.d';
+  static const dartBuildResultFilename = 'dart_build_result.json';
+  static const depFilename = 'dart_build.d';
 }
 
 class DartBuildForNative extends DartBuild {
@@ -165,7 +173,7 @@ class InstallCodeAssets extends Target {
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
-    final Depfile depfile = Depfile(
+    final depfile = Depfile(
       <File>[for (final Uri file in dartBuildResult.filesToBeBundled) fileSystem.file(file)],
       <File>[fileSystem.file(nativeAssetsFileUri)],
     );
@@ -197,8 +205,8 @@ class InstallCodeAssets extends Target {
   @override
   List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/$nativeAssetsFilename')];
 
-  static const String nativeAssetsFilename = 'native_assets.json';
-  static const String depFilename = 'install_code_assets.d';
+  static const nativeAssetsFilename = 'native_assets.json';
+  static const depFilename = 'install_code_assets.d';
 }
 
 TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String name) {

@@ -23,7 +23,9 @@ FlutterSemanticsNode2 CreateSemanticsNode(
     const std::vector<int32_t>* children = nullptr) {
   return {
       .id = id,
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .flags__deprecated__ = static_cast<FlutterSemanticsFlag>(0),
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .actions = static_cast<FlutterSemanticsAction>(0),
       .text_selection_base = -1,
       .text_selection_extent = -1,
@@ -213,8 +215,8 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   auto flags = FlutterSemanticsFlags{
+      .is_focused = FlutterTristate::kFlutterTristateTrue,
       .is_text_field = true,
-      .is_focused = true,
   };
   root.flags2 = &flags;
 
@@ -267,10 +269,8 @@ TEST(AccessibilityBridgeTest, SwitchHasSwitchRole) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   auto flags = FlutterSemanticsFlags{
-
-      .has_enabled_state = true,
-      .is_enabled = true,
-      .has_toggled_state = true,
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_toggled = FlutterTristate::kFlutterTristateFalse,
   };
 
   root.flags2 = &flags;
@@ -286,10 +286,8 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   auto flags = FlutterSemanticsFlags{
-
-      .has_enabled_state = true,
-      .is_enabled = true,
-      .is_focusable = true,
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_focused = FlutterTristate::kFlutterTristateFalse,
       .is_slider = true,
   };
 
@@ -312,9 +310,7 @@ TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
   auto flags = FlutterSemanticsFlags{
-
-      .has_checked_state = true,
-      .is_checked = true,
+      .is_checked = FlutterCheckState::kFlutterCheckStateTrue,
   };
 
   root.flags2 = &flags;

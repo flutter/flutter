@@ -163,8 +163,7 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
   auto flags = FlutterSemanticsFlags{
-      .has_expanded_state = true,
-      .is_expanded = true,
+      .is_expanded = FlutterTristate::kFlutterTristateTrue,
   };
   root.flags2 = &flags;
 
@@ -204,7 +203,7 @@ TEST(FlutterWindowsViewTest, SubMenuExpandedState) {
 
   // Test collapsed too.
   auto updated_flags = FlutterSemanticsFlags{
-      .has_expanded_state = true,
+      .is_expanded = FlutterTristate::kFlutterTristateFalse,
   };
   root.flags2 = &updated_flags;
 
@@ -1177,8 +1176,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
   auto flags = FlutterSemanticsFlags{
-      .has_checked_state = true,
-      .is_checked = true,
+      .is_checked = FlutterCheckState::kFlutterCheckStateTrue,
   };
   root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -1219,7 +1217,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
 
   // Test unchecked too.
   auto updated_flags = FlutterSemanticsFlags{
-      .has_checked_state = true,
+      .is_checked = FlutterCheckState::kFlutterCheckStateFalse,
   };
   root.flags2 = &updated_flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -1259,8 +1257,7 @@ TEST(FlutterWindowsViewTest, CheckboxNativeState) {
 
   // Now check mixed state.
   auto updated_mixe_flags = FlutterSemanticsFlags{
-      .has_checked_state = true,
-      .is_check_state_mixed = true,
+      .is_checked = FlutterCheckState::kFlutterCheckStateMixed,
   };
   root.flags2 = &updated_mixe_flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -1328,8 +1325,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
   root.custom_accessibility_actions_count = 0;
 
   auto flags = FlutterSemanticsFlags{
-      .has_toggled_state = true,
-      .is_toggled = true,
+      .is_toggled = FlutterTristate::kFlutterTristateTrue,
   };
   root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -1381,7 +1377,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
 
   // Test unpressed too.
   auto updated_flags = FlutterSemanticsFlags{
-      .has_toggled_state = true,
+      .is_toggled = FlutterTristate::kFlutterTristateFalse,
   };
   root.flags2 = &updated_flags;
 

@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
+using flutter::DlISize;
 using flutter::DlMatrix;
 using flutter::DlRect;
 using flutter::DlRoundRect;
@@ -20,7 +21,7 @@ using flutter::DlRoundRect;
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
 struct LayerData {
-  SkRect rect;
+  DlRect rect;
   int64_t view_id;
   int64_t overlay_id;
   std::shared_ptr<flutter::OverlayLayer> layer;
@@ -37,9 +38,7 @@ struct PlatformViewData {
   UIView* root_view;
 };
 
-// Converts a SkMatrix to CATransform3D.
-//
-// Certain fields are ignored in CATransform3D since SkMatrix is 3x3 and CATransform3D is 4x4.
+// Converts a DlMatrix to CATransform3D.
 static CATransform3D GetCATransform3DFromDlMatrix(const DlMatrix& matrix) {
   CATransform3D transform = CATransform3DIdentity;
   transform.m11 = matrix.m[0];
@@ -103,7 +102,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         gestureRecognizersBlockingPolicies;
 
 /// The size of the current onscreen surface in physical pixels.
-@property(nonatomic, assign) SkISize frameSize;
+@property(nonatomic, assign) DlISize frameSize;
 
 /// The task runner for posting tasks to the platform thread.
 @property(nonatomic, readonly) const fml::RefPtr<fml::TaskRunner>& platformTaskRunner;
@@ -195,7 +194,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 // frame. See: `compositeView:withParams:` for details.
 - (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
          embeddedView:(UIView*)embeddedView
-         boundingRect:(const SkRect&)boundingRect;
+         boundingRect:(const DlRect&)boundingRect;
 
 // Appends the overlay views and platform view and sets their z index based on the composition
 // order.
@@ -402,7 +401,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
-- (void)beginFrameWithSize:(SkISize)frameSize {
+- (void)beginFrameWithSize:(DlISize)frameSize {
   [self resetFrameState];
   self.frameSize = frameSize;
 }
@@ -421,7 +420,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
-                                withRect:(const SkRect&)filterRect {
+                                withRect:(const flutter::DlRect&)filterRect {
   for (int64_t id : self.visitedPlatformViews) {
     flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
     params.PushImageFilter(filter, filterRect);
@@ -431,7 +430,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)prerollCompositeEmbeddedView:(int64_t)viewId
                           withParams:(std::unique_ptr<flutter::EmbeddedViewParams>)params {
-  SkRect viewBounds = SkRect::Make(self.frameSize);
+  DlRect viewBounds = DlRect::MakeSize(self.frameSize);
   std::unique_ptr<flutter::EmbedderViewSlice> view;
   view = std::make_unique<flutter::DisplayListEmbedderViewSlice>(viewBounds);
   self.slices.insert_or_assign(viewId, std::move(view));
@@ -485,7 +484,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
          embeddedView:(UIView*)embeddedView
-         boundingRect:(const SkRect&)boundingRect {
+         boundingRect:(const DlRect&)boundingRect {
   if (self.flutterView == nil) {
     return;
   }
@@ -494,7 +493,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   ChildClippingView* clipView = (ChildClippingView*)embeddedView.superview;
 
   DlMatrix transformMatrix;
-  const DlRect& dlBoundingRect = flutter::ToDlRect(boundingRect);
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
@@ -512,7 +510,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       }
       case flutter::MutatorType::kClipRect: {
         if (flutter::DisplayListMatrixClipState::TransformedRectCoversBounds(
-                (*iter)->GetRect(), transformMatrix, dlBoundingRect)) {
+                (*iter)->GetRect(), transformMatrix, boundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
@@ -522,7 +520,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       }
       case flutter::MutatorType::kClipRRect: {
         if (flutter::DisplayListMatrixClipState::TransformedRRectCoversBounds(
-                (*iter)->GetRRect(), transformMatrix, dlBoundingRect)) {
+                (*iter)->GetRRect(), transformMatrix, boundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
@@ -532,11 +530,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       }
       case flutter::MutatorType::kClipRSE: {
         if (flutter::DisplayListMatrixClipState::TransformedRoundSuperellipseCoversBounds(
-                (*iter)->GetRSE(), transformMatrix, dlBoundingRect)) {
+                (*iter)->GetRSE(), transformMatrix, boundingRect)) {
           break;
         }
         [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRRect()
+        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRSEApproximation()
                                                         matrix:transformMatrix];
         break;
       }
@@ -617,7 +615,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
   // TODO(https://github.com/flutter/flutter/issues/109700)
-  CGRect frame = CGRectMake(0, 0, params.sizePoints().width(), params.sizePoints().height());
+  CGRect frame = CGRectMake(0, 0, params.sizePoints().width, params.sizePoints().height);
   FlutterTouchInterceptingView* touchInterceptor = self.platformViews[viewId].touch_interceptor;
   touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
@@ -629,10 +627,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Because the translate matrix in the Mutator Stack also includes the offset,
   // when we apply the transforms matrix in |applyMutators:embeddedView:boundingRect|, we need
   // to remember to do a reverse translate.
-  const SkRect& rect = params.finalBoundingRect();
+  const DlRect& rect = params.finalBoundingRect();
   CGFloat screenScale = [UIScreen mainScreen].scale;
-  clippingView.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
-                                  rect.width() / screenScale, rect.height() / screenScale);
+  clippingView.frame = CGRectMake(rect.GetX() / screenScale, rect.GetY() / screenScale,
+                                  rect.GetWidth() / screenScale, rect.GetHeight() / screenScale);
   [self applyMutators:mutatorStack embeddedView:touchInterceptor boundingRect:rect];
 }
 
@@ -676,18 +674,18 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   LayersMap platformViewLayers;
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(self.compositionOrder.size());
-  std::unordered_map<int64_t, SkRect> viewRects;
+  std::unordered_map<int64_t, DlRect> viewRects;
 
   for (int64_t viewId : self.compositionOrder) {
     viewRects[viewId] = self.currentCompositionParams[viewId].finalBoundingRect();
   }
 
-  std::unordered_map<int64_t, SkRect> overlayLayers =
+  std::unordered_map<int64_t, DlRect> overlayLayers =
       SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : self.compositionOrder) {
-    std::unordered_map<int64_t, SkRect>::const_iterator overlay = overlayLayers.find(viewId);
+    std::unordered_map<int64_t, DlRect>::const_iterator overlay = overlayLayers.find(viewId);
     if (overlay == overlayLayers.end()) {
       continue;
     }
@@ -701,7 +699,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   int64_t overlayId = 0;
   for (int64_t viewId : self.compositionOrder) {
-    std::unordered_map<int64_t, SkRect>::const_iterator overlay = overlayLayers.find(viewId);
+    std::unordered_map<int64_t, DlRect>::const_iterator overlay = overlayLayers.find(viewId);
     if (overlay == overlayLayers.end()) {
       continue;
     }
@@ -718,7 +716,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     flutter::DlCanvas* overlayCanvas = frame->Canvas();
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
-    overlayCanvas->ClipRect(flutter::ToDlRect(overlay->second));
+    overlayCanvas->ClipRect(overlay->second);
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);

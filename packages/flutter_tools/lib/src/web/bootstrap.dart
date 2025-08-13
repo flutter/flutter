@@ -5,7 +5,7 @@
 import 'package:package_config/package_config.dart';
 
 /// Used to load prerequisite scripts such as ddc_module_loader.js
-const String _simpleLoaderScript = r'''
+const _simpleLoaderScript = r'''
 window.$dartCreateScript = (function() {
   // Find the nonce value. (Note, this is only computed once.)
   var scripts = Array.from(document.getElementsByTagName("script"));
@@ -267,7 +267,7 @@ $_simpleLoaderScript
             for (var i = 0; i < scripts.length; i++) {
               var script = scripts[i];
               if (script.id == null) continue;
-              var src = _currentDirectory + script.src.toString();
+              var src = script.src.toString();
               var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
 
               // We might actually load from a different uri, delete the old one
@@ -457,13 +457,18 @@ document.addEventListener('dart-app-ready', function (e) {
 ''';
 }
 
-const String _onLoadEndCallback = r'$onLoadEndCallback';
+const _onLoadEndCallback = r'$onLoadEndCallback';
 
 String generateDDCLibraryBundleMainModule({
   required String entrypoint,
   required bool nativeNullAssertions,
   required String onLoadEndBootstrap,
+  required bool isCi,
 }) {
+  // Chrome in CI seems to hang when there are too many requests at once, so we
+  // limit the max number of script requests for that environment.
+  // https://github.com/flutter/flutter/issues/169574
+  final setMaxRequests = isCi ? r'window.$dartLoader.loadConfig.maxRequestPoolSize = 100;' : '';
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
@@ -473,6 +478,7 @@ String generateDDCLibraryBundleMainModule({
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
+  $setMaxRequests
   // Set up a final script that lets us know when all scripts have been loaded.
   // Only then can we call the main method.
   let onLoadEndSrc = '$onLoadEndBootstrap';
@@ -583,11 +589,11 @@ String generateTestEntrypoint({
   required List<WebTestInfo> testInfos,
   required LanguageVersion languageVersion,
 }) {
-  final List<String> importMainStatements = <String>[];
-  final List<String> importTestConfigStatements = <String>[];
-  final List<String> webTestPairs = <String>[];
+  final importMainStatements = <String>[];
+  final importTestConfigStatements = <String>[];
+  final webTestPairs = <String>[];
 
-  for (int index = 0; index < testInfos.length; index++) {
+  for (var index = 0; index < testInfos.length; index++) {
     final WebTestInfo testInfo = testInfos[index];
     final String entryPointPath = testInfo.entryPoint;
     importMainStatements.add(
@@ -663,15 +669,14 @@ String generateTestBootstrapFileContents(String mainUri, String requireUrl, Stri
 }
 
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {
-  final String serviceWorkerSettings =
-      includeServiceWorkerSettings
-          ? '''
+  final serviceWorkerSettings = includeServiceWorkerSettings
+      ? '''
 {
   serviceWorkerSettings: {
     serviceWorkerVersion: {{flutter_service_worker_version}}
   }
 }'''
-          : '';
+      : '';
   return '''
 {{flutter_js}}
 {{flutter_build_config}}

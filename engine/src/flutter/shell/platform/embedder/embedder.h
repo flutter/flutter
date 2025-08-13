@@ -264,27 +264,49 @@ typedef enum {
   kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
 
+typedef enum {
+  /// The property is not applicable to this semantics node.
+  kFlutterTristateNone,
+  /// The property is applicable and its state is "true" or "on".
+  kFlutterTristateTrue,
+  /// The property is applicable and its state is "false" or "off".
+  kFlutterTristateFalse,
+} FlutterTristate;
+
+typedef enum {
+  /// The semantics node does not have check state.
+  kFlutterCheckStateNone,
+  /// The semantics node is checked.
+  kFlutterCheckStateTrue,
+  /// The semantics node is not checked.
+  kFlutterCheckStateFalse,
+  /// The semantics node represents a checkbox in mixed state.
+  kFlutterCheckStateMixed,
+} FlutterCheckState;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsFlags).
   size_t struct_size;
-  /// The semantics node has the quality of either being "checked" or
-  /// "unchecked".
-  bool has_checked_state;
   /// Whether a semantics node is checked.
-  bool is_checked;
+  FlutterCheckState is_checked;
   /// Whether a semantics node is selected.
-  bool is_selected;
+  FlutterTristate is_selected;
+  /// Whether a semantic node is currently enabled.
+  FlutterTristate is_enabled;
+  /// If true, the semantics node is "on". If false, the semantics node is
+  /// "off".
+  FlutterTristate is_toggled;
+  /// Whether a semantic node that is currently expanded.
+  FlutterTristate is_expanded;
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  FlutterTristate is_required;
+  /// Whether the semantic node currently holds the user's focus.
+  FlutterTristate is_focused;
   /// Whether the semantic node represents a button.
   bool is_button;
   /// Whether the semantic node represents a text field.
   bool is_text_field;
-  /// Whether the semantic node currently holds the user's focus.
-  bool is_focused;
-  /// The semantics node has the quality of either being "enabled" or
-  /// "disabled".
-  bool has_enabled_state;
-  /// Whether a semantic node that hasEnabledState is currently enabled.
-  bool is_enabled;
   /// Whether a semantic node is in a mutually exclusive group.
   bool is_in_mutually_exclusive_group;
   /// Whether a semantic node is a header that divides content into sections.
@@ -302,11 +324,6 @@ typedef struct {
   bool is_image;
   /// Whether the semantics node is a live region.
   bool is_live_region;
-  /// The semantics node has the quality of either being "on" or "off".
-  bool has_toggled_state;
-  /// If true, the semantics node is "on". If false, the semantics node is
-  /// "off".
-  bool is_toggled;
   /// Whether the platform can scroll the semantics node when the user attempts
   /// to move the accessibility focus to an offscreen child.
   ///
@@ -325,31 +342,12 @@ typedef struct {
   ///
   /// Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
   bool is_read_only;
-  /// Whether the semantic node can hold the user's focus.
-  bool is_focusable;
   /// Whether the semantics node represents a link.
   bool is_link;
   /// Whether the semantics node represents a slider.
   bool is_slider;
   /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
-  /// Whether the semantics node represents a tristate checkbox in mixed state.
-  bool is_check_state_mixed;
-  /// The semantics node has the quality of either being "expanded" or
-  /// "collapsed".
-  bool has_expanded_state;
-  /// Whether a semantic node that hasExpandedState is currently expanded.
-  bool is_expanded;
-  /// The semantics node has the quality of either being "selected" or
-  /// "not selected".
-  bool has_selected_state;
-  /// Whether a semantics node has the quality of being required.
-  bool has_required_state;
-  /// Whether user input is required on the semantics node before a form can be
-  /// submitted.
-  ///
-  /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
-  bool is_required;
 } FlutterSemanticsFlags;
 
 typedef enum {
@@ -3364,7 +3362,7 @@ uint64_t FlutterEngineGetCurrentTime();
 
 //------------------------------------------------------------------------------
 /// @brief      Inform the engine to run the specified task. This task has been
-///             given to the engine via the
+///             given to the embedder via the
 ///             `FlutterTaskRunnerDescription.post_task_callback`. This call
 ///             must only be made at the target time specified in that callback.
 ///             Running the task before that time is undefined behavior.

@@ -156,7 +156,7 @@ bool LayerRasterCacheItem::TryToPrepareRasterCache(const PaintContext& context,
           .flow_type          = flow_type,
           // clang-format on
       };
-      auto id = maybe_id.value();
+      const auto& id = maybe_id.value();
       return context.raster_cache->UpdateCacheEntry(
           id, r_context,
           [ctx = context, cache_state = cache_state_,

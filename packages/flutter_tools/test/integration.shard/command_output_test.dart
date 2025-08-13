@@ -24,9 +24,6 @@ void main() {
       // Development tools.
       expect(result.stdout, isNot(contains('update-packages')));
 
-      // Deprecated.
-      expect(result.stdout, isNot(contains('make-host-app-editable')));
-
       // Only printed by verbose tool.
       expect(result.stdout, isNot(contains('exiting with code 0')));
     },
@@ -34,6 +31,19 @@ void main() {
 
   testWithoutContext('Flutter help is shown with -? command line argument', () async {
     final ProcessResult result = await processManager.run(<String>[flutterBin, '-?']);
+
+    // Development tools.
+    expect(
+      result.stdout,
+      contains(
+        'Run "flutter help <command>" for more information about a command.\n'
+        'Run "flutter help -v" for verbose help output, including less commonly used options.',
+      ),
+    );
+  });
+
+  testWithoutContext('Flutter help is shown with /? command line argument', () async {
+    final ProcessResult result = await processManager.run(<String>[flutterBin, '/?']);
 
     // Development tools.
     expect(
@@ -114,7 +124,7 @@ void main() {
       '--machine',
     ]);
 
-    final Map<String, Object?> versionInfo =
+    final versionInfo =
         json.decode(
               result.stdout
                   .toString()

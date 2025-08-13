@@ -25,6 +25,7 @@ import 'checkable.dart';
 import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
+import 'form.dart';
 import 'header.dart';
 import 'heading.dart';
 import 'image.dart';
@@ -44,6 +45,8 @@ import 'table.dart';
 import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
+
+const String kFlutterSemanticNodePrefix = 'flt-semantic-node-';
 
 class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   const EngineAccessibilityFeatures(this._index);
@@ -75,9 +78,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   @override
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
   // This index check is inverted (== 0 vs != 0); far more platforms support
-  // "announce" than discourage it.
+  // announce than discourage it.
   @override
-  bool get announce => _kNoAnnounceIndex & _index == 0;
+  bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
   @override
   String toString() {
@@ -103,8 +106,8 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (onOffSwitchLabels) {
       features.add('onOffSwitchLabels');
     }
-    if (announce) {
-      features.add('announce');
+    if (supportsAnnounce) {
+      features.add('supportsAnnounce');
     }
     return 'AccessibilityFeatures$features';
   }
@@ -128,7 +131,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? reduceMotion,
     bool? highContrast,
     bool? onOffSwitchLabels,
-    bool? announce,
+    bool? supportsAnnounce,
   }) {
     final EngineAccessibilityFeaturesBuilder builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -139,7 +142,7 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.reduceMotion = reduceMotion ?? this.reduceMotion;
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
-    builder.announce = announce ?? this.announce;
+    builder.supportsAnnounce = supportsAnnounce ?? this.supportsAnnounce;
 
     return builder.build();
   }
@@ -158,8 +161,8 @@ class EngineAccessibilityFeaturesBuilder {
   bool get highContrast => EngineAccessibilityFeatures._kHighContrastIndex & _index != 0;
   bool get onOffSwitchLabels => EngineAccessibilityFeatures._kOnOffSwitchLabelsIndex & _index != 0;
   // This index check is inverted (== 0 vs != 0); far more platforms support
-  // "announce" than discourage it.
-  bool get announce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
+  // announce than discourage it.
+  bool get supportsAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -196,9 +199,11 @@ class EngineAccessibilityFeaturesBuilder {
     _index = value ? _index | onOffSwitchLabels : _index & ~onOffSwitchLabels;
   }
 
-  set announce(bool value) {
+  // This setter uses an inverted check (!value instead of value) to set the noAnnounce
+  // field in EngineAccessibilityFeatures since far more platforms support announce
+  // than not.
+  set supportsAnnounce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
-    // Since we are using noAnnounce for the embedder, we need to flip the value.
     _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
   }
 
@@ -266,6 +271,7 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.locale,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -378,6 +384,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.Locale? locale;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -520,6 +529,9 @@ enum EngineSemanticsRole {
   /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
+
+  /// An area that represents a form.
+  form,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -598,7 +610,7 @@ abstract class SemanticRole {
     element.style
       ..position = 'absolute'
       ..overflow = 'visible';
-    element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
+    element.setAttribute('id', '$kFlutterSemanticNodePrefix${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
     if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
@@ -765,11 +777,10 @@ abstract class SemanticRole {
     }
 
     final List<SemanticBehavior>? behaviors = _behaviors;
-    if (behaviors == null) {
-      return;
-    }
-    for (final SemanticBehavior behavior in behaviors) {
-      behavior.update();
+    if (behaviors != null) {
+      for (final SemanticBehavior behavior in behaviors) {
+        behavior.update();
+      }
     }
 
     if (semanticsObject.isIdentifierDirty) {
@@ -778,6 +789,10 @@ abstract class SemanticRole {
 
     if (semanticsObject.isControlsNodesDirty) {
       _updateControls();
+    }
+
+    if (semanticsObject.isLocaleDirty) {
+      semanticsObject.owner.addOneTimePostUpdateCallback(_updateLocale);
     }
   }
 
@@ -798,7 +813,7 @@ abstract class SemanticRole {
           if (semanticNodeId == null) {
             continue;
           }
-          elementIds.add('flt-semantic-node-$semanticNodeId');
+          elementIds.add('$kFlutterSemanticNodePrefix$semanticNodeId');
         }
         if (elementIds.isNotEmpty) {
           setAttribute('aria-controls', elementIds.join(' '));
@@ -807,6 +822,16 @@ abstract class SemanticRole {
       });
     }
     removeAttribute('aria-controls');
+  }
+
+  void _updateLocale() {
+    final String locale = semanticsObject.locale?.toString() ?? '';
+    final isSameAsParent = semanticsObject.locale == semanticsObject.parent?.locale;
+    if (locale.isEmpty || isSameAsParent) {
+      removeAttribute('lang');
+      return;
+    }
+    setAttribute('lang', locale);
   }
 
   /// Applies the current [SemanticsObject.validationResult] to the DOM managed
@@ -1469,6 +1494,18 @@ class SemanticsObject {
     _dirtyFields |= _controlsNodesIndex;
   }
 
+  /// The language of this node.
+  ui.Locale? locale;
+
+  static const int _localeIndex = 1 << 28;
+
+  /// Whether the [locale] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isLocaleDirty => _isDirty(_localeIndex);
+  void _markLocaleDirty() {
+    _dirtyFields |= _localeIndex;
+  }
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1751,6 +1788,11 @@ class SemanticsObject {
       _markControlsNodesDirty();
     }
 
+    if (locale != update.locale) {
+      locale = update.locale;
+      _markLocaleDirty();
+    }
+
     // Apply updates to the DOM.
     _updateRole();
 
@@ -1987,12 +2029,13 @@ class SemanticsObject {
         return EngineSemanticsRole.navigation;
       case ui.SemanticsRole.region:
         return EngineSemanticsRole.region;
+      case ui.SemanticsRole.form:
+        return EngineSemanticsRole.form;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
       case ui.SemanticsRole.progressBar:
@@ -2068,6 +2111,7 @@ class SemanticsObject {
       EngineSemanticsRole.main => SemanticMain(this),
       EngineSemanticsRole.navigation => SemanticNavigation(this),
       EngineSemanticsRole.region => SemanticRegion(this),
+      EngineSemanticsRole.form => SemanticForm(this),
     };
   }
 
@@ -2389,8 +2433,8 @@ class SemanticsObject {
     assert(() {
       final String children =
           _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty
-              ? '[${_childrenInTraversalOrder!.join(', ')}]'
-              : '<empty>';
+          ? '[${_childrenInTraversalOrder!.join(', ')}]'
+          : '<empty>';
       result = '$runtimeType(#$id, children: $children)';
       return true;
     }());
@@ -2558,7 +2602,7 @@ class EngineSemantics {
   /// actually updating the semantic DOM.
   void didReceiveSemanticsUpdate() {
     if (!_semanticsEnabled) {
-      if (ui_web.debugEmulateFlutterTesterEnvironment) {
+      if (ui_web.TestEnvironment.instance.keepSemanticsDisabledOnUpdate) {
         // Running Flutter widget tests in a fake environment. Don't enable
         // engine semantics. Test semantics trees violate invariants in ways
         // production implementation isn't built to handle. For example, tests

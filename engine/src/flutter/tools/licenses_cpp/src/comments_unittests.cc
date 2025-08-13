@@ -17,7 +17,7 @@ TEST(CommentsTest, Simple) {
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "// Hello");
+  EXPECT_EQ(comments[0], "Hello");
 }
 
 TEST(CommentsTest, Nothing) {
@@ -47,7 +47,7 @@ dfdd
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "/*\nhello world\n*/");
+  EXPECT_EQ(comments[0], "hello world\n");
 }
 
 TEST(CommentsTest, MultilineCpp) {
@@ -64,5 +64,69 @@ daa
   });
 
   ASSERT_EQ(comments.size(), 1u);
-  EXPECT_EQ(comments[0], "// hello\n// world");
+  EXPECT_EQ(comments[0], "hello\nworld");
+}
+
+TEST(CommentsTest, CWithLeadingStars) {
+  std::string test = R"test(
+/*************
+ * hello
+ * world
+ */
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "hello\nworld\n");
+}
+
+TEST(CommentsTest, CWithTrailingStars) {
+  std::string test = R"test(
+/*************
+ * hello *
+ * world *
+ */
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "hello\nworld\n");
+}
+
+TEST(CommentsTest, CTextOnEndingLine) {
+  std::string test = R"test(
+/*hello
+world*/
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "hello\nworld");
+}
+
+TEST(CommentsTest, HashComments) {
+  std::string test = R"test(
+# Hello
+# World
+)test";
+
+  std::vector<std::string> comments;
+  IterateComments(test.c_str(), test.size(), [&](std::string_view comment) {
+    comments.push_back(std::string(comment));
+  });
+
+  ASSERT_EQ(comments.size(), 1u);
+  EXPECT_EQ(comments[0], "Hello\nWorld");
 }

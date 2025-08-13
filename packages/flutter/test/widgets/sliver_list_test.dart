@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -218,7 +218,7 @@ void main() {
     items.insert(0, -1);
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -258,7 +258,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -285,7 +285,7 @@ void main() {
 
     await tester.pumpWidget(
       _buildSliverList(
-        items: List<int>.from(items),
+        items: List<int>.of(items),
         controller: controller,
         itemHeight: 50,
         viewportHeight: 200,
@@ -375,12 +375,11 @@ Widget _buildSliverListRenderWidgetChild(List<String> items, ScrollController co
           child: CustomScrollView(
             controller: controller,
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  items.map<Widget>((String item) {
-                    return Chip(key: Key(item), label: Text('Tile $item'));
-                  }).toList(),
-                ),
+              SliverList.builder(
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Chip(key: Key(items[index]), label: Text('Tile ${items[index]}'));
+                },
               ),
             ],
           ),

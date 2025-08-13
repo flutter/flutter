@@ -46,8 +46,10 @@ namespace {
 id<MTLDevice> SelectMetalDevice() {
   NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
   for (id<MTLDevice> device in devices) {
-    if (device.hasUnifiedMemory) {
-      return device;
+    if (@available(macOS 10.15, *)) {
+      if (device.hasUnifiedMemory) {
+        return device;
+      }
     }
   }
   return MTLCreateSystemDefaultDevice();

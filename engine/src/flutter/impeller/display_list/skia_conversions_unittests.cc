@@ -10,8 +10,6 @@
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/scalar.h"
-#include "include/core/SkMatrix.h"
-#include "include/core/SkRRect.h"
 
 namespace impeller {
 namespace testing {

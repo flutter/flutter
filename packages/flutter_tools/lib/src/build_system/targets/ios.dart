@@ -12,7 +12,9 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart' show Logger;
 import '../../base/process.dart';
+import '../../base/version.dart';
 import '../../build_info.dart';
+import '../../darwin/darwin.dart';
 import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
@@ -40,7 +42,7 @@ abstract class AotAssemblyBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
+    final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
       xcode: globals.xcode!,
@@ -65,10 +67,10 @@ abstract class AotAssemblyBase extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+    final buildMode = BuildMode.fromCliName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> darwinArchs =
         environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
         <DarwinArch>[DarwinArch.arm64];
@@ -90,9 +92,9 @@ abstract class AotAssemblyBase extends Target {
 
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
-    final List<Future<int>> pending = <Future<int>>[];
-    for (final DarwinArch darwinArch in darwinArchs) {
-      final List<String> archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
+    final pending = <Future<int>>[];
+    for (final darwinArch in darwinArchs) {
+      final archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
@@ -287,8 +289,8 @@ abstract class UnpackIOS extends UnpackDarwin {
     await _copyFrameworkDysm(environment, sdkRoot: sdkRoot, environmentType: environmentType);
 
     final File frameworkBinary = environment.outputDir
-        .childDirectory('Flutter.framework')
-        .childFile('Flutter');
+        .childDirectory(FlutterDarwinPlatform.ios.frameworkName)
+        .childFile(FlutterDarwinPlatform.ios.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
@@ -376,9 +378,9 @@ Future<void> _checkForLaunchRootViewControllerAccessDeprecation(
 ) async {
   final List<String> lines = file.readAsLinesSync();
 
-  bool inDidFinishLaunchingWithOptions = false;
-  int lineNumber = 0;
-  for (final String line in lines) {
+  var inDidFinishLaunchingWithOptions = false;
+  var lineNumber = 0;
+  for (final line in lines) {
     lineNumber += 1;
     if (!inDidFinishLaunchingWithOptions) {
       if (line.contains('didFinishLaunchingWithOptions')) {
@@ -485,6 +487,113 @@ class _IssueLaunchRootViewControllerAccess extends Target {
   List<Source> get outputs => <Source>[];
 }
 
+/// This target verifies that the Xcode project has an LLDB Init File set within
+/// at least one scheme.
+///
+/// LLDB Init File is needed for debugging on physical iOS 26+ devices.
+class DebugIosLLDBInit extends Target {
+  const DebugIosLLDBInit();
+
+  @override
+  String get name => 'debug_ios_lldb_init';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? sdkRoot = environment.defines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, name);
+    }
+    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+      sdkRoot,
+      environment.fileSystem,
+    );
+
+    // LLDB Init File is only required for physical devices in debug mode.
+    if (environmentType != EnvironmentType.physical) {
+      return;
+    }
+
+    final String? targetDeviceVersionString = environment.defines[kTargetDeviceOSVersion];
+    if (targetDeviceVersionString == null) {
+      // Skip if TARGET_DEVICE_OS_VERSION is not found. TARGET_DEVICE_OS_VERSION
+      // is not set if "build ios-framework" is called, which builds the
+      // DebugIosApplicationBundle directly rather than through flutter assemble.
+      // If may also be null if the build is targeting multiple architectures.
+      return;
+    }
+
+    final Version? targetDeviceVersion = Version.parse(targetDeviceVersionString);
+    if (targetDeviceVersion == null) {
+      environment.logger.printError(
+        'Failed to parse TARGET_DEVICE_OS_VERSION: $targetDeviceVersionString',
+      );
+      return;
+    }
+
+    // LLDB Init File is only needed for iOS 26+.
+    if (targetDeviceVersion < Version(26, 0, null)) {
+      return;
+    }
+
+    final String? srcRoot = environment.defines[kSrcRoot];
+    if (srcRoot == null) {
+      environment.logger.printError('Failed to find $srcRoot');
+      return;
+    }
+
+    final Directory xcodeProjectDir = environment.fileSystem.directory(srcRoot);
+    if (!xcodeProjectDir.existsSync()) {
+      environment.logger.printError('Failed to find ${xcodeProjectDir.path}');
+      return;
+    }
+
+    // The scheme name is not available in Xcode Build Phases Run Scripts.
+    // Instead, find all xcscheme files in the Xcode project (this may be the
+    // Flutter Xcode project or an Add to App native Xcode project) and check
+    // if any of them contain "customLLDBInitFile". If none have it set, print
+    // a warning.
+    // Also, this cannot check for a specific path/name for the LLDB Init File
+    // since Flutter's LLDB Init file may be imported from within a user's
+    // custom LLDB Init File.
+    var anyLLDBInitFound = false;
+    await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
+      if (environment.fileSystem.path.extension(entity.path) == '.xcscheme' && entity is File) {
+        if (entity.readAsStringSync().contains('customLLDBInitFile')) {
+          anyLLDBInitFound = true;
+          break;
+        }
+      }
+    }
+    if (!anyLLDBInitFound) {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final tab = flutterProject.isModule ? 'Use CocoaPods' : 'Use frameworks';
+      printXcodeWarning(
+        'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+        'ensure debug mode works, please complete instructions found in '
+        '"Embed a Flutter module in your iOS app > $tab > Set LLDB Init File" '
+        'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+      );
+    }
+    return;
+  }
+}
+
 /// The base class for all iOS bundle targets.
 ///
 /// This is responsible for setting up the basic App.framework structure, including:
@@ -525,7 +634,7 @@ abstract class IosAssetBundle extends Target {
     if (environmentBuildMode == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+    final buildMode = BuildMode.fromCliName(environmentBuildMode);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkBinary = frameworkDirectory.childFile('App');
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
@@ -640,7 +749,11 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[const DebugUniversalFramework(), ...super.dependencies];
+  List<Target> get dependencies => <Target>[
+    const DebugUniversalFramework(),
+    const DebugIosLLDBInit(),
+    ...super.dependencies,
+  ];
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.
@@ -683,7 +796,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   Future<void> build(Environment environment) async {
-    bool buildSuccess = true;
+    var buildSuccess = true;
     try {
       await super.build(environment);
     } catch (_) {
@@ -729,7 +842,8 @@ Future<void> _createStubAppFramework(
     'flutter_tools_stub_source.',
   );
   try {
-    final File stubSource = tempDir.childFile('debug_app.cc')..writeAsStringSync(r'''
+    final File stubSource = tempDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
   static const int Moo = 88;
   ''');
 
@@ -743,9 +857,9 @@ Future<void> _createStubAppFramework(
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=13.0'
+        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}'
       else
-        '-miphonesimulator-version-min=13.0',
+        '-miphonesimulator-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',
@@ -791,7 +905,7 @@ Future<void> _signFramework(Environment environment, File binary, BuildMode buil
   if (result.exitCode != 0) {
     final String stdout = (result.stdout as String).trim();
     final String stderr = (result.stderr as String).trim();
-    final StringBuffer output = StringBuffer();
+    final output = StringBuffer();
     output.writeln('Failed to codesign ${binary.path} with identity $codesignIdentity.');
     if (stdout.isNotEmpty) {
       output.writeln(stdout);

@@ -21,7 +21,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   group('Clients of flutter run on web with DDS enabled', () {
@@ -40,7 +40,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -53,7 +53,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);
@@ -85,7 +85,7 @@ void main() {
       await flutter.run(
         withDebugger: true,
         device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: <String>['--verbose'],
+        additionalCommandArgs: <String>['--verbose', '--no-web-resources-cdn'],
       );
 
       expect(flutter.vmServiceWsUri, isNotNull);

@@ -95,6 +95,14 @@ DEF_SWITCH(EnableDartProfiling,
            "enable-dart-profiling",
            "Enable Dart profiling. Profiling information can be viewed from "
            "Dart / Flutter DevTools.")
+DEF_SWITCH(
+    ProfileStartup,
+    "profile-startup",
+    "Make the profiler discard new samples once the profiler sample buffer is "
+    "full. When this flag is not set, the profiler sample buffer is used as a "
+    "ring buffer, meaning that once it is full, new samples start overwriting "
+    "the oldest ones. This switch is only meaningful when set in conjunction "
+    "with --enable-dart-profiling.")
 DEF_SWITCH(EndlessTraceBuffer,
            "endless-trace-buffer",
            "Enable an endless trace buffer. The default is a ring buffer. "
@@ -175,6 +183,12 @@ DEF_SWITCH(TraceToFile,
            "Write the timeline trace to a file at the specified path. The file "
            "will be in Perfetto's proto format; it will be possible to load "
            "the file into Perfetto's trace viewer.")
+DEF_SWITCH(ProfileMicrotasks,
+           "profile-microtasks",
+           "Enable collection of information about each microtask. Information "
+           "about completed microtasks will be written to the \"Microtask\" "
+           "timeline stream. Information about queued microtasks will be "
+           "accessible from Dart / Flutter DevTools.")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "

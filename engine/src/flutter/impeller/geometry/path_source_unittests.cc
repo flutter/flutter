@@ -37,7 +37,6 @@ TEST(PathSourceTest, RectSourceTest) {
     EXPECT_CALL(receiver, LineTo(Point(10, 30)));
     EXPECT_CALL(receiver, LineTo(Point(10, 15)));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -62,7 +61,6 @@ TEST(PathSourceTest, EllipseSourceTest) {
     EXPECT_CALL(receiver, ConicTo(Point(20, 30), Point(15, 30), kSqrt2Over2));
     EXPECT_CALL(receiver, ConicTo(Point(10, 30), Point(10, 22.5), kSqrt2Over2));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -98,7 +96,6 @@ TEST(PathSourceTest, RoundRectSourceTest) {
     EXPECT_CALL(receiver, LineTo(Point(10, 26)));
     EXPECT_CALL(receiver, ConicTo(Point(10, 15), Point(11, 15), kSqrt2Over2));
     EXPECT_CALL(receiver, Close());
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -152,8 +149,6 @@ TEST(PathSourceTest, DiffRoundRectSourceTest) {
     EXPECT_CALL(receiver, ConicTo(Point(50, 60), Point(51, 60), kSqrt2Over2));
     // RetiresOnSaturation keeps identical calls from matching each other
     EXPECT_CALL(receiver, Close()).RetiresOnSaturation();
-
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -175,7 +170,6 @@ TEST(PathSourceTest, DashedLinePathSource) {
     EXPECT_CALL(receiver, LineTo(Point(15, 10)));
     EXPECT_CALL(receiver, MoveTo(Point(20, 10), false));
     EXPECT_CALL(receiver, LineTo(Point(25, 10)));
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -195,7 +189,6 @@ TEST(PathSourceTest, EmptyDashedLinePathSource) {
 
     EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
     EXPECT_CALL(receiver, LineTo(Point(10, 10)));
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -215,7 +208,6 @@ TEST(PathSourceTest, DashedLinePathSourceZeroOffGaps) {
 
     EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
     EXPECT_CALL(receiver, LineTo(Point(30, 10)));
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -235,7 +227,6 @@ TEST(PathSourceTest, DashedLinePathSourceInvalidOffGaps) {
 
     EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
     EXPECT_CALL(receiver, LineTo(Point(30, 10)));
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);
@@ -255,7 +246,6 @@ TEST(PathSourceTest, DashedLinePathSourceInvalidOnRegion) {
 
     EXPECT_CALL(receiver, MoveTo(Point(10, 10), false));
     EXPECT_CALL(receiver, LineTo(Point(30, 10)));
-    EXPECT_CALL(receiver, PathEnd());
   }
 
   source.Dispatch(receiver);

@@ -57,10 +57,10 @@ class CustomDeviceLogReader extends DeviceLogReader {
   final String name;
 
   @visibleForTesting
-  final StreamController<String> logLinesController = StreamController<String>.broadcast();
+  final logLinesController = StreamController<String>.broadcast();
 
   @visibleForTesting
-  final List<StreamSubscription<String>> subscriptions = <StreamSubscription<String>>[];
+  final subscriptions = <StreamSubscription<String>>[];
 
   /// Listen to [process]' stdout and stderr, decode them using [encoding]
   /// and add each decoded line to [logLines].
@@ -103,7 +103,7 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[
+    final futures = <Future<void>>[
       for (final StreamSubscription<String> subscription in subscriptions) subscription.cancel(),
       logLinesController.close(),
     ];
@@ -141,7 +141,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   final ProcessUtils _processUtils;
   final int? numTries;
   final Map<String, String> _additionalReplacementValues;
-  final List<ForwardedPort> _forwardedPorts = <ForwardedPort>[];
+  final _forwardedPorts = <ForwardedPort>[];
 
   @override
   Future<void> dispose() async {
@@ -158,15 +158,14 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // launch the forwarding command
     final Process process = await _processUtils.start(interpolated);
 
-    final Completer<ForwardedPort?> completer = Completer<ForwardedPort?>();
+    final completer = Completer<ForwardedPort?>();
 
     // Read the outputs of the process; if we find a line that matches
     // the configs forwardPortSuccessRegex, we complete with a successfully
     // forwarded port.
     // If that regex never matches, this will potentially run forever
     // and the forwarding will never complete.
-    final CustomDeviceLogReader reader = CustomDeviceLogReader(_deviceName)
-      ..listenToProcessOutput(process);
+    final reader = CustomDeviceLogReader(_deviceName)..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
         completer.complete(ForwardedPort.withContext(hostPort, devicePort, process));
@@ -196,7 +195,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
     int actualHostPort = (hostPort == 0 || hostPort == null) ? devicePort : hostPort;
-    int tries = 0;
+    var tries = 0;
 
     while ((numTries == null) || (tries < numTries!)) {
       // when the desired host port is already forwarded by this Forwarder,
@@ -284,6 +283,7 @@ class CustomDeviceAppSession {
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
       if (debuggingOptions.enableDartProfiling) 'enable-dart-profiling=true',
+      if (debuggingOptions.profileStartup) 'profile-startup=true',
       if (debuggingOptions.enableSoftwareRendering) 'enable-software-rendering=true',
       if (debuggingOptions.skiaDeterministicRendering) 'skia-deterministic-rendering=true',
       if (debuggingOptions.traceSkia) 'trace-skia=true',
@@ -292,6 +292,7 @@ class CustomDeviceAppSession {
       if (debuggingOptions.traceSystrace) 'trace-systrace=true',
       if (debuggingOptions.traceToFile != null) 'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer) 'endless-trace-buffer=true',
+      if (debuggingOptions.profileMicrotasks) 'profile-microtasks=true',
       if (debuggingOptions.purgePersistentCache) 'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
@@ -358,7 +359,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
+    final discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -433,16 +434,15 @@ class CustomDevice extends Device {
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _globalLogReader = CustomDeviceLogReader(config.label),
-       portForwarder =
-           config.usesPortForwarding
-               ? CustomDevicePortForwarder(
-                 deviceName: config.label,
-                 forwardPortCommand: config.forwardPortCommand!,
-                 forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-                 processManager: processManager,
-                 logger: logger,
-               )
-               : const NoOpDevicePortForwarder(),
+       portForwarder = config.usesPortForwarding
+           ? CustomDevicePortForwarder(
+               deviceName: config.label,
+               forwardPortCommand: config.forwardPortCommand!,
+               forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
+               processManager: processManager,
+               logger: logger,
+             )
+           : const NoOpDevicePortForwarder(),
        super(
          config.id,
          category: Category.mobile,
@@ -454,9 +454,9 @@ class CustomDevice extends Device {
   final Logger _logger;
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
-  final Map<ApplicationPackage, CustomDeviceAppSession> _sessions =
-      <ApplicationPackage, CustomDeviceAppSession>{};
+  final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
+  Process? _globalLogReaderProcess;
 
   @override
   final DevicePortForwarder portForwarder;
@@ -465,7 +465,7 @@ class CustomDevice extends Device {
     return _sessions.putIfAbsent(app, () {
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
-      final CustomDeviceAppSession session = CustomDeviceAppSession(
+      final session = CustomDeviceAppSession(
         name: name,
         device: this,
         appPackage: app,
@@ -610,15 +610,26 @@ class CustomDevice extends Device {
     _sessions
       ..forEach((_, CustomDeviceAppSession session) => session.dispose())
       ..clear();
+    _globalLogReaderProcess?.kill();
+    _globalLogReaderProcess = null;
   }
 
   @override
   Future<String?> get emulatorId async => null;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+  }) async {
     if (app != null) {
       return _getOrCreateAppSession(app).logReader;
+    }
+
+    if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
+      // launch the readLogs command
+      _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
+      _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
     return _globalLogReader;
@@ -668,7 +679,7 @@ class CustomDevice extends Device {
   }
 
   @override
-  bool isSupported() {
+  Future<bool> isSupported() async {
     return true;
   }
 
@@ -703,11 +714,12 @@ class CustomDevice extends Device {
     final TargetPlatform platform = await targetPlatform;
     final Artifacts artifacts = globals.artifacts!;
 
-    final Map<String, String> additionalReplacementValues = <String, String>{
+    final additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
       'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
-      'engineRevision':
-          artifacts.usesLocalArtifacts ? 'local' : globals.flutterVersion.engineRevision,
+      'engineRevision': artifacts.usesLocalArtifacts
+          ? 'local'
+          : globals.flutterVersion.engineRevision,
     };
 
     if (!prebuiltApplication) {
@@ -824,7 +836,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     final List<CustomDevice> devices = _enabledCustomDevices;
 
     // maps any custom device to whether its reachable or not.
-    final Map<CustomDevice, bool> pingedDevices = Map<CustomDevice, bool>.fromIterables(
+    final pingedDevices = Map<CustomDevice, bool>.fromIterables(
       devices,
       await Future.wait(devices.map((CustomDevice e) => e.tryPing(timeout: timeout))),
     );
