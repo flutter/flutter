@@ -847,7 +847,7 @@ class EditableText extends StatefulWidget {
     )
     this.textScaleFactor,
     this.textScaler,
-    this.maxLines = 1,
+    this.maxLines = 1.0,
     this.minLines,
     this.expands = false,
     this.forceLine = true,
@@ -927,7 +927,7 @@ class EditableText extends StatefulWidget {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
-       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+       assert(!obscureText || maxLines == 1.0, 'Obscured fields cannot be multiline.'),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
        selectAllOnFocus = selectAllOnFocus ?? _defaultSelectAllOnFocus,
        toolbarOptions = selectionControls is TextSelectionHandleControls && toolbarOptions == null
@@ -959,7 +959,7 @@ class EditableText extends StatefulWidget {
        _strutStyle = strutStyle,
        keyboardType =
            keyboardType ?? _inferKeyboardType(autofillHints: autofillHints, maxLines: maxLines),
-       inputFormatters = maxLines == 1
+       inputFormatters = maxLines == 1.0
            ? <TextInputFormatter>[
                FilteringTextInputFormatter.singleLineFormatter,
                ...inputFormatters ?? const Iterable<TextInputFormatter>.empty(),
@@ -1246,13 +1246,13 @@ class EditableText extends StatefulWidget {
   /// The input's height is large enough for the given number of lines. If
   /// additional lines are entered the input scrolls vertically.
   /// ```dart
-  /// const TextField(maxLines: 2)
+  /// const TextField(maxLines: 2.0)
   /// ```
   ///
   /// Input whose height grows with content between a min and max. An infinite
   /// max is possible with `maxLines: null`.
   /// ```dart
-  /// const TextField(minLines: 2, maxLines: 4)
+  /// const TextField(minLines: 2, maxLines: 4.0)
   /// ```
   ///
   /// See also:
@@ -1261,7 +1261,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  final int? maxLines;
+  final double? maxLines;
 
   /// {@template flutter.widgets.editableText.minLines}
   /// The minimum number of lines to occupy when the content spans fewer lines.
@@ -1296,7 +1296,7 @@ class EditableText extends StatefulWidget {
   /// point the height limit is reached. If additional lines are entered it will
   /// scroll vertically.
   /// ```dart
-  /// const TextField(minLines:2, maxLines: 4)
+  /// const TextField(minLines:2, maxLines: 4.0)
   /// ```
   ///
   /// Defaults to null.
@@ -1936,7 +1936,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to only apply a [Scrollbar] if [maxLines] is greater
-  /// than 1.
+  /// than 1.0.
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
@@ -2210,10 +2210,10 @@ class EditableText extends StatefulWidget {
   // Infer the keyboard type of an `EditableText` if it's not specified.
   static TextInputType _inferKeyboardType({
     required Iterable<String>? autofillHints,
-    required int? maxLines,
+    required double? maxLines,
   }) {
     if (autofillHints == null || autofillHints.isEmpty) {
-      return maxLines == 1 ? TextInputType.text : TextInputType.multiline;
+      return maxLines == 1.0 ? TextInputType.text : TextInputType.multiline;
     }
 
     final String effectiveHint = autofillHints.first;
@@ -2273,7 +2273,7 @@ class EditableText extends StatefulWidget {
       }
     }
 
-    if (maxLines != 1) {
+    if (maxLines != 1.0) {
       return TextInputType.multiline;
     }
 
@@ -2382,7 +2382,7 @@ class EditableText extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: null));
-    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(DoubleProperty('maxLines', maxLines, defaultValue: 1.0));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
@@ -3839,7 +3839,7 @@ class EditableTextState extends State<EditableText>
   }
 
   bool get _hasFocus => widget.focusNode.hasFocus;
-  bool get _isMultiline => widget.maxLines != 1;
+  bool get _isMultiline => widget.maxLines != 1.0;
 
   /// Flag to track whether this [EditableText] was in focus when [onTapOutside]
   /// was called.
@@ -5362,7 +5362,7 @@ class EditableTextState extends State<EditableText>
     }
 
     final ScrollPosition position = _scrollController.position;
-    if (widget.maxLines == 1) {
+    if (widget.maxLines == 1.0) {
       _scrollController.jumpTo(position.maxScrollExtent);
       return;
     }
@@ -5389,7 +5389,7 @@ class EditableTextState extends State<EditableText>
   /// Extend the selection down by page if the `forward` parameter is true, or
   /// up by page otherwise.
   void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if (widget.maxLines == 1) {
+    if (widget.maxLines == 1.0) {
       return;
     }
 
@@ -5962,7 +5962,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool forceLine;
   final bool readOnly;
   final bool hasFocus;
-  final int? maxLines;
+  final double? maxLines;
   final int? minLines;
   final bool expands;
   final StrutStyle? strutStyle;
