@@ -539,7 +539,7 @@ class ChipThemeData with Diagnosticable {
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       side: _lerpSides(a?.side, b?.side, t),
-      shape: _lerpShapes(a?.shape, b?.shape, t),
+      shape: OutlinedBorder.lerp(a?.shape, b?.shape, t),
       labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
       secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
       brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
@@ -566,27 +566,16 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    if (a is MaterialStateBorderSide) {
-      a = a.resolve(<WidgetState>{});
+    if (a is WidgetStateBorderSide) {
+      a = a.resolve(const <WidgetState>{});
     }
-    if (b is MaterialStateBorderSide) {
-      b = b.resolve(<WidgetState>{});
+    if (b is WidgetStateBorderSide) {
+      b = b.resolve(const <WidgetState>{});
     }
-    if (a == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: b!.color.withAlpha(0)), b, t);
-    }
-    if (b == null) {
-      return BorderSide.lerp(BorderSide(width: 0, color: a.color.withAlpha(0)), a, t);
-    }
-    return BorderSide.lerp(a, b, t);
-  }
+    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
+    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
 
-  // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return ShapeBorder.lerp(a, b, t) as OutlinedBorder?;
+    return BorderSide.lerp(a, b, t);
   }
 
   @override
