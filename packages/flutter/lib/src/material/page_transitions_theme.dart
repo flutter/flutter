@@ -837,10 +837,9 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     }
 
     return ColoredBox(
-      color:
-          secondaryAnimation.isAnimating
-              ? backgroundColor ?? ColorScheme.of(context).surface
-              : Colors.transparent,
+      color: secondaryAnimation.isAnimating
+          ? backgroundColor ?? ColorScheme.of(context).surface
+          : Colors.transparent,
       child: builder,
     );
   }
