@@ -346,10 +346,11 @@ public class FlutterLoader {
         shellArgs.add(
             "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
       } else {
+        // Add default AOT shared library name arg.
         shellArgs.add(aotSharedLibraryNameFlagPrefix + flutterApplicationInfo.aotSharedLibraryName);
 
-        // Most devices can load the AOT shared library based on the library name
-        // with no directory path.  Provide a fully qualified path to the library
+        // Some devices cannot load the an AOT shared library based on the library name
+        // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
             aotSharedLibraryNameFlagPrefix
@@ -463,13 +464,13 @@ public class FlutterLoader {
 
   /**
    * Checks if the library that engine will use to load application's Dart code lives within a path
-   * we consider safe: within the application's APK, within the application's native code directory
-   * within internal storage, or within application's internal storage (which means the library was
-   * explicitly placed there by the application developer).
+   * we consider safe: within the the application's native code directory in its base APK or or
+   * within the application's internal storage (which means the library was explicitly placed there
+   * by the application developer).
    *
-   * <p>In the case where the library lives within internal storage but not in the native code
-   * directory, we will warn the application developer to ensure they have vetted the library they
-   * wish to use.
+   * <p>In the case where the library does not live in a safe location, we will warn the application
+   * developer to ensure they have vetted the library they wish to use and place it in a trusted
+   * location.
    */
   private boolean shouldAddAotSharedLibraryNameFlag(
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
@@ -529,7 +530,7 @@ public class FlutterLoader {
         TAG,
         "Failed to set AOT shared library name to path "
             + aotSharedLibraryPath
-            + " because it does not point to the native code directory inside your application's APK nor your application's internal storage.");
+            + " because it does not point to the native code directory inside your application's APK nor your application's internal storage. Please make sure to vet this library and package it within one of those trusted locations.");
     return false;
   }
 
