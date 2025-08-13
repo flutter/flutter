@@ -197,7 +197,7 @@ void main() {
     Map<String, Object?> testCommand(int id, [int? binarySize]) => <String, Object?>{
       'id': id,
       'method': 'test',
-      if (binarySize != null) '_binaryLength': binarySize,
+      '_binaryLength': ?binarySize,
     };
     List<int> testCommandBinary(int id, [int? binarySize]) =>
         utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
