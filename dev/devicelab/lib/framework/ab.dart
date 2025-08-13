@@ -89,7 +89,7 @@ class ABTest {
     kBenchmarkTypeKeyName: kBenchmarkResultsType,
     kBenchmarkVersionKeyName: kBenchmarkABVersion,
     kLocalEngineKeyName: localEngine,
-    if (localEngineHost != null) kLocalEngineHostKeyName: localEngineHost,
+    kLocalEngineHostKeyName: ?localEngineHost,
     kTaskNameKeyName: taskName,
     kRunStartKeyName: runStart.toIso8601String(),
     kRunEndKeyName: runEnd!.toIso8601String(),
