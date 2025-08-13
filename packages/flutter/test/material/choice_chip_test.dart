@@ -848,4 +848,18 @@ void main() {
       SystemMouseCursors.forbidden,
     );
   });
+
+  testWidgets('ChoiceChip renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(body: ChoiceChip(label: Text('X'), selected: true)),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }
