@@ -381,14 +381,12 @@ static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
 
 static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_current(self->opengl_manager);
 }
 
 static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_clear_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_clear_current(self->opengl_manager);
 }
 
 static uint32_t fl_engine_gl_get_fbo(void* user_data) {
@@ -398,8 +396,7 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
 
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_resource_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_resource_current(self->opengl_manager);
 }
 
 // Called by the engine to retrieve an external texture.
