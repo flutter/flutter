@@ -42,7 +42,7 @@ object DeepLinkJsonFromManifestTaskHelper {
         deepLinkJson: RegularFileProperty,
     ) {
         val appLinkSettings = createAppLinkSettings(applicationId, manifestFile.get().asFile)
-        deepLinkJson.asFile.get().writeText(appLinkSettings.toJson().toString())
+        deepLinkJson.get().asFile.writeText(appLinkSettings.toJson().toString())
     }
 
     /**

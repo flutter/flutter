@@ -4,6 +4,9 @@
 
 package com.flutter.gradle.tasks
 
+import io.mockk.every
+import io.mockk.mockk
+import org.gradle.api.file.RegularFileProperty
 import org.xml.sax.SAXParseException
 import java.io.File
 import kotlin.test.Test
@@ -31,6 +34,42 @@ class DeepLinkJsonFromManifestTaskTest {
         manifestFile.deleteOnExit()
         manifestFile.writeText(content.trimIndent())
         return manifestFile
+    }
+
+    @Test
+    fun createAppLinkSettingsFileCreation() {
+        val scheme = "http"
+        val host = "example.com"
+        val pathPrefix = "/profile"
+        val manifestContent = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="$defaultNamespace">
+                <application android:label="Test App">
+                    <activity android:name=".MainActivity">
+                    <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+                        <intent-filter>
+                            <action android:name="android.intent.action.VIEW" />
+                            <data android:scheme="$scheme" android:host="$host" android:pathPrefix="$pathPrefix" />
+                        </intent-filter>
+                    </activity>
+                </application>
+            </manifest>
+            """
+        val manifestFile = createTempManifestFile(manifestContent)
+        val manifest = mockk<RegularFileProperty>()
+        every { manifest.get().asFile } returns manifestFile
+
+        val jsonFile = File.createTempFile("deeplink", ".json")
+        jsonFile.deleteOnExit()
+        val json = mockk<RegularFileProperty>()
+        every { json.get().asFile } returns jsonFile
+
+        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(defaultNamespace, manifest, json)
+        assertEquals(
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile).toJson().toString(),
+            jsonFile.readText(),
+        )
     }
 
     @Test
