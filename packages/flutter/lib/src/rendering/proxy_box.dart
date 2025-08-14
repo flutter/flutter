@@ -2842,11 +2842,6 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return child?.getDryBaseline(const BoxConstraints(), baseline);
-  }
-
-  @override
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
