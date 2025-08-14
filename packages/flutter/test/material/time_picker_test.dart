@@ -2273,6 +2273,89 @@ void main() {
         expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
       });
     });
+
+    group('Time picker - emptyInitialInput (${materialType.name})', () {
+      testWidgets('Fields are empty and show correct hints when emptyInitialInput is true', (
+        WidgetTester tester,
+      ) async {
+        await startPicker(
+          tester,
+          (_) {},
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+          emptyInitialInput: true,
+        );
+        await tester.pump();
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, isEmpty); // hour
+        expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
+        await finishPicker(tester);
+      });
+
+      testWidgets('User sets hour/minute after initially empty fields', (
+        WidgetTester tester,
+      ) async {
+        late TimeOfDay result;
+        await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time!;
+          },
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+          emptyInitialInput: true,
+        );
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, isEmpty); // hour
+        expect(textFields[1].controller?.text, isEmpty); // minute
+        expect(textFields[0].decoration?.hintText, isNull);
+        expect(textFields[1].decoration?.hintText, isNull);
+
+        await tester.enterText(find.byType(TextField).first, '11');
+        await tester.enterText(find.byType(TextField).last, '30');
+        await finishPicker(tester);
+
+        expect(result, equals(const TimeOfDay(hour: 11, minute: 30)));
+      });
+
+      testWidgets('User overrides default values when emptyInitialInput is false', (
+        WidgetTester tester,
+      ) async {
+        late TimeOfDay result;
+        await startPicker(
+          tester,
+          (TimeOfDay? time) {
+            result = time!;
+          },
+          entryMode: TimePickerEntryMode.input,
+          materialType: materialType,
+        );
+
+        final List<TextField> textFields = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .toList();
+
+        expect(textFields[0].controller?.text, '7'); // hour
+        expect(textFields[1].controller?.text, '00'); // minute
+
+        await tester.enterText(find.byType(TextField).first, '8');
+        await tester.enterText(find.byType(TextField).last, '15');
+        await tester.pump();
+        await finishPicker(tester);
+
+        expect(result, equals(const TimeOfDay(hour: 8, minute: 15)));
+      });
+    });
   }
 
   testWidgets('Material3 - Time selector separator default text style', (
@@ -2569,6 +2652,7 @@ class _TimePickerLauncher extends StatefulWidget {
     this.restorationId,
     this.cancelText,
     this.confirmText,
+    required this.emptyInitialInput,
   });
 
   final ValueChanged<TimeOfDay?> onChanged;
@@ -2576,6 +2660,7 @@ class _TimePickerLauncher extends StatefulWidget {
   final String? restorationId;
   final String? cancelText;
   final String? confirmText;
+  final bool emptyInitialInput;
 
   @override
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
@@ -2653,6 +2738,7 @@ class _TimePickerLauncherState extends State<_TimePickerLauncher> with Restorati
                       context: context,
                       initialTime: const TimeOfDay(hour: 7, minute: 0),
                       initialEntryMode: widget.entryMode,
+                      emptyInitialInput: widget.emptyInitialInput,
                     ),
                   );
                 } else {
@@ -2682,6 +2768,7 @@ Future<Offset?> startPicker(
   MaterialType? materialType,
   String? cancelText,
   String? confirmText,
+  bool emptyInitialInput = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -2694,6 +2781,7 @@ Future<Offset?> startPicker(
         restorationId: restorationId,
         cancelText: cancelText,
         confirmText: confirmText,
+        emptyInitialInput: emptyInitialInput,
       ),
     ),
   );
