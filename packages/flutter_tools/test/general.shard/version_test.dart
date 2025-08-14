@@ -735,7 +735,7 @@ void main() {
 
     VersionCheckError? runUpstreamValidator({String? versionUpstreamUrl, String? flutterGitUrl}) {
       final Platform testPlatform = FakePlatform(
-        environment: <String, String>{if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl},
+        environment: <String, String>{'FLUTTER_GIT_URL': ?flutterGitUrl},
       );
       return VersionUpstreamValidator(
         version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),

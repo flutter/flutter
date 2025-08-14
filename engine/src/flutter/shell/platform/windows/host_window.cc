@@ -6,9 +6,11 @@
 
 #include <dwmapi.h>
 
+#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
+#include "flutter/shell/platform/windows/rect_helper.h"
 #include "flutter/shell/platform/windows/window_manager.h"
 
 namespace {
@@ -193,6 +195,60 @@ void SetChildContent(HWND content, HWND window) {
              client_rect.bottom - client_rect.top, true);
 }
 
+// Adjusts a 1D segment (defined by origin and size) to fit entirely within
+// a destination segment. If the segment is larger than the destination, it is
+// first shrunk to fit. Then, it's shifted to be within the bounds.
+//
+// Let the destination be "{...}" and the segment to adjust be "[...]".
+//
+// Case 1: The segment sticks out to the right.
+//
+//   Before:      {------[----}------]
+//   After:       {------[----]}
+//
+// Case 2: The segment sticks out to the left.
+//
+//   Before: [------{----]------}
+//   After:        {[----]------}
+void AdjustAlongAxis(LONG dst_origin, LONG dst_size, LONG* origin, LONG* size) {
+  *size = std::min(dst_size, *size);
+  if (*origin < dst_origin)
+    *origin = dst_origin;
+  else
+    *origin = std::min(dst_origin + dst_size, *origin + *size) - *size;
+}
+
+RECT AdjustToFit(const RECT& parent, const RECT& child) {
+  auto new_x = child.left;
+  auto new_y = child.top;
+  auto new_width = flutter::RectWidth(child);
+  auto new_height = flutter::RectHeight(child);
+  AdjustAlongAxis(parent.left, flutter::RectWidth(parent), &new_x, &new_width);
+  AdjustAlongAxis(parent.top, flutter::RectHeight(parent), &new_y, &new_height);
+  RECT result;
+  result.left = new_x;
+  result.right = new_x + new_width;
+  result.top = new_y;
+  result.bottom = new_y + new_height;
+  return result;
+}
+
+flutter::BoxConstraints FromWindowConstraints(
+    const flutter::WindowConstraints& preferred_constraints) {
+  std::optional<flutter::Size> smallest, biggest;
+  if (preferred_constraints.has_view_constraints) {
+    smallest = flutter::Size(preferred_constraints.view_min_width,
+                             preferred_constraints.view_min_height);
+    if (preferred_constraints.view_max_width > 0 &&
+        preferred_constraints.view_max_height > 0) {
+      biggest = flutter::Size(preferred_constraints.view_max_width,
+                              preferred_constraints.view_max_height);
+    }
+  }
+
+  return flutter::BoxConstraints(smallest, biggest);
+}
+
 }  // namespace
 
 namespace flutter {
@@ -200,21 +256,15 @@ namespace flutter {
 std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
-    const WindowSizing& content_size) {
+    const WindowSizeRequest& preferred_size,
+    const WindowConstraints& preferred_constraints,
+    LPCWSTR title) {
   DWORD window_style = WS_OVERLAPPEDWINDOW;
   DWORD extended_window_style = 0;
-  std::optional<Size> smallest = std::nullopt;
-  std::optional<Size> biggest = std::nullopt;
-
-  if (content_size.has_view_constraints) {
-    smallest = Size(content_size.view_min_width, content_size.view_min_height);
-    if (content_size.view_max_width > 0 && content_size.view_max_height > 0) {
-      biggest = Size(content_size.view_max_width, content_size.view_max_height);
-    }
-  }
+  auto const box_constraints = FromWindowConstraints(preferred_constraints);
 
   // TODO(knopp): What about windows sized to content?
-  FML_CHECK(content_size.has_preferred_view_size);
+  FML_CHECK(preferred_size.has_preferred_view_size);
 
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
@@ -222,9 +272,10 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   Rect const initial_window_rect = [&]() -> Rect {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine->windows_proc_table(),
-        Size(content_size.preferred_view_width,
-             content_size.preferred_view_height),
-        smallest, biggest, window_style, extended_window_style, nullptr);
+        Size(preferred_size.preferred_view_width,
+             preferred_size.preferred_view_height),
+        box_constraints.smallest(), box_constraints.biggest(), window_style,
+        extended_window_style, nullptr);
     return {{CW_USEDEFAULT, CW_USEDEFAULT},
             window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
   }();
@@ -274,7 +325,7 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
 
   // Create the native window.
   HWND hwnd = CreateWindowEx(
-      extended_window_style, kWindowClassName, L"", window_style,
+      extended_window_style, kWindowClassName, title, window_style,
       initial_window_rect.left(), initial_window_rect.top(),
       initial_window_rect.width(), initial_window_rect.height(), nullptr,
       nullptr, GetModuleHandle(nullptr), engine->windows_proc_table().get());
@@ -308,9 +359,9 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
   ShowWindow(hwnd, SW_SHOWNORMAL);
-  return std::unique_ptr<HostWindow>(new HostWindow(
-      window_manager, engine, WindowArchetype::kRegular,
-      std::move(view_controller), BoxConstraints(smallest, biggest), hwnd));
+  return std::unique_ptr<HostWindow>(
+      new HostWindow(window_manager, engine, WindowArchetype::kRegular,
+                     std::move(view_controller), box_constraints, hwnd));
 }
 
 HostWindow::HostWindow(
@@ -463,28 +514,77 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
   return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-void HostWindow::SetContentSize(const WindowSizing& size) {
-  WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
-  GetWindowInfo(window_handle_, &window_info);
-
-  std::optional<Size> smallest, biggest;
-  if (size.has_view_constraints) {
-    smallest = Size(size.view_min_width, size.view_min_height);
-    if (size.view_max_width > 0 && size.view_max_height > 0) {
-      biggest = Size(size.view_max_width, size.view_max_height);
-    }
+void HostWindow::SetContentSize(const WindowSizeRequest& size) {
+  if (!size.has_preferred_view_size) {
+    return;
   }
 
-  box_constraints_ = BoxConstraints(smallest, biggest);
+  if (GetFullscreen()) {
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(),
+        Size(size.preferred_view_width, size.preferred_view_height),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        saved_window_info_.style, saved_window_info_.ex_style, nullptr);
+    if (!window_size) {
+      return;
+    }
 
-  if (size.has_preferred_view_size) {
+    saved_window_info_.client_size =
+        ActualWindowSize{.width = size.preferred_view_width,
+                         .height = size.preferred_view_height};
+    saved_window_info_.rect.right =
+        saved_window_info_.rect.left + static_cast<LONG>(window_size->width());
+    saved_window_info_.rect.bottom =
+        saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
+  } else {
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(),
         Size(size.preferred_view_width, size.preferred_view_height),
         box_constraints_.smallest(), box_constraints_.biggest(),
         window_info.dwStyle, window_info.dwExStyle, nullptr);
 
-    if (window_size) {
+    if (!window_size) {
+      return;
+    }
+
+    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+                 window_size->height(),
+                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+}
+
+void HostWindow::SetConstraints(const WindowConstraints& constraints) {
+  box_constraints_ = FromWindowConstraints(constraints);
+
+  if (GetFullscreen()) {
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(),
+        Size(saved_window_info_.client_size.width,
+             saved_window_info_.client_size.height),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        saved_window_info_.style, saved_window_info_.ex_style, nullptr);
+    if (!window_size) {
+      return;
+    }
+
+    saved_window_info_.rect.right =
+        saved_window_info_.rect.left + static_cast<LONG>(window_size->width());
+    saved_window_info_.rect.bottom =
+        saved_window_info_.rect.top + static_cast<LONG>(window_size->height());
+  } else {
+    auto const client_size = GetWindowContentSize(window_handle_);
+    auto const current_size = Size(client_size.width, client_size.height);
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(), current_size,
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        window_info.dwStyle, window_info.dwExStyle, nullptr);
+
+    if (window_size && current_size != window_size) {
       SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
                    window_size->height(),
                    SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -492,4 +592,173 @@ void HostWindow::SetContentSize(const WindowSizing& size) {
   }
 }
 
+// The fullscreen method is largely adapted from the method found in chromium:
+// See:
+//
+// * https://chromium.googlesource.com/chromium/src/+/refs/heads/main/ui/views/win/fullscreen_handler.h
+// * https://chromium.googlesource.com/chromium/src/+/refs/heads/main/ui/views/win/fullscreen_handler.cc
+void HostWindow::SetFullscreen(
+    bool fullscreen,
+    std::optional<FlutterEngineDisplayId> display_id) {
+  if (fullscreen == GetFullscreen()) {
+    return;
+  }
+
+  if (fullscreen) {
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+    saved_window_info_.style = window_info.dwStyle;
+    saved_window_info_.ex_style = window_info.dwExStyle;
+    // Store the original window rect, DPI, and monitor info to detect changes
+    // and more accurately restore window placements when exiting fullscreen.
+    ::GetWindowRect(window_handle_, &saved_window_info_.rect);
+    saved_window_info_.client_size = GetWindowContentSize(window_handle_);
+    saved_window_info_.dpi = GetDpiForHWND(window_handle_);
+    saved_window_info_.monitor =
+        MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
+    saved_window_info_.monitor_info.cbSize =
+        sizeof(saved_window_info_.monitor_info);
+    GetMonitorInfo(saved_window_info_.monitor,
+                   &saved_window_info_.monitor_info);
+  }
+
+  if (fullscreen) {
+    // Next, get the raw HMONITOR that we want to be fullscreened on
+    HMONITOR monitor =
+        MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
+    if (display_id) {
+      for (auto const& display : engine_->display_monitor()->GetDisplays()) {
+        if (display.display_id == display_id) {
+          monitor = reinterpret_cast<HMONITOR>(display.display_id);
+          break;
+        }
+      }
+    }
+
+    MONITORINFO monitor_info;
+    monitor_info.cbSize = sizeof(monitor_info);
+    if (!GetMonitorInfo(monitor, &monitor_info)) {
+      FML_LOG(ERROR) << "Cannot set window fullscreen because the monitor info "
+                        "was not found";
+    }
+
+    auto const width = RectWidth(monitor_info.rcMonitor);
+    auto const height = RectHeight(monitor_info.rcMonitor);
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+
+    // Set new window style and size.
+    SetWindowLong(window_handle_, GWL_STYLE,
+                  saved_window_info_.style & ~(WS_CAPTION | WS_THICKFRAME));
+    SetWindowLong(
+        window_handle_, GWL_EXSTYLE,
+        saved_window_info_.ex_style & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
+                                        WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+    // We call SetWindowPos first to set the window flags immediately. This
+    // makes it so that the WM_GETMINMAXINFO gets called with the correct window
+    // and content sizes.
+    SetWindowPos(window_handle_, NULL, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+    SetWindowPos(window_handle_, nullptr, monitor_info.rcMonitor.left,
+                 monitor_info.rcMonitor.top, width, height,
+                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+  } else {
+    // Restore the window style and bounds saved prior to entering fullscreen.
+    // Use WS_VISIBLE for windows shown after SetFullscreen: crbug.com/1062251.
+    // Making multiple window adjustments here is ugly, but if SetWindowPos()
+    // doesn't redraw, the taskbar won't be repainted.
+    SetWindowLong(window_handle_, GWL_STYLE,
+                  saved_window_info_.style | WS_VISIBLE);
+    SetWindowLong(window_handle_, GWL_EXSTYLE, saved_window_info_.ex_style);
+
+    // We call SetWindowPos first to set the window flags immediately. This
+    // makes it so that the WM_GETMINMAXINFO gets called with the correct window
+    // and content sizes.
+    SetWindowPos(window_handle_, NULL, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
+    HMONITOR monitor =
+        MonitorFromRect(&saved_window_info_.rect, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO monitor_info;
+    monitor_info.cbSize = sizeof(monitor_info);
+    GetMonitorInfo(monitor, &monitor_info);
+
+    auto window_rect = saved_window_info_.rect;
+
+    // Adjust the window bounds to restore, if displays were disconnected,
+    // virtually rearranged, or otherwise changed metrics during fullscreen.
+    if (monitor != saved_window_info_.monitor ||
+        !AreRectsEqual(saved_window_info_.monitor_info.rcWork,
+                       monitor_info.rcWork)) {
+      window_rect = AdjustToFit(monitor_info.rcWork, window_rect);
+    }
+
+    auto const fullscreen_dpi = GetDpiForHWND(window_handle_);
+    SetWindowPos(window_handle_, nullptr, window_rect.left, window_rect.top,
+                 RectWidth(window_rect), RectHeight(window_rect),
+                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    auto const final_dpi = GetDpiForHWND(window_handle_);
+    if (final_dpi != saved_window_info_.dpi || final_dpi != fullscreen_dpi) {
+      // Reissue SetWindowPos if the DPI changed from saved or fullscreen DPIs.
+      // The first call may misinterpret bounds spanning displays, if the
+      // fullscreen display's DPI does not match the target display's DPI.
+      //
+      // Scale and clamp the bounds if the final DPI changed from the saved DPI.
+      // This more accurately matches the original placement, while avoiding
+      // unexpected offscreen placement in a recongifured multi-screen space.
+      if (final_dpi != saved_window_info_.dpi) {
+        auto const scale =
+            final_dpi / static_cast<float>(saved_window_info_.dpi);
+        auto const width = static_cast<LONG>(scale * RectWidth(window_rect));
+        auto const height = static_cast<LONG>(scale * RectHeight(window_rect));
+        window_rect.right = window_rect.left + width;
+        window_rect.bottom = window_rect.top + height;
+        window_rect = AdjustToFit(monitor_info.rcWork, window_rect);
+      }
+
+      SetWindowPos(window_handle_, nullptr, window_rect.left, window_rect.top,
+                   RectWidth(window_rect), RectHeight(window_rect),
+                   SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
+  }
+
+  if (!task_bar_list_) {
+    HRESULT hr =
+        ::CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_INPROC_SERVER,
+                           IID_PPV_ARGS(&task_bar_list_));
+    if (SUCCEEDED(hr) && FAILED(task_bar_list_->HrInit())) {
+      task_bar_list_ = nullptr;
+    }
+  }
+
+  // As per MSDN marking the window as fullscreen should ensure that the
+  // taskbar is moved to the bottom of the Z-order when the fullscreen window
+  // is activated. If the window is not fullscreen, the Shell falls back to
+  // heuristics to determine how the window should be treated, which means
+  // that it could still consider the window as fullscreen. :(
+  if (task_bar_list_) {
+    task_bar_list_->MarkFullscreenWindow(window_handle_, !!fullscreen);
+  }
+
+  is_fullscreen_ = fullscreen;
+}
+
+bool HostWindow::GetFullscreen() const {
+  return is_fullscreen_;
+}
+
+ActualWindowSize HostWindow::GetWindowContentSize(HWND hwnd) {
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
+                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+  double const width = rect.right / dpr;
+  double const height = rect.bottom / dpr;
+  return {
+      .width = rect.right / dpr,
+      .height = rect.bottom / dpr,
+  };
+}
 }  // namespace flutter

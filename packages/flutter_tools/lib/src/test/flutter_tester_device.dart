@@ -138,7 +138,7 @@ class FlutterTesterTestDevice extends TestDevice {
       'APP_NAME': flutterProject?.manifest.appName ?? '',
       if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
         'FLUTTER_TEST_IMPELLER': 'true',
-      if (testAssetDirectory != null) 'UNIT_TEST_ASSETS': testAssetDirectory!,
+      'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
         'PATH':
             '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',

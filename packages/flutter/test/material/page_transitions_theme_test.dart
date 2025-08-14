@@ -314,6 +314,81 @@ void main() {
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
+
+    testWidgets(
+      'FadeForwardsPageTransitionBuilder does not use ColoredBox for non-opaque routes',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                    backgroundColor: Colors.lightGreen,
+                  ),
+                },
+              ),
+            ),
+            home: Builder(
+              builder: (BuildContext context) {
+                return Material(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder<void>(
+                          opaque: false,
+                          pageBuilder: (_, _, _) {
+                            return Material(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(builder: (_) => const Text('page b')),
+                                  );
+                                },
+                                child: const Text('push b'),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('push a'),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('push a'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('push b'));
+        await tester.pump(const Duration(milliseconds: 400));
+
+        void findColoredBox() {
+          expect(
+            find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == Colors.lightGreen),
+            findsNothing,
+          );
+        }
+
+        // Check that ColoredBox is not used for non-opaque route.
+        findColoredBox();
+
+        await tester.pumpAndSettle();
+
+        Navigator.pop(tester.element(find.text('page b')));
+
+        await tester.pumpAndSettle(const Duration(milliseconds: 400));
+
+        // Check that ColoredBox is not used for non-opaque route
+        findColoredBox();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   testWidgets(
