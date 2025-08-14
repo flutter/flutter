@@ -29,6 +29,17 @@ Our goal is to make the list easy for them to scan.
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
+
+## Flutter 3.35 Changes
+
+### [3.35.1](https://github.com/flutter/flutter/releases/tag/3.35.1)
+
+- [flutter/173785](https://github.com/flutter/flutter/issues/173785) - Fixes an issue that prevented downloading the Flutter SDK for Windows from `flutter.dev`.
+
+### [3.35.0](https://github.com/flutter/flutter/releases/tag/3.35.0)
+
+Initial stable release.
+
 ## Flutter 3.32 Changes
 
 ### [3.32.8](https://github.com/flutter/flutter/releases/tag/3.32.8)
