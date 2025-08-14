@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.1](https://github.com/flutter/flutter/releases/tag/3.35.1)
 
-- [flutter/173785](https://github.com/flutter/flutter/issues/173785) - Fixed an infra bug where the Windows SDK archive was not uploaded to `flutter.dev`
+- [flutter/173785](https://github.com/flutter/flutter/issues/173785) - Fixes an issue that prevented downloading the Flutter SDK for Windows from `flutter.dev`.
 
 ### [3.35.0](https://github.com/flutter/flutter/releases/tag/3.35.0)
 
