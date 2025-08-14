@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -229,20 +228,6 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
@@ -327,7 +312,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -395,7 +380,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -448,7 +433,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -678,7 +663,7 @@ void main() {
         event.eventData['targetPlatform'],
         getNameForTargetPlatform(TargetPlatform.android_arm),
       );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -758,7 +743,6 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(),
         ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-        Usage: () => TestUsage(),
       },
     ),
   );
@@ -770,20 +754,6 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
@@ -832,7 +802,7 @@ void main() {
         newEvent.eventData['targetPlatform'],
         getNameForTargetPlatform(TargetPlatform.android_arm),
       );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -842,31 +812,6 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakePausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'removeBreakpoint',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'breakpointId': 'test-breakpoint',
-            },
-          ),
-          FakeVmServiceRequest(
-            method: 'resume',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
@@ -913,20 +858,6 @@ void main() {
         requests: <VmServiceExpectation>[
           listViews,
           listViews,
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
@@ -948,20 +879,6 @@ void main() {
             streamId: 'Isolate',
             event: vm_service.Event(timestamp: 0, kind: vm_service.EventKind.kIsolateRunnable),
           ),
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
-          ),
           FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
@@ -982,20 +899,6 @@ void main() {
           FakeVmServiceStreamResponse(
             streamId: 'Isolate',
             event: vm_service.Event(timestamp: 0, kind: vm_service.EventKind.kIsolateRunnable),
-          ),
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
-            jsonResponse: fakeUnpausedIsolate.toJson(),
-          ),
-          FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, Object?>{
-              'isolateId': fakeUnpausedIsolate.id,
-              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
-            },
-            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
@@ -1069,7 +972,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(

@@ -621,68 +621,12 @@ class HotRunner extends ResidentRunner {
         device.generator!.accept();
       }
     }
-    // Check if the isolate is paused and resume it.
     final operations = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      final uiIsolatesIds = <String?>{};
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        if (view.uiIsolate == null) {
-          continue;
-        }
-        uiIsolatesIds.add(view.uiIsolate!.id);
-        // Reload the isolate.
-        final Future<vm_service.Isolate?> reloadIsolate = device.vmService!.getIsolateOrNull(
-          view.uiIsolate!.id!,
-        );
-        operations.add(
-          reloadIsolate.then((vm_service.Isolate? isolate) async {
-            if (isolate != null) {
-              // The embedder requires that the isolate is unpaused, because the
-              // runInView method requires interaction with dart engine APIs that
-              // are not thread-safe, and thus must be run on the same thread that
-              // would be blocked by the pause. Simply un-pausing is not sufficient,
-              // because this does not prevent the isolate from immediately hitting
-              // a breakpoint (for example if the breakpoint was placed in a loop
-              // or in a frequently called method) or an exception. Instead, all
-              // breakpoints are first disabled and exception pause mode set to
-              // None, and then the isolate resumed.
-              // These settings do not need restoring as Hot Restart results in
-              // new isolates, which will be configured by the editor as they are
-              // started.
-              final breakpointAndExceptionRemoval = <Future<void>>[
-                device.vmService!.service.setIsolatePauseMode(
-                  isolate.id!,
-                  exceptionPauseMode: vm_service.ExceptionPauseMode.kNone,
-                ),
-                for (final vm_service.Breakpoint breakpoint in isolate.breakpoints!)
-                  device.vmService!.service.removeBreakpoint(isolate.id!, breakpoint.id!),
-              ];
-              await Future.wait(breakpointAndExceptionRemoval);
-              if (isPauseEvent(isolate.pauseEvent!.kind!)) {
-                await device.vmService!.service.resume(view.uiIsolate!.id!);
-              }
-            }
-          }),
-        );
-      }
-
-      // Wait for the UI isolates to have their breakpoints removed and exception pause mode
-      // cleared while also ensuring the isolate's are no longer paused. If we don't clear
-      // the exception pause mode before we start killing child isolates, it's possible that
-      // any UI isolate waiting on a result from a child isolate could throw an unhandled
-      // exception and re-pause the isolate, causing hot restart to hang.
-      await Future.wait(operations);
-      operations.clear();
-
-      // The engine handles killing and recreating isolates that it has spawned
-      // ("uiIsolates"). The isolates that were spawned from these uiIsolates
-      // will not be restarted, and so they must be manually killed.
-      final vm_service.VM vm = await device.vmService!.service.getVM();
+      // Explicitly kill all the isolates in the application, otherwise we need to account for
+      // special cases that the engine can't handle (e.g., paused isolates, infinite loops, etc.).
+      final vm_service.VM vm = await device!.vmService!.service.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates!) {
-        if (uiIsolatesIds.contains(isolateRef.id)) {
-          continue;
-        }
         operations.add(
           device.vmService!.service
               .kill(isolateRef.id!)
