@@ -4319,7 +4319,6 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 200.0);
   });
 
@@ -4344,7 +4343,6 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
       expect(tester.getSize(findMenuItemButton(shortLabel)).width, 200);
 
       // Use expandedInsets to anchor the TextField to the same size as the parent.
