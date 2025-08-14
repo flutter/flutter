@@ -2,15 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../../engine.dart' show BitmapSize, FrameTimingRecorder, kProfileApplyFrame, kProfilePrerollFrame;
-import '../platform_views/embedder.dart';
-import '../profiler.dart';
-import 'layer.dart';
-import 'layer_painting.dart';
-import 'layer_visitor.dart';
-import 'n_way_canvas.dart';
 
 /// A tree of [Layer]s that, together with a [Size] compose a frame.
 class LayerTree {
