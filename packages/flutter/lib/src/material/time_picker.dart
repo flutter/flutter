@@ -647,7 +647,6 @@ class _DayPeriodControl extends StatelessWidget {
         dayPeriodSize = defaultTheme.dayPeriodInputSize;
     }
 
-    final Widget result;
     OutlinedBorder amShape = resolvedShape;
     OutlinedBorder pmShape = resolvedShape;
     final bool hasRoundedBorder =
@@ -700,7 +699,7 @@ class _DayPeriodControl extends StatelessWidget {
           shape: pmShape,
         );
 
-        result = _DayPeriodInputPadding(
+        return _DayPeriodInputPadding(
           minSize: minInteractiveSize,
           orientation: orientation,
           child: SizedBox.fromSize(
@@ -755,7 +754,7 @@ class _DayPeriodControl extends StatelessWidget {
           shape: pmShape,
         );
 
-        result = _DayPeriodInputPadding(
+        return _DayPeriodInputPadding(
           minSize: minInteractiveSize,
           orientation: orientation,
           child: SizedBox(
@@ -769,7 +768,6 @@ class _DayPeriodControl extends StatelessWidget {
           ),
         );
     }
-    return result;
   }
 }
 
