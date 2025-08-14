@@ -40,20 +40,35 @@ Widget buildTabBar({
   List<Widget> tabs = _tabs,
   bool isScrollable = false,
   bool useMaterial3 = false,
+  String? fontFamily,
+  TextStyle? labelStyle,
+  TextStyle? unselectedLabelStyle,
 }) {
   final TabController controller = TabController(length: tabs.length, vsync: const TestVSync());
   addTearDown(controller.dispose);
 
   Widget tabBar = secondaryTabBar
-      ? TabBar.secondary(tabs: tabs, isScrollable: isScrollable, controller: controller)
-      : TabBar(tabs: tabs, isScrollable: isScrollable, controller: controller);
+      ? TabBar.secondary(
+          tabs: tabs,
+          isScrollable: isScrollable,
+          controller: controller,
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
+        )
+      : TabBar(
+          tabs: tabs,
+          isScrollable: isScrollable,
+          controller: controller,
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
+        );
 
   if (localTabBarTheme != null) {
     tabBar = TabBarTheme(data: localTabBarTheme, child: tabBar);
   }
 
   return MaterialApp(
-    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
+    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3, fontFamily: fontFamily),
     home: Scaffold(
       body: RepaintBoundary(key: _painterKey, child: tabBar),
     ),
@@ -1746,6 +1761,76 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+    'Tab bar inherits fontFamily from theme when labelStyle and unselectedLabelStyle are specified',
+    (WidgetTester tester) async {
+      const String fontFamily = 'TestFont';
+      await tester.pumpWidget(buildTabBar(fontFamily: fontFamily));
+
+      RenderParagraph selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      RenderParagraph unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          localTabBarTheme: const TabBarThemeData(
+            labelStyle: TextStyle(),
+            unselectedLabelStyle: TextStyle(),
+          ),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          labelStyle: const TextStyle(),
+          unselectedLabelStyle: const TextStyle(),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals(fontFamily));
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals(fontFamily));
+
+      // if inherit is false, the fontFamily should not be applied
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          localTabBarTheme: const TabBarThemeData(
+            labelStyle: TextStyle(inherit: false),
+            unselectedLabelStyle: TextStyle(inherit: false),
+          ),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, isNull);
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, isNull);
+
+      await tester.pumpWidget(
+        buildTabBar(
+          fontFamily: fontFamily,
+          labelStyle: const TextStyle(inherit: false),
+          unselectedLabelStyle: const TextStyle(inherit: false),
+        ),
+      );
+
+      selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, isNull);
+      unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, isNull);
+    },
+  );
 
   testWidgets('TabBar inherits splashBorderRadius from theme', (WidgetTester tester) async {
     const Color hoverColor = Color(0xfff44336);

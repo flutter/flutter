@@ -733,7 +733,7 @@ class AutofillConfiguration {
             'uniqueIdentifier': uniqueIdentifier,
             'hints': autofillHints,
             'editingValue': currentEditingValue.toJSON(),
-            if (hintText != null) 'hintText': hintText,
+            'hintText': ?hintText,
           }
         : null;
   }

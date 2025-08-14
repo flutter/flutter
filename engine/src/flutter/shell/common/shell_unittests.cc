@@ -206,10 +206,10 @@ class MockSurface : public Surface {
 
   MOCK_METHOD(std::unique_ptr<SurfaceFrame>,
               AcquireFrame,
-              (const SkISize& size),
+              (const DlISize& size),
               (override));
 
-  MOCK_METHOD(SkMatrix, GetRootTransformation, (), (const, override));
+  MOCK_METHOD(DlMatrix, GetRootTransformation, (), (const, override));
 
   MOCK_METHOD(GrDirectContext*, GetContext, (), (override));
 
@@ -2316,7 +2316,7 @@ TEST_F(ShellTest, LocaltimesMatch) {
 class SinglePixelImageGenerator : public ImageGenerator {
  public:
   SinglePixelImageGenerator()
-      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)){};
+      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)) {};
   ~SinglePixelImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 
@@ -2487,7 +2487,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
         sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
-            MakeSizedDisplayList(50, 50), SkISize::Make(50, 50));
+            MakeSizedDisplayList(50, 50), DlISize(50, 50));
         EXPECT_NE(image, nullptr);
 
         latch->Signal();
@@ -2608,8 +2608,8 @@ TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
 TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
   auto settings = CreateSettingsForFixture();
 
-  SkISize wrong_size = SkISize::Make(400, 100);
-  SkISize expected_size = SkISize::Make(400, 200);
+  DlISize wrong_size = DlISize(400, 100);
+  DlISize expected_size = DlISize(400, 200);
 
   fml::AutoResetWaitableEvent end_frame_latch;
   auto end_frame_callback =
@@ -2634,8 +2634,8 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
       [&shell, &expected_size]() {
         shell->GetPlatformView()->SetViewportMetrics(
             kImplicitViewId,
-            {1.0, static_cast<double>(expected_size.width()),
-             static_cast<double>(expected_size.height()), 22, 0});
+            {1.0, static_cast<double>(expected_size.width),
+             static_cast<double>(expected_size.height), 22, 0});
       });
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -2643,16 +2643,16 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
 
   RunEngine(shell.get(), std::move(configuration));
 
-  PumpOneFrame(shell.get(), ViewContent::DummyView(
-                                static_cast<double>(wrong_size.width()),
-                                static_cast<double>(wrong_size.height())));
+  PumpOneFrame(shell.get(),
+               ViewContent::DummyView(static_cast<double>(wrong_size.width),
+                                      static_cast<double>(wrong_size.height)));
   end_frame_latch.Wait();
   // Wrong size, no frames are submitted.
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
 
   PumpOneFrame(shell.get(), ViewContent::DummyView(
-                                static_cast<double>(expected_size.width()),
-                                static_cast<double>(expected_size.height())));
+                                static_cast<double>(expected_size.width),
+                                static_cast<double>(expected_size.height)));
   end_frame_latch.Wait();
   // Expected size, 1 frame submitted.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
@@ -2669,8 +2669,8 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
 TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
   auto settings = CreateSettingsForFixture();
 
-  SkISize origin_size = SkISize::Make(400, 100);
-  SkISize new_size = SkISize::Make(400, 200);
+  DlISize origin_size = DlISize(400, 100);
+  DlISize new_size = DlISize(400, 200);
 
   fml::AutoResetWaitableEvent end_frame_latch;
 
@@ -2713,9 +2713,8 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
       shell->GetTaskRunners().GetPlatformTaskRunner(),
       [&shell, &origin_size]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            kImplicitViewId,
-            {1.0, static_cast<double>(origin_size.width()),
-             static_cast<double>(origin_size.height()), 22, 0});
+            kImplicitViewId, {1.0, static_cast<double>(origin_size.width),
+                              static_cast<double>(origin_size.height), 22, 0});
       });
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -2723,9 +2722,9 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
 
   RunEngine(shell.get(), std::move(configuration));
 
-  PumpOneFrame(shell.get(), ViewContent::DummyView(
-                                static_cast<double>(origin_size.width()),
-                                static_cast<double>(origin_size.height())));
+  PumpOneFrame(shell.get(),
+               ViewContent::DummyView(static_cast<double>(origin_size.width),
+                                      static_cast<double>(origin_size.height)));
 
   end_frame_latch.Wait();
   ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
@@ -2734,8 +2733,8 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
       shell->GetTaskRunners().GetPlatformTaskRunner(),
       [&shell, &new_size, &resize_latch]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            kImplicitViewId, {1.0, static_cast<double>(new_size.width()),
-                              static_cast<double>(new_size.height()), 22, 0});
+            kImplicitViewId, {1.0, static_cast<double>(new_size.width),
+                              static_cast<double>(new_size.height), 22, 0});
         resize_latch.Signal();
       });
 
@@ -2747,8 +2746,8 @@ TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
 
   // Threads will be merged at the end of this frame.
   PumpOneFrame(shell.get(),
-               ViewContent::DummyView(static_cast<double>(new_size.width()),
-                                      static_cast<double>(new_size.height())));
+               ViewContent::DummyView(static_cast<double>(new_size.width),
+                                      static_cast<double>(new_size.height)));
 
   end_frame_latch.Wait();
   ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
@@ -4590,6 +4589,7 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
 
 // Test that remove view fails if the view ID does not exist.
 TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
@@ -4832,9 +4832,9 @@ TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
   std::ostringstream stream;
   fml::LogMessage::CaptureNextLog(&stream);
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-  ASSERT_TRUE(stream.str().find(
-                  "[Action Required] The application opted out of Impeller") !=
-              std::string::npos);
+  ASSERT_TRUE(
+      stream.str().find("[Action Required]: Impeller opt-out deprecated.") !=
+      std::string::npos);
   ASSERT_TRUE(shell);
   DestroyShell(std::move(shell), task_runners);
 }
