@@ -313,6 +313,7 @@ void sendSemanticsUpdate() {
     additionalActions: additionalActions,
     controlsNodes: null,
     inputType: SemanticsInputType.none,
+    locale: null,
   );
   _semanticsUpdate(builder.build());
 }
