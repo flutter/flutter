@@ -4074,12 +4074,7 @@ class _Location {
   final String? name;
 
   Map<String, Object?> toJsonMap() {
-    return <String, Object?>{
-      'file': file,
-      'line': line,
-      'column': column,
-      if (name != null) 'name': name,
-    };
+    return <String, Object?>{'file': file, 'line': line, 'column': column, 'name': ?name};
   }
 
   @override
