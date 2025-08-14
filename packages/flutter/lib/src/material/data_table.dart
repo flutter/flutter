@@ -202,7 +202,7 @@ class DataRow {
   /// that particular cell.
   final GestureLongPressCallback? onLongPress;
 
-  /// Called if the row is hovered.
+  /// Called when a pointer enters or exits the row.
   ///
   /// The boolean value passed to the callback is true if a pointer has entered the row and false
   /// when a pointer has exited the row.
