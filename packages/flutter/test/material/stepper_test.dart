@@ -1298,7 +1298,11 @@ void main() {
             ?.color;
 
     Color lineColor() {
-      return tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
+      return tester
+          .widget<ColoredBox>(
+            find.descendant(of: find.byType(Stepper), matching: find.byType(ColoredBox)),
+          )
+          .color;
     }
 
     // Step 1
