@@ -54,7 +54,9 @@ abstract class WindowsMessageHandler {
   /// Handles a window message.
   ///
   /// Returned value, if not null will be returned to the system as LRESULT
-  /// and will stop all other handlers from being called.
+  /// and will stop all other handlers from being called. See
+  /// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
+  /// for more information.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

@@ -509,7 +509,7 @@ class RegularWindow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: controller,
-      builder: (BuildContext context, Widget? _) => WindowScope(
+      builder: (BuildContext context, Widget? widget) => WindowScope(
         controller: controller,
         child: View(view: controller.rootView, child: child),
       ),
