@@ -20,6 +20,7 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 import 'localizations.dart';
+import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
@@ -406,6 +407,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _announceSemantics(bool resultsAvailable) {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
