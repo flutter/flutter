@@ -1012,16 +1012,15 @@ class _RenderDecoration extends RenderBox
     final double topHeight;
     if (label != null) {
       final double suffixIconSpace = decoration.border.isOutline
-          ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+          ? lerpDouble(suffixIconSize.width, contentPadding.end, decoration.floatingLabelProgress)!
           : suffixIconSize.width;
       final double labelWidth = math.max(
         0.0,
         constraints.maxWidth -
             (decoration.inputGap * 2 +
                 iconWidth +
-                contentPadding.horizontal +
-                prefixIconSize.width +
-                suffixIconSpace),
+                (prefixIcon == null ? contentPadding.start : prefixIconSize.width) +
+                (suffixIcon == null ? contentPadding.end : suffixIconSpace)),
       );
 
       // Increase the available width for the label when it is scaled down.
