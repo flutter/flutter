@@ -16,6 +16,7 @@
 
 import 'dart:ffi' as ffi;
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' show Display, FlutterView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -629,16 +630,6 @@ final class _Utf16 extends ffi.Opaque {}
 
 /// Extension method for converting a`Pointer<Utf16>` to a [String].
 extension _Utf16Pointer on ffi.Pointer<_Utf16> {
-  /// The number of UTF-16 code units in this zero-terminated UTF-16 string.
-  ///
-  /// The UTF-16 code units of the strings are the non-zero code units up to
-  /// the first zero code unit.
-  int get length {
-    _ensureNotNullptr('length');
-    final ffi.Pointer<ffi.Uint16> codeUnits = cast<ffi.Uint16>();
-    return _length(codeUnits);
-  }
-
   /// Converts this UTF-16 encoded string to a Dart string.
   ///
   /// Decodes the UTF-16 code units of this zero-terminated code unit array as
@@ -677,14 +668,6 @@ extension _Utf16Pointer on ffi.Pointer<_Utf16> {
     }
   }
 
-  static int _length(ffi.Pointer<ffi.Uint16> codeUnits) {
-    int length = 0;
-    while (codeUnits[length] != 0) {
-      length++;
-    }
-    return length;
-  }
-
   void _ensureNotNullptr(String operation) {
     if (this == ffi.nullptr) {
       throw UnsupportedError("Operation '$operation' not allowed on a 'nullptr'.");
@@ -702,18 +685,22 @@ extension _StringUtf16Pointer on String {
   ///
   /// Returns an [allocator]-allocated pointer to the result.
   ffi.Pointer<_Utf16> toNativeUtf16({required ffi.Allocator allocator}) {
-    final units = codeUnits;
-    final result = allocator<ffi.Uint16>(units.length + 1);
-    final nativeString = result.asTypedList(units.length + 1);
+    final List<int> units = codeUnits;
+    final ffi.Pointer<ffi.Uint16> result = allocator<ffi.Uint16>(units.length + 1);
+    final Uint16List nativeString = result.asTypedList(units.length + 1);
     nativeString.setRange(0, units.length, units);
     nativeString[units.length] = 0;
     return result.cast();
   }
 }
 
+// ignore: always_specify_types
 typedef _WinCoTaskMemAllocNative = ffi.Pointer Function(ffi.Size);
+// ignore: always_specify_types
 typedef _WinCoTaskMemAlloc = ffi.Pointer Function(int);
+// ignore: always_specify_types
 typedef _WinCoTaskMemFreeNative = ffi.Void Function(ffi.Pointer);
+// ignore: always_specify_types
 typedef _WinCoTaskMemFree = void Function(ffi.Pointer);
 
 final class _CallocAllocator implements ffi.Allocator {
@@ -732,15 +719,16 @@ final class _CallocAllocator implements ffi.Allocator {
   late final _WinCoTaskMemFree _winCoTaskMemFree;
 
   /// Fills a block of memory with a specified value.
+  // ignore: always_specify_types
   void _fillMemory(ffi.Pointer destination, int length, int fill) {
-    final ptr = destination.cast<ffi.Uint8>();
+    final ffi.Pointer<ffi.Uint8> ptr = destination.cast<ffi.Uint8>();
     for (int i = 0; i < length; i++) {
       ptr[i] = fill;
     }
   }
 
   /// Fills a block of memory with zeros.
-  ///
+  // ignore: always_specify_types
   void _zeroMemory(ffi.Pointer destination, int length) => _fillMemory(destination, length, 0);
 
   /// Allocates [byteCount] bytes of zero-initialized of memory on the native
@@ -760,6 +748,7 @@ final class _CallocAllocator implements ffi.Allocator {
 
   /// Releases memory allocated on the native heap.
   @override
+  // ignore: always_specify_types
   void free(ffi.Pointer pointer) {
     _winCoTaskMemFree(pointer);
   }
