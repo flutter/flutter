@@ -599,10 +599,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return RangeValues(_unlerp(values.start), _unlerp(values.end));
   }
 
-  // Finds closest thumb. If the thumbs are close to each other, no thumb is
-  // immediately selected while the drag displacement is zero. If the first
-  // non-zero displacement is negative, then the left thumb is selected, and if its
-  // positive, then the right thumb is selected.
+  // Finds the closest thumb. If both thumbs are close to each other and within
+  // the touch radius, neither is selected immediately while the drag
+  // displacement is zero. The first non-zero displacement determines which
+  // thumb is selected: a negative displacement selects the left thumb,
+  // a positive one selects the right thumb.
+  // If only one or zero thumbs are within the touch radius,
+  // the closest one is selected.
   Thumb? _defaultRangeThumbSelector(
     TextDirection textDirection,
     RangeValues values,
@@ -632,11 +635,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         return Thumb.end;
       }
     } else {
-      // Snap position on the track if its in the inactive range.
-      if (tapValue < values.start || inStartTouchTarget) {
+      // Choose the closest thumb and snap position.
+      if (tapValue * 2 < values.start + values.end) {
         return Thumb.start;
-      }
-      if (tapValue > values.end || inEndTouchTarget) {
+      } else {
         return Thumb.end;
       }
     }
