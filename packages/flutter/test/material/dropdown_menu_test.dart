@@ -4301,7 +4301,76 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+
+    // The overwrite of menuStyle is different when a width is provided but maximumSize is not,
+    // So it needs to be tested separately.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            width: 200.0,
+            dropdownMenuEntries: menuChildren,
+            menuStyle: const MenuStyle(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 200.0);
   });
+
+  testWidgets(
+    'ensure items are constrained to intrinsic size of DropdownMenu (width or anchor) when no maximumSize',
+    (WidgetTester tester) async {
+      const String shortLabel = 'Male';
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<int>(
+              width: 200,
+              dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                DropdownMenuEntry<int>(value: 0, label: shortLabel),
+              ],
+              menuStyle: MenuStyle(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(findMenuItemButton(shortLabel)).width, 200);
+
+      // Use expandedInsets to anchor the TextField to the same size as the parent.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: double.infinity,
+              child: DropdownMenu<int>(
+                expandedInsets: EdgeInsets.symmetric(horizontal: 20),
+                dropdownMenuEntries: <DropdownMenuEntry<int>>[
+                  DropdownMenuEntry<int>(value: 0, label: shortLabel),
+                ],
+                menuStyle: MenuStyle(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // Default width is 800, so the expected width is 800 - padding (20 + 20).
+      expect(tester.getSize(findMenuItemButton(shortLabel)).width, 760.0);
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/164905.
   testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
