@@ -190,6 +190,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: ZoomPageTransitionsBuilder(),
+              },
+            ),
+          ),
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(
               allowSnapshotting: false,
@@ -268,7 +275,14 @@ void main() {
         RepaintBoundary(
           key: key,
           child: MaterialApp(
-            theme: ThemeData(useMaterial3: false),
+            theme: ThemeData(
+              useMaterial3: false,
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
+              ),
+            ),
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
@@ -315,6 +329,13 @@ void main() {
           key: key,
           child: MaterialApp(
             debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                },
+              ),
+            ),
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
