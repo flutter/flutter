@@ -2122,15 +2122,10 @@ void main() {
       await tester.tap(find.byType(TextField));
       // Wait for context menu to be built.
       await tester.pumpAndSettle();
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
-      final SizedBox sizedBox = tester.widget(
-        find.descendant(
-          of: find.byType(AdaptiveTextSelectionToolbar),
-          matching: find.byType(SizedBox),
-        ),
+      final RenderBox container = tester.renderObject(
+        find.descendant(of: find.byType(SnapshotWidget), matching: find.byType(SizedBox)).first,
       );
-      expect(sizedBox.width, 0.0);
-      expect(sizedBox.height, 0.0);
+      expect(container.size, Size.zero);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
