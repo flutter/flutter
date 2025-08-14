@@ -2059,7 +2059,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    if (!(_isRelayoutBoundary ?? true)) {
+    if (!(child._isRelayoutBoundary ?? true)) {
       child._isRelayoutBoundary = null;
     }
     child.parentData!.detach();

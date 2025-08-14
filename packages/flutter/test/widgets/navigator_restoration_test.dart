@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -1095,18 +1094,6 @@ void main() {
         (exception as AssertionError).message,
         contains('All routes returned by onGenerateInitialRoutes are not restorable.'),
       );
-
-      // The previous assert leaves the widget tree in a broken state, so the
-      // following code catches any remaining exceptions from attempting to build
-      // new widget tree.
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      dynamic remainingException;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        remainingException ??= details.exception;
-      };
-      await tester.pumpWidget(Container(key: UniqueKey()));
-      FlutterError.onError = oldHandler;
-      expect(remainingException, isAssertionError);
     },
   );
 }
