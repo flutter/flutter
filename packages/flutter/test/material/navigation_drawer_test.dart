@@ -550,7 +550,7 @@ InkWell? _getInkWell(WidgetTester tester) {
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
           .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
           )
           .decoration
       as ShapeDecoration?;
