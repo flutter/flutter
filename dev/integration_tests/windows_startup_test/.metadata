@@ -12,24 +12,6 @@ project_type: app
 # Tracks metadata for the flutter migrate command
 migration:
   platforms:
-    - platform: root
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-    - platform: android
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-    - platform: ios
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-    - platform: linux
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-    - platform: macos
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-    - platform: web
-      create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
-      base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
     - platform: windows
       create_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
       base_revision: c865207540a1eb960aa89ac61ba89d0f0fa7bd17
@@ -42,4 +24,3 @@ migration:
   # Files that are not part of the templates will be ignored by default.
   unmanaged_files:
     - 'lib/main.dart'
-    - 'ios/Runner.xcodeproj/project.pbxproj'
