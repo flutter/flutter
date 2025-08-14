@@ -12,8 +12,6 @@
   "shareButtonLabel": "Paylaş",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü seç",
-  "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available",
   "searchResultsFound": "Search results found",
   "noResultsFound": "No results found"
 }

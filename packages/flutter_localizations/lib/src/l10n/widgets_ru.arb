@@ -12,8 +12,6 @@
   "shareButtonLabel": "Поделиться",
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
-  "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available",
   "searchResultsFound": "Search results found",
   "noResultsFound": "No results found"
 }
