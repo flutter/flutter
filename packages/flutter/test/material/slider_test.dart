@@ -5695,7 +5695,7 @@ void main() {
       const String labelText = 'First line\nSecond line\nThird line\nFourth line\nFifth line';
 
       // First test without cornerPadding to get baseline overlay size.
-      // without additional padding - text might spill out at corners.
+      // Without additional padding - text might spill out at corners.
       const ValueIndicatorMultilineConfig configNoPadding = ValueIndicatorMultilineConfig(
         cornerPadding: 0.0,
       );
@@ -5737,7 +5737,6 @@ void main() {
       expect(paddingSize.height, greaterThanOrEqualTo(noPaddingSize.height));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('ValueIndicatorMultilineConfig.cornerPadding is ignored  when year2023 is true', (
@@ -5785,7 +5784,6 @@ void main() {
       expect(largePaddingSize.height, equals(defaultPaddingSize.height));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('text is truncated when label exceeds maxLines with year2023 false', (
@@ -5844,7 +5842,6 @@ void main() {
       expect(limitedHeight, lessThan(unlimitedHeight));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('text is truncated when label exceeds maxLines with year2023 true', (
@@ -5902,7 +5899,6 @@ void main() {
       expect(limitedHeight, lessThan(unlimitedHeight));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('multiline text gets ellipsis at the tail when exceeding maxLines', (
@@ -5929,7 +5925,6 @@ void main() {
       expect(capturedTexts.first.split('\n').length, lessThanOrEqualTo(2));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('text with fewer line than maxLines should not throw any crash', (
@@ -5956,7 +5951,6 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
 
     testWidgets('text with fewer lines than maxLines preserves original text', (
@@ -5983,7 +5977,6 @@ void main() {
       expect(capturedTexts.first, equals('Line 1\nLine 2'));
 
       await gesture.up();
-      await tester.pumpAndSettle();
     });
   });
 }
