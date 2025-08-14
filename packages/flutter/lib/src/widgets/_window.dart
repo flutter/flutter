@@ -14,14 +14,13 @@
 //
 // See: https://github.com/flutter/flutter/issues/30701.
 
-import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/_features.dart';
-import '_window_win32.dart';
+import '_window_ffi.dart' if (dart.library.js_util) '_window_web.dart' as window_impl;
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
@@ -405,8 +404,9 @@ abstract class WindowingOwner {
       return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
     }
 
-    if (Platform.isWindows) {
-      return WindowingOwnerWin32();
+    final WindowingOwner? owner = window_impl.createDefaultOwner();
+    if (owner != null) {
+      return owner;
     }
 
     return _WindowingOwnerUnsupported(errorMessage: 'Windowing is unsupported on this platform.');
