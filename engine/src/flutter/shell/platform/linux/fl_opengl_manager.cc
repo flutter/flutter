@@ -73,16 +73,17 @@ FlOpenGLManager* fl_opengl_manager_new() {
   return self;
 }
 
-void fl_opengl_manager_make_current(FlOpenGLManager* self) {
-  eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                 self->render_context);
+gboolean fl_opengl_manager_make_current(FlOpenGLManager* self) {
+  return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        self->render_context) == EGL_TRUE;
 }
 
-void fl_opengl_manager_make_resource_current(FlOpenGLManager* self) {
-  eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                 self->resource_context);
+gboolean fl_opengl_manager_make_resource_current(FlOpenGLManager* self) {
+  return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        self->resource_context) == EGL_TRUE;
 }
 
-void fl_opengl_manager_clear_current(FlOpenGLManager* self) {
-  eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+gboolean fl_opengl_manager_clear_current(FlOpenGLManager* self) {
+  return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        EGL_NO_CONTEXT) == EGL_TRUE;
 }

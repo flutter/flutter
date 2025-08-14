@@ -113,7 +113,12 @@ static gchar* get_program_log(GLuint program) {
 }
 
 static void setup_shader(FlCompositorOpenGL* self) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to setup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
 
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
@@ -167,7 +172,12 @@ static void setup_shader(FlCompositorOpenGL* self) {
 }
 
 static void cleanup_shader(FlCompositorOpenGL* self) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to cleanup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
 
   if (self->program != 0) {
     glDeleteProgram(self->program);

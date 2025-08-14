@@ -29,24 +29,30 @@ FlOpenGLManager* fl_opengl_manager_new();
  * @manager: an #FlOpenGLManager.
  *
  * Makes the rendering context current.
+ *
+ * Returns: %TRUE if the context made current.
  */
-void fl_opengl_manager_make_current(FlOpenGLManager* manager);
+gboolean fl_opengl_manager_make_current(FlOpenGLManager* manager);
 
 /**
  * fl_opengl_manager_make_resource_current:
  * @manager: an #FlOpenGLManager.
  *
  * Makes the resource rendering context current.
+ *
+ * Returns: %TRUE if the context made current.
  */
-void fl_opengl_manager_make_resource_current(FlOpenGLManager* manager);
+gboolean fl_opengl_manager_make_resource_current(FlOpenGLManager* manager);
 
 /**
  * fl_opengl_manager_clear_current:
  * @manager: an #FlOpenGLManager.
  *
  * Clears the current rendering context.
+ *
+ * Returns: %TRUE if the context cleared.
  */
-void fl_opengl_manager_clear_current(FlOpenGLManager* manager);
+gboolean fl_opengl_manager_clear_current(FlOpenGLManager* manager);
 
 G_END_DECLS
 
