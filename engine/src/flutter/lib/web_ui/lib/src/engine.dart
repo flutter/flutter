@@ -58,6 +58,7 @@ export 'engine/mouse/prevent_default.dart';
 export 'engine/navigation/history.dart';
 export 'engine/noto_font.dart';
 export 'engine/noto_font_encoding.dart';
+export 'engine/occlusion_map.dart';
 export 'engine/onscreen_logging.dart';
 export 'engine/platform_dispatcher.dart';
 export 'engine/platform_dispatcher/app_lifecycle_state.dart';

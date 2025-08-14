@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show PlatformViewManager;
+import '../../engine.dart' show OcclusionMap, PlatformViewManager;
 import '../compositing/rasterizer.dart';
 import '../layer/layer.dart';
 import '../platform_views/embedder.dart';
@@ -65,6 +65,8 @@ sealed class CompositionEntity {
 class CompositionCanvas extends CompositionEntity {
   CompositionCanvas();
 
+  final OcclusionMap _occlusionMap = OcclusionMap();
+
   /// The [pictures] which should be rendered in this canvas.
   final List<PictureLayer> pictures = <PictureLayer>[];
 
@@ -76,6 +78,11 @@ class CompositionCanvas extends CompositionEntity {
   /// Adds the [picture] to the pictures that should be rendered in this canvas.
   void add(PictureLayer picture) {
     pictures.add(picture);
+    _occlusionMap.addRect(picture.sceneBounds!);
+  }
+
+  bool overlaps(ui.Rect rect) {
+    return _occlusionMap.overlaps(rect);
   }
 
   @override
@@ -187,12 +194,9 @@ Composition createOptimizedComposition(
 
         // If the platform view intersects with any pictures in the tentative canvas
         // then add the tentative canvas to the composition.
-        for (final PictureLayer picture in tentativeCanvas.pictures) {
-          if (!picture.sceneBounds!.intersect(platformViewBounds).isEmpty) {
-            result.add(tentativeCanvas);
-            tentativeCanvas = CompositionCanvas();
-            break;
-          }
+        if (tentativeCanvas.overlaps(platformViewBounds)) {
+          result.add(tentativeCanvas);
+          tentativeCanvas = CompositionCanvas();
         }
       }
       result.add(platformView);
@@ -209,15 +213,8 @@ Composition createOptimizedComposition(
       // First check if the picture intersects with any pictures in the
       // tentative canvas, as this will be the last canvas in the composition
       // when it is eventually added.
-      bool addedToTentativeCanvas = false;
-      for (final PictureLayer canvasPicture in tentativeCanvas.pictures) {
-        if (!canvasPicture.sceneBounds!.intersect(picture.sceneBounds!).isEmpty) {
-          tentativeCanvas.add(picture);
-          addedToTentativeCanvas = true;
-          break;
-        }
-      }
-      if (addedToTentativeCanvas) {
+      if (tentativeCanvas.overlaps(picture.sceneBounds!)) {
+        tentativeCanvas.add(picture);
         continue;
       }
 
@@ -243,12 +240,9 @@ Composition createOptimizedComposition(
         } else if (entity is CompositionCanvas) {
           lastCanvasSeen = entity;
           // Check if we intersect with any pictures in this canvas.
-          for (final PictureLayer canvasPicture in entity.pictures) {
-            if (!canvasPicture.sceneBounds!.intersect(picture.sceneBounds!).isEmpty) {
-              lastCanvasSeen.add(picture);
-              addedPictureToComposition = true;
-              break;
-            }
+          if (entity.overlaps(picture.sceneBounds!)) {
+            entity.add(picture);
+            addedPictureToComposition = true;
           }
         }
       }
