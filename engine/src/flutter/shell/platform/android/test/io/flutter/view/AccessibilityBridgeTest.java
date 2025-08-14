@@ -874,7 +874,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    SpannedString actual = (SpannedString) nodeInfo.getContentDescription();
+    SpannableString actual = (SpannableString) nodeInfo.getContentDescription();
     assertEquals(actual.toString(), "label");
     Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
     assertEquals(objectSpans.length, 1);
