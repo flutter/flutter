@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidSourceDirectorySet
@@ -31,7 +32,7 @@ import kotlin.test.Test
 class FlutterPluginTest {
     @Test
     fun `FlutterPlugin apply() adds expected tasks`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -48,6 +49,12 @@ class FlutterPluginTest {
         val project = mockk<Project>(relaxed = true)
         val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { mockAndroidComponentsExtension.selector() } returns
+            mockk {
+                every { all() } returns mockk()
+            }
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
         every { project.projectDir } returns projectDir.toFile()
@@ -87,7 +94,7 @@ class FlutterPluginTest {
 
     @Test
     fun `copyFlutterAssets task sets filePermissions correctly`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -106,6 +113,12 @@ class FlutterPluginTest {
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
+        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { mockAndroidComponentsExtension.selector() } returns
+            mockk {
+                every { all() } returns mockk()
+            }
         every { project.projectDir } returns projectDir.toFile()
         every { project.findProperty("flutter.sdk") } returns fakeFlutterSdkDir.toString()
         every { project.file(fakeFlutterSdkDir.toString()) } returns fakeFlutterSdkDir.toFile()
@@ -188,7 +201,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("compileFlutterBuild") },
                 any<Class<FlutterTask>>(),
-                any()
+                any(),
             )
         } answers {
             flutterTaskProvider
@@ -200,7 +213,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.startsWith("copyFlutterAssets") },
                 eq(Copy::class.java),
-                capture(copyTaskActionCaptor)
+                capture(copyTaskActionCaptor),
             )
         } answers {
             mockCopyTaskProvider
@@ -212,7 +225,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("packJniLibs") },
                 eq(org.gradle.api.tasks.bundling.Jar::class.java),
-                any()
+                any(),
             )
         } answers {
             mockJarTaskProvider
