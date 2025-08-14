@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں",
   "pasteButtonLabel": "پیسٹ کریں",
-  "selectAllButtonLabel": "سبھی کو منتخب کریں"
+  "selectAllButtonLabel": "سبھی کو منتخب کریں",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

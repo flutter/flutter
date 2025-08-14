@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Maghanap sa Web",
   "shareButtonLabel": "I-share",
   "pasteButtonLabel": "I-paste",
-  "selectAllButtonLabel": "Piliin lahat"
+  "selectAllButtonLabel": "Piliin lahat",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Интернеттен іздеу",
   "shareButtonLabel": "Бөлісу",
   "pasteButtonLabel": "Қою",
-  "selectAllButtonLabel": "Барлығын таңдау"
+  "selectAllButtonLabel": "Барлығын таңдау",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

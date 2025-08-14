@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Αναζήτηση στον ιστό",
   "shareButtonLabel": "Κοινή χρήση",
   "pasteButtonLabel": "Επικόλληση",
-  "selectAllButtonLabel": "Επιλογή όλων"
+  "selectAllButtonLabel": "Επιλογή όλων",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

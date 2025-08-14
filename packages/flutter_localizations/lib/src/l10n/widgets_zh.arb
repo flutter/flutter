@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "搜索",
   "shareButtonLabel": "分享",
   "pasteButtonLabel": "粘贴",
-  "selectAllButtonLabel": "全选"
+  "selectAllButtonLabel": "全选",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
