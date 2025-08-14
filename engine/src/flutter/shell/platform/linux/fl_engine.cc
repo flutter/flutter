@@ -251,7 +251,9 @@ static bool create_opengl_backing_store(
     FlEngine* self,
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
 
   GLint sized_format = GL_RGBA8;
   GLint general_format = GL_RGBA;
@@ -285,7 +287,9 @@ static bool create_opengl_backing_store(
 static bool collect_opengl_backing_store(
     FlEngine* self,
     const FlutterBackingStore* backing_store) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
 
   // OpenGL context is required when destroying #FlFramebuffer.
   g_object_unref(backing_store->open_gl.framebuffer.user_data);
