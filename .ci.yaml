@@ -3066,10 +3066,15 @@ targets:
       task_name: large_image_changer_perf_android
 
   - name: Linux_pixel_7pro linux_chrome_dev_mode
+    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: linux_chrome_dev_mode
@@ -5247,6 +5252,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -5260,6 +5266,7 @@ targets:
     properties:
       dependencies: >-
         [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -5464,7 +5471,7 @@ targets:
         ["devicelab", "hostonly", "mac"]
       task_name: hot_mode_dev_cycle_ios_simulator
 
-  - name: Mac_ios hot_mode_dev_cycle_ios_xcode_debug
+  - name: Mac_ios ios_debug_workflow
     recipe: devicelab/devicelab_drone
     bringup: true
     presubmit: false
@@ -5472,7 +5479,12 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: hot_mode_dev_cycle_ios_xcode_debug
+      task_name: ios_debug_workflow
+      os: Mac-15
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "17a5295f"
+        }
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -6910,6 +6922,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
       tags: >
         ["devicelab", "android", "windows", "mokey"]
       task_name: windows_chrome_dev_mode
