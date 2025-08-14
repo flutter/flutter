@@ -1699,6 +1699,46 @@ void main() {
         expect(minuteSize.width, greaterThanOrEqualTo(48));
         expect(minuteSize.height, greaterThanOrEqualTo(48));
       });
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Portrait mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          // Ensure picker is displayed in portrait mode.
+          tester.view.physicalSize = const Size(600, 1000);
+          addTearDown(tester.view.reset);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
+
+      testWidgets(
+        'Period selector touch target respects accessibility guidelines - Landscape mode',
+        (WidgetTester tester) async {
+          final SemanticsTester semantics = SemanticsTester(tester);
+          const Size minInteractiveSize = Size(kMinInteractiveDimension, kMinInteractiveDimension);
+
+          await mediaQueryBoilerplate(tester, materialType: materialType);
+
+          final SemanticsNode amButton = semantics.nodesWith(label: amString).single;
+          expect(amButton.rect.size >= minInteractiveSize, isTrue);
+
+          final SemanticsNode pmButton = semantics.nodesWith(label: pmString).single;
+          expect(pmButton.rect.size >= minInteractiveSize, isTrue);
+
+          semantics.dispose();
+        },
+      );
     });
 
     group('Time picker - Input (${materialType.name})', () {
@@ -2490,8 +2530,9 @@ void main() {
     (WidgetTester tester) async {
       addTearDown(tester.view.reset);
 
-      final Finder dayPeriodControlFinder = find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
+      final Finder amMaterialFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_AmPmButton').first,
+        matching: find.byType(Material),
       );
       final Finder timeControlFinder = find
           .ancestor(of: find.text('7'), matching: find.byType(Row))
@@ -2506,10 +2547,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodPortraitGap = 12.0; // From Material spec.
       expect(
-        tester.getBottomLeft(timeControlFinder).dx -
-            tester.getBottomRight(dayPeriodControlFinder).dx,
-        12,
+        tester.getBottomLeft(timeControlFinder).dx - tester.getBottomRight(amMaterialFinder).dx,
+        dayPeriodPortraitGap,
       );
 
       // Dismiss the dialog.
@@ -2528,9 +2569,10 @@ void main() {
         locale: const Locale('ko', 'KR'),
       );
 
+      const double dayPeriodLandscapeGap = 16.0; // From Material spec.
       expect(
-        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(dayPeriodControlFinder).dy,
-        12,
+        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(amMaterialFinder).dy,
+        dayPeriodLandscapeGap,
       );
     },
   );
