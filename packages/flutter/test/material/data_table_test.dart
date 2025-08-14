@@ -2331,6 +2331,23 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('DataTable, DataColumn, DataRow, and DataCell render at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.shrink(
+          child: DataTable(
+            columns: const <DataColumn>[DataColumn(label: Text('X'))],
+            rows: const <DataRow>[
+              DataRow(cells: <DataCell>[DataCell(Text('X'))]),
+            ],
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
