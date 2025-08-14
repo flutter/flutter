@@ -1462,18 +1462,7 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: const SubCategoryScreenView(),
-        theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: <TargetPlatform, PageTransitionsBuilder>{
-              TargetPlatform.android: ZoomPageTransitionsBuilder(),
-            },
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: SubCategoryScreenView()));
 
     expect(RenderRebuildTracker.count, 1);
     expect(
