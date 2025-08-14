@@ -40,7 +40,7 @@ Future<void> runServiceWorkerCleanupTest({required bool headless}) async {
   const String cleanupWorkerContent = '''
 'use strict';
 
-const OLD_CACHE_NAMES = ['flutter-app-manifest', 'flutter-app-cache', 'flutter-temp-cache'];
+const CACHE_NAME = 'flutter-app-cache';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
