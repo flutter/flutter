@@ -868,10 +868,10 @@ class _DropSliderValueIndicatorPathPainter {
   Size getPreferredSize(TextPainter labelPainter, double textScaleFactor) {
     // For getPreferredSize, assuming multiline support for sizing estimation.
     // The actual rendering decision is made in the paint method based on theme.
-    final bool hasMultipleLines = labelPainter.text?.toPlainText().contains('\n') ?? false;
+    final bool hasNewline = labelPainter.text?.toPlainText().contains('\n') ?? false;
     final double width =
         math.max(_minLabelWidth, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
-    if (hasMultipleLines) {
+    if (hasNewline) {
       final double height = math.max(
         _preferredHeight,
         labelPainter.height + (_labelPadding * 2 * textScaleFactor),
@@ -987,10 +987,10 @@ class _DropSliderValueIndicatorPathPainter {
       scale: scale,
     );
 
-    final bool hasMultipleLines = multilineConfig.enabled && (labelText.contains('\n'));
+    final bool hasNewline = multilineConfig.enabled && (labelText.contains('\n'));
 
     final Rect upperRect;
-    if (hasMultipleLines) {
+    if (hasNewline) {
       // For multiline text, the rectangle should be positioned to accommodate
       // the text with proper padding.
       final double rectHeight = finalLabelPainter.height + (_labelPadding * 2);
@@ -1018,7 +1018,7 @@ class _DropSliderValueIndicatorPathPainter {
     canvas.scale(scale, scale);
 
     final Path path;
-    if (hasMultipleLines) {
+    if (hasNewline) {
       // For multiline text, create a single continuous path for the
       // drop/triangle shape.
       path = Path();
@@ -1098,7 +1098,7 @@ class _DropSliderValueIndicatorPathPainter {
     canvas.drawPath(path, fillPaint);
 
     // The label text is centered within the value indicator.
-    if (hasMultipleLines) {
+    if (hasNewline) {
       // Center multiline text within the rectangle.
       final Offset labelOffset = Offset(
         upperRect.left + (upperRect.width - finalLabelPainter.width) / 2,
@@ -1483,16 +1483,15 @@ class _RoundedRectSliderValueIndicatorPathPainter {
   /// A default extra padding for rounded corners when the label is multiline.
   ///
   /// This constant is to prevent text from appearing to "spill out" of the rounded corners.
-
   static const double _multilineCornerPadding = 8.0;
 
   Size getPreferredSize(TextPainter labelPainter, double textScaleFactor) {
     // For getPreferredSize, assuming multiline support for sizing estimation.
     // The actual rendering decision is made in the paint method based on theme.
-    final bool hasMultipleLines = labelPainter.text?.toPlainText().contains('\n') ?? false;
+    final bool hasNewline = labelPainter.text?.toPlainText().contains('\n') ?? false;
     final double width =
         math.max(_minLabelWidth, labelPainter.width) + _labelPadding * 2 * textScaleFactor;
-    if (hasMultipleLines) {
+    if (hasNewline) {
       final double height = math.max(
         _preferredHeight,
         labelPainter.height + (_labelPadding * 2 * textScaleFactor) + _multilineCornerPadding,
@@ -1601,9 +1600,9 @@ class _RoundedRectSliderValueIndicatorPathPainter {
       scale: scale,
     );
 
-    final bool hasMultipleLines = multilineConfig.enabled && labelText.contains('\n');
+    final bool hasNewline = multilineConfig.enabled && labelText.contains('\n');
     final double cornerPadding = multilineConfig.cornerPadding ?? _multilineCornerPadding;
-    final double rectHeight = hasMultipleLines
+    final double rectHeight = hasNewline
         ? math.max(_preferredHeight, finalLabelPainter.height + (_labelPadding * 2) + cornerPadding)
         : _preferredHeight * textScaleFactor;
 
