@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Iskanje v spletu",
   "shareButtonLabel": "Deli",
   "pasteButtonLabel": "Prilepi",
-  "selectAllButtonLabel": "Izberi vse"
+  "selectAllButtonLabel": "Izberi vse",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
