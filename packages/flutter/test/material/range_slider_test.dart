@@ -125,7 +125,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 0.8);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -151,13 +151,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.3, 0.8)));
     //  taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pump();
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.5, 0.8)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -168,7 +168,7 @@ void main() {
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
     expect(values.start, moreOrLessEquals(0.1, epsilon: 0.01));
-    expect(values.end, equals(0.7));
+    expect(values.end, equals(0.8));
 
     // The end thumb is selected when tapping the right inactive track.
     await tester.pump();
@@ -179,7 +179,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    RangeValues values = const RangeValues(0.3, 1.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -205,13 +205,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.3, 1.0)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pump();
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.5, 1.0)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -221,7 +221,7 @@ void main() {
     // The end thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
-    expect(values.start, 0.3);
+    expect(values.start, 0.5);
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
 
     // The start thumb is selected when tapping the right inactive track.
@@ -233,7 +233,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 80);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -261,13 +261,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(30, 80)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(50, 80)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -279,7 +279,7 @@ void main() {
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
     expect(values.start.round(), equals(10));
-    expect(values.end.round(), equals(70));
+    expect(values.end.round(), equals(80));
 
     // The end thumb is selected when tapping the right inactive track.
     await tester.pump();
@@ -291,7 +291,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    RangeValues values = const RangeValues(30, 80);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -319,13 +319,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(30, 80)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(50, 80)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -336,7 +336,7 @@ void main() {
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
-    expect(values.start.round(), equals(30));
+    expect(values.start.round(), equals(50));
     expect(values.end.round(), equals(90));
 
     // The end thumb is selected when tapping the right inactive track.
@@ -744,6 +744,7 @@ void main() {
       final Offset rightTarget = topLeft + (bottomRight - topLeft) * 0.7;
       await tester.dragFrom(rightTarget, middle - rightTarget);
       expect(values.start, moreOrLessEquals(50, epsilon: 0.01));
+      expect(values.end, moreOrLessEquals(50, epsilon: 0.01));
 
       // Drag the start thumb apart.
       await tester.pumpAndSettle();
