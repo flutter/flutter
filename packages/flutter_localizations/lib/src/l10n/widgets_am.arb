@@ -13,5 +13,7 @@
   "pasteButtonLabel": "ለጥፍ",
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
   "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available"
+  "searchResultsUnavailable": "Search results not available",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

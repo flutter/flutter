@@ -13,5 +13,7 @@
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
   "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available"
+  "searchResultsUnavailable": "Search results not available",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

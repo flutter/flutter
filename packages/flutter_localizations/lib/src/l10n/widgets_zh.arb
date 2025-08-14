@@ -13,5 +13,7 @@
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
   "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available"
+  "searchResultsUnavailable": "Search results not available",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

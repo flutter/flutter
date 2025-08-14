@@ -13,5 +13,7 @@
   "pasteButtonLabel": "పేస్ట్ చేయండి",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
   "searchResultsAvailable": "Search results available",
-  "searchResultsUnavailable": "Search results not available"
+  "searchResultsUnavailable": "Search results not available",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
