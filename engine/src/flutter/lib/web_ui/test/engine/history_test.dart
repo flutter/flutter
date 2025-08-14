@@ -186,7 +186,7 @@ void testMain() {
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntry.state, flutterState);
       expect(strategy.currentEntry.url, '/home');
-      await routeUpdated('/page1');
+      await routeInformationUpdated('/page1', null);
       // The number of entries shouldn't change.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -204,7 +204,7 @@ void testMain() {
       expect(spy.messages[0].methodName, 'popRoute');
       expect(spy.messages[0].methodArguments, isNull);
       // The framework responds by updating to the most current route name.
-      await routeUpdated('/home');
+      await routeInformationUpdated('/home', null);
       // We still have 2 entries.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -219,8 +219,8 @@ void testMain() {
       );
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
-      await routeUpdated('/page1');
-      await routeUpdated('/page2');
+      await routeInformationUpdated('/page1', null);
+      await routeInformationUpdated('/page2', null);
 
       // Make sure we are on page2.
       expect(strategy.history, hasLength(2));
@@ -237,7 +237,7 @@ void testMain() {
       expect(spy.messages[0].methodArguments, isNull);
       spy.messages.clear();
       // 2. The framework sends a `routePopped` platform message.
-      await routeUpdated('/page1');
+      await routeInformationUpdated('/page1', null);
       // 3. The history state should reflect that /page1 is currently active.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -253,7 +253,7 @@ void testMain() {
       expect(spy.messages[0].methodArguments, isNull);
       spy.messages.clear();
       // 2. The framework sends a `routePopped` platform message.
-      await routeUpdated('/home');
+      await routeInformationUpdated('/home', null);
       // 3. The history state should reflect that /page1 is currently active.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -296,7 +296,7 @@ void testMain() {
       expect(spy.messages[0].methodArguments, '/page3');
       spy.messages.clear();
       // 2. The framework sends a `routeUpdated` platform message.
-      await routeUpdated('/page3');
+      await routeInformationUpdated('/page3', null);
       // 3. The history state should reflect that /page3 is currently active.
       expect(strategy.history, hasLength(3));
       expect(strategy.currentEntryIndex, 1);
@@ -312,7 +312,7 @@ void testMain() {
       expect(spy.messages[0].methodArguments, isNull);
       spy.messages.clear();
       // 2. The framework sends a `routeUpdated` platform message.
-      await routeUpdated('/home');
+      await routeInformationUpdated('/home', null);
       // 3. The history state should reflect that /home is currently active.
       expect(strategy.history, hasLength(2));
       expect(strategy.currentEntryIndex, 1);
@@ -351,7 +351,7 @@ void testMain() {
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
 
       // Go to a named route.
-      await routeUpdated('/named-route');
+      await routeInformationUpdated('/named-route', null);
       expect(strategy.currentEntry.url, '/named-route');
 
       // Now, push a nameless route. The url shouldn't change.
@@ -759,16 +759,6 @@ void testMain() {
       expect(location.getBaseHref(), isNotNull);
     });
   });
-}
-
-Future<void> routeUpdated(String routeName) {
-  final Completer<void> completer = Completer<void>();
-  EnginePlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/navigation',
-    codec.encodeMethodCall(MethodCall('routeUpdated', <String, dynamic>{'routeName': routeName})),
-    (_) => completer.complete(),
-  );
-  return completer.future;
 }
 
 Future<void> routeInformationUpdated(String location, dynamic state) {
