@@ -17,7 +17,6 @@ import 'package:flutter/services.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
-import 'predictive_back_page_transitions_builder.dart';
 import 'theme.dart';
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
@@ -760,12 +759,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   final Color? backgroundColor;
 
   /// The value of [transitionDuration] in milliseconds.
-  ///
-  /// Eyeballed on a physical Pixel 9 running Android 16. This does not match
-  /// the actual value used by native Android, which is 800ms, because native
-  /// Android is using Material 3 Expressive springs that are not currently
-  /// supported by Flutter. So for now at least, this is an approximation.
-  static const int kTransitionMilliseconds = 450;
+  static const int kTransitionMilliseconds = 800;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: kTransitionMilliseconds);
@@ -1103,7 +1097,7 @@ class PageTransitionsTheme with Diagnosticable {
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders =
       <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.windows: ZoomPageTransitionsBuilder(),
