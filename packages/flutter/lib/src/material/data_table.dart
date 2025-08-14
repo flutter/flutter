@@ -204,7 +204,8 @@ class DataRow {
 
   /// Called if the row is hovered.
   ///
-  /// If non-null, hovering the row will invoke this callback.
+  /// The boolean value passed to the callback is true if a pointer has entered the row and false
+  /// when a pointer has exited the row.
   final ValueChanged<bool>? onHover;
 
   /// Whether the row is selected.
