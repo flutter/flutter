@@ -21,7 +21,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import '_window.dart';
-import 'binding.dart';
 
 /// A Win32 window handle.
 ///
@@ -91,63 +90,21 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   ///  * [WindowingOwner], the abstract class that manages native windows.
   @internal
-  WindowingOwnerWin32()
-    : win32PlatformInterface = _NativeWin32PlatformInterface(),
-      platformDispatcher = PlatformDispatcher.instance,
-      allocator = _CallocAllocator._() {
+  WindowingOwnerWin32() : allocator = _CallocAllocator._() {
     if (!Platform.isWindows) {
       throw UnsupportedError('Only available on the Win32 platform');
     }
 
-    final ffi.Pointer<WindowingInitRequest> request = allocator<WindowingInitRequest>()
+    final ffi.Pointer<_WindowingInitRequest> request = allocator<_WindowingInitRequest>()
       ..ref.onMessage =
-          ffi.NativeCallable<ffi.Void Function(ffi.Pointer<WindowsMessage>)>.isolateLocal(
+          ffi.NativeCallable<ffi.Void Function(ffi.Pointer<_WindowsMessage>)>.isolateLocal(
             _onMessage,
           ).nativeFunction;
-    win32PlatformInterface.initialize(platformDispatcher.engineId!, request);
-    allocator.free(request);
-  }
-
-  /// Creates a new [WindowingOwnerWin32] instance for testing purposes.
-  ///
-  /// This constructor will not throw when we are not on the win32 platform.
-  ///
-  /// This constructor takes a [win32PlatformInterface], which is most likely
-  /// a mock interface in addition to a custom [platformDispatcher] so that
-  /// [PlatformDispatcher.engineId] can successfully be mocked.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  @visibleForTesting
-  WindowingOwnerWin32.test({
-    required this.win32PlatformInterface,
-    required this.platformDispatcher,
-    required this.allocator,
-  }) {
-    final ffi.Pointer<WindowingInitRequest> request = allocator<WindowingInitRequest>()
-      ..ref.onMessage =
-          ffi.NativeCallable<ffi.Void Function(ffi.Pointer<WindowsMessage>)>.isolateLocal(
-            _onMessage,
-          ).nativeFunction;
-    win32PlatformInterface.initialize(platformDispatcher.engineId!, request);
+    _Win32PlatformInterface.initializeWindowing(PlatformDispatcher.instance.engineId!, request);
     allocator.free(request);
   }
 
   final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
-
-  /// Provides access to the native win32 backend.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final Win32PlatformInterface win32PlatformInterface;
-
-  /// The [PlatformDispatcher].
-  ///
-  /// This will differ from [PlatformDispatcher.instance] during testing.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final PlatformDispatcher platformDispatcher;
 
   /// The [Allocator] used for allocating native memory in this owner.
   ///
@@ -216,9 +173,9 @@ class WindowingOwnerWin32 extends WindowingOwner {
     _messageHandlers.remove(handler);
   }
 
-  void _onMessage(ffi.Pointer<WindowsMessage> message) {
+  void _onMessage(ffi.Pointer<_WindowsMessage> message) {
     final List<WindowsMessageHandler> handlers = List<WindowsMessageHandler>.from(_messageHandlers);
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
       (FlutterView view) => view.viewId == message.ref.viewId,
     );
     for (final WindowsMessageHandler handler in handlers) {
@@ -240,7 +197,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   @internal
   @override
   bool hasTopLevelWindows() {
-    return win32PlatformInterface.hasTopLevelWindows(platformDispatcher.engineId!);
+    return _Win32PlatformInterface.hasTopLevelWindows(PlatformDispatcher.instance.engineId!);
   }
 }
 
@@ -274,16 +231,16 @@ class RegularWindowControllerWin32 extends RegularWindowController
        _delegate = delegate,
        super.empty() {
     owner.addMessageHandler(this);
-    final ffi.Pointer<WindowCreationRequest> request = owner.allocator<WindowCreationRequest>()
+    final ffi.Pointer<_WindowCreationRequest> request = owner.allocator<_WindowCreationRequest>()
       ..ref.preferredSize.from(preferredSize)
       ..ref.preferredConstraints.from(preferredConstraints)
       ..ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: _owner.allocator);
-    final int viewId = _owner.win32PlatformInterface.createWindow(
-      _owner.platformDispatcher.engineId!,
+    final int viewId = _Win32PlatformInterface.createWindow(
+      PlatformDispatcher.instance.engineId!,
       request,
     );
     owner.allocator.free(request);
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     rootView = flutterView;
@@ -297,9 +254,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   Size get contentSize {
     _ensureNotDestroyed();
-    final ActualContentSize size = _owner.win32PlatformInterface.getWindowContentSize(
-      getWindowHandle(),
-    );
+    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
     final Size result = Size(size.width, size.height);
     return result;
   }
@@ -308,7 +263,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   String get title {
     _ensureNotDestroyed();
-    final int length = _owner.win32PlatformInterface.getWindowTextLength(getWindowHandle());
+    final int length = _Win32PlatformInterface.getWindowTextLength(getWindowHandle());
     if (length == 0) {
       return '';
     }
@@ -316,7 +271,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     final ffi.Pointer<ffi.Uint16> data = _owner.allocator<ffi.Uint16>(length + 1);
     try {
       final ffi.Pointer<_Utf16> buffer = data.cast<_Utf16>();
-      _owner.win32PlatformInterface.getWindowText(getWindowHandle(), buffer, length + 1);
+      _Win32PlatformInterface.getWindowText(getWindowHandle(), buffer, length + 1);
       return buffer.toDartString();
     } finally {
       _owner.allocator.free(data);
@@ -327,39 +282,39 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   bool get isActivated {
     _ensureNotDestroyed();
-    return _owner.win32PlatformInterface.getForegroundWindow() == getWindowHandle();
+    return _Win32PlatformInterface.getForegroundWindow() == getWindowHandle();
   }
 
   @override
   @internal
   bool get isMaximized {
     _ensureNotDestroyed();
-    return _owner.win32PlatformInterface.isZoomed(getWindowHandle()) != 0;
+    return _Win32PlatformInterface.isZoomed(getWindowHandle()) != 0;
   }
 
   @override
   @internal
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _owner.win32PlatformInterface.isIconic(getWindowHandle()) != 0;
+    return _Win32PlatformInterface.isIconic(getWindowHandle()) != 0;
   }
 
   @override
   @internal
   bool get isFullscreen {
     _ensureNotDestroyed();
-    return _owner.win32PlatformInterface.getFullscreen(getWindowHandle());
+    return _Win32PlatformInterface.getFullscreen(getWindowHandle());
   }
 
   @override
   @internal
   void setSize(Size? size) {
     _ensureNotDestroyed();
-    final ffi.Pointer<WindowSizeRequest> request = _owner.allocator<WindowSizeRequest>();
+    final ffi.Pointer<_WindowSizeRequest> request = _owner.allocator<_WindowSizeRequest>();
     request.ref.hasSize = size != null;
     request.ref.width = size?.width ?? 0;
     request.ref.height = size?.height ?? 0;
-    _owner.win32PlatformInterface.setWindowContentSize(getWindowHandle(), request);
+    _Win32PlatformInterface.setWindowContentSize(getWindowHandle(), request);
     _owner.allocator.free(request);
   }
 
@@ -367,10 +322,10 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    final ffi.Pointer<WindowConstraintsRequest> request = _owner
-        .allocator<WindowConstraintsRequest>();
+    final ffi.Pointer<_WindowConstraintsRequest> request = _owner
+        .allocator<_WindowConstraintsRequest>();
     request.ref.from(constraints);
-    _owner.win32PlatformInterface.setWindowConstraints(getWindowHandle(), request);
+    _Win32PlatformInterface.setWindowConstraints(getWindowHandle(), request);
     _owner.allocator.free(request);
 
     notifyListeners();
@@ -381,7 +336,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   void setTitle(String title) {
     _ensureNotDestroyed();
     final ffi.Pointer<_Utf16> titlePointer = title.toNativeUtf16(allocator: _owner.allocator);
-    _owner.win32PlatformInterface.setWindowTitle(getWindowHandle(), titlePointer);
+    _Win32PlatformInterface.setWindowTitle(getWindowHandle(), titlePointer);
     _owner.allocator.free(titlePointer);
 
     notifyListeners();
@@ -391,7 +346,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   void activate() {
     _ensureNotDestroyed();
-    _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+    _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
   }
 
   @override
@@ -399,9 +354,9 @@ class RegularWindowControllerWin32 extends RegularWindowController
   void setMaximized(bool maximized) {
     _ensureNotDestroyed();
     if (maximized) {
-      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_MAXIMIZE);
+      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MAXIMIZE);
     } else {
-      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
     }
   }
 
@@ -410,21 +365,21 @@ class RegularWindowControllerWin32 extends RegularWindowController
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
+      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
     } else {
-      _owner.win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
     }
   }
 
   @override
   @internal
   void setFullscreen(bool fullscreen, {Display? display}) {
-    final ffi.Pointer<WindowFullscreenRequest> request = _owner
-        .allocator<WindowFullscreenRequest>();
+    final ffi.Pointer<_WindowFullscreenRequest> request = _owner
+        .allocator<_WindowFullscreenRequest>();
     request.ref.hasDisplayId = false;
     request.ref.displayId = display?.id ?? 0;
     request.ref.fullscreen = fullscreen;
-    _owner.win32PlatformInterface.setFullscreen(getWindowHandle(), request);
+    _Win32PlatformInterface.setFullscreen(getWindowHandle(), request);
     _owner.allocator.free(request);
   }
 
@@ -432,8 +387,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   HWND getWindowHandle() {
     _ensureNotDestroyed();
-    return _owner.win32PlatformInterface.getWindowHandle(
-      _owner.platformDispatcher.engineId!,
+    return _Win32PlatformInterface.getWindowHandle(
+      PlatformDispatcher.instance.engineId!,
       rootView.viewId,
     );
   }
@@ -449,7 +404,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
     if (_destroyed) {
       return;
     }
-    _owner.win32PlatformInterface.destroyWindow(getWindowHandle());
+    _Win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
     _delegate.onWindowDestroyed();
     _owner.removeMessageHandler(this);
@@ -478,340 +433,104 @@ class RegularWindowControllerWin32 extends RegularWindowController
   }
 }
 
-/// Abstract class that wraps native access to the win32 API.
-///
-/// Used by [WindowingOwnerWin32].
-///
-/// Overriding this is only useful for testing purposes.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-///
-/// See also:
-///
-///  * [WindowingOwnerWin32], the user of this interface.
-@visibleForTesting
-@internal
-abstract class Win32PlatformInterface {
-  /// Checks if the engine specified by [engineId] has any top level
-  /// windows created on it.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  bool hasTopLevelWindows(int engineId);
-
-  /// Initialize the window subsystem for the provided engine.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void initialize(int engineId, ffi.Pointer<WindowingInitRequest> request);
-
-  /// Create a regular window on the provided engine.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  int createWindow(int engineId, ffi.Pointer<WindowCreationRequest> request);
-
-  /// Retrieve the window handle associated with the provided engine and view ids.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  HWND getWindowHandle(int engineId, int viewId);
-
-  /// Destroy a window given its window handle.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void destroyWindow(HWND windowHandle);
-
-  /// Retrieve the current content size of a window given its handle.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  ActualContentSize getWindowContentSize(HWND windowHandle);
-
-  /// Set the title of a window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
-
-  /// Set the content size of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void setWindowContentSize(HWND windowHandle, ffi.Pointer<WindowSizeRequest> size);
-
-  /// Set the constraints of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void setWindowConstraints(HWND windowHandle, ffi.Pointer<WindowConstraintsRequest> constraints);
-
-  /// Show the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void showWindow(HWND windowHandle, int command);
-
-  /// Check if the window is minimized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  int isIconic(HWND windowHandle);
-
-  /// Check if the window is maximized.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  int isZoomed(HWND windowHandle);
-
-  /// Request that the window change its fullscreen status.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  void setFullscreen(HWND windowHandle, ffi.Pointer<WindowFullscreenRequest> request);
-
-  /// Retrieve the fullscreen status of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  bool getFullscreen(HWND windowHandle);
-
-  /// Retrieve the text length of the title of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  int getWindowTextLength(HWND windowHandle);
-
-  /// Retrieve the title of the window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  int getWindowText(HWND windowHandle, ffi.Pointer<_Utf16> lpString, int maxLength);
-
-  /// Retrieve the currently focused window handle.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @visibleForTesting
-  @internal
-  HWND getForegroundWindow();
-}
-
-class _NativeWin32PlatformInterface extends Win32PlatformInterface {
-  @override
-  bool hasTopLevelWindows(int engineId) {
-    return _hasTopLevelWindows(engineId);
-  }
-
-  @override
-  void initialize(int engineId, ffi.Pointer<WindowingInitRequest> request) {
-    _initializeWindowing(engineId, request);
-  }
-
-  @override
-  int createWindow(int engineId, ffi.Pointer<WindowCreationRequest> request) {
-    return _createWindow(engineId, request);
-  }
-
-  @override
-  HWND getWindowHandle(int engineId, int viewId) {
-    return _getWindowHandle(engineId, viewId);
-  }
-
-  @override
-  void destroyWindow(HWND windowHandle) {
-    _destroyWindow(windowHandle);
-  }
-
-  @override
-  ActualContentSize getWindowContentSize(HWND windowHandle) {
-    return _getWindowContentSize(windowHandle);
-  }
-
-  @override
-  void setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title) {
-    _setWindowTitle(windowHandle, title);
-  }
-
-  @override
-  void setWindowContentSize(HWND windowHandle, ffi.Pointer<WindowSizeRequest> size) {
-    _setWindowContentSize(windowHandle, size);
-  }
-
-  @override
-  void setWindowConstraints(HWND windowHandle, ffi.Pointer<WindowConstraintsRequest> constraints) {
-    _setWindowConstraints(windowHandle, constraints);
-  }
-
-  @override
-  void showWindow(HWND windowHandle, int command) {
-    _showWindow(windowHandle, command);
-  }
-
-  @override
-  int isIconic(HWND windowHandle) {
-    return _isIconic(windowHandle);
-  }
-
-  @override
-  int isZoomed(HWND windowHandle) {
-    return _isZoomed(windowHandle);
-  }
-
-  @override
-  void setFullscreen(HWND windowHandle, ffi.Pointer<WindowFullscreenRequest> request) {
-    _setFullscreen(windowHandle, request);
-  }
-
-  @override
-  bool getFullscreen(HWND windowHandle) {
-    return _getFullscreen(windowHandle);
-  }
-
-  @override
-  int getWindowTextLength(HWND windowHandle) {
-    return _getWindowTextLength(windowHandle);
-  }
-
-  @override
-  int getWindowText(HWND windowHandle, ffi.Pointer<_Utf16> lpString, int maxLength) {
-    return _getWindowText(windowHandle, lpString, maxLength);
-  }
-
-  @override
-  HWND getForegroundWindow() {
-    return _getForegroundWindow();
-  }
-
+class _Win32PlatformInterface {
   @ffi.Native<ffi.Bool Function(ffi.Int64)>(
     symbol: 'InternalFlutterWindows_WindowManager_HasTopLevelWindows',
   )
-  external static bool _hasTopLevelWindows(int engineId);
+  external static bool hasTopLevelWindows(int engineId);
 
-  @ffi.Native<ffi.Void Function(ffi.Int64, ffi.Pointer<WindowingInitRequest>)>(
+  @ffi.Native<ffi.Void Function(ffi.Int64, ffi.Pointer<_WindowingInitRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_Initialize',
   )
-  external static void _initializeWindowing(
+  external static void initializeWindowing(
     int engineId,
-    ffi.Pointer<WindowingInitRequest> request,
+    ffi.Pointer<_WindowingInitRequest> request,
   );
 
-  @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<WindowCreationRequest>)>(
+  @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_CreateRegularWindow',
   )
-  external static int _createWindow(int engineId, ffi.Pointer<WindowCreationRequest> request);
+  external static int createWindow(int engineId, ffi.Pointer<_WindowCreationRequest> request);
 
   @ffi.Native<HWND Function(ffi.Int64, ffi.Int64)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle',
   )
-  external static HWND _getWindowHandle(int engineId, int viewId);
+  external static HWND getWindowHandle(int engineId, int viewId);
 
   @ffi.Native<ffi.Void Function(HWND)>(symbol: 'DestroyWindow')
-  external static void _destroyWindow(HWND windowHandle);
+  external static void destroyWindow(HWND windowHandle);
 
-  @ffi.Native<ActualContentSize Function(HWND)>(
+  @ffi.Native<_ActualContentSize Function(HWND)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetWindowContentSize',
   )
-  external static ActualContentSize _getWindowContentSize(HWND windowHandle);
+  external static _ActualContentSize getWindowContentSize(HWND windowHandle);
 
   @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_Utf16>)>(symbol: 'SetWindowTextW')
-  external static void _setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
+  external static void setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
 
-  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<WindowSizeRequest>)>(
+  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowSizeRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowSize',
   )
-  external static void _setWindowContentSize(
+  external static void setWindowContentSize(
     HWND windowHandle,
-    ffi.Pointer<WindowSizeRequest> size,
+    ffi.Pointer<_WindowSizeRequest> size,
   );
 
-  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<WindowConstraintsRequest>)>(
+  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowConstraintsRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowConstraints',
   )
-  external static void _setWindowConstraints(
+  external static void setWindowConstraints(
     HWND windowHandle,
-    ffi.Pointer<WindowConstraintsRequest> constraints,
+    ffi.Pointer<_WindowConstraintsRequest> constraints,
   );
 
   @ffi.Native<ffi.Void Function(HWND, ffi.Int32)>(symbol: 'ShowWindow')
-  external static void _showWindow(HWND windowHandle, int command);
+  external static void showWindow(HWND windowHandle, int command);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'IsIconic')
-  external static int _isIconic(HWND windowHandle);
+  external static int isIconic(HWND windowHandle);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'IsZoomed')
-  external static int _isZoomed(HWND windowHandle);
+  external static int isZoomed(HWND windowHandle);
 
-  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<WindowFullscreenRequest>)>(
+  @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowFullscreenRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetFullscreen',
   )
-  external static void _setFullscreen(
+  external static void setFullscreen(
     HWND windowHandle,
-    ffi.Pointer<WindowFullscreenRequest> request,
+    ffi.Pointer<_WindowFullscreenRequest> request,
   );
 
   @ffi.Native<ffi.Bool Function(HWND)>(symbol: 'InternalFlutterWindows_WindowManager_GetFullscreen')
-  external static bool _getFullscreen(HWND windowHandle);
+  external static bool getFullscreen(HWND windowHandle);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'GetWindowTextLengthW')
-  external static int _getWindowTextLength(HWND windowHandle);
+  external static int getWindowTextLength(HWND windowHandle);
 
   @ffi.Native<ffi.Int32 Function(HWND, ffi.Pointer<_Utf16>, ffi.Int32)>(symbol: 'GetWindowTextW')
-  external static int _getWindowText(
-    HWND windowHandle,
-    ffi.Pointer<_Utf16> lpString,
-    int maxLength,
-  );
+  external static int getWindowText(HWND windowHandle, ffi.Pointer<_Utf16> lpString, int maxLength);
 
   @ffi.Native<HWND Function()>(symbol: 'GetForegroundWindow')
-  external static HWND _getForegroundWindow();
+  external static HWND getForegroundWindow();
 }
 
-/// Payload for the creation method used by [Win32PlatformInterface.createWindow].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowCreationRequest extends ffi.Struct {
-  external WindowSizeRequest preferredSize;
-  external WindowConstraintsRequest preferredConstraints;
+/// Payload for the creation method used by [_Win32PlatformInterface.createWindow].
+final class _WindowCreationRequest extends ffi.Struct {
+  external _WindowSizeRequest preferredSize;
+  external _WindowConstraintsRequest preferredConstraints;
   external ffi.Pointer<_Utf16> title;
 }
 
 /// Payload for the initialization request for the windowing subsystem used
 /// by the constructor for [WindowingOwnerWin32].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowingInitRequest extends ffi.Struct {
-  external ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<WindowsMessage>)>>
+final class _WindowingInitRequest extends ffi.Struct {
+  external ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<_WindowsMessage>)>>
   onMessage;
 }
 
-/// Payload for the size of a window used by [WindowCreationRequest] and
-/// [Win32PlatformInterface.setWindowContentSize].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowSizeRequest extends ffi.Struct {
+/// Payload for the size of a window used by [_WindowCreationRequest] and
+/// [_Win32PlatformInterface.setWindowContentSize].
+final class _WindowSizeRequest extends ffi.Struct {
   @ffi.Bool()
   external bool hasSize;
 
@@ -828,13 +547,9 @@ final class WindowSizeRequest extends ffi.Struct {
   }
 }
 
-/// Payload for the constraints of a window used by [WindowCreationRequest] and
-/// [Win32PlatformInterface.setWindowConstraints].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowConstraintsRequest extends ffi.Struct {
+/// Payload for the constraints of a window used by [_WindowCreationRequest] and
+/// [_Win32PlatformInterface.setWindowConstraints].
+final class _WindowConstraintsRequest extends ffi.Struct {
   @ffi.Bool()
   external bool hasConstraints;
 
@@ -859,12 +574,8 @@ final class WindowConstraintsRequest extends ffi.Struct {
   }
 }
 
-/// A message received for all toplevel windows, used by [WindowingInitRequest].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowsMessage extends ffi.Struct {
+/// A message received for all toplevel windows, used by [_WindowingInitRequest].
+final class _WindowsMessage extends ffi.Struct {
   @ffi.Int64()
   external int viewId;
 
@@ -887,12 +598,8 @@ final class WindowsMessage extends ffi.Struct {
 }
 
 /// Holds the real size of a window as retrieved from
-/// [Win32PlatformInterface.getWindowContentSize].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class ActualContentSize extends ffi.Struct {
+/// [_Win32PlatformInterface.getWindowContentSize].
+final class _ActualContentSize extends ffi.Struct {
   @ffi.Double()
   external double width;
 
@@ -900,12 +607,8 @@ final class ActualContentSize extends ffi.Struct {
   external double height;
 }
 
-/// Payload for the [Win32PlatformInterface.setFullscreen] request.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@visibleForTesting
-@internal
-final class WindowFullscreenRequest extends ffi.Struct {
+/// Payload for the [_Win32PlatformInterface.setFullscreen] request.
+final class _WindowFullscreenRequest extends ffi.Struct {
   @ffi.Bool()
   external bool fullscreen;
 
