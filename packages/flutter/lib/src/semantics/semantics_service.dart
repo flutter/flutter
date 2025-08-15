@@ -68,6 +68,8 @@ abstract final class SemanticsService {
 
   /// Sends a semantic announcement for a particular view.
   ///
+  /// Users can use [View.of] to get the current [FlutterView].
+  ///
   /// {@macro flutter.semantics.service.announce}
   static Future<void> sendAnnouncement(
     FlutterView view,
@@ -79,7 +81,7 @@ abstract final class SemanticsService {
       message,
       textDirection,
       assertiveness: assertiveness,
-      view: view,
+      viewId: view.viewId,
     );
     await SystemChannels.accessibility.send(event.toMap());
   }

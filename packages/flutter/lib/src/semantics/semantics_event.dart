@@ -100,11 +100,11 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     this.message,
     this.textDirection, {
     this.assertiveness = Assertiveness.polite,
-    this.view = null,
+    this.viewId,
   }) : super('announce');
 
   /// The view that this announcement is on.
-  final FlutterView? view;
+  final int? viewId;
 
   /// The message to announce.
   final String message;
