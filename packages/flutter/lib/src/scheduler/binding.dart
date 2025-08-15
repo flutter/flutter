@@ -458,7 +458,7 @@ mixin SchedulerBinding on BindingBase {
   /// millisecond), so as to not cause the regular frame callbacks to
   /// get delayed.
   ///
-  /// If an animation is running, including, for instance, a [ProgressIndicator]
+  /// If an animation is running, including, for instance, a [MaterialProgressIndicator]
   /// indicating that there are pending tasks, then tasks with a priority below
   /// [Priority.animation] won't run (at least, not with the
   /// [defaultSchedulingStrategy]; this can be configured using
