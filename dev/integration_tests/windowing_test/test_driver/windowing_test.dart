@@ -55,6 +55,24 @@ void main() {
       expect(data["height"], 600);
     });
 
+    test('Can set constraints and see the resize', () async {
+      await driver.requestData(
+        jsonEncode({
+          'type': 'set_constraints',
+          'min_width': 0,
+          'min_height': 0,
+          'max_width': 500,
+          'max_height': 501,
+        }),
+      );
+      final response = await driver.requestData(
+        jsonEncode({'type': 'get_size'}),
+      );
+      final data = jsonDecode(response);
+      expect(data["width"], 500);
+      expect(data["height"], 501);
+    });
+
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
       var response = await driver.requestData(

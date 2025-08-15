@@ -44,6 +44,14 @@ void main() {
           jsonMap['height'].toDouble(),
         );
         controller.setSize(size);
+      } else if (jsonMap['type'] == 'set_constraints') {
+        final BoxConstraints constraints = BoxConstraints(
+          minWidth: jsonMap['min_width'].toDouble(),
+          minHeight: jsonMap['min_height'].toDouble(),
+          maxWidth: jsonMap['max_width'].toDouble(),
+          maxHeight: jsonMap['max_height'].toDouble(),
+        );
+        controller.setConstraints(constraints);
       } else if (jsonMap['type'] == 'set_fullscreen') {
         controller.setFullscreen(true);
       } else if (jsonMap['type'] == 'unset_fullscreen') {
