@@ -2750,6 +2750,16 @@ void main() {
       expect(lastDayText.data, equals('28'));
     });
   });
+
+  testWidgets('DatePickerDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.shrink(
+          child: DatePickerDialog(firstDate: firstDate, lastDate: lastDate),
+        ),
+      ),
+    );
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {

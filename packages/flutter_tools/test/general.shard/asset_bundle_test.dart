@@ -1017,26 +1017,30 @@ flutter:
           materialDir.childFile(shader).createSync(recursive: true);
         }
 
-        (globals.processManager as FakeProcessManager).addCommand(
-          FakeCommand(
-            command: <String>[
-              impellerc,
-              '--sksl',
-              '--iplr',
-              '--json',
-              '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
-              '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
-              '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
-              '--input-type=frag',
-              '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-              '--include=$shaderLibDir',
-            ],
-            onRun: (_) {
-              fileSystem.file(outputPath).createSync(recursive: true);
-              fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-            },
-          ),
-        );
+        final testShaders = <String>['ink_sparkle.frag', 'stretch_effect.frag'];
+
+        for (final shader in testShaders) {
+          (globals.processManager as FakeProcessManager).addCommand(
+            FakeCommand(
+              command: <String>[
+                impellerc,
+                '--sksl',
+                '--iplr',
+                '--json',
+                '--sl=${fileSystem.path.join(output.path, 'shaders', shader)}',
+                '--spirv=${fileSystem.path.join(output.path, 'shaders', '$shader.spirv')}',
+                '--input=${fileSystem.path.join(materialDir.path, 'shaders', shader)}',
+                '--input-type=frag',
+                '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+                '--include=$shaderLibDir',
+              ],
+              onRun: (_) {
+                fileSystem.file(outputPath).createSync(recursive: true);
+                fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+              },
+            ),
+          );
+        }
 
         fileSystem.file('pubspec.yaml')
           ..createSync()
