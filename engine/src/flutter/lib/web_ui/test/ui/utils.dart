@@ -51,7 +51,6 @@ Future<void> disposePlatformView(int id) {
   return completer.future;
 }
 
-
 /// Convenience getter for the implicit view.
 FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
