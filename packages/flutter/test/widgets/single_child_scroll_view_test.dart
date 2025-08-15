@@ -1125,4 +1125,62 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
+
+  testWidgets('', (WidgetTester tester) async {});
+
+  // Regression test for https://github.com/flutter/flutter/issues/173225
+  testWidgets('ValueListenableBuilder rebuild does not interrupt ongoing scroll gesture', (
+    WidgetTester tester,
+  ) async {
+    final ValueNotifier<String> titleValue = ValueNotifier<String>('0');
+    addTearDown(titleValue.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            child: ValueListenableBuilder<String>(
+              valueListenable: titleValue,
+              builder: (BuildContext context, String value, Widget? child) {
+                return Text(value);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
+    expect(scrollableState.position.pixels, 0.0);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Text)));
+    await tester.pump();
+
+    // Simulate initial downward drag to create overscroll
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+
+    // Verify we're in overscroll territory
+    final double initialOffset = scrollableState.position.pixels;
+    expect(initialOffset, lessThan(0.0), reason: 'Should be in overscroll territory');
+
+    // Now simulate ValueListenableBuilder rebuild during the gesture
+    titleValue.value = '1';
+    await tester.pump();
+
+    // Verify the scroll position hasn't been reset to 0
+    expect(scrollableState.position.pixels, lessThan(0.0));
+    expect(scrollableState.position.pixels, equals(initialOffset));
+
+    // Continue the gesture to verify it's still active
+    await gesture.moveBy(const Offset(0.0, 50.0));
+    await tester.pump();
+
+    // Verify gesture continues to work
+    expect(scrollableState.position.pixels, lessThan(initialOffset));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
