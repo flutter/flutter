@@ -407,7 +407,6 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -1665,7 +1664,6 @@ targets:
 
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: android_engine_vulkan_tests
@@ -2316,7 +2314,6 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true # LUCI failing KVM access https://github.com/flutter/flutter/issues/170529
     timeout: 60
     properties:
       tags: >
