@@ -17,22 +17,25 @@ namespace {
 
 static const constexpr char* kAndroidHuawei = "android-huawei";
 
-/// These are SoCs that crash when using AHB imports.
-static constexpr const char* kBLC[] = {
-    // Most Exynos Series SoC
+static constexpr const char* kBadSocs[] = {
+    // Most Exynos Series SoC. These are SoCs that crash when using AHB imports.
     "exynos7870",  //
     "exynos7880",  //
     "exynos7872",  //
     "exynos7884",  //
     "exynos7885",  //
+    "exynos7904",  //
+    // Mongoose line.
     "exynos8890",  //
     "exynos8895",  //
-    "exynos7904",  //
     "exynos9609",  //
     "exynos9610",  //
     "exynos9611",  //
     "exynos9810",  //
-    "exynos9820"   // https://github.com/flutter/flutter/issues/171992.
+    // `exynos9820` and `exynos9825` have graphical errors:
+    // https://github.com/flutter/flutter/issues/171992.
+    "exynos9820",  //
+    "exynos9825"   //
 };
 
 static bool IsDeviceEmulator(std::string_view product_model) {
@@ -42,7 +45,7 @@ static bool IsDeviceEmulator(std::string_view product_model) {
 static bool IsKnownBadSOC(std::string_view hardware) {
   // TODO(jonahwilliams): if the list gets too long (> 16), convert
   // to a hash map first.
-  for (const auto& board : kBLC) {
+  for (const auto& board : kBadSocs) {
     if (strcmp(board, hardware.data()) == 0) {
       return true;
     }
