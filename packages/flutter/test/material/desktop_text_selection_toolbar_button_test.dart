@@ -42,4 +42,19 @@ void main() {
     final TextButton button = tester.widget(find.byType(TextButton));
     expect(button.enabled, isFalse);
   });
+
+  testWidgets('DesktopTextSelectionToolbarButton renders at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DesktopTextSelectionToolbarButton(onPressed: null, child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DesktopTextSelectionToolbarButton)).isEmpty, isTrue);
+  });
 }
