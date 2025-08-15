@@ -32,7 +32,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // We'll use this to control the visibility of the texture layer.
   bool _showTexture = true;
 
   void _toggleTexture() {
@@ -60,7 +59,6 @@ class _MyAppState extends State<MyApp> {
               child: Center(
                 child: Stack(
                   children: <Widget>[
-                    // The platform view, which is the base layer.
                     Center(
                       child: SizedBox(
                         width: 300,
@@ -90,8 +88,6 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ),
 
-                    // The texture layer on top. We'll use an Opacity widget
-                    // to make it semi-transparent for a clearer demonstration.
                     if (_showTexture)
                       const Center(
                         child: SizedBox(
@@ -100,9 +96,9 @@ class _MyAppState extends State<MyApp> {
                           child: Opacity(
                             opacity: 0.5,
                             child: Texture(
-                              // This texture ID needs to be provided by the platform.
-                              // For this example, we'll use a placeholder. In a real
-                              // test, you'd need a mock to provide this.
+                              // Intentionally use an unknown texture ID: this
+                              // results a black rectangle which is good enough
+                              // for our purposes.
                               textureId: 1,
                             ),
                           ),
