@@ -4,6 +4,8 @@
 
 import UIKit
 
+/// A UITextPosition subclass that represents a location in the text, in
+/// a Flutter text field.
 @objc(FlutterTextPosition)
 final class TextPosition: UITextPosition, NSCopying {
   // offset is exposed as `range` in an extension on UITextPosition.
@@ -32,6 +34,11 @@ final class TextPosition: UITextPosition, NSCopying {
   }
 }
 
+/// A UITextRange subclass that represents a text range within the text, in
+/// a Flutter text field.
+///
+/// Similar to the dart:ui TextRange class, this class represents a right open
+/// interval consists of two `TextPosition`s.
 @objc(FlutterTextRange)
 final class TextRange: UITextRange, NSCopying {
   // nsRange is exposed as `range` in an extension on UITextPosition.
