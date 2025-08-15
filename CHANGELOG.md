@@ -38,7 +38,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.0](https://github.com/flutter/flutter/releases/tag/3.35.0)
 
-Initial stable release.
+Initial stable release. [Learn what's new in Flutter 3.35](https://medium.com/flutter/whats-new-in-flutter-3-35-c58ef72e3766).
 
 ## Flutter 3.32 Changes
 
