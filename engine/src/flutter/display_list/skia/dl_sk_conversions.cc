@@ -154,7 +154,7 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       auto samplers = runtime_source->samplers();
       std::vector<sk_sp<SkShader>> sk_samplers(samplers.size());
       for (size_t i = 0; i < samplers.size(); i++) {
-        auto sampler = samplers[i];
+        const auto& sampler = samplers[i];
         if (sampler == nullptr) {
           return nullptr;
         }

@@ -2316,7 +2316,7 @@ TEST_F(ShellTest, LocaltimesMatch) {
 class SinglePixelImageGenerator : public ImageGenerator {
  public:
   SinglePixelImageGenerator()
-      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)){};
+      : info_(SkImageInfo::MakeN32(1, 1, SkAlphaType::kOpaque_SkAlphaType)) {};
   ~SinglePixelImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 
@@ -4589,6 +4589,7 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
 
 // Test that remove view fails if the view ID does not exist.
 TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(

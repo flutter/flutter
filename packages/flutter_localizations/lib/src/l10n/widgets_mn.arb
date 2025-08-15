@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Вебээс хайх",
   "shareButtonLabel": "Хуваалцах",
   "pasteButtonLabel": "Буулгах",
-  "selectAllButtonLabel": "Бүгдийг сонгох"
+  "selectAllButtonLabel": "Бүгдийг сонгох",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
