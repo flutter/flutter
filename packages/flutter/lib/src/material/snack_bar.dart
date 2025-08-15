@@ -289,7 +289,7 @@ class SnackBar extends StatefulWidget {
     this.showCloseIcon,
     this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
-    this.persist = false,
+    this.persist,
     this.animation,
     this.onVisible,
     this.dismissDirection,
@@ -462,9 +462,12 @@ class SnackBar extends StatefulWidget {
 
   /// Whether the snack bar will stay or auto-dismissed after timeout.
   ///
-  /// Defaults to false. If true, the snack bar is still there even after the
-  /// timeout, unless the user taps the action button or the close icon.
-  final bool persist;
+  /// If true, the snack bar is still there even after the timeout, until the
+  /// user taps the action button or the close icon. If false, the snack bar
+  /// will be dismissed after the timeout. If this is null but the talkback is
+  /// turned on and snackbar action is not null, the snackbar will persist as
+  /// well.
+  final bool? persist;
 
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double>? animation;
