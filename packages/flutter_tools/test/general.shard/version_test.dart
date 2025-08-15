@@ -417,7 +417,6 @@ void main() {
 
           // Verify the version files exist and have been repopulated after the fetch.
           expect(FlutterVersion.getVersionFile(fs, flutterRoot), exists); // flutter.version.json
-          expect(fs.file(fs.path.join(flutterRoot, 'version')), exists); // legacy
 
           expect(flutterVersion.channel, channel);
           expect(flutterVersion.repositoryUrl, flutterUpstreamUrl);
@@ -1056,7 +1055,12 @@ void main() {
       expect(legacyVersionFile.existsSync(), isTrue);
       expect(legacyVersionFile.readAsStringSync(), '1.2.3');
     },
-    overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
+    overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Cache: () => cache,
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isOmitLegacyVersionFileEnabled: false),
+    },
   );
 
   testUsingContext(
@@ -1128,7 +1132,6 @@ void main() {
       final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
       final Directory cacheDir = flutterRoot.childDirectory('bin').childDirectory('cache')
         ..createSync(recursive: true);
-      final File legacyVersionFile = flutterRoot.childFile('version');
       final File versionFile = cacheDir.childFile('flutter.version.json')..writeAsStringSync('{');
 
       processManager.addCommands(<FakeCommand>[
@@ -1202,12 +1205,10 @@ void main() {
 
       // version file was deleted because it couldn't be parsed
       expect(versionFile.existsSync(), isFalse);
-      expect(legacyVersionFile.existsSync(), isFalse);
       // version file was written to disk
       flutterVersion.ensureVersionFile();
       expect(processManager, hasNoRemainingExpectations);
       expect(versionFile.existsSync(), isTrue);
-      expect(legacyVersionFile.existsSync(), isTrue);
     },
     overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
   );
