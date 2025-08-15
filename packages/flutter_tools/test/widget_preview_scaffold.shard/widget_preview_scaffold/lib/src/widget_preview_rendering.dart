@@ -114,12 +114,7 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
 class NoPreviewsDetectedWidget extends StatelessWidget {
   const NoPreviewsDetectedWidget({super.key});
 
-  // TODO(bkonyi): update with actual documentation on flutter.dev.
-  static Uri documentationUrl = Uri.https(
-    'github.com',
-    'flutter/flutter/blob/master/packages/flutter/'
-        'lib/src/widget_previews/widget_previews.dart',
-  );
+  static Uri documentationUrl = Uri.https('flutter.dev', 'to/widget-previews');
 
   @override
   Widget build(BuildContext context) {
@@ -726,6 +721,7 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     // actually located in the parent project, meaning their paths did not need
     // to be modified.
     if (key == 'AssetManifest.bin' ||
+        key == 'AssetManifest.bin.json' ||
         key == 'FontManifest.json' ||
         key.startsWith(_kPackagesPrefix) ||
         packageName == null) {

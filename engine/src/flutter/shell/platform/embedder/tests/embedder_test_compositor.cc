@@ -13,10 +13,10 @@
 namespace flutter {
 namespace testing {
 
-EmbedderTestCompositor::EmbedderTestCompositor(SkISize surface_size,
+EmbedderTestCompositor::EmbedderTestCompositor(DlISize surface_size,
                                                sk_sp<GrDirectContext> context)
     : surface_size_(surface_size), context_(std::move(context)) {
-  FML_CHECK(!surface_size_.isEmpty()) << "Surface size must not be empty";
+  FML_CHECK(!surface_size_.IsEmpty()) << "Surface size must not be empty";
 }
 
 EmbedderTestCompositor::~EmbedderTestCompositor() = default;

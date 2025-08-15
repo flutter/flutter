@@ -29,7 +29,7 @@ void testMain() {
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
-          const MethodCall('routeUpdated', <String, dynamic>{'routeName': '/foo'}),
+          const MethodCall('routeInformationUpdated', <String, dynamic>{'location': '/foo'}),
         ),
         (ByteData? response) => completer.complete(response),
       );
@@ -53,7 +53,7 @@ void testMain() {
       ui.PlatformDispatcher.instance.sendPlatformMessage(
         'flutter/navigation',
         codec.encodeMethodCall(
-          const MethodCall('routeUpdated', <String, dynamic>{'routeName': '/foo'}),
+          const MethodCall('routeInformationUpdated', <String, dynamic>{'location': '/foo'}),
         ),
         (_) => completer.complete(),
       );
