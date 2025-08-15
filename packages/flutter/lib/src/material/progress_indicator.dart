@@ -38,17 +38,7 @@ enum _ActivityIndicatorType { material, adaptive }
 abstract class MaterialProgressIndicator extends ProgressIndicator {
   /// Creates a progress indicator.
   ///
-  /// {@template flutter.widget.ProgressIndicator.ProgressIndicator}
-  /// The [value] argument can either be null for an indeterminate
-  /// progress indicator, or a non-null value between 0.0 and 1.0 for a
-  /// determinate progress indicator.
-  ///
-  /// ## Accessibility
-  ///
-  /// The [semanticsLabel] can be used to identify the purpose of this progress
-  /// bar for screen reading software. The [semanticsValue] property may be used
-  /// for determinate progress indicators to indicate how much progress has been made.
-  /// {@endtemplate}
+  /// {@macro flutter.widget.ProgressIndicator.ProgressIndicator}
   const MaterialProgressIndicator({
     super.key,
     super.value,
