@@ -2881,12 +2881,11 @@ class EditableTextState extends State<EditableText>
   /// Throws an error if the selection is empty or collapsed.
   Future<void> lookUpSelection(SelectionChangedCause cause) async {
     assert(!widget.obscureText);
-
     final String text = textEditingValue.selection.textInside(textEditingValue.text);
     if (widget.obscureText || text.isEmpty) {
       return;
     }
-    await SystemChannels.platform.invokeMethod('LookUp.invoke', text);
+    await SystemChannels.textInput.invokeMethod('TextInput.lookUp', text);
   }
 
   /// Launch a web search on the current selection,

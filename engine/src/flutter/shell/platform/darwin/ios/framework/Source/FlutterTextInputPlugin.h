@@ -37,10 +37,12 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 @property(nonatomic, weak) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
 @property(nonatomic, strong)
     NSMutableDictionary<UIScribbleElementIdentifier, NSValue*>* scribbleElements;
+@property(nonatomic, assign, readonly) BOOL preventUnfocusOnNextResign;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
+- (void)prepareForLookUp;
 - (instancetype)initWithDelegate:(id<FlutterTextInputDelegate>)textInputDelegate
     NS_DESIGNATED_INITIALIZER;
 
