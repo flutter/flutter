@@ -13,10 +13,7 @@ void main() {
     await tester.pumpWidget(const example.FadeTransitionExampleApp());
 
     expect(
-      find.descendant(
-        of: find.byType(example.FadeTransitionExample),
-        matching: find.byType(FadeTransition),
-      ),
+      find.ancestor(of: find.byType(FlutterLogo), matching: find.byType(FadeTransition)),
       findsOneWidget,
     );
   });
@@ -24,8 +21,8 @@ void main() {
   testWidgets('FadeTransition animates', (WidgetTester tester) async {
     await tester.pumpWidget(const example.FadeTransitionExampleApp());
 
-    final Finder fadeTransitionFinder = find.descendant(
-      of: find.byType(example.FadeTransitionExample),
+    final Finder fadeTransitionFinder = find.ancestor(
+      of: find.byType(FlutterLogo),
       matching: find.byType(FadeTransition),
     );
 
