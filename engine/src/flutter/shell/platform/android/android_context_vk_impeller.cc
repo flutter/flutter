@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 
-#include <sys/system_properties.h>
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/impeller/entity/vk/entity_shaders_vk.h"
@@ -15,23 +14,6 @@
 #include "shell/platform/android/context/android_context.h"
 
 namespace flutter {
-
-namespace {
-constexpr const char* kKnownBadSOCs[] = {
-    "exynos9820",  // https://github.com/flutter/flutter/issues/171992.
-};
-
-bool IsKnownBadSOC() {
-  char product_model[PROP_VALUE_MAX];
-  __system_property_get("ro.product.board", product_model);
-  for (const auto& board : kKnownBadSOCs) {
-    if (strcmp(board, product_model) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-}  // namespace
 
 static std::shared_ptr<impeller::Context> CreateImpellerContext(
     const fml::RefPtr<fml::NativeLibrary>& vulkan_dylib,
@@ -80,17 +62,10 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan).";
     }
   }
-  if (context) {
-    if (context->GetDriverInfo()->IsKnownBadDriver()) {
-      FML_LOG(INFO)
-          << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
-      return nullptr;
-    }
-    if (IsKnownBadSOC()) {
-      FML_LOG(INFO)
-          << "Known bad Vulkan SoC encountered, falling back to OpenGLES.";
-      return nullptr;
-    }
+  if (context && context->GetDriverInfo()->IsKnownBadDriver()) {
+    FML_LOG(INFO)
+        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    return nullptr;
   }
 
   return context;

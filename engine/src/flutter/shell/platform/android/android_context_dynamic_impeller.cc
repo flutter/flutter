@@ -31,7 +31,8 @@ static constexpr const char* kBLC[] = {
     "exynos9609",  //
     "exynos9610",  //
     "exynos9611",  //
-    "exynos9810"   //
+    "exynos9810",  //
+    "exynos9820"   // https://github.com/flutter/flutter/issues/171992.
 };
 
 static bool IsDeviceEmulator(std::string_view product_model) {
@@ -83,7 +84,8 @@ GetActualRenderingAPIForImpeller(
 
   __system_property_get("ro.product.board", product_model);
   if (IsKnownBadSOC(product_model)) {
-    // Avoid using Vulkan on known bad SoCs.
+    FML_LOG(INFO)
+        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
     return nullptr;
   }
 
