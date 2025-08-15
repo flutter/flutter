@@ -156,6 +156,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
           context, android_context_, jni_facade_, surface_factory_);
       overlay_frame = layer->surface->AcquireFrame(frame_size_);
+      overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       overlay_frame->set_submit_info({.frame_boundary = false});
       overlay_frame->Submit();
       has_overlay_layers_ = false;
