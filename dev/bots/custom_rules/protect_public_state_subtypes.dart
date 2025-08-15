@@ -73,7 +73,7 @@ class _StateSubclassVisitor extends SimpleAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    if (isPublicStateSubtype(node.declaredElement!)) {
+    if (isPublicStateSubtype(node.declaredFragment!.element)) {
       node.visitChildren(this);
     }
   }
@@ -92,7 +92,7 @@ class _StateSubclassVisitor extends SimpleAstVisitor<void> {
       case 'dispose':
       case 'build':
       case 'debugFillProperties':
-        if (!node.declaredElement!.hasProtected) {
+        if (!node.declaredFragment!.element.metadata.hasProtected) {
           unprotectedMethods.add(node);
         }
     }

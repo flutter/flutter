@@ -95,7 +95,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           PreviewDetails(
             packageName: packageName,
             functionName: _currentFunction!.name.toString(),
-            isBuilder: returnType.name2.isWidgetBuilder,
+            isBuilder: returnType.name.isWidgetBuilder,
             previewAnnotation: preview,
           ),
         );
@@ -117,7 +117,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           PreviewDetails(
             packageName: packageName,
             functionName: '${parentClass.name}.${_currentMethod!.name}',
-            isBuilder: returnType.name2.isWidgetBuilder,
+            isBuilder: returnType.name.isWidgetBuilder,
             previewAnnotation: preview,
           ),
         );
@@ -134,7 +134,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
 
 /// Contains all the information related to a library being watched by [PreviewDetector].
 final class LibraryPreviewNode {
-  LibraryPreviewNode({required LibraryElement2 library, required this.logger})
+  LibraryPreviewNode({required LibraryElement library, required this.logger})
     : path = library.toPreviewPath() {
     final libraryFilePaths = <String>[
       for (final LibraryFragment fragment in library.fragments) fragment.source.fullName,
@@ -190,7 +190,7 @@ final class LibraryPreviewNode {
   /// Finds all previews defined in the [lib] and adds them to [previews].
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
-    final visitor = _PreviewVisitor(lib: lib.element2);
+    final visitor = _PreviewVisitor(lib: lib.element);
     for (final ResolvedUnitResult libUnit in lib.units) {
       libUnit.unit.visitChildren(visitor);
     }
@@ -212,13 +212,13 @@ final class LibraryPreviewNode {
 
     for (final unit in units) {
       final LibraryFragment fragment = unit.libraryFragment;
-      for (final LibraryImport importedLib in fragment.libraryImports2) {
-        if (importedLib.importedLibrary2 == null) {
+      for (final LibraryImport importedLib in fragment.libraryImports) {
+        if (importedLib.importedLibrary == null) {
           // This is an import for a file that's not analyzed (likely an import of a package from
           // the pub-cache) and isn't necessary to track as part of the dependency graph.
           continue;
         }
-        final LibraryElement2 importedLibrary = importedLib.importedLibrary2!;
+        final LibraryElement importedLibrary = importedLib.importedLibrary!;
         final LibraryPreviewNode result = graph.putIfAbsent(
           importedLibrary.toPreviewPath(),
           () => LibraryPreviewNode(library: importedLibrary, logger: logger),
