@@ -38,7 +38,6 @@ final class TextRange: UITextRange, NSCopying {
   fileprivate let nsRange: NSRange
 
   init(NSRange range: NSRange) {
-    assert(range.location != NSNotFound)
     self.nsRange = range
   }
 
