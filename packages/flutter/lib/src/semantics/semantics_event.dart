@@ -123,7 +123,7 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
-      'viewId': view?.viewId,
+      'viewId': viewId,
       'message': message,
       'textDirection': textDirection.index,
       if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,
