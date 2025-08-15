@@ -3209,14 +3209,16 @@ class _DismissDrawerAction extends DismissAction {
 
   @override
   bool isEnabled(DismissIntent intent) {
-    return Scaffold.of(context).isDrawerOpen || Scaffold.of(context).isEndDrawerOpen;
+    final scaffold = Scaffold.of(context);
+    return (scaffold.isDrawerOpen || scaffold.isEndDrawerOpen) && scaffold.isDrawerBarrierDismissible;
   }
 
   @override
   void invoke(DismissIntent intent) {
-    if (Scaffold.of(context).isDrawerBarrierDismissible) {
-      Scaffold.of(context).closeDrawer();
-      Scaffold.of(context).closeEndDrawer();
+    final scaffold = Scaffold.of(context);
+    if (isEnabled(intent)) {
+      scaffold.closeDrawer();
+      scaffold.closeEndDrawer();
     }
   }
 }
