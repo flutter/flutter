@@ -70,6 +70,7 @@ class WebSocketDwdsTestUtils {
       }
     });
 
+    io.Process? chromeProcess;
     try {
       // Step 1: Start Flutter app with web-server device (will wait for debug connection)
       debugPrint('Step 2: Starting Flutter app with web-server device...');
@@ -90,7 +91,7 @@ class WebSocketDwdsTestUtils {
 
       // Step 3: Launch headless Chrome to connect to DWDS
       debugPrint('Step 4: Launching headless Chrome to connect to DWDS...');
-      final io.Process chromeProcess = await launchHeadlessChrome(debugUrl);
+      chromeProcess = await launchHeadlessChrome(debugUrl);
       debugPrint('✓ Headless Chrome launched and connecting to DWDS');
 
       // Step 4: Wait for app to start (Chrome connection established)
@@ -111,6 +112,10 @@ class WebSocketDwdsTestUtils {
     } catch (e) {
       // Clean up on error
       await subscription.cancel();
+      if (chromeProcess != null) {
+        chromeProcess.kill();
+        await chromeProcess.exitCode;
+      }
       rethrow;
     }
   }
