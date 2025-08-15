@@ -1203,6 +1203,14 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   @override
+  void didUpdateWidget(CupertinoSliverNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.middle != oldWidget.middle) {
+      effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
