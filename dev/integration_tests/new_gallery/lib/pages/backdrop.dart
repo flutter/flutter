@@ -265,7 +265,7 @@ class _SettingsIcon extends AnimatedWidget {
               onTap: () {
                 toggleSettings();
                 SemanticsService.sendAnnouncement(
-                  View.of(context).viewId,
+                  View.of(context),
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
                   GalleryOptions.of(context).resolvedTextDirection()!,
                 );

@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:ui' show FlutterView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -99,11 +100,11 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     this.message,
     this.textDirection, {
     this.assertiveness = Assertiveness.polite,
-    this.viewId = null,
+    this.view = null,
   }) : super('announce');
 
-  /// The id of the view that this announcement is on.
-  final int? viewId;
+  /// The view that this announcement is on.
+  final FlutterView? view;
 
   /// The message to announce.
   final String message;
@@ -122,7 +123,7 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
-      'viewId': viewId,
+      'viewId': view?.viewId,
       'message': message,
       'textDirection': textDirection.index,
       if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,

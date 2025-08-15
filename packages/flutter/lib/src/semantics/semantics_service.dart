@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show TextDirection;
+import 'dart:ui' show FlutterView, TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
@@ -51,7 +51,7 @@ abstract final class SemanticsService {
   @Deprecated(
     'Use sendAnnouncement instead. '
     'This API is incompatible with multiple windows. '
-    'This feature was deprecated after 3.35.0-0.1.pre.'
+    'This feature was deprecated after 3.35.0-0.1.pre.',
   )
   static Future<void> announce(
     String message,
@@ -66,12 +66,11 @@ abstract final class SemanticsService {
     await SystemChannels.accessibility.send(event.toMap());
   }
 
-
   /// Sends a semantic announcement for a particular view.
   ///
   /// {@macro flutter.semantics.service.announce}
   static Future<void> sendAnnouncement(
-    int viewId,
+    FlutterView view,
     String message,
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
@@ -80,7 +79,7 @@ abstract final class SemanticsService {
       message,
       textDirection,
       assertiveness: assertiveness,
-      viewId: viewId
+      view: view,
     );
     await SystemChannels.accessibility.send(event.toMap());
   }
