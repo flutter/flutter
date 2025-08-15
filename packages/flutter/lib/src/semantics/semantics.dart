@@ -1475,7 +1475,7 @@ class SemanticsProperties extends DiagnosticableTree {
     @Deprecated(
       'Use focused instead. '
       'Setting focused automatically set focusable. '
-      'This feature was deprecated after v3.34.0-0.0.pre.',
+      'This feature was deprecated after v3.36.0-0.0.pre.',
     )
     this.focusable,
     this.focused,
@@ -1664,7 +1664,7 @@ class SemanticsProperties extends DiagnosticableTree {
   @Deprecated(
     'Use focused instead. '
     'Setting focused automatically set focusable. '
-    'This feature was deprecated after v3.34.0-0.0.pre.',
+    'This feature was deprecated after v3.36.0-0.0.pre.',
   )
   final bool? focusable;
 
@@ -5603,13 +5603,13 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] can hold the input focus.
   @Deprecated(
     'Check if isFocused is null instead. '
-    'This feature was deprecated after v3.34.0-0.0.pre.',
+    'This feature was deprecated after v3.36.0-0.0.pre.',
   )
   bool get isFocusable => _flags.isFocusable;
 
   @Deprecated(
     'Setting isFocused automatically set this to true. '
-    'This feature was deprecated after v3.34.0-0.0.pre.',
+    'This feature was deprecated after v3.36.0-0.0.pre.',
   )
   set isFocusable(bool value) {
     _flags = _flags.copyWith(isFocusable: value);
