@@ -21,10 +21,10 @@ final Platform testPlatform = FakePlatform();
 
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -44,10 +44,10 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater can download a zip archive and delete stale files', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -75,9 +75,9 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will delete any denylisted files from the outputDirectory',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
       final Directory tempStorage = fileSystem.currentDirectory.childDirectory('temp');
       final String localZipPath = tempStorage.childFile('test.zip').path;
       File? desiredArtifact;
@@ -87,12 +87,12 @@ void main() {
       operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
         desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
         entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
-        nestedWithoutEntitlementsFile = outputDirectory
-          .childDirectory('dir')
-          .childFile('without_entitlements.txt')..createSync(recursive: true);
+        nestedWithoutEntitlementsFile =
+            outputDirectory.childDirectory('dir').childFile('without_entitlements.txt')
+              ..createSync(recursive: true);
         unsignedBinariesFile = outputDirectory.childFile('unsigned_binaries.txt')..createSync();
       };
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -123,11 +123,11 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
       'x-goog-hash header is present but missing an md5 entry', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
 
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -153,11 +153,11 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
       'x-goog-hash header is present', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
 
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -188,11 +188,11 @@ void main() {
 
   testWithoutContext('ArtifactUpdater will validate the md5 hash if the '
       'x-goog-hash header is present and throw if it does not match', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
 
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -233,14 +233,14 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will restart the status ticker if it needs to retry the download',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
       final Logger logger = StdoutLogger(
         terminal: Terminal.test(supportsColor: true),
         stdio: FakeStdio(),
         outputPreferences: OutputPreferences.test(),
       );
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -264,11 +264,11 @@ void main() {
   );
 
   testWithoutContext('ArtifactUpdater will re-attempt on a non-200 response', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
 
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -303,10 +303,10 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will tool exit on an ArgumentError from http client with base url override',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -337,10 +337,10 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will rethrow on an ArgumentError from http client without base url override',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -367,10 +367,10 @@ void main() {
   );
 
   testWithoutContext('ArtifactUpdater will re-download a file if unzipping fails', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -393,10 +393,10 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will de-download a file if unzipping fails on windows',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -420,10 +420,10 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will bail with a tool exit if unzipping fails more than twice',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -450,10 +450,10 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will bail if unzipping fails more than twice on Windows',
     () async {
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -478,10 +478,10 @@ void main() {
   );
 
   testWithoutContext('ArtifactUpdater can download a tar archive', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -499,11 +499,33 @@ void main() {
     expect(fileSystem.file('out/test'), exists);
   });
 
+  testWithoutContext('ArtifactUpdater can download a single file', () async {
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: fileSystem.currentDirectory.childDirectory('temp')..createSync(),
+      allowedBaseUrls: <String>['http://example.com'],
+    );
+
+    await artifactUpdater.downloadFile(
+      'test message',
+      Uri.parse('http://example.com/test.json'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(fileSystem.file('out/test.json'), exists);
+  });
+
   testWithoutContext('ArtifactUpdater will delete downloaded files if they exist.', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+    final operatingSystemUtils = FakeOperatingSystemUtils();
+    final fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -527,12 +549,12 @@ void main() {
   testWithoutContext(
     'ArtifactUpdater will tool exit if deleting the existing artifacts fails with 32 on windows',
     () async {
-      const int kSharingViolation = 32;
-      final FileExceptionHandler handler = FileExceptionHandler();
-      final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
-      final BufferLogger logger = BufferLogger.test();
-      final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      const kSharingViolation = 32;
+      final handler = FileExceptionHandler();
+      final operatingSystemUtils = FakeOperatingSystemUtils();
+      final fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+      final logger = BufferLogger.test();
+      final artifactUpdater = ArtifactUpdater(
         fileSystem: fileSystem,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -542,9 +564,9 @@ void main() {
         allowedBaseUrls: <String>['http://test.zip'],
       );
 
-      final Directory errorDirectory = fileSystem.currentDirectory
-        .childDirectory('out')
-        .childDirectory('test')..createSync(recursive: true);
+      final Directory errorDirectory =
+          fileSystem.currentDirectory.childDirectory('out').childDirectory('test')
+            ..createSync(recursive: true);
       handler.addError(
         errorDirectory,
         FileSystemOp.delete,
@@ -568,13 +590,13 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  int failures = 0;
+  var failures = 0;
 
-  /// A mapping of zip [file] paths to callbacks that receive the [targetDirectory].
+  /// A mapping of zip [File] paths to callbacks that receive the `targetDirectory`.
   ///
   /// Use this to have [unzip] generate an arbitrary set of [FileSystemEntity]s
-  /// under [targetDirectory].
-  final Map<String, void Function(Directory)> unzipCallbacks = <String, void Function(Directory)>{};
+  /// under `targetDirectory`.
+  final unzipCallbacks = <String, void Function(Directory)>{};
 
   @override
   void unzip(File file, Directory targetDirectory) {

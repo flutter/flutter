@@ -503,6 +503,7 @@ public class FlutterView extends FrameLayout
    * <p>We register for {@link androidx.window.layout.WindowInfoTracker} updates.
    */
   @Override
+  @RequiresApi(API_LEVELS.API_28)
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     this.windowInfoRepo = createWindowInfoRepo();
@@ -1085,6 +1086,7 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #detachFromFlutterEngine()} for information on how to detach from a {@link
    * FlutterEngine}.
    */
+  @RequiresApi(API_LEVELS.API_24)
   public void attachToFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     Log.v(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
     if (isAttachedToFlutterEngine()) {
@@ -1112,16 +1114,16 @@ public class FlutterView extends FrameLayout
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      mouseCursorPlugin = new MouseCursorPlugin(this, this.flutterEngine.getMouseCursorChannel());
-    }
+    mouseCursorPlugin = new MouseCursorPlugin(this, this.flutterEngine.getMouseCursorChannel());
 
     textInputPlugin =
         new TextInputPlugin(
             this,
             this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getScribeChannel(),
-            this.flutterEngine.getPlatformViewsController(),
+            this.flutterEngine
+                .getPlatformViewsController(), // TODO(gmackall): this can be changed to take a pvc
+            // delegator.
             this.flutterEngine.getPlatformViewsController2());
 
     try {
@@ -1143,13 +1145,14 @@ public class FlutterView extends FrameLayout
     keyboardManager = new KeyboardManager(this);
     androidTouchProcessor =
         new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
+
     accessibilityBridge =
         new AccessibilityBridge(
             this,
             flutterEngine.getAccessibilityChannel(),
             (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
             getContext().getContentResolver(),
-            this.flutterEngine.getPlatformViewsController());
+            flutterEngine.getPlatformViewsControllerDelegator());
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),
@@ -1210,6 +1213,7 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #attachToFlutterEngine(FlutterEngine)} for information on how to attach a {@link
    * FlutterEngine}.
    */
+  @RequiresApi(API_LEVELS.API_24)
   public void detachFromFlutterEngine() {
     Log.v(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
     if (!isAttachedToFlutterEngine()) {

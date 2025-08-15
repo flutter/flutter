@@ -45,7 +45,8 @@ void ConvertImageToRasterSkia(
       return;
     }
 
-    if (sk_sp<SkImage> raster_image = image->makeRasterImage()) {
+    if (sk_sp<SkImage> raster_image =
+            image->makeRasterImage(resource_context.get())) {
       // The image can be converted to a raster image.
       encode_task(raster_image);
       return;

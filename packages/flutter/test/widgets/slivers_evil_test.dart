@@ -19,7 +19,12 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Column(children: <Widget>[Container(height: minExtent), Expanded(child: Container())]);
+    return Column(
+      children: <Widget>[
+        Container(height: minExtent),
+        Expanded(child: Container()),
+      ],
+    );
   }
 
   @override
@@ -143,8 +148,8 @@ void main() {
                         floating: true,
                       ),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverList(
-                        delegate: SliverChildListDelegate(<Widget>[
+                      SliverList.list(
+                        children: <Widget>[
                           Container(height: 50.0),
                           Container(height: 50.0),
                           Container(height: 50.0),
@@ -160,7 +165,7 @@ void main() {
                           Container(height: 50.0),
                           Container(height: 50.0),
                           Container(height: 50.0),
-                        ]),
+                        ],
                       ),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),

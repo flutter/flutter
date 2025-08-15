@@ -51,7 +51,8 @@ class TestToggleableState extends State<TestToggleable>
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => (bool? value) => this.value = value;
+  ValueChanged<bool?>? get onChanged =>
+      (bool? value) => this.value = value;
 
   @override
   bool tristate = true;

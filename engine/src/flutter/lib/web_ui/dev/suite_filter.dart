@@ -78,10 +78,10 @@ class CompilerFilter extends SuiteFilter {
   @override
   SuiteFilterResult filterSuite(TestSuite suite) =>
       suite.testBundle.compileConfigs.any(
-            (CompileConfiguration config) => allowList.contains(config.compiler),
-          )
-          ? SuiteFilterResult.accepted()
-          : SuiteFilterResult.rejected('Selected compilers not used in suite.');
+        (CompileConfiguration config) => allowList.contains(config.compiler),
+      )
+      ? SuiteFilterResult.accepted()
+      : SuiteFilterResult.rejected('Selected compilers not used in suite.');
 }
 
 class RendererFilter extends SuiteFilter {
@@ -92,10 +92,10 @@ class RendererFilter extends SuiteFilter {
   @override
   SuiteFilterResult filterSuite(TestSuite suite) =>
       suite.testBundle.compileConfigs.any(
-            (CompileConfiguration config) => allowList.contains(config.renderer),
-          )
-          ? SuiteFilterResult.accepted()
-          : SuiteFilterResult.rejected('Selected renderers not used in suite.');
+        (CompileConfiguration config) => allowList.contains(config.renderer),
+      )
+      ? SuiteFilterResult.accepted()
+      : SuiteFilterResult.rejected('Selected renderers not used in suite.');
 }
 
 class CanvasKitVariantFilter extends AllowListSuiteFilter<CanvasKitVariant> {

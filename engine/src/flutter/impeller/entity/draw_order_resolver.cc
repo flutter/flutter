@@ -9,7 +9,7 @@
 
 namespace impeller {
 
-DrawOrderResolver::DrawOrderResolver() : draw_order_layers_({{}}){};
+DrawOrderResolver::DrawOrderResolver() : draw_order_layers_({{}}) {};
 
 void DrawOrderResolver::AddElement(size_t element_index, bool is_opaque) {
   DrawOrderLayer& layer = draw_order_layers_.back();

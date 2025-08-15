@@ -21,7 +21,10 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerDownEvent(int timeStampUs, double x, double y) {
-    return PointerDownEvent(timeStamp: Duration(microseconds: timeStampUs), position: Offset(x, y));
+    return PointerDownEvent(
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
+    );
   }
 
   PointerEvent createSimulatedPointerMoveEvent(
@@ -53,7 +56,10 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerUpEvent(int timeStampUs, double x, double y) {
-    return PointerUpEvent(timeStamp: Duration(microseconds: timeStampUs), position: Offset(x, y));
+    return PointerUpEvent(
+      timeStamp: Duration(microseconds: timeStampUs),
+      position: Offset(x, y),
+    );
   }
 
   test('basic', () {

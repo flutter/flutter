@@ -146,7 +146,9 @@ void main() {
 
   testWidgets('Button child alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
-      CupertinoApp(home: CupertinoButton(onPressed: () {}, child: const Text('button'))),
+      CupertinoApp(
+        home: CupertinoButton(onPressed: () {}, child: const Text('button')),
+      ),
     );
 
     Align align = tester.firstWidget<Align>(
@@ -256,7 +258,9 @@ void main() {
 
   testWidgets('Enabled button animates', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     await tester.tap(find.byType(CupertinoButton));
@@ -291,7 +295,9 @@ void main() {
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(child: const Text('Tap me'), onPressed: () {})),
+      boilerplate(
+        child: CupertinoButton(child: const Text('Tap me'), onPressed: () {}),
+      ),
     );
 
     // Keep a "down" gesture on the button
@@ -342,7 +348,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
-        child: Center(child: CupertinoButton(onPressed: () {}, child: const Text('ABC'))),
+        child: Center(
+          child: CupertinoButton(onPressed: () {}, child: const Text('ABC')),
+        ),
       ),
     );
 
@@ -379,11 +387,11 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration =
+    ShapeDecoration decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color, const Color(0x000000FF));
+    expect(decoration.color, const Color(0x000000FF));
 
     await tester.pumpWidget(
       boilerplate(
@@ -396,11 +404,11 @@ void main() {
       ),
     );
 
-    boxDecoration =
+    decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color, const Color(0x0000FF00));
+    expect(decoration.color, const Color(0x0000FF00));
   });
 
   testWidgets('Can specify dynamic colors', (WidgetTester tester) async {
@@ -428,11 +436,11 @@ void main() {
       ),
     );
 
-    BoxDecoration boxDecoration =
+    ShapeDecoration decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
-    expect(boxDecoration.color!.value, 0xFF654321);
+    expect(decoration.color!.value, 0xFF654321);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -448,12 +456,12 @@ void main() {
       ),
     );
 
-    boxDecoration =
+    decoration =
         tester.widget<DecoratedBox>(find.widgetWithText(DecoratedBox, 'Skeuomorph me')).decoration
-            as BoxDecoration;
+            as ShapeDecoration;
 
     // Disabled color.
-    expect(boxDecoration.color!.value, 0xFF111111);
+    expect(decoration.color!.value, 0xFF111111);
   });
 
   testWidgets('Button respects themes', (WidgetTester tester) async {
@@ -488,7 +496,7 @@ void main() {
       ),
     );
     expect(textStyle.color, CupertinoColors.activeBlue);
-    BoxDecoration decoration =
+    ShapeDecoration decoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -497,7 +505,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.withOpacity(0.12)));
 
     await tester.pumpWidget(
@@ -523,7 +531,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue));
 
     await tester.pumpWidget(
@@ -566,7 +574,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.activeBlue.darkColor.withOpacity(0.26)));
 
     await tester.pumpWidget(
@@ -593,7 +601,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
     await tester.pumpWidget(
@@ -620,7 +628,7 @@ void main() {
                   ),
                 )
                 .decoration
-            as BoxDecoration;
+            as ShapeDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
 
@@ -639,7 +647,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Center(child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me'))),
+        home: Center(
+          child: CupertinoButton.filled(onPressed: () {}, child: const Text('Tap me')),
+        ),
       ),
     );
 
@@ -667,16 +677,13 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final Border defaultFocusBorder = Border.fromBorderSide(
-      BorderSide(
-        color:
-            HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
-                .withLightness(kCupertinoFocusColorBrightness)
-                .withSaturation(kCupertinoFocusColorSaturation)
-                .toColor(),
-        width: 3.5,
-        strokeAlign: BorderSide.strokeAlignOutside,
-      ),
+    final BorderSide defaultFocusBorder = BorderSide(
+      color: HSLColor.fromColor(CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity))
+          .withLightness(kCupertinoFocusColorBrightness)
+          .withSaturation(kCupertinoFocusColorSaturation)
+          .toColor(),
+      width: 3.5,
+      strokeAlign: BorderSide.strokeAlignOutside,
     );
 
     await tester.pumpWidget(
@@ -695,33 +702,25 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
 
     // The button has no border.
-    final BoxDecoration unfocusedDecoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
+    expect(
+      _findBorder(
+        tester,
+        find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+      ),
+      BorderSide.none,
+    );
     await tester.pump();
-    expect(unfocusedDecoration.border, null);
 
     // When focused, the button has a light blue border outline by default.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    final BoxDecoration decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-    expect(decoration.border, defaultFocusBorder);
+    expect(
+      _findBorder(
+        tester,
+        find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+      ),
+      defaultFocusBorder,
+    );
   });
 
   testWidgets('Button configures focus color', (WidgetTester tester) async {
@@ -748,22 +747,12 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     focusNode.requestFocus();
     await tester.pump();
-    final BoxDecoration decoration =
-        tester
-                .widget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byType(CupertinoButton),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as BoxDecoration;
-    final Border border = decoration.border! as Border;
     await tester.pumpAndSettle();
-    expect(border.top.color, focusColor);
-    expect(border.left.color, focusColor);
-    expect(border.right.color, focusColor);
-    expect(border.bottom.color, focusColor);
+    final BorderSide borderSide = _findBorder(
+      tester,
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+    );
+    expect(borderSide.color, focusColor);
   });
 
   testWidgets('CupertinoButton.onFocusChange callback', (WidgetTester tester) async {
@@ -888,7 +877,9 @@ void main() {
 
   testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+      boilerplate(
+        child: CupertinoButton(onPressed: () {}, child: const Text('Tap me')),
+      ),
     );
     final TestGesture gesture = await tester.startGesture(
       tester.getTopLeft(find.byType(CupertinoButton)),
@@ -1029,10 +1020,117 @@ void main() {
     await gesture.up();
     await gesture.removePointer();
   });
+
+  testWidgets('CupertinoButton foregroundColor applies to its text', (WidgetTester tester) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
+
+  testWidgets('CupertinoButton foregroundColor applies to its icon', (WidgetTester tester) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Icon(IconData(0xE000)),
+        ),
+      ),
+    );
+
+    // Check that the icon has the custom foreground color
+    final IconTheme iconTheme = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(IconTheme)),
+    );
+    expect(iconTheme.data.color, customForegroundColor);
+  });
+
+  testWidgets(
+    "CupertinoButton uses the theme's primaryColor when foregroundColor is not specified",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoButton(onPressed: () {}, child: const Text('Button')),
+          ),
+        ),
+      );
+
+      // The default color should be the primary color from the theme
+      final BuildContext context = tester.element(find.text('Button'));
+      final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+
+      final RichText text = tester.widget(find.byType(RichText));
+      expect(text.text.style?.color, primaryColor);
+    },
+  );
+
+  testWidgets('CupertinoButton.filled foregroundColor applies to its text', (
+    WidgetTester tester,
+  ) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoButton.filled(
+          onPressed: () {},
+          foregroundColor: customForegroundColor,
+          child: const Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
+
+  testWidgets('CupertinoButton foregroundColor applies to its text when disabled', (
+    WidgetTester tester,
+  ) async {
+    const Color customForegroundColor = Color(0xFF5500FF);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const CupertinoButton(
+          onPressed: null, // disabled button
+          foregroundColor: customForegroundColor,
+          child: Text('Button'),
+        ),
+      ),
+    );
+
+    // Check that the text has the custom foreground color even when disabled
+    final RichText text = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(RichText)),
+    );
+    expect(text.text.style?.color, customForegroundColor);
+  });
 }
 
 Widget boilerplate({required Widget child}) {
-  return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }
 
 class _ButtonMouseCursor extends WidgetStateMouseCursor {
@@ -1050,4 +1148,10 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 
   @override
   String get debugDescription => '_ButtonMouseCursor()';
+}
+
+BorderSide _findBorder(WidgetTester tester, Finder finder) {
+  final ShapeDecoration decoration =
+      tester.widget<DecoratedBox>(finder).decoration as ShapeDecoration;
+  return (decoration.shape as RoundedSuperellipseBorder).side;
 }

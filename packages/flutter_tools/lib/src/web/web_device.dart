@@ -97,7 +97,7 @@ abstract class ChromiumDevice extends Device {
   Future<String?> get emulatorId async => null;
 
   @override
-  bool isSupported() => chromeLauncher.canFindExecutable();
+  Future<bool> isSupported() async => chromeLauncher.canFindExecutable();
 
   @override
   DevicePortForwarder? get portForwarder => const NoOpDevicePortForwarder();
@@ -116,8 +116,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final RegExp pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+      if (_isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
         throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
@@ -125,7 +124,7 @@ abstract class ChromiumDevice extends Device {
     } else {
       url = platformArgs['uri']! as String;
     }
-    final bool launchChrome = platformArgs['no-launch-chrome'] != true;
+    final launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
       _chrome = await chromeLauncher.launch(
         url,
@@ -139,6 +138,11 @@ abstract class ChromiumDevice extends Device {
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
+  }
+
+  bool _isLaunchUrlValid(String url) {
+    final pattern = RegExp(r'^(https?:\/\/)[^\s]+');
+    return pattern.hasMatch(url);
   }
 
   @override
@@ -182,6 +186,8 @@ class GoogleChromeDevice extends ChromiumDevice {
   final Platform _platform;
   final ProcessManager _processManager;
 
+  static const kChromeDeviceId = 'chrome';
+
   @override
   String get name => 'Chrome';
 
@@ -189,11 +195,11 @@ class GoogleChromeDevice extends ChromiumDevice {
   late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
 
   Future<String> _computeSdkNameAndVersion() async {
-    if (!isSupported()) {
+    if (!await isSupported()) {
       return 'unknown';
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
-    String version = 'unknown';
+    var version = 'unknown';
     if (_platform.isWindows) {
       if (_processManager.canRun('reg')) {
         final ProcessResult result = await _processManager.run(<String>[
@@ -234,7 +240,9 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
   final ProcessManager _processManager;
 
   // The first version of Edge with chromium support.
-  static const int _kFirstChromiumEdgeMajorVersion = 79;
+  static const _kFirstChromiumEdgeMajorVersion = 79;
+
+  static const kEdgeDeviceId = 'edge';
 
   @override
   String get name => 'Edge';
@@ -283,7 +291,7 @@ class WebDevices extends PollingDeviceDiscovery {
   }) : _featureFlags = featureFlags,
        _webServerDevice = WebServerDevice(logger: logger),
        super('Chrome') {
-    final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
+    final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
       logger: logger,
@@ -336,7 +344,7 @@ class WebDevices extends PollingDeviceDiscovery {
     final MicrosoftEdgeDevice? edgeDevice = _edgeDevice;
     return <Device>[
       if (WebServerDevice.showWebServerDevice) _webServerDevice,
-      if (_chromeDevice.isSupported()) _chromeDevice,
+      if (await _chromeDevice.isSupported()) _chromeDevice,
       if (edgeDevice != null && await edgeDevice._meetsVersionConstraint()) edgeDevice,
     ];
   }
@@ -359,8 +367,8 @@ class WebServerDevice extends Device {
     : _logger = logger,
       super('web-server', platformType: PlatformType.web, category: Category.web, ephemeral: false);
 
-  static const String kWebServerDeviceId = 'web-server';
-  static bool showWebServerDevice = false;
+  static const kWebServerDeviceId = 'web-server';
+  static var showWebServerDevice = false;
 
   final Logger _logger;
 
@@ -396,7 +404,7 @@ class WebServerDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -422,7 +430,7 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final String? url = platformArgs['uri'] as String?;
+    final url = platformArgs['uri'] as String?;
     if (debuggingOptions.startPaused) {
       _logger.printStatus(
         'Waiting for connection from Dart debug extension at $url',

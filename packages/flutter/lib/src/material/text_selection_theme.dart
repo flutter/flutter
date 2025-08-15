@@ -30,7 +30,7 @@ import 'theme.dart';
 ///
 ///  * [TextSelectionTheme], an [InheritedWidget] that propagates the theme down its
 ///    subtree.
-///  * [InputDecorationTheme], which defines most other visual properties of
+///  * [InputDecorationThemeData], which defines most other visual properties of
 ///    text fields.
 @immutable
 class TextSelectionThemeData with Diagnosticable {
@@ -177,8 +177,8 @@ class TextSelectionTheme extends InheritedTheme {
   /// TextSelectionThemeData theme = TextSelectionTheme.of(context);
   /// ```
   static TextSelectionThemeData of(BuildContext context) {
-    final TextSelectionTheme? selectionTheme =
-        context.dependOnInheritedWidgetOfExactType<TextSelectionTheme>();
+    final TextSelectionTheme? selectionTheme = context
+        .dependOnInheritedWidgetOfExactType<TextSelectionTheme>();
     return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
   }
 

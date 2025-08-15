@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "live_objects.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
@@ -12,14 +13,17 @@
 using namespace Skwasm;
 
 SKWASM_EXPORT SkPath* path_create() {
+  livePathCount++;
   return new SkPath();
 }
 
 SKWASM_EXPORT void path_dispose(SkPath* path) {
+  livePathCount--;
   delete path;
 }
 
 SKWASM_EXPORT SkPath* path_copy(SkPath* path) {
+  livePathCount++;
   return new SkPath(*path);
 }
 
@@ -187,6 +191,7 @@ SKWASM_EXPORT void path_getBounds(SkPath* path, SkRect* rect) {
 SKWASM_EXPORT SkPath* path_combine(SkPathOp operation,
                                    const SkPath* path1,
                                    const SkPath* path2) {
+  livePathCount++;
   SkPath* output = new SkPath();
   if (Op(*path1, *path2, operation, output)) {
     output->setFillType(path1->getFillType());
@@ -198,6 +203,7 @@ SKWASM_EXPORT SkPath* path_combine(SkPathOp operation,
 }
 
 SKWASM_EXPORT SkString* path_getSvgString(SkPath* path) {
+  liveStringCount++;
   SkString* string = new SkString(SkParsePath::ToSVGString(*path));
   return string;
 }

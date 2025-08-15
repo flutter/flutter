@@ -168,10 +168,10 @@ class Instrumentation {
       }
       final StringBuffer message = StringBuffer('Engine counters:\n');
       // Entries are sorted for readability and testability.
-      final List<MapEntry<String, int>> entries =
-          _counters.entries.toList()..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
-            return a.key.compareTo(b.key);
-          });
+      final List<MapEntry<String, int>> entries = _counters.entries.toList()
+        ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
+          return a.key.compareTo(b.key);
+        });
       for (final MapEntry<String, int> entry in entries) {
         message.writeln('  ${entry.key}: ${entry.value}');
       }

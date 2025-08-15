@@ -57,17 +57,16 @@ class _DropdownMenuEntryLabelWidgetExampleState extends State<DropdownMenuEntryL
           onSelected: (ColorItem? color) {
             print('Selected $color');
           },
-          dropdownMenuEntries:
-              ColorItem.values.map<DropdownMenuEntry<ColorItem>>((ColorItem item) {
-                final String labelText = '${item.label} $longText\n';
-                return DropdownMenuEntry<ColorItem>(
-                  value: item,
-                  label: labelText,
-                  // Try commenting the labelWidget out or changing
-                  // the labelWidget's Text parameters.
-                  labelWidget: Text(labelText, maxLines: 1, overflow: TextOverflow.ellipsis),
-                );
-              }).toList(),
+          dropdownMenuEntries: ColorItem.values.map<DropdownMenuEntry<ColorItem>>((ColorItem item) {
+            final String labelText = '${item.label} $longText\n';
+            return DropdownMenuEntry<ColorItem>(
+              value: item,
+              label: labelText,
+              // Try commenting the labelWidget out or changing
+              // the labelWidget's Text parameters.
+              labelWidget: Text(labelText, maxLines: 1, overflow: TextOverflow.ellipsis),
+            );
+          }).toList(),
         ),
       ),
     );

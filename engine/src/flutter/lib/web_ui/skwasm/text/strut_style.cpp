@@ -3,17 +3,20 @@
 // found in the LICENSE file.
 
 #include "../export.h"
+#include "../live_objects.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
 using namespace skia::textlayout;
 
 SKWASM_EXPORT StrutStyle* strutStyle_create() {
+  liveStrutStyleCount++;
   auto style = new StrutStyle();
   style->setStrutEnabled(true);
   return style;
 }
 
 SKWASM_EXPORT void strutStyle_dispose(StrutStyle* style) {
+  liveStrutStyleCount--;
   delete style;
 }
 

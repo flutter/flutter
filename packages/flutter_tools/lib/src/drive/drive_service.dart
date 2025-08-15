@@ -90,11 +90,11 @@ abstract class DriverService {
   /// If --use-existing-app is provided, configured the correct VM Service URI.
   Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions);
 
-  /// Start the test file with the provided [arguments] and [environment], returning
-  /// the test process exit code.
+  /// Start the test file with the provided [arguments] and current environment,
+  /// returning the test process exit code.
   ///
-  /// if [profileMemory] is provided, it will be treated as a file path to write a
-  /// devtools memory profile.
+  /// If [profileMemory] is provided, it will be treated as a file path to
+  /// write a devtools memory profile.
   Future<int> startTest(
     String testFile,
     List<String> arguments,
@@ -132,7 +132,7 @@ class FlutterDriverService extends DriverService {
        _vmServiceConnector = vmServiceConnector,
        _devtoolsLauncher = devtoolsLauncher;
 
-  static const int _kLaunchAttempts = 3;
+  static const _kLaunchAttempts = 3;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Logger _logger;
@@ -173,9 +173,9 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
-    int attempt = 0;
+    var attempt = 0;
     LaunchResult? result;
-    bool prebuiltApplication = applicationBinary != null;
+    var prebuiltApplication = applicationBinary != null;
     while (attempt < _kLaunchAttempts) {
       result = await device.startApp(
         _applicationPackage,

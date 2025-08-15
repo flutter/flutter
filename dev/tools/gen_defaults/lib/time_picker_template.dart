@@ -20,7 +20,8 @@ class TimePickerTemplate extends TokenTemplate {
   static const String variant = '';
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   _${blockName}DefaultsM3(this.context, { this.entryMode = TimePickerEntryMode.dial });
 
@@ -298,7 +299,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   }
 
   @override
-  InputDecorationTheme get inputDecorationTheme {
+  InputDecorationThemeData get inputDecorationTheme {
     // This is NOT correct, but there's no token for
     // 'time-input.container.shape', so this is using the radius from the shape
     // for the hour/minute selector. It's a BorderRadiusGeometry, so we have to
@@ -306,7 +307,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
     final BorderRadius selectorRadius = ${shape('$hourMinuteComponent.container')}
       .borderRadius
       .resolve(Directionality.of(context));
-    return InputDecorationTheme(
+    return InputDecorationThemeData(
       contentPadding: EdgeInsets.zero,
       filled: true,
       // This should be derived from a token, but there isn't one for 'time-input'.

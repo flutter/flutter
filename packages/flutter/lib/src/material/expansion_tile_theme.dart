@@ -17,9 +17,8 @@ import 'theme.dart';
 /// descendant [ExpansionTile] widgets.
 ///
 /// Descendant widgets obtain the current [ExpansionTileThemeData] object
-/// using `ExpansionTileTheme.of(context)`. Instances of
-/// [ExpansionTileThemeData] can be customized with
-/// [ExpansionTileThemeData.copyWith].
+/// using [ExpansionTileTheme.of]. Instances of [ExpansionTileThemeData] can
+/// be customized with [ExpansionTileThemeData.copyWith].
 ///
 /// A [ExpansionTileThemeData] is often specified as part of the
 /// overall [Theme] with [ThemeData.expansionTileTheme].
@@ -262,7 +261,7 @@ class ExpansionTileTheme extends InheritedTheme {
   /// descendant [ExpansionTile] widgets.
   final ExpansionTileThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [ExpansionTileThemeData] from the closest ancestor [ExpansionTileTheme].
   ///
   /// If there is no enclosing [ExpansionTileTheme] widget, then
   /// [ThemeData.expansionTileTheme] is used.
@@ -273,8 +272,8 @@ class ExpansionTileTheme extends InheritedTheme {
   /// ExpansionTileThemeData theme = ExpansionTileTheme.of(context);
   /// ```
   static ExpansionTileThemeData of(BuildContext context) {
-    final ExpansionTileTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<ExpansionTileTheme>();
+    final ExpansionTileTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<ExpansionTileTheme>();
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 

@@ -26,6 +26,7 @@ class ChromeOptions {
     this.headless,
     this.debugPort,
     this.enableWasmGC = false,
+    this.silent = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -57,6 +58,9 @@ class ChromeOptions {
 
   /// Whether to enable experimental WasmGC flags
   final bool enableWasmGC;
+
+  /// Disables Chrome stdio outputs.
+  final bool silent;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -94,10 +98,9 @@ class Chrome {
       print('Launching Chrome...');
     }
 
-    final String jsFlags =
-        options.enableWasmGC
-            ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
-            : '';
+    final String jsFlags = options.enableWasmGC
+        ? <String>['--experimental-wasm-gc', '--experimental-wasm-type-reflection'].join(' ')
+        : '';
     final bool withDebugging = options.debugPort != null;
     final List<String> args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
@@ -120,12 +123,13 @@ class Chrome {
     final io.Process chromeProcess = await _spawnChromiumProcess(
       _findSystemChromeExecutable(),
       args,
+      silent: options.silent,
       workingDirectory: workingDirectory,
     );
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -146,7 +150,7 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      debugConnection = await _connectToChromeDebugPort(options.debugPort!);
+      debugConnection = await _connectToChromeDebugPort(options.debugPort!, options.url);
     }
 
     return Chrome._(chromeProcess, onError, debugConnection);
@@ -264,12 +268,11 @@ String _findSystemChromeExecutable() {
     return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   } else if (io.Platform.isWindows) {
     const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-    final List<String> kWindowsPrefixes =
-        <String?>[
-          io.Platform.environment['LOCALAPPDATA'],
-          io.Platform.environment['PROGRAMFILES'],
-          io.Platform.environment['PROGRAMFILES(X86)'],
-        ].whereType<String>().toList();
+    final List<String> kWindowsPrefixes = <String?>[
+      io.Platform.environment['LOCALAPPDATA'],
+      io.Platform.environment['PROGRAMFILES'],
+      io.Platform.environment['PROGRAMFILES(X86)'],
+    ].whereType<String>().toList();
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
       final String expectedPath = path.join(prefix, kWindowsExecutable);
       return io.File(expectedPath).existsSync();
@@ -281,12 +284,12 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(int port) async {
+Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
   final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
   final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith('http://localhost');
+    return tab.url.startsWith(tabUrl ?? 'http://localhost');
   });
   final ChromeTab tab = tabs.single;
   final WipConnection debugConnection = await tab.connect();
@@ -612,6 +615,7 @@ const String _kGlibcError = 'Inconsistency detected by ld.so';
 Future<io.Process> _spawnChromiumProcess(
   String executable,
   List<String> args, {
+  required bool silent,
   String? workingDirectory,
 }) async {
   // Keep attempting to launch the browser until one of:
@@ -625,7 +629,9 @@ Future<io.Process> _spawnChromiumProcess(
     );
 
     process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
-      print('[CHROME STDOUT]: $line');
+      if (!silent) {
+        print('[CHROME STDOUT]: $line');
+      }
     });
 
     // Wait until the DevTools are listening before trying to connect. This is
@@ -635,7 +641,9 @@ Future<io.Process> _spawnChromiumProcess(
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .map((String line) {
-          print('[CHROME STDERR]:$line');
+          if (!silent) {
+            print('[CHROME STDERR]:$line');
+          }
           if (line.contains(_kGlibcError)) {
             hitGlibcBug = true;
           }

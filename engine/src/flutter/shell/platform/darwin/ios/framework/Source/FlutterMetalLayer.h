@@ -15,9 +15,10 @@
 @interface FlutterMetalLayer : CALayer
 
 @property(nullable, retain) id<MTLDevice> device;
-@property(nullable, readonly)
-    id<MTLDevice> preferredDevice API_AVAILABLE(macos(10.15), ios(13.0), tvos(13.0))
-        API_UNAVAILABLE(watchos);
+@property(nullable, readonly) id<MTLDevice> preferredDevice API_AVAILABLE(macos(10.15),
+                                                                          ios(13.0),
+                                                                          tvos(13.0))
+    API_UNAVAILABLE(watchos);
 @property MTLPixelFormat pixelFormat;
 @property BOOL framebufferOnly;
 @property CGSize drawableSize;

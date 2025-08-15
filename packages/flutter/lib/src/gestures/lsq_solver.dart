@@ -76,8 +76,10 @@ class PolynomialFit {
 
   @override
   String toString() {
-    final String coefficientString =
-        coefficients.map((double c) => c.toStringAsPrecision(3)).toList().toString();
+    final String coefficientString = coefficients
+        .map((double c) => c.toStringAsPrecision(3))
+        .toList()
+        .toString();
     return '${objectRuntimeType(this, 'PolynomialFit')}($coefficientString, confidence: ${confidence.toStringAsFixed(3)})';
   }
 }
@@ -193,10 +195,9 @@ class LeastSquaresSolver {
       sumSquaredTotal += w[h] * w[h] * v * v;
     }
 
-    result.confidence =
-        sumSquaredTotal <= precisionErrorTolerance
-            ? 1.0
-            : 1.0 - (sumSquaredError / sumSquaredTotal);
+    result.confidence = sumSquaredTotal <= precisionErrorTolerance
+        ? 1.0
+        : 1.0 - (sumSquaredError / sumSquaredTotal);
 
     return result;
   }

@@ -11,6 +11,7 @@
 
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {
@@ -18,39 +19,19 @@ namespace impeller {
 /// @brief  Draws a fast solid color blur of an rounded rectangle. Only supports
 /// RRects with fully symmetrical radii. Also produces correct results for
 /// rectangles (corner_radius=0) and circles (corner_radius=width/2=height/2).
-class SolidRRectBlurContents final : public Contents {
+class SolidRRectBlurContents final : public SolidRRectLikeBlurContents {
  public:
   SolidRRectBlurContents();
 
   ~SolidRRectBlurContents() override;
 
-  void SetRRect(std::optional<Rect> rect, Size corner_radii = {});
-
-  void SetSigma(Sigma sigma);
-
-  void SetColor(Color color);
-
-  Color GetColor() const;
-
-  // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
-
-  // |Contents|
-  bool Render(const ContentContext& renderer,
-              const Entity& entity,
-              RenderPass& pass) const override;
-
-  // |Contents|
-  [[nodiscard]] bool ApplyColorFilter(
-      const ColorFilterProc& color_filter_proc) override;
+ protected:
+  // |SolidRRectLikeBlurContents|
+  bool SetPassInfo(RenderPass& pass,
+                   const ContentContext& renderer,
+                   PassContext& pass_context) const override;
 
  private:
-  std::optional<Rect> rect_;
-  Size corner_radii_;
-  Sigma sigma_;
-
-  Color color_;
-
   SolidRRectBlurContents(const SolidRRectBlurContents&) = delete;
 
   SolidRRectBlurContents& operator=(const SolidRRectBlurContents&) = delete;

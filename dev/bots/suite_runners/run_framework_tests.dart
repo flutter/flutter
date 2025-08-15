@@ -62,15 +62,12 @@ Future<void> frameworkTestsRunner() async {
   }
 
   Future<void> runLibraries() async {
-    final List<String> tests =
-        Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
-            .listSync(followLinks: false)
-            .whereType<Directory>()
-            .where((Directory dir) => !dir.path.endsWith('widgets'))
-            .map<String>(
-              (Directory dir) => path.join('test', path.basename(dir.path)) + path.separator,
-            )
-            .toList();
+    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
+        .listSync(followLinks: false)
+        .whereType<Directory>()
+        .where((Directory dir) => !dir.path.endsWith('widgets'))
+        .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
+        .toList();
     printProgress(
       '${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset',
     );
@@ -91,8 +88,9 @@ Future<void> frameworkTestsRunner() async {
     await runCommand(dart, <String>[
       path.join(flutterRoot, 'dev', 'tools', 'examples_smoke_test.dart'),
     ], workingDirectory: path.join(flutterRoot, 'examples', 'api'));
-    for (final FileSystemEntity entity
-        in Directory(path.join(flutterRoot, 'examples')).listSync()) {
+    for (final FileSystemEntity entity in Directory(
+      path.join(flutterRoot, 'examples'),
+    ).listSync()) {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }
@@ -294,7 +292,7 @@ Future<void> frameworkTestsRunner() async {
       path.join(flutterRoot, 'dev', 'devicelab'),
       ensurePrecompiledTool: false, // See https://github.com/flutter/flutter/issues/86209
     );
-    await runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await runDartTest(path.join(flutterRoot, 'dev', 'packages_autoroller'));
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),

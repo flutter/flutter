@@ -511,10 +511,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             color: _stepStyle(index)?.color ?? _circleColor(index),
             shape: BoxShape.circle,
             border: _stepStyle(index)?.border,
-            boxShadow:
-                _stepStyle(index)?.boxShadow != null
-                    ? <BoxShadow>[_stepStyle(index)!.boxShadow!]
-                    : null,
+            boxShadow: _stepStyle(index)?.boxShadow != null
+                ? <BoxShadow>[_stepStyle(index)!.boxShadow!]
+                : null,
             gradient: _stepStyle(index)?.gradient,
           ),
           child: Center(
@@ -565,10 +564,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
         secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
         sizeCurve: Curves.fastOutSlowIn,
-        crossFadeState:
-            widget.steps[index].state == StepState.error
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
+        crossFadeState: widget.steps[index].state == StepState.error
+            ? CrossFadeState.showSecond
+            : CrossFadeState.showFirst,
         duration: kThemeAnimationDuration,
       );
     } else {
@@ -839,20 +837,19 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             key: _keys[i],
             children: <Widget>[
               InkWell(
-                onTap:
-                    widget.steps[i].state != StepState.disabled
-                        ? () {
-                          // In the vertical case we need to scroll to the newly tapped
-                          // step.
-                          Scrollable.ensureVisible(
-                            _keys[i].currentContext!,
-                            curve: Curves.fastOutSlowIn,
-                            duration: kThemeAnimationDuration,
-                          );
+                onTap: widget.steps[i].state != StepState.disabled
+                    ? () {
+                        // In the vertical case we need to scroll to the newly tapped
+                        // step.
+                        Scrollable.ensureVisible(
+                          _keys[i].currentContext!,
+                          curve: Curves.fastOutSlowIn,
+                          duration: kThemeAnimationDuration,
+                        );
 
-                          widget.onStepTapped?.call(i);
-                        }
-                        : null,
+                        widget.onStepTapped?.call(i);
+                      }
+                    : null,
                 canRequestFocus: widget.steps[i].state != StepState.disabled,
                 child: _buildVerticalHeader(i),
               ),
@@ -867,12 +864,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final List<Widget> children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
-          onTap:
-              widget.steps[i].state != StepState.disabled
-                  ? () {
-                    widget.onStepTapped?.call(i);
-                  }
-                  : null,
+          onTap: widget.steps[i].state != StepState.disabled
+              ? () {
+                  widget.onStepTapped?.call(i);
+                }
+              : null,
           canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
@@ -898,7 +894,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Padding(
-              key: Key('line$i'),
               padding: _stepIconMargin ?? const EdgeInsets.symmetric(horizontal: 8.0),
               child: SizedBox(
                 height:

@@ -1,4 +1,7 @@
 {
+    "luci_flags": {
+      "upload_content_hash": true
+    },
     "builds": [
         {
             "archives": [

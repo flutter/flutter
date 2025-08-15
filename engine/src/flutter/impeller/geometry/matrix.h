@@ -320,7 +320,12 @@ struct Matrix {
 
   bool IsInvertible() const { return GetDeterminant() != 0; }
 
-  constexpr Scalar GetMaxBasisLengthXY() const {
+  /// @brief  Return the maximum scale applied specifically to either the
+  ///         X axis or Y axis unit vectors (the bases). The matrix might
+  ///         lengthen a non-axis-aligned vector by more than this value.
+  ///
+  /// @see |GetMaxScale2D|
+  inline Scalar GetMaxBasisLengthXY() const {
     // The full basis computation requires computing the squared scaling factor
     // for translate/scale only matrices. This substantially limits the range of
     // precision for small and large scales. Instead, check for the common cases
@@ -332,23 +337,71 @@ struct Matrix {
                               e[1][0] * e[1][0] + e[1][1] * e[1][1]));
   }
 
+  /// @brief   Return the smaller of the two non-negative scales that will
+  ///          be applied to 2D coordinates by this matrix. If the matrix
+  ///          has perspective components, the method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// This method differs from the "basis length" methods in that those
+  /// methods answer the question "how much does this transform stretch
+  /// perfectly horizontal or vertical source vectors, whereas this method
+  /// can answer "what's the smallest scale applied to any vector regardless
+  /// of direction".
+  ///
+  /// @see |GetScales2D|
+  std::optional<Scalar> GetMinScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return std::nullopt;
+    }
+    return std::min(scales->first, scales->second);
+  }
+
+  /// @brief   Return the smaller of the two non-negative scales that will
+  ///          be applied to 2D coordinates by this matrix. If the matrix
+  ///          has perspective components, the method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// This method differs from the "basis length" methods in that those
+  /// methods answer the question "how much does this transform stretch
+  /// perfectly horizontal or vertical source vectors, whereas this method
+  /// can answer "what's the largest scale applied to any vector regardless
+  /// of direction".
+  ///
+  /// @see |GetScales2D|
+  std::optional<Scalar> GetMaxScale2D() const {
+    auto scales = GetScales2D();
+    if (!scales.has_value()) {
+      return std::nullopt;
+    }
+    return std::max(scales->first, scales->second);
+  }
+
   constexpr Vector3 GetBasisX() const { return Vector3(m[0], m[1], m[2]); }
 
   constexpr Vector3 GetBasisY() const { return Vector3(m[4], m[5], m[6]); }
 
   constexpr Vector3 GetBasisZ() const { return Vector3(m[8], m[9], m[10]); }
 
-  constexpr Vector3 GetScale() const {
+  inline Vector3 GetScale() const {
     return Vector3(GetBasisX().GetLength(), GetBasisY().GetLength(),
                    GetBasisZ().GetLength());
   }
 
-  constexpr Scalar GetDirectionScale(Vector3 direction) const {
+  inline Scalar GetDirectionScale(Vector3 direction) const {
     return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
            direction.GetLength();
   }
 
-  constexpr bool IsFinite() const {
+  inline bool IsFinite() const {
     return vec[0].IsFinite() && vec[1].IsFinite() && vec[2].IsFinite() &&
            vec[3].IsFinite();
   }
@@ -449,6 +502,20 @@ struct Matrix {
   }
 
   std::optional<MatrixDecomposition> Decompose() const;
+
+  /// @brief  Compute the two non-negative scales applied by this matrix to
+  ///         2D coordinates and return them as an optional pair of Scalar
+  ///         values in any order. If the matrix has perspective elements,
+  ///         this method will return a nullopt.
+  ///
+  /// Note that negative scale factors really represent a positive scale
+  /// factor with a flip, so the absolute value (the positive scale factor)
+  /// is returned instead so that the results can be directly applied to
+  /// rendering calculations to compute the potential size of an operation.
+  ///
+  /// @see |GetMinScale2D|
+  /// @see |GetMaxScale2D|
+  std::optional<std::pair<Scalar, Scalar>> GetScales2D() const;
 
   bool Equals(const Matrix& matrix, Scalar epsilon = 1e-5f) const {
     const Scalar* a = m;
@@ -572,10 +639,10 @@ struct Matrix {
     return translate * scale;
   }
 
-  static constexpr Matrix MakePerspective(Radians fov_y,
-                                          Scalar aspect_ratio,
-                                          Scalar z_near,
-                                          Scalar z_far) {
+  static inline Matrix MakePerspective(Radians fov_y,
+                                       Scalar aspect_ratio,
+                                       Scalar z_near,
+                                       Scalar z_far) {
     Scalar height = std::tan(fov_y.radians * 0.5f);
     Scalar width = height * aspect_ratio;
 
@@ -598,9 +665,9 @@ struct Matrix {
                            z_near, z_far);
   }
 
-  static constexpr Matrix MakeLookAt(Vector3 position,
-                                     Vector3 target,
-                                     Vector3 up) {
+  static inline Matrix MakeLookAt(Vector3 position,
+                                  Vector3 target,
+                                  Vector3 up) {
     Vector3 forward = (target - position).Normalize();
     Vector3 right = up.Cross(forward);
     up = forward.Cross(right);
@@ -615,7 +682,7 @@ struct Matrix {
     // clang-format on
   }
 
-  static constexpr Vector2 CosSin(Radians radians) {
+  static inline Vector2 CosSin(Radians radians) {
     // The precision of a float around 1.0 is much lower than it is
     // around 0.0, so we end up with cases on quadrant rotations where
     // we get a +/-1.0 for one of the values and a non-zero value for

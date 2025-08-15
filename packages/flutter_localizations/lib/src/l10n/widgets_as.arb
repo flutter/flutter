@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ৱেবত সন্ধান কৰক",
   "shareButtonLabel": "শ্বেয়াৰ কৰক",
   "pasteButtonLabel": "পে'ষ্ট কৰক",
-  "selectAllButtonLabel": "সকলো বাছনি কৰক"
+  "selectAllButtonLabel": "সকলো বাছনি কৰক",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

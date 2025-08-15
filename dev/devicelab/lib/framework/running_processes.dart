@@ -66,10 +66,9 @@ Future<Set<RunningProcessInfo>> windowsRunningProcesses(
 ) async {
   // PowerShell script to get the command line arguments and create time of a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
-  final String script =
-      processName != null
-          ? '"Get-CimInstance Win32_Process -Filter \\"name=\'$processName\'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
-          : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
+  final String script = processName != null
+      ? '"Get-CimInstance Win32_Process -Filter \\"name=\'$processName\'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
+      : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
   // TODO(ianh): Unfortunately, there doesn't seem to be a good way to get
   // ProcessManager to run this.
   final ProcessResult result = await Process.run('powershell -command $script', <String>[]);

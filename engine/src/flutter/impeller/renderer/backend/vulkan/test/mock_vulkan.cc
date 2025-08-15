@@ -94,16 +94,16 @@ class MockDevice final {
   MockDevice& operator=(const MockDevice&) = delete;
 
   Mutex called_functions_mutex_;
-  std::shared_ptr<std::vector<std::string>> called_functions_ IPLR_GUARDED_BY(
-      called_functions_mutex_);
+  std::shared_ptr<std::vector<std::string>> called_functions_
+      IPLR_GUARDED_BY(called_functions_mutex_);
 
   Mutex command_buffers_mutex_;
   std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
       IPLR_GUARDED_BY(command_buffers_mutex_);
 
   Mutex commmand_pools_mutex_;
-  std::vector<std::unique_ptr<MockCommandPool>> command_pools_ IPLR_GUARDED_BY(
-      commmand_pools_mutex_);
+  std::vector<std::unique_ptr<MockCommandPool>> command_pools_
+      IPLR_GUARDED_BY(commmand_pools_mutex_);
 };
 
 void noop() {}
@@ -764,6 +764,23 @@ void vkTrimCommandPool(VkDevice device,
   mock_device->AddCalledFunction("vkTrimCommandPool");
 }
 
+VkResult vkGetPipelineCacheData(VkDevice device,
+                                VkPipelineCache pipelineCache,
+                                size_t* pDataSize,
+                                void* pData) {
+  if (pData) {
+    const std::array<uint8_t, 5> cache_data{1, 2, 3, 4, 5};
+    size_t dst_buffer_size = *pDataSize;
+    size_t length = std::min(dst_buffer_size, cache_data.size());
+    std::memcpy(pData, cache_data.data(), length);
+    *pDataSize = length;
+    return (dst_buffer_size >= length) ? VK_SUCCESS : VK_INCOMPLETE;
+  } else {
+    *pDataSize = 10;
+    return VK_SUCCESS;
+  }
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -917,6 +934,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFramebuffer);
   } else if (strcmp("vkTrimCommandPool", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkTrimCommandPool);
+  } else if (strcmp("vkGetPipelineCacheData", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetPipelineCacheData);
   }
   return noop;
 }

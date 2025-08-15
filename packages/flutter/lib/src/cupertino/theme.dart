@@ -67,8 +67,8 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
   }
 
@@ -88,8 +88,8 @@ class CupertinoTheme extends StatelessWidget {
   /// * [CupertinoThemeData.brightness], the property takes precedence over
   ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
@@ -109,8 +109,8 @@ class CupertinoTheme extends StatelessWidget {
   /// * [brightnessOf], which throws if no valid [CupertinoTheme] or
   ///   [MediaQuery] exists, instead of returning null.
   static Brightness? maybeBrightnessOf(BuildContext context) {
-    final InheritedCupertinoTheme? inheritedTheme =
-        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final InheritedCupertinoTheme? inheritedTheme = context
+        .dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
@@ -123,7 +123,10 @@ class CupertinoTheme extends StatelessWidget {
   Widget build(BuildContext context) {
     return InheritedCupertinoTheme(
       theme: this,
-      child: IconTheme(data: CupertinoIconThemeData(color: data.primaryColor), child: child),
+      child: IconTheme(
+        data: CupertinoIconThemeData(color: data.primaryColor),
+        child: child,
+      ),
     );
   }
 
@@ -134,10 +137,10 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-/// Provides a [CupertinoTheme] to all descendents.
+/// Provides a [CupertinoTheme] to all descendants.
 class InheritedCupertinoTheme extends InheritedTheme {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
-  /// descendents.
+  /// descendants.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
 
   /// The [CupertinoTheme] that is provided to widgets lower in the tree.

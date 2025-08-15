@@ -1,0 +1,17 @@
+gifencode
+(?s)Based on GIFENCODE.*Permission to use
+(?s)This code is loosely based on ppmtogif from the PBMPLUS distribution
+of Feb. 1991.  That file contains the following copyright notice:
+\s+Based on GIFENCODE by David Rowley <mgardi@watdscu.waterloo.edu>.
+\s+Lempel-Ziv compression based on "compress" by Spencer W. Thomas et al.
+\s+Copyright \(C\) 1989 by Jef Poskanzer.
+\s+Permission to use, copy, modify, and distribute this software and its
+\s+documentation for any purpose and without fee is hereby granted, provided
+\s+that the above copyright notice appear in all copies and that both that
+\s+copyright notice and this permission notice appear in supporting
+\s+documentation.  This software is provided "as is" without express or
+\s+implied warranty.
+\s+We are also required to state that
+\s+"The Graphics Interchange Format\(c\) is the Copyright property of
+\s+CompuServe Incorporated. GIF\(sm\) is a Service Mark property of
+\s+CompuServe Incorporated."

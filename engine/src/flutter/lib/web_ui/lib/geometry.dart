@@ -401,7 +401,7 @@ class Radius {
     return x == y
         ? 'Radius.circular(${x.toStringAsFixed(1)})'
         : 'Radius.elliptical(${x.toStringAsFixed(1)}, '
-            '${y.toStringAsFixed(1)})';
+              '${y.toStringAsFixed(1)})';
   }
 }
 
@@ -441,6 +441,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   });
 
   final double left;
@@ -460,6 +461,19 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   final double blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
+  // Whether the radii of the four corners are guaranteed to be the same.
+  //
+  // This is a Web-only flag for optimization.
+  //
+  // Returns `true` only if the object was constructed in a way that guarantees
+  // all radii are equal (e.g., from `.fromRectAndRadius`), saving the cost of
+  // checking the corner radii fields individually.
+  //
+  // A `false` return value does not mean the radii are necessarily different.
+  // It simply means there's no guarantee, and they must be compared manually
+  // if uniformity needs to be determined.
+  bool get _uniformRadii => false;
+
   T shift(Offset offset) {
     return _create(
       left: left + offset.dx,
@@ -474,6 +488,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: blRadiusY,
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
+      uniformRadii: _uniformRadii,
     );
   }
 
@@ -491,6 +506,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: math.max(0, blRadiusY + delta),
       brRadiusX: math.max(0, brRadiusX + delta),
       brRadiusY: math.max(0, brRadiusY + delta),
+      uniformRadii: _uniformRadii,
     );
   }
 
@@ -614,6 +630,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
         blRadiusY: blRadiusY * scale,
         brRadiusX: brRadiusX * scale,
         brRadiusY: brRadiusY * scale,
+        uniformRadii: _uniformRadii,
       );
     }
 
@@ -630,6 +647,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
       blRadiusY: blRadiusY,
       brRadiusX: brRadiusX,
       brRadiusY: brRadiusY,
+      uniformRadii: _uniformRadii,
     );
   }
 
@@ -651,6 +669,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
         brRadiusY: math.max(0, brRadiusY * k),
         blRadiusX: math.max(0, blRadiusX * k),
         blRadiusY: math.max(0, blRadiusY * k),
+        uniformRadii: _uniformRadii,
       );
     } else {
       return _create(
@@ -666,6 +685,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
         brRadiusY: math.max(0, _lerpDouble(brRadiusY, b.brRadiusY, t)),
         blRadiusX: math.max(0, _lerpDouble(blRadiusX, b.blRadiusX, t)),
         blRadiusY: math.max(0, _lerpDouble(blRadiusY, b.blRadiusY, t)),
+        uniformRadii: _uniformRadii,
       );
     }
   }
@@ -876,6 +896,7 @@ class RRect extends _RRectLike<RRect> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii, // Not used. See `get _uniformRadii`.
   }) => RRect._raw(
     top: top,
     left: left,
@@ -890,6 +911,10 @@ class RRect extends _RRectLike<RRect> {
     brRadiusX: brRadiusX,
     brRadiusY: brRadiusY,
   );
+
+  // RRect doesn't need uniformRadii for optimization for now.
+  @override
+  bool get _uniformRadii => false;
 
   static const RRect zero = RRect._raw();
 
@@ -976,6 +1001,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
@@ -992,6 +1018,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY)
@@ -1008,6 +1035,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromRectAndRadius(Rect rect, Radius radius)
@@ -1024,6 +1052,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromLTRBAndCorners(
@@ -1048,6 +1077,13 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topRight.x &&
+             topLeft.y == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.y == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.y == bottomRight.y,
        );
 
   RSuperellipse.fromRectAndCorners(
@@ -1069,6 +1105,13 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         uniformRadii:
+             topLeft.x == topRight.x &&
+             topLeft.y == topRight.y &&
+             topLeft.x == bottomLeft.x &&
+             topLeft.y == bottomLeft.y &&
+             topLeft.x == bottomRight.x &&
+             topLeft.y == bottomRight.y,
        );
 
   const RSuperellipse._raw({
@@ -1084,7 +1127,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.brRadiusY = 0.0,
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
-  });
+    bool uniformRadii = false,
+  }) : _uniformRadii = uniformRadii;
 
   @override
   RSuperellipse _create({
@@ -1100,6 +1144,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
+    required bool uniformRadii,
   }) => RSuperellipse._raw(
     top: top,
     left: left,
@@ -1113,7 +1158,45 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     blRadiusY: blRadiusY,
     brRadiusX: brRadiusX,
     brRadiusY: brRadiusY,
+    uniformRadii: uniformRadii,
   );
+
+  @override
+  final bool _uniformRadii;
+
+  static (double, double) _normalizeEmptyToZero(double inputX, double inputY) {
+    return (inputX > 0 && inputY > 0) ? (inputX, inputY) : (0, 0);
+  }
+
+  static double _adjustScale(double radius1, double radius2, double dimension, double scale) {
+    assert(radius1 >= 0.0 && radius2 >= 0.0 && dimension > 0.0);
+    if (radius1 + radius2 > dimension) {
+      return math.min(scale, dimension / (radius1 + radius2));
+    }
+    return scale;
+  }
+
+  /// (Web only) Returns a [Path] for this shape and an [Offset] for its
+  /// placement.
+  ///
+  /// To correctly position the shape, the caller is required to apply the
+  /// returned `offset` to the `path`.
+  ///
+  /// The returned path's coordinate system is relative to the `offset`. The
+  /// caller should not make any assumptions about the path's origin or whether
+  /// the offset is zero, as the implementation may use different strategies for
+  /// efficiency.
+  ///
+  /// For example, to draw the shape, first translate the canvas by the `offset`
+  /// and then draw the `path`. To add it to another path, provide both the
+  /// `path` and the `offset` to the `addPath` method.
+  (Path, Offset) toPathOffset() {
+    if (_uniformRadii) {
+      return (_RSuperellipseCache.instance.get(width, height, _scaledUniformRadii()), center);
+    } else {
+      return (_RSuperellipsePathBuilder.exact(_toScaledRadii()).path, Offset.zero);
+    }
+  }
 
   // Approximates a rounded superellipse with a round rectangle to the
   // best practical accuracy.
@@ -1140,15 +1223,86 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     );
   }
 
+  /// Returns a [RSuperellipse] whose corner radii are scaled based on this one,
+  /// ensuring that the sum of the corner radii on each side does not exceed the
+  /// width or height of the given bounds.
+  ///
+  /// See the [Skia scaling
+  /// implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
+  /// for more details.
+  RSuperellipse _toScaledRadii() {
+    if (!(width > 0 && height > 0)) {
+      return RSuperellipse.fromLTRBXY(left, top, right, bottom, 0.0, 0.0);
+    }
+
+    // If any corner is flat or has a negative value, normalize it to zeros
+    // We do this first so that the unnecessary non-flat part of that radius
+    // does not contribute to the global scaling below.
+    final (double tlRadiusX, double tlRadiusY) = _normalizeEmptyToZero(
+      this.tlRadiusX,
+      this.tlRadiusY,
+    );
+    final (double trRadiusX, double trRadiusY) = _normalizeEmptyToZero(
+      this.trRadiusX,
+      this.trRadiusY,
+    );
+    final (double blRadiusX, double blRadiusY) = _normalizeEmptyToZero(
+      this.blRadiusX,
+      this.blRadiusY,
+    );
+    final (double brRadiusX, double brRadiusY) = _normalizeEmptyToZero(
+      this.brRadiusX,
+      this.brRadiusY,
+    );
+
+    // Now determine a global scale to apply to all of the radii to ensure
+    // that none of the adjacent pairs of radius values sum to larger than
+    // the corresponding dimension of the rectangle.
+    double scale = 1.0;
+    scale = _adjustScale(tlRadiusX, trRadiusX, width, scale);
+    scale = _adjustScale(blRadiusX, brRadiusX, width, scale);
+    scale = _adjustScale(tlRadiusY, blRadiusY, height, scale);
+    scale = _adjustScale(trRadiusY, brRadiusY, height, scale);
+    if (scale < 1.0) {
+      return _create(
+        left: left,
+        top: top,
+        right: right,
+        bottom: bottom,
+        tlRadiusX: tlRadiusX * scale,
+        tlRadiusY: tlRadiusY * scale,
+        trRadiusX: trRadiusX * scale,
+        trRadiusY: trRadiusY * scale,
+        brRadiusX: brRadiusX * scale,
+        brRadiusY: brRadiusY * scale,
+        blRadiusX: blRadiusX * scale,
+        blRadiusY: blRadiusY * scale,
+        uniformRadii: _uniformRadii,
+      );
+    } else {
+      return this;
+    }
+  }
+
+  // A variation of `_toScaledRadii` that deals with uniform radii and returns a
+  // `Radius`.
+  Radius _scaledUniformRadii() {
+    assert(_uniformRadii);
+    if (!(width > 0 && height > 0)) {
+      return Radius.zero;
+    }
+    final (double radiusX, double radiusY) = _normalizeEmptyToZero(tlRadiusX, tlRadiusY);
+    double scale = 1.0;
+    scale = _adjustScale(radiusX, radiusX, width, scale);
+    scale = _adjustScale(radiusY, radiusY, height, scale);
+    return Radius.elliptical(radiusX * scale, radiusY * scale);
+  }
+
   static const RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    // Web doesn't support RSuperellipse, but falls back to RRect in all use
-    // cases. Therefore this `contains` is implemented as RRect. Once Web
-    // supports RSuperellipse this method should be changed to the correct shape.
-    // TODO(dkwingsmt): Properly implement the shape on Web instead of
-    // falling back to RRect.  https://github.com/flutter/flutter/issues/163718
-    return toApproximateRRect().contains(point);
+    final (Path path, Offset offset) = toPathOffset();
+    return path.contains(point - offset);
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
@@ -1166,6 +1320,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     return _toString(className: 'RSuperellipse');
   }
 }
+
 // Modeled after Skia's SkRSXform.
 
 class RSTransform {

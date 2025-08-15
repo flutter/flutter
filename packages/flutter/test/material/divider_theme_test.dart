@@ -19,17 +19,17 @@ void main() {
     expect(dividerTheme.thickness, null);
     expect(dividerTheme.indent, null);
     expect(dividerTheme.endIndent, null);
+    expect(dividerTheme.radius, null);
   });
 
   testWidgets('Default DividerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DividerThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -42,13 +42,13 @@ void main() {
       thickness: 4.0,
       indent: 3.0,
       endIndent: 2.0,
+      radius: BorderRadius.all(Radius.circular(20)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'color: ${const Color(0xffffffff)}',
@@ -56,13 +56,19 @@ void main() {
       'thickness: 4.0',
       'indent: 3.0',
       'endIndent: 2.0',
+      'radius: BorderRadius.circular(20.0)',
     ]);
   });
 
   group('Material3 - Horizontal Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
-      await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Divider())));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Scaffold(body: Divider()),
+        ),
+      );
 
       final RenderBox box = tester.firstRenderObject(find.byType(Divider));
       expect(box.size.height, 16.0);
@@ -100,12 +106,22 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.left, dividerRect.left + dividerTheme.indent!);
       expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(1));
+      expect(borderRadius.topRight, const Radius.circular(2));
+      expect(borderRadius.bottomLeft, const Radius.circular(3));
+      expect(borderRadius.bottomRight, const Radius.circular(4));
     });
 
     testWidgets('DividerTheme overrides defaults', (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DividerTheme(data: dividerTheme, child: const Divider()))),
+        MaterialApp(
+          home: Scaffold(
+            body: DividerTheme(data: dividerTheme, child: const Divider()),
+          ),
+        ),
       );
 
       final Container container = tester.widget(find.byType(Container));
@@ -132,6 +148,7 @@ void main() {
               thickness: thickness,
               indent: indent,
               endIndent: endIndent,
+              radius: BorderRadiusGeometry.all(Radius.circular(5)),
             ),
           ),
         ),
@@ -149,6 +166,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.left, dividerRect.left + indent);
       expect(lineRect.right, dividerRect.right - endIndent);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(5));
+      expect(borderRadius.topRight, const Radius.circular(5));
+      expect(borderRadius.bottomLeft, const Radius.circular(5));
+      expect(borderRadius.bottomRight, const Radius.circular(5));
     });
   });
 
@@ -156,7 +179,10 @@ void main() {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        MaterialApp(theme: theme, home: const Scaffold(body: VerticalDivider())),
+        MaterialApp(
+          theme: theme,
+          home: const Scaffold(body: VerticalDivider()),
+        ),
       );
 
       final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
@@ -197,13 +223,21 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.top, dividerRect.top + dividerTheme.indent!);
       expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(1));
+      expect(borderRadius.topRight, const Radius.circular(2));
+      expect(borderRadius.bottomLeft, const Radius.circular(3));
+      expect(borderRadius.bottomRight, const Radius.circular(4));
     });
 
     testWidgets('DividerTheme overrides defaults', (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: DividerTheme(data: dividerTheme, child: const VerticalDivider())),
+          home: Scaffold(
+            body: DividerTheme(data: dividerTheme, child: const VerticalDivider()),
+          ),
         ),
       );
 
@@ -232,6 +266,7 @@ void main() {
               thickness: thickness,
               indent: indent,
               endIndent: endIndent,
+              radius: BorderRadiusGeometry.all(Radius.circular(5)),
             ),
           ),
         ),
@@ -250,6 +285,12 @@ void main() {
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
       expect(lineRect.top, dividerRect.top + indent);
       expect(lineRect.bottom, dividerRect.bottom - endIndent);
+
+      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      expect(borderRadius.topLeft, const Radius.circular(5));
+      expect(borderRadius.topRight, const Radius.circular(5));
+      expect(borderRadius.bottomLeft, const Radius.circular(5));
+      expect(borderRadius.bottomRight, const Radius.circular(5));
     });
   });
 
@@ -261,7 +302,10 @@ void main() {
     group('Material2 - Horizontal Divider', () {
       testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(theme: ThemeData(useMaterial3: false), home: const Scaffold(body: Divider())),
+          MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: const Scaffold(body: Divider()),
+          ),
         );
 
         final RenderBox box = tester.firstRenderObject(find.byType(Divider));
@@ -283,13 +327,23 @@ void main() {
       testWidgets('DividerTheme overrides defaults', (WidgetTester tester) async {
         final DividerThemeData theme = _dividerTheme();
         await tester.pumpWidget(
-          MaterialApp(home: Scaffold(body: DividerTheme(data: theme, child: const Divider()))),
+          MaterialApp(
+            home: Scaffold(
+              body: DividerTheme(data: theme, child: const Divider()),
+            ),
+          ),
         );
 
         final Container container = tester.widget(find.byType(Container));
         final BoxDecoration decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, theme.thickness);
         expect(decoration.border!.bottom.color, theme.color);
+
+        final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+        expect(borderRadius.topLeft, const Radius.circular(1));
+        expect(borderRadius.topRight, const Radius.circular(2));
+        expect(borderRadius.bottomLeft, const Radius.circular(3));
+        expect(borderRadius.bottomRight, const Radius.circular(4));
       });
     });
 
@@ -329,5 +383,11 @@ DividerThemeData _dividerTheme() {
     thickness: 2.0,
     indent: 7.0,
     endIndent: 5.0,
+    radius: BorderRadiusGeometry.only(
+      topLeft: Radius.circular(1),
+      topRight: Radius.circular(2),
+      bottomLeft: Radius.circular(3),
+      bottomRight: Radius.circular(4),
+    ),
   );
 }

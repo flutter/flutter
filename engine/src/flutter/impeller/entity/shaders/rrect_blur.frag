@@ -6,59 +6,36 @@
 // post "Blurred rounded rectangles":
 // https://web.archive.org/web/20231103044404/https://raphlinus.github.io/graphics/2020/04/21/blurred-rounded-rects.html
 
+// NOTICE: Changes made to this file should be mirrored to
+// rsuperellipse_blur.frag, which is based on this algorithm.
+
 precision highp float;
 
 #include <impeller/gaussian.glsl>
 #include <impeller/math.glsl>
+#include <impeller/rrect.glsl>
 #include <impeller/types.glsl>
 
 uniform FragInfo {
-  f16vec4 color;
-  vec2 center;
-  vec2 adjust;
-  float minEdge;
-  float r1;
-  float exponent;
-  float sInv;
-  float exponentInv;
-  float scale;
+  vec4 color;
+  vec4 center_adjust;
+  vec3 r1_exponent_exponentInv;
+  vec3 sInv_minEdge_scale;
 }
 frag_info;
 
 in vec2 v_position;
 
-out f16vec4 frag_color;
-
-const float kTwoOverSqrtPi = 2.0 / sqrt(3.1415926);
-
-float maxXY(vec2 v) {
-  return max(v.x, v.y);
-}
-
-// use crate::math::compute_erf7;
-float computeErf7(float x) {
-  x *= kTwoOverSqrtPi;
-  float xx = x * x;
-  x = x + (0.24295 + (0.03395 + 0.0104 * xx) * xx) * (x * xx);
-  return x / sqrt(1.0 + x * x);
-}
-
-// The length formula, but with an exponent other than 2
-float powerDistance(vec2 p) {
-  float xp = POW(p.x, frag_info.exponent);
-  float yp = POW(p.y, frag_info.exponent);
-  return POW(xp + yp, frag_info.exponentInv);
-}
+out vec4 frag_color;
 
 void main() {
-  vec2 adjusted = abs(v_position - frag_info.center) - frag_info.adjust;
+  vec2 center = frag_info.center_adjust.xy;
+  vec2 adjust = frag_info.center_adjust.zw;
 
-  float dPos = powerDistance(max(adjusted, 0.0));
-  float dNeg = min(maxXY(adjusted), 0.0);
-  float d = dPos + dNeg - frag_info.r1;
-  float z =
-      frag_info.scale * (computeErf7(frag_info.sInv * (frag_info.minEdge + d)) -
-                         computeErf7(frag_info.sInv * d));
+  vec2 centered = abs(v_position - center);
+  float d =
+      computeRRectDistance(centered, adjust, frag_info.r1_exponent_exponentInv);
+  float z = computeRRectFade(d, frag_info.sInv_minEdge_scale);
 
   frag_color = frag_info.color * float16_t(z);
 }

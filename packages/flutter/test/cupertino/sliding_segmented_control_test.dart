@@ -324,7 +324,7 @@ void main() {
       ),
     );
 
-    final BoxDecoration decoration =
+    final ShapeDecoration decoration =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -333,7 +333,7 @@ void main() {
                   ),
                 )
                 .decoration!
-            as BoxDecoration;
+            as ShapeDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
@@ -343,7 +343,7 @@ void main() {
     });
     await tester.pump();
 
-    final BoxDecoration decorationDark =
+    final ShapeDecoration decorationDark =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -352,7 +352,7 @@ void main() {
                   ),
                 )
                 .decoration!
-            as BoxDecoration;
+            as ShapeDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);
@@ -2125,5 +2125,66 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(onValueChangedCalled, 0);
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl can be momentary', (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+
+    groupValue = 1;
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            isMomentary: true,
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    expect(getHighlightedIndex(tester), null);
+
+    // Tap first segment.
+    await tester.tap(find.text('A'));
+    await tester.pumpAndSettle();
+
+    // The highlighted index doesn't change.
+    expect(getHighlightedIndex(tester), null);
+  });
+
+  testWidgets('CupertinoSlidingSegmentedControl with momentary scales up selected segment', (
+    WidgetTester tester,
+  ) async {
+    const Map<int, Widget> children = <int, Widget>{0: Text('A'), 1: Text('BB'), 2: Text('CCCC')};
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            isMomentary: true,
+            children: children,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('A')));
+    final Finder scaleTransition = find.ancestor(
+      of: find.text('A'),
+      matching: find.byType(ScaleTransition),
+    );
+
+    await tester.pumpAndSettle();
+    double scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
+    expect(scale, greaterThan(1.0));
+
+    await gesture.up();
+
+    await tester.pumpAndSettle();
+    scale = tester.widget<ScaleTransition>(scaleTransition).scale.value;
+    expect(scale, moreOrLessEquals(1.0));
   });
 }

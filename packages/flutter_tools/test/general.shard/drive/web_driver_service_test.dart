@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -25,7 +26,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const List<String> kChromeArgs = <String>[
+const kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
   '--disable-default-apps',
@@ -39,7 +40,7 @@ const List<String> kChromeArgs = <String>[
 
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
-    final Map<String, dynamic> expected = <String, dynamic>{
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
       'goog:loggingPrefs': <String, String>{
@@ -62,8 +63,8 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
-    const String chromeBinary = 'random-binary';
-    final Map<String, dynamic> expected = <String, dynamic>{
+    const chromeBinary = 'random-binary';
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
       'goog:loggingPrefs': <String, String>{
@@ -87,12 +88,12 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
-    const List<String> webBrowserFlags = <String>[
+    const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
       '--auto-select-desktop-capture-source="Entire screen"',
     ];
-    final Map<String, dynamic> expected = <String, dynamic>{
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
       'goog:loggingPrefs': <String, String>{
@@ -123,7 +124,7 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
-    final Map<String, dynamic> expected = <String, dynamic>{
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
       'moz:firefoxOptions': <String, dynamic>{
@@ -146,7 +147,7 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
-    final Map<String, dynamic> expected = <String, dynamic>{
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
       'moz:firefoxOptions': <String, dynamic>{
@@ -169,8 +170,8 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
-    const List<String> webBrowserFlags = <String>['-url=https://example.com', '-private'];
-    final Map<String, dynamic> expected = <String, dynamic>{
+    const webBrowserFlags = <String>['-url=https://example.com', '-private'];
+    final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
       'moz:firefoxOptions': <String, dynamic>{
@@ -196,22 +197,19 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities Edge', () {
-    final Map<String, dynamic> expected = <String, dynamic>{
-      'acceptInsecureCerts': true,
-      'browserName': 'edge',
-    };
+    final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false), expected);
   });
 
   testWithoutContext('getDesiredCapabilities macOS Safari', () {
-    final Map<String, dynamic> expected = <String, dynamic>{'browserName': 'safari'};
+    final expected = <String, dynamic>{'browserName': 'safari'};
 
     expect(getDesiredCapabilities(Browser.safari, false), expected);
   });
 
   testWithoutContext('getDesiredCapabilities iOS Safari', () {
-    final Map<String, dynamic> expected = <String, dynamic>{
+    final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
       'safari:useSimulator': true,
@@ -221,11 +219,8 @@ void main() {
   });
 
   testWithoutContext('getDesiredCapabilities android chrome', () {
-    const List<String> webBrowserFlags = <String>[
-      '--autoplay-policy=no-user-gesture-required',
-      '--incognito',
-    ];
-    final Map<String, dynamic> expected = <String, dynamic>{
+    const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
+    final expected = <String, dynamic>{
       'browserName': 'chrome',
       'platformName': 'android',
       'goog:chromeOptions': <String, dynamic>{
@@ -248,7 +243,7 @@ void main() {
     'WebDriverService starts and stops an app',
     () async {
       final WebDriverService service = setUpDriverService();
-      final FakeDevice device = FakeDevice();
+      final device = FakeDevice();
       await service.start(
         BuildInfo.profile,
         device,
@@ -264,8 +259,8 @@ void main() {
     'WebDriverService can start an app with a launch url provided',
     () async {
       final WebDriverService service = setUpDriverService();
-      final FakeDevice device = FakeDevice();
-      const String testUrl = 'http://localhost:1234/test';
+      final device = FakeDevice();
+      const testUrl = 'http://localhost:1234/test';
       await service.start(
         BuildInfo.profile,
         device,
@@ -281,15 +276,23 @@ void main() {
     'WebDriverService starts an app with provided web headers',
     () async {
       final WebDriverService service = setUpDriverService();
-      final FakeDevice device = FakeDevice();
-      final Map<String, String> webHeaders = <String, String>{'test-header': 'test-value'};
+      final device = FakeDevice();
+      final webHeaders = <String, String>{'test-header': 'test-value'};
+      final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
       await service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, webHeaders: webHeaders, ipv6: true),
+        DebuggingOptions.enabled(
+          BuildInfo.profile,
+          webDevServerConfig: webDevServerConfig,
+          ipv6: true,
+        ),
       );
       await service.stop();
-      expect(FakeResidentRunner.instance.debuggingOptions.webHeaders, equals(webHeaders));
+      expect(
+        FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
+        equals(webHeaders),
+      );
     },
     overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
   );
@@ -298,8 +301,8 @@ void main() {
     'WebDriverService will throw when an invalid launch url is provided',
     () async {
       final WebDriverService service = setUpDriverService();
-      final FakeDevice device = FakeDevice();
-      const String invalidTestUrl = '::INVALID_URL::';
+      final device = FakeDevice();
+      const invalidTestUrl = '::INVALID_URL::';
       await expectLater(
         service.start(
           BuildInfo.profile,
@@ -374,8 +377,8 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   final bool doResolveToError;
   @override
   final DebuggingOptions debuggingOptions;
-  final Completer<int> _exitCompleter = Completer<int>();
-  final List<String> callLog = <String>[];
+  final _exitCompleter = Completer<int>();
+  final callLog = <String>[];
 
   @override
   Uri get uri => Uri();
@@ -411,7 +414,7 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  final BufferLogger logger = BufferLogger.test();
+  final logger = BufferLogger.test();
   return WebDriverService(
     logger: logger,
     terminal: Terminal.test(),

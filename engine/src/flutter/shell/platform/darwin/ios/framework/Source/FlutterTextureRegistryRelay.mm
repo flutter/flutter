@@ -4,7 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
 
-#include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -21,7 +21,7 @@ FLUTTER_ASSERT_ARC
 
 - (int64_t)registerTexture:(NSObject<FlutterTexture>*)texture {
   if (!self.parent) {
-    FML_LOG(WARNING) << "Using on an empty registry.";
+    [FlutterLogger logWarning:@"Using on an empty registry."];
     return 0;
   }
   return [self.parent registerTexture:texture];
@@ -29,14 +29,14 @@ FLUTTER_ASSERT_ARC
 
 - (void)textureFrameAvailable:(int64_t)textureId {
   if (!self.parent) {
-    FML_LOG(WARNING) << "Using on an empty registry.";
+    [FlutterLogger logWarning:@"Using on an empty registry."];
   }
   return [self.parent textureFrameAvailable:textureId];
 }
 
 - (void)unregisterTexture:(int64_t)textureId {
   if (!self.parent) {
-    FML_LOG(WARNING) << "Using on an empty registry.";
+    [FlutterLogger logWarning:@"Using on an empty registry."];
   }
   return [self.parent unregisterTexture:textureId];
 }

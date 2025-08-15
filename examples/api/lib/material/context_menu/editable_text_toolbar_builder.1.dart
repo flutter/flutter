@@ -30,8 +30,8 @@ class _EditableTextToolbarBuilderExampleAppState
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder:
-            (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
+        builder: (BuildContext context) =>
+            const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
   }

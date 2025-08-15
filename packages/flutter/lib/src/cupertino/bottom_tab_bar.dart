@@ -159,15 +159,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     // Return the border as is when it's a subclass.
-    final Border? resolvedBorder =
-        border == null || border.runtimeType != Border
-            ? border
-            : Border(
-              top: resolveBorderSide(border!.top),
-              left: resolveBorderSide(border!.left),
-              bottom: resolveBorderSide(border!.bottom),
-              right: resolveBorderSide(border!.right),
-            );
+    final Border? resolvedBorder = border == null || border.runtimeType != Border
+        ? border
+        : Border(
+            top: resolveBorderSide(border!.top),
+            left: resolveBorderSide(border!.left),
+            bottom: resolveBorderSide(border!.bottom),
+            right: resolveBorderSide(border!.right),
+          );
 
     final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(
@@ -226,12 +225,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                   cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap:
-                        onTap == null
-                            ? null
-                            : () {
-                              onTap!(index);
-                            },
+                    onTap: onTap == null
+                        ? null
+                        : () {
+                            onTap!(index);
+                          },
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Column(
@@ -271,7 +269,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     );
     return IconTheme.merge(
       data: IconThemeData(color: activeColor),
-      child: DefaultTextStyle.merge(style: TextStyle(color: activeColor), child: item),
+      child: DefaultTextStyle.merge(
+        style: TextStyle(color: activeColor),
+        child: item,
+      ),
     );
   }
 

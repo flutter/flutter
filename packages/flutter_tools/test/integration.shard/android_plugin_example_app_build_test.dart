@@ -24,7 +24,7 @@ void main() {
   });
 
   Future<void> testPlugin({required String template, required Directory tempDir}) async {
-    final String testName = '${template}_test';
+    final testName = '${template}_test';
 
     ProcessResult result = processManager.runSync(<String>[
       flutterBin,
@@ -98,7 +98,6 @@ void main() {
     gradleProperties.writeAsStringSync('''
 org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
 android.useAndroidX=true
-android.enableJetifier=true
 android.enableR8=true''');
 
     // Run flutter build apk using AGP 3.3.0

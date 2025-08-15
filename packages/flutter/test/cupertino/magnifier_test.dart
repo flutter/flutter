@@ -26,9 +26,8 @@ void main() {
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
       context: context,
-      builder:
-          (BuildContext context) =>
-              CupertinoTextMagnifier(controller: magnifierController, magnifierInfo: magnifierInfo),
+      builder: (BuildContext context) =>
+          CupertinoTextMagnifier(controller: magnifierController, magnifierInfo: magnifierInfo),
     );
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
@@ -83,8 +82,10 @@ void main() {
       await showCupertinoMagnifier(context, tester, magnifier);
 
       // Magnifier border color should inherit from CupertinoTheme.of(context).primaryColor.
-      final Color magnifierBorderColor =
-          tester.widget<CupertinoMagnifier>(find.byType(CupertinoMagnifier)).borderSide.color;
+      final Color magnifierBorderColor = tester
+          .widget<CupertinoMagnifier>(find.byType(CupertinoMagnifier))
+          .borderSide
+          .color;
       expect(magnifierBorderColor, equals(Colors.green));
     });
 

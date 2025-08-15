@@ -125,7 +125,7 @@ class TestIOManager final : public IOManager {
  public:
   explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
-      : gl_surface_(SkISize::Make(1, 1)),
+      : gl_surface_(DlISize(1, 1)),
         impeller_context_(std::make_shared<impeller::TestImpellerContext>()),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(
@@ -230,7 +230,7 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
 /// An Image generator that pretends it can't recognize the data it was given.
 class UnknownImageGenerator : public ImageGenerator {
  public:
-  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()){};
+  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()) {};
   ~UnknownImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 
@@ -921,7 +921,8 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   ASSERT_TRUE(expected_data != nullptr);
   ASSERT_FALSE(expected_data->isEmpty());
 
-  auto assert_image = [&](auto decoded_image, const std::string& decode_error) {
+  auto assert_image = [&](const auto& decoded_image,
+                          const std::string& decode_error) {
     ASSERT_EQ(decoded_image->dimensions(), SkISize::Make(300, 100));
     sk_sp<SkData> encoded =
         SkPngEncoder::Encode(nullptr, decoded_image.get(), {});

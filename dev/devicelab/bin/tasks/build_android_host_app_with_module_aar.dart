@@ -72,13 +72,6 @@ class ModuleTest {
 
       section('Create package with native assets');
 
-      await flutter(
-        'config',
-        options: <String>['--enable-native-assets'],
-        output: stdout,
-        stderr: stderr,
-      );
-
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
 
@@ -186,17 +179,6 @@ class ModuleTest {
         await flutter('clean', output: stdout, stderr: stderr);
       });
 
-      section('Make Android host app editable');
-
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'make-host-app-editable',
-          options: <String>['android'],
-          output: stdout,
-          stderr: stderr,
-        );
-      });
-
       section('Build editable host app');
 
       await inDirectory(projectDir, () async {
@@ -221,6 +203,17 @@ class ModuleTest {
         return TaskResult.failure('Failed to build editable host .apk');
       }
 
+      section('Flutter build aar succeeds');
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>['aar', '--no-profile'],
+          output: stdout,
+          stderr: stderr,
+        );
+      });
+
       section('Add to existing Android app');
 
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
@@ -244,13 +237,12 @@ class ModuleTest {
       );
 
       // Modify gradle version to the passed in version.
-      // This is somehow the wrong file.
       final File gradleWrapperProperties = File(
         path.join(hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'),
       );
       String propertyContent = await gradleWrapperProperties.readAsString();
       propertyContent = propertyContent.replaceFirst('REPLACEME', gradleVersion);
-      section(propertyContent);
+      section('Modify gradle wrapper file contents');
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
       // Modify AGP version to the passed in version.
@@ -444,7 +436,8 @@ class ModuleTest {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);

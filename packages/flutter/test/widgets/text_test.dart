@@ -79,7 +79,7 @@ void main() {
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaler, TextScaler.noScaling);
+    expect(text.textScaler, isSystemTextScaler(withScaleFactor: 1.0));
   });
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
@@ -87,7 +87,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaler, TextScaler.noScaling);
+    expect(text.textScaler, isSystemTextScaler(withScaleFactor: 1.0));
     final Size baseSize = tester.getSize(find.byType(RichText));
     expect(baseSize.width, equals(70.0));
     expect(baseSize.height, equals(14.0));
@@ -113,7 +113,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaler, TextScaler.noScaling);
+    expect(text.textScaler, isSystemTextScaler(withScaleFactor: 1.0));
     final Size baseSize = tester.getSize(find.byType(RichText));
     expect(baseSize.width, equals(100.0));
     expect(baseSize.height, equals(20.0));
@@ -139,8 +139,8 @@ void main() {
 
   testWidgets(
     "Text throws a nice error message if there's no Directionality",
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const Text('Hello'));
       final String message = tester.takeException().toString();
@@ -159,8 +159,14 @@ void main() {
           TextSpan(
             text: 'Hello',
             children: <TextSpan>[
-              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
-              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' beautiful ',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'world',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           textDirection: TextDirection.ltr,

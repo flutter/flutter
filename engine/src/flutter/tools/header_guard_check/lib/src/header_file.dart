@@ -34,8 +34,9 @@ final class HeaderFile {
 
   static ({int start, int end, String line}) _getLine(SourceFile sourceFile, int index) {
     final int start = sourceFile.getOffset(index);
-    int end =
-        index == sourceFile.lines - 1 ? sourceFile.length : sourceFile.getOffset(index + 1) - 1;
+    int end = index == sourceFile.lines - 1
+        ? sourceFile.length
+        : sourceFile.getOffset(index + 1) - 1;
     String line = sourceFile.getText(start, end);
 
     // On Windows, it's common for files to have CRLF line endings, and for

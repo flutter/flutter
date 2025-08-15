@@ -11,8 +11,14 @@ void main() {
   for (final UseCase useCase in useCases) {
     testWidgets('testing accessibility guideline for ${useCase.name}', (WidgetTester tester) async {
       await tester.pumpWidget(const App());
-      final ScrollController controller =
-          tester.state<HomePageState>(find.byType(HomePage)).scrollController;
+
+      // Tap on the switch to show all use-cases, not just the core ones.
+      await tester.tap(find.byTooltip('Show additional use cases'));
+      await tester.pumpAndSettle();
+
+      final ScrollController controller = tester
+          .state<HomePageState>(find.byType(HomePage))
+          .scrollController;
       while (find.byKey(Key(useCase.name)).evaluate().isEmpty) {
         controller.jumpTo(controller.offset + 600);
         await tester.pumpAndSettle();

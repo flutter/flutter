@@ -112,7 +112,7 @@ void RenderPass::SetViewport(Viewport viewport) {
   pending_.viewport = viewport;
 }
 
-void RenderPass::SetScissor(IRect scissor) {
+void RenderPass::SetScissor(IRect32 scissor) {
   pending_.scissor = scissor;
 }
 
@@ -306,8 +306,8 @@ bool RenderPass::BindTexture(ShaderStage stage,
   TextureAndSampler data = TextureAndSampler{
       .stage = stage,
       .texture = std::move(resource),
-      // NOLINTNEXTLINE(performance-move-const-arg)
-      .sampler = sampler,
+      // NOLINTNEXTLINE(performance-move-const-arg,performance-unnecessary-value-param)
+      .sampler = std::move(sampler),
   };
 
   if (!bound_textures_start_.has_value()) {

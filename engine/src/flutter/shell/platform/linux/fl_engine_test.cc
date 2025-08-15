@@ -989,6 +989,7 @@ TEST(FlEngineTest, SendKeyEventError) {
   g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   g_autoptr(GError) error = nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign)
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
@@ -1032,7 +1033,6 @@ TEST(FlEngineTest, ChildObjects) {
 
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
-  EXPECT_NE(fl_engine_get_compositor(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);

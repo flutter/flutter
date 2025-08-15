@@ -9,17 +9,25 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
+import 'package:flutter_tools/src/ios/lldb.dart';
+import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 class LocalFileSystemFake extends Fake implements LocalFileSystem {
-  MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
+  var memoryFileSystem = MemoryFileSystem.test();
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
@@ -41,7 +49,7 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
   @override
   bool get disposed => _disposed;
 
-  bool _disposed = false;
+  var _disposed = false;
 }
 
 void main() {
@@ -49,6 +57,584 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+  });
+
+  group('IOSCoreDeviceLauncher', () {
+    group('launchAppWithoutDebugger', () {
+      testWithoutContext('succeeds', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithoutDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isTrue);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on install', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(installSuccess: false);
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+        );
+
+        final bool result = await launcher.launchAppWithoutDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+      });
+
+      testWithoutContext('fails on launch', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'failed'},
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+        );
+
+        final bool result = await launcher.launchAppWithoutDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+      });
+
+      testWithoutContext('fails on null launch result', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+        );
+
+        final bool result = await launcher.launchAppWithoutDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+      });
+    });
+
+    group('launchAppWithLLDBDebugger', () {
+      testWithoutContext('succeeds', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isTrue);
+        expect(fakeLLDB.attemptedToAttach, isTrue);
+      });
+
+      testWithoutContext('fails on install', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(installSuccess: false);
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on launch', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'failed'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on null launch result', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on null launched process', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on null launched process id', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{'process': <String, Object?>{}},
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isFalse);
+      });
+
+      testWithoutContext('fails on lldb attach', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+        );
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB(attachSuccess: false);
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+        );
+
+        expect(result, isFalse);
+        expect(fakeLLDB.attemptedToAttach, isTrue);
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isTrue);
+      });
+    });
+
+    group('launchAppWithXcodeDebugger', () {
+      testWithoutContext('succeeds with PrebuiltIOSApp', () async {
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final IOSApp package = FakePrebuiltIOSApp();
+        final fileSystem = MemoryFileSystem.test();
+        final fakeXcodeDebug = FakeXcodeDebug(
+          tempXcodeProject: fileSystem.systemTempDirectory,
+          expectedLaunchArguments: [],
+        );
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          logger: logger,
+          xcodeDebug: fakeXcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: FakeLLDB(),
+        );
+        final bool result = await launcher.launchAppWithXcodeDebugger(
+          deviceId: 'device-id',
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          package: package,
+          launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
+          templateRenderer: FakeTemplateRenderer(),
+        );
+
+        expect(result, isTrue);
+        expect(fakeXcodeDebug.isTemporaryProject, isTrue);
+        expect(fakeXcodeDebug.debugStarted, isTrue);
+      });
+
+      testWithoutContext('succeeds with BuildableIOSApp', () async {
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeIosProject = FakeIosProject();
+        final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
+        final fileSystem = MemoryFileSystem.test();
+        final fakeXcodeDebug = FakeXcodeDebug(
+          tempXcodeProject: fileSystem.systemTempDirectory,
+          expectedLaunchArguments: [],
+        );
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          logger: logger,
+          xcodeDebug: fakeXcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: FakeLLDB(),
+        );
+        final bool result = await launcher.launchAppWithXcodeDebugger(
+          deviceId: 'device-id',
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          package: package,
+          launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
+          templateRenderer: FakeTemplateRenderer(),
+        );
+
+        expect(result, isTrue);
+        expect(fakeXcodeDebug.isTemporaryProject, isFalse);
+        expect(fakeXcodeDebug.debugStarted, isTrue);
+      });
+
+      testWithoutContext('fails with BuildableIOSApp if unable to find workspace', () async {
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeIosProject = FakeIosProject(missingWorkspace: true);
+        final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
+        final fileSystem = MemoryFileSystem.test();
+        final fakeXcodeDebug = FakeXcodeDebug(
+          tempXcodeProject: fileSystem.systemTempDirectory,
+          expectedLaunchArguments: [],
+        );
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          logger: logger,
+          xcodeDebug: fakeXcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: FakeLLDB(),
+        );
+        final bool result = await launcher.launchAppWithXcodeDebugger(
+          deviceId: 'device-id',
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          package: package,
+          launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
+          templateRenderer: FakeTemplateRenderer(),
+        );
+
+        expect(result, isFalse);
+        expect(fakeXcodeDebug.isTemporaryProject, isFalse);
+        expect(fakeXcodeDebug.debugStarted, isFalse);
+      });
+
+      testWithoutContext('fails with BuildableIOSApp if unable to find scheme', () async {
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeIosProject = FakeIosProject(missingScheme: true);
+        final IOSApp package = FakeBuildableIOSApp(fakeIosProject);
+        final fileSystem = MemoryFileSystem.test();
+        final fakeXcodeDebug = FakeXcodeDebug(
+          tempXcodeProject: fileSystem.systemTempDirectory,
+          expectedLaunchArguments: [],
+        );
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          logger: logger,
+          xcodeDebug: fakeXcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: FakeLLDB(),
+        );
+        final bool result = await launcher.launchAppWithXcodeDebugger(
+          deviceId: 'device-id',
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          package: package,
+          launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
+          templateRenderer: FakeTemplateRenderer(),
+        );
+
+        expect(result, isFalse);
+        expect(fakeXcodeDebug.isTemporaryProject, isFalse);
+        expect(fakeXcodeDebug.debugStarted, isFalse);
+      });
+    });
+
+    group('stopApp', () {
+      testWithoutContext('stops with xcode debug', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+        final xcodeDebug = FakeXcodeDebug();
+        xcodeDebug._debugStarted = true;
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: xcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.stopApp(deviceId: 'device-id');
+
+        expect(result, isTrue);
+        expect(xcodeDebug.exitCalled, isTrue);
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isFalse);
+        expect(fakeLLDB.exitCalled, isFalse);
+      });
+
+      testWithoutContext('stops with lldb process', () async {
+        const processId = 1234;
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+        final xcodeDebug = FakeXcodeDebug();
+        final fakeLLDB = FakeLLDB();
+
+        fakeLLDB.setIsRunning(true, processId);
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: xcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.stopApp(deviceId: 'device-id');
+
+        expect(result, isTrue);
+        expect(xcodeDebug.exitCalled, isFalse);
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isTrue);
+        expect(fakeCoreDeviceControl.processTerminated, processId);
+        expect(fakeLLDB.exitCalled, isTrue);
+      });
+
+      testWithoutContext('stops with processId', () async {
+        const processId = 1234;
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+        final xcodeDebug = FakeXcodeDebug();
+        final fakeLLDB = FakeLLDB();
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: xcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.stopApp(deviceId: 'device-id', processId: processId);
+
+        expect(result, isTrue);
+        expect(xcodeDebug.exitCalled, isFalse);
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isTrue);
+        expect(fakeCoreDeviceControl.processTerminated, processId);
+        expect(fakeLLDB.exitCalled, isFalse);
+      });
+
+      testWithoutContext('no process to stop', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl();
+        final xcodeDebug = FakeXcodeDebug();
+        final fakeLLDB = FakeLLDB();
+
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: xcodeDebug,
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.stopApp(deviceId: 'device-id');
+
+        expect(result, isFalse);
+        expect(xcodeDebug.exitCalled, isFalse);
+        expect(fakeCoreDeviceControl.terminateProcessCalled, isFalse);
+        expect(fakeLLDB.exitCalled, isFalse);
+      });
+    });
   });
 
   group('Xcode prior to Core Device Control/Xcode 15', () {
@@ -60,7 +646,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
+      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
         processManager: fakeProcessManager,
         version: Version(14, 0, 0),
       );
@@ -95,13 +681,13 @@ void main() {
       });
 
       testWithoutContext('fails to launch app', () async {
-        final bool status = await deviceControl.launchApp(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: 'device-id',
           bundleId: 'com.example.flutterApp',
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl is not installed.'));
-        expect(status, isFalse);
+        expect(logger.traceText, contains('devicectl is not installed.'));
+        expect(result, isNull);
       });
 
       testWithoutContext('fails to check if app is installed', () async {
@@ -136,11 +722,11 @@ void main() {
     });
 
     group('install app', () {
-      const String deviceId = 'device-id';
-      const String bundlePath = '/path/to/com.example.flutterApp';
+      const deviceId = 'device-id';
+      const bundlePath = '/path/to/com.example.flutterApp';
 
       testWithoutContext('Successful install', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -214,7 +800,7 @@ void main() {
       });
 
       testWithoutContext('devicectl fails install', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "error" : {
     "code" : 1005,
@@ -301,7 +887,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails install because of unexpected JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -342,7 +928,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails install because of invalid JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -382,11 +968,11 @@ invalid JSON
     });
 
     group('uninstall app', () {
-      const String deviceId = 'device-id';
-      const String bundleId = 'com.example.flutterApp';
+      const deviceId = 'device-id';
+      const bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successful uninstall', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -454,7 +1040,7 @@ invalid JSON
       });
 
       testWithoutContext('devicectl fails uninstall', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "error" : {
     "code" : 1005,
@@ -541,7 +1127,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails uninstall because of unexpected JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -582,7 +1168,7 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
       });
 
       testWithoutContext('fails uninstall because of invalid JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -622,11 +1208,11 @@ invalid JSON
     });
 
     group('launch app', () {
-      const String deviceId = 'device-id';
-      const String bundleId = 'com.example.flutterApp';
+      const deviceId = 'device-id';
+      const bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successful launch without launch args', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -701,16 +1287,20 @@ invalid JSON
           ),
         );
 
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, isEmpty);
         expect(tempFile, isNot(exists));
-        expect(status, true);
+        expect(result, isNotNull);
+        expect(result!.outcome, 'success');
       });
 
       testWithoutContext('Successful launch with launch args', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -789,7 +1379,7 @@ invalid JSON
           ),
         );
 
-        final bool status = await deviceControl.launchApp(
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
           deviceId: deviceId,
           bundleId: bundleId,
           launchArguments: <String>['--arg1', '--arg2'],
@@ -798,11 +1388,12 @@ invalid JSON
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, isEmpty);
         expect(tempFile, isNot(exists));
-        expect(status, true);
+        expect(result, isNotNull);
+        expect(result!.outcome, 'success');
       });
 
-      testWithoutContext('devicectl fails install', () async {
-        const String deviceControlOutput = '''
+      testWithoutContext('devicectl fails install with an error', () async {
+        const deviceControlOutput = '''
 {
   "error" : {
     "code" : -10814,
@@ -867,16 +1458,90 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           ),
         );
 
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
+        expect(logger.traceText, contains('ERROR: The operation couldn?t be completed.'));
         expect(tempFile, isNot(exists));
-        expect(status, false);
+        expect(result, isNull);
+      });
+
+      testWithoutContext('devicectl fails install without an error', () async {
+        const deviceControlOutput = '''
+{
+  "error" : {
+    "code" : -10814,
+    "domain" : "NSOSStatusErrorDomain",
+    "userInfo" : {
+      "_LSFunction" : {
+        "string" : "runEvaluator"
+      },
+      "_LSLine" : {
+        "int" : 1608
+      }
+    }
+  },
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "launch",
+      "--device",
+      "00001234-0001234A3C03401E",
+      "com.example.flutterApp",
+      "--json-output",
+      "/var/folders/wq/randompath/T/flutter_tools.rand0/core_devices.rand0/install_results.json"
+    ],
+    "commandType" : "devicectl.device.process.launch",
+    "environment" : {
+
+    },
+    "outcome" : "failed",
+    "version" : "341"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('launch_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+        expect(result, isNotNull);
+        expect(result!.outcome, isNot('success'));
       });
 
       testWithoutContext('fails launch because of unexpected JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -905,16 +1570,19 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
           ),
         );
 
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+        expect(logger.traceText, contains('devicectl returned unexpected JSON response'));
         expect(tempFile, isNot(exists));
-        expect(status, false);
+        expect(result, isNull);
       });
 
       testWithoutContext('fails launch because of invalid JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -941,21 +1609,338 @@ invalid JSON
           ),
         );
 
-        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('devicectl returned non-JSON response'));
+        expect(logger.traceText, contains('devicectl returned non-JSON response'));
+        expect(tempFile, isNot(exists));
+        expect(result, isNull);
+      });
+    });
+
+    group('terminate app', () {
+      const deviceId = 'device-id';
+      const processId = 1234;
+
+      testWithoutContext('Successful terminate app', () async {
+        const deviceControlOutput = '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "terminate",
+      "--device",
+      "00001234-0001234A3C03401E",
+      "--pid",
+      "1234",
+      "--json-output",
+      "./temp.txt"
+    ],
+    "commandType" : "devicectl.device.process.terminate",
+    "environment" : {
+      "TERM" : "xterm-256color"
+    },
+    "jsonVersion" : 2,
+    "outcome" : "success",
+    "version" : "477.29"
+  },
+  "result" : {
+    "deviceIdentifier" : "95F6A339-849B-50D6-B27A-4DB39527E070",
+    "deviceTimestamp" : "2025-08-07T16:13:35.220Z",
+    "process" : {
+      "executable" : "file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/Runner",
+      "processIdentifier" : 1234
+    },
+    "signal" : {
+      "name" : "SIGTERM",
+      "value" : 15
+    }
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, isEmpty);
+        expect(tempFile, isNot(exists));
+        expect(status, true);
+      });
+
+      testWithoutContext('devicectl fails terminate with an error', () async {
+        const deviceControlOutput = '''
+{
+  "error" : {
+    "code" : 3,
+    "domain" : "NSPOSIXErrorDomain",
+    "userInfo" : {
+
+    }
+  },
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "terminate",
+      "--device",
+      "00001234-0001234A3C03401E",
+      "--pid",
+      "1234",
+      "--json-output",
+      "./temp.txt"
+    ],
+    "commandType" : "devicectl.device.process.terminate",
+    "environment" : {
+      "TERM" : "xterm-256color"
+    },
+    "jsonVersion" : 2,
+    "outcome" : "failed",
+    "version" : "477.29"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+            exitCode: 1,
+            stderr: '''
+ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatusErrorDomain error -10814.)
+    _LSFunction = runEvaluator
+    _LSLine = 1608
+''',
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('ERROR: The operation couldn?t be completed.'));
+        expect(tempFile, isNot(exists));
+        expect(status, false);
+      });
+
+      testWithoutContext('devicectl fails terminate without an error', () async {
+        const deviceControlOutput = '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "terminate",
+      "--device",
+      "00001234-0001234A3C03401E",
+      "--pid",
+      "1234",
+      "--json-output",
+      "./temp.txt"
+    ],
+    "commandType" : "devicectl.device.process.terminate",
+    "environment" : {
+      "TERM" : "xterm-256color"
+    },
+    "jsonVersion" : 2,
+    "outcome" : "failed",
+    "version" : "477.29"
+  },
+  "result" : {
+    "deviceIdentifier" : "95F6A339-849B-50D6-B27A-4DB39527E070",
+    "deviceTimestamp" : "2025-08-07T16:13:35.220Z",
+    "process" : {
+      "executable" : "file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/Runner",
+      "processIdentifier" : 1234
+    },
+    "signal" : {
+      "name" : "SIGTERM",
+      "value" : 15
+    }
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+        expect(status, false);
+      });
+
+      testWithoutContext('fails launch because of unexpected JSON', () async {
+        const deviceControlOutput = '''
+{
+  "valid_unexpected_json": true
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl returned unexpected JSON response'));
+        expect(tempFile, isNot(exists));
+        expect(status, false);
+      });
+
+      testWithoutContext('fails launch because of invalid JSON', () async {
+        const deviceControlOutput = '''
+invalid JSON
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('terminate_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'terminate',
+              '--device',
+              deviceId,
+              '--pid',
+              processId.toString(),
+              '--kill',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.terminateProcess(
+          deviceId: deviceId,
+          processId: processId,
+        );
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl returned non-JSON response'));
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
     });
 
     group('list apps', () {
-      const String deviceId = 'device-id';
-      const String bundleId = 'com.example.flutterApp';
+      const deviceId = 'device-id';
+      const bundleId = 'com.example.flutterApp';
 
       testWithoutContext('Successfully parses apps', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1083,7 +2068,7 @@ invalid JSON
       });
 
       testWithoutContext('Successfully find installed app', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1168,7 +2153,7 @@ invalid JSON
       });
 
       testWithoutContext('Succeeds but does not find app', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1240,7 +2225,7 @@ invalid JSON
       });
 
       testWithoutContext('devicectl fails to get apps', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "error" : {
     "code" : 1000,
@@ -1314,7 +2299,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
       });
 
       testWithoutContext('fails launch because of unexpected JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "valid_unexpected_json": true
 }
@@ -1356,7 +2341,7 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
       });
 
       testWithoutContext('fails launch because of invalid JSON', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 invalid JSON
 ''';
         final File tempFile = fileSystem.systemTempDirectory
@@ -1402,7 +2387,7 @@ invalid JSON
           'core_devices.rand0',
         );
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final List<String> args = <String>[
+        final args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1436,7 +2421,7 @@ invalid JSON
           'core_devices.rand0',
         );
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final List<String> args = <String>[
+        final args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1482,10 +2467,7 @@ invalid JSON
 
       testWithoutContext('Handles file system disposal', () async {
         final LocalFileSystem localFs = LocalFileSystemFake();
-        final ErrorHandlingFileSystem fs = ErrorHandlingFileSystem(
-          delegate: localFs,
-          platform: FakePlatform(),
-        );
+        final fs = ErrorHandlingFileSystem(delegate: localFs, platform: FakePlatform());
         deviceControl = IOSCoreDeviceControl(
           logger: logger,
           processManager: fakeProcessManager,
@@ -1494,7 +2476,7 @@ invalid JSON
         );
         final Directory tempDir = localFs.systemTempDirectory.childDirectory('core_devices.rand0');
         final File tempFile = tempDir.childFile('core_device_list.json');
-        final List<String> args = <String>[
+        final args = <String>[
           'xcrun',
           'devicectl',
           'list',
@@ -1533,7 +2515,7 @@ invalid JSON
       });
 
       testWithoutContext('No devices', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1586,7 +2568,7 @@ invalid JSON
       });
 
       testWithoutContext('All sections parsed', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1659,7 +2641,7 @@ invalid JSON
       });
 
       testWithoutContext('All sections parsed, device missing sections', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -1724,7 +2706,7 @@ invalid JSON
       });
 
       testWithoutContext('capabilities parsed', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1787,7 +2769,7 @@ invalid JSON
       });
 
       testWithoutContext('connectionProperties parsed', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1865,7 +2847,7 @@ invalid JSON
       });
 
       testWithoutContext('deviceProperties parsed', () async {
-        const String deviceControlOutput = '''
+        const deviceControlOutput = '''
 {
   "result" : {
     "devices" : [
@@ -1934,7 +2916,7 @@ invalid JSON
       });
 
       testWithoutContext('hardwareProperties parsed', () async {
-        const String deviceControlOutput = r'''
+        const deviceControlOutput = r'''
 {
   "result" : {
     "devices" : [
@@ -2036,7 +3018,7 @@ invalid JSON
 
       group('Handles errors', () {
         testWithoutContext('invalid json', () async {
-          const String deviceControlOutput = '''Invalid JSON''';
+          const deviceControlOutput = '''Invalid JSON''';
 
           final File tempFile = fileSystem.systemTempDirectory
               .childDirectory('core_devices.rand0')
@@ -2067,7 +3049,7 @@ invalid JSON
         });
 
         testWithoutContext('unexpected json', () async {
-          const String deviceControlOutput = '''
+          const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -2119,7 +3101,7 @@ invalid JSON
         });
 
         testWithoutContext('When timeout is below minimum, default to minimum', () async {
-          const String deviceControlOutput = '''
+          const deviceControlOutput = '''
 {
   "info" : {
     "arguments" : [
@@ -2186,3 +3168,202 @@ invalid JSON
     });
   });
 }
+
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  FakeIOSCoreDeviceControl({
+    this.installSuccess = true,
+    this.launchResult,
+    this.terminateSuccess = true,
+  });
+
+  bool installSuccess;
+  IOSCoreDeviceLaunchResult? launchResult;
+  bool terminateSuccess;
+  int? processTerminated;
+  bool get terminateProcessCalled => processTerminated != null;
+
+  @override
+  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
+    return installSuccess;
+  }
+
+  @override
+  Future<IOSCoreDeviceLaunchResult?> launchApp({
+    required String deviceId,
+    required String bundleId,
+    List<String> launchArguments = const <String>[],
+    bool startStopped = false,
+  }) async {
+    return launchResult;
+  }
+
+  @override
+  Future<bool> terminateProcess({required String deviceId, required int processId}) async {
+    processTerminated = processId;
+    return terminateSuccess;
+  }
+}
+
+class FakeXcodeDebug extends Fake implements XcodeDebug {
+  FakeXcodeDebug({this.tempXcodeProject, this.expectedProject, this.expectedLaunchArguments});
+  var exitSuccess = true;
+  var _debugStarted = false;
+  var exitCalled = false;
+  var isTemporaryProject = false;
+  Directory? tempXcodeProject;
+  XcodeDebugProject? expectedProject;
+  List<String>? expectedLaunchArguments;
+
+  @override
+  bool get debugStarted => _debugStarted;
+
+  @override
+  Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
+    String deviceBundlePath, {
+    required TemplateRenderer templateRenderer,
+    Directory? projectDestination,
+    bool verboseLogging = false,
+  }) async {
+    isTemporaryProject = true;
+    return XcodeDebugProject(
+      scheme: 'Runner',
+      hostAppProjectName: 'Runner',
+      xcodeProject: tempXcodeProject!.childDirectory('Runner.xcodeproj'),
+      xcodeWorkspace: tempXcodeProject!.childDirectory('Runner.xcworkspace'),
+      isTemporaryProject: true,
+      verboseLogging: verboseLogging,
+    );
+  }
+
+  @override
+  Future<bool> debugApp({
+    required XcodeDebugProject project,
+    required String deviceId,
+    required List<String> launchArguments,
+  }) async {
+    if (expectedProject != null) {
+      expect(expectedProject, project);
+      expect(expectedLaunchArguments, launchArguments);
+    }
+    _debugStarted = true;
+    return true;
+  }
+
+  @override
+  Future<bool> exit({bool force = false, bool skipDelay = false}) async {
+    exitCalled = true;
+    return exitSuccess;
+  }
+
+  @override
+  void ensureXcodeDebuggerLaunchAction(File schemeFile) {}
+
+  @override
+  Future<void> updateConfigurationBuildDir({
+    required FlutterProject project,
+    required BuildInfo buildInfo,
+    String? mainPath,
+    required String configurationBuildDir,
+  }) async {}
+}
+
+class FakeLLDB extends Fake implements LLDB {
+  FakeLLDB({this.attachSuccess = true});
+  bool attachSuccess;
+
+  var attemptedToAttach = false;
+
+  var _isRunning = false;
+  int? _processId;
+  var exitCalled = false;
+
+  @override
+  bool get isRunning => _isRunning;
+
+  @override
+  int? get appProcessId => _processId;
+
+  void setIsRunning(bool running, int? processId) {
+    _isRunning = running;
+    _processId = processId;
+  }
+
+  @override
+  Future<bool> attachAndStart(String deviceId, int processId) async {
+    attemptedToAttach = true;
+    return attachSuccess;
+  }
+
+  @override
+  bool exit() {
+    exitCalled = true;
+    return true;
+  }
+}
+
+class FakePrebuiltIOSApp extends Fake implements PrebuiltIOSApp {
+  @override
+  String get deviceBundlePath => '/path/to/prebuilt/app';
+}
+
+class FakeBuildableIOSApp extends Fake implements BuildableIOSApp {
+  FakeBuildableIOSApp(this.project);
+
+  @override
+  String get deviceBundlePath => '/path/to/buildable/app';
+
+  @override
+  final IosProject project;
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject(this.ios);
+
+  @override
+  final IosProject ios;
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  FakeIosProject({this.missingWorkspace = false, this.missingScheme = false});
+
+  late final _flutterProject = FakeFlutterProject(this);
+
+  bool missingWorkspace;
+  bool missingScheme;
+
+  @override
+  late FlutterProject parent = _flutterProject;
+
+  @override
+  Directory? get xcodeWorkspace {
+    if (missingWorkspace) {
+      return null;
+    }
+    return MemoryFileSystem.test().directory('Runner.xcworkspace');
+  }
+
+  @override
+  Future<String?> schemeForBuildInfo(BuildInfo buildInfo, {Logger? logger}) async {
+    if (missingScheme) {
+      return null;
+    }
+    return 'Runner';
+  }
+
+  @override
+  File xcodeProjectSchemeFile({String? scheme}) {
+    final String schemeName = scheme ?? 'Runner';
+    return xcodeProject
+        .childDirectory('xcshareddata')
+        .childDirectory('xcschemes')
+        .childFile('$schemeName.xcscheme');
+  }
+
+  @override
+  Directory get xcodeProject => MemoryFileSystem.test().directory('Runner.xcodeproj');
+
+  @override
+  String get hostAppProjectName => 'Runner';
+}
+
+class FakeTemplateRenderer extends Fake implements TemplateRenderer {}

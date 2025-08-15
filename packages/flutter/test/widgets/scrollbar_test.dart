@@ -17,7 +17,7 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 ScrollbarPainter _buildPainter({
   TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
+  EdgeInsetsGeometry padding = EdgeInsets.zero,
   Color color = _kScrollbarColor,
   double thickness = _kThickness,
   double mainAxisMargin = 0.0,
@@ -2277,11 +2277,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
         ),
       );
       await tester.pumpAndSettle();
+
+      // Rectangle for the track of scrollbar.
+      // The default thickness of thumb is 6.0, hence topLeft = 800.0 - 6.0 = 794.0
+      const Rect trackRect = Rect.fromLTRB(794.0, 0.0, 800.0, 600.0);
+
       expect(scrollController.offset, 0.0);
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect)
           ..rect(
             rect: const Rect.fromLTRB(794.0, 200.0, 800.0, 400.0),
             color: const Color(0x66BCBCBC),
@@ -2305,9 +2310,45 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(
         find.byType(RawScrollbar),
         paints
-          ..rect(rect: const Rect.fromLTRB(794.0, 0.0, 800.0, 600.0))
+          ..rect(rect: trackRect) // Scrollbar track
           ..rect(
-            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0),
+            rect: const Rect.fromLTRB(794.0, 190.0, 800.0, 390.0), // Scrollbar thumb
+            color: const Color(0x66BCBCBC),
+          ),
+      );
+
+      // Regression test for issue: https://github.com/flutter/flutter/issues/170246
+      // First scroll to the top, then drag the thumb to scroll down.
+      final double minScrollExtent = scrollController.position.minScrollExtent; // -600
+      scrollController.jumpTo(minScrollExtent);
+      await tester.pumpAndSettle();
+      expect(scrollController.offset, minScrollExtent);
+      const Rect thumbRectBefore = Rect.fromLTRB(794.0, 0.0, 800.0, 200.0); // Scrollbar thumb
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(rect: thumbRectBefore, color: const Color(0x66BCBCBC)),
+      );
+
+      // Drag the thumb to scroll down.
+      const double scrollDownAmount = 20.0;
+      final Offset thumbCenter = thumbRectBefore.center;
+      final TestGesture dragGesture = await tester.startGesture(thumbCenter);
+      await tester.pumpAndSettle();
+      await dragGesture.moveBy(const Offset(0.0, scrollDownAmount));
+      await tester.pumpAndSettle();
+      await dragGesture.up();
+      await tester.pumpAndSettle();
+
+      // The view should have scrolled by the amount dragged.
+      expect(scrollController.offset - minScrollExtent, 1800 * scrollDownAmount / 600);
+      expect(
+        find.byType(RawScrollbar),
+        paints
+          ..rect(rect: trackRect)
+          ..rect(
+            rect: thumbRectBefore.shift(const Offset(0.0, scrollDownAmount)),
             color: const Color(0x66BCBCBC),
           ),
       );
@@ -2685,8 +2726,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                 child: CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 100,
+                      itemBuilder: (BuildContext context, int index) {
                         final double height;
                         if (index < 10) {
                           height = 100;
@@ -2694,7 +2736,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                           height = 500;
                         }
                         return SizedBox(height: height, child: Text('$index'));
-                      }, childCount: 100),
+                      },
                     ),
                   ],
                 ),
@@ -2753,8 +2795,9 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  SliverList.builder(
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
                       final double height;
                       if (index < 10) {
                         height = 500;
@@ -2762,7 +2805,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                         height = 100;
                       }
                       return SizedBox(height: height, child: Text('$index'));
-                    }, childCount: 100),
+                    },
                   ),
                 ],
               ),
@@ -2866,14 +2909,15 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                   controller: scrollController,
                   reverse: reverse,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 10,
+                      itemBuilder: (BuildContext context, int index) {
                         return Container(
                           height: 100,
                           alignment: Alignment.center,
                           child: Text('$index'),
                         );
-                      }, childCount: 10),
+                      },
                     ),
                   ],
                 ),
@@ -3014,14 +3058,15 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
                   reverse: reverse,
                   scrollDirection: Axis.horizontal,
                   slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                    SliverList.builder(
+                      itemCount: 10,
+                      itemBuilder: (BuildContext context, int index) {
                         return Container(
                           width: 100,
                           alignment: Alignment.center,
                           child: Text('$index'),
                         );
-                      }, childCount: 10),
+                      },
                     ),
                   ],
                 ),
@@ -3526,4 +3571,68 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  test('with EdgeInsetsDirectional', () {
+    const Size size = Size(60, 80);
+    final ScrollMetrics metrics = defaultMetrics.copyWith(
+      minScrollExtent: -100,
+      maxScrollExtent: 240,
+      axisDirection: AxisDirection.down,
+    );
+
+    final ScrollbarPainter ltrPainter = _buildPainter(
+      padding: const EdgeInsetsDirectional.fromSTEB(1, 2, 3, 4),
+      scrollMetrics: metrics,
+    );
+
+    ltrPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.negativeInfinity),
+      AxisDirection.down,
+    );
+
+    // Top overscroll.
+    ltrPainter.paint(testCanvas, size);
+    final Rect ltrRect0 = captureRect();
+    expect(ltrRect0.top, 2);
+    expect(size.width - ltrRect0.right, 3);
+
+    // Bottom overscroll.
+    ltrPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.infinity),
+      AxisDirection.down,
+    );
+
+    ltrPainter.paint(testCanvas, size);
+    final Rect ltrRect1 = captureRect();
+    expect(size.height - ltrRect1.bottom, 4);
+    expect(size.width - ltrRect1.right, 3);
+
+    final ScrollbarPainter rtlPainter = _buildPainter(
+      padding: const EdgeInsetsDirectional.fromSTEB(1, 2, 3, 4),
+      scrollMetrics: metrics,
+      textDirection: TextDirection.rtl,
+    );
+
+    rtlPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.negativeInfinity),
+      AxisDirection.down,
+    );
+
+    // Top overscroll.
+    rtlPainter.paint(testCanvas, size);
+    final Rect rtlRect0 = captureRect();
+    expect(rtlRect0.top, 2);
+    expect(rtlRect0.left, 3);
+
+    // Bottom overscroll.
+    rtlPainter.update(
+      metrics.copyWith(viewportDimension: size.height, pixels: double.infinity),
+      AxisDirection.down,
+    );
+
+    rtlPainter.paint(testCanvas, size);
+    final Rect rtlRect1 = captureRect();
+    expect(size.height - rtlRect1.bottom, 4);
+    expect(rtlRect1.left, 3);
+  });
 }

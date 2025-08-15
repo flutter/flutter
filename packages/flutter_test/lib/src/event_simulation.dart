@@ -282,8 +282,9 @@ abstract final class KeyEventSimulator {
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
-        result['unicodeScalarValues'] =
-            resultCharacter.isNotEmpty ? resultCharacter.codeUnitAt(0) : 0;
+        result['unicodeScalarValues'] = resultCharacter.isNotEmpty
+            ? resultCharacter.codeUnitAt(0)
+            : 0;
       case 'macos':
         result['keyCode'] = scanCode;
         if (resultCharacter.isNotEmpty) {
@@ -678,17 +679,16 @@ abstract final class KeyEventSimulator {
     });
   }
 
-  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey =
-      (() {
-        final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
-        for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
-          final String? debugName = key.debugName;
-          if (debugName != null) {
-            result[debugName] = key;
-          }
-        }
-        return result;
-      })();
+  static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
+    final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
+    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
+      final String? debugName = key.debugName;
+      if (debugName != null) {
+        result[debugName] = key;
+      }
+    }
+    return result;
+  })();
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key) {
     final PhysicalKeyboardKey? result = _debugNameToPhysicalKey[key.debugName];
     assert(result != null, 'Physical key for $key not found in known physical keys');

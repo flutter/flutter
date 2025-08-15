@@ -38,6 +38,7 @@ void main() {
     const Set<String> intentionallyOmitted = <String>{
       '.dart_tool',
       '.git',
+      '.gemini',
       '.github',
       '.vscode',
       'build_overrides',

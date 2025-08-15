@@ -36,18 +36,16 @@ class FrameService {
     _instance = mock;
   }
 
-  /// A monotonically increasing frame number being rendered.
-  ///
-  /// This is intended for tests only.
-  int get debugFrameNumber => _debugFrameNumber;
-  int _debugFrameNumber = 0;
+  /// The [ui.FrameData] object for the current frame.
+  ui.FrameData get frameData => _frameData;
+  ui.FrameData _frameData = const ui.FrameData();
 
-  /// Resets [debugFrameNumber] back to zero.
+  /// Resets [frameData] back to the initial value.
   ///
   /// This is intended for tests only.
   @visibleForTesting
-  void debugResetFrameNumber() {
-    _debugFrameNumber = 0;
+  void debugResetFrameData() {
+    _frameData = const ui.FrameData();
   }
 
   /// Whether a frame has already been scheduled.
@@ -102,7 +100,7 @@ class FrameService {
 
       try {
         _isRenderingFrame = true;
-        _debugFrameNumber += 1;
+        _frameData = ui.FrameData(frameNumber: _frameData.frameNumber + 1);
         _renderFrame(highResTime.toDartDouble);
       } finally {
         _isRenderingFrame = false;
@@ -132,7 +130,7 @@ class FrameService {
 
     Timer.run(() {
       _isRenderingFrame = true;
-      _debugFrameNumber += 1;
+      _frameData = ui.FrameData(frameNumber: _frameData.frameNumber + 1);
       // TODO(yjbanov): it's funky that if beginFrame crashes, the drawFrame
       //                fires anyway. We should clean this up, or better explain
       //                what the expectations are for various situations. The
@@ -158,6 +156,7 @@ class FrameService {
   }
 
   void _renderFrame(double highResTime) {
+    FrameTimingRecorder.recordCurrentFrameNumber(_frameData.frameNumber);
     FrameTimingRecorder.recordCurrentFrameVsync();
 
     // In Flutter terminology "building a frame" consists of "beginning
@@ -179,6 +178,10 @@ class FrameService {
       EnginePlatformDispatcher.instance.invokeOnBeginFrame(
         Duration(microseconds: highResTimeMicroseconds),
       );
+    }
+
+    if (EnginePlatformDispatcher.instance.onFrameDataChanged != null) {
+      EnginePlatformDispatcher.instance.invokeOnFrameDataChanged();
     }
 
     if (EnginePlatformDispatcher.instance.onDrawFrame != null) {

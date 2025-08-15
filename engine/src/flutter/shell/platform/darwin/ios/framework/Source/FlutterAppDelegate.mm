@@ -4,11 +4,12 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 
-#import "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
@@ -20,9 +21,13 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate ()
+@interface FlutterAppDelegate () {
+  __weak NSObject<FlutterPluginRegistrant>* _weakRegistrant;
+  NSObject<FlutterPluginRegistrant>* _strongRegistrant;
+}
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
+@property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
 @end
 
 @implementation FlutterAppDelegate
@@ -30,8 +35,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (instancetype)init {
   if (self = [super init]) {
     _lifeCycleDelegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    _launchEngine = [[FlutterLaunchEngine alloc] init];
   }
   return self;
+}
+
+- (nullable FlutterEngine*)takeLaunchEngine {
+  return [self.launchEngine takeEngine];
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -175,7 +185,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                    }
                                  }];
   } else {
-    FML_LOG(ERROR) << "Attempting to open an URL without a Flutter RootViewController.";
+    [FlutterLogger logError:@"Attempting to open an URL without a Flutter RootViewController."];
     return NO;
   }
   return YES;
@@ -214,9 +224,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 // This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:
-          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
-              restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
   if ([self.lifeCycleDelegate application:application
                      continueUserActivity:userActivity
                        restorationHandler:restorationHandler]) {
@@ -228,12 +237,32 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController
 
+- (NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (_weakRegistrant) {
+    return _weakRegistrant;
+  }
+  if (_strongRegistrant) {
+    return _strongRegistrant;
+  }
+  return nil;
+}
+
+- (void)setPluginRegistrant:(NSObject<FlutterPluginRegistrant>*)pluginRegistrant {
+  if (pluginRegistrant == (id)self) {
+    _weakRegistrant = pluginRegistrant;
+    _strongRegistrant = nil;
+  } else {
+    _weakRegistrant = nil;
+    _strongRegistrant = pluginRegistrant;
+  }
+}
+
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -241,7 +270,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return false;
+  return [self.launchEngine.engine hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -249,7 +278,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return nil;
+  return [self.launchEngine.engine valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling
