@@ -259,27 +259,27 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement2()) => _createEnumInstance(this),
+      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
       InterfaceType() => _createInstance(type, this),
-      FunctionType() => _createTearoff(toFunctionValue2()!),
+      FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
     };
   }
 
-  cb.Expression _createTearoff(ExecutableElement2 element) {
+  cb.Expression _createTearoff(ExecutableElement element) {
     return cb.refer(element.displayName, _elementToLibraryIdentifier(element));
   }
 
   cb.Expression _createEnumInstance(DartObject object) {
-    final VariableElement2 variable = object.variable2!;
+    final VariableElement variable = object.variable!;
     return switch (variable) {
-      FieldElement2(
+      FieldElement(
         isEnumConstant: true,
         displayName: final enumValue,
-        enclosingElement2: EnumElement2(displayName: final enumName),
+        enclosingElement: EnumElement(displayName: final enumName),
       ) =>
         cb.refer('$enumName.$enumValue', _elementToLibraryIdentifier(variable)),
-      PropertyInducingElement2(:final displayName) => cb.refer(
+      PropertyInducingElement(:final displayName) => cb.refer(
         displayName,
         _elementToLibraryIdentifier(variable),
       ),
@@ -289,7 +289,7 @@ extension on DartObject {
 
   cb.Expression _createInstance(InterfaceType dartType, DartObject object) {
     final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
-    final ConstructorElement2 constructor = constructorInvocation.constructor2;
+    final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
       dartType.element3.name3!,
       _elementToLibraryIdentifier(dartType.element3),
@@ -314,6 +314,6 @@ extension on DartObject {
     );
   }
 
-  /// Returns the import URI for the [analyzer.LibraryElement2] containing [element].
-  String? _elementToLibraryIdentifier(analyzer.Element2? element) => element?.library2!.identifier;
+  /// Returns the import URI for the [analyzer.LibraryElement] containing [element].
+  String? _elementToLibraryIdentifier(analyzer.Element? element) => element?.library!.identifier;
 }
