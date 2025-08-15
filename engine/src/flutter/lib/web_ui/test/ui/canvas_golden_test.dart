@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -34,7 +35,7 @@ void testMain() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final ui.Canvas canvas = ui.Canvas(recorder, kDefaultRegion);
       expect(canvas, isA<LayerCanvas>());
-      drawTestPicture(canvas as LayerCanvas);
+      await drawTestPicture(canvas as LayerCanvas);
       await drawPictureUsingCurrentRenderer(recorder.endRecording());
       await matchGoldenFile('ui_weakref_picture.png', region: kDefaultRegion);
     });
@@ -218,7 +219,7 @@ void testMain() {
 
 typedef ParagraphFactory = ui.Paragraph Function();
 
-void drawTestPicture(LayerCanvas canvas) {
+Future<void> drawTestPicture(LayerCanvas canvas) async {
   canvas.clear(const ui.Color(0xFFFFFFF));
 
   canvas.translate(10, 10);
@@ -253,7 +254,7 @@ void drawTestPicture(LayerCanvas canvas) {
   );
 
   canvas.translate(60, 0);
-  canvas.drawImage(generateTestImage(), const ui.Offset(20, 20), ui.Paint());
+  canvas.drawImage(await generateTestImage(), const ui.Offset(20, 20), ui.Paint());
 
   canvas.translate(60, 0);
   final ui.RSTransform transform = ui.RSTransform.fromComponents(
@@ -265,7 +266,7 @@ void drawTestPicture(LayerCanvas canvas) {
     translateY: 0,
   );
   canvas.drawRawAtlas(
-    generateTestImage(),
+    await generateTestImage(),
     Float32List(4)
       ..[0] = transform.scos
       ..[1] = transform.ssin
@@ -291,7 +292,7 @@ void drawTestPicture(LayerCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawImageRect(
-    generateTestImage(),
+    await generateTestImage(),
     const ui.Rect.fromLTRB(0, 0, 15, 15),
     const ui.Rect.fromLTRB(10, 10, 40, 40),
     ui.Paint(),
@@ -299,7 +300,7 @@ void drawTestPicture(LayerCanvas canvas) {
 
   canvas.translate(60, 0);
   canvas.drawImageNine(
-    generateTestImage(),
+    await generateTestImage(),
     const ui.Rect.fromLTRB(5, 5, 15, 15),
     const ui.Rect.fromLTRB(10, 10, 50, 40),
     ui.Paint(),
@@ -471,7 +472,7 @@ void drawTestPicture(LayerCanvas canvas) {
   canvas.restore();
 }
 
-ui.Image generateTestImage() {
+Future<ui.Image> generateTestImage() {
   final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 20, height: 20);
   final DomCanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#FF0000';
@@ -483,11 +484,11 @@ ui.Image generateTestImage() {
   ctx.fillStyle = '#FF00FF';
   ctx.fillRect(10, 10, 10, 10);
   final Uint8List imageData = ctx.getImageData(0, 0, 20, 20).data.buffer.asUint8List();
-  late ui.Image image;
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   renderer.decodeImageFromPixels(imageData, 20, 20, ui.PixelFormat.rgba8888, (ui.Image result) {
-    image = result;
+    completer.complete(result);
   });
-  return image;
+  return completer.future;
 }
 
 ui.Paragraph makeSimpleText(

@@ -47,7 +47,7 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
-  /// Render the given [pictures] so it is displayed by the given [canvas].
+  /// Render the given [picture] so it is displayed by the given [canvas].
   Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) async {
     await rasterizer.offscreenSurface.rasterizeToCanvas(
       currentFrameSize,

@@ -50,7 +50,7 @@ class OcclusionMapBranch implements OcclusionMapNode {
 
   double _areaOfUnion(ui.Rect first, ui.Rect second) {
     return (math.max(first.right, second.right) - math.min(first.left, second.left)) *
-        (math.max(first.bottom, second.bottom) - math.max(first.top, second.top));
+        (math.max(first.bottom, second.bottom) - math.min(first.top, second.top));
   }
 
   @override

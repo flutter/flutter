@@ -328,6 +328,7 @@ abstract class Renderer {
       rasterizer.dispose();
     }
     rasterizers.clear();
+    rasterizer.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.
