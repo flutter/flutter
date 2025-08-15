@@ -41,8 +41,8 @@ static const char* fragment_shader_src =
 struct _FlCompositorOpenGL {
   FlCompositor parent_instance;
 
-  // Engine we are rendering.
-  GWeakRef engine;
+  // Task runner to wait for frames on.
+  FlTaskRunner* task_runner;
 
   // TRUE if can share framebuffers between contexts.
   gboolean shareable;
@@ -198,11 +198,9 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
                                                     size_t layers_count) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
-
+  g_mutex_lock(&self->frame_mutex);
   if (layers_count == 0) {
+    g_mutex_unlock(&self->frame_mutex);
     return TRUE;
   }
 
@@ -319,6 +317,10 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
 
+  g_mutex_unlock(&self->frame_mutex);
+
+  fl_task_runner_stop_wait(self->task_runner);
+
   return TRUE;
 }
 
@@ -326,8 +328,6 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
                                             GdkWindow* window) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
-
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
 
   g_mutex_lock(&self->frame_mutex);
   if (self->framebuffer == nullptr) {
@@ -342,7 +342,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   while (fl_framebuffer_get_width(self->framebuffer) != width ||
          fl_framebuffer_get_height(self->framebuffer) != height) {
     g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_run_expired_tasks(fl_engine_get_task_runner(engine));
+    fl_task_runner_wait(self->task_runner);
     g_mutex_lock(&self->frame_mutex);
   }
 
@@ -376,7 +376,7 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 
   cleanup_shader(self);
 
-  g_weak_ref_clear(&self->engine);
+  g_clear_object(&self->task_runner);
   g_clear_object(&self->opengl_manager);
   g_clear_object(&self->framebuffer);
   g_clear_pointer(&self->pixels, g_free);
@@ -397,15 +397,15 @@ static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
   g_mutex_init(&self->frame_mutex);
 }
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine,
+FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
+                                             FlOpenGLManager* opengl_manager,
                                              gboolean shareable) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
-  g_weak_ref_init(&self->engine, engine);
+  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
   self->shareable = shareable;
-  self->opengl_manager =
-      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
+  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
 
   setup_shader(self);
 

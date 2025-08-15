@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
@@ -21,6 +22,8 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -34,7 +37,7 @@ TEST(FlCompositorOpenGLTest, RestoresGLState) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   fml::AutoResetWaitableEvent latch;
@@ -77,6 +80,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -92,7 +97,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   fml::AutoResetWaitableEvent latch;
@@ -125,6 +130,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -145,7 +152,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   fml::AutoResetWaitableEvent latch;
@@ -180,6 +187,8 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -193,7 +202,7 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   fml::AutoResetWaitableEvent latch;
@@ -228,6 +237,8 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -242,7 +253,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
 
   fml::AutoResetWaitableEvent latch;
@@ -277,6 +288,8 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
@@ -292,7 +305,7 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
   g_autoptr(FlCompositorOpenGL) compositor =
-      fl_compositor_opengl_new(engine, FALSE);
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
                      1.0, nullptr, nullptr, nullptr);

@@ -6,17 +6,18 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
+#include "flutter/shell/platform/linux/fl_task_runner.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
-#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 #include <gdk/gdkwayland.h>
 
 TEST(FlCompositorSoftwareTest, Render) {
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
 
   g_autoptr(FlCompositorSoftware) compositor =
-      fl_compositor_software_new(engine);
+      fl_compositor_software_new(task_runner);
 
   unsigned char image_data[1024 * 1024 * 4];
   cairo_surface_t* surface = cairo_image_surface_create_for_data(

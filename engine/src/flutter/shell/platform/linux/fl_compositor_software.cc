@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 #include "fl_compositor_software.h"
-#include "flutter/shell/platform/linux/fl_engine_private.h"
 
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
 
-  // Engine we are rendering.
-  GWeakRef engine;
+  // Task runner to wait for frames on.
+  FlTaskRunner* task_runner;
 
   // Width of frame in pixels.
   size_t width;
@@ -64,6 +63,8 @@ static gboolean fl_compositor_software_present_layers(
         backing_store->software.height, backing_store->software.row_bytes);
   }
 
+  fl_task_runner_stop_wait(self->task_runner);
+
   return TRUE;
 }
 
@@ -72,11 +73,9 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               GdkWindow* window) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
-  g_mutex_lock(&self->frame_mutex);
   if (self->surface == nullptr) {
-    g_mutex_unlock(&self->frame_mutex);
     return FALSE;
   }
 
@@ -86,7 +85,7 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   size_t height = gdk_window_get_height(window) * scale_factor;
   while (self->width != width || self->height != height) {
     g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_run_expired_tasks(fl_engine_get_task_runner(engine));
+    fl_task_runner_wait(self->task_runner);
     g_mutex_lock(&self->frame_mutex);
   }
 
@@ -94,15 +93,13 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
   cairo_paint(cr);
 
-  g_mutex_unlock(&self->frame_mutex);
-
   return TRUE;
 }
 
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
-  g_weak_ref_clear(&self->engine);
+  g_clear_object(&self->task_runner);
   if (self->surface != nullptr) {
     free(cairo_image_surface_get_data(self->surface));
   }
@@ -125,9 +122,9 @@ static void fl_compositor_software_init(FlCompositorSoftware* self) {
   g_mutex_init(&self->frame_mutex);
 }
 
-FlCompositorSoftware* fl_compositor_software_new(FlEngine* engine) {
+FlCompositorSoftware* fl_compositor_software_new(FlTaskRunner* task_runner) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(
       g_object_new(fl_compositor_software_get_type(), nullptr));
-  g_weak_ref_init(&self->engine, engine);
+  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
   return self;
 }

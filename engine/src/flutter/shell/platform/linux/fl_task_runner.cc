@@ -14,6 +14,7 @@ struct _FlTaskRunner {
   GWeakRef engine;
 
   GMutex mutex;
+  GCond cond;
 
   guint timeout_source_id;
   GList /*<FlTaskRunnerTask>*/* pending_tasks;
@@ -124,6 +125,7 @@ void fl_task_runner_dispose(GObject* object) {
 
   g_weak_ref_clear(&self->engine);
   g_mutex_clear(&self->mutex);
+  g_cond_clear(&self->cond);
 
   g_list_free_full(self->pending_tasks, g_free);
   if (self->timeout_source_id != 0) {
@@ -139,6 +141,7 @@ static void fl_task_runner_class_init(FlTaskRunnerClass* klass) {
 
 static void fl_task_runner_init(FlTaskRunner* self) {
   g_mutex_init(&self->mutex);
+  g_cond_init(&self->cond);
 }
 
 FlTaskRunner* fl_task_runner_new(FlEngine* engine) {
@@ -161,12 +164,21 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* self,
 
   self->pending_tasks = g_list_append(self->pending_tasks, runner_task);
   fl_task_runner_tasks_did_change_locked(self);
+
+  // Tasks changed, so wake up anything blocking in fl_task_runner_wait.
+  g_cond_signal(&self->cond);
 }
 
-void fl_task_runner_run_expired_tasks(FlTaskRunner* self) {
+void fl_task_runner_wait(FlTaskRunner* self) {
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->mutex);
   (void)locker;  // unused variable
 
+  g_cond_wait_until(&self->cond, &self->mutex,
+                    fl_task_runner_next_task_expiration_time_locked(self));
   fl_task_runner_process_expired_tasks_locked(self);
   fl_task_runner_tasks_did_change_locked(self);
+}
+
+void fl_task_runner_stop_wait(FlTaskRunner* self) {
+  g_cond_signal(&self->cond);
 }

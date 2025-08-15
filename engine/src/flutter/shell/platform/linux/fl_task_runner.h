@@ -38,12 +38,27 @@ void fl_task_runner_post_flutter_task(FlTaskRunner* task_runner,
                                       uint64_t target_time_nanos);
 
 /**
- * fl_task_runner_run_pending_tasks:
+ * fl_task_runner_wait:
  * @task_runner: an #FlTaskRunner.
  *
- * Runs any tasks that are ready.
+ * Block until the next task is ready and then perform it. May be interrupted by
+ * fl_task_runner_stop_wait(), in which case no task is run but execution will
+ * be returned to the caller.
+ *
+ * Must be called only by the GTK thread.
  */
-void fl_task_runner_run_expired_tasks(FlTaskRunner* task_runner);
+void fl_task_runner_wait(FlTaskRunner* task_runner);
+
+/**
+ * fl_task_runner_stop_wait:
+ * @task_runner: an #FlTaskRunner.
+ *
+ * Cause fl_task_runner_wait() to complete. May be called even if
+ * fl_task_runner_wait() is not being used.
+ *
+ * May be called by any thread.
+ */
+void fl_task_runner_stop_wait(FlTaskRunner* self);
 
 G_END_DECLS
 
