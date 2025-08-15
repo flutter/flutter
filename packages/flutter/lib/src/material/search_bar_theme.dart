@@ -155,7 +155,7 @@ class SearchBarThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
-      side: _lerpSides(a?.side, b?.side, t),
+      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(
         a?.shape,
         b?.shape,
@@ -303,18 +303,6 @@ class SearchBarThemeData with Diagnosticable {
         defaultValue: null,
       ),
     );
-  }
-
-  // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(
-    MaterialStateProperty<BorderSide?>? a,
-    MaterialStateProperty<BorderSide?>? b,
-    double t,
-  ) {
-    if (identical(a, b)) {
-      return a;
-    }
-    return MaterialStateBorderSide.lerp(a, b, t);
   }
 }
 

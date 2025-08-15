@@ -67,7 +67,7 @@ size_t EmbedderTestContextVulkan::GetSurfacePresentCount() const {
   return present_count_;
 }
 
-VkImage EmbedderTestContextVulkan::GetNextImage(const SkISize& size) {
+VkImage EmbedderTestContextVulkan::GetNextImage(const DlISize& size) {
   return surface_->GetImage();
 }
 
@@ -88,8 +88,8 @@ void* EmbedderTestContextVulkan::InstanceProcAddr(
   return reinterpret_cast<void*>(proc_addr);
 }
 
-void EmbedderTestContextVulkan::SetSurface(SkISize surface_size) {
-  FML_CHECK(surface_size_.isEmpty());
+void EmbedderTestContextVulkan::SetSurface(DlISize surface_size) {
+  FML_CHECK(surface_size_.IsEmpty());
   surface_size_ = surface_size;
   surface_ = TestVulkanSurface::Create(*vulkan_context_, surface_size_);
 }
