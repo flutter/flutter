@@ -165,8 +165,9 @@ class CupertinoDemoTab1 extends StatelessWidget {
             padding: MediaQuery.of(
               context,
             ).removePadding(removeTop: true, removeLeft: true, removeRight: true).padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            sliver: SliverList.builder(
+              itemCount: _kChildCount,
+              itemBuilder: (BuildContext context, int index) {
                 return Tab1RowItem(
                   index: index,
                   lastItem: index == _kChildCount - 1,
@@ -174,7 +175,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
                   colorName: colorNameItems![index],
                   randomSeed: randomSeed,
                 );
-              }, childCount: _kChildCount),
+              },
             ),
           ),
         ],
@@ -687,7 +688,7 @@ class Tab2ConversationRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
         children: <Widget>[
-          if (avatar != null) avatar!,
+          ?avatar,
           CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Tab2ConversationBubble(
