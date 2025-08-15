@@ -1149,7 +1149,7 @@ void main() {
       expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
       final double actualProgress = tester
           .widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator))
-          .progress;
+          .value;
       expect(actualProgress, 0.5);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
