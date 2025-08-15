@@ -2885,7 +2885,7 @@ class EditableTextState extends State<EditableText>
     if (widget.obscureText || text.isEmpty) {
       return;
     }
-    await SystemChannels.textInput.invokeMethod('TextInput.lookUp', text);
+    await SystemChannels.platform.invokeMethod('LookUp.invoke', text);
   }
 
   /// Launch a web search on the current selection,
