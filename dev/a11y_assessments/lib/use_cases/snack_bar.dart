@@ -1,9 +1,8 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -30,20 +29,23 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   String pageTitle = getUseCaseName(SnackBarUseCase());
 
-  void showAccessibleSnackBar(String message, {VoidCallback? onAction}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        action: onAction != null
-            ? SnackBarAction(label: 'Action', onPressed: onAction)
-            : null,
-      ),
+  /// Shows a SnackBar with accessibility announcement support.
+  /// This method checks if the device supports announcements and announces
+  /// the SnackBar message to assistive technologies after the frame is rendered.
+  void showAccessibleSnackBar(BuildContext context, String message, {SnackBarAction? action}) {
+    final SnackBar snackBar = SnackBar(
+      content: Text(message),
+      action: action,
     );
 
-    Future<void>.delayed(const Duration(milliseconds: 100), () {
-      debugPrint('Announcing: $message');
-      SemanticsService.announce(message, TextDirection.ltr);
-    });
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    if (mediaQuery.supportsAnnounce) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        SemanticsService.announce(message, TextDirection.ltr);
+      });
+    }
   }
 
   @override
@@ -55,23 +57,20 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
               child: const Text('Show Snackbar'),
               onPressed: () {
-                showAccessibleSnackBar('Awesome Snackbar!');
+                showAccessibleSnackBar(context, 'Awesome Snackbar!');
               },
             ),
             ElevatedButton(
-              child: const Text('Show Snackbar with action'),
+              child: const Text('Show Snackbar with action '),
               onPressed: () {
                 showAccessibleSnackBar(
+                  context,
                   'Awesome Snackbar!',
-                  onAction: () {
-                    // TODO: Replace with actual logic if needed.
-                    debugPrint('Snackbar action clicked!');
-                  },
+                  action: SnackBarAction(label: 'Action', onPressed: () {}),
                 );
               },
             ),
