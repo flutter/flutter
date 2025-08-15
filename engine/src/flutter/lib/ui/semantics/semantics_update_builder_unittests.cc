@@ -145,7 +145,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsLocale) {
     ASSERT_EQ(nodes.size(), (size_t)1);
     auto node = nodes.find(0)->second;
     // Should match the updateNode in ui_test.dart.
-    ASSERT_EQ(node.locale, "es_MX");
+    ASSERT_EQ(node.locale, "es-MX");
     message_latch->Signal();
   };
 
