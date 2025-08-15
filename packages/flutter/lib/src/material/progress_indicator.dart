@@ -151,8 +151,8 @@ abstract class ProgressIndicator extends StatefulWidget {
       role: expandedSemanticsValue != null
           ? SemanticsRole.progressBar
           : SemanticsRole.loadingSpinner,
-      minValue: '0',
-      maxValue: '100',
+      minValue: expandedSemanticsValue != null ? '0' : null,
+      maxValue: expandedSemanticsValue != null ? '100' : null,
       value: expandedSemanticsValue,
       child: child,
     );
