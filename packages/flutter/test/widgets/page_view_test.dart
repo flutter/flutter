@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is run as part of a reduced test set in CI on Mac and Windows
-// machines.
-@Tags(<String>['reduced-test-set'])
-library;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -1269,10 +1264,19 @@ void main() {
     controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byType(PageView),
-      matchesGoldenFile('page_view_no_stretch_precision_error.png'),
+    final Finder transformFinder = find.descendant(
+      of: find.byType(PageView),
+      matching: find.byType(Transform),
     );
+    expect(transformFinder, findsOneWidget);
+
+    // Get the Transform widget that stretches the PageView.
+    final Transform transform = tester.firstWidget<Transform>(
+      find.descendant(of: find.byType(PageView), matching: find.byType(Transform)),
+    );
+
+    // Check the stretch factor in the first element of the transform matrix.
+    expect(transform.transform.storage.first, 1.0);
   });
 
   testWidgets('PageController onAttach, onDetach', (WidgetTester tester) async {
