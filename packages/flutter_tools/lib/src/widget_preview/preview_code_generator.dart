@@ -6,8 +6,6 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart' as analyzer;
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
-// ignore: implementation_imports, can be removed when package:analyzer 8.1.0 is released.
-import 'package:analyzer/src/dart/constant/value.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
@@ -254,7 +252,6 @@ class PreviewCodeGenerator {
 
 extension on DartObject {
   cb.Expression toExpression() {
-    final objectImpl = this as DartObjectImpl;
     final DartType type = this.type!;
     return switch (type) {
       DartType(isDartCoreBool: true) => cb.literalBool(toBoolValue()!),
@@ -262,8 +259,8 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement2()) => _createEnumInstance(objectImpl),
-      InterfaceType() => _createInstance(type, objectImpl),
+      InterfaceType(element3: EnumElement2()) => _createEnumInstance(this),
+      InterfaceType() => _createInstance(type, this),
       FunctionType() => _createTearoff(toFunctionValue2()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
     };
@@ -273,7 +270,7 @@ extension on DartObject {
     return cb.refer(element.displayName, _elementToLibraryIdentifier(element));
   }
 
-  cb.Expression _createEnumInstance(DartObjectImpl object) {
+  cb.Expression _createEnumInstance(DartObject object) {
     final VariableElement2 variable = object.variable2!;
     return switch (variable) {
       FieldElement2(
@@ -290,8 +287,8 @@ extension on DartObject {
     };
   }
 
-  cb.Expression _createInstance(InterfaceType dartType, DartObjectImpl object) {
-    final ConstructorInvocation constructorInvocation = object.getInvocation()!;
+  cb.Expression _createInstance(InterfaceType dartType, DartObject object) {
+    final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
     final ConstructorElement2 constructor = constructorInvocation.constructor2;
     final cb.Expression type = cb.refer(
       dartType.element3.name3!,
