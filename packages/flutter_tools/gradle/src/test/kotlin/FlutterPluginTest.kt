@@ -32,7 +32,7 @@ import kotlin.test.Test
 class FlutterPluginTest {
     @Test
     fun `FlutterPlugin apply() adds expected tasks`(
-        @TempDir tempDir: Path,
+        @TempDir tempDir: Path
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -94,7 +94,7 @@ class FlutterPluginTest {
 
     @Test
     fun `copyFlutterAssets task sets filePermissions correctly`(
-        @TempDir tempDir: Path,
+        @TempDir tempDir: Path
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -201,7 +201,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("compileFlutterBuild") },
                 any<Class<FlutterTask>>(),
-                any(),
+                any()
             )
         } answers {
             flutterTaskProvider
@@ -213,7 +213,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.startsWith("copyFlutterAssets") },
                 eq(Copy::class.java),
-                capture(copyTaskActionCaptor),
+                capture(copyTaskActionCaptor)
             )
         } answers {
             mockCopyTaskProvider
@@ -225,7 +225,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("packJniLibs") },
                 eq(org.gradle.api.tasks.bundling.Jar::class.java),
-                any(),
+                any()
             )
         } answers {
             mockJarTaskProvider

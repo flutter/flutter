@@ -68,7 +68,7 @@ class DeepLinkJsonFromManifestTaskTest {
         DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(defaultNamespace, manifest, json)
         assertEquals(
             DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile).toJson().toString(),
-            jsonFile.readText(),
+            jsonFile.readText()
         )
     }
 
