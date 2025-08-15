@@ -28,7 +28,8 @@
 ^third_party/dart/third_party/pkg/.*
 ^third_party/dart/third_party/requirejs/.*
 ^third_party/depot_tools/.*
-^third_party/freetype2/docs/.*
+^third_party/expat/expat/lib/internal\.h$
+^third_party/freetype2/docs/[^F].*$
 ^third_party/google_fonts_for_unit_tests/.*
 ^third_party/gradle/.*
 ^third_party/harfbuzz/.*\.py
@@ -65,7 +66,9 @@
 ^third_party/swiftshader/third_party/llvm-16.0/.*
 (?i)^third_party/vulkan-deps/glslang/src/LICENSE\.txt$
 ^third_party/vulkan-deps/spirv-headers/.*
+^third_party/vulkan-deps/vulkan-headers/src/LICENSE\.md$
 ^third_party/vulkan-deps/vulkan-loader/.*
+^third_party/vulkan-deps/vulkan-utility-libraries/src/LICENSE.md$
 ^tools/android_sdk/packages\.txt$
 ^tools/fuchsia/.*
 ^tools/licenses_cpp/data/.*

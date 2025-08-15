@@ -25,6 +25,7 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -170,6 +171,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             'is only meaningful in debug and profile builds.',
       )
       ..addFlag(
+        'profile-startup',
+        negatable: false,
+        help:
+            'Make the profiler discard new samples once the profiler sample '
+            'buffer is full. When this flag is not set, the profiler sample '
+            'buffer is used as a ring buffer, meaning that once it is full, '
+            'new samples start overwriting the oldest ones.',
+        hide: !verboseHelp,
+      )
+      ..addFlag(
         'enable-software-rendering',
         negatable: false,
         help:
@@ -269,7 +280,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
-  Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
+  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
@@ -279,18 +290,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
 
-    final Map<String, String> webHeaders = featureFlags.isWebEnabled
-        ? extractWebHeaders()
-        : const <String, String>{};
-
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
-        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy:
             featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend:
@@ -302,7 +305,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
-        webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
@@ -313,6 +315,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
+        webDevServerConfig: webDevServerConfig,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -344,10 +347,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArg('verbose-system-logs'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
-        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy:
             featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend:
@@ -362,7 +361,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
-        webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
@@ -376,12 +374,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
+        profileStartup: boolArg('profile-startup'),
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        webDevServerConfig: webDevServerConfig,
       );
     }
   }
@@ -493,7 +493,37 @@ class RunCommand extends RunCommandBase {
   String get category => FlutterCommandCategory.project;
 
   List<Device>? devices;
-  var webMode = false;
+  Future<WebDevServerConfig?> getWebDevServerConfig() async {
+    // Only support "web mode" with a single web device due to resident runner
+    // refactoring required otherwise.
+
+    if (featureFlags.isWebEnabled &&
+        devices != null &&
+        devices!.length == 1 &&
+        await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
+      final String? webPortArg = stringArg('web-port');
+      final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+
+      final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+      );
+
+      final HttpsConfig? httpsConfig = fileConfig.https?.copyWith(
+        certPath: stringArg('web-tls-cert-path'),
+        certKeyPath: stringArg('web-tls-cert-key-path'),
+      );
+
+      final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
+        host: stringArg('web-hostname'),
+        port: webPort,
+        https: httpsConfig,
+        headers: extractWebHeaders(),
+      );
+      return webDevServerConfig;
+    }
+    return null;
+  }
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -644,6 +674,8 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
+    final webMode = webDevServerConfig != null;
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -660,13 +692,6 @@ class RunCommand extends RunCommandBase {
     if (devices!.any((Device device) => device is AndroidDevice)) {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
-
-    // Only support "web mode" with a single web device due to resident runner
-    // refactoring required otherwise.
-    webMode =
-        featureFlags.isWebEnabled &&
-        devices!.length == 1 &&
-        await devices!.single.targetPlatform == TargetPlatform.web_javascript;
 
     if (useWasm && !webMode) {
       throwToolExit('--wasm is only supported on the web platform');
@@ -696,11 +721,17 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
+    final webMode = webDevServerConfig != null;
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
+
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: debuggingOptions,
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -716,7 +747,7 @@ class RunCommand extends RunCommandBase {
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         fileSystem: globals.fs,
         analytics: globals.analytics,
@@ -730,7 +761,7 @@ class RunCommand extends RunCommandBase {
     return ColdRunner(
       flutterDevices,
       target: targetFile,
-      debuggingOptions: await createDebuggingOptions(webMode),
+      debuggingOptions: debuggingOptions,
       traceStartup: traceStartup,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null
@@ -752,6 +783,7 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
 
     if (outputMachineFormat) {
       if (devices!.length > 1) {
@@ -759,13 +791,17 @@ class RunCommand extends RunCommandBase {
       }
       final Daemon daemon = createMachineDaemon();
       late AppInstance app;
+
+      final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+        webDevServerConfig: webDevServerConfig,
+      );
       try {
         app = await daemon.appDomain.startApp(
           devices!.first,
           globals.fs.currentDirectory.path,
           targetFile,
           route,
-          await createDebuggingOptions(webMode),
+          debuggingOptions,
           hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
