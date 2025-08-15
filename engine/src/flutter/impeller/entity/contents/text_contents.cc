@@ -57,24 +57,15 @@ std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
   return frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
-void TextContents::SetTextProperties(Color color,
-                                     bool stroke,
-                                     Scalar stroke_width,
-                                     Cap stroke_cap,
-                                     Join stroke_join,
-                                     Scalar stroke_miter) {
+void TextContents::SetTextProperties(
+    Color color,
+    const std::optional<StrokeParameters>& stroke) {
   if (frame_->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
     properties_.color = color.WithAlpha(1.0);
   }
-  if (stroke) {
-    properties_.stroke = true;
-    properties_.stroke_width = stroke_width;
-    properties_.stroke_cap = stroke_cap;
-    properties_.stroke_join = stroke_join;
-    properties_.stroke_miter = stroke_miter;
-  }
+  properties_.stroke = stroke;
 }
 
 namespace {

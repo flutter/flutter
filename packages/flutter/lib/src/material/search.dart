@@ -8,6 +8,8 @@
 /// @docImport 'list_tile.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -260,13 +262,13 @@ abstract class SearchDelegate<T> {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
-      appBarTheme: AppBarTheme(
-        systemOverlayStyle:
-            colorScheme.brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light
-                : SystemUiOverlayStyle.dark,
-        backgroundColor:
-            colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+      appBarTheme: AppBarThemeData(
+        systemOverlayStyle: colorScheme.brightness == Brightness.dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        backgroundColor: colorScheme.brightness == Brightness.dark
+            ? Colors.grey[900]
+            : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         titleTextStyle: theme.textTheme.titleLarge,
         toolbarTextStyle: theme.textTheme.bodyMedium,
@@ -633,16 +635,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             leadingWidth: widget.delegate.leadingWidth,
             automaticallyImplyLeading: widget.delegate.automaticallyImplyLeading ?? true,
             leading: widget.delegate.buildLeading(context),
-            title: TextField(
-              controller: widget.delegate._queryTextController,
-              focusNode: focusNode,
-              style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
-              textInputAction: widget.delegate.textInputAction,
-              autocorrect: widget.delegate.autocorrect,
-              enableSuggestions: widget.delegate.enableSuggestions,
-              keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) => widget.delegate.showResults(context),
-              decoration: InputDecoration(hintText: searchFieldLabel),
+            title: Semantics(
+              inputType: SemanticsInputType.search,
+              child: TextField(
+                controller: widget.delegate._queryTextController,
+                focusNode: focusNode,
+                style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
+                textInputAction: widget.delegate.textInputAction,
+                autocorrect: widget.delegate.autocorrect,
+                enableSuggestions: widget.delegate.enableSuggestions,
+                keyboardType: widget.delegate.keyboardType,
+                onSubmitted: (String _) => widget.delegate.showResults(context),
+                decoration: InputDecoration(hintText: searchFieldLabel),
+              ),
             ),
             flexibleSpace: widget.delegate.buildFlexibleSpace(context),
             actions: widget.delegate.buildActions(context),

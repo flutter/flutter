@@ -54,7 +54,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
   }) async => '/';
 }
 
-/// Creates a [FlutterProject] in a directory named [flutter_project]
+/// Creates a [FlutterProject] in a directory named `flutter_project`
 /// within [directoryOverride].
 class FakeFlutterProjectFactory extends FlutterProjectFactory {
   FakeFlutterProjectFactory(this.directoryOverride)
@@ -74,7 +74,7 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
 // When making changes here, consider making the corresponding changes to that
 // file as well.
 
-const String gradleSettingsFileContent = r'''
+const gradleSettingsFileContent = r'''
 pluginManagement {
     def flutterSdkPath = {
         def properties = new Properties()
@@ -103,10 +103,10 @@ include ":app"
 
 ''';
 
-const String agpReplacementString = 'AGP_REPLACE_ME';
-const String kgpReplacementString = 'KGP_REPLACE_ME';
+const agpReplacementString = 'AGP_REPLACE_ME';
+const kgpReplacementString = 'KGP_REPLACE_ME';
 
-const String gradleWrapperPropertiesFileContent = r'''
+const gradleWrapperPropertiesFileContent = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
@@ -115,8 +115,8 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 
 ''';
 
-const String gradleReplacementString = 'GRADLE_REPLACE_ME';
-const String flutterCompileSdkString = 'flutter.compileSdkVersion';
+const gradleReplacementString = 'GRADLE_REPLACE_ME';
+const flutterCompileSdkString = 'flutter.compileSdkVersion';
 
 class VersionTuple {
   VersionTuple({
@@ -144,6 +144,7 @@ class VersionTuple {
 Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required VersionTuple versions,
   required Directory tempDir,
+  bool skipChecking = false,
 }) async {
   // Create a new flutter project.
   final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -155,10 +156,10 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   ], workingDirectory: tempDir.path);
   expect(result, const ProcessResultMatcher());
 
-  final Directory app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
+  final app = Directory(fileSystem.path.join(tempDir.path, 'dependency_checker_app'));
 
   if (versions.compileSdkVersion != null) {
-    final File appGradleBuild = File(
+    final appGradleBuild = File(
       fileSystem.path.join(app.path, 'android', 'app', 'build.gradle.kts'),
     );
     final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
@@ -169,7 +170,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   }
 
   // Modify gradle version to passed in version.
-  final File gradleWrapperProperties = File(
+  final gradleWrapperProperties = File(
     fileSystem.path.join(app.path, 'android', 'gradle', 'wrapper', 'gradle-wrapper.properties'),
   );
   final String propertyContent = gradleWrapperPropertiesFileContent.replaceFirst(
@@ -178,7 +179,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
   );
   await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-  final File gradleSettings = File(fileSystem.path.join(app.path, 'android', 'settings.gradle'));
+  final gradleSettings = File(fileSystem.path.join(app.path, 'android', 'settings.gradle'));
   final String settingsContent = gradleSettingsFileContent
       .replaceFirst(agpReplacementString, versions.agpVersion)
       .replaceFirst(kgpReplacementString, versions.kotlinVersion);
@@ -190,6 +191,7 @@ Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
     'build',
     'apk',
     '--debug',
+    if (skipChecking) '--android-skip-build-dependency-validation',
   ], workingDirectory: app.path);
   return result;
 }

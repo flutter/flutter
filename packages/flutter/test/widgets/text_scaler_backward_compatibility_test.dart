@@ -97,7 +97,7 @@ void main() {
       // should get the correct TextScaler.
       expect(outsideTextScaleFactor, 1.0);
       expect(outsideTextScaler.textScaleFactor, 1.0);
-      expect(outsideTextScaler, TextScaler.noScaling);
+      expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
       expect(insideTextScaleFactor, 4.0);
       expect(insideTextScaler.textScaleFactor, 4.0);
       expect(insideTextScaler, const TextScaler.linear(4.0));
@@ -130,7 +130,7 @@ void main() {
 
       expect(outsideTextScaleFactor, 1.0);
       expect(outsideTextScaler.textScaleFactor, 1.0);
-      expect(outsideTextScaler, TextScaler.noScaling);
+      expect(outsideTextScaler, isSystemTextScaler(withScaleFactor: 1.0));
       expect(insideTextScaleFactor, 4.0);
       expect(insideTextScaler.textScaleFactor, 4.0);
       expect(insideTextScaler, const TextScaler.linear(4.0));
@@ -224,8 +224,9 @@ void main() {
         ),
       );
 
-      final RenderEditable renderEditable =
-          tester.allRenderObjects.whereType<RenderEditable>().first;
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
       expect(renderEditable.textScaler, const TextScaler.linear(2.0));
     });
   });

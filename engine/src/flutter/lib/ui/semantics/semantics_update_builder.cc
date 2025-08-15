@@ -30,35 +30,9 @@ SemanticsUpdateBuilder::SemanticsUpdateBuilder() = default;
 
 SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
-// TODO(hangyujin): This a temporary converter, change this to use a list of
-// bool after migrating framework to use SemanticsFlags class instead of a
-// bitmask.
-SemanticsFlags _intToSemanticsFlags(int bitmask) {
-  return SemanticsFlags{
-
-      (bitmask & (1 << 0)) != 0,  (bitmask & (1 << 1)) != 0,
-      (bitmask & (1 << 2)) != 0,  (bitmask & (1 << 3)) != 0,
-      (bitmask & (1 << 4)) != 0,  (bitmask & (1 << 5)) != 0,
-      (bitmask & (1 << 6)) != 0,  (bitmask & (1 << 7)) != 0,
-      (bitmask & (1 << 8)) != 0,  (bitmask & (1 << 9)) != 0,
-      (bitmask & (1 << 10)) != 0, (bitmask & (1 << 11)) != 0,
-      (bitmask & (1 << 12)) != 0, (bitmask & (1 << 13)) != 0,
-      (bitmask & (1 << 14)) != 0, (bitmask & (1 << 15)) != 0,
-      (bitmask & (1 << 16)) != 0, (bitmask & (1 << 17)) != 0,
-      (bitmask & (1 << 18)) != 0, (bitmask & (1 << 19)) != 0,
-      (bitmask & (1 << 20)) != 0, (bitmask & (1 << 21)) != 0,
-      (bitmask & (1 << 22)) != 0, (bitmask & (1 << 23)) != 0,
-      (bitmask & (1 << 24)) != 0, (bitmask & (1 << 25)) != 0,
-      (bitmask & (1 << 26)) != 0, (bitmask & (1 << 27)) != 0,
-      (bitmask & (1 << 28)) != 0, (bitmask & (1 << 29)) != 0,
-      (bitmask & (1 << 30)) != 0
-
-  };
-}
-
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    int flags,
+    Dart_Handle flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -74,8 +48,6 @@ void SemanticsUpdateBuilder::updateNode(
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     std::string identifier,
     std::string label,
     const std::vector<NativeStringAttribute*>& labelAttributes,
@@ -104,7 +76,9 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = _intToSemanticsFlags(flags);
+  auto* flags_object =
+      tonic::DartConverter<flutter::NativeSemanticsFlags*>::FromDart(flags);
+  node.flags = flags_object->GetFlags();
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;
@@ -118,8 +92,6 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
-  node.elevation = elevation;
-  node.thickness = thickness;
   node.identifier = std::move(identifier);
   node.label = std::move(label);
   pushStringAttributes(node.labelAttributes, labelAttributes);

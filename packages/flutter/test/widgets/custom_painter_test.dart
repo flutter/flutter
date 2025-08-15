@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -443,32 +445,31 @@ void _defineTests() {
               onCopy: () => performedActions.add(SemanticsAction.copy),
               onCut: () => performedActions.add(SemanticsAction.cut),
               onPaste: () => performedActions.add(SemanticsAction.paste),
-              onMoveCursorForwardByCharacter:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-              onMoveCursorBackwardByCharacter:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
-              onMoveCursorForwardByWord:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
-              onMoveCursorBackwardByWord:
-                  (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
-              onSetSelection:
-                  (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+              onMoveCursorForwardByCharacter: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+              onMoveCursorBackwardByCharacter: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+              onMoveCursorForwardByWord: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorForwardByWord),
+              onMoveCursorBackwardByWord: (bool _) =>
+                  performedActions.add(SemanticsAction.moveCursorBackwardByWord),
+              onSetSelection: (TextSelection _) =>
+                  performedActions.add(SemanticsAction.setSelection),
               onSetText: (String text) => performedActions.add(SemanticsAction.setText),
-              onDidGainAccessibilityFocus:
-                  () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
-              onDidLoseAccessibilityFocus:
-                  () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+              onDidGainAccessibilityFocus: () =>
+                  performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+              onDidLoseAccessibilityFocus: () =>
+                  performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
               onFocus: () => performedActions.add(SemanticsAction.focus),
             ),
           ),
         ),
       ),
     );
-    final Set<SemanticsAction> allActions =
-        SemanticsAction.values.toSet()
-          ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-          ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-          ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
+    final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
+      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -636,6 +637,78 @@ void _defineTests() {
           id: 1,
           children: <TestSemantics>[
             TestSemantics.rootChild(id: 2, rect: TestSemantics.fullScreen, flags: flags),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
+  });
+
+  testWidgets('semantics properties', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final SemanticsProperties properties = SemanticsProperties(
+      label: 'label',
+      value: 'value',
+      increasedValue: 'increasedValue',
+      decreasedValue: 'decreasedValue',
+      hint: 'hint',
+      link: true,
+      linkUrl: Uri.parse('http://google.com'),
+      headingLevel: 1,
+      maxValueLength: 3,
+      currentValueLength: 1,
+      identifier: 'id',
+      tooltip: 'tooltip',
+      hintOverrides: const SemanticsHintOverrides(onLongPressHint: 'long', onTapHint: 'tap'),
+      textDirection: TextDirection.rtl,
+      tagForChildren: const SemanticsTag('tag'),
+      role: SemanticsRole.alertDialog,
+      controlsNodes: const <String>{'abc'},
+      inputType: SemanticsInputType.phone,
+      validationResult: SemanticsValidationResult.invalid,
+    );
+    await tester.pumpWidget(
+      CustomPaint(
+        painter: _PainterWithSemantics(
+          semantics: CustomPainterSemantics(
+            key: const ValueKey<int>(1),
+            rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+            properties: properties,
+          ),
+        ),
+      ),
+    );
+
+    const int expectedId = 2;
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: expectedId,
+              rect: TestSemantics.fullScreen,
+              label: properties.label!,
+              value: properties.value!,
+              increasedValue: properties.increasedValue!,
+              decreasedValue: properties.decreasedValue!,
+              hint: properties.hint!,
+              linkUrl: properties.linkUrl,
+              headingLevel: properties.headingLevel,
+              maxValueLength: properties.maxValueLength,
+              currentValueLength: properties.currentValueLength,
+              identifier: properties.identifier!,
+              tooltip: properties.tooltip!,
+              hintOverrides: properties.hintOverrides,
+              textDirection: properties.textDirection,
+              tags: <SemanticsTag>{properties.tagForChildren!},
+              role: properties.role!,
+              controlsNodes: properties.controlsNodes,
+              inputType: properties.inputType!,
+              validationResult: properties.validationResult,
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
+            ),
           ],
         ),
       ],

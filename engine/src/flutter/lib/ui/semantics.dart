@@ -399,9 +399,6 @@ enum SemanticsRole {
   /// * [table] ,[cell], [row] for table related roles.
   columnHeader,
 
-  /// An input field for users to enter search terms.
-  searchBox,
-
   /// A control used for dragging across content.
   ///
   /// For example, the drag handle of [ReorderableList].
@@ -504,6 +501,44 @@ enum SemanticsRole {
   /// * The connection to the server was lost so local changes will not be
   ///   saved.
   alert,
+
+  /// A supporting section that relates to the main content.
+  ///
+  /// The compelementary role is one of landmark roles. This role can be used to
+  /// describe sidebars, or call-out boxes.
+  ///
+  /// For more information, see: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/complementary_role
+  complementary,
+
+  /// A section for a footer, containing identifying information such as
+  /// copyright information, navigation links and privacy statements.
+  ///
+  /// The contentInfo role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/contentinfo_role
+  contentInfo,
+
+  /// The primary content of a document.
+  ///
+  /// The section consists of content that is directly related to or expands on
+  /// the central topic of a document, or the main function of an application.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/main_role
+  main,
+
+  /// A region of a web page that contains navigation links.
+  ///
+  /// This role is one of landmark roles. For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/navigation_role
+  navigation,
+
+  /// A section of content sufficiently important but cannot be descrived by one
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
+  /// navigation.
+  ///
+  /// For more information, see:
+  /// https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role
+  region,
 }
 
 /// Describe the type of data for an input field.
@@ -1030,10 +1065,10 @@ class SemanticsFlag {
 ///
 /// For example, These flags can indicate if an element is
 /// checkable, currently checked, selectable, or functions as a button.
-class SemanticsFlags {
+class SemanticsFlags extends NativeFieldWrapperClass1 {
   /// Creates a set of semantics flags that describe various states of a widget.
   /// All flags default to `false` unless specified.
-  const SemanticsFlags({
+  SemanticsFlags({
     this.hasCheckedState = false,
     this.isChecked = false,
     this.isSelected = false,
@@ -1065,10 +1100,116 @@ class SemanticsFlags {
     this.hasSelectedState = false,
     this.hasRequiredState = false,
     this.isRequired = false,
-  });
+  }) {
+    _initSemanticsFlags(
+      this,
+      hasCheckedState,
+      isChecked,
+      isSelected,
+      isButton,
+      isTextField,
+      isFocused,
+      hasEnabledState,
+      isEnabled,
+      isInMutuallyExclusiveGroup,
+      isHeader,
+      isObscured,
+      scopesRoute,
+      namesRoute,
+      isHidden,
+      isImage,
+      isLiveRegion,
+      hasToggledState,
+      isToggled,
+      hasImplicitScrolling,
+      isMultiline,
+      isReadOnly,
+      isFocusable,
+      isLink,
+      isSlider,
+      isKeyboardKey,
+      isCheckStateMixed,
+      hasExpandedState,
+      isExpanded,
+      hasSelectedState,
+      hasRequiredState,
+      isRequired,
+    );
+  }
+
+  @Native<
+    Void Function(
+      Handle,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+      Bool,
+    )
+  >(symbol: 'NativeSemanticsFlags::initSemanticsFlags')
+  external static void _initSemanticsFlags(
+    SemanticsFlags instance,
+    bool hasCheckedState,
+    bool isChecked,
+    bool isSelected,
+    bool isButton,
+    bool isTextField,
+    bool isFocused,
+    bool hasEnabledState,
+    bool isEnabled,
+    bool isInMutuallyExclusiveGroup,
+    bool isHeader,
+    bool isObscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool isHidden,
+    bool isImage,
+    bool isLiveRegion,
+    bool hasToggledState,
+    bool isToggled,
+    bool hasImplicitScrolling,
+    bool isMultiline,
+    bool isReadOnly,
+    bool isFocusable,
+    bool isLink,
+    bool isSlider,
+    bool isKeyboardKey,
+    bool isCheckStateMixed,
+    bool hasExpandedState,
+    bool isExpanded,
+    bool hasSelectedState,
+    bool hasRequiredState,
+    bool isRequired,
+  );
 
   /// The set of semantics flags with every flag set to false.
-  static const SemanticsFlags kNone = SemanticsFlags();
+  static SemanticsFlags none = SemanticsFlags();
 
   /// {@macro dart.ui.semantics.hasCheckedState}
   final bool hasCheckedState;
@@ -1340,6 +1481,79 @@ class SemanticsFlags {
     hasRequiredState,
     isRequired,
   ]);
+
+  /// Convert flags to a list of string.
+  List<String> toStrings() {
+    return <String>[
+      if (hasCheckedState) 'hasCheckedState',
+      if (isChecked) 'isChecked',
+      if (isSelected) 'isSelected',
+      if (isButton) 'isButton',
+      if (isTextField) 'isTextField',
+      if (isFocused) 'isFocused',
+      if (hasEnabledState) 'hasEnabledState',
+      if (isEnabled) 'isEnabled',
+      if (isInMutuallyExclusiveGroup) 'isInMutuallyExclusiveGroup',
+      if (isHeader) 'isHeader',
+      if (isObscured) 'isObscured',
+      if (scopesRoute) 'scopesRoute',
+      if (namesRoute) 'namesRoute',
+      if (isHidden) 'isHidden',
+      if (isImage) 'isImage',
+      if (isLiveRegion) 'isLiveRegion',
+      if (hasToggledState) 'hasToggledState',
+      if (isToggled) 'isToggled',
+      if (hasImplicitScrolling) 'hasImplicitScrolling',
+      if (isMultiline) 'isMultiline',
+      if (isReadOnly) 'isReadOnly',
+      if (isFocusable) 'isFocusable',
+      if (isLink) 'isLink',
+      if (isSlider) 'isSlider',
+      if (isKeyboardKey) 'isKeyboardKey',
+      if (isCheckStateMixed) 'isCheckStateMixed',
+      if (hasExpandedState) 'hasExpandedState',
+      if (isExpanded) 'isExpanded',
+      if (hasSelectedState) 'hasSelectedState',
+      if (hasRequiredState) 'hasRequiredState',
+      if (isRequired) 'isRequired',
+    ];
+  }
+
+  /// Checks if any of the boolean semantic flags are set to true
+  /// in both this instance and the [other] instance.
+  bool hasRepeatedFlags(SemanticsFlags other) {
+    return (hasCheckedState && other.hasCheckedState) ||
+        (isChecked && other.isChecked) ||
+        (isSelected && other.isSelected) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isFocused && other.isFocused) ||
+        (hasEnabledState && other.hasEnabledState) ||
+        (isEnabled && other.isEnabled) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasToggledState && other.hasToggledState) ||
+        (isToggled && other.isToggled) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isFocusable && other.isFocusable) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isCheckStateMixed && other.isCheckStateMixed) ||
+        (hasExpandedState && other.hasExpandedState) ||
+        (isExpanded && other.isExpanded) ||
+        (hasSelectedState && other.hasSelectedState) ||
+        (hasRequiredState && other.hasRequiredState) ||
+        (isRequired && other.isRequired);
+  }
 }
 
 /// The validation result of a form field.
@@ -1563,14 +1777,6 @@ abstract class SemanticsUpdateBuilder {
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   ///
-  /// The `elevation` describes the distance in z-direction between this node
-  /// and the `elevation` of the parent.
-  ///
-  /// The `thickness` describes how much space this node occupies in the
-  /// z-direction starting at `elevation`. Basically, in the z-direction the
-  /// node starts at `elevation` above the parent and ends at `elevation` +
-  /// `thickness` above the parent.
-  ///
   /// The `headingLevel` describes that this node is a heading and the hierarchy
   /// level this node represents as a heading. A value of 0 indicates that this
   /// node is not a heading. A value of 1 or greater indicates that this node is
@@ -1583,6 +1789,9 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// The `role` describes the role of this node. Defaults to
   /// [SemanticsRole.none] if not set.
+  ///
+  /// The `locale` describes the language of the content in this node. i.e.
+  /// label, value, and hint.
   ///
   /// If `validationResult` is not null, indicates the result of validating a
   /// form field. If null, indicates that the node is not being validated, or
@@ -1598,7 +1807,7 @@ abstract class SemanticsUpdateBuilder {
   ///    `validationResult` argument.
   void updateNode({
     required int id,
-    required int flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1610,8 +1819,6 @@ abstract class SemanticsUpdateBuilder {
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1636,6 +1843,7 @@ abstract class SemanticsUpdateBuilder {
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required Locale? locale,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1677,7 +1885,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   @override
   void updateNode({
     required int id,
-    required int flags,
+    required SemanticsFlags flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1689,8 +1897,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
     required Rect rect,
     required String identifier,
     required String label,
@@ -1715,6 +1921,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required Locale? locale,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1739,8 +1946,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       rect.top,
       rect.right,
       rect.bottom,
-      elevation,
-      thickness,
       identifier,
       label,
       labelAttributes,
@@ -1764,6 +1969,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       controlsNodes,
       validationResult.index,
       inputType.index,
+      locale?.toString() ?? '',
     );
   }
 
@@ -1771,7 +1977,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     Void Function(
       Pointer<Void>,
       Int32,
-      Int32,
+      Handle,
       Int32,
       Int32,
       Int32,
@@ -1787,8 +1993,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Double,
       Double,
       Double,
-      Double,
-      Double,
       Handle,
       Handle,
       Handle,
@@ -1812,11 +2016,12 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Int32,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
     int id,
-    int flags,
+    SemanticsFlags flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -1832,8 +2037,6 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     double top,
     double right,
     double bottom,
-    double elevation,
-    double thickness,
     String? identifier,
     String label,
     List<StringAttribute> labelAttributes,
@@ -1857,6 +2060,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     List<String>? controlsNodes,
     int validationResultIndex,
     int inputType,
+    String locale,
   );
 
   @override

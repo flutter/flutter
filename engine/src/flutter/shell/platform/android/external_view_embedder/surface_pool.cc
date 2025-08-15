@@ -13,7 +13,7 @@ OverlayLayer::OverlayLayer(int id,
                            std::unique_ptr<Surface> surface)
     : id(id),
       android_surface(std::move(android_surface)),
-      surface(std::move(surface)){};
+      surface(std::move(surface)) {};
 
 OverlayLayer::~OverlayLayer() = default;
 
@@ -49,6 +49,7 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
 
     FML_CHECK(java_metadata->window);
     android_surface->SetNativeWindow(java_metadata->window, jni_facade);
+    android_surface->SetupImpellerSurface();
 
     std::unique_ptr<Surface> surface =
         android_surface->CreateGPUSurface(gr_context);
@@ -117,7 +118,7 @@ std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::GetUnusedLayers() {
   return results;
 }
 
-void SurfacePool::SetFrameSize(SkISize frame_size) {
+void SurfacePool::SetFrameSize(DlISize frame_size) {
   std::lock_guard lock(mutex_);
   requested_frame_size_ = frame_size;
 }

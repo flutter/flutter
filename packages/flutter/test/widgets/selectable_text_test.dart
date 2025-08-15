@@ -8,7 +8,7 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -53,10 +53,9 @@ Widget overlay({Widget? child}) {
     },
   );
   addTearDown(
-    () =>
-        entry
-          ..remove()
-          ..dispose(),
+    () => entry
+      ..remove()
+      ..dispose(),
   );
   return overlayWithEntry(entry);
 }
@@ -212,8 +211,8 @@ void main() {
 
   testWidgets(
     'throw if no Overlay widget exists above',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
@@ -1503,7 +1502,9 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SelectableText('some text')))),
+      const MaterialApp(
+        home: Material(child: Center(child: SelectableText('some text'))),
+      ),
     );
 
     expect(
@@ -1511,6 +1512,7 @@ void main() {
       includesNodeWith(
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
         ],
@@ -1542,6 +1544,7 @@ void main() {
         ),
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
         ],
@@ -1578,6 +1581,7 @@ void main() {
         ),
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
+          SemanticsFlag.isFocusable,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
         ],
@@ -1616,6 +1620,7 @@ void main() {
               id: 1,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
@@ -2165,8 +2170,10 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               actions: <SemanticsAction>[SemanticsAction.longPress],
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isMultiline,
               ],
@@ -2194,6 +2201,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               textSelection: const TextSelection.collapsed(offset: 9),
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2203,6 +2211,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2227,6 +2236,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2238,6 +2248,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2262,6 +2273,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorForwardByCharacter,
@@ -2271,6 +2283,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2341,6 +2354,7 @@ void main() {
               id: 1,
               value: 'Guten Tag',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 // Absent the following because enableInteractiveSelection: false
@@ -2352,6 +2366,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 // SelectableText act like a text widget when enableInteractiveSelection
                 // is false. It will not respond to any pointer event.
@@ -2386,10 +2401,12 @@ void main() {
               id: 1,
               value: 'Hello',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
               ],
             ),
@@ -2417,6 +2434,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2426,6 +2444,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2450,6 +2469,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2462,6 +2482,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2526,6 +2547,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           actions: <SemanticsAction>[SemanticsAction.longPress],
+                          inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
                               children: <TestSemantics>[
@@ -2599,6 +2621,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2608,6 +2631,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2652,6 +2676,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2662,6 +2687,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2698,9 +2724,11 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
               ],
               actions: <SemanticsAction>[SemanticsAction.longPress],
@@ -2724,9 +2752,11 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
+                SemanticsFlag.isFocusable,
                 SemanticsFlag.isMultiline,
                 SemanticsFlag.isFocused,
               ],
@@ -2821,7 +2851,9 @@ void main() {
 
   testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
-      return MaterialApp(home: Material(child: SelectableText('something', style: style)));
+      return MaterialApp(
+        home: Material(child: SelectableText('something', style: style)),
+      );
     }
 
     await tester.pumpWidget(
@@ -3418,8 +3450,9 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      final TextEditingValue currentValue =
-          tester.state<EditableTextState>(find.byType(EditableText)).textEditingValue;
+      final TextEditingValue currentValue = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .textEditingValue;
       expect(
         currentValue.selection,
         TextSelection(baseOffset: testValue.indexOf('g'), extentOffset: testValue.indexOf('p') + 3),
@@ -3886,18 +3919,17 @@ void main() {
 
       // Find the selection handle fade transition after the start handle has been
       // hidden because it is out of view.
-      final List<FadeTransition> transitionsAfter =
-          find
-              .descendant(
-                of: find.byWidgetPredicate(
-                  (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-                ),
-                matching: find.byType(FadeTransition),
-              )
-              .evaluate()
-              .map((Element e) => e.widget)
-              .cast<FadeTransition>()
-              .toList();
+      final List<FadeTransition> transitionsAfter = find
+          .descendant(
+            of: find.byWidgetPredicate(
+              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+            ),
+            matching: find.byType(FadeTransition),
+          )
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<FadeTransition>()
+          .toList();
 
       expect(transitionsAfter.length, 2);
 
@@ -4272,11 +4304,10 @@ void main() {
 
     const SelectableText('something').debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>['data: something']);
   });
@@ -4305,11 +4336,10 @@ void main() {
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'data: something',
@@ -4582,18 +4612,15 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<FadeTransition> transitions =
-        find
-            .descendant(
-              of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-              ),
-              matching: find.byType(FadeTransition),
-            )
-            .evaluate()
-            .map((Element e) => e.widget)
-            .cast<FadeTransition>()
-            .toList();
+    final List<FadeTransition> transitions = find
+        .descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+          matching: find.byType(FadeTransition),
+        )
+        .evaluate()
+        .map((Element e) => e.widget)
+        .cast<FadeTransition>()
+        .toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -4609,15 +4636,19 @@ void main() {
 
       await tester.pumpWidget(const MaterialApp(home: Material(child: SelectableText(testText))));
 
-      final RenderEditable renderEditable =
-          tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+      final RenderEditable renderEditable = tester
+          .state<EditableTextState>(find.byType(EditableText))
+          .renderEditable;
 
       await tester.tapAt(const Offset(20, 10));
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       await tester.pumpAndSettle();
 
-      final List<Widget> transitions =
-          find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<Widget> transitions = find
+          .byType(FadeTransition)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .toList();
       expect(transitions.length, 2);
       final FadeTransition left = transitions[0] as FadeTransition;
       final FadeTransition right = transitions[1] as FadeTransition;
@@ -4734,11 +4765,10 @@ void main() {
     WidgetTester tester,
   ) async {
     int spyTaps = 0;
-    final TapGestureRecognizer spyRecognizer =
-        TapGestureRecognizer()
-          ..onTap = () {
-            spyTaps += 1;
-          };
+    final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        spyTaps += 1;
+      };
     addTearDown(spyRecognizer.dispose);
 
     await tester.pumpWidget(
@@ -4787,11 +4817,10 @@ void main() {
     WidgetTester tester,
   ) async {
     int spyLongPress = 0;
-    final LongPressGestureRecognizer spyRecognizer =
-        LongPressGestureRecognizer()
-          ..onLongPress = () {
-            spyLongPress += 1;
-          };
+    final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
+      ..onLongPress = () {
+        spyLongPress += 1;
+      };
     addTearDown(spyRecognizer.dispose);
 
     await tester.pumpWidget(
@@ -4842,7 +4871,9 @@ void main() {
 
   testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: SelectableText('test')))),
+      const MaterialApp(
+        home: Material(child: Center(child: SelectableText('test'))),
+      ),
     );
 
     final TestGesture gesture = await tester.createGesture(
@@ -5326,7 +5357,10 @@ void main() {
                     child: Center(
                       child: TabBar(
                         labelColor: Colors.black,
-                        tabs: <Tab>[Tab(text: 'Sliver Tab 1'), Tab(text: 'Sliver Tab 2')],
+                        tabs: <Tab>[
+                          Tab(text: 'Sliver Tab 1'),
+                          Tab(text: 'Sliver Tab 2'),
+                        ],
                       ),
                     ),
                   ),
@@ -5397,14 +5431,11 @@ void main() {
       final SelectableText selectableText = SelectableText(
         testValue,
         magnifierConfiguration: TextMagnifierConfiguration(
-          magnifierBuilder: (
-            _,
-            MagnifierController controller,
-            ValueNotifier<MagnifierInfo> localMagnifierInfo,
-          ) {
-            magnifierInfo = localMagnifierInfo;
-            return fakeMagnifier;
-          },
+          magnifierBuilder:
+              (_, MagnifierController controller, ValueNotifier<MagnifierInfo> localMagnifierInfo) {
+                magnifierInfo = localMagnifierInfo;
+                return fakeMagnifier;
+              },
         ),
       );
 
@@ -5568,26 +5599,28 @@ void main() {
   });
 
   group('context menu', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169001.
     testWidgets(
-      'iOS uses the system context menu by default if supported',
+      'iOS does not use the system context menu by default even when supported',
       (WidgetTester tester) async {
-        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
-            true;
-        _updateMediaQueryFromView(tester);
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         addTearDown(() {
-          TestWidgetsFlutterBinding.instance.platformDispatcher
-              .resetSupportsShowingSystemContextMenu();
-          _updateMediaQueryFromView(tester);
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.view.reset();
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
-        addTearDown(controller.dispose);
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
+          View(
+            view: tester.view,
+            child: const MaterialApp(home: Material(child: SelectableText('one two three'))),
+          ),
         );
 
         // No context menu shown.
-        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(SystemContextMenu), findsNothing);
 
         // Double tap to select the first word and show the menu.
@@ -5596,31 +5629,11 @@ void main() {
         await tester.tapAt(textOffsetToPosition(tester, 1));
         await tester.pump(SelectionOverlay.fadeDuration);
 
-        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
-        expect(find.byType(SystemContextMenu), findsOneWidget);
+        expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+        expect(find.byType(SystemContextMenu), findsNothing);
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
   });
-}
-
-// Trigger MediaQuery to update itself based on the View, which is not
-// recreated between tests. This is necessary when changing something on
-// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
-// TODO(justinmc): This hack can be removed if
-// https://github.com/flutter/flutter/issues/165519 is fixed.
-void _updateMediaQueryFromView(WidgetTester tester) {
-  expect(find.byType(MediaQuery), findsOneWidget);
-  final WidgetsBindingObserver widgetsBindingObserver =
-      tester.state(
-            find.ancestor(
-              of: find.byType(MediaQuery),
-              matching: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
-              ),
-            ),
-          )
-          as WidgetsBindingObserver;
-  widgetsBindingObserver.didChangeMetrics();
 }

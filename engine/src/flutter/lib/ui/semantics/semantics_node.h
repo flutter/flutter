@@ -13,6 +13,7 @@
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
+#include "flutter/lib/ui/semantics/semantics_flags.h"
 #include "flutter/lib/ui/semantics/string_attribute.h"
 
 namespace flutter {
@@ -79,25 +80,29 @@ enum class SemanticsRole : int32_t {
   kCell = 7,
   kRow = 8,
   kColumnHeader = 9,
-  kSearchBox = 10,
-  kDragHandle = 11,
-  kSpinButton = 12,
-  kComboBox = 13,
-  kMenuBar = 14,
-  kMenu = 15,
-  kMenuItem = 16,
-  kMenuItemCheckbox = 17,
-  kMenuItemRadio = 18,
-  kList = 19,
-  kListItem = 20,
-  kForm = 21,
-  kTooltip = 22,
-  kLoadingSpinner = 23,
-  kProgressBar = 24,
-  kHotKey = 25,
-  kRadioGroup = 26,
-  kStatus = 27,
-  kAlert = 28,
+  kDragHandle = 10,
+  kSpinButton = 11,
+  kComboBox = 12,
+  kMenuBar = 13,
+  kMenu = 14,
+  kMenuItem = 15,
+  kMenuItemCheckbox = 16,
+  kMenuItemRadio = 17,
+  kList = 18,
+  kListItem = 19,
+  kForm = 20,
+  kTooltip = 21,
+  kLoadingSpinner = 22,
+  kProgressBar = 23,
+  kHotKey = 24,
+  kRadioGroup = 25,
+  kStatus = 26,
+  kAlert = 27,
+  kComplementary = 28,
+  kContentInfo = 29,
+  kMain = 30,
+  kNavigation = 31,
+  kRegion = 32,
 };
 
 /// C/C++ representation of `SemanticsValidationResult` defined in
@@ -110,40 +115,6 @@ enum class SemanticsValidationResult : int32_t {
   kNone = 0,
   kValid = 1,
   kInvalid = 2,
-};
-
-struct SemanticsFlags {
-  bool hasCheckedState = false;
-  bool isChecked = false;
-  bool isSelected = false;
-  bool isButton = false;
-  bool isTextField = false;
-  bool isFocused = false;
-  bool hasEnabledState = false;
-  bool isEnabled = false;
-  bool isInMutuallyExclusiveGroup = false;
-  bool isHeader = false;
-  bool isObscured = false;
-  bool scopesRoute = false;
-  bool namesRoute = false;
-  bool isHidden = false;
-  bool isImage = false;
-  bool isLiveRegion = false;
-  bool hasToggledState = false;
-  bool isToggled = false;
-  bool hasImplicitScrolling = false;
-  bool isMultiline = false;
-  bool isReadOnly = false;
-  bool isFocusable = false;
-  bool isLink = false;
-  bool isSlider = false;
-  bool isKeyboardKey = false;
-  bool isCheckStateMixed = false;
-  bool hasExpandedState = false;
-  bool isExpanded = false;
-  bool hasSelectedState = false;
-  bool hasRequiredState = false;
-  bool isRequired = false;
 };
 
 struct SemanticsNode {
@@ -171,8 +142,6 @@ struct SemanticsNode {
   double scrollPosition = std::nan("");
   double scrollExtentMax = std::nan("");
   double scrollExtentMin = std::nan("");
-  double elevation = 0.0;
-  double thickness = 0.0;
   std::string identifier;
   std::string label;
   StringAttributes labelAttributes;

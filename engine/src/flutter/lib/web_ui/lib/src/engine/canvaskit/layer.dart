@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../vector_math.dart';
-import 'layer_visitor.dart';
-import 'path.dart';
-import 'picture.dart';
 
 /// A layer to be composed into a scene.
 ///
@@ -79,7 +75,7 @@ class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLay
   ClipPathEngineLayer(this.clipPath, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The path used to clip child layers.
-  final CkPath clipPath;
+  final LazyPath clipPath;
   final ui.Clip clipBehavior;
 
   @override
@@ -116,7 +112,7 @@ class ClipRRectEngineLayer extends ContainerLayer implements ui.ClipRRectEngineL
   }
 }
 
-/// A layer that clips its child layers by a given [RRect].
+/// A layer that clips its child layers by a given [RSuperellipse].
 class ClipRSuperellipseEngineLayer extends ContainerLayer
     implements ui.ClipRSuperellipseEngineLayer {
   ClipRSuperellipseEngineLayer(this.clipRSuperellipse, this.clipBehavior)

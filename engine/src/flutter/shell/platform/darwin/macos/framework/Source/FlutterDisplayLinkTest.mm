@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDisplayLink.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 
 #import <AppKit/AppKit.h>
+
 #include <numeric>
 
 #include "flutter/fml/synchronization/waitable_event.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
 #include "flutter/testing/testing.h"
 
 @interface TestDisplayLinkDelegate : NSObject <FlutterDisplayLinkDelegate> {

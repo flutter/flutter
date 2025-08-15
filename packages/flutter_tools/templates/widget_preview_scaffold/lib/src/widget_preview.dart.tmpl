@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
@@ -22,13 +21,20 @@ class WidgetPreview {
   /// properties.
   const WidgetPreview({
     required this.builder,
+    this.packageName,
     this.name,
-    this.width,
-    this.height,
+    this.size,
     this.textScaleFactor,
     this.brightness,
     this.theme,
+    this.localizations,
   });
+
+  /// The name of the package in which a preview was defined.
+  ///
+  /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
+  /// will have the value 'foo'.
+  final String? packageName;
 
   /// A description to be displayed alongside the preview.
   ///
@@ -38,17 +44,14 @@ class WidgetPreview {
   /// A callback to build the [Widget] to be rendered in the preview.
   final Widget Function() builder;
 
-  /// Artificial width constraint to be applied to the [Widget] returned by [builder].
+  /// Artificial constraints to be applied to the previewed widget.
   ///
-  /// If not provided, the previewed widget will attempt to set its own width
-  /// constraints and may result in an unbounded constraint error.
-  final double? width;
-
-  /// Artificial height constraint to be applied to the [Widget] returned by [builder].
+  /// If not provided, the previewed widget will attempt to set its own
+  /// constraints.
   ///
-  /// If not provided, the previewed widget will attempt to set its own height
-  /// constraints and may result in an unbounded constraint error.
-  final double? height;
+  /// If a dimension has a value of `double.infinity`, the previewed widget
+  /// will attempt to set its own constraints in the relevant dimension.
+  final Size? size;
 
   /// Applies font scaling to text within the [Widget] returned by [builder].
   ///
@@ -65,4 +68,26 @@ class WidgetPreview {
   ///
   /// If not provided, the current system default brightness will be used.
   final Brightness? brightness;
+
+  /// A callback to return a localization configuration to be applied to the
+  /// previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewLocalizationsData? localizations;
+
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty<String>('name', name, ifNull: 'not set'))
+      ..add(DiagnosticsProperty<Size>('size', size))
+      ..add(DiagnosticsProperty<double>('textScaleFactor', textScaleFactor))
+      ..add(DiagnosticsProperty<PreviewThemeData>('theme', theme))
+      ..add(DiagnosticsProperty<Brightness>('brightness', brightness))
+      ..add(
+        DiagnosticsProperty<PreviewLocalizationsData>(
+          'localizations',
+          localizations,
+        ),
+      );
+  }
 }

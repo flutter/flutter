@@ -10,6 +10,7 @@ library;
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
@@ -26,7 +27,17 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
-      ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+      ..onAccessibilityFeaturesChanged = () {
+        // TODO(chunhtai): Web should not notify accessibility feature changes during updateSemantics
+        // https://github.com/flutter/flutter/issues/158399
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+            handleAccessibilityFeaturesChanged();
+          }, debugLabel: 'SemanticsBinding.handleAccessibilityFeaturesChanged');
+        } else {
+          handleAccessibilityFeaturesChanged();
+        }
+      };
     _handleSemanticsEnabledChanged();
   }
 
@@ -138,10 +149,9 @@ mixin SemanticsBinding on BindingBase {
 
   void _handleSemanticsActionEvent(ui.SemanticsActionEvent action) {
     final Object? arguments = action.arguments;
-    final ui.SemanticsActionEvent decodedAction =
-        arguments is ByteData
-            ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
-            : action;
+    final ui.SemanticsActionEvent decodedAction = arguments is ByteData
+        ? action.copyWith(arguments: const StandardMessageCodec().decodeMessage(arguments))
+        : action;
     // Listeners may get added/removed while the iteration is in progress. Since the list cannot
     // be modified while iterating, we are creating a local copy for the iteration.
     final List<ValueSetter<ui.SemanticsActionEvent>> localListeners = _semanticsActionListeners

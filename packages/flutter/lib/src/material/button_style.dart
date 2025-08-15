@@ -249,12 +249,23 @@ class ButtonStyle with Diagnosticable {
   /// See [ThemeData.visualDensity] for more details.
   final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
-  /// The minimum size of the button itself.
+  /// The minimum size of the button itself before applying [visualDensity].
   ///
   /// The size of the rectangle the button lies within may be larger
   /// per [tapTargetSize].
   ///
   /// This value must be less than or equal to [maximumSize].
+  ///
+  /// The minimum size is adjusted automatically based on [visualDensity].
+  ///
+  /// When visual density is [VisualDensity.compact], the minimum size is
+  /// reduced by 8 pixels on both dimensions.
+  ///
+  /// When visual density is [VisualDensity.comfortable], the minimum size is
+  /// [minimumSize] reduced by 4 pixels on both dimensions.
+  ///
+  /// When visual density is [VisualDensity.standard], the minimum size is
+  /// [minimumSize].
   final MaterialStateProperty<Size?>? minimumSize;
 
   /// The button's size.
@@ -262,6 +273,9 @@ class ButtonStyle with Diagnosticable {
   /// This size is still constrained by the style's [minimumSize]
   /// and [maximumSize]. Fixed size dimensions whose value is
   /// [double.infinity] are ignored.
+  ///
+  /// The size of the rectangle the button lies within may be larger
+  /// per [tapTargetSize].
   ///
   /// To specify buttons with a fixed width and the default height use
   /// `fixedSize: Size.fromWidth(320)`. Similarly, to specify a fixed
@@ -762,7 +776,7 @@ class ButtonStyle with Diagnosticable {
       iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
       iconAlignment: t < 0.5 ? a?.iconAlignment : b?.iconAlignment,
-      side: _lerpSides(a?.side, b?.side, t),
+      side: WidgetStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(
         a?.shape,
         b?.shape,
@@ -779,17 +793,5 @@ class ButtonStyle with Diagnosticable {
       backgroundBuilder: t < 0.5 ? a?.backgroundBuilder : b?.backgroundBuilder,
       foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,
     );
-  }
-
-  // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(
-    MaterialStateProperty<BorderSide?>? a,
-    MaterialStateProperty<BorderSide?>? b,
-    double t,
-  ) {
-    if (a == null && b == null) {
-      return null;
-    }
-    return MaterialStateBorderSide.lerp(a, b, t);
   }
 }

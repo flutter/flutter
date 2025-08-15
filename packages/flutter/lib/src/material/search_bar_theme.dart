@@ -155,7 +155,7 @@ class SearchBarThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
-      side: _lerpSides(a?.side, b?.side, t),
+      side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(
         a?.shape,
         b?.shape,
@@ -304,18 +304,6 @@ class SearchBarThemeData with Diagnosticable {
       ),
     );
   }
-
-  // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(
-    MaterialStateProperty<BorderSide?>? a,
-    MaterialStateProperty<BorderSide?>? b,
-    double t,
-  ) {
-    if (identical(a, b)) {
-      return a;
-    }
-    return MaterialStateBorderSide.lerp(a, b, t);
-  }
 }
 
 /// Applies a search bar theme to descendant [SearchBar] widgets.
@@ -347,8 +335,8 @@ class SearchBarTheme extends InheritedWidget {
   /// SearchBarThemeData theme = SearchBarTheme.of(context);
   /// ```
   static SearchBarThemeData of(BuildContext context) {
-    final SearchBarTheme? searchBarTheme =
-        context.dependOnInheritedWidgetOfExactType<SearchBarTheme>();
+    final SearchBarTheme? searchBarTheme = context
+        .dependOnInheritedWidgetOfExactType<SearchBarTheme>();
     return searchBarTheme?.data ?? Theme.of(context).searchBarTheme;
   }
 

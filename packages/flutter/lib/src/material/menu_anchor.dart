@@ -121,6 +121,11 @@ class _MenuAnchorScope extends InheritedWidget {
 /// [MenuBar], used in situations where a [MenuBar] isn't appropriate, or to
 /// construct widgets or screen regions that have submenus.
 ///
+/// To programmatically control a [MenuAnchor], like opening or closing it, or checking its state,
+/// you can get its associated [MenuController]. Use `MenuController.maybeOf(BuildContext context)`
+/// to retrieve the controller for the closest [MenuAnchor] ancestor of a given [BuildContext].
+/// More detailed usage of [MenuController] is available in its class documentation.
+///
 /// {@tool dartpad}
 /// This example shows how to use a [MenuAnchor] to wrap a button and open a
 /// cascading menu from the button.
@@ -940,9 +945,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child = MouseRegion(onHover: _handlePointerHover, onExit: _handlePointerExit, child: child);
     }
 
-    return MergeSemantics(
-      child: Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child),
-    );
+    return MergeSemantics(child: child);
   }
 
   void _handleFocusChange() {
@@ -1156,54 +1159,43 @@ class CheckboxMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: Semantics(
-        role: SemanticsRole.menuItemCheckbox,
-        checked: value ?? false,
-        mixed: tristate ? value == null : null,
-        child: MenuItemButton(
-          key: key,
-          onPressed:
-              onChanged == null
-                  ? null
-                  : () {
-                    switch (value) {
-                      case false:
-                        onChanged!(true);
-                      case true:
-                        onChanged!(tristate ? null : false);
-                      case null:
-                        onChanged!(false);
-                    }
-                  },
-          onHover: onHover,
-          onFocusChange: onFocusChange,
-          focusNode: focusNode,
-          style: style,
-          shortcut: shortcut,
-          statesController: statesController,
-          leadingIcon: ExcludeFocus(
-            child: IgnorePointer(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: Checkbox.width,
-                  maxWidth: Checkbox.width,
-                ),
-                child: Checkbox(
-                  tristate: tristate,
-                  value: value,
-                  onChanged: onChanged,
-                  isError: isError,
-                ),
-              ),
+    return MenuItemButton(
+      key: key,
+      onPressed: onChanged == null
+          ? null
+          : () {
+              switch (value) {
+                case false:
+                  onChanged!(true);
+                case true:
+                  onChanged!(tristate ? null : false);
+                case null:
+                  onChanged!(false);
+              }
+            },
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      focusNode: focusNode,
+      style: style,
+      shortcut: shortcut,
+      statesController: statesController,
+      leadingIcon: ExcludeFocus(
+        child: IgnorePointer(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
+            child: Checkbox(
+              tristate: tristate,
+              value: value,
+              onChanged: onChanged,
+              isError: isError,
             ),
           ),
-          clipBehavior: clipBehavior,
-          trailingIcon: trailingIcon,
-          closeOnActivate: closeOnActivate,
-          child: child,
         ),
       ),
+      clipBehavior: clipBehavior,
+      trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
+      child: child,
     );
   }
 }
@@ -1365,49 +1357,39 @@ class RadioMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: Semantics(
-        role: SemanticsRole.menuItemRadio,
-        checked: value == groupValue,
-        child: MenuItemButton(
-          key: key,
-          onPressed:
-              onChanged == null
-                  ? null
-                  : () {
-                    if (toggleable && groupValue == value) {
-                      return onChanged!(null);
-                    }
-                    onChanged!(value);
-                  },
-          onHover: onHover,
-          onFocusChange: onFocusChange,
-          focusNode: focusNode,
-          style: style,
-          shortcut: shortcut,
-          statesController: statesController,
-          leadingIcon: ExcludeFocus(
-            child: IgnorePointer(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: Checkbox.width,
-                  maxWidth: Checkbox.width,
-                ),
-                child: Radio<T>(
-                  value: value,
-                  groupValue: groupValue,
-                  onChanged: onChanged,
-                  toggleable: toggleable,
-                ),
-              ),
+    return MenuItemButton(
+      key: key,
+      onPressed: onChanged == null
+          ? null
+          : () {
+              if (toggleable && groupValue == value) {
+                return onChanged!(null);
+              }
+              onChanged!(value);
+            },
+      onHover: onHover,
+      onFocusChange: onFocusChange,
+      focusNode: focusNode,
+      style: style,
+      shortcut: shortcut,
+      statesController: statesController,
+      leadingIcon: ExcludeFocus(
+        child: IgnorePointer(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: Checkbox.width, maxWidth: Checkbox.width),
+            child: Radio<T>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              toggleable: toggleable,
             ),
           ),
-          clipBehavior: clipBehavior,
-          trailingIcon: trailingIcon,
-          closeOnActivate: closeOnActivate,
-          child: child,
         ),
       ),
+      clipBehavior: clipBehavior,
+      trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
+      child: child,
     );
   }
 }
@@ -1846,24 +1828,23 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             }
           }
 
-          child = Semantics(
-            container: true,
-            role: SemanticsRole.menuItem,
-            expanded: _enabled && controller.isOpen,
-            enabled: _enabled,
-            child: TextButton(
-              style: mergedStyle,
-              focusNode: _buttonFocusNode,
-              onFocusChange: _enabled ? widget.onFocusChange : null,
-              onPressed: _enabled ? toggleShowMenu : null,
-              isSemanticButton: null,
-              child: _MenuItemLabel(
-                leadingIcon: widget.leadingIcon,
-                trailingIcon: widget.trailingIcon,
-                hasSubmenu: true,
-                showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-                submenuIcon: submenuIcon,
-                child: child,
+          child = MergeSemantics(
+            child: Semantics(
+              expanded: _enabled && controller.isOpen,
+              child: TextButton(
+                style: mergedStyle,
+                focusNode: _buttonFocusNode,
+                onFocusChange: _enabled ? widget.onFocusChange : null,
+                onPressed: _enabled ? toggleShowMenu : null,
+                isSemanticButton: null,
+                child: _MenuItemLabel(
+                  leadingIcon: widget.leadingIcon,
+                  trailingIcon: widget.trailingIcon,
+                  hasSubmenu: true,
+                  showDecoration: (_parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  submenuIcon: submenuIcon,
+                  child: child,
+                ),
               ),
             ),
           );
@@ -1894,9 +1875,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     // After closing the children of this submenu, this submenu button will
     // regain focus. Because submenu buttons open on focus, this submenu will
     // immediately reopen. To prevent this from happening, we prevent focus on
-    // SubmenuButtons that do not already have focus using the _isOpenOnFocusEnabled
+    // SubmenuButtons that do not already have focus using the _openOnFocus
     // flag. This flag is reset after one frame.
-    if (!_buttonFocusNode.hasPrimaryFocus) {
+    if (!_buttonFocusNode.hasFocus) {
       _isOpenOnFocusEnabled = false;
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         FocusManager.instance.applyFocusChangesIfNeeded();
@@ -2153,8 +2134,9 @@ class _LocalizedShortcutLabeler {
         if (shortcutTrigger == null && logicalKeyId & LogicalKeyboardKey.planeMask == 0x0) {
           // If the trigger is a Unicode-character-producing key, then use the
           // character.
-          shortcutTrigger =
-              String.fromCharCode(logicalKeyId & LogicalKeyboardKey.valueMask).toUpperCase();
+          shortcutTrigger = String.fromCharCode(
+            logicalKeyId & LogicalKeyboardKey.valueMask,
+          ).toUpperCase();
         }
         // Fall back to the key label if all else fails.
         shortcutTrigger ??= trigger.keyLabel;
@@ -2843,15 +2825,14 @@ class _MenuItemLabel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              if (leadingIcon != null) leadingIcon!,
+              ?leadingIcon,
               if (child != null)
                 Expanded(
                   child: ClipRect(
                     child: Padding(
-                      padding:
-                          leadingIcon != null
-                              ? EdgeInsetsDirectional.only(start: horizontalPadding)
-                              : EdgeInsets.zero,
+                      padding: leadingIcon != null
+                          ? EdgeInsetsDirectional.only(start: horizontalPadding)
+                          : EdgeInsets.zero,
                       child: child,
                     ),
                   ),
@@ -2864,13 +2845,12 @@ class _MenuItemLabel extends StatelessWidget {
       leadings = Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (leadingIcon != null) leadingIcon!,
+          ?leadingIcon,
           if (child != null)
             Padding(
-              padding:
-                  leadingIcon != null
-                      ? EdgeInsetsDirectional.only(start: horizontalPadding)
-                      : EdgeInsets.zero,
+              padding: leadingIcon != null
+                  ? EdgeInsetsDirectional.only(start: horizontalPadding)
+                  : EdgeInsets.zero,
               child: child,
             ),
         ],
@@ -3229,10 +3209,9 @@ class _MenuPanelState extends State<_MenuPanel> {
     // widest child.
     List<Widget> children = widget.children;
     if (widget.orientation == Axis.horizontal) {
-      children =
-          children.map<Widget>((Widget child) {
-            return IntrinsicWidth(child: child);
-          }).toList();
+      children = children.map<Widget>((Widget child) {
+        return IntrinsicWidth(child: child);
+      }).toList();
     }
 
     Widget menuPanel = _intrinsicCrossSize(
@@ -3283,10 +3262,7 @@ class _MenuPanelState extends State<_MenuPanel> {
       );
     }
 
-    return Semantics(
-      role: widget.orientation == Axis.vertical ? SemanticsRole.menu : SemanticsRole.menuBar,
-      child: ConstrainedBox(constraints: effectiveConstraints, child: menuPanel),
-    );
+    return ConstrainedBox(constraints: effectiveConstraints, child: menuPanel);
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
@@ -3363,15 +3339,14 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
-    final Rect anchorRect =
-        layerLink == null
-            ? Rect.fromLTRB(
-              menuPosition.anchorRect.left + dx,
-              menuPosition.anchorRect.top - dy,
-              menuPosition.anchorRect.right,
-              menuPosition.anchorRect.bottom,
-            )
-            : Rect.zero;
+    final Rect anchorRect = layerLink == null
+        ? Rect.fromLTRB(
+            menuPosition.anchorRect.left + dx,
+            menuPosition.anchorRect.top - dy,
+            menuPosition.anchorRect.right,
+            menuPosition.anchorRect.bottom,
+          )
+        : Rect.zero;
 
     final Widget menuPanel = TapRegion(
       groupId: menuPosition.tapRegionGroupId,

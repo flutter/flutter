@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:native_assets_cli/code_assets.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
@@ -36,10 +36,9 @@ void main(List<String> args) async {
     await cbuilder.run(
       input: input,
       output: outputCatcher,
-      logger:
-          Logger('')
-            ..level = Level.ALL
-            ..onRecord.listen((LogRecord record) => print(record.message)),
+      logger: Logger('')
+        ..level = Level.ALL
+        ..onRecord.listen((LogRecord record) => print(record.message)),
     );
     final BuildOutput caughtOutput = BuildOutput(outputCatcher.json);
     output.addDependencies(caughtOutput.dependencies);

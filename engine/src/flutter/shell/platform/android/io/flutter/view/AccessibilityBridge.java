@@ -7,7 +7,6 @@ package io.flutter.view;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -491,6 +490,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.accessibilityManager.addTouchExplorationStateChangeListener(
         touchExplorationStateChangeListener);
 
+    accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
     // Tell Flutter whether animations should initially be enabled or disabled. Then register a
     // listener to be notified of changes in the future.
     animationScaleObserver.onChange(false);
@@ -564,7 +564,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  @TargetApi(API_LEVELS.API_31)
   @RequiresApi(API_LEVELS.API_31)
   private void setBoldTextFlag() {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
@@ -784,7 +783,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setParent(rootAccessibilityView);
     }
 
-    if (semanticsNode.previousNodeId != -1 && Build.VERSION.SDK_INT >= API_LEVELS.API_22) {
+    if (semanticsNode.previousNodeId != -1) {
+      // Requires at least android api 22.
       result.setTraversalAfter(rootAccessibilityView, semanticsNode.previousNodeId);
     }
 
@@ -932,6 +932,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       if (semanticsNode.tooltip != null) {
         result.setTooltipText(semanticsNode.tooltip);
+        // Tooltips are not announced when a node is focused resulting in no
+        // message. This is only announced after a long press and the tooltip
+        // is shown.
+        // To be consistent with platforms other than Android and prevent
+        // TalkBack from announcing the node as unlabeled, a content
+        // description is set.
+        if (semanticsNode.getValueLabelHint() == null) {
+          result.setContentDescription(semanticsNode.tooltip);
+        }
       }
     }
 
@@ -991,6 +1000,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         //
         // See the case above for how virtual displays are handled.
         if (!platformViewsAccessibilityDelegate.usesVirtualDisplay(child.platformViewId)) {
+          assert embeddedView != null;
+          // The embedded view is initially marked as not important at creation in the platform
+          // view controller, so we must explicitly mark it as important here.
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
           result.addChild(embeddedView);
           continue;
         }
@@ -1926,7 +1939,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private void setAccessibilityPaneTitle(String title) {
     rootAccessibilityView.setAccessibilityPaneTitle(title);
@@ -1975,7 +1987,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *
    * <p>The {@code layoutInDisplayCutoutMode} is added after API level 28.
    */
-  @TargetApi(API_LEVELS.API_28)
   @RequiresApi(API_LEVELS.API_28)
   private boolean doesLayoutInDisplayCutoutModeRequireLeftInset() {
     Context context = rootAccessibilityView.getContext();
@@ -2174,7 +2185,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     BOLD_TEXT(1 << 3), // NOT SUPPORTED
     REDUCE_MOTION(1 << 4), // NOT SUPPORTED
     HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
-    ON_OFF_SWITCH_LABELS(1 << 6); // NOT SUPPORTED
+    ON_OFF_SWITCH_LABELS(1 << 6), // NOT SUPPORTED
+    NO_ANNOUNCE(1 << 7);
 
     final int value;
 

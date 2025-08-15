@@ -36,9 +36,9 @@ application (which is necessary to use `flutter run` with a test).
 
 Unit tests run with `flutter test` run inside a headless flutter shell on your workstation,
 you won't see any UI. You can use `print` to generate console output or you can interact
-with the Dart VM via the Dart Observatory at [http://localhost:8181/](http://localhost:8181/).
+with the Dart VM via Flutter DevTools at [http://localhost:8181/](http://localhost:8181/).
 
-To debug tests in Observatory, use the `--start-paused` option to start the test in a
+To debug tests in Flutter DevTools, use the `--start-paused` option to start the test in a
 paused state and wait for connection from a debugger. This option lets you set breakpoints
 before the test runs.
 

@@ -35,8 +35,8 @@ class MethodResultFunctions : public MethodResult<T> {
   MethodResultFunctions(ResultHandlerSuccess<T> on_success,
                         ResultHandlerError<T> on_error,
                         ResultHandlerNotImplemented<T> on_not_implemented)
-      : on_success_(on_success),
-        on_error_(on_error),
+      : on_success_(std::move(on_success)),
+        on_error_(std::move(on_error)),
         on_not_implemented_(std::move(on_not_implemented)) {}
 
   virtual ~MethodResultFunctions() = default;

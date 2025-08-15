@@ -12,6 +12,10 @@ const char* GetFlutterEngineVersion() {
   return FLUTTER_ENGINE_VERSION;
 }
 
+const char* GetFlutterContentHash() {
+  return FLUTTER_CONTENT_HASH;
+}
+
 const char* GetSkiaVersion() {
   return SKIA_VERSION;
 }

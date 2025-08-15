@@ -18,18 +18,6 @@ import 'package:path/path.dart' as path;
 /// adding Flutter to an existing iOS app.
 Future<void> main() async {
   await task(() async {
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
-    // Update pod repo.
-    await eval(
-      'pod',
-      <String>['repo', 'update'],
-      environment: <String, String>{'LANG': 'en_US.UTF-8'},
-    );
-
     // This variable cannot be `late`, as we reference it in the `finally` block
     // which may execute before this field has been initialized.
     String? simulatorDeviceId;
@@ -67,8 +55,6 @@ Future<void> main() async {
       marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
       section('Create package with native assets');
-
-      await flutter('config', options: <String>['--enable-native-assets']);
 
       const String ffiPackageName = 'ffi_package';
       await createFfiPackage(ffiPackageName, tempDir);
@@ -271,7 +257,7 @@ dependencies:
       });
 
       await inDirectory(projectDir, () async {
-        await flutter('pub', options: <String>['get']);
+        await flutter('build', options: <String>['ios', '--config-only']);
       });
 
       section('Add to existing iOS Objective-C app');
@@ -289,7 +275,13 @@ dependencies:
         section('Validate iOS Objective-C host app Podfile');
 
         final File podfile = File(path.join(objectiveCHostApp.path, 'Podfile'));
-        String podfileContent = await podfile.readAsString();
+        final String correctPodfileContents = await podfile.readAsString();
+        final File podfileMissingPostInstall = File(
+          path.join(objectiveCHostApp.path, 'PodfileMissingPostInstall'),
+        );
+
+        podfile.writeAsStringSync(podfileMissingPostInstall.readAsStringSync());
+
         final String podFailure = await eval(
           'pod',
           <String>['install'],
@@ -303,18 +295,12 @@ dependencies:
             !podFailure.contains(
               'Add `flutter_post_install(installer)` to your Podfile `post_install` block to build Flutter plugins',
             )) {
-          print(podfileContent);
+          print(podfile.readAsStringSync());
           throw TaskResult.failure(
             'pod install unexpectedly succeed without "flutter_post_install" post_install block',
           );
         }
-        podfileContent = '''
-$podfileContent
-
-post_install do |installer|
-  flutter_post_install(installer)
-end
-          ''';
+        String podfileContent = correctPodfileContents;
         await podfile.writeAsString(podfileContent, flush: true);
 
         await exec(
@@ -543,8 +529,9 @@ end
 
       section('Run platform unit tests');
 
-      final String resultBundleTemp =
-          Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
+      final String resultBundleTemp = Directory.systemTemp
+          .createTempSync('flutter_module_test_ios_xcresult.')
+          .path;
       await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -668,7 +655,8 @@ end
       }
 
       return TaskResult.success(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       unawaited(removeIOSSimulator(simulatorDeviceId));
@@ -715,7 +703,8 @@ Future<void> _createFakeDartPlugin(String name, Directory parent) async {
   // Add the Dart registration hook that the build will generate a call to.
   final File dartCode = File(path.join(pluginDir, 'lib', '$name.dart'));
   content = await dartCode.readAsString();
-  content = '''
+  content =
+      '''
 $content
 
 class $dartPluginClass {

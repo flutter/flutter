@@ -13,8 +13,9 @@ class BottomAppBarTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
-class _${blockName}DefaultsM3 extends BottomAppBarTheme {
+  String generate() =>
+      '''
+class _${blockName}DefaultsM3 extends BottomAppBarThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
       elevation: ${elevation('md.comp.bottom-app-bar.container')},

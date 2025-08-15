@@ -1,8 +1,11 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.os.Build;
@@ -12,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
@@ -49,6 +53,8 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerDeviceKind enum in pointer.dart.
+  // When changing the length of this enum check if TOOL_TYPE_BITS needs to increase its value. Next
+  // increase is at length 8.
   @IntDef({
     PointerDeviceKind.TOUCH,
     PointerDeviceKind.MOUSE,
@@ -81,6 +87,15 @@ public class AndroidTouchProcessor {
     int SCALE = 3;
     int UNKNOWN = 4;
   }
+
+  // We need 3 bits to represent 6 possible tool types.
+  // See uniquePointerIdByType().
+  private static final int TOOL_TYPE_BITS = 3;
+
+  // A mask to ensure the toolType doesn't exceed its allocated bits.
+  // For TOOL_TYPE_BITS = 3, this is (1 << 3) - 1 = 8 - 1 = 7 (binary 111).
+  // See uniquePointerIdByType().
+  private static final int TOOL_TYPE_MASK = (1 << TOOL_TYPE_BITS) - 1;
 
   // This value must match kPointerDataFieldCount in pointer_data.cc. (The
   // pointer_data.cc also lists other locations that must be kept consistent.)
@@ -266,6 +281,18 @@ public class AndroidTouchProcessor {
         event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
   }
 
+  // Some screen mirroring tools will occasionally report the same ID as having different associated
+  // tool types across different events, which breaks Flutter's internal handling of pointer events.
+  // Instead give each (pointerId, toolType) pair a unique ID. Technically this could break when
+  // handling a pointer of id 2^29, but that seems unlikely. Flutter's internal handling uses a
+  // long, so we can convert this method to return a long if needed.
+  // See https://github.com/flutter/flutter/issues/160144.
+  private int uniquePointerIdByType(MotionEvent event, int pointerIndex) {
+    assert (event.getToolType(pointerIndex) & ~TOOL_TYPE_MASK) == 0;
+    return (event.getPointerId(pointerIndex) << TOOL_TYPE_BITS)
+        | (event.getToolType(pointerIndex) & TOOL_TYPE_MASK);
+  }
+
   // TODO: consider creating a PointerPacket class instead of using a procedure that
   // mutates inputs. https://github.com/flutter/flutter/issues/132853
   private void addPointerForIndex(
@@ -283,7 +310,7 @@ public class AndroidTouchProcessor {
     // multiple views.
     // https://github.com/flutter/flutter/issues/134405
     final int viewId = IMPLICIT_VIEW_ID;
-    final int pointerId = event.getPointerId(pointerIndex);
+    final int pointerId = uniquePointerIdByType(event, pointerIndex);
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
@@ -465,7 +492,7 @@ public class AndroidTouchProcessor {
     }
   }
 
-  @TargetApi(API_LEVELS.API_26)
+  @RequiresApi(API_LEVELS.API_26)
   private float getVerticalScrollFactorAbove26(@NonNull Context context) {
     return ViewConfiguration.get(context).getScaledVerticalScrollFactor();
   }

@@ -13,7 +13,7 @@ library canvaskit_api;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -44,7 +44,7 @@ external set windowFlutterCanvasKit(CanvasKit? value);
 external CanvasKit? get windowFlutterCanvasKit;
 
 @JS('window.flutterCanvasKitLoaded')
-external JSPromise<JSAny>? get windowFlutterCanvasKitLoaded;
+external JSPromise<CanvasKit>? get windowFlutterCanvasKitLoaded;
 
 extension type CanvasKit(JSObject _) implements JSObject {
   external SkBlendModeEnum get BlendMode;
@@ -98,6 +98,10 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint32List? colors,
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
+
+  external BidiNamespace get Bidi;
+
+  external CodeUnitsNamespace get CodeUnits;
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -959,6 +963,7 @@ extension type SkPaint._(JSObject _) implements JSObject {
   external void setAntiAlias(bool isAntiAlias);
   external void setColorInt(int color);
   external void setShader(SkShader? shader);
+  external void setDither(bool isDither);
   external void setMaskFilter(SkMaskFilter? maskFilter);
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
@@ -1144,10 +1149,9 @@ Float32List toSkPoint(ui.Offset offset) {
 }
 
 /// Color stops used when the framework specifies `null`.
-final Float32List _kDefaultSkColorStops =
-    Float32List(2)
-      ..[0] = 0
-      ..[1] = 1;
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
 
 /// Converts a list of color stops into a Skia-compatible JS array or color stops.
 ///
@@ -1778,9 +1782,43 @@ extension type SkPicture(JSObject _) implements JSObject {
 
   @JS('cullRect')
   external JSFloat32Array _cullRect();
+
   Float32List cullRect() => _cullRect().toDart;
 
   external int approximateBytesUsed();
+}
+
+extension type BidiRegion(JSObject _) implements JSObject {
+  external int get start;
+  external int get end;
+  external int get level;
+}
+
+extension type BidiIndex(JSObject _) implements JSObject {
+  external int get index;
+}
+
+extension type BidiNamespace(JSObject _) implements JSObject {
+  @JS('getBidiRegions')
+  external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
+  List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
+      _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
+
+  @JS('reorderVisual')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
+  List<BidiIndex> reorderVisual(Uint8List visuals) =>
+      _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
+}
+
+extension type CodeUnitInfo(JSObject _) implements JSObject {
+  external int get flags;
+}
+
+extension type CodeUnitsNamespace(JSObject _) implements JSObject {
+  @JS('compute')
+  external JSArray<JSAny?> _compute(String text);
+  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
@@ -1790,10 +1828,10 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   );
 
   bool RequiresClientICU() {
-    if (!js_util.hasProperty(this, 'RequiresClientICU')) {
+    if (!has('RequiresClientICU')) {
       return false;
     }
-    return js_util.callMethod(this, 'RequiresClientICU', const <Object>[]) as bool;
+    return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;
   }
 }
 
@@ -2325,6 +2363,7 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
@@ -2337,6 +2376,7 @@ List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
     ],
     CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
     CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
   };
 }
 

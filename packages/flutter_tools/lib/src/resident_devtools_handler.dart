@@ -75,16 +75,16 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     this._chromiumLauncher,
   );
 
-  static const Duration launchInBrowserTimeout = Duration(seconds: 15);
+  static const launchInBrowserTimeout = Duration(seconds: 15);
 
   final DevtoolsLauncher? _devToolsLauncher;
   final ResidentRunner _residentRunner;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
-  bool _shutdown = false;
+  var _shutdown = false;
 
   @visibleForTesting
-  bool launchedInBrowser = false;
+  var launchedInBrowser = false;
 
   @override
   DevToolsServerAddress? get activeDevToolsServer {
@@ -100,7 +100,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   bool get readyToAnnounce => _readyToAnnounce;
-  bool _readyToAnnounce = false;
+  var _readyToAnnounce = false;
 
   // This must be guaranteed not to return a Future that fails.
   @override
@@ -185,13 +185,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
-    for (final FlutterDevice? device in flutterDevices) {
-      final String devToolsUrl =
-          activeDevToolsServer!.uri!
-              .replace(
-                queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
-              )
-              .toString();
+    for (final device in flutterDevices) {
+      final devToolsUrl = activeDevToolsServer!.uri!
+          .replace(queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'})
+          .toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
 
       _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
@@ -239,7 +236,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   /// Returns null if the service extension cannot be found on the device.
   Future<FlutterDevice?> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
-    const String extension = 'ext.flutter.connectedVmServiceUri';
+    const extension = 'ext.flutter.connectedVmServiceUri';
     try {
       await flutterDevice.vmService?.findExtensionIsolate(extension);
       return flutterDevice;
@@ -334,7 +331,7 @@ NoOpDevtoolsHandler createNoOpHandler(
 
 @visibleForTesting
 class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
-  bool wasShutdown = false;
+  var wasShutdown = false;
 
   @override
   DevToolsServerAddress? get activeDevToolsServer => null;
@@ -374,12 +371,10 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   bool get printDtdUri => false;
 }
 
-/// Convert a [URI] with query parameters into a display format instead
+/// Convert the [uri] with query parameters into a display format instead
 /// of the default URI encoding.
 String urlToDisplayString(Uri uri) {
-  final StringBuffer base = StringBuffer(
-    uri.replace(queryParameters: <String, String>{}).toString(),
-  );
+  final base = StringBuffer(uri.replace(queryParameters: <String, String>{}).toString());
   base.write(
     uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'),
   );
