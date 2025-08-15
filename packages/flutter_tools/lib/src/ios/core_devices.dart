@@ -255,7 +255,6 @@ class IOSCoreDeviceLauncher {
 
 /// This class is used to forward logs from devicectl to any active listeners.
 class IOSCoreDeviceLogForwarder {
-
   /// The `devicectl` process that launched the app and is streaming the logs.
   Process? launchProcess;
 
@@ -314,6 +313,8 @@ class IOSCoreDeviceControl {
   /// A list of log patterns to ignore.
   static final _ignorePatterns = <Pattern>[
     RegExp(r'\[PreviewsAgentExecutorLibrary\].*'),
+    RegExp(r'\[UIKit App Config\].*'),
+    RegExp(r'\[UIFocus\].*'),
     RegExp(r'Dart execution mode: .*'),
   ];
 
