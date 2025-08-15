@@ -506,7 +506,7 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
 
   cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                      vk::PipelineStageFlagBits::eFragmentShader, {}, {}, {},
+                      vk::PipelineStageFlagBits::eTransfer, {}, {}, {},
                       {barrier});
 
   // Now everything is in eTransferSrcOptimal, switch everything to
