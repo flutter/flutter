@@ -51,7 +51,7 @@ abstract final class SemanticsService {
   @Deprecated(
     'Use sendAnnouncement instead. '
     'This API is incompatible with multiple windows. '
-    'This feature was deprecated after 3.35.0-0.1.pre.',
+    'This feature was deprecated after v3.35.0-0.1.pre.',
   )
   static Future<void> announce(
     String message,
