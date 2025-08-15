@@ -47,6 +47,11 @@ void main() {
             onLongPress: () {
               log.add('onLongPress: ${dessert.name}');
             },
+            onHover: (bool hovering) {
+              if (hovering) {
+                log.add('onHover: ${dessert.name}');
+              }
+            },
             cells: <DataCell>[
               DataCell(Text(dessert.name)),
               DataCell(
@@ -91,6 +96,15 @@ void main() {
     expect(log, <String>['onLongPress: Cupcake']);
     log.clear();
 
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Cupcake')));
+
+    expect(log, <String>['onHover: Cupcake']);
+    log.clear();
+
     await tester.tap(find.text('Calories'));
 
     expect(log, <String>['column-sort: 1 true']);
@@ -123,7 +137,7 @@ void main() {
     expect(log, <String>['cell-tapDown: 375', 'cell-tapCancel: 375', 'cell-longPress: 375']);
     log.clear();
 
-    TestGesture gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
+    gesture = await tester.startGesture(tester.getRect(find.text('375')).center);
     await tester.pump(const Duration(milliseconds: 100));
     // onTapDown callback is registered.
     expect(log, equals(<String>['cell-tapDown: 375']));
