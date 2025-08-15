@@ -500,6 +500,7 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
 
   // Switch the last one to eTransferSrcOptimal.
   barrier.subresourceRange.baseMipLevel = mip_count - 1;
+  barrier.subresourceRange.levelCount = 1;
   barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
   barrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
   barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
