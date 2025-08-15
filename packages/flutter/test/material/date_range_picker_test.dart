@@ -1967,6 +1967,16 @@ void main() {
       expect(getDayCount(secondMonthItem), 21);
     });
   });
+
+  testWidgets('DateRangePickerDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.shrink(
+          child: DateRangePickerDialog(firstDate: firstDate, lastDate: lastDate),
+        ),
+      ),
+    );
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
