@@ -4317,21 +4317,27 @@ void main() {
                             ),
                             TestSemantics(
                               id: 6,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                              rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
                               children: <TestSemantics>[
                                 TestSemantics(
                                   id: 7,
-                                  label: 'Item 0',
                                   rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.hasEnabledState,
-                                    SemanticsFlag.isEnabled,
-                                    SemanticsFlag.isFocusable,
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.tap,
-                                    SemanticsAction.focus,
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 8,
+                                      label: 'Item 0',
+                                      rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                      flags: <SemanticsFlag>[
+                                        SemanticsFlag.hasEnabledState,
+                                        SemanticsFlag.isEnabled,
+                                        SemanticsFlag.isFocusable,
+                                      ],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ],
