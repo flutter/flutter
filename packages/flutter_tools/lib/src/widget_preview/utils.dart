@@ -32,22 +32,22 @@ extension AnnotationExtension on Annotation {
   /// Convenience getter to identify `@Preview` annotations
   bool get isPreview =>
       name.name == 'Preview' &&
-      elementAnnotation!.element2?.library2!.uri == widgetPreviewsLibraryUri;
+      elementAnnotation!.element?.library!.uri == widgetPreviewsLibraryUri;
 
   bool get isMultiPreview {
-    final Element2? element = elementAnnotation!.element2;
-    if (element is ConstructorElement2) {
-      final InterfaceType type = element.enclosingElement2.supertype!;
+    final Element? element = elementAnnotation!.element;
+    if (element is ConstructorElement) {
+      final InterfaceType type = element.enclosingElement.supertype!;
       return type.getDisplayString() == 'MultiPreview' &&
-          type.element3.library2.uri == widgetPreviewsLibraryUri;
+          type.element.library.uri == widgetPreviewsLibraryUri;
     }
     return false;
   }
 
   List<DartObject> findMultiPreviewPreviewNodes({required AnalysisContext context}) {
     final DartObject evaluatedAnnotation = elementAnnotation!.computeConstantValue()!;
-    final Element2 element = evaluatedAnnotation.type!.element3!;
-    if (element is ClassElement2) {
+    final Element element = evaluatedAnnotation.type!.element!;
+    if (element is ClassElement) {
       final InterfaceType type = element.supertype!;
       if (type.getDisplayString() != 'MultiPreview') {
         throw StateError('$element is not a MultiPreview!');
@@ -67,7 +67,7 @@ extension StringExtension on String {
   bool get doesContainDartTool => contains('.dart_tool');
 }
 
-extension LibraryElement2Extension on LibraryElement2 {
+extension LibraryElementExtension on LibraryElement {
   /// Convenience method to package path and [uri] into a [PreviewPath]
   PreviewPath toPreviewPath() => (path: firstFragment.source.fullName, uri: uri);
 }
