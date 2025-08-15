@@ -1412,7 +1412,7 @@ class ThemeData with Diagnosticable {
   /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
-  /// A theme for customizing the appearance and layout of [ProgressIndicator] widgets.
+  /// A theme for customizing the appearance and layout of [MaterialProgressIndicator] widgets.
   final ProgressIndicatorThemeData progressIndicatorTheme;
 
   /// A theme for customizing the appearance and layout of [Radio] widgets.
