@@ -37,11 +37,20 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 @property(nonatomic, weak) id<FlutterIndirectScribbleDelegate> indirectScribbleDelegate;
 @property(nonatomic, strong)
     NSMutableDictionary<UIScribbleElementIdentifier, NSValue*>* scribbleElements;
+
+/**
+ * A temporary flag to prevent the text field from losing focus when the
+ * "Look Up" action is triggered.
+ */
 @property(nonatomic, assign, readonly) BOOL preventUnfocusOnNextResign;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
+/**
+ * Prepares the text input plugin for a "Look Up" action by setting a flag
+ * to preserve focus.
+ */
 - (void)prepareForLookUp;
 - (instancetype)initWithDelegate:(id<FlutterTextInputDelegate>)textInputDelegate
     NS_DESIGNATED_INITIALIZER;
