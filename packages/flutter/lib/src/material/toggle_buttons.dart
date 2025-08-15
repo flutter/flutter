@@ -1204,7 +1204,10 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
-      Axis.vertical => childOffset + leadingBorderSide.width,
+      Axis.vertical => childOffset + switch (verticalDirection) {
+        VerticalDirection.down => leadingBorderSide.width,
+        VerticalDirection.up => trailingBorderSide.width,
+      },
     }.offset;
   }
 
@@ -1657,9 +1660,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }
@@ -1679,9 +1682,11 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
+    // Calculate the size and child offset using the same logic as performLayout
+    final Size drySize = getDryLayout(constraints);
     final Size childSize = child.getDryLayout(constraints);
-    return result +
-        Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    final Offset childOffset = Alignment.center.alongOffset(drySize - childSize as Offset);
+    return result + childOffset.dy;
   }
 
   @override
