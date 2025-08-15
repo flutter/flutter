@@ -701,14 +701,14 @@ void main() {
         isFalse,
       );
 
-      await SemanticsService.sendAnnouncement(0, 'announcement 1', TextDirection.ltr);
+      await SemanticsService.sendAnnouncement(tester.view, 'announcement 1', TextDirection.ltr);
       await SemanticsService.sendAnnouncement(
-        0,
+        tester.view,
         'announcement 2',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
       );
-      await SemanticsService.sendAnnouncement(0, 'announcement 3', TextDirection.rtl);
+      await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
       final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
       expect(list, hasLength(3));
@@ -730,7 +730,7 @@ void main() {
       expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
     });
 
-    test('New test API is not breaking existing tests', () async {
+    testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {
       final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
       Future<dynamic> handleMessage(dynamic mockMessage) async {
@@ -742,7 +742,7 @@ void main() {
           .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, handleMessage);
 
       await SemanticsService.sendAnnouncement(
-        0,
+        tester.view,
         'announcement 1',
         TextDirection.rtl,
         assertiveness: Assertiveness.assertive,
