@@ -45,13 +45,14 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(events.length, 5);
+    expect(events.length, 6);
     // user scroll do not trigger the ScrollMetricsNotification.
     expect(events[0] is ScrollStartNotification, true);
     expect(events[1] is UserScrollNotification, true);
     expect(events[2] is ScrollUpdateNotification, true);
-    expect(events[3] is ScrollEndNotification, true);
-    expect(events[4] is UserScrollNotification, true);
+    expect(events[3] is ScrollMetricsNotification, true);
+    expect(events[4] is ScrollEndNotification, true);
+    expect(events[5] is UserScrollNotification, true);
 
     events.clear();
     // Change the content dimensions again.
@@ -222,10 +223,12 @@ void main() {
     ScrollNotification? notification;
 
     void handleNotification(ScrollNotification value) {
-      if (value is ScrollStartNotification ||
-          value is ScrollUpdateNotification ||
-          value is ScrollEndNotification) {
-        notification = value;
+      switch (value) {
+        case ScrollStartNotification():
+        case ScrollUpdateNotification(dragDetails: DragUpdateDetails _):
+        case ScrollEndNotification():
+          notification = value;
+        default:
       }
     }
 

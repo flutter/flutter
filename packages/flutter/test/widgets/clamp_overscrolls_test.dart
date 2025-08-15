@@ -103,7 +103,8 @@ void main() {
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
-      // The initialScrollOffset will be corrected during the first frame.
+      expect(scrollable.position.pixels, equals(initialOffset));
+      await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
       expect(scrollable.position.pixels, equals(expectedOffset));
     }
 
