@@ -734,10 +734,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = switch (fit) {
-      OverflowBoxFit.max => constraints.biggest,
-      OverflowBoxFit.deferToChild => childSize,
-    };
+    final Size size = getDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1084,7 +1081,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    final Size size = constraints.constrain(_requestedSize);
+    final Size size = getDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
@@ -1264,7 +1261,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final Size size = constraints.constrain(childSize);
+    final Size size = getDryLayout(constraints);
     return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
