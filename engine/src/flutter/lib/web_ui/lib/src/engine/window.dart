@@ -625,11 +625,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           await _useSingleEntryBrowserHistory();
           return true;
         // the following cases assert that arguments are not null
-        case 'routeUpdated': // deprecated
-          assert(arguments != null);
-          await _useSingleEntryBrowserHistory();
-          browserHistory.setRouteName(arguments!.tryString('routeName'));
-          return true;
         case 'routeInformationUpdated':
           assert(arguments != null);
           final String? uriString = arguments!.tryString('uri');
