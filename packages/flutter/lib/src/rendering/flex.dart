@@ -940,10 +940,6 @@ class RenderFlex extends RenderBox
       getBaseline: ChildLayoutHelper.getDryBaseline,
     );
 
-    if (_isBaselineAligned) {
-      return sizes.baselineOffset;
-    }
-
     final BoxConstraints nonFlexConstraints = _constraintsForNonFlexChild(constraints);
     BoxConstraints constraintsForChild(RenderBox child) {
       final double? spacePerFlex = sizes.spacePerFlex;
@@ -953,7 +949,7 @@ class RenderFlex extends RenderBox
           : nonFlexConstraints;
     }
 
-    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    BaselineOffset resultBaselineOffset = BaselineOffset.noBaseline;
     switch (direction) {
       case Axis.vertical:
         final double freeSpace = math.max(0.0, sizes.mainAxisFreeSpace);
@@ -972,32 +968,60 @@ class RenderFlex extends RenderBox
         final double directionUnit = flipMainAxis ? -1.0 : 1.0;
         for (
           RenderBox? child = firstChild;
-          baselineOffset == BaselineOffset.noBaseline && child != null;
+          resultBaselineOffset == BaselineOffset.noBaseline && child != null;
           child = childAfter(child)
         ) {
           final BoxConstraints childConstraints = constraintsForChild(child);
           final Size childSize = child.getDryLayout(childConstraints);
           final double? childBaselineOffset = child.getDryBaseline(childConstraints, baseline);
           final double additionalY = flipMainAxis ? -childSize.height : 0.0;
-          baselineOffset = BaselineOffset(childBaselineOffset) + y + additionalY;
+          resultBaselineOffset = BaselineOffset(childBaselineOffset) + y + additionalY;
           y += directionUnit * (spaceBetween + childSize.height);
         }
       case Axis.horizontal:
-        final bool flipCrossAxis = _flipCrossAxis;
-        for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-          final BoxConstraints childConstraints = constraintsForChild(child);
-          final BaselineOffset distance = BaselineOffset(
-            child.getDryBaseline(childConstraints, baseline),
-          );
-          final double freeCrossAxisSpace =
-              sizes.axisSize.crossAxisExtent - child.getDryLayout(childConstraints).height;
-          final BaselineOffset childBaseline =
-              distance +
-              crossAxisAlignment._getChildCrossAxisOffset(freeCrossAxisSpace, flipCrossAxis);
-          baselineOffset = baselineOffset.minOf(childBaseline);
+        if (_isBaselineAligned) {
+          assert(textBaseline != null);
+          final double? flexBaselineOffset = sizes.baselineOffset; // for textBaseline
+          if (flexBaselineOffset == null) {
+            return null;
+          }
+          for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+            final BoxConstraints childConstraints = constraintsForChild(child);
+            final double? childTargetBaseline = child.getDryBaseline(childConstraints, baseline); // the baseline we are looking for
+            if (childTargetBaseline != null) {
+              final double? childAlignBaseline = child.getDryBaseline(childConstraints, textBaseline!); // the baseline we align to
+              final double childCrossPosition;
+              if (childAlignBaseline != null) {
+                childCrossPosition = flexBaselineOffset - childAlignBaseline;
+              } else {
+                childCrossPosition = crossAxisAlignment._getChildCrossAxisOffset(
+                  sizes.axisSize.crossAxisExtent - child.getDryLayout(childConstraints).height,
+                  _flipCrossAxis,
+                );
+              }
+              resultBaselineOffset = resultBaselineOffset.minOf(BaselineOffset(childTargetBaseline) + childCrossPosition);
+            }
+          }
+        } else {
+          final bool flipCrossAxis = _flipCrossAxis;
+          final double crossAxisExtent = sizes.axisSize.crossAxisExtent;
+          for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+            final BoxConstraints childConstraints = constraintsForChild(child);
+            final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+            if (childBaseline != null) {
+              final double childCrossPosition = crossAxisAlignment._getChildCrossAxisOffset(
+                crossAxisExtent - child.getDryLayout(childConstraints).height,
+                flipCrossAxis,
+              );
+              resultBaselineOffset = resultBaselineOffset.minOf(
+                BaselineOffset(childBaseline) + childCrossPosition,
+              );
+            }
+          }
         }
+        break;
     }
-    return baselineOffset.offset;
+    return resultBaselineOffset.offset;
   }
 
   @override

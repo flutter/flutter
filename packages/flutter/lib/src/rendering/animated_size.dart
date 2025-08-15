@@ -413,7 +413,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     // For RenderAnimatedSize, we need to account for the animated size,
     // not just the child size, to match the offset calculation in alignChild().
     final Size childSize = child.getDryLayout(constraints);
-    final Size mySize = getDryLayout(constraints);
+    final Size mySize = computeDryLayout(constraints);
     final Offset offset = resolvedAlignment.alongOffset((mySize - childSize) as Offset);
     return result + offset.dy;
   }
