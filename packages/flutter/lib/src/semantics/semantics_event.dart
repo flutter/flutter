@@ -94,7 +94,7 @@ abstract class SemanticsEvent {
 ///
 class AnnounceSemanticsEvent extends SemanticsEvent {
   /// Constructs an event that triggers an announcement by the platform
-  /// on the provided [viewId].
+  /// on the implicit view
   const AnnounceSemanticsEvent(
     this.message,
     this.textDirection, {
