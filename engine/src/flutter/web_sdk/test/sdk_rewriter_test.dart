@@ -161,6 +161,7 @@ void printSomething() {
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
+      "import 'dart:_canvaskit';",
     ]);
     expect(getExtraImportsForLibrary('skwasm_stub'), <String>[
       "import 'dart:ui_web' as ui_web;",
@@ -168,6 +169,7 @@ void printSomething() {
       "import 'dart:_web_unicode';",
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
+      "import 'dart:_canvaskit';",
     ]);
     expect(getExtraImportsForLibrary('skwasm_impl'), <String>[
       "import 'dart:ui_web' as ui_web;",
@@ -176,6 +178,7 @@ void printSomething() {
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
       "import 'dart:_wasm';",
+      "import 'dart:_canvaskit';",
     ]);
 
     // Other libraries (should not have extra imports).

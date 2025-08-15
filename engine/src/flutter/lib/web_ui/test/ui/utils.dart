@@ -27,6 +27,31 @@ Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
   await renderScene(sb.build());
 }
 
+// Sends a platform message to create a Platform View with the given id and viewType.
+Future<void> createPlatformView(int id, String viewType) {
+  final Completer<void> completer = Completer<void>();
+  const MethodCodec codec = StandardMethodCodec();
+  PlatformDispatcher.instance.sendPlatformMessage(
+    'flutter/platform_views',
+    codec.encodeMethodCall(MethodCall('create', <String, dynamic>{'id': id, 'viewType': viewType})),
+    (dynamic _) => completer.complete(),
+  );
+  return completer.future;
+}
+
+/// Disposes of the platform view with the given [id].
+Future<void> disposePlatformView(int id) {
+  final Completer<void> completer = Completer<void>();
+  const MethodCodec codec = StandardMethodCodec();
+  PlatformDispatcher.instance.sendPlatformMessage(
+    'flutter/platform_views',
+    codec.encodeMethodCall(MethodCall('dispose', id)),
+    (dynamic _) => completer.complete(),
+  );
+  return completer.future;
+}
+
+
 /// Convenience getter for the implicit view.
 FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
