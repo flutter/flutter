@@ -191,12 +191,12 @@ class PreviewDetector {
           final unit =
               (await context.currentSession.getResolvedUnit(filePath)) as ResolvedUnitResult;
           lib = await context.currentSession.getResolvedLibrary(
-            unit.libraryElement2.firstFragment.source.fullName,
+            unit.libraryElement.firstFragment.source.fullName,
           );
         }
         if (lib is ResolvedLibraryResult) {
           final ResolvedLibraryResult resolvedLib = lib;
-          final PreviewPath previewPath = lib.element2.toPreviewPath();
+          final PreviewPath previewPath = lib.element.toPreviewPath();
           // This library has already been processed.
           if (updatedPreviews.containsKey(previewPath)) {
             continue;
@@ -204,7 +204,7 @@ class PreviewDetector {
 
           final LibraryPreviewNode previewsForLibrary = _dependencyGraph.putIfAbsent(
             previewPath,
-            () => LibraryPreviewNode(library: resolvedLib.element2, logger: logger),
+            () => LibraryPreviewNode(library: resolvedLib.element, logger: logger),
           );
 
           previewsForLibrary.updateDependencyGraph(graph: _dependencyGraph, units: lib.units);
