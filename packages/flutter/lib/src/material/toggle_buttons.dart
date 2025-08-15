@@ -1204,10 +1204,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
-      Axis.vertical => childOffset + switch (verticalDirection) {
-        VerticalDirection.down => leadingBorderSide.width,
-        VerticalDirection.up => trailingBorderSide.width,
-      },
+      Axis.vertical =>
+        childOffset +
+            switch (verticalDirection) {
+              VerticalDirection.down => leadingBorderSide.width,
+              VerticalDirection.up => trailingBorderSide.width,
+            },
     }.offset;
   }
 

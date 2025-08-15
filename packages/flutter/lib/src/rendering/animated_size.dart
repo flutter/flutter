@@ -400,6 +400,24 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     }
   }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    // For RenderAnimatedSize, we need to account for the animated size,
+    // not just the child size, to match the offset calculation in alignChild().
+    final Size childSize = child.getDryLayout(constraints);
+    final Size mySize = computeDryLayout(constraints);
+    final Offset offset = resolvedAlignment.alongOffset((mySize - childSize) as Offset);
+    return result + offset.dy;
+  }
+
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
