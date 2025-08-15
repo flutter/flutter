@@ -839,7 +839,7 @@ class _StretchController extends Listenable {
   final ValueNotifier<double> _overscrollNotifier = ValueNotifier<double>(0.0);
   double get overscroll => _overscrollNotifier.value;
   set overscroll(double newValue) {
-    _overscrollNotifier.value = newValue.clamp(minOverscroll, maxOverscroll);
+    _overscrollNotifier.value = clampDouble(newValue, minOverscroll, maxOverscroll);
   }
 
   /// Stores the `overscroll` value from an ongoing animation at the precise
@@ -905,12 +905,14 @@ class _StretchController extends Listenable {
   /// velocities gradually saturate. Returns the scaled velocity
   /// with the original direction preserved.
   double _calculateVelocityScale(double velocity) {
+    const double referenceVelocity = 3000.0;
+    const double velocityScaleFactor = 0.0001;
     final double absVelocity = velocity.abs();
 
     // Normalizes using 3,000px/s as the reference.
-    final double normalizedVelocity = absVelocity / 3000.0;
+    final double normalizedVelocity = absVelocity / referenceVelocity;
     final double saturatedScale = normalizedVelocity / (1.0 + normalizedVelocity);
-    final double maxScale = 1.0 + velocity.abs() * 0.0001;
+    final double maxScale = 1.0 + velocity.abs() * velocityScaleFactor;
 
     return saturatedScale * maxScale * velocity.sign;
   }
@@ -945,7 +947,10 @@ class _StretchController extends Listenable {
   void animate(SpringSimulation simulation) {
     final double initialOverscroll = simulation.dx(0);
 
+    final AnimationController controller = AnimationController.unbounded(vsync: vsync);
+
     _controller?.dispose();
+    _controller = controller;
     _controller = AnimationController.unbounded(vsync: vsync)
       ..addListener(() {
         final double newOverscroll = _controller?.value ?? 0.0;
@@ -985,10 +990,6 @@ class _StretchController extends Listenable {
     final double linearIntensity = _stretchIntensity * absDistance;
     final double exponentialIntensity =
         _stretchIntensity * (1 - math.exp(-absDistance * _exponentialScalar));
-
-    if (normalizedOverscroll.sign == _interruptedOverscroll.sign) {
-      normalizedOverscroll += _interruptedOverscroll;
-    }
 
     // Maintain sign of overscroll for direction
     final double directionSign = pullDistance.sign;
