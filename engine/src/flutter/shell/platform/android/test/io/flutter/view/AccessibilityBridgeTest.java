@@ -869,7 +869,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode root = new TestSemanticsNode();
     root.id = 0;
     root.label = "label";
-    root.locale = "es_MX";
+    root.locale = "es-MX";
 
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
@@ -879,7 +879,7 @@ public class AccessibilityBridgeTest {
     Object[] objectSpans = actual.getSpans(0, actual.length(), Object.class);
     assertEquals(objectSpans.length, 1);
     LocaleSpan localeSpan = (LocaleSpan) objectSpans[0];
-    assertEquals(localeSpan.getLocale().toLanguageTag(), "es_MX");
+    assertEquals(localeSpan.getLocale().toLanguageTag(), "es-MX");
     assertEquals(actual.getSpanStart(localeSpan), 0);
     assertEquals(actual.getSpanEnd(localeSpan), actual.length());
   }
