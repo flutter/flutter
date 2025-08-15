@@ -254,6 +254,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
 
+    registerShutdownHooks();
+
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
@@ -322,9 +324,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final PreviewDependencyGraph graph = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
-    shutdownHooks.addShutdownHook(() async {
-      await _widgetPreviewApp?.exitApp();
-    });
     await configureDtd();
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
@@ -333,7 +332,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       throwToolExit('Failed to launch the widget previewer.', exitCode: result);
     }
 
-    await _previewDetector.dispose();
     return FlutterCommandResult.success();
   }
 
@@ -346,6 +344,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
     _widgetPreviewApp?.restart(fullRestart: true);
+  }
+
+  void registerShutdownHooks() {
+    shutdownHooks.addShutdownHook(() async {
+      await _previewDetector.dispose();
+    });
   }
 
   /// Configures the Dart Tooling Daemon connection.

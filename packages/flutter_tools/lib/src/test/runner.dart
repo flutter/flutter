@@ -105,6 +105,7 @@ interface class FlutterTestRunner {
             artifacts: globals.artifacts!,
             processManager: globals.processManager,
             config: globals.config,
+            shutdownHooks: globals.shutdownHooks,
           ).initialize(
             projectDirectory: flutterProject!.directory,
             testOutputDir: tempBuildDir,
@@ -572,6 +573,7 @@ class SpawnPlugin extends PlatformPlugin {
       fileSystem: globals.fs,
       fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
       fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
+      shutdownHooks: globals.shutdownHooks,
     );
 
     await residentCompiler.recompile(

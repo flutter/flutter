@@ -1908,11 +1908,6 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
 
-class FakeShutdownHooks extends Fake implements ShutdownHooks {
-  @override
-  void addShutdownHook(ShutdownHook shutdownHook) {}
-}
-
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   var devices = <FakeIOSCoreDevice>[];
 
