@@ -452,7 +452,6 @@ void main() {
                 'hotReload': true,
                 'hotRestart': true,
                 'screenshot': true,
-                'fastStart': true,
                 'flutterExit': true,
                 'hardwareRendering': true,
                 'startPaused': true,
@@ -1171,9 +1170,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   bool get supportsScreenshot => true;
-
-  @override
-  bool get supportsFastStart => true;
 
   @override
   bool get supportsFlutterExit => true;

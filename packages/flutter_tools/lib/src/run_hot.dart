@@ -316,13 +316,6 @@ class HotRunner extends ResidentRunner {
       }
     }
 
-    // In fast-start mode, apps are initialized from a placeholder splashscreen
-    // app. We must do a restart here to load the program and assets for the
-    // real app.
-    if (debuggingOptions.fastStart) {
-      await restart(fullRestart: true, reason: 'restart', silent: true);
-    }
-
     appStartedCompleter?.complete();
 
     if (benchmarkMode) {
