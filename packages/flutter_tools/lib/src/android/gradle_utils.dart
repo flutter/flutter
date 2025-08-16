@@ -171,8 +171,15 @@ final gradleOrgVersionMatch = RegExp(
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
 // file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
 // equals syntax and when using minSdk or minSdkVersion.
-final tooOldMinSdkVersionMatch = RegExp(
-  r'(?<=^\s*)minSdk(Version)?\s=?\s?(1[6789]|2[0123])(?=\s*(?://|$))',
+// Matches uncommented minSdkVersion lines using equals syntax (=)
+final tooOldMinSdkVersionEqualsMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s*=\s*(1[6789]|2[0123])(?=\s*(?://|$))',
+  multiLine: true,
+);
+
+// Matches uncommented minSdkVersion lines using space syntax (no =)
+final tooOldMinSdkVersionSpaceMatch = RegExp(
+  r'(?<=^\s*)minSdk(Version)?\s+(1[6789]|2[0123])(?=\s*(?://|$))',
   multiLine: true,
 );
 
