@@ -6,6 +6,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:ui' show FlutterView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -93,12 +94,17 @@ abstract class SemanticsEvent {
 /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
 ///
 class AnnounceSemanticsEvent extends SemanticsEvent {
-  /// Constructs an event that triggers an announcement by the platform.
+  /// Constructs an event that triggers an announcement by the platform
+  /// on the implicit view
   const AnnounceSemanticsEvent(
     this.message,
     this.textDirection, {
     this.assertiveness = Assertiveness.polite,
+    this.viewId,
   }) : super('announce');
+
+  /// The view that this announcement is on.
+  final int? viewId;
 
   /// The message to announce.
   final String message;
@@ -117,6 +123,7 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() {
     return <String, dynamic>{
+      'viewId': viewId,
       'message': message,
       'textDirection': textDirection.index,
       if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,

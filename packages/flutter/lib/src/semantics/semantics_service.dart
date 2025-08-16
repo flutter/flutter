@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show TextDirection;
+import 'dart:ui' show FlutterView, TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
@@ -23,6 +23,9 @@ export 'dart:ui' show TextDirection;
 abstract final class SemanticsService {
   /// Sends a semantic announcement.
   ///
+  /// This method is deprecated. Prefer using [sendAnnouncement] instead.
+  ///
+  /// {@template flutter.semantics.service.announce}
   /// This should be used for announcement that are not seamlessly announced by
   /// the system as a result of a UI state change.
   ///
@@ -43,7 +46,13 @@ abstract final class SemanticsService {
   /// trigger announcements.
   ///
   /// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
+  /// {@endtemplate}
   ///
+  @Deprecated(
+    'Use sendAnnouncement instead. '
+    'This API is incompatible with multiple windows. '
+    'This feature was deprecated after v3.35.0-0.1.pre.',
+  )
   static Future<void> announce(
     String message,
     TextDirection textDirection, {
@@ -53,6 +62,26 @@ abstract final class SemanticsService {
       message,
       textDirection,
       assertiveness: assertiveness,
+    );
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+  /// Sends a semantic announcement for a particular view.
+  ///
+  /// Users can use [View.of] to get the current [FlutterView].
+  ///
+  /// {@macro flutter.semantics.service.announce}
+  static Future<void> sendAnnouncement(
+    FlutterView view,
+    String message,
+    TextDirection textDirection, {
+    Assertiveness assertiveness = Assertiveness.polite,
+  }) async {
+    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
+      message,
+      textDirection,
+      assertiveness: assertiveness,
+      viewId: view.viewId,
     );
     await SystemChannels.accessibility.send(event.toMap());
   }
