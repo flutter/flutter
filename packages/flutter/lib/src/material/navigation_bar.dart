@@ -1450,8 +1450,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
@@ -1470,8 +1470,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   ShapeBorder? get indicatorShape => const StadiumBorder();
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
         color: states.contains(MaterialState.disabled)

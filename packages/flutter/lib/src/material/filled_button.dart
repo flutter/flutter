@@ -624,12 +624,12 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get backgroundColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -637,8 +637,8 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get foregroundColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -646,8 +646,8 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return _colors.onPrimary.withOpacity(0.1);
       }
@@ -661,16 +661,16 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
-  MaterialStateProperty<double>? get elevation =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<double>? get elevation =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
@@ -687,22 +687,22 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>
+  WidgetStateProperty<Size>? get minimumSize =>
     const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(18.0);
 
   @override
-  MaterialStateProperty<Color>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -720,18 +720,18 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }
@@ -771,12 +771,12 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge);
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get backgroundColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -784,8 +784,8 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get foregroundColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -793,8 +793,8 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return _colors.onSecondaryContainer.withOpacity(0.1);
       }
@@ -808,16 +808,16 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     MaterialStatePropertyAll<Color>(_colors.shadow);
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     const MaterialStatePropertyAll<Color>(Colors.transparent);
 
   @override
-  MaterialStateProperty<double>? get elevation =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<double>? get elevation =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
@@ -834,22 +834,22 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     });
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>
+  WidgetStateProperty<Size>? get minimumSize =>
     const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(18.0);
 
   @override
-  MaterialStateProperty<Color>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -867,18 +867,18 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
+    WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

@@ -2186,8 +2186,8 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<Color> get thumbColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get thumbColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.surface.withOpacity(1.0);
@@ -2220,8 +2220,8 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color> get trackColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get trackColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.12);
@@ -2254,8 +2254,8 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get trackOutlineColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get trackOutlineColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return Colors.transparent;
       }
@@ -2267,8 +2267,8 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.primary.withOpacity(0.1);
@@ -2295,8 +2295,8 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
-  MaterialStateProperty<MouseCursor> get mouseCursor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states)
+  WidgetStateProperty<MouseCursor> get mouseCursor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states)
       => MaterialStateMouseCursor.clickable.resolve(states));
   }
 
@@ -2323,8 +2323,8 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get activeThumbRadius => 24.0 / 2;
 
   @override
-  MaterialStateProperty<Color> get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get iconColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
