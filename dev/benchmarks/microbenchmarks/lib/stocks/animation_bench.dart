@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart' show DrawerController;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
@@ -32,15 +33,17 @@ Future<void> execute(BenchmarkingBinding binding) async {
 
     bool drawerIsOpen = false;
     wallClockWatch.start();
+    final Offset drawerController = tester.getCenter(find.byType(DrawerController));
+    final Offset navigationMenu = tester.getCenter(find.byTooltip('Open navigation menu'));
     while (wallClockWatch.elapsed < kBenchmarkTime) {
       binding.drawFrameWatch.reset();
       if (drawerIsOpen) {
-        await tester.tapAt(const Offset(780.0, 250.0)); // Close drawer
+        await tester.tapAt(drawerController); // Close drawer
         await tester.pump();
         totalCloseIterationCount += 1;
         totalCloseFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
       } else {
-        await tester.tapAt(const Offset(20.0, 50.0)); // Open drawer
+        await tester.tapAt(navigationMenu); // Open drawer
         await tester.pump();
         totalOpenIterationCount += 1;
         totalOpenFrameElapsedMicroseconds += binding.drawFrameWatch.elapsedMicroseconds;
