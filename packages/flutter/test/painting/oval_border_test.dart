@@ -22,7 +22,7 @@ void main() {
     const OvalBorder c10 = OvalBorder(side: BorderSide(width: 10.0));
     const OvalBorder c15 = OvalBorder(side: BorderSide(width: 15.0));
     const OvalBorder c20 = OvalBorder(side: BorderSide(width: 20.0));
-    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.dimensions, EdgeInsets.zero);
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
     expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
@@ -42,5 +42,20 @@ void main() {
         excludes: const <Offset>[Offset(7, 16), Offset(10, 2), Offset(84, 1), Offset(86, 18)],
       ),
     );
+  });
+
+  test('OvalBorder.dimensions', () {
+    const OvalBorder inside = OvalBorder(side: BorderSide(width: 10.0));
+    expect(inside.dimensions, EdgeInsets.zero);
+
+    const OvalBorder center = OvalBorder(
+      side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignCenter),
+    );
+    expect(center.dimensions, const EdgeInsets.all(5.0));
+
+    const OvalBorder outside = OvalBorder(
+      side: BorderSide(width: 10.0, strokeAlign: BorderSide.strokeAlignOutside),
+    );
+    expect(outside.dimensions, const EdgeInsets.all(10.0));
   });
 }
