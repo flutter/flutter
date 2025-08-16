@@ -17,7 +17,7 @@ import 'theme.dart';
 // late BuildContext context;
 
 @immutable
-/// Defines the visual properties of [ProgressIndicator] widgets.
+/// Defines the visual properties of [MaterialProgressIndicator] widgets.
 ///
 /// Used by [ProgressIndicatorTheme] to control the visual properties of
 /// progress indicators in a widget subtree.
@@ -32,7 +32,7 @@ import 'theme.dart';
 ///  * [ThemeData.progressIndicatorTheme], which describes the defaults for
 ///    any progress indicators as part of the application's [ThemeData].
 class ProgressIndicatorThemeData with Diagnosticable {
-  /// Creates the set of properties used to configure [ProgressIndicator] widgets.
+  /// Creates the set of properties used to configure [MaterialProgressIndicator] widgets.
   const ProgressIndicatorThemeData({
     this.color,
     this.linearTrackColor,
@@ -56,16 +56,16 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.year2023,
   });
 
-  /// The color of the [ProgressIndicator]'s indicator.
+  /// The color of the [MaterialProgressIndicator]'s indicator.
   ///
   /// If null, then it will use [ColorScheme.primary] of the ambient
   /// [ThemeData.colorScheme].
   ///
   /// See also:
   ///
-  ///  * [ProgressIndicator.color], which specifies the indicator color for a
+  ///  * [MaterialProgressIndicator.color], which specifies the indicator color for a
   ///    specific progress indicator.
-  ///  * [ProgressIndicator.valueColor], which specifies the indicator color
+  ///  * [MaterialProgressIndicator.valueColor], which specifies the indicator color
   ///    a an animated color.
   final Color? color;
 
@@ -81,7 +81,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
   final Color? refreshBackgroundColor;
 
-  /// Overrides the border radius of the [ProgressIndicator].
+  /// Overrides the border radius of the [MaterialProgressIndicator].
   final BorderRadiusGeometry? borderRadius;
 
   /// Overrides the stop indicator color of the [LinearProgressIndicator].
@@ -289,9 +289,9 @@ class ProgressIndicatorThemeData with Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for
-/// [ProgressIndicator]s in this widget's subtree.
+/// [MaterialProgressIndicator]s in this widget's subtree.
 ///
-/// Values specified here are used for [ProgressIndicator] properties that are not
+/// Values specified here are used for [MaterialProgressIndicator] properties that are not
 /// given an explicit non-null value.
 ///
 /// {@tool snippet}
@@ -309,11 +309,11 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// ```
 /// {@end-tool}
 class ProgressIndicatorTheme extends InheritedTheme {
-  /// Creates a theme that controls the configurations for [ProgressIndicator]
+  /// Creates a theme that controls the configurations for [MaterialProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});
 
-  /// The properties for descendant [ProgressIndicator] widgets.
+  /// The properties for descendant [MaterialProgressIndicator] widgets.
   final ProgressIndicatorThemeData data;
 
   /// Returns the [data] from the closest [ProgressIndicatorTheme] ancestor. If

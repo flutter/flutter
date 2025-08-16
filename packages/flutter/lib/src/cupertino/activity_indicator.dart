@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -15,6 +16,40 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFF3C3C44),
   darkColor: Color(0xFFEBEBF5),
 );
+
+/// A base class for Cupertino progress indicators.
+///
+/// This widget cannot be instantiated directly. For a linear activity
+/// indicator, see [CupertinoLinearActivityIndicator]. For a circular activity
+/// indicator, see [CupertinoActivityIndicator].
+abstract class CupertinoProgressIndicator extends ProgressIndicator {
+  /// A base class for Cupertino progress indicators.
+  ///
+  /// This widget cannot be instantiated directly. For a linear activity
+  /// indicator, see [CupertinoLinearActivityIndicator]. For a circular activity
+  /// indicator, see [CupertinoActivityIndicator].
+  const CupertinoProgressIndicator({
+    super.key,
+    double progress = 1,
+    super.semanticsLabel,
+    super.semanticsValue,
+    this.color,
+  }) : super(value: progress);
+
+  /// Color of the activity indicator.
+  ///
+  /// Defaults to color extracted from native iOS.
+  final Color? color;
+
+  /// Determines the percentage of spinner ticks that will be shown. Typical usage would
+  /// display all ticks, however, this allows for more fine-grained control such as
+  /// during pull-to-refresh when the drag-down action shows one tick at a time as
+  /// the user continues to drag down.
+  ///
+  /// Defaults to one. Must be between zero and one, inclusive.
+  @override
+  double get value => super.value!;
+}
 
 /// An iOS-style activity indicator that spins clockwise.
 ///
@@ -28,16 +63,16 @@ const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///
 /// See also:
 ///
+///  * [CupertinoLinearActivityIndicator], which displays progress along a line.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
-class CupertinoActivityIndicator extends StatefulWidget {
+class CupertinoActivityIndicator extends CupertinoProgressIndicator {
   /// Creates an iOS-style activity indicator that spins clockwise.
   const CupertinoActivityIndicator({
     super.key,
-    this.color,
+    super.color,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-  }) : assert(radius > 0.0),
-       progress = 1.0;
+  }) : assert(radius > 0.0);
 
   /// Creates a non-animated iOS-style activity indicator that displays
   /// a partial count of ticks based on the value of [progress].
@@ -47,18 +82,13 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// to 1.0.
   const CupertinoActivityIndicator.partiallyRevealed({
     super.key,
-    this.color,
+    super.color,
     this.radius = _kDefaultIndicatorRadius,
-    this.progress = 1.0,
+    super.progress,
   }) : assert(radius > 0.0),
        assert(progress >= 0.0),
        assert(progress <= 1.0),
        animating = false;
-
-  /// Color of the activity indicator.
-  ///
-  /// Defaults to color extracted from native iOS.
-  final Color? color;
 
   /// Whether the activity indicator is running its animation.
   ///
@@ -70,61 +100,40 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// Defaults to 10 pixels. Must be positive.
   final double radius;
 
-  /// Determines the percentage of spinner ticks that will be shown. Typical usage would
-  /// display all ticks, however, this allows for more fine-grained control such as
-  /// during pull-to-refresh when the drag-down action shows one tick at a time as
-  /// the user continues to drag down.
-  ///
-  /// Defaults to one. Must be between zero and one, inclusive.
-  final double progress;
-
   @override
   State<CupertinoActivityIndicator> createState() => _CupertinoActivityIndicatorState();
+
+  @protected
+  @override
+  Color getValueColor(BuildContext context, {Color? defaultColor}) {
+    return color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context);
+  }
 }
 
 class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with
+        SingleTickerProviderStateMixin<CupertinoActivityIndicator>,
+        ProgressIndicatorMixin<CupertinoActivityIndicator> {
+  @override
+  bool get animating => widget.animating;
 
   @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(seconds: 1), vsync: this);
-
-    if (widget.animating) {
-      _controller.repeat();
-    }
-  }
-
-  @override
-  void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animating != oldWidget.animating) {
-      if (widget.animating) {
-        _controller.repeat();
-      } else {
-        _controller.stop();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  Duration get duration => const Duration(seconds: 1);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.radius * 2,
-      width: widget.radius * 2,
-      child: CustomPaint(
-        painter: _CupertinoActivityIndicatorPainter(
-          position: _controller,
-          activeColor: widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
-          radius: widget.radius,
-          progress: widget.progress,
+    return buildSemanticsWrapper(
+      context: context,
+      child: SizedBox(
+        height: widget.radius * 2,
+        width: widget.radius * 2,
+        child: CustomPaint(
+          painter: _CupertinoActivityIndicatorPainter(
+            position: controller,
+            activeColor: widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
+            radius: widget.radius,
+            progress: widget.value,
+          ),
         ),
       ),
     );
@@ -193,4 +202,118 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
         oldPainter.activeColor != activeColor ||
         oldPainter.progress != progress;
   }
+}
+
+/// An iOS-style linear activity indicator.
+///
+/// The [CupertinoLinearActivityIndicator] is a linear progress bar that
+/// displays a colored bar to indicate the progress of an ongoing task.
+///
+/// {@tool dartpad}
+/// This example shows how [CupertinoLinearActivityIndicator] can be customized.
+///
+/// ** See code in examples/api/lib/cupertino/activity_indicator/cupertino_linear_activity_indicator.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [CupertinoActivityIndicator], which is an iOS-style activity indicator that spins clockwise.
+///  * <https://developer.apple.com/design/human-interface-guidelines/progress-indicators/>
+class CupertinoLinearActivityIndicator extends CupertinoProgressIndicator {
+  /// Creates a linear iOS-style activity indicator.
+  const CupertinoLinearActivityIndicator({
+    super.key,
+    required super.progress,
+    this.height = 4.5,
+    super.color,
+  }) : assert(height > 0),
+       assert(progress >= 0.0 && progress <= 1.0);
+
+  /// The height of the line used to draw the linear activity indicator.
+  ///
+  /// Defaults to 4.5 units. Must be positive.
+  final double height;
+
+  @override
+  Color getValueColor(BuildContext context, {Color? defaultColor}) {
+    return color ?? CupertinoColors.activeBlue;
+  }
+
+  @override
+  State<CupertinoLinearActivityIndicator> createState() => _CupertinoLinearActivityIndicatorState();
+}
+
+class _CupertinoLinearActivityIndicatorState extends State<CupertinoLinearActivityIndicator>
+    with
+        SingleTickerProviderStateMixin<CupertinoLinearActivityIndicator>,
+        ProgressIndicatorMixin<CupertinoLinearActivityIndicator> {
+  @override
+  Widget build(BuildContext context) {
+    return buildSemanticsWrapper(
+      context: context,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: widget.height, minWidth: double.infinity),
+        child: CustomPaint(
+          painter: _CupertinoLinearActivityIndicator(
+            progress: widget.value,
+            color: widget.getValueColor(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool get animating => false;
+
+  @override
+  Duration get duration => Duration.zero;
+}
+
+class _CupertinoLinearActivityIndicator extends CustomPainter {
+  _CupertinoLinearActivityIndicator({required this.progress, required this.color})
+    : _backgroundPaint = Paint()
+        ..color = CupertinoColors.systemFill
+        ..style = PaintingStyle.fill,
+      _progressPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+
+  final double progress;
+
+  final Color color;
+
+  /// The background paint used to draw the full width of the progress bar.
+  ///
+  /// This paint object is created once and reused to fill the background
+  /// with a system fill color.
+  final Paint _backgroundPaint;
+
+  /// The paint used to draw the progress portion of the progress bar.
+  ///
+  /// This paint object is created once and reused to fill the progress area.
+  final Paint _progressPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw the background of the progress bar.
+    canvas.drawRRect(
+      BorderRadius.all(Radius.circular(size.height / 2)).toRRect(Offset.zero & size),
+      _backgroundPaint,
+    );
+
+    // Draw the progress portion of the bar.
+    if (progress > 0) {
+      canvas.drawRRect(
+        BorderRadius.all(
+          Radius.circular(size.height / 2),
+        ).toRRect(Offset.zero & Size(clampDouble(progress, 0.0, 1.0) * size.width, size.height)),
+        _progressPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CupertinoLinearActivityIndicator old) =>
+      old.progress != progress || old.color != color;
 }
