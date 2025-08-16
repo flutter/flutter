@@ -504,7 +504,6 @@ class _RenderSingleChildViewport extends RenderBox
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    // offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
     while (!offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent)) {}
   }
 
