@@ -6,38 +6,36 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import 'canvas.dart';
-import 'painting.dart';
-import 'path.dart';
+import 'layer_painting.dart';
 
 /// A virtual canvas that applies operations to multiple canvases at once.
-class CkNWayCanvas {
-  final List<CkCanvas> _canvases = <CkCanvas>[];
+class NWayCanvas {
+  final List<LayerCanvas> _canvases = <LayerCanvas>[];
 
-  void addCanvas(CkCanvas canvas) {
+  void addCanvas(LayerCanvas canvas) {
     _canvases.add(canvas);
   }
 
   /// Calls [save] on all canvases.
-  int save() {
-    int saveCount = 0;
+  void save() {
     for (int i = 0; i < _canvases.length; i++) {
-      saveCount = _canvases[i].save();
+      _canvases[i].save();
     }
-    return saveCount;
   }
 
   /// Calls [saveLayer] on all canvases.
-  void saveLayer(ui.Rect bounds, CkPaint? paint) {
+  void saveLayer(ui.Rect bounds, ui.Paint? paint) {
+    paint ??= ui.Paint();
     for (int i = 0; i < _canvases.length; i++) {
       _canvases[i].saveLayer(bounds, paint);
     }
   }
 
   /// Calls [saveLayerWithFilter] on all canvases.
-  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [CkPaint? paint]) {
+  void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter, [ui.Paint? paint]) {
+    paint ??= ui.Paint();
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].saveLayerWithFilter(bounds, filter, paint);
+      _canvases[i].saveLayerWithFilter(bounds, paint, filter);
     }
   }
 
@@ -64,8 +62,9 @@ class CkNWayCanvas {
 
   /// Calls [transform] on all canvases.
   void transform(Float32List matrix) {
+    final Float64List matrix64 = Float64List.fromList(matrix);
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].transform(matrix);
+      _canvases[i].transform(matrix64);
     }
   }
 
@@ -77,23 +76,23 @@ class CkNWayCanvas {
   }
 
   /// Calls [clipPath] on all canvases.
-  void clipPath(CkPath path, bool doAntiAlias) {
+  void clipPath(ui.Path path, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipPath(path, doAntiAlias);
+      _canvases[i].clipPath(path, doAntiAlias: doAntiAlias);
     }
   }
 
   /// Calls [clipRect] on all canvases.
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipRect(rect, clipOp, doAntiAlias);
+      _canvases[i].clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
     }
   }
 
   /// Calls [clipRRect] on all canvases.
   void clipRRect(ui.RRect rrect, bool doAntiAlias) {
     for (int i = 0; i < _canvases.length; i++) {
-      _canvases[i].clipRRect(rrect, doAntiAlias);
+      _canvases[i].clipRRect(rrect, doAntiAlias: doAntiAlias);
     }
   }
 

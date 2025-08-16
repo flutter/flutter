@@ -6,6 +6,8 @@ import 'dart:async';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+/// A [Rasterizer] creates [ViewRasterizer]s which are able to draw Flutter
+/// content into [FlutterView]s.
 abstract class Rasterizer {
   /// Creates a [ViewRasterizer] for a given [view].
   ViewRasterizer createViewRasterizer(EngineFlutterView view);
@@ -17,9 +19,11 @@ abstract class Rasterizer {
   void dispose();
 }
 
+/// Composites Flutter content into a [FlutterView]. Manages the creation of
+/// [DisplayCanvas] objects to render the content into.
 abstract class ViewRasterizer {
   ViewRasterizer(this.view) {
-    view.dom.sceneHost.append(sceneElement);
+    view.dom.setScene(sceneElement);
   }
 
   /// The view this rasterizer renders into.
@@ -35,7 +39,7 @@ abstract class ViewRasterizer {
   final CompositorContext context = CompositorContext();
 
   /// The platform view embedder.
-  late final HtmlViewEmbedder viewEmbedder = HtmlViewEmbedder(sceneElement, this);
+  late final PlatformViewEmbedder viewEmbedder = PlatformViewEmbedder(sceneElement, this);
 
   /// A factory for creating overlays.
   DisplayCanvasFactory<DisplayCanvas> get displayFactory;
@@ -43,9 +47,12 @@ abstract class ViewRasterizer {
   /// The DOM element which this rasterizer should raster into.
   final DomElement sceneElement = domDocument.createElement('flt-scene');
 
+  /// The last layer tree that was rendered. Only non-null if in debug mode.
+  LayerTree? _lastRenderedLayerTree;
+
   /// Draws the [layerTree] to the screen for the view associated with this
   /// rasterizer.
-  Future<void> draw(LayerTree layerTree) async {
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) async {
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
@@ -65,9 +72,10 @@ abstract class ViewRasterizer {
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
-    compositorFrame.raster(layerTree, currentFrameSize, ignoreRasterCache: true);
+    compositorFrame.raster(layerTree, currentFrameSize, recorder);
+    _lastRenderedLayerTree = layerTree;
 
-    await viewEmbedder.submitFrame();
+    await viewEmbedder.submitFrame(recorder);
   }
 
   /// Do some initialization to prepare to draw a frame.
@@ -76,8 +84,15 @@ abstract class ViewRasterizer {
   /// [OffscreenCanvas] is the correct size to draw the frame.
   void prepareToDraw();
 
-  /// Rasterize the [pictures] to the given [canvas].
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures);
+  /// Rasterizes the given [pictures] into the [displayCanvases].
+  ///
+  /// Throws an [ArgumentError] if [displayCanvases] and [pictures] are not
+  /// the same length.
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  );
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -109,6 +124,16 @@ abstract class ViewRasterizer {
   void debugClear() {
     viewEmbedder.debugClear();
   }
+
+  /// Returns helpful debug information.
+  Map<String, dynamic>? dumpDebugInfo() {
+    if (kDebugMode) {
+      if (_lastRenderedLayerTree != null) {
+        return _lastRenderedLayerTree!.dumpDebugInfo();
+      }
+    }
+    return null;
+  }
 }
 
 /// A [DisplayCanvas] is an abstraction for a canvas element which displays
@@ -116,7 +141,7 @@ abstract class ViewRasterizer {
 /// because they can be overlaid on top of platform views, which are HTML
 /// content that isn't rendered by Skia.
 ///
-/// [DisplayCanvas]es are drawn into with [ViewRasterizer.rasterizeToCanvas].
+/// [DisplayCanvas]es are drawn into with [ViewRasterizer.rasterize].
 abstract class DisplayCanvas {
   /// The DOM element which, when appended to the scene host, will display the
   /// Skia-rendered content to the screen.

@@ -102,6 +102,10 @@ SKWASM_EXPORT void canvas_drawColor(SkCanvas* canvas,
   canvas->drawColor(color, blendMode);
 }
 
+SKWASM_EXPORT void canvas_clear(SkCanvas* canvas, SkColor color) {
+  canvas->clear(color);
+}
+
 SKWASM_EXPORT void canvas_drawLine(SkCanvas* canvas,
                                    SkScalar x1,
                                    SkScalar y1,
@@ -272,4 +276,8 @@ SKWASM_EXPORT void canvas_getLocalClipBounds(SkCanvas* canvas,
 SKWASM_EXPORT void canvas_getDeviceClipBounds(SkCanvas* canvas,
                                               SkIRect* outRect) {
   *outRect = canvas->getDeviceClipBounds();
+}
+
+SKWASM_EXPORT bool canvas_quickReject(SkCanvas* canvas, const SkRect* rect) {
+  return canvas->quickReject(*rect);
 }

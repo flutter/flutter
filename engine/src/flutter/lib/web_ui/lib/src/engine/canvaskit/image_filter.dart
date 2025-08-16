@@ -4,10 +4,9 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
+import '../../engine.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 
@@ -42,7 +41,7 @@ abstract class CkManagedSkImageFilterConvertible implements ui.ImageFilter {
 /// The CanvasKit implementation of [ui.ImageFilter].
 ///
 /// Currently only supports `blur`, `matrix`, and ColorFilters.
-abstract class CkImageFilter implements CkManagedSkImageFilterConvertible {
+abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, LayerImageFilter {
   factory CkImageFilter.blur({
     required double sigmaX,
     required double sigmaY,
@@ -71,6 +70,15 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible {
 
   @override
   Matrix4 get transform => Matrix4.identity();
+
+  @override
+  ui.Rect filterBounds(ui.Rect input) {
+    late ui.Rect result;
+    withSkImageFilter((SkImageFilter filter) {
+      result = rectFromSkIRect(filter.getOutputBounds(toSkRect(input)));
+    }, defaultBlurTileMode: ui.TileMode.decal);
+    return result;
+  }
 }
 
 class CkColorFilterImageFilter extends CkImageFilter {

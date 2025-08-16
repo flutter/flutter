@@ -4,7 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
@@ -140,7 +140,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
+    paragraph.paintOnCanvasKit(canvas as CkCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
   });
@@ -161,7 +161,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
+    paragraph.paintOnCanvasKit(canvas as CkCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });

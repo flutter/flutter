@@ -6,8 +6,8 @@ import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
@@ -54,15 +54,24 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree tree) async {
+  Future<void> draw(LayerTree tree, FrameTimingRecorder? recorder) async {
     treesRendered.add(tree);
     return Future<void>.value();
   }
 
   @override
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, List<CkPicture> pictures) {
+  Future<void> rasterize(
+    List<DisplayCanvas> displayCanvases,
+    List<ui.Picture> pictures,
+    FrameTimingRecorder? recorder,
+  ) {
     // No-op
     return Future<void>.value();
+  }
+
+  @override
+  Map<String, dynamic>? dumpDebugInfo() {
+    return null;
   }
 }
 
@@ -186,9 +195,9 @@ void testMain() {
       'defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari',
       () {
         if (isChromium) {
-          expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<OffscreenCanvasRasterizer>());
+          expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
         } else {
-          expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<MultiSurfaceRasterizer>());
+          expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
         }
       },
     );
@@ -199,7 +208,7 @@ void testMain() {
             as JsFlutterConfiguration?,
       );
       CanvasKitRenderer.instance.debugResetRasterizer();
-      expect(CanvasKitRenderer.instance.debugGetRasterizer(), isA<MultiSurfaceRasterizer>());
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
     });
   });
 }

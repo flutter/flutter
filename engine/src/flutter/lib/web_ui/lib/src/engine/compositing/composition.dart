@@ -6,62 +6,66 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show PictureLayer, PlatformViewManager;
+import '../../engine.dart' show OcclusionMap, PlatformViewManager;
+import '../compositing/rasterizer.dart';
+import '../layer/layer.dart';
+import '../platform_views/embedder.dart';
 import '../vector_math.dart';
-import 'embedded_views.dart';
-import 'rasterizer.dart';
 
 /// If `true`, draws the computed bounds for platform views and pictures to
 /// help debug issues with the overlay optimization.
 bool debugOverlayOptimizationBounds = false;
 
-/// A [Rendering] is a concrete description of how a Flutter scene will be
+/// A [Composition] is a concrete description of how a Flutter scene will be
 /// rendered in a web browser.
 ///
-/// A [Rendering] is a sequence containing two types of entities:
-///   * Render canvases: which contain rasterized CkPictures, and
+/// A [Composition] is a sequence containing two types of entities:
+///   * Canvases: which contain rasterized Pictures, and
 ///   * Platform views: being HTML content that is to be composited along with
 ///     the Flutter content.
-class Rendering {
-  final List<RenderingEntity> entities = <RenderingEntity>[];
+class Composition {
+  final List<CompositionEntity> entities = <CompositionEntity>[];
 
-  void add(RenderingEntity entity) {
+  void add(CompositionEntity entity) {
     entities.add(entity);
   }
 
-  /// Returns [true] if this is equibalent to [other] for use in rendering.
-  bool equalsForRendering(Rendering other) {
+  /// Returns [true] if this is equivalent to [other] for use in a composition.
+  bool equalsForCompositing(Composition other) {
     if (other.entities.length != entities.length) {
       return false;
     }
     for (int i = 0; i < entities.length; i++) {
-      if (!entities[i].equalsForRendering(other.entities[i])) {
+      if (!entities[i].equalsForCompositing(other.entities[i])) {
         return false;
       }
     }
     return true;
   }
 
-  /// A list of just the canvases in the rendering.
-  List<RenderingRenderCanvas> get canvases => entities.whereType<RenderingRenderCanvas>().toList();
+  /// A list of just the canvases in the composition.
+  List<CompositionCanvas> get canvases => entities.whereType<CompositionCanvas>().toList();
 
   @override
   String toString() => entities.toString();
 }
 
-/// An element of a [Rendering]. Either a render canvas or a platform view.
-sealed class RenderingEntity {
-  /// Returns [true] if this entity is equal to [other] for use in a rendering.
+/// An element of a [Composition]. Either a canvas or a platform view.
+sealed class CompositionEntity {
+  /// Returns [true] if this entity is equal to [other] for use in a
+  /// composition.
   ///
-  /// For example, all [RenderingRenderCanvas] objects are equal to each other
-  /// for purposes of rendering since any canvas in that place in the rendering
-  /// will be equivalent. Platform views are only equal if they are for the same
-  /// view id.
-  bool equalsForRendering(RenderingEntity other);
+  /// For example, all [CompositionCanvas] objects are equal to each other
+  /// for purposes of rendering since any canvas in that place in the
+  /// composition will be equivalent. Platform views are only equal if they are
+  /// for the same view id.
+  bool equalsForCompositing(CompositionEntity other);
 }
 
-class RenderingRenderCanvas extends RenderingEntity {
-  RenderingRenderCanvas();
+class CompositionCanvas extends CompositionEntity {
+  CompositionCanvas();
+
+  final OcclusionMap _occlusionMap = OcclusionMap();
 
   /// The [pictures] which should be rendered in this canvas.
   final List<PictureLayer> pictures = <PictureLayer>[];
@@ -74,38 +78,43 @@ class RenderingRenderCanvas extends RenderingEntity {
   /// Adds the [picture] to the pictures that should be rendered in this canvas.
   void add(PictureLayer picture) {
     pictures.add(picture);
+    _occlusionMap.addRect(picture.sceneBounds!);
+  }
+
+  bool overlaps(ui.Rect rect) {
+    return _occlusionMap.overlaps(rect);
   }
 
   @override
-  bool equalsForRendering(RenderingEntity other) {
-    return other is RenderingRenderCanvas;
+  bool equalsForCompositing(CompositionEntity other) {
+    return other is CompositionCanvas;
   }
 
   @override
   String toString() {
-    return '$RenderingRenderCanvas(${pictures.length} pictures)';
+    return '$CompositionCanvas(${pictures.length} pictures)';
   }
 }
 
-/// A platform view to be rendered.
-class RenderingPlatformView extends RenderingEntity {
-  RenderingPlatformView(this.viewId);
+/// A platform view to be composited.
+class CompositionPlatformView extends CompositionEntity {
+  CompositionPlatformView(this.viewId);
 
   /// The [viewId] of the platform view to render.
   final int viewId;
 
   @override
-  bool equalsForRendering(RenderingEntity other) {
-    return other is RenderingPlatformView && other.viewId == viewId;
+  bool equalsForCompositing(CompositionEntity other) {
+    return other is CompositionPlatformView && other.viewId == viewId;
   }
 
   @override
   String toString() {
-    return '$RenderingPlatformView($viewId)';
+    return '$CompositionPlatformView($viewId)';
   }
 
   /// The bounds that were computed for this platform view when creating the
-  /// optimized rendering. This is only set in debug mode.
+  /// optimized composition. This is only set in debug mode.
   ui.Rect? debugComputedBounds;
 }
 
@@ -155,25 +164,25 @@ ui.Rect computePlatformViewBounds(EmbeddedViewParams params) {
   return transformedBounds.intersect(currentClipBounds);
 }
 
-/// Returns the optimized [Rendering] for a sequence of [pictures] and
+/// Returns the optimized [Composition] for a sequence of [pictures] and
 /// [platformViews].
 ///
 /// [paramsForViews] is required to compute the bounds of the platform views.
-Rendering createOptimizedRendering(
-  Iterable<SceneElement> renderObjects,
+Composition createOptimizedComposition(
+  Iterable<SceneElement> sceneElements,
   Map<int, EmbeddedViewParams> paramsForViews,
 ) {
   final Map<int, ui.Rect> cachedComputedRects = <int, ui.Rect>{};
 
-  final Rendering result = Rendering();
+  final Composition result = Composition();
 
-  // The first picture is added to the rendering in a new render canvas.
-  RenderingRenderCanvas tentativeCanvas = RenderingRenderCanvas();
+  // The first picture is added to the composition in a new canvas.
+  CompositionCanvas tentativeCanvas = CompositionCanvas();
 
-  for (final SceneElement renderObject in renderObjects) {
-    if (renderObject is PlatformViewSceneElement) {
-      final int viewId = renderObject.viewId;
-      final RenderingPlatformView platformView = RenderingPlatformView(viewId);
+  for (final SceneElement sceneElement in sceneElements) {
+    if (sceneElement is PlatformViewSceneElement) {
+      final int viewId = sceneElement.viewId;
+      final CompositionPlatformView platformView = CompositionPlatformView(viewId);
       if (PlatformViewManager.instance.isVisible(viewId)) {
         final ui.Rect platformViewBounds = cachedComputedRects[viewId] = computePlatformViewBounds(
           paramsForViews[viewId]!,
@@ -184,75 +193,62 @@ Rendering createOptimizedRendering(
         }
 
         // If the platform view intersects with any pictures in the tentative canvas
-        // then add the tentative canvas to the rendering.
-        for (final PictureLayer picture in tentativeCanvas.pictures) {
-          if (!picture.sceneBounds!.intersect(platformViewBounds).isEmpty) {
-            result.add(tentativeCanvas);
-            tentativeCanvas = RenderingRenderCanvas();
-            break;
-          }
+        // then add the tentative canvas to the composition.
+        if (tentativeCanvas.overlaps(platformViewBounds)) {
+          result.add(tentativeCanvas);
+          tentativeCanvas = CompositionCanvas();
         }
       }
       result.add(platformView);
-    } else if (renderObject is PictureSceneElement) {
-      final PictureLayer picture = renderObject.picture;
+    } else if (sceneElement is PictureSceneElement) {
+      final PictureLayer picture = sceneElement.picture;
       if (picture.isCulled) {
         continue;
       }
 
-      // Find the first render canvas which comes after the last entity (picture
+      // Find the first canvas which comes after the last entity (picture
       // or platform view) that the next picture intersects with, and add the
-      // picture to that render canvas, or create a new render canvas.
+      // picture to that canvas, or create a new canvas.
 
       // First check if the picture intersects with any pictures in the
-      // tentative  canvas, as this will be the last canvas in the rendering
+      // tentative canvas, as this will be the last canvas in the composition
       // when it is eventually added.
-      bool addedToTentativeCanvas = false;
-      for (final PictureLayer canvasPicture in tentativeCanvas.pictures) {
-        if (!canvasPicture.sceneBounds!.intersect(picture.sceneBounds!).isEmpty) {
-          tentativeCanvas.add(picture);
-          addedToTentativeCanvas = true;
-          break;
-        }
-      }
-      if (addedToTentativeCanvas) {
+      if (tentativeCanvas.overlaps(picture.sceneBounds!)) {
+        tentativeCanvas.add(picture);
         continue;
       }
 
-      RenderingRenderCanvas? lastCanvasSeen;
-      bool addedPictureToRendering = false;
-      for (final RenderingEntity entity in result.entities.reversed) {
-        if (entity is RenderingPlatformView) {
+      CompositionCanvas? lastCanvasSeen;
+      bool addedPictureToComposition = false;
+      for (final CompositionEntity entity in result.entities.reversed) {
+        if (entity is CompositionPlatformView) {
           if (PlatformViewManager.instance.isVisible(entity.viewId)) {
             final ui.Rect platformViewBounds = cachedComputedRects[entity.viewId]!;
             if (!platformViewBounds.intersect(picture.sceneBounds!).isEmpty) {
               // The next picture intersects with a platform view already in the
-              // result. Add this picture to the first render canvas which comes
+              // result. Add this picture to the first canvas which comes
               // after this platform view or create one if none exists.
               if (lastCanvasSeen != null) {
                 lastCanvasSeen.add(picture);
               } else {
                 tentativeCanvas.add(picture);
               }
-              addedPictureToRendering = true;
+              addedPictureToComposition = true;
               break;
             }
           }
-        } else if (entity is RenderingRenderCanvas) {
+        } else if (entity is CompositionCanvas) {
           lastCanvasSeen = entity;
-          // Check if we intersect with any pictures in this render canvas.
-          for (final PictureLayer canvasPicture in entity.pictures) {
-            if (!canvasPicture.sceneBounds!.intersect(picture.sceneBounds!).isEmpty) {
-              lastCanvasSeen.add(picture);
-              addedPictureToRendering = true;
-              break;
-            }
+          // Check if we intersect with any pictures in this canvas.
+          if (entity.overlaps(picture.sceneBounds!)) {
+            entity.add(picture);
+            addedPictureToComposition = true;
           }
         }
       }
-      if (!addedPictureToRendering) {
+      if (!addedPictureToComposition) {
         if (lastCanvasSeen != null) {
-          // Add it to the last canvas seen in the rendering, if any.
+          // Add it to the last canvas seen in the composition, if any.
           lastCanvasSeen.add(picture);
         } else {
           tentativeCanvas.add(picture);

@@ -12,6 +12,17 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import 'canvas.dart';
+import 'canvaskit_api.dart';
+import 'image_wasm_codecs.dart';
+import 'image_web_codecs.dart';
+import 'native_memory.dart';
+import 'painting.dart';
+import 'picture.dart';
+import 'picture_recorder.dart';
+import 'renderer.dart';
+import 'surface.dart';
+
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 Future<ui.Codec> skiaInstantiateImageCodec(
   Uint8List list, [
@@ -310,17 +321,6 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
 
   final CkImage ckImage = finalImage as CkImage;
   return ckImage;
-}
-
-/// Thrown when the web engine fails to decode an image, either due to a
-/// network issue, corrupted image contents, or missing codec.
-class ImageCodecException implements Exception {
-  ImageCodecException(this._message);
-
-  final String _message;
-
-  @override
-  String toString() => 'ImageCodecException: $_message';
 }
 
 const String _kNetworkImageMessage = 'Failed to load network image.';
