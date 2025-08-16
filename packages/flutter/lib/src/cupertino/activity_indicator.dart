@@ -223,38 +223,24 @@ class CupertinoLinearActivityIndicator extends CupertinoProgressIndicator {
   /// Creates a linear iOS-style activity indicator.
   const CupertinoLinearActivityIndicator({
     super.key,
-    required this.progress,
+    required super.progress,
     this.height = 4.5,
-    this.color,
+    super.color,
   }) : assert(height > 0),
        assert(progress >= 0.0 && progress <= 1.0);
-
-  /// The current progress of the linear activity indicator.
-  ///
-  /// This value must be between 0.0 and 1.0. A value of 0.0 means no progress
-  /// and 1.0 means that progress is complete.
-  final double progress;
 
   /// The height of the line used to draw the linear activity indicator.
   ///
   /// Defaults to 4.5 units. Must be positive.
   final double height;
 
-  /// The color of the progress bar.
-  ///
-  /// This color represents the portion of the bar that indicates progress.
-  ///
-  /// Defaults to [CupertinoColors.activeBlue] if no color is specified.
-  @override
-  final Color? color;
-
-  @override
-  State<CupertinoLinearActivityIndicator> createState() => _CupertinoLinearActivityIndicatorState();
-
   @override
   Color getValueColor(BuildContext context, {Color? defaultColor}) {
     return color ?? CupertinoColors.activeBlue;
   }
+
+  @override
+  State<CupertinoLinearActivityIndicator> createState() => _CupertinoLinearActivityIndicatorState();
 }
 
 class _CupertinoLinearActivityIndicatorState extends State<CupertinoLinearActivityIndicator>
@@ -269,7 +255,7 @@ class _CupertinoLinearActivityIndicatorState extends State<CupertinoLinearActivi
         constraints: BoxConstraints(minHeight: widget.height, minWidth: double.infinity),
         child: CustomPaint(
           painter: _CupertinoLinearActivityIndicator(
-            progress: widget.progress,
+            progress: widget.value,
             color: widget.getValueColor(context),
           ),
         ),
