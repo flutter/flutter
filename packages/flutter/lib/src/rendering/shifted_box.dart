@@ -74,6 +74,24 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+
+    // Get the child baseline using the same constraints as would be used in actual layout
+    final double? childBaseline = child.getDryBaseline(constraints, baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+
+    // The base RenderShiftedBox implementation doesn't apply any offset transformation
+    // Subclasses override this method to account for their specific positioning logic
+    return childBaseline;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = this.child;
     if (child != null) {
@@ -539,6 +557,33 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('widthFactor', _widthFactor, ifNull: 'expand'));
     properties.add(DoubleProperty('heightFactor', _heightFactor, ifNull: 'expand'));
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+
+    // Calculate size using exactly the same logic as performLayout to ensure consistency
+    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
+    final Size size = constraints.constrain(
+      Size(
+        shrinkWrapWidth ? childSize.width * (_widthFactor ?? 1.0) : double.infinity,
+        shrinkWrapHeight ? childSize.height * (_heightFactor ?? 1.0) : double.infinity,
+      ),
+    );
+
+    final Offset childOffset = resolvedAlignment.alongOffset(size - childSize as Offset);
+    return result + childOffset.dy;
   }
 }
 
