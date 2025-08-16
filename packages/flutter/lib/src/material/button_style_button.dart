@@ -85,6 +85,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.focusNode,
     required this.autofocus,
     required this.clipBehavior,
+    this.isEnabled,
     this.statesController,
     this.isSemanticButton = true,
     @Deprecated(
@@ -96,6 +97,19 @@ abstract class ButtonStyleButton extends StatefulWidget {
     this.tooltip,
     required this.child,
   });
+
+  /// Whether the button is enabled.
+  ///
+  /// If this is non-null, this value is used to determine if the button is
+  /// enabled.
+  ///
+  /// If this is null, the button is enabled if [onPressed] or [onLongPress]
+  /// is non-null.
+  ///
+  /// See also:
+  ///
+  /// * [enabled], which is true if the button is enabled.
+  final bool? isEnabled;
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -239,7 +253,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
   /// or [onLongPress] properties to a non-null value.
-  bool get enabled => onPressed != null || onLongPress != null;
+  bool get enabled => isEnabled ?? (onPressed != null || onLongPress != null);
 
   @override
   State<ButtonStyleButton> createState() => _ButtonStyleState();
@@ -547,14 +561,24 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
+    // If both `onPressed` and `onLongPress` are null, but `isEnabled` is true,
+    // we need to provide a default `onTap` callback to satisfy the underlying InkWell.
+    final bool hasAnyCallback = widget.onPressed != null || widget.onLongPress != null;
+    final bool? isEnabled = widget.isEnabled;
+    final VoidCallback? onLongPress = isEnabled ?? true ? widget.onLongPress : null;
+    VoidCallback? onTap = isEnabled ?? true ? widget.onPressed : null;
+    if (!hasAnyCallback && (isEnabled ?? false)) {
+      onTap = () {};
+    }
+
     result = AnimatedTheme(
       duration: resolvedAnimationDuration,
       data: theme.copyWith(
         iconTheme: iconTheme.merge(IconThemeData(color: resolvedIconColor, size: resolvedIconSize)),
       ),
       child: InkWell(
-        onTap: widget.onPressed,
-        onLongPress: widget.onLongPress,
+        onTap: onTap,
+        onLongPress: onLongPress,
         onHover: widget.onHover,
         mouseCursor: mouseCursor,
         enableFeedback: resolvedEnableFeedback,
