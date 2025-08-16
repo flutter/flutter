@@ -307,7 +307,7 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: _focusNode,
       style: ButtonStyle(
         foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.red;
           }

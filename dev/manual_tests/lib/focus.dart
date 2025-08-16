@@ -55,7 +55,7 @@ class _DemoButtonState extends State<DemoButton> {
       focusNode: focusNode,
       autofocus: widget.autofocus,
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        overlayColor: WidgetStateProperty.resolveWith<Color>((Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.red.withOpacity(0.25);
           }

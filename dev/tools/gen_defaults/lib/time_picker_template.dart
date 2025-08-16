@@ -254,8 +254,8 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
     });
   }
 
-  MaterialStateProperty<Color> get _hourMinuteTextColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color> get _hourMinuteTextColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor("$hourMinuteComponent.selected.pressed.label-text")};
@@ -345,14 +345,14 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
   }
 
   @override
-  MaterialStateProperty<Color?>? get timeSelectorSeparatorColor {
+  WidgetStateProperty<Color?>? get timeSelectorSeparatorColor {
     // TODO(tahatesser): Update this when tokens are available.
     // This is taken from https://m3.material.io/components/time-pickers/specs.
     return MaterialStatePropertyAll<Color>(_colors.onSurface);
   }
 
   @override
-  MaterialStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
+  WidgetStateProperty<TextStyle?>? get timeSelectorSeparatorTextStyle {
     // TODO(tahatesser): Update this when tokens are available.
     // This is taken from https://m3.material.io/components/time-pickers/specs.
     return MaterialStatePropertyAll<TextStyle?>(_textTheme.displayLarge);
