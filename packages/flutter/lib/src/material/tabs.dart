@@ -2693,8 +2693,8 @@ class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
   TextStyle? get unselectedLabelStyle => _textTheme.titleSmall;
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.primary.withOpacity(0.1);
@@ -2772,8 +2772,8 @@ class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
   TextStyle? get unselectedLabelStyle => _textTheme.titleSmall;
 
   @override
-  MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?> get overlayColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);

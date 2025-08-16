@@ -40,7 +40,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   );
 
   @override
-  MaterialStateProperty<Color?>? get color => null; // Subclasses override this getter
+  WidgetStateProperty<Color?>? get color => null; // Subclasses override this getter
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
