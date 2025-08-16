@@ -387,9 +387,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     return;
   }
 
-  FlutterTouchInterceptingView* view = self.platformViews[viewId].touch_interceptor;
-  [view blockGesture];
-
   result(nil);
 }
 
