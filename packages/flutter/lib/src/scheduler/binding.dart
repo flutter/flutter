@@ -401,6 +401,7 @@ mixin SchedulerBinding on BindingBase {
   void resetInternalState() {
     _lifecycleState = null;
     _framesEnabled = true;
+    _forceFramesEnabled = false;
   }
 
   /// Called when the application lifecycle state changes.
@@ -870,10 +871,46 @@ mixin SchedulerBinding on BindingBase {
 
   /// Whether frames are currently being scheduled when [scheduleFrame] is called.
   ///
-  /// This value depends on the value of the [lifecycleState].
-  bool get framesEnabled => _framesEnabled;
+  /// This value depends on the [lifecycleState], unless overridden by
+  /// [forceFramesEnabled] if lifecycle state is not detached.
+  bool get framesEnabled {
+    return _framesEnabled || (_forceFramesEnabled && _lifecycleState != AppLifecycleState.detached);
+  }
 
   bool _framesEnabled = true;
+
+  /// Forces frames to remain enabled when the app is hidden or paused.
+  ///
+  /// When `true`, frames continue to be scheduled even when the app is hidden
+  /// or paused. When `false` (the default), frames are disabled during these
+  /// lifecycle states.
+  ///
+  /// Useful for applications that need continuous rendering when not visible,
+  /// such as maintaining animations.
+  ///
+  /// Forcing frames when hidden or paused may impact battery life and performance.
+  ///
+  /// See also:
+  ///
+  ///  * [framesEnabled], which controls the actual frame scheduling behavior.
+  ///  * [scheduleFrame], which schedules frames when enabled.
+  bool get forceFramesEnabled => _forceFramesEnabled;
+  bool _forceFramesEnabled = false;
+
+  /// Sets whether to force frames to remain enabled regardless of lifecycle state.
+  ///
+  /// See [forceFramesEnabled] for details.
+  set forceFramesEnabled(bool value) {
+    if (_forceFramesEnabled == value) {
+      return;
+    }
+    final bool oldFramesEnabled = framesEnabled;
+    _forceFramesEnabled = value;
+    if (!oldFramesEnabled && framesEnabled) {
+      scheduleFrame();
+    }
+  }
+
   void _setFramesEnabledState(bool enabled) {
     if (_framesEnabled == enabled) {
       return;
