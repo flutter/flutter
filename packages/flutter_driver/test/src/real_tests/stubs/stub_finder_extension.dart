@@ -24,8 +24,9 @@ class StubFinderExtension extends FinderExtension {
   @override
   SerializableFinder deserialize(
     Map<String, String> params,
-    DeserializeFinderFactory finderFactory,
-  ) {
+    DeserializeFinderFactory finderFactory, {
+    String? path,
+  }) {
     return StubFinder(params['keyString']!);
   }
 
