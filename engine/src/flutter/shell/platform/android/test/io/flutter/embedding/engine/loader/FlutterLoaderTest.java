@@ -13,8 +13,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
@@ -26,6 +28,10 @@ import android.util.DisplayMetrics;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -398,5 +404,268 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertTrue(arguments.contains(shaderModeArg));
+  }
+
+  @Test
+  public void itSetsAotSharedLibraryNameIfPathIsInApk() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Path nativeLibraryDir = Paths.get(File.separator, "native", "lib", "dir");
+    String nativeLibraryDirPath = nativeLibraryDir.toString();
+
+    assertFalse(flutterLoader.initialized());
+    ctx.getApplicationInfo().nativeLibraryDir = nativeLibraryDirPath;
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within application APK.
+    Path pathWithDirectApkPath = nativeLibraryDir.resolve("library.so");
+    Path pathWithNestedApkPath =
+        nativeLibraryDir.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectApkPath1 =
+        nativeLibraryDir.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectApkPath2 =
+        nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectApkPath3 =
+        nativeLibraryDir.resolve(Paths.get("some", "directory", "..", "library.so"));
+
+    Path[] pathsToTest = {
+      pathWithDirectApkPath,
+      pathWithNestedApkPath,
+      pathWithIndirectApkPath1,
+      pathWithIndirectApkPath2,
+      pathWithIndirectApkPath3
+    };
+    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
+
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
+      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String[] args = {aotSharedLibraryNameArg};
+      flutterLoader.ensureInitializationComplete(ctx, args);
+      shadowOf(getMainLooper()).idle();
+
+      ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+      verify(mockFlutterJNI)
+          .init(
+              eq(ctx),
+              shellArgsCaptor.capture(),
+              anyString(),
+              anyString(),
+              anyString(),
+              anyLong(),
+              anyInt());
+
+      List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+      // This check works because the tests run in debug mode. If run in release (or JIT release)
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
+      assertTrue(actualArgs.contains(aotSharedLibraryNameArg));
+
+      // Reset FlutterLoader and mockFlutterJNI to make more calls to
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+      flutterLoader.initialized = false;
+      clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetAotSharedLibraryNameIfPathOutsideApk() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Path nativeLibraryDir = Paths.get(File.separator, "native", "lib", "dir");
+    String nativeLibraryDirPath = nativeLibraryDir.toString();
+
+    assertFalse(flutterLoader.initialized());
+    ctx.getApplicationInfo().nativeLibraryDir = nativeLibraryDirPath;
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within application APK.
+    Path pathWithIndirectOutsideApkPath = nativeLibraryDir.resolve(Paths.get("..", "library.so"));
+    Path pathWithMoreIndirectOutsideApkPath =
+        nativeLibraryDir.resolve(Paths.get("some", "directories", "..", "..", "..", "library.so"));
+    Path pathWithoutSoFile = nativeLibraryDir.resolve(Paths.get("library.somethingElse"));
+    Path pathWithPartialNativeLibraryPath1 = Paths.get(File.separator, "native", "library.so");
+    Path pathWithPartialNativeLibraryPath2 =
+        Paths.get(File.separator, "native", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath3 =
+        Paths.get(File.separator, "native", "library", "library.so");
+    Path pathWithPartialNativeLibraryPath4 =
+        Paths.get(File.separator, "library", "dir", "library.so");
+    Path pathWithPartialNativeLibraryPath5 = Paths.get(File.separator, "dir", "library.so");
+
+    Path[] pathsToTest = {
+      pathWithIndirectOutsideApkPath,
+      pathWithMoreIndirectOutsideApkPath,
+      pathWithoutSoFile,
+      pathWithPartialNativeLibraryPath1,
+      pathWithPartialNativeLibraryPath2,
+      pathWithPartialNativeLibraryPath3,
+      pathWithPartialNativeLibraryPath4,
+      pathWithPartialNativeLibraryPath5
+    };
+    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
+
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
+      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String[] args = {aotSharedLibraryNameArg};
+      flutterLoader.ensureInitializationComplete(ctx, args);
+      shadowOf(getMainLooper()).idle();
+
+      ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+      verify(mockFlutterJNI)
+          .init(
+              eq(ctx),
+              shellArgsCaptor.capture(),
+              anyString(),
+              anyString(),
+              anyString(),
+              anyLong(),
+              anyInt());
+
+      List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+      // This check works because the tests run in debug mode. If run in release (or JIT release)
+      // mode, actualArgs would contain the default arguments for AOT shared library name.
+      assertFalse(actualArgs.contains(aotSharedLibraryNameArg));
+
+      // Reset FlutterLoader and mockFlutterJNI to make more calls to
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+      flutterLoader.initialized = false;
+      clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itSetsAotSharedLibraryNameIfPathIsInInternalStorage() throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Context mockApplicationContext = mock(Context.class);
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+    String internalStorageDirPath = internalStorageDir.getCanonicalPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within internal storage.
+    Path pathWithDirectInternalStoragePath = internalStorageDirAsPathObj.resolve("library.so");
+    Path pathWithNestedInternalStoragePath =
+        internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", "library.so"));
+    Path pathWithIndirectInternalStoragePath1 =
+        internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath2 =
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("some", "directory", "..", "..", "library.so"));
+    Path pathWithIndirectInternalStoragePath3 =
+        internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "library.so"));
+
+    Path[] pathsToTest = {
+      pathWithDirectInternalStoragePath,
+      pathWithNestedInternalStoragePath,
+      pathWithIndirectInternalStoragePath1,
+      pathWithIndirectInternalStoragePath2,
+      pathWithIndirectInternalStoragePath3
+    };
+    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
+
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
+      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String[] args = {aotSharedLibraryNameArg};
+      flutterLoader.ensureInitializationComplete(ctx, args);
+      shadowOf(getMainLooper()).idle();
+
+      ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+      verify(mockFlutterJNI)
+          .init(
+              eq(ctx),
+              shellArgsCaptor.capture(),
+              anyString(),
+              anyString(),
+              anyString(),
+              anyLong(),
+              anyInt());
+
+      List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+      // This check works because the tests run in debug mode. If run in release (or JIT release)
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
+      assertTrue(actualArgs.contains(aotSharedLibraryNameArg));
+
+      // Reset FlutterLoader and mockFlutterJNI to make more calls to
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+      flutterLoader.initialized = false;
+      clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itDoesNotSetAotSharedLibraryNameIfPathOutsideInternalStorage() throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Context mockApplicationContext = mock(Context.class);
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+    String internalStorageDirPath = internalStorageDir.getCanonicalPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within internal storage.
+    Path pathWithIndirectOutsideInternalStorage =
+        internalStorageDirAsPathObj.resolve(Paths.get("..", "library.so"));
+    Path pathWithMoreIndirectOutsideInternalStorage =
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("some", "directory", "..", "..", "..", "library.so"));
+    Path pathWithoutSoFile =
+        internalStorageDirAsPathObj.resolve(Paths.get("library.somethingElse"));
+    Path pathWithPartialInternalStoragePath =
+        internalStorageDirAsPathObj.getParent().resolve("library.so");
+
+    Path[] pathsToTest = {
+      pathWithIndirectOutsideInternalStorage,
+      pathWithMoreIndirectOutsideInternalStorage,
+      pathWithoutSoFile,
+      pathWithPartialInternalStoragePath
+    };
+    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
+
+    for (Path testPath : pathsToTest) {
+      String path = testPath.toString();
+      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String[] args = {aotSharedLibraryNameArg};
+      flutterLoader.ensureInitializationComplete(ctx, args);
+      shadowOf(getMainLooper()).idle();
+
+      ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+      verify(mockFlutterJNI)
+          .init(
+              eq(ctx),
+              shellArgsCaptor.capture(),
+              anyString(),
+              anyString(),
+              anyString(),
+              anyLong(),
+              anyInt());
+
+      List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+      // This check works because the tests run in debug mode. If run in release (or JIT release)
+      // mode, actualArgs would contain the default arguments for AOT shared library name on top
+      // of aotSharedLibraryNameArg.
+      assertFalse(actualArgs.contains(aotSharedLibraryNameArg));
+
+      // Reset FlutterLoader and mockFlutterJNI to make more calls to
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+      flutterLoader.initialized = false;
+      clearInvocations(mockFlutterJNI);
+    }
   }
 }

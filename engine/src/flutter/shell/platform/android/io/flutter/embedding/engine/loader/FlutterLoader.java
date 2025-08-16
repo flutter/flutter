@@ -18,6 +18,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
@@ -27,10 +28,13 @@ import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -117,7 +121,7 @@ public class FlutterLoader {
     this.executorService = executorService;
   }
 
-  private boolean initialized = false;
+  @VisibleForTesting boolean initialized = false;
   @Nullable private Settings settings;
   private long initStartTimestampMillis;
   private FlutterApplicationInfo flutterApplicationInfo;
@@ -313,8 +317,23 @@ public class FlutterLoader {
               + flutterApplicationInfo.nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
+
+      String aotSharedLibraryNameFlagPrefix = "--" + AOT_SHARED_LIBRARY_NAME + "=";
       if (args != null) {
-        Collections.addAll(shellArgs, args);
+        for (String arg : args) {
+          // Perform security check for path containing application's compiled Dart code and
+          // potentially user-provided compiled native code.
+          if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
+            if (!shouldAddAotSharedLibraryNameFlag(applicationContext, arg)) {
+              break;
+            }
+          }
+
+          // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
+          // arguments to be used for engine initialization and should be fixed. See
+          // https://github.com/flutter/flutter/issues/172553.
+          shellArgs.add(arg);
+        }
       }
 
       String kernelPath = null;
@@ -327,16 +346,14 @@ public class FlutterLoader {
         shellArgs.add(
             "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
       } else {
-        shellArgs.add(
-            "--" + AOT_SHARED_LIBRARY_NAME + "=" + flutterApplicationInfo.aotSharedLibraryName);
+        // Add default AOT shared library name arg.
+        shellArgs.add(aotSharedLibraryNameFlagPrefix + flutterApplicationInfo.aotSharedLibraryName);
 
-        // Most devices can load the AOT shared library based on the library name
-        // with no directory path.  Provide a fully qualified path to the library
+        // Some devices cannot load the an AOT shared library based on the library name
+        // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            "--"
-                + AOT_SHARED_LIBRARY_NAME
-                + "="
+            aotSharedLibraryNameFlagPrefix
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -443,6 +460,78 @@ public class FlutterLoader {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Checks if the library that engine will use to load application's Dart code lives within a path
+   * we consider safe: within the the application's native code directory in its base APK or or
+   * within the application's internal storage (which means the library was explicitly placed there
+   * by the application developer).
+   *
+   * <p>In the case where the library does not live in a safe location, we will warn the application
+   * developer to ensure they have vetted the library they wish to use and place it in a trusted
+   * location.
+   */
+  private boolean shouldAddAotSharedLibraryNameFlag(
+      @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
+      throws IOException {
+    // Isolate AOT shared library path.
+    String aotSharedLibraryNameRegex = "^--aot-shared-library-name=(.*)$";
+    Pattern aotSharedLibraryNamePattern = Pattern.compile(aotSharedLibraryNameRegex);
+    Matcher aotSharedLibraryNameMatcher =
+        aotSharedLibraryNamePattern.matcher(aotSharedLibraryNameArg);
+
+    if (!aotSharedLibraryNameMatcher.find()) {
+      throw new IllegalArgumentException(
+          "AOT shared library name argument "
+              + aotSharedLibraryNameArg
+              + "is invalid. Please provide a valid path name.");
+    }
+    String aotSharedLibraryPath = aotSharedLibraryNameMatcher.group(1);
+
+    // Canocalize path for safety analysis.
+    File aotSharedLibraryFile = new File(aotSharedLibraryPath);
+    String aotSharedLibraryPathCanonicalPath = aotSharedLibraryFile.getCanonicalPath();
+
+    // Check if library lives within application's native code directory.
+    String nativeCodeDirectoryPath = flutterApplicationInfo.nativeLibraryDir;
+    Pattern aotSharedLibraryInNativeCodeDirPattern =
+        Pattern.compile(
+            "^"
+                + Pattern.quote(nativeCodeDirectoryPath)
+                + "(?:"
+                + Pattern.quote(File.separator)
+                + ".*?)?"
+                + "\\.so$");
+    Matcher aotSharedLibraryInNativeCodeDirMatcher =
+        aotSharedLibraryInNativeCodeDirPattern.matcher(aotSharedLibraryPathCanonicalPath);
+    if (aotSharedLibraryInNativeCodeDirMatcher.find()) {
+      return true;
+    }
+
+    // Check if library lives within application's internal storage.
+    File internalStorageDirectory = applicationContext.getApplicationContext().getFilesDir();
+    String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
+    Pattern aotSharedLibraryInInternalStoragePattern =
+        Pattern.compile(
+            "^"
+                + Pattern.quote(internalStorageDirectoryPathCanonicalPath)
+                + "(?:"
+                + Pattern.quote(File.separator)
+                + ".*?)?"
+                + "\\.so$");
+    Matcher aotSharedLibraryInInternalStorageMatcher =
+        aotSharedLibraryInInternalStoragePattern.matcher(aotSharedLibraryPathCanonicalPath);
+    if (aotSharedLibraryInInternalStorageMatcher.find()) {
+      return true;
+    }
+
+    Log.e(
+        TAG,
+        "Failed to set AOT shared library name to path "
+            + aotSharedLibraryPath
+            + " because it does not point to the native code directory inside your application's APK nor your application's internal storage. Please make sure to vet this library and package it within one of those trusted locations.");
+    return false;
   }
 
   private static boolean isLeakVM(@Nullable Bundle metaData) {

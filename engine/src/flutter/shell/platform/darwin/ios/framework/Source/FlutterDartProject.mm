@@ -95,32 +95,32 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     if (hasExplicitBundle) {
       NSString* executablePath = bundle.executablePath;
       if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
-        settings.application_library_path.push_back(executablePath.UTF8String);
+        settings.application_library_paths.push_back(executablePath.UTF8String);
       }
     }
 
     // No application bundle specified.  Try a known location from the main bundle's Info.plist.
-    if (settings.application_library_path.empty()) {
+    if (settings.application_library_paths.empty()) {
       NSString* libraryName = [mainBundle objectForInfoDictionaryKey:@"FLTLibraryPath"];
       NSString* libraryPath = [mainBundle pathForResource:libraryName ofType:@""];
       if (libraryPath.length > 0) {
         NSString* executablePath = [NSBundle bundleWithPath:libraryPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path.push_back(executablePath.UTF8String);
+          settings.application_library_paths.push_back(executablePath.UTF8String);
         }
       }
     }
 
     // In case the application bundle is still not specified, look for the App.framework in the
     // Frameworks directory.
-    if (settings.application_library_path.empty()) {
+    if (settings.application_library_paths.empty()) {
       NSString* applicationFrameworkPath = [mainBundle pathForResource:@"Frameworks/App.framework"
                                                                 ofType:@""];
       if (applicationFrameworkPath.length > 0) {
         NSString* executablePath =
             [NSBundle bundleWithPath:applicationFrameworkPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path.push_back(executablePath.UTF8String);
+          settings.application_library_paths.push_back(executablePath.UTF8String);
         }
       }
     }
