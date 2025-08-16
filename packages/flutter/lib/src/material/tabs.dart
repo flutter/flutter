@@ -806,10 +806,15 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
     // guard because the super call below would start a ballistic scroll activity.
     if (!_viewportDimensionWasNonZero || _needsPixelsCorrection) {
       _needsPixelsCorrection = false;
-      correctPixels(
-        tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent),
+      final double newPixels = tabBar._initialScrollOffset(
+        viewportDimension,
+        minScrollExtent,
+        maxScrollExtent,
       );
-      result = false;
+      if (newPixels != (hasPixels ? pixels : null)) {
+        correctPixels(newPixels);
+        result = false;
+      }
     }
     return super.applyContentDimensions(minScrollExtent, maxScrollExtent) && result;
   }

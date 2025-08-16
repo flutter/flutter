@@ -1126,8 +1126,6 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('', (WidgetTester tester) async {});
-
   // Regression test for https://github.com/flutter/flutter/issues/173225
   testWidgets('ValueListenableBuilder rebuild does not interrupt ongoing scroll gesture', (
     WidgetTester tester,
