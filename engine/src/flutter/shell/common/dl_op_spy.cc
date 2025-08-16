@@ -132,16 +132,10 @@ void DlOpSpy::drawDisplayList(const sk_sp<DisplayList> display_list,
   display_list->Dispatch(receiver);
   did_draw_ |= receiver.did_draw();
 }
-void DlOpSpy::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                           DlScalar x,
-                           DlScalar y) {
-  did_draw_ |= will_draw_;
-}
 
-void DlOpSpy::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void DlOpSpy::drawText(const std::shared_ptr<flutter::DlText>& text_frame,
+                       DlScalar x,
+                       DlScalar y) {
   did_draw_ |= will_draw_;
 }
 

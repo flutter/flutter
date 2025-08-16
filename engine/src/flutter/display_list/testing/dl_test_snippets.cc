@@ -5,6 +5,7 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTypeface.h"
@@ -1084,23 +1085,23 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             },
             1u},
        }},
-      {"DrawTextBlob",
+      {"DrawText",
        {
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
-              r.drawTextBlob(GetTestTextBlob(1), 10, 10);
+              r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 10);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
-              r.drawTextBlob(GetTestTextBlob(1), 20, 10);
+              r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 20, 10);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
-              r.drawTextBlob(GetTestTextBlob(1), 10, 20);
+              r.drawText(DlTextSkia::Make(GetTestTextBlob(1)), 10, 20);
             }},
-           {1, 24, 1,
+           {1, 32, 1,
             [](DlOpReceiver& r) {
-              r.drawTextBlob(GetTestTextBlob(2), 10, 10);
+              r.drawText(DlTextSkia::Make(GetTestTextBlob(2)), 10, 10);
             }},
        }},
       {"DrawShadow",

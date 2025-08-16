@@ -294,9 +294,9 @@ class DisplayListOpFlags : DisplayListFlags {
   };
   // Special case flags for horizonal and vertical lines
   static constexpr DisplayListAttributeFlags kDrawHVLineFlags{
-      kBasePaintFlags |   //
-      kBaseStrokeFlags |  //
-      kMayHaveCaps        //
+      kBasePaintFlags |         //
+      kBaseStrokeOrFillFlags |  // TODO(jacksongardner): see if this is right
+      kMayHaveCaps              //
   };
   static constexpr DisplayListAttributeFlags kDrawLineFlags{
       kDrawHVLineFlags        //

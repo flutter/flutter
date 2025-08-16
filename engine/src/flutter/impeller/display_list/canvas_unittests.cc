@@ -13,6 +13,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
@@ -333,7 +334,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
-  auto runtime_effect = flutter::DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
       runtime_effect, {}, uniform_data);
