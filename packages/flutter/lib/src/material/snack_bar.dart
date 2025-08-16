@@ -225,8 +225,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
-/// A SnackBar with an action will not time out when TalkBack or VoiceOver are
-/// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
+/// A SnackBar with an action will not time out.
 ///
 /// During page transitions, the [SnackBar] will smoothly animate to its
 /// location on the other page. For example if the [SnackBar.behavior] is set to
@@ -413,6 +412,8 @@ class SnackBar extends StatefulWidget {
   ///
   /// For example, the snack bar might let the user undo the operation that
   /// prompted the snackbar. Snack bars can have at most one action.
+  ///
+  /// If provided, the snack bar will not time out.
   ///
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction? action;
