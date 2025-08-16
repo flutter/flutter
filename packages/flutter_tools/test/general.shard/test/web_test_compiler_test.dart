@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/expect.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 void main() {
   testUsingContext('web test compiler issues valid compile command', () async {
@@ -74,6 +75,7 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: processManager,
       config: config,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     const buildInfo = BuildInfo(
@@ -143,6 +145,7 @@ void main() {
       artifacts: Artifacts.test(),
       processManager: processManager,
       config: config,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     const buildInfo = BuildInfo(

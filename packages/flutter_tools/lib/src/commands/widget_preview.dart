@@ -322,9 +322,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     final PreviewDependencyGraph graph = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
-    shutdownHooks.addShutdownHook(() async {
-      await _widgetPreviewApp?.exitApp();
-    });
     await configureDtd();
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
