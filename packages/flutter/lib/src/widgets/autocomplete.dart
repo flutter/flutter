@@ -533,12 +533,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       Offset.zero & layoutInfo.overlaySize,
     );
 
-    bool opensUp = widget.optionsViewOpenDirection == OptionsViewOpenDirection.up;
-    if (widget.optionsViewOpenDirection == OptionsViewOpenDirection.automatic) {
-      final double spaceAbove = -overlayRectInField.top;
-      final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
-      opensUp = spaceAbove > spaceBelow;
-    }
+    final double spaceAbove = -overlayRectInField.top;
+    final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
+    final bool opensUp = switch (widget.optionsViewOpenDirection) {
+      OptionsViewOpenDirection.up => true,
+      OptionsViewOpenDirection.down => false,
+      OptionsViewOpenDirection.automatic => spaceAbove > spaceBelow,
+    };
 
     final double optionsViewMaxHeight = opensUp
         ? -overlayRectInField.top
