@@ -20,7 +20,7 @@ void configureProject(Project project, String outputDir) {
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
-    if (project.hasProperty("buildNumber")) {
+    if (project.name == "flutter" && project.hasProperty("buildNumber")) {
         project.version = project.property("buildNumber")
     }
 
