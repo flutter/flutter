@@ -36,6 +36,7 @@ class MockTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     TextSelectionHandleType type,
     double textLineHeight, [
+    double? cursorWidth,
     VoidCallback? onTap,
   ]) {
     throw UnimplementedError();
@@ -56,7 +57,11 @@ class MockTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    bool isEditText = true,
+  }) {
     throw UnimplementedError();
   }
 
