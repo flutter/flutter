@@ -8,11 +8,12 @@
 library;
 
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate, ViewConstraints;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../rendering.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
@@ -42,6 +43,7 @@ class ViewConfiguration {
       view.physicalConstraints,
     );
     final double devicePixelRatio = view.devicePixelRatio;
+
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,
       logicalConstraints: physicalConstraints / devicePixelRatio,
@@ -289,6 +291,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void performLayout() {
+    print(constraints);
     assert(_rootTransform != null);
     final bool sizedByChild = !constraints.isTight;
     child?.layout(constraints, parentUsesSize: sizedByChild);
@@ -359,8 +362,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      assert(configuration.logicalConstraints.isSatisfiedBy(size));
-      _view.render(scene, size: configuration.toPhysicalSize(size));
+      // assert(configuration.logicalConstraints.isSatisfiedBy(size));
+      _view.render(scene, size: configuration.physicalConstraints.biggest);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
