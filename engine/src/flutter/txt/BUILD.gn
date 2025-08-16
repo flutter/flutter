@@ -96,6 +96,9 @@ source_set("txt") {
       "src/txt/platform_mac.mm",
     ]
     deps += [ "//flutter/fml" ]
+
+    configs += [ "//flutter/shell/platform/darwin/ios:utilities_subframework_config" ]
+
   } else if (is_android) {
     sources += [ "src/txt/platform_android.cc" ]
   } else if (is_linux) {
@@ -108,6 +111,9 @@ source_set("txt") {
   } else {
     sources += [ "src/txt/platform.cc" ]
   }
+
+
+
 }
 
 if (enable_unittests) {
