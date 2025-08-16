@@ -208,24 +208,15 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   Widget build(BuildContext context) {
     final int highlightedIndex = AutocompleteHighlightedOption.of(context);
 
-    final AlignmentDirectional optionsAlignment = switch (openDirection) {
-      OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-      OptionsViewOpenDirection.down ||
-      OptionsViewOpenDirection.automatic => AlignmentDirectional.topStart,
-    };
-
-    return Align(
-      alignment: optionsAlignment,
-      child: Material(
-        elevation: 4.0,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: optionsMaxHeight),
-          child: _AutocompleteOptionsList<T>(
-            displayStringForOption: displayStringForOption,
-            highlightedIndex: highlightedIndex,
-            onSelected: onSelected,
-            options: options,
-          ),
+    return Material(
+      elevation: 4.0,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: optionsMaxHeight),
+        child: _AutocompleteOptionsList<T>(
+          displayStringForOption: displayStringForOption,
+          highlightedIndex: highlightedIndex,
+          onSelected: onSelected,
+          options: options,
         ),
       ),
     );
