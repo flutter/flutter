@@ -520,68 +520,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
            ((isAboveBottomOfLine && isCloserHorizontally) || (isBelowBottomOfLine && isFarther))));
 }
 
-#pragma mark - FlutterTextPosition
-
-@implementation FlutterTextPosition
-
-+ (instancetype)positionWithIndex:(NSUInteger)index {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:UITextStorageDirectionForward];
-}
-
-+ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  return [[FlutterTextPosition alloc] initWithIndex:index affinity:affinity];
-}
-
-- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
-  self = [super init];
-  if (self) {
-    _index = index;
-    _affinity = affinity;
-  }
-  return self;
-}
-
-@end
-
-#pragma mark - FlutterTextRange
-
-@implementation FlutterTextRange
-
-+ (instancetype)rangeWithNSRange:(NSRange)range {
-  return [[FlutterTextRange alloc] initWithNSRange:range];
-}
-
-- (instancetype)initWithNSRange:(NSRange)range {
-  self = [super init];
-  if (self) {
-    _range = range;
-  }
-  return self;
-}
-
-- (UITextPosition*)start {
-  return [FlutterTextPosition positionWithIndex:self.range.location
-                                       affinity:UITextStorageDirectionForward];
-}
-
-- (UITextPosition*)end {
-  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
-                                       affinity:UITextStorageDirectionBackward];
-}
-
-- (BOOL)isEmpty {
-  return self.range.length == 0;
-}
-
-- (id)copyWithZone:(NSZone*)zone {
-  return [[FlutterTextRange allocWithZone:zone] initWithNSRange:self.range];
-}
-
-- (BOOL)isEqualTo:(FlutterTextRange*)other {
-  return NSEqualRanges(self.range, other.range);
-}
-@end
-
 #pragma mark - FlutterTokenizer
 
 @interface FlutterTokenizer ()
@@ -633,9 +571,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     // According to the API doc if the text position is at a text-unit boundary, it is considered
     // enclosed only if the next position in the given direction is entirely enclosed. Link:
     // https://developer.apple.com/documentation/uikit/uitextinputtokenizer/1614464-rangeenclosingposition?language=objc
-    FlutterTextPosition* flutterPosition = (FlutterTextPosition*)position;
-    if (flutterPosition.index > _textInputView.text.length ||
-        (flutterPosition.index == _textInputView.text.length &&
+    if (position.index > _textInputView.text.length ||
+        (position.index == _textInputView.text.length &&
          direction == UITextStorageDirectionForward)) {
       return nil;
     }
@@ -839,7 +776,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
     // UITextInput
     _text = [[NSMutableString alloc] init];
-    _selectedTextRange = [[FlutterTextRange alloc] initWithNSRange:NSMakeRange(0, 0)];
+    _selectedTextRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(0, 0)];
     _markedRect = kInvalidFirstRect;
     _cachedFirstRect = kInvalidFirstRect;
     _scribbleInteractionStatus = FlutterScribbleInteractionStatusNone;
@@ -1174,7 +1111,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                                 extent:[state[@"selectionExtent"] intValue]
                                                forText:self.text];
 
-  NSRange oldSelectedRange = [(FlutterTextRange*)self.selectedTextRange range];
+  NSRange oldSelectedRange = self.selectedTextRange.range;
   if (!NSEqualRanges(selectedRange, oldSelectedRange)) {
     [self.inputDelegate selectionWillChange:self];
 
@@ -1374,9 +1311,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)setSelectedTextRangeLocal:(UITextRange*)selectedTextRange {
   if (_selectedTextRange != selectedTextRange) {
     if (self.hasText) {
-      FlutterTextRange* flutterTextRange = (FlutterTextRange*)selectedTextRange;
       _selectedTextRange = [[FlutterTextRange
-          rangeWithNSRange:fml::RangeForCharactersInRange(self.text, flutterTextRange.range)] copy];
+          rangeWithNSRange:fml::RangeForCharactersInRange(self.text, selectedTextRange.range)]
+          copy];
     } else {
       _selectedTextRange = [selectedTextRange copy];
     }
@@ -1400,8 +1337,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
       _scribbleFocusStatus == FlutterScribbleFocusStatusFocused) {
     NSAssert([selectedTextRange isKindOfClass:[FlutterTextRange class]],
              @"Expected a FlutterTextRange for range (got %@).", [selectedTextRange class]);
-    FlutterTextRange* flutterTextRange = (FlutterTextRange*)selectedTextRange;
-    if (flutterTextRange.range.length > 0) {
+    if (selectedTextRange.range.length > 0) {
       [self.textInputDelegate flutterTextInputView:self showToolbar:_textInputClient];
     }
   }
@@ -1420,9 +1356,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (!range) {
     return nil;
   }
-  NSAssert([range isKindOfClass:[FlutterTextRange class]],
-           @"Expected a FlutterTextRange for range (got %@).", [range class]);
-  NSRange textRange = ((FlutterTextRange*)range).range;
+  NSRange textRange = range.range;
   if (textRange.location == NSNotFound) {
     // Avoids [crashes](https://github.com/flutter/flutter/issues/138464) from an assertion
     // against NSNotFound.
@@ -1456,7 +1390,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)replaceRange:(UITextRange*)range withText:(NSString*)text {
   NSString* textBeforeChange = [self.text copy];
-  NSRange replaceRange = ((FlutterTextRange*)range).range;
+  NSRange replaceRange = range.range;
   [self replaceRangeLocal:replaceRange withText:text];
   if (_enableDeltaModel) {
     NSRange nextReplaceRange = [self clampSelection:replaceRange forText:textBeforeChange];
@@ -1543,7 +1477,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     markedText = @"";
   }
 
-  const FlutterTextRange* currentMarkedTextRange = (FlutterTextRange*)self.markedTextRange;
+  const UITextRange* currentMarkedTextRange = self.markedTextRange;
   const NSRange& actualReplacedRange = currentMarkedTextRange && !currentMarkedTextRange.isEmpty
                                            ? currentMarkedTextRange.range
                                            : _selectedTextRange.range;
@@ -1588,8 +1522,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UITextRange*)textRangeFromPosition:(UITextPosition*)fromPosition
                            toPosition:(UITextPosition*)toPosition {
-  NSUInteger fromIndex = ((FlutterTextPosition*)fromPosition).index;
-  NSUInteger toIndex = ((FlutterTextPosition*)toPosition).index;
+  NSUInteger fromIndex = fromPosition.index;
+  NSUInteger toIndex = toPosition.index;
   if (toIndex >= fromIndex) {
     return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
   } else {
@@ -1613,7 +1547,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)positionFromPosition:(UITextPosition*)position offset:(NSInteger)offset {
-  NSUInteger offsetPosition = ((FlutterTextPosition*)position).index;
+  NSUInteger offsetPosition = position.index;
 
   NSInteger newLocation = (NSInteger)offsetPosition + offset;
   if (newLocation < 0 || newLocation > (NSInteger)self.text.length) {
@@ -1660,8 +1594,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
-  NSUInteger positionIndex = ((FlutterTextPosition*)position).index;
-  NSUInteger otherIndex = ((FlutterTextPosition*)other).index;
+  NSUInteger positionIndex = position.index;
+  NSUInteger otherIndex = other.index;
   if (positionIndex < otherIndex) {
     return NSOrderedAscending;
   }
@@ -1682,7 +1616,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (NSInteger)offsetFromPosition:(UITextPosition*)from toPosition:(UITextPosition*)toPosition {
-  return ((FlutterTextPosition*)toPosition).index - ((FlutterTextPosition*)from).index;
+  return toPosition.index - from.index;
 }
 
 - (UITextPosition*)positionWithinRange:(UITextRange*)range
@@ -1692,12 +1626,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   switch (direction) {
     case UITextLayoutDirectionLeft:
     case UITextLayoutDirectionUp:
-      index = ((FlutterTextPosition*)range.start).index;
+      index = range.start.index;
       affinity = UITextStorageDirectionForward;
       break;
     case UITextLayoutDirectionRight:
     case UITextLayoutDirectionDown:
-      index = ((FlutterTextPosition*)range.end).index;
+      index = range.end.index;
       affinity = UITextStorageDirectionBackward;
       break;
   }
@@ -1706,7 +1640,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UITextRange*)characterRangeByExtendingPosition:(UITextPosition*)position
                                       inDirection:(UITextLayoutDirection)direction {
-  NSUInteger positionIndex = ((FlutterTextPosition*)position).index;
+  NSUInteger positionIndex = position.index;
   NSUInteger startIndex;
   NSUInteger endIndex;
   switch (direction) {
@@ -1820,12 +1754,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // Returns the rect for the queried range, or a subrange through the end of line, if
 // the range encompasses multiple lines.
 - (CGRect)firstRectForRange:(UITextRange*)range {
-  NSAssert([range.start isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
-  NSAssert([range.end isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for range.end (got %@).", [range.end class]);
-  NSUInteger start = ((FlutterTextPosition*)range.start).index;
-  NSUInteger end = ((FlutterTextPosition*)range.end).index;
+  NSUInteger start = range.start.index;
+  NSUInteger end = range.end.index;
   if (_markedTextRange != nil) {
     // The candidates view can't be shown if the framework has not sent the
     // first caret rect.
@@ -1936,7 +1866,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
-  NSInteger index = ((FlutterTextPosition*)position).index;
+  NSInteger index = position.index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
   // Get the selectionRect of the characters before and after the requested caret position.
   NSArray<UITextSelectionRect*>* rects = [self
@@ -2002,9 +1932,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
              @"Expected a FlutterTextPosition for position (got %@).",
              [_selectedTextRange.start class]);
-    NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-    UITextStorageDirection currentAffinity =
-        ((FlutterTextPosition*)_selectedTextRange.start).affinity;
+    NSUInteger currentIndex = _selectedTextRange.start.index;
+    UITextStorageDirection currentAffinity = _selectedTextRange.start.affinity;
     return [FlutterTextPosition positionWithIndex:currentIndex affinity:currentAffinity];
   }
 
@@ -2024,8 +1953,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
            @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
   NSAssert([range.end isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for range.end (got %@).", [range.end class]);
-  NSUInteger start = ((FlutterTextPosition*)range.start).index;
-  NSUInteger end = ((FlutterTextPosition*)range.end).index;
+  NSUInteger start = range.start.index;
+  NSUInteger end = range.end.index;
   NSMutableArray* rects = [[NSMutableArray alloc] init];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     if (_selectionRects[i].position >= start &&
@@ -2053,12 +1982,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)closestPositionToPoint:(CGPoint)point withinRange:(UITextRange*)range {
-  NSAssert([range.start isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
-  NSAssert([range.end isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for range.end (got %@).", [range.end class]);
-  NSUInteger start = ((FlutterTextPosition*)range.start).index;
-  NSUInteger end = ((FlutterTextPosition*)range.end).index;
+  NSUInteger start = range.start.index;
+  NSUInteger end = range.end.index;
 
   // Selecting text using the floating cursor is not as precise as the pencil.
   // Allow further vertical deviation and base more of the decision on horizontal comparison.
@@ -2109,7 +2034,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
-  NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger currentIndex = _selectedTextRange.start.index;
   return [FlutterTextRange rangeWithNSRange:fml::RangeForCharacterAtIndex(self.text, currentIndex)];
 }
 
@@ -2185,15 +2110,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 #pragma mark - UIKeyInput Overrides
 
 - (void)updateEditingState {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
   NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
-    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
-    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    composingBase = self.markedTextRange.start.index;
+    composingExtent = self.markedTextRange.end.index;
   }
   NSDictionary* state = @{
     @"selectionBase" : @(selectionBase),
@@ -2218,15 +2143,15 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)updateEditingStateWithDelta:(flutter::TextEditingDelta)delta {
-  NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
+  NSUInteger selectionBase = _selectedTextRange.start.index;
+  NSUInteger selectionExtent = _selectedTextRange.end.index;
 
   // Empty compositing range is represented by the framework's TextRange.empty.
   NSInteger composingBase = -1;
   NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
-    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
-    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    composingBase = self.markedTextRange.start.index;
+    composingExtent = self.markedTextRange.end.index;
   }
 
   NSDictionary* deltaToFramework = @{
@@ -2281,7 +2206,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for position (got %@).",
            [_selectedTextRange.start class]);
-  NSUInteger insertPosition = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSUInteger insertPosition = _selectedTextRange.start.index;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
@@ -2341,7 +2266,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // https://github.com/flutter/flutter/issues/28962
   if (_selectedTextRange.isEmpty && [self hasText]) {
     UITextRange* oldSelectedRange = _selectedTextRange;
-    NSRange oldRange = ((FlutterTextRange*)oldSelectedRange).range;
+    NSRange oldRange = oldSelectedRange.range;
     if (oldRange.location > 0) {
       NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
 

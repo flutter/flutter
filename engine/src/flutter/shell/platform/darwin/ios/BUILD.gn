@@ -54,6 +54,7 @@ source_set("InternalFlutterSwift") {
   bridge_header = "InternalFlutterSwift-Bridging-Header.h"
   sources = [
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/TextRange.swift",
     "framework/Source/UIPressProxy.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
