@@ -157,6 +157,7 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
       if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
+      if (editableTextState.shareEnabled) const IOSSystemContextMenuItemShare(),
     ];
   }
 
