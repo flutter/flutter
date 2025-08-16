@@ -2110,6 +2110,7 @@ class _InactiveElements {
       }
       return true;
     }());
+    assert(element._debugVerifyVisitChildrenImplementation());
     element.visitChildren((Element child) {
       assert(child._parent == element);
       _unmount(child);
@@ -3751,6 +3752,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @protected
   void reassemble() {
     markNeedsBuild();
+    assert(_debugVerifyVisitChildrenImplementation());
     visitChildren((Element child) {
       child.reassemble();
     });
@@ -3889,6 +3891,52 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// or might be old children that are going to be replaced. This method should
   /// only be called if it is provable that the children are available.
   void visitChildren(ElementVisitor visitor) {}
+
+  // It's a set because it's illegal to add the same Element to the same parent
+  // (or different parents) more than once.
+  @_debugOnly
+  final Set<Element>? _debugChildren = kDebugMode ? <Element>{} : null;
+
+  /// This method must be called in an assert.
+  bool _debugVerifyVisitChildrenImplementation() {
+    final activatedChildren = Set<Element>.of(_debugChildren!);
+    int count = 0;
+    Element? firstUnaccountedForChild;
+    visitChildren((Element child) {
+      count += 1;
+      firstUnaccountedForChild ??= activatedChildren.remove(child) ? null : child;
+    });
+    if (firstUnaccountedForChild != null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          "An Element was included in another Element's visitChildren implementation which isn't its parent.",
+        ),
+        DiagnosticsProperty<Element>('The offending child Element was', firstUnaccountedForChild),
+        describeElement('The parent of the Element was'),
+        DiagnosticsProperty<Widget>(
+          'The second child that was to be instantiated with that key was',
+          widget,
+          style: DiagnosticsTreeStyle.errorProperty,
+        ),
+        ErrorHint(
+          "This usually indicates a bug in the parent $runtimeType's implementation. "
+          'Consider double checking the visitChildren implementation to make sure  ',
+        ),
+      ]);
+    }
+    if (activatedChildren.isEmpty) {
+      return true;
+    }
+
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary("An Element was inside its parent's visitChildren implementation."),
+      DiagnosticsProperty<Set<Element>>('The offending child Elements were', activatedChildren),
+      ErrorHint(
+        "This usually indicates a bug in the parent $runtimeType's implementation. "
+        'Consider double checking the visitChildren implementation to make sure  ',
+      ),
+    ]);
+  }
 
   /// Calls the argument for each child considered onstage.
   ///
@@ -4341,6 +4389,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     );
     assert(slot == null, "This element already has a slot ($slot) and it shouldn't");
     _parent = parent;
+    assert(
+      parent?._debugChildren!.add(this) ?? true,
+      '$this is already in the child list of $parent',
+    );
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
     _depth = 1 + (_parent?.depth ?? 0);
@@ -4632,6 +4684,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void deactivateChild(Element child) {
     assert(child._parent == this);
+    assert(_debugChildren!.remove(child), '$child was not in the child list of $this');
     child._parent = null;
     child.detachRenderObject();
     owner!._inactiveElements.add(child); // this eventually calls child.deactivate()
@@ -4718,6 +4771,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _activateWithParent(Element parent, Object? newSlot) {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
+    assert(parent._debugChildren!.add(this), '$this is already in the child list of $parent');
     _owner = parent.owner;
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
@@ -4736,6 +4790,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(element._lifecycleState == _ElementLifecycle.inactive);
     element.activate();
     assert(element._lifecycleState == _ElementLifecycle.active);
+    assert(element._debugVerifyVisitChildrenImplementation());
     element.visitChildren(_activateRecursively);
   }
 
