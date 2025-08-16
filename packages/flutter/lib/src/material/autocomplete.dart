@@ -208,10 +208,11 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   Widget build(BuildContext context) {
     final int highlightedIndex = AutocompleteHighlightedOption.of(context);
 
-    final bool opensUp = openDirection == OptionsViewOpenDirection.up;
-    final AlignmentDirectional optionsAlignment = opensUp
-        ? AlignmentDirectional.bottomStart
-        : AlignmentDirectional.topStart;
+    final AlignmentDirectional optionsAlignment = switch (openDirection) {
+      OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
+      OptionsViewOpenDirection.down ||
+      OptionsViewOpenDirection.automatic => AlignmentDirectional.topStart,
+    };
 
     return Align(
       alignment: optionsAlignment,
