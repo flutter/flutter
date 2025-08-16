@@ -711,6 +711,8 @@ class SemanticsUpdateBuilder {
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -755,6 +757,8 @@ class SemanticsUpdateBuilder {
         validationResult: validationResult,
         inputType: inputType,
         locale: locale,
+        minValue: minValue,
+        maxValue: maxValue,
       ),
     );
   }
