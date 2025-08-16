@@ -144,6 +144,9 @@ class TransformAdapter {
   virtual void TransformAndClipRect(const TestTransform& transform,
                                     const TestRect& in,
                                     TestRect& out) const = 0;
+  virtual void TransformRectScaleTranslate2D(const TestTransform& transform,
+                                             const TestRect& in,
+                                             TestRect& out) const = 0;
   virtual int CountClippedCorners(const TestTransform& transform,
                                   const TestRect& rect) const = 0;
   virtual void InvertUnchecked(const TestTransform& transform,
@@ -229,6 +232,13 @@ class SkMatrixAdapter : public SkiaAdapterBase {
                             TestRect& out) const override {
     out.sk_rect =
         transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+  }
+
+  void TransformRectScaleTranslate2D(const TestTransform& transform,
+                                     const TestRect& in,
+                                     TestRect& out) const override {
+    out.sk_rect =
+        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
   }
 
   int CountClippedCorners(const TestTransform& transform,
@@ -322,6 +332,16 @@ class SkM44Adapter : public SkiaAdapterBase {
     out.sk_rect = transform.sk_m44
                       .asM33()
                       .mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+    // clang-format on
+  }
+
+  void TransformRectScaleTranslate2D(const TestTransform& transform,
+                                     const TestRect& in,
+                                     TestRect& out) const override {
+    // clang-format off
+    out.sk_rect = transform.sk_m44
+                      .asM33()
+                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
     // clang-format on
   }
 
@@ -434,6 +454,13 @@ class ImpellerMatrixAdapter : public TransformAdapter {
                             TestRect& out) const override {
     out.impeller_rect =
         in.impeller_rect.TransformAndClipBounds(transform.impeller_matrix);
+  }
+
+  void TransformRectScaleTranslate2D(const TestTransform& transform,
+                                     const TestRect& in,
+                                     TestRect& out) const override {
+    out.impeller_rect = in.impeller_rect.TransformBoundsTranslateScale2D(
+        transform.impeller_matrix);
   }
 
   int CountClippedCorners(const TestTransform& transform,
@@ -722,6 +749,19 @@ static void BM_TransformAndClipRect(benchmark::State& state,
   }
 }
 
+static void BM_TransformRectScaleTranslate2D(benchmark::State& state,
+                                             AdapterType type,
+                                             const SetupFunction& setup) {
+  auto adapter = GetAdapter(type);
+  TestTransform transform;
+  TestRect rect, result;
+  adapter->InitRectLTRB(rect, 100, 100, 200, 200);
+  setup(adapter.get(), transform, &rect);
+  while (state.KeepRunning()) {
+    adapter->TransformRectScaleTranslate2D(transform, rect, result);
+  }
+}
+
 static void BM_InvertUnchecked(benchmark::State& state,
                                AdapterType type,
                                const SetupFunction& setup) {
@@ -846,5 +886,10 @@ BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipOne);
 BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipTwo);
 BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipThree);
 BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipFour);
+
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectScaleTranslate2D, Identity);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectScaleTranslate2D, Translate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectScaleTranslate2D, Scale);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectScaleTranslate2D, ScaleTranslate);
 
 }  // namespace flutter
