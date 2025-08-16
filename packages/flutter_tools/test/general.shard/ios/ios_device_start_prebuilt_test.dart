@@ -177,7 +177,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp twice in a row where ios-deploy fails the first time',
     () async {
       final logger = BufferLogger.test();
@@ -429,7 +429,7 @@ void main() {
     overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()},
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp retries when ios-deploy loses connection the first time in CI',
     () async {
       final logger = BufferLogger.test();
@@ -490,7 +490,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp does not retry when ios-deploy loses connection if not in CI',
     () async {
       final logger = BufferLogger.test();
