@@ -648,7 +648,7 @@ void main() {
 
       // Show the options. It should open downwards since there is more space.
       await tester.tap(find.byKey(fieldKey));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         tester.getBottomLeft(find.byKey(fieldKey)),
@@ -659,7 +659,7 @@ void main() {
       setState(() {
         alignment = Alignment.bottomCenter;
       });
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // The options should now open upwards, since there is more space above.
       expect(
@@ -671,7 +671,7 @@ void main() {
       setState(() {
         alignment = Alignment.center;
       });
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Show the options. It should open downwards since there is more space.
       expect(

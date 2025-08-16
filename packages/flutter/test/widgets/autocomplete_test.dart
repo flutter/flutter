@@ -1056,7 +1056,7 @@ void main() {
 
       // Show the options. It should open downwards since there is more space.
       await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         tester.getBottomLeft(find.byKey(fieldKey)),
@@ -1067,7 +1067,7 @@ void main() {
       setState(() {
         alignment = Alignment.bottomCenter;
       });
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // The options should now open upwards, since there is more space above.
       expect(
