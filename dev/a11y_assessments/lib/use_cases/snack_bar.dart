@@ -1,8 +1,8 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
@@ -29,6 +29,25 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   String pageTitle = getUseCaseName(SnackBarUseCase());
 
+  /// Shows a SnackBar with accessibility announcement support.
+  /// This method checks if the device supports announcements and announces
+  /// the SnackBar message to assistive technologies after the frame is rendered.
+  void showAccessibleSnackBar(BuildContext context, String message, {SnackBarAction? action}) {
+    final SnackBar snackBar = SnackBar(
+      content: Text(message),
+      action: action,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    if (mediaQuery.supportsAnnounce) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        SemanticsService.announce(message, TextDirection.ltr);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,19 +61,16 @@ class MainWidgetState extends State<MainWidget> {
             ElevatedButton(
               child: const Text('Show Snackbar'),
               onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
+                showAccessibleSnackBar(context, 'Awesome Snackbar!');
               },
             ),
             ElevatedButton(
               child: const Text('Show Snackbar with action '),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Awesome Snackbar!'),
-                    action: SnackBarAction(label: 'Action', onPressed: () {}),
-                  ),
+                showAccessibleSnackBar(
+                  context,
+                  'Awesome Snackbar!',
+                  action: SnackBarAction(label: 'Action', onPressed: () {}),
                 );
               },
             ),
