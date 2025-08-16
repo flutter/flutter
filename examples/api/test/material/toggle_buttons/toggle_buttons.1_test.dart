@@ -12,7 +12,7 @@ void main() {
     Finder findButton(String text) {
       return find.descendant(
         of: find.byType(ToggleButtons),
-        matching: find.widgetWithText(TextButton, text),
+        matching: find.ancestor(of: find.text(text), matching: find.bySubtype<TextButton>()),
       );
     }
 
@@ -75,7 +75,7 @@ void main() {
     Finder findButton(String text) {
       return find.descendant(
         of: find.byType(SegmentedButton<example.ShirtSize>),
-        matching: find.widgetWithText(TextButton, text),
+        matching: find.ancestor(of: find.text(text), matching: find.bySubtype<TextButton>()),
       );
     }
 

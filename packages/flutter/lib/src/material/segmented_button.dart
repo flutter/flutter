@@ -570,44 +570,23 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       );
       controller.update(WidgetState.selected, segmentSelected);
 
-      final Widget button = icon != null
-          ? TextButton.icon(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              icon: icon,
-              label: label,
-            )
-          : TextButton(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              child: label,
-            );
+      final Widget button = TextButton.icon(
+        style: segmentStyle,
+        statesController: controller,
+        onHover: (bool hovering) {
+          setState(() {
+            _hovering = hovering;
+          });
+        },
+        onFocusChange: (bool focused) {
+          setState(() {
+            _focused = focused;
+          });
+        },
+        onPressed: (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
+        icon: icon,
+        label: label,
+      );
 
       final Widget buttonWithTooltip = segment.tooltip != null
           ? Tooltip(message: segment.tooltip, child: button)

@@ -243,6 +243,55 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/161922.
+  testWidgets('Selected segment does not lose focus when selected', (WidgetTester tester) async {
+    int callbackCount = 0;
+    Set<int> selection = <int>{1};
+
+    Widget frameWithSelection(Set<int> selected) {
+      return Material(
+        child: boilerplate(
+          child: SegmentedButton<int>(
+            multiSelectionEnabled: true,
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(value: 1, label: Text('1')),
+              ButtonSegment<int>(value: 2, label: Text('2')),
+            ],
+            selected: selected,
+            onSelectionChanged: (Set<int> selected) {
+              selection = selected;
+              callbackCount += 1;
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(frameWithSelection(selection));
+    expect(selection, <int>{1});
+    expect(callbackCount, 0);
+
+    // Select segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1, 2}));
+    await tester.pumpAndSettle();
+
+    FocusNode getSegment2FocusNode() {
+      return Focus.of(tester.element(find.text('2')));
+    }
+
+    // Set focus on segment 2.
+    getSegment2FocusNode().requestFocus();
+    await tester.pumpAndSettle();
+    expect(getSegment2FocusNode().hasFocus, true);
+
+    // Unselect segment 2.
+    await tester.pumpWidget(frameWithSelection(<int>{1}));
+    await tester.pumpAndSettle();
+
+    // The button should still be focused.
+    expect(getSegment2FocusNode().hasFocus, true);
+  });
+
   testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
@@ -585,7 +634,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(
-      find.descendant(of: find.byType(TextButton), matching: find.byType(Material)),
+      find.descendant(of: find.bySubtype<TextButton>().last, matching: find.byType(Material)),
     );
 
     // Hovered.
@@ -718,8 +767,12 @@ void main() {
       ),
     );
 
+    const Set<MaterialState> enabled = <MaterialState>{};
+    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+    const Set<MaterialState> selected = <MaterialState>{MaterialState.selected};
+
     // Test provided button style is applied to the enabled button segment.
-    ButtonStyle? buttonStyle = tester.widget<TextButton>(find.byType(TextButton).first).style;
+    ButtonStyle? buttonStyle = tester.widget<TextButton>(find.bySubtype<TextButton>().first).style;
     expect(buttonStyle?.foregroundColor?.resolve(enabled), foregroundColor);
     expect(buttonStyle?.backgroundColor?.resolve(enabled), backgroundColor);
     expect(buttonStyle?.overlayColor, styleFromStyle.overlayColor);
@@ -736,13 +789,13 @@ void main() {
     expect(buttonStyle?.splashFactory, styleFromStyle.splashFactory);
 
     // Test provided button style is applied selected button segment.
-    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).at(1)).style;
+    buttonStyle = tester.widget<TextButton>(find.bySubtype<TextButton>().at(1)).style;
     expect(buttonStyle?.foregroundColor?.resolve(selected), selectedForegroundColor);
     expect(buttonStyle?.backgroundColor?.resolve(selected), selectedBackgroundColor);
     expect(buttonStyle?.mouseCursor?.resolve(enabled), enabledMouseCursor);
 
     // Test provided button style is applied disabled button segment.
-    buttonStyle = tester.widget<TextButton>(find.byType(TextButton).last).style;
+    buttonStyle = tester.widget<TextButton>(find.bySubtype<TextButton>().last).style;
     expect(buttonStyle?.foregroundColor?.resolve(disabled), disabledForegroundColor);
     expect(buttonStyle?.backgroundColor?.resolve(disabled), disabledBackgroundColor);
     expect(buttonStyle?.mouseCursor?.resolve(disabled), disabledMouseCursor);
@@ -1148,9 +1201,13 @@ void main() {
       ),
     );
 
+    Finder findSegmentWithText(String text) {
+      return find.ancestor(of: find.text(text), matching: find.bySubtype<TextButton>());
+    }
+
     Rect? previewsChildRect;
     for (int i = 0; i <= 3; i++) {
-      final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
+      final Rect currentChildRect = tester.getRect(findSegmentWithText('Option $i'));
       if (previewsChildRect != null) {
         expect(currentChildRect.left, previewsChildRect.left);
         expect(currentChildRect.right, previewsChildRect.right);
@@ -1395,7 +1452,3 @@ void main() {
     );
   });
 }
-
-Set<MaterialState> enabled = const <MaterialState>{};
-Set<MaterialState> disabled = const <MaterialState>{MaterialState.disabled};
-Set<MaterialState> selected = const <MaterialState>{MaterialState.selected};
