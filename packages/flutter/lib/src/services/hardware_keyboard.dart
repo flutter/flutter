@@ -416,6 +416,9 @@ class HardwareKeyboard {
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys =
       <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
+  // Indicates whether the keyboard state has been initialized.
+  bool _keyboardStateInitialized = false;
+
   /// The set of [PhysicalKeyboardKey]s that are pressed.
   ///
   /// If called from a key event handler, the result will already include the effect
@@ -505,6 +508,10 @@ class HardwareKeyboard {
   }
 
   void _assertEventIsRegular(KeyEvent event) {
+    if (!_keyboardStateInitialized) {
+      // Skip assertion if keyboard state is not initialized.
+      return;
+    }
     assert(() {
       const String common =
           'If this occurs in real application, please report this '
@@ -514,18 +521,18 @@ class HardwareKeyboard {
       if (event is KeyDownEvent) {
         assert(
           !_pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is already pressed. $common$event',
         );
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
         assert(
           _pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is not pressed. $common$event',
         );
         assert(
           _pressedKeys[event.physicalKey] == event.logicalKey,
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
+          'A  ${event.runtimeType}  is dispatched, but the state shows that the physical '
           'key is pressed on a different logical key. $common$event '
           'and the recorded logical key ${_pressedKeys[event.physicalKey]}',
         );
@@ -601,6 +608,7 @@ class HardwareKeyboard {
         _pressedKeys[physicalKey] = logicalKey;
       }
     }
+    _keyboardStateInitialized = true;
   }
 
   bool _dispatchKeyEvent(KeyEvent event) {
