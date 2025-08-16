@@ -1211,6 +1211,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       logger: globals.logger,
       cacheDir: globals.cache.getRoot(),
       engineVersion: globals.flutterVersion.engineRevision,
+      contentHash: globals.flutterVersion.engineContentHash,
       fileSystem: globals.fs,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(getBuildDirectory()),

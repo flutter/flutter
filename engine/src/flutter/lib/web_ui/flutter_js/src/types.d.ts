@@ -29,6 +29,7 @@ export type ApplicationBuild = JSApplicationBuild | WasmApplicationBuild;
 export interface BuildConfig {
   serviceWorkerVersion: string;
   engineRevision: string;
+  contentHash: string;
   useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
 }
