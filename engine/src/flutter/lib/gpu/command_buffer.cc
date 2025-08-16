@@ -53,9 +53,9 @@ bool CommandBuffer::Submit(
             encodable->EncodeCommands();
           }
 
-          context->GetCommandQueue()
-              ->Submit({command_buffer}, completion_callback)
-              .ok();
+          context->GetCommandQueue()->Submit({command_buffer},
+                                             completion_callback);
+          context->DisposeThreadLocalCachedResources();
         }));
     return true;
   }
@@ -64,9 +64,10 @@ bool CommandBuffer::Submit(
     encodable->EncodeCommands();
   }
 
-  return context_->GetCommandQueue()
-      ->Submit({command_buffer_}, completion_callback)
-      .ok();
+  auto status = context_->GetCommandQueue()->Submit({command_buffer_},
+                                                    completion_callback);
+  context_->DisposeThreadLocalCachedResources();
+  return status.ok();
 }
 
 }  // namespace gpu
