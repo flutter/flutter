@@ -2594,14 +2594,14 @@ void main() {
     expect(find.text(':'), findsNothing);
   });
 
-  test('CupertinoDatePicker selectableDatePredicate parameter validation', () async {
+  test('CupertinoDatePicker selectableDayPredicate parameter validation', () async {
     expect(() => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}), returnsNormally);
 
     expect(
       () => CupertinoDatePicker(
         initialDateTime: DateTime(2025),
         onDateTimeChanged: (DateTime _) {},
-        selectableDatePredicate: (DateTime date) {
+        selectableDayPredicate: (DateTime date) {
           return date.year == 2025;
         },
       ),
@@ -2611,7 +2611,7 @@ void main() {
     expect(
       () => CupertinoDatePicker(
         onDateTimeChanged: (DateTime _) {},
-        selectableDatePredicate: (DateTime date) {
+        selectableDayPredicate: (DateTime date) {
           return date.year == 2025;
         },
       ),
@@ -2622,7 +2622,7 @@ void main() {
       () => CupertinoDatePicker(
         initialDateTime: DateTime(2025, 7, 4),
         onDateTimeChanged: (DateTime _) {},
-        selectableDatePredicate: (DateTime date) {
+        selectableDayPredicate: (DateTime date) {
           return date.month == 6;
         },
       ),
@@ -2645,7 +2645,7 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            selectableDatePredicate: (DateTime date) {
+            selectableDayPredicate: (DateTime date) {
               return date.weekday >= DateTime.monday && date.weekday <= DateTime.friday;
             },
             onDateTimeChanged: (DateTime dateTime) {
@@ -2670,7 +2670,7 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            selectableDatePredicate: (DateTime date) {
+            selectableDayPredicate: (DateTime date) {
               return date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
             },
             onDateTimeChanged: (DateTime dateTime) {
@@ -2698,7 +2698,7 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             initialDateTime: initialDateTime,
-            selectableDatePredicate: (DateTime date) {
+            selectableDayPredicate: (DateTime date) {
               return date.day >= 16;
             },
             onDateTimeChanged: (DateTime dateTime) {

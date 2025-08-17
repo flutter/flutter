@@ -308,7 +308,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showTimeSeparator = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
-    this.selectableDatePredicate,
+    this.selectableDayPredicate,
     this.changeReportingBehavior = ChangeReportingBehavior.onScrollUpdate,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(itemExtent > 0, 'item extent should be greater than 0'),
@@ -366,8 +366,8 @@ class CupertinoDatePicker extends StatefulWidget {
          'showTimeSeparator is only supported in time or dateAndTime modes',
        ),
        assert(
-         selectableDatePredicate == null ||
-             selectableDatePredicate(initialDateTime ?? DateTime.now()),
+         selectableDayPredicate == null ||
+             selectableDayPredicate(initialDateTime ?? DateTime.now()),
          '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
        );
 
@@ -464,7 +464,7 @@ class CupertinoDatePicker extends StatefulWidget {
   final bool showTimeSeparator;
 
   /// Function to provide full control over which [DateTime] can be selected.
-  final SelectableDayPredicate? selectableDatePredicate;
+  final SelectableDayPredicate? selectableDayPredicate;
 
   /// {@macro flutter.cupertino.picker.itemExtent}
   ///
@@ -832,7 +832,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     if (isDateInvalid) {
       return;
-    } else if (widget.selectableDatePredicate?.call(selected) == false) {
+    } else if (widget.selectableDayPredicate?.call(selected) == false) {
       return;
     }
 
@@ -883,10 +883,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           );
 
           final bool isValidDate;
-          if (widget.selectableDatePredicate == null) {
+          if (widget.selectableDayPredicate == null) {
             isValidDate = true;
           } else {
-            isValidDate = widget.selectableDatePredicate!.call(rangeStart);
+            isValidDate = widget.selectableDayPredicate!.call(rangeStart);
           }
           final DateTime now = DateTime.now();
 
@@ -1128,7 +1128,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final DateTime selectedDate = selectedDateTime;
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
 
-    if (widget.selectableDatePredicate?.call(selectedDate) == false) {
+    if (widget.selectableDayPredicate?.call(selectedDate) == false) {
       const int daysThreshold = 1;
       final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
 

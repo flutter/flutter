@@ -71,12 +71,6 @@ abstract class Intent with Diagnosticable {
   static const DoNothingIntent doNothing = DoNothingIntent._();
 }
 
-/// Signature for predicating dates for enabled date selections.
-///
-/// See [showDatePicker], which has a [SelectableDayPredicate] parameter used
-/// to specify allowable days in the date picker.
-typedef SelectableDayPredicate = bool Function(DateTime day);
-
 /// The kind of callback that an [Action] uses to notify of changes to the
 /// action's state.
 ///
