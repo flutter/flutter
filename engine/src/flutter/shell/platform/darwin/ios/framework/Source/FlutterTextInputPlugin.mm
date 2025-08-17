@@ -1016,8 +1016,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
           FlutterTextInputView* strongSelf = weakSelf;
           if (strongSelf) {
             [strongSelf.textInputDelegate flutterTextInputView:strongSelf
-                performPlatformChannelContextMenuCustomAction:callbackId
-                                                   withClient:strongSelf->_textInputClient];
+                performContextMenuCustomActionWithActionID:callbackId
+                                            textInputClient:strongSelf->_textInputClient];
           }
         }];
         [items addObject:action];
