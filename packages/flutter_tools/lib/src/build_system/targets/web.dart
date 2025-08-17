@@ -72,8 +72,9 @@ class WebEntrypointTarget extends Target {
     // file-scheme will cause said library to be recognized as two distinct
     // libraries. This can cause surprising behavior as types from that library
     // will be considered distinct from each other.
-    // By construction, this will only be null if the .packages file does not
-    // have an entry for the user's application or if the main file is
+    //
+    // By construction, this will only be null if the package_config.json file
+    // does not have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
     final String importedEntrypoint =
         packageConfig.toPackageUri(importUri)?.toString() ?? importUri.toString();
@@ -660,6 +661,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
         final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
+          staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,

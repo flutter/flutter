@@ -16,7 +16,6 @@ workspace:
   - dev/benchmarks/platform_views_layout_hybrid_composition
   - dev/benchmarks/test_apps/stocks
   - dev/bots
-  - dev/checks_tool
   - dev/customer_testing
   - dev/devicelab
   - dev/forbidden_from_release_tests
@@ -79,9 +78,9 @@ workspace:
 
 dependencies:
   _discoveryapis_commons: 1.0.7
-  _fe_analyzer_shared: 82.0.0
+  _fe_analyzer_shared: 88.0.0
   adaptive_breakpoints: 0.1.7
-  analyzer: 7.4.5
+  analyzer: 8.1.1
   animations: 2.0.11
   archive: 3.6.1
   args: 2.7.0
@@ -110,14 +109,14 @@ dependencies:
   frontend_server_client: 4.0.0
   gcloud: 0.8.19
   glob: 2.1.3
-  google_fonts: 6.2.1
+  google_fonts: 6.3.0
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
   googleapis_auth: 1.6.0
   hooks: 0.19.5
   html: 0.15.6
-  http: 1.4.0
+  http: 1.5.0
   http_multi_server: 3.2.2
   http_parser: 4.1.2
   intl: 0.20.2
@@ -131,7 +130,7 @@ dependencies:
   logging: 1.3.0
   matcher: 0.12.17
   material_color_utilities: 0.11.1
-  meta: 1.16.0
+  meta: 1.17.0
   metrics_center: 1.0.13
   mime: 2.0.0
   native_toolchain_c: 0.16.8
@@ -149,7 +148,7 @@ dependencies:
   platform: 3.1.6
   plugin_platform_interface: 2.1.8
   pool: 1.5.1
-  process: 5.0.4
+  process: 5.0.5
   process_runner: 4.2.0
   provider: 6.1.5
   pub_semver: 2.2.0
@@ -171,12 +170,12 @@ dependencies:
   string_scanner: 1.4.1
   sync_http: 0.3.1
   term_glyph: 1.2.2
-  test: 1.26.2
-  test_api: 0.7.6
-  test_core: 0.6.11
+  test: 1.26.3
+  test_api: 0.7.7
+  test_core: 0.6.12
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.16
+  url_launcher_android: 6.3.17
   url_launcher_ios: 6.3.3
   url_launcher_linux: 3.2.1
   url_launcher_macos: 3.2.2
@@ -199,13 +198,13 @@ dependencies:
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
-  webview_flutter_platform_interface: 2.13.1
-  webview_flutter_wkwebview: 3.22.1
+  webview_flutter_platform_interface: 2.14.0
+  webview_flutter_wkwebview: 3.23.0
   xdg_directories: 1.1.0
   xml: 6.5.0
   yaml: 3.1.3
   cli_util: 0.4.2
-  dart_style: 3.1.0
+  dart_style: 3.1.2
   ffigen: 18.1.0
   file_testing: 3.0.2
   flutter_lints: 6.0.0
@@ -213,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.2
-# PUBSPEC CHECKSUM: p6e5dn
+# PUBSPEC CHECKSUM: jbcfui

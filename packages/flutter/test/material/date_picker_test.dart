@@ -1847,6 +1847,7 @@ void main() {
             isEnabled: true,
             hasEnabledState: true,
             isTextField: true,
+            isFocusable: true,
             isFocused: true,
             value: '01/15/2016',
             hasTapAction: true,
@@ -2748,6 +2749,16 @@ void main() {
       expect(find.text('March 2016'), findsOneWidget);
       expect(lastDayText.data, equals('28'));
     });
+  });
+
+  testWidgets('DatePickerDialog renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox.shrink(
+          child: DatePickerDialog(firstDate: firstDate, lastDate: lastDate),
+        ),
+      ),
+    );
   });
 }
 

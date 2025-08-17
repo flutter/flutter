@@ -154,7 +154,7 @@ void main() {
       ...?arguments,
       '--no-launch-previewer',
       '--verbose',
-      if (rootProject != null) rootProject.path,
+      ?rootProject?.path,
     ]);
     final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(
       rootProject: rootProject ?? current,

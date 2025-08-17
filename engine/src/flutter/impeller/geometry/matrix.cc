@@ -7,6 +7,8 @@
 #include <climits>
 #include <sstream>
 
+#include "flutter/fml/logging.h"
+
 namespace impeller {
 
 Matrix::Matrix(const MatrixDecomposition& d) : Matrix() {
@@ -356,6 +358,76 @@ std::optional<MatrixDecomposition> Matrix::Decompose() const {
   }
 
   return result;
+}
+
+std::optional<std::pair<Scalar, Scalar>> Matrix::GetScales2D() const {
+  if (HasPerspective2D()) {
+    return std::nullopt;
+  }
+
+  // We only operate on the uppermost 2x2 matrix since those are the only
+  // values that can induce a scale on 2D coordinates.
+  // [ a b ]
+  // [ c d ]
+  double a = m[0];
+  double b = m[1];
+  double c = m[4];
+  double d = m[5];
+
+  if (b == 0.0f && c == 0.0f) {
+    return {{std::abs(a), std::abs(d)}};
+  }
+
+  if (a == 0.0f && d == 0.0f) {
+    return {{std::abs(b), std::abs(c)}};
+  }
+
+  // Compute eigenvalues for the matrix (transpose(A) * A):
+  //   [ a2  b2 ] == [ a  b ] [ a  c ] == [ aa + bb   ac + bd ]
+  //   [ c2  d2 ]    [ c  d ] [ b  d ]    [ ac + bd   cc + dd ]
+  // (note the reverse diagonal entries in the answer are identical)
+  double a2 = a * a + b * b;
+  double b2 = a * c + b * d;
+  double c2 = b2;
+  double d2 = c * c + d * d;
+
+  //
+  //   If L is an eigenvalue, then
+  //   det(this - L*Identity) == 0
+  //   det([ a - L     b   ]
+  //       [   c     d - L ]) == 0
+  //   (a - L) * (d - L) - bc == 0
+  //   ad - aL - dL + L^2 - bc == 0
+  //   L^2 + (-a + -d)L + ad - bc == 0
+  //
+  // Using quadratic equation for (Ax^2 + Bx + C):
+  //   A == 1
+  //   B == -(a2 + d2)
+  //   C == a2d2 - b2c2
+  //
+  // (We use -B for calculations because the square is the same as B and we
+  //  need -B for the final quadratic equation computations anyway.)
+  double minus_B = a2 + d2;
+  double C = a2 * d2 - b2 * c2;
+  double B_squared_minus_4AC = minus_B * minus_B - 4 * 1.0f * C;
+
+  double quadratic_sqrt;
+  if (B_squared_minus_4AC <= 0.0f) {
+    // This test should never fail, but we might be slightly negative
+    FML_DCHECK(B_squared_minus_4AC + kEhCloseEnough >= 0.0f);
+    // Uniform scales (possibly rotated) would tend to end up here
+    // in which case both eigenvalues are identical
+    quadratic_sqrt = 0.0f;
+  } else {
+    quadratic_sqrt = std::sqrt(B_squared_minus_4AC);
+  }
+
+  // Since this is returning the sqrt of the values, we can guarantee that
+  // the returned scales are non-negative.
+  FML_DCHECK(minus_B - quadratic_sqrt >= 0.0f);
+  FML_DCHECK(minus_B + quadratic_sqrt >= 0.0f);
+  return {{std::sqrt((minus_B - quadratic_sqrt) / 2.0f),
+           std::sqrt((minus_B + quadratic_sqrt) / 2.0f)}};
 }
 
 uint64_t MatrixDecomposition::GetComponentsMask() const {
