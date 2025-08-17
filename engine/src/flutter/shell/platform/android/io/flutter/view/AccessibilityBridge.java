@@ -866,13 +866,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setCollectionInfo(
             new AccessibilityNodeInfo.CollectionInfo(
                 1, // row count
-                semanticsNode.childrenInTraversalOrder.size(), // column count
+                semanticsNode.scrollChildren, // column count
                 false // hierarchical
                 ));
       } else {
         result.setCollectionInfo(
             new AccessibilityNodeInfo.CollectionInfo(
-                semanticsNode.childrenInTraversalOrder.size(), // row count
+                semanticsNode.scrollChildren, // row count
                 1, // column count
                 false // hierarchical
                 ));
