@@ -815,7 +815,30 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// `addRepaintBoundaries` argument corresponds to the
   /// [SliverChildListDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
-  /// [SliverChildListDelegate.addSemanticIndexes] property.
+  /// [SliverChildListDelegate.addSemanticIndexes] property. The
+  /// `semanticIndexOffset` argument corresponds to the
+  /// [SliverChildListDelegate.semanticIndexOffset] property.
+  ///
+  /// {@tool snippet}
+  /// This example, which would be inserted into a [CustomScrollView.slivers]
+  /// list, shows a grid of [Container] widgets.
+  ///
+  /// ```dart
+  /// SliverGrid.list(
+  ///   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  ///     crossAxisCount: 3,
+  ///   ),
+  ///   children: <Widget>[
+  ///     Container(color: Colors.red),
+  ///     Container(color: Colors.green),
+  ///     Container(color: Colors.blue),
+  ///     Container(color: Colors.yellow),
+  ///     Container(color: Colors.orange),
+  ///     Container(color: Colors.purple),
+  ///   ],
+  /// );
+  /// ```
+  /// {@end-tool}
   SliverGrid.list({
     super.key,
     required this.gridDelegate,
