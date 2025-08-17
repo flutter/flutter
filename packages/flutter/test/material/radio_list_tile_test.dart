@@ -2294,4 +2294,18 @@ void main() {
     final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
     expect(radio.side, side);
   });
+
+  testWidgets('radioInnerRadius is passed to the Radio', (WidgetTester tester) async {
+    final WidgetStateProperty<double?> innerRadius = MaterialStateProperty.all(6);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(child: RadioListTile<bool>(value: true, radioInnerRadius: innerRadius)),
+        ),
+      ),
+    );
+
+    final Radio<bool> radio = tester.widget(find.byType(Radio<bool>));
+    expect(radio.innerRadius, innerRadius);
+  });
 }

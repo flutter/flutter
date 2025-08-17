@@ -1038,6 +1038,8 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
+
+  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1477,6 +1479,21 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 @JS('TextMetrics')
 extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
+
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters();
+  List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
+
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+
+  external double get fontBoundingBoxAscent;
+
+  external double get fontBoundingBoxDescent;
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1721,9 +1738,9 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   external void _observe(DomNode target, JSAny options);
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
     final Map<String, dynamic> options = <String, dynamic>{
-      if (childList != null) 'childList': childList,
-      if (attributes != null) 'attributes': attributes,
-      if (attributeFilter != null) 'attributeFilter': attributeFilter,
+      'childList': ?childList,
+      'attributes': ?attributes,
+      'attributeFilter': ?attributeFilter,
     };
     return _observe(target, options.toJSAnyDeep);
   }
@@ -2427,6 +2444,50 @@ extension type DomSegments._(JSObject _) implements JSObject {
   }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
+@JS('Intl.Locale')
+extension type DomLocale._(JSObject _) implements JSObject {
+  external DomLocale(String tag, [DomLocaleOptions? options]);
+
+  external String get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+
+  @JS('toString')
+  external String toJSString();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
+  external DomLocaleOptions({
+    String? language,
+    String? script,
+    String? region,
+    String? calendar,
+    String? caseFirst,
+    String? collation,
+    String? hourCycle,
+    String? numberingSystem,
+    bool? numeric,
+  });
+
+  external String? get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 @JS('Iterator')
 extension type DomIterator._(JSObject _) implements JSObject {
@@ -2542,4 +2603,21 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
+}
+
+@JS('TextCluster')
+extension type DomTextCluster._(JSObject _) implements JSObject {
+  @JS('begin')
+  external int? _begin;
+  @JS('start')
+  external int _start;
+  // The proposal had this `begin` then renamed it to `start`. Some versions of Chrome still have
+  // the old name.
+  //
+  // `_begin` can be removed once this feature is launched in a stable Chrome release.
+  int get start => _begin ?? _start;
+
+  external int get end;
+  external double get x;
+  external double get y;
 }

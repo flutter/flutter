@@ -251,7 +251,9 @@ static bool create_opengl_backing_store(
     FlEngine* self,
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
 
   GLint sized_format = GL_RGBA8;
   GLint general_format = GL_RGBA;
@@ -261,7 +263,7 @@ static bool create_opengl_backing_store(
   }
 
   FlFramebuffer* framebuffer = fl_framebuffer_new(
-      general_format, config->size.width, config->size.height);
+      general_format, config->size.width, config->size.height, FALSE);
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return false;
@@ -285,7 +287,9 @@ static bool create_opengl_backing_store(
 static bool collect_opengl_backing_store(
     FlEngine* self,
     const FlutterBackingStore* backing_store) {
-  fl_opengl_manager_make_current(self->opengl_manager);
+  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+    return false;
+  }
 
   // OpenGL context is required when destroying #FlFramebuffer.
   g_object_unref(backing_store->open_gl.framebuffer.user_data);
@@ -381,14 +385,12 @@ static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
 
 static bool fl_engine_gl_make_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_current(self->opengl_manager);
 }
 
 static bool fl_engine_gl_clear_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_clear_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_clear_current(self->opengl_manager);
 }
 
 static uint32_t fl_engine_gl_get_fbo(void* user_data) {
@@ -398,8 +400,7 @@ static uint32_t fl_engine_gl_get_fbo(void* user_data) {
 
 static bool fl_engine_gl_make_resource_current(void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
-  fl_opengl_manager_make_resource_current(self->opengl_manager);
-  return true;
+  return fl_opengl_manager_make_resource_current(self->opengl_manager);
 }
 
 // Called by the engine to retrieve an external texture.
@@ -668,6 +669,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
     }
     self->renderer_type = kOpenGL;
   }
+
   if (binary_messenger != nullptr) {
     self->binary_messenger =
         FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
