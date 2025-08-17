@@ -803,6 +803,37 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
        ),
        super(delegate: SliverChildListDelegate(children));
 
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
+  ///
+  /// Uses a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// The [gridDelegate] argument is required.
+  ///
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. The
+  /// `addSemanticIndexes` argument corresponds to the
+  /// [SliverChildListDelegate.addSemanticIndexes] property.
+  SliverGrid.list({
+    super.key,
+    required this.gridDelegate,
+    required List<Widget> children,
+    bool addAutomaticKeepAlives = true,
+    bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
+    int semanticIndexOffset = 0,
+  }) : super(
+         delegate: SliverChildListDelegate(
+           children,
+           addAutomaticKeepAlives: addAutomaticKeepAlives,
+           addRepaintBoundaries: addRepaintBoundaries,
+           addSemanticIndexes: addSemanticIndexes,
+           semanticIndexOffset: semanticIndexOffset,
+         ),
+       );
+
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 
