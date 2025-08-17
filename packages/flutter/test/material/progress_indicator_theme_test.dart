@@ -560,4 +560,71 @@ void main() {
         ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 4.0), color: theme.colorScheme.primary),
     );
   });
+
+  testWidgets(
+    'LinearProgressIndicator paints at 50% and 80% when controller value is 0.5 and 0.8',
+    (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(
+        vsync: tester,
+        duration: LinearProgressIndicator.defaultAnimationDuration,
+      );
+
+      final ThemeData theme = ThemeData(
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Colors.black,
+          linearTrackColor: Colors.green,
+          controller: controller,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Theme(
+                data: theme,
+                child: const SizedBox(width: 200.0, child: LinearProgressIndicator()),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.value = 0.5; // Set the progress
+
+      await tester.pump(); // Wait for all rebuilds
+
+      expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0),
+            color: theme.progressIndicatorTheme.linearTrackColor,
+          )
+          ..rect(
+            rect: const Rect.fromLTRB(127.79541015625, 0.0, 200.0, 4.0),
+            color: theme.progressIndicatorTheme.color,
+          ),
+      );
+
+      controller.value = 0.8; // Set the progress
+
+      await tester.pump(); // Wait for all rebuilds
+
+      expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0),
+            color: theme.progressIndicatorTheme.linearTrackColor,
+          )
+          ..rect(
+            rect: const Rect.fromLTRB(98.24226796627045, 0.0, 181.18448555469513, 4.0),
+            color: theme.progressIndicatorTheme.color,
+          ),
+      );
+
+      controller.dispose();
+    },
+  );
 }
