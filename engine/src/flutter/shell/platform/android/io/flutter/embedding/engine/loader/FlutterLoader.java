@@ -469,7 +469,7 @@ public class FlutterLoader {
    * either explicitly placed the library there or set the Android Gradle Plugin jniLibs packaging
    * option {@code useLegacyPackaging} to true; see
    * https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes#compress-native-libs-dsl
-   * fore more information.
+   * for more information.
    *
    * <p>In the case where the library does not live in a safe location, we will warn the application
    * developer to ensure they have vetted the library they wish to use and place it in a trusted
@@ -501,7 +501,7 @@ public class FlutterLoader {
     String internalStorageDirectoryPathCanonicalPath = internalStorageDirectory.getCanonicalPath();
     boolean livesWithinInternalStorage =
         aotSharedLibraryPathCanonicalPath.startsWith(
-            internalStorageDirectoryPathCanonicalPath + "/");
+            internalStorageDirectoryPathCanonicalPath + File.separator);
     boolean isSoFile = aotSharedLibraryPathCanonicalPath.endsWith(".so");
 
     if (livesWithinInternalStorage && isSoFile) {
