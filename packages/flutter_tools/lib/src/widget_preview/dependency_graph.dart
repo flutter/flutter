@@ -75,15 +75,7 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
   }
 
   bool hasRequiredParams(FormalParameterList? params) {
-    if (params == null) {
-      return false;
-    }
-    for (final FormalParameter param in params.parameters) {
-      if (param.isRequired) {
-        return true;
-      }
-    }
-    return false;
+    return params?.parameters.any((p) => p.isRequired) ?? false;
   }
 
   @override
