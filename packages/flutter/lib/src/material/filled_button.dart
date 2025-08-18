@@ -61,6 +61,14 @@ enum _FilledButtonVariant { filled, tonal }
 /// ** See code in examples/api/lib/material/filled_button/filled_button.0.dart **
 /// {@end-tool}
 ///
+/// ## Visual density effects
+///
+/// The button's appearance is affected by the [VisualDensity] from the enclosing
+/// [Theme] or from its [style]. Visual density adjusts the [ButtonStyle.padding]
+/// and [ButtonStyle.minimumSize] to accommodate different UI densities across platforms.
+/// See [VisualDensity] for more details on how it affects component layout and
+/// the platform-specific defaults.
+///
 /// See also:
 ///
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
