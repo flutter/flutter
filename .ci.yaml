@@ -2728,15 +2728,6 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: drive_perf_debug_warning
 
-  - name: Linux_pixel_7pro embedded_android_views_integration_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: embedded_android_views_integration_test
-
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
     bringup: true
