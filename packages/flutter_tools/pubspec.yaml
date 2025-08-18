@@ -10,6 +10,7 @@ dependencies:
   #
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+  analyzer: 8.1.1
   archive: 3.6.1
   args: 2.7.0
   dds: 5.0.3
@@ -23,13 +24,13 @@ dependencies:
   file: 7.0.1
   flutter_template_images: 5.0.0
   html: 0.15.6
-  http: 1.4.0
+  http: 1.5.0
   intl: 0.20.2
   meta: 1.17.0
   multicast_dns: 0.3.3
   mustache_template: 2.0.0
   package_config: 2.2.0
-  process: 5.0.4
+  process: 5.0.5
   fake_async: 1.3.3
   stack_trace: 1.12.1
   usage: 4.1.1
@@ -71,20 +72,19 @@ dependencies:
 
   standard_message_codec: 0.0.1+4
 
-  dart_style: 3.1.0
+  dart_style: 3.1.2
 
   # The below dependencies are transitive and are here to pin them to a specific version.
-  _fe_analyzer_shared: 82.0.0
-  analyzer: 7.4.5
+  _fe_analyzer_shared: 88.0.0
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.11.0
+  built_value: 8.11.1
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
   dap: 1.4.0
-  dds_service_extensions: 2.0.2
+  dds_service_extensions: 2.1.0
   devtools_shared: 12.0.0
   dtd: 4.0.0
   extension_discovery: 2.1.0
@@ -126,4 +126,4 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-# PUBSPEC CHECKSUM: 932agm
+# PUBSPEC CHECKSUM: f0tepf
