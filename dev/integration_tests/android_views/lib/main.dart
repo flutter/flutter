@@ -16,7 +16,18 @@ final List<PageWidget> _allPages = <PageWidget>[
 
 void main() {
   enableFlutterDriverExtension(handler: driverDataHandler.handleMessage);
-  runApp(const MaterialApp(home: Home()));
+  runApp(
+    MaterialApp(
+      theme: ThemeData(
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          },
+        ),
+      ),
+      home: const Home(),
+    ),
+  );
 }
 
 class Home extends StatelessWidget {

@@ -50,7 +50,7 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
+const kMaterialShaders = <String>['shaders/ink_sparkle.frag'];
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
