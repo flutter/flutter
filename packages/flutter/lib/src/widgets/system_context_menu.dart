@@ -502,10 +502,7 @@ final class IOSSystemContextMenuItemLiveText extends IOSSystemContextMenuItem {
 @immutable
 class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemCustom].
-  const IOSSystemContextMenuItemCustom({
-    required this.title,
-    required this.onPressed,
-  });
+  const IOSSystemContextMenuItemCustom({required this.title, required this.onPressed});
 
   @override
   final String title;
@@ -515,10 +512,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem with Diagn
 
   @override
   IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations) {
-    return IOSSystemContextMenuItemDataCustom(
-      title: title,
-      onPressed: onPressed,
-    );
+    return IOSSystemContextMenuItemDataCustom(title: title, onPressed: onPressed);
   }
 
   @override

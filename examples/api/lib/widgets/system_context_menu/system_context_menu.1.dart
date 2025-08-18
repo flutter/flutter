@@ -17,9 +17,7 @@ class SystemContextMenuExampleApp extends StatelessWidget {
       title: 'Custom Context Menu Demo',
       home: Scaffold(
         appBar: AppBar(title: const Text('Custom Context Menu Example')),
-        body: const Center(
-          child: SystemContextMenuExample(),
-        ),
+        body: const Center(child: SystemContextMenuExample()),
       ),
     );
   }
@@ -44,9 +42,7 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -63,9 +59,7 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
         ),
         contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
           if (!MediaQuery.of(context).supportsShowingSystemContextMenu) {
-            return AdaptiveTextSelectionToolbar.editableText(
-              editableTextState: editableTextState,
-            );
+            return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
           }
 
           return SystemContextMenu.editableText(
@@ -84,14 +78,8 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
                   final TextSelection selection = _controller.selection;
                   final String text = _controller.text;
                   _controller.value = TextEditingValue(
-                    text: text.replaceRange(
-                      selection.start,
-                      selection.end,
-                      '❤️',
-                    ),
-                    selection: TextSelection.collapsed(
-                      offset: selection.start + 2,
-                    ),
+                    text: text.replaceRange(selection.start, selection.end, '❤️'),
+                    selection: TextSelection.collapsed(offset: selection.start + 2),
                   );
                   _showMessage('Heart added');
                 },

@@ -903,7 +903,7 @@ void main() {
       bool customAction2Called = false;
       final List<List<IOSSystemContextMenuItemData>> itemsReceived =
           <List<IOSSystemContextMenuItemData>>[];
-      
+
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -947,7 +947,7 @@ void main() {
 
       final TextEditingController controller = TextEditingController(text: 'test text');
       addTearDown(controller.dispose);
-      
+
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context) {
@@ -983,16 +983,22 @@ void main() {
       expect(find.byType(SystemContextMenu), findsOneWidget);
       expect(itemsReceived, hasLength(1));
       expect(itemsReceived.last, hasLength(3));
-      
+
       expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
       expect(itemsReceived.last[1], isA<IOSSystemContextMenuItemDataCustom>());
-      expect((itemsReceived.last[1] as IOSSystemContextMenuItemDataCustom).title, 'Custom Action 1');
+      expect(
+        (itemsReceived.last[1] as IOSSystemContextMenuItemDataCustom).title,
+        'Custom Action 1',
+      );
       expect(itemsReceived.last[2], isA<IOSSystemContextMenuItemDataCustom>());
-      expect((itemsReceived.last[2] as IOSSystemContextMenuItemDataCustom).title, 'Custom Action 2');
-      
+      expect(
+        (itemsReceived.last[2] as IOSSystemContextMenuItemDataCustom).title,
+        'Custom Action 2',
+      );
+
       final IOSSystemContextMenuItemCustom customItem1 = items[1] as IOSSystemContextMenuItemCustom;
       final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
-      
+
       ByteData? message = const StandardMethodCodec().encodeMethodCall(
         MethodCall('SystemContextMenu.onPerformCustomAction', customItem1.hashCode.toString()),
       );
@@ -1003,7 +1009,7 @@ void main() {
       );
       expect(customAction1Called, isTrue);
       expect(customAction2Called, isFalse);
-      
+
       message = const StandardMethodCodec().encodeMethodCall(
         MethodCall('SystemContextMenu.onPerformCustomAction', customItem2.hashCode.toString()),
       );
@@ -1013,7 +1019,7 @@ void main() {
         (_) {},
       );
       expect(customAction2Called, isTrue);
-      
+
       state.hideToolbar();
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsNothing);
@@ -1028,7 +1034,7 @@ void main() {
       bool customActionCalled = false;
       final TextEditingController controller = TextEditingController(text: 'test text');
       addTearDown(controller.dispose);
-      
+
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context) {
@@ -1067,12 +1073,14 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
-      
+
       expect(find.byType(SystemContextMenu), findsOneWidget);
-      
-      final SystemContextMenu menu = tester.widget<SystemContextMenu>(find.byType(SystemContextMenu));
+
+      final SystemContextMenu menu = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
       final IOSSystemContextMenuItemCustom item = menu.items[0] as IOSSystemContextMenuItemCustom;
-      
+
       final ByteData message = const StandardMethodCodec().encodeMethodCall(
         MethodCall('SystemContextMenu.onPerformCustomAction', item.hashCode.toString()),
       );
@@ -1081,9 +1089,9 @@ void main() {
         message,
         (_) {},
       );
-      
+
       expect(customActionCalled, isTrue);
-      
+
       // iOS system menus auto-close after custom actions on real devices.
       // Simulate this by sending the platform dismiss message.
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
@@ -1095,7 +1103,7 @@ void main() {
         (_) {},
       );
       await tester.pump();
-      
+
       expect(find.byType(SystemContextMenu), findsNothing);
     },
     skip: kIsWeb, // [intended]
@@ -1107,7 +1115,7 @@ void main() {
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
-      
+
       bool customActionCalled = false;
       final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
         const IOSSystemContextMenuItemCut(),
@@ -1118,7 +1126,7 @@ void main() {
           },
         ),
       ];
-      
+
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context) {
@@ -1151,10 +1159,10 @@ void main() {
 
       const TextSelection selection = TextSelection(baseOffset: 0, extentOffset: 3);
       controller.selection = selection;
-      
+
       await tester.longPress(find.byType(TextField));
       await tester.pumpAndSettle();
-      
+
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
       final IOSSystemContextMenuItemCustom customItem = items[1] as IOSSystemContextMenuItemCustom;
@@ -1170,7 +1178,7 @@ void main() {
       );
 
       expect(customActionCalled, isTrue);
-      
+
       // Verify menu closes after custom action.
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       state.hideToolbar();
@@ -1186,14 +1194,14 @@ void main() {
     (WidgetTester tester) async {
       bool field1ActionCalled = false;
       bool field2ActionCalled = false;
-      
+
       final TextEditingController controller1 = TextEditingController(text: 'Field 1 text');
       final TextEditingController controller2 = TextEditingController(text: 'Field 2 text');
       addTearDown(() {
         controller1.dispose();
         controller2.dispose();
       });
-      
+
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context) {
@@ -1246,15 +1254,16 @@ void main() {
           },
         ),
       );
-      
+
       await tester.longPress(find.byType(TextField).first);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
-      
-      final EditableTextState state1 = tester.state<EditableTextState>(find.byType(EditableText).first);
-      final SystemContextMenu menu1 = tester.widget<SystemContextMenu>(find.byType(SystemContextMenu));
+
+      final SystemContextMenu menu1 = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
       final IOSSystemContextMenuItemCustom item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
-      
+
       ByteData message = const StandardMethodCodec().encodeMethodCall(
         MethodCall('SystemContextMenu.onPerformCustomAction', item1.hashCode.toString()),
       );
@@ -1263,10 +1272,10 @@ void main() {
         message,
         (_) {},
       );
-      
+
       expect(field1ActionCalled, isTrue);
       expect(field2ActionCalled, isFalse);
-      
+
       final ByteData? messageBytes1 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'ContextMenu.onDismissSystemContextMenu',
       });
@@ -1276,17 +1285,18 @@ void main() {
         (_) {},
       );
       await tester.pump();
-      
+
       field1ActionCalled = false;
-      
+
       await tester.longPress(find.byType(TextField).last);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
-      
-      final EditableTextState state2 = tester.state<EditableTextState>(find.byType(EditableText).last);
-      final SystemContextMenu menu2 = tester.widget<SystemContextMenu>(find.byType(SystemContextMenu));
+
+      final SystemContextMenu menu2 = tester.widget<SystemContextMenu>(
+        find.byType(SystemContextMenu),
+      );
       final IOSSystemContextMenuItemCustom item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
-      
+
       message = const StandardMethodCodec().encodeMethodCall(
         MethodCall('SystemContextMenu.onPerformCustomAction', item2.hashCode.toString()),
       );
@@ -1295,10 +1305,10 @@ void main() {
         message,
         (_) {},
       );
-      
+
       expect(field1ActionCalled, isFalse);
       expect(field2ActionCalled, isTrue);
-      
+
       final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'ContextMenu.onDismissSystemContextMenu',
       });
@@ -1308,7 +1318,7 @@ void main() {
         (_) {},
       );
       await tester.pump();
-      
+
       expect(find.byType(SystemContextMenu), findsNothing);
     },
     skip: kIsWeb, // [intended]

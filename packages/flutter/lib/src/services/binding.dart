@@ -427,7 +427,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           assert(
             false,
             'Platform sent onPerformCustomAction when no SystemContextMenuClient was registered. '
-            'ServicesBinding.systemContextMenuClient shouldn\'t be cleared unless the menu is hidden.',
+            "ServicesBinding.systemContextMenuClient shouldn't be cleared unless the menu is hidden.",
           );
           return;
         }

@@ -55,11 +55,11 @@ void main() {
         expect(find.byType(SystemContextMenu), findsOneWidget);
         expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
         expect(itemsReceived.length, greaterThanOrEqualTo(3));
-        
+
         final List<Map<String, dynamic>> customItems = itemsReceived
             .where((Map<String, dynamic> item) => item['type'] == 'custom')
             .toList();
-        
+
         expect(customItems.length, 3);
         expect(customItems[0]['title'], 'Clear Text');
         expect(customItems[1]['title'], 'Add Heart');
@@ -81,9 +81,7 @@ void main() {
           builder: (BuildContext context) {
             final MediaQueryData mediaQueryData = MediaQuery.of(context);
             return MediaQuery(
-              data: mediaQueryData.copyWith(
-                supportsShowingSystemContextMenu: true,
-              ),
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
               child: const example.SystemContextMenuExampleApp(),
             );
           },
@@ -114,7 +112,7 @@ void main() {
 
       expect(controller.text, '');
       expect(find.text('Text cleared'), findsOneWidget);
-      
+
       // Verify menu auto-closes after custom action (iOS behavior).
       expect(find.byType(SystemContextMenu), findsNothing);
     },
