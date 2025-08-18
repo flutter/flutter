@@ -194,6 +194,14 @@ abstract class WidgetsLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from empty to non-empty.
+  String get searchResultsFound => 'Search results found';
+
+  /// The semantics label used for [RawAutocomplete] when the options list goes
+  /// from non-empty to empty.
+  String get noResultsFound => 'No results found';
+
   /// Label for "copy" edit buttons and menu items.
   String get copyButtonLabel;
 
@@ -283,6 +291,12 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get searchResultsFound => 'Search results found';
+
+  @override
+  String get noResultsFound => 'No results found';
 
   @override
   String get copyButtonLabel => 'Copy';

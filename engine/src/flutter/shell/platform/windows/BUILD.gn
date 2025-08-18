@@ -110,6 +110,7 @@ source_set("flutter_windows_source") {
     "platform_view_manager.h",
     "platform_view_plugin.cc",
     "platform_view_plugin.h",
+    "rect_helper.h",
     "sequential_id_generator.cc",
     "sequential_id_generator.h",
     "settings_plugin.cc",
