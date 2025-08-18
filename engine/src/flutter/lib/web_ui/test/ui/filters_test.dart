@@ -442,8 +442,12 @@ Future<void> testMain() async {
   });
 
   test('does not throw for both sigmaX and sigmaY set to 0', () async {
+    // Ignoring redundant arguments (the default sigma is 0) to make the
+    // test clearer.
     final ui.ImageFilter imageFilter = ui.ImageFilter.blur(
+      // ignore: avoid_redundant_argument_values
       sigmaX: 0,
+      // ignore: avoid_redundant_argument_values
       sigmaY: 0,
       tileMode: ui.TileMode.clamp,
     );
@@ -500,7 +504,14 @@ Future<void> testMain() async {
       for (int index2 = 0; index2 < filters2.length; index2 += 1) {
         final ui.ImageFilter imageFilter2 = filters2[index2];
         expect(imageFilter1 == imageFilter2, imageFilter2 == imageFilter1);
-        expect(imageFilter1 == imageFilter2, index1 == index2);
+        expect(
+          imageFilter1 == imageFilter2,
+          index1 == index2,
+          reason:
+              'filters1[$index1] != filters2[$index2]\n'
+              'imageFilter1 = $imageFilter1\n'
+              'imageFilter2 = $imageFilter2',
+        );
       }
     }
     // == for ImageFilter is not implemented in Skwasm.

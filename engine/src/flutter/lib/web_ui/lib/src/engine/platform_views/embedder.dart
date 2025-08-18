@@ -31,8 +31,8 @@ class PlatformViewEmbedder {
   /// * The number of clipping elements used last time the view was composited.
   final Map<int, ViewClipChain> _viewClipChains = <int, ViewClipChain>{};
 
-  /// The maximum number of render canvases to create. Too many canvases can
-  /// cause a performance burden.
+  /// The maximum number of canvases to create. Too many canvases can cause a
+  /// performance burden.
   static int get maximumCanvases => configuration.canvasKitMaximumSurfaces;
 
   /// The views that need to be recomposited into the scene on the next frame.
@@ -62,7 +62,7 @@ class PlatformViewEmbedder {
     _frameSize = size;
   }
 
-  /// Returns a list of canvases for the optimized rendering. These are used in
+  /// Returns a list of canvases for the optimized composition. These are used in
   /// the paint step.
   Iterable<LayerCanvas> getOptimizedCanvases() {
     return _context.optimizedCanvases!;
@@ -267,9 +267,9 @@ class PlatformViewEmbedder {
       _context.sceneElements,
       _currentCompositionParams,
     );
-    composition = _modifyRenderingForMaxCanvases(composition);
+    composition = _modifyCompositionForMaxCanvases(composition);
     _context.optimizedComposition = composition;
-    // Create new picture recorders for the optimized render canvases and record
+    // Create new picture recorders for the optimized canvases and record
     // which pictures go in which canvas.
     final List<LayerPictureRecorder> optimizedCanvasRecorders = <LayerPictureRecorder>[];
     final List<LayerCanvas> optimizedCanvases = <LayerCanvas>[];
@@ -409,9 +409,9 @@ class PlatformViewEmbedder {
     _viewsToRecomposite.remove(viewId);
   }
 
-  /// Modify the given rendering by removing canvases until the number of
+  /// Modify the given composition by removing canvases until the number of
   /// canvases is less than or equal to the maximum number of canvases.
-  Composition _modifyRenderingForMaxCanvases(Composition composition) {
+  Composition _modifyCompositionForMaxCanvases(Composition composition) {
     final Composition result = Composition();
     final int numCanvases = composition.canvases.length;
     if (numCanvases <= maximumCanvases) {
@@ -459,21 +459,21 @@ class PlatformViewEmbedder {
 
   void _updateDomForNewComposition(Composition composition) {
     if (composition.equalsForCompositing(_activeComposition)) {
-      // The rendering has not changed, so no DOM manipulation is needed.
+      // The composition has not changed, so no DOM manipulation is needed.
       return;
     }
-    final List<int> indexMap = _getIndexMapFromPreviousRendering(_activeComposition, composition);
+    final List<int> indexMap = _getIndexMapFromPreviousComposition(_activeComposition, composition);
     final List<int> existingIndexMap = indexMap.where((int index) => index != -1).toList();
 
     final List<int> staticElements = longestIncreasingSubsequence(existingIndexMap);
     // Convert longest increasing subsequence from subsequence of indices of
-    // `existingIndexMap` to a subsequence of indices in previous rendering.
+    // `existingIndexMap` to a subsequence of indices in previous composition.
     for (int i = 0; i < staticElements.length; i++) {
       staticElements[i] = existingIndexMap[staticElements[i]];
     }
 
-    // Remove elements which are in the active rendering, but not in the new
-    // rendering.
+    // Remove elements which are in the active composition, but not in the new
+    // composition.
     for (int i = 0; i < _activeComposition.entities.length; i++) {
       if (indexMap.contains(i)) {
         continue;
@@ -484,7 +484,7 @@ class PlatformViewEmbedder {
       } else if (entity is CompositionCanvas) {
         assert(
           entity.displayCanvas != null,
-          'RenderCanvas in previous composition was '
+          'CompositionCanvas in previous composition was '
           'not assigned a DisplayCanvas',
         );
         rasterizer.releaseOverlay(entity.displayCanvas!);
@@ -492,65 +492,64 @@ class PlatformViewEmbedder {
       }
     }
 
-    // Updates [renderCanvas] (located in [index] in the next rendering) to have
-    // a display canvas, either taken from the associated render canvas in the
-    // previous rendering, or newly created.
-    void updateRenderCanvasWithDisplay(CompositionCanvas renderCanvas, int index) {
-      // Does [nextEntity] correspond with a render canvas in the previous
-      // rendering? If so, then the render canvas in the previous rendering
-      // had an associated display canvas. Use this display canvas for
-      // [nextEntity].
+    // Updates [canvas] (located in [index] in the next composition) to have a
+    // display canvas, either taken from the associated canvas in the previous
+    // composition, or newly created.
+    void updateCompositionCanvasWithDisplay(CompositionCanvas canvas, int index) {
+      // Does [nextEntity] correspond with a canvas in the previous composition?
+      // If so, then the canvas in the previous composition had an associated
+      //display canvas. Use this display canvas for [nextEntity].
       if (indexMap[index] != -1) {
         final CompositionEntity previousEntity = _activeComposition.entities[indexMap[index]];
         assert(previousEntity is CompositionCanvas && previousEntity.displayCanvas != null);
-        renderCanvas.displayCanvas = (previousEntity as CompositionCanvas).displayCanvas;
+        canvas.displayCanvas = (previousEntity as CompositionCanvas).displayCanvas;
         previousEntity.displayCanvas = null;
       } else {
-        // There is no corresponding render canvas in the previous
-        // rendering. So this render canvas needs a display canvas.
-        renderCanvas.displayCanvas = rasterizer.getOverlay();
+        // There is no corresponding canvas in the previous composition. So this
+        // canvas needs a display canvas.
+        canvas.displayCanvas = rasterizer.getOverlay();
       }
     }
 
     // At this point, the DOM contains the static elements and the elements from
-    // the previous rendering which need to move. We iterate over the static
+    // the previous composition which need to move. We iterate over the static
     // elements and insert the elements which come before them into the DOM.
     int staticElementIndex = 0;
-    int nextRenderingIndex = 0;
+    int nextCompositionIndex = 0;
     while (staticElementIndex < staticElements.length) {
-      final int staticElementIndexInActiveRendering = staticElements[staticElementIndex];
+      final int staticElementIndexInActiveComposition = staticElements[staticElementIndex];
       final DomElement staticDomElement = _getElement(
-        _activeComposition.entities[staticElementIndexInActiveRendering],
+        _activeComposition.entities[staticElementIndexInActiveComposition],
       );
-      // Go through next rendering elements until we reach the static element.
-      while (indexMap[nextRenderingIndex] != staticElementIndexInActiveRendering) {
-        final CompositionEntity nextEntity = composition.entities[nextRenderingIndex];
+      // Go through next composition elements until we reach the static element.
+      while (indexMap[nextCompositionIndex] != staticElementIndexInActiveComposition) {
+        final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
         if (nextEntity is CompositionCanvas) {
-          updateRenderCanvasWithDisplay(nextEntity, nextRenderingIndex);
+          updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
         }
         sceneHost.insertBefore(_getElement(nextEntity), staticDomElement);
-        nextRenderingIndex++;
+        nextCompositionIndex++;
       }
-      if (composition.entities[nextRenderingIndex] is CompositionCanvas) {
-        updateRenderCanvasWithDisplay(
-          composition.entities[nextRenderingIndex] as CompositionCanvas,
-          nextRenderingIndex,
+      if (composition.entities[nextCompositionIndex] is CompositionCanvas) {
+        updateCompositionCanvasWithDisplay(
+          composition.entities[nextCompositionIndex] as CompositionCanvas,
+          nextCompositionIndex,
         );
       }
-      // Also increment the next rendering index because this is the static
+      // Also increment the next composition index because this is the static
       // element.
-      nextRenderingIndex++;
+      nextCompositionIndex++;
       staticElementIndex++;
     }
 
     // Add the leftover entities.
-    while (nextRenderingIndex < composition.entities.length) {
-      final CompositionEntity nextEntity = composition.entities[nextRenderingIndex];
+    while (nextCompositionIndex < composition.entities.length) {
+      final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
       if (nextEntity is CompositionCanvas) {
-        updateRenderCanvasWithDisplay(nextEntity, nextRenderingIndex);
+        updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
       }
       sceneHost.append(_getElement(nextEntity));
-      nextRenderingIndex++;
+      nextCompositionIndex++;
     }
   }
 
@@ -561,10 +560,10 @@ class PlatformViewEmbedder {
     };
   }
 
-  /// Returns a [List] of ints mapping elements from the [next] rendering to
-  /// elements of the [previous] rendering. If there is no matching element in
-  /// the previous rendering, then the index map for that element is `-1`.
-  List<int> _getIndexMapFromPreviousRendering(Composition previous, Composition next) {
+  /// Returns a [List] of ints mapping elements from the [next] composition to
+  /// elements of the [previous] composition. If there is no matching element in
+  /// the previous composition, then the index map for that element is `-1`.
+  List<int> _getIndexMapFromPreviousComposition(Composition previous, Composition next) {
     assert(
       !previous.equalsForCompositing(next),
       'Should not be in this method if the Compositions are equal',
@@ -574,9 +573,9 @@ class PlatformViewEmbedder {
 
     final int maxUnchangedLength = math.min(previous.entities.length, next.entities.length);
 
-    // A canvas in the previous rendering can only be used once in the next
-    // rendering. So if it is matched with one in the next rendering, mark it
-    // here so it is only matched once.
+    // A canvas in the previous composition can only be used once in the next
+    // composition. So if it is matched with one in the next composition, mark
+    // it here so it is only matched once.
     final Set<int> alreadyClaimedCanvases = <int>{};
 
     // Add the unchanged elements from the beginning of the list.
@@ -621,12 +620,13 @@ class PlatformViewEmbedder {
     _viewClipChains.keys.toList().forEach(disposeView);
     _context = EmbedderFrameContext();
     _currentCompositionParams.clear();
-    _currentCompositionParams.clear();
     _viewClipChains.clear();
     _viewsToRecomposite.clear();
     _activeCompositionOrder.clear();
     _compositionOrder.clear();
     _activeComposition = Composition();
+    debugBoundsCanvas?.dispose();
+    debugBoundsCanvas = null;
   }
 
   /// Clears the state. Used in tests.
@@ -816,7 +816,7 @@ class EmbedderFrameContext {
   /// painted.
   final List<SceneElement> sceneElements = <SceneElement>[];
 
-  /// The optimized rendering for this frame. This is set by calling
+  /// The optimized composition for this frame. This is set by calling
   /// [optimizeComposition].
   Composition? optimizedComposition;
 
