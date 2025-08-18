@@ -71,7 +71,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
       allowed: <String>['objc', 'swift'],
       help:
           '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy). '
-          'Only supported for "--template=plugin".',
+          'Only supported for "--template=plugin". '
+          'This command will be removed in a future version of Flutter. Swift is now the default language for iOS plugins.',
       hide: !verboseHelp,
     );
     argParser.addOption(

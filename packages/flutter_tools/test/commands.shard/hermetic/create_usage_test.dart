@@ -237,12 +237,11 @@ void main() {
           'create',
           '--no-pub',
           '--template=plugin',
-          '--ios-language=objc',
           'testy',
         ]);
         expect(
           (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
+          'swift',
         );
       }),
       overrides: <Type, Generator>{Java: () => FakeJava()},
