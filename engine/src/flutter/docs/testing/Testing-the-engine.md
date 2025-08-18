@@ -61,11 +61,13 @@ To run the shell's C++ unit tests:
 ../out/host_debug_unopt/shell_unittests
 ```
 
-To run a single test, use Google Tests filters:
+To run a single test, use [Google Test's filters][]:
 
 ```sh
 ../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame"
 ```
+
+[Google Test's filters]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
 
 You can use `*` wildcards to run tests whose name matches a pattern:
 
@@ -73,8 +75,9 @@ You can use `*` wildcards to run tests whose name matches a pattern:
 ../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitFor*"
 ```
 
-Google Test supports other patterns, like `-` for exclusions and `:` for joins.
-Check [Google Test's documentation][] for details.
+> [!TIP]
+> Google Test supports other patterns, like `-` for exclusions and `:` for joins.
+> Check [Google Test's documentation][] for details.
 
 [Google Test's documentation]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
 
