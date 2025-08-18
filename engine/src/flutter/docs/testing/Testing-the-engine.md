@@ -55,7 +55,7 @@ mocks for all other dependencies.
 Each Google Test target produces an executable in the `out` directory with the
 `_unittests` suffix. You use these executables to run Google Tests.
 
-For example, to run the shell's C++ unit tests:
+To run the shell's C++ unit tests:
 
 ```sh
 ../out/host_debug_unopt/shell_unittests
