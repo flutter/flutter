@@ -16,7 +16,7 @@ void main() {
 
 void testMain() {
   group('RenderCanvas', () {
-    setUpImplicitView();
+    setUpUnitTests(withImplicitView: true);
     setUp(() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });
