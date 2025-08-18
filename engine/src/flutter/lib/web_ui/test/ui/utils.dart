@@ -69,7 +69,6 @@ Future<bool> matchImage(Image left, Image right) async {
   return true;
 }
 
-
 /// Convenience getter for the implicit view.
 FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
