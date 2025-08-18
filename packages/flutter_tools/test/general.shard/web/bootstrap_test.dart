@@ -267,7 +267,7 @@ void main() {
         isCi: true,
       );
       // bootstrap main module has correct defined module.
-      expect(result, contains('let appName = "org-dartlang-app:/main.js";'));
+      expect(result, contains('const appName = "org-dartlang-app:/main.js";'));
       expect(result, contains('dartDevEmbedder.runMain(appName, sdkOptions);'));
     });
 
