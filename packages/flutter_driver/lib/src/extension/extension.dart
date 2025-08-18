@@ -444,7 +444,7 @@ class FlutterDriverExtension
   SerializableFinder deserializeFinder(Map<String, String> json, {String? path}) {
     final String? finderType = json['finderType'];
     if (_finderExtensions.containsKey(finderType)) {
-      return _finderExtensions[finderType]!.deserialize(json, this, path: path);
+      return _finderExtensions[finderType]!.deserialize(json, this);
     }
 
     return super.deserializeFinder(json, path: path);
