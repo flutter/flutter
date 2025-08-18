@@ -52,6 +52,38 @@ on and for your host machine architecture.
 It's best practice to test only one real production class per test and create
 mocks for all other dependencies.
 
+Each Google Test target produces an executable in the `out` directory with the
+`_unittests` suffix. You can run Google Tests by running these executables.
+
+For example, to run the shell's C++ unit tests:
+
+```sh
+../out/host_debug_unopt/shell_unittests
+```
+
+To run a single test, use Google Tests filters:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame"
+```
+
+You can use `*` wildcards to run tests whose name matches a pattern:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitFor*"
+```
+
+Google Test supports other patterns, like `-` for exclusions and `:` for joins.
+Check [Google Test's documentation][] for details.
+
+[Google Test's documentation]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
+
+To reproduces test flakes, you can run a test multiple times:
+
+```sh
+../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame" --gtest_repeat=1000
+```
+
 ## Java - Android embedding
 
 If you edit `.java` files in the [`shell/platform/android`](../../shell/platform/android/)
