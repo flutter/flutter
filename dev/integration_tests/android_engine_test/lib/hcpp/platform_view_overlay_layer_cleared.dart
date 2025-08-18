@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
                                       const <Factory<OneSequenceGestureRecognizer>>{},
                                 );
                               },
-                          onCreatePlatformView: (params) {
+                          onCreatePlatformView: (PlatformViewCreationParams params) {
                             return PlatformViewsService.initHybridAndroidView(
                                 id: params.id,
                                 viewType: 'changing_color_button_platform_view',
