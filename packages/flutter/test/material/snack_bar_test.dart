@@ -4268,12 +4268,96 @@ void main() {
     expect(find.text(snackbarContent), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pumpAndSettle();
     // The snackbar is still there after the timeout.
     expect(find.text(snackbarContent), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     // The snackbar is dismissed.
+    expect(find.text(snackbarContent), findsNothing);
+  });
+
+  testWidgets('Setting persist to false so snackbar auto dismisses', (WidgetTester tester) async {
+    const String buttonText = 'Show';
+    const String snackbarContent = 'SnackbarContent';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      persist: false,
+                      showCloseIcon: true,
+                      content: Text(snackbarContent),
+                    ),
+                  );
+                },
+                child: const Text(buttonText),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 750));
+    // The snackbar shows up before the timeout.
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1500));
+    await tester.pumpAndSettle();
+    // The snackbar auto dismisses after the timeout.
+    expect(find.text(snackbarContent), findsNothing);
+  });
+
+  testWidgets('Setting persist to false overrides accessibleNavigation', (
+    WidgetTester tester,
+  ) async {
+    const String buttonText = 'Show';
+    const String snackbarContent = 'SnackbarContent';
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: const Duration(seconds: 1),
+                        persist: false,
+                        action: SnackBarAction(label: 'Action', onPressed: () {}),
+                        content: const Text(snackbarContent),
+                      ),
+                    );
+                  },
+                  child: const Text(buttonText),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.text(snackbarContent), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    // The snackbar auto dismisses after the timeout.
     expect(find.text(snackbarContent), findsNothing);
   });
 }
