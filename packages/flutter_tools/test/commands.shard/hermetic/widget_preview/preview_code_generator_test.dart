@@ -171,6 +171,7 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
+        platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
             // We don't care about anything written to the file system by analytics, so we're safe
