@@ -78,7 +78,7 @@ Check [Google Test's documentation][] for details.
 
 [Google Test's documentation]: https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests
 
-To reproduces test flakes, you can run a test multiple times:
+To reproduce test flakes, you can run a test multiple times:
 
 ```sh
 ../out/host_debug_unopt/shell_unittests --gtest_filter="ShellTest.WaitForFirstFrame" --gtest_repeat=1000
