@@ -149,9 +149,9 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   if (overlay_frame != nullptr) {
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
-    has_overlay_layers_ = true;
+    overlay_layer_has_content_ = true;
   } else {
-    if (has_overlay_layers_) {
+    if (overlay_layer_has_content_) {
       // Submit one frame to clean up the outstanding overlay content.
       std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
           context, android_context_, jni_facade_, surface_factory_);
@@ -159,7 +159,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       overlay_frame->set_submit_info({.frame_boundary = false});
       overlay_frame->Submit();
-      has_overlay_layers_ = false;
+      overlay_layer_has_content_ = false;
     }
   }
   frame->Submit();
