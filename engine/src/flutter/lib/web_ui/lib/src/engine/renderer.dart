@@ -45,6 +45,14 @@ abstract class Renderer {
 
   late Rasterizer rasterizer;
 
+  /// Resets the [Rasterizer] to the default value. Used in tests.
+  void debugResetRasterizer();
+
+  /// Override the rasterizer with the given [_rasterizer]. Used in tests.
+  void debugOverrideRasterizer(Rasterizer testRasterizer) {
+    rasterizer = testRasterizer;
+  }
+
   // Listens for view creation events from the view manager.
   late StreamSubscription<int> _onViewCreatedListener;
   // Listens for view disposal events from the view manager.

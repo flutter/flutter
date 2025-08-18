@@ -78,14 +78,9 @@ class CanvasKitRenderer extends Renderer {
     return OffscreenCanvasRasterizer();
   }
 
-  /// Resets the [Rasterizer] to the default value. Used in tests.
+  @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
-  }
-
-  /// Override the rasterizer with the given [_rasterizer]. Used in tests.
-  void debugOverrideRasterizer(Rasterizer testRasterizer) {
-    rasterizer = testRasterizer;
   }
 
   set resourceCacheMaxBytes(int bytes) => rasterizer.setResourceCacheMaxBytes(bytes);

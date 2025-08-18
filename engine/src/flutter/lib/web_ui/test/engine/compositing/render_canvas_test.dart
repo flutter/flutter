@@ -6,18 +6,17 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'common.dart';
+import '../../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  group('CanvasKit', () {
-    setUpCanvasKitTest(withImplicitView: true);
+  group('RenderCanvas', () {
+    setUpImplicitView();
     setUp(() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });
@@ -64,18 +63,18 @@ void testMain() {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
 
-      final ui.SceneBuilder sceneBuilder = LayerSceneBuilder();
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
-      canvas.drawPaint(CkPaint()..color = const ui.Color(0xff00ff00));
-      final CkPicture picture = recorder.endRecording();
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder, ui.Rect.largest);
+      canvas.drawPaint(ui.Paint()..color = const ui.Color(0xff00ff00));
+      final ui.Picture picture = recorder.endRecording();
       sceneBuilder.addPicture(ui.Offset.zero, picture);
       final ui.Scene scene = sceneBuilder.build();
 
-      await renderScene(scene);
+      await renderer.renderScene(scene, implicitView);
 
       expect(
-        CanvasKitRenderer.instance.rasterizers[implicitView.viewId]!.currentFrameSize,
+        renderer.rasterizers[implicitView.viewId]!.currentFrameSize,
         const BitmapSize(200, 200),
       );
 

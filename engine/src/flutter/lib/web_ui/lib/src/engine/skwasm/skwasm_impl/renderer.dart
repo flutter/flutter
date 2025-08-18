@@ -543,4 +543,9 @@ class SkwasmRenderer extends Renderer {
       }
     }
   }
+
+  @override
+  void debugResetRasterizer() {
+    rasterizer = OffscreenCanvasRasterizer(surface);
+  }
 }

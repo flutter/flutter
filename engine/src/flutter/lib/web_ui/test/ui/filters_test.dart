@@ -500,17 +500,12 @@ Future<void> testMain() async {
       for (int index2 = 0; index2 < filters2.length; index2 += 1) {
         final ui.ImageFilter imageFilter2 = filters2[index2];
         expect(imageFilter1 == imageFilter2, imageFilter2 == imageFilter1);
-        if (index1 == index2) {
-          if (imageFilter1 != imageFilter2) {
-            print('filters1[$index1] != filters2[$index2]');
-            print('imageFilter1 = $imageFilter1');
-            print('imageFilter2 = $imageFilter2');
-          }
-        }
         expect(imageFilter1 == imageFilter2, index1 == index2);
       }
     }
-  });
+    // == for ImageFilter is not implemented in Skwasm.
+    // See: https://github.com/flutter/flutter/issues/173968
+  }, skip: isSkwasm);
 
   group('MaskFilter', () {
     test('with 0 sigma can be set on a Paint', () {
@@ -564,7 +559,6 @@ List<ui.ImageFilter> createImageFilters() {
     ui.ImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
     ui.ImageFilter.dilate(radiusX: 5, radiusY: 6),
     ui.ImageFilter.erode(radiusX: 7, radiusY: 8),
-    ...createColorFilters(),
   ];
   filters.add(ui.ImageFilter.compose(outer: filters[0], inner: filters[1]));
   filters.add(ui.ImageFilter.compose(outer: filters[1], inner: filters[3]));

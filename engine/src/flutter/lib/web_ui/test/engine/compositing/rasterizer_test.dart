@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
-
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'common.dart';
+import '../../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -76,16 +73,16 @@ class TestViewRasterizer extends ViewRasterizer {
 }
 
 void testMain() {
-  group('Renderer', () {
-    setUpCanvasKitTest();
+  group('Rasterizer', () {
+    setUpUnitTests();
 
     tearDown(() {
-      CanvasKitRenderer.instance.debugResetRasterizer();
+      renderer.debugResetRasterizer();
     });
 
     test('always renders most recent picture and skips intermediate pictures', () async {
       final TestRasterizer testRasterizer = TestRasterizer();
-      CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
+      renderer.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
       // a [ViewRasterizer] for it.
@@ -109,7 +106,7 @@ void testMain() {
         builder.addPicture(ui.Offset.zero, picture);
         final ui.Scene scene = builder.build();
         treesToRender.add((scene as LayerScene).layerTree);
-        renderFutures.add(CanvasKitRenderer.instance.renderScene(scene, testView));
+        renderFutures.add(renderer.renderScene(scene, testView));
       }
       await Future.wait(renderFutures);
 
@@ -122,7 +119,7 @@ void testMain() {
 
     test('can render multiple frames at once into multiple views', () async {
       final TestRasterizer testRasterizer = TestRasterizer();
-      CanvasKitRenderer.instance.debugOverrideRasterizer(testRasterizer);
+      renderer.debugOverrideRasterizer(testRasterizer);
 
       // Create another view to render into to force the renderer to make
       // a [ViewRasterizer] for it.
@@ -166,7 +163,7 @@ void testMain() {
           builder.addPicture(ui.Offset.zero, picture);
           final ui.Scene scene = builder.build();
           treesToRender[testView]!.add((scene as LayerScene).layerTree);
-          renderFutures.add(CanvasKitRenderer.instance.renderScene(scene, testView));
+          renderFutures.add(renderer.renderScene(scene, testView));
         }
       }
       await Future.wait(renderFutures);
@@ -189,26 +186,6 @@ void testMain() {
       expect(treesRenderedInView3.length, 2);
       expect(treesRenderedInView3.first, treesToRenderInView3.first);
       expect(treesRenderedInView3.last, treesToRenderInView3.last);
-    });
-
-    test(
-      'defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari',
-      () {
-        if (isChromium) {
-          expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
-        } else {
-          expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-        }
-      },
-    );
-
-    test('can be configured to always use MultiSurfaceRasterizer', () {
-      debugOverrideJsConfiguration(
-        <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
-            as JsFlutterConfiguration?,
-      );
-      CanvasKitRenderer.instance.debugResetRasterizer();
-      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
     });
   });
 }

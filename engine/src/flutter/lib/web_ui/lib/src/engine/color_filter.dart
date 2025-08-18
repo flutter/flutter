@@ -129,4 +129,19 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
 
   @override
   Matrix4? get transform => null;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! EngineColorFilter) {
+      return false;
+    }
+    return other.type == type &&
+        other.color == color &&
+        other.blendMode == blendMode &&
+        listEquals(other.matrix, matrix);
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(type, color, blendMode, Object.hashAll(matrix ?? const <double>[]));
 }
