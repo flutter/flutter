@@ -94,16 +94,19 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     for (final preview in previewsToProcess) {
       if (_currentFunction != null &&
           !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
-        final Token returnType = (_currentFunction!.returnType! as NamedType).name;
-        if (returnType.isWidget || returnType.isWidgetBuilder) {
-          previewEntries.add(
-            PreviewDetails(
-              packageName: packageName,
-              functionName: _currentFunction!.name.toString(),
-              isBuilder: returnType.isWidgetBuilder,
-              previewAnnotation: preview,
-            ),
-          );
+        final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            previewEntries.add(
+              PreviewDetails(
+                packageName: packageName,
+                functionName: _currentFunction!.name.toString(),
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
         }
       } else if (_currentConstructor != null &&
           !hasRequiredParams(_currentConstructor!.parameters)) {
@@ -118,17 +121,20 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
           ),
         );
       } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
-        final Token returnType = (_currentMethod!.returnType! as NamedType).name;
-        if (returnType.isWidget || returnType.isWidgetBuilder) {
-          final parentClass = _currentMethod!.parent! as ClassDeclaration;
-          previewEntries.add(
-            PreviewDetails(
-              packageName: packageName,
-              functionName: '${parentClass.name}.${_currentMethod!.name}',
-              isBuilder: returnType.isWidgetBuilder,
-              previewAnnotation: preview,
-            ),
-          );
+        final TypeAnnotation? returnTypeAnnotation = _currentMethod!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            final parentClass = _currentMethod!.parent! as ClassDeclaration;
+            previewEntries.add(
+              PreviewDetails(
+                packageName: packageName,
+                functionName: '${parentClass.name}.${_currentMethod!.name}',
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
         }
       }
     }
