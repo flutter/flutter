@@ -45,13 +45,13 @@ class PreviewDetector {
   final Logger logger;
   final void Function(PreviewDependencyGraph) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  final WatcherBuilder watcherBuilder;
 
   @visibleForTesting
   static const kDirectoryWatcherClosedUnexpectedlyPrefix = 'Directory watcher closed unexpectedly';
   @visibleForTesting
   static const kWindowsFileWatcherRestartedMessage =
       'WindowsDirectoryWatcher has closed and been restarted.';
-  final WatcherBuilder watcherBuilder;
   StreamSubscription<WatchEvent>? _fileWatcher;
   final _mutex = PreviewDetectorMutex();
 
