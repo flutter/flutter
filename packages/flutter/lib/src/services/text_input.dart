@@ -2788,7 +2788,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
       if (item is IOSSystemContextMenuItemDataCustom) {
         assert(
           !_customActionCallbacks.containsKey(item.callbackId) ||
-          _customActionCallbacks[item.callbackId] == item.onPressed,
+              _customActionCallbacks[item.callbackId] == item.onPressed,
           'Duplicate callback ID "${item.callbackId}" with different callbacks. '
           'Each custom menu item must have a unique ID or the same callback.',
         );
@@ -3120,10 +3120,7 @@ final class IOSSystemContextMenuItemDataLiveText extends IOSSystemContextMenuIte
 final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemData
     with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataCustom].
-  const IOSSystemContextMenuItemDataCustom({
-    required this.title,
-    required this.onPressed,
-  });
+  const IOSSystemContextMenuItemDataCustom({required this.title, required this.onPressed});
 
   @override
   final String title;
@@ -3139,11 +3136,7 @@ final class IOSSystemContextMenuItemDataCustom extends IOSSystemContextMenuItemD
 
   @override
   Map<String, dynamic> get _json {
-    return <String, dynamic>{
-      'id': callbackId,
-      'title': title,
-      'type': _jsonType,
-    };
+    return <String, dynamic>{'id': callbackId, 'title': title, 'type': _jsonType};
   }
 
   @override

@@ -597,10 +597,7 @@ void main() {
     controller.hide();
     expect(controller.isVisible, isFalse);
 
-    expect(
-      () => controller.handleCustomContextMenuAction(callbackId1),
-      throwsAssertionError,
-    );
+    expect(() => controller.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
   });
 
   test('multiple controllers handle callbacks independently', () {
@@ -658,10 +655,7 @@ void main() {
     // Get the actual callback ID from controller1's items.
     final String callbackId1 = (items1[0] as IOSSystemContextMenuItemDataCustom).callbackId;
 
-    expect(
-      () => controller1.handleCustomContextMenuAction(callbackId1),
-      throwsAssertionError,
-    );
+    expect(() => controller1.handleCustomContextMenuAction(callbackId1), throwsAssertionError);
   });
 
   test('platform dismissal clears callbacks', () {
@@ -697,10 +691,7 @@ void main() {
     // Get the actual callback ID from the item.
     final String callbackId = (items[0] as IOSSystemContextMenuItemDataCustom).callbackId;
 
-    expect(
-      () => controller.handleCustomContextMenuAction(callbackId),
-      throwsAssertionError,
-    );
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
     expect(actionCalled, isFalse);
   });
 
@@ -733,20 +724,14 @@ void main() {
     });
 
     final List<IOSSystemContextMenuItemData> items = <IOSSystemContextMenuItemData>[
-      IOSSystemContextMenuItemDataCustom(
-        title: 'Test Action',
-        onPressed: () {},
-      ),
+      IOSSystemContextMenuItemDataCustom(title: 'Test Action', onPressed: () {}),
     ];
 
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     controller.showWithItems(rect, items);
     expect(controller.isVisible, isTrue);
 
-    expect(
-      () => controller.handleCustomContextMenuAction('non-existent-id'),
-      throwsAssertionError,
-    );
+    expect(() => controller.handleCustomContextMenuAction('non-existent-id'), throwsAssertionError);
   });
 
   test('handleCustomContextMenuAction after hide clears callbacks', () {
@@ -786,10 +771,7 @@ void main() {
     controller.hide();
     expect(controller.isVisible, isFalse);
 
-    expect(
-      () => controller.handleCustomContextMenuAction(callbackId),
-      throwsAssertionError,
-    );
+    expect(() => controller.handleCustomContextMenuAction(callbackId), throwsAssertionError);
     expect(actionCalled, isFalse);
   });
 
@@ -841,10 +823,7 @@ void main() {
     final String newCallbackId = (newItems[0] as IOSSystemContextMenuItemDataCustom).callbackId;
 
     // Old callback should not work.
-    expect(
-      () => controller.handleCustomContextMenuAction(oldCallbackId),
-      throwsAssertionError,
-    );
+    expect(() => controller.handleCustomContextMenuAction(oldCallbackId), throwsAssertionError);
     expect(oldActionCalled, isFalse);
 
     // New callback should work.
