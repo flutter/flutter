@@ -937,7 +937,7 @@ void main() {
     expect(config.isChecked, null);
     expect(config.isSelected, isFalse);
     expect(config.isBlockingSemanticsOfPreviouslyPaintedNodes, isFalse);
-    expect(config.isFocused, isFalse);
+    expect(config.isFocused, null);
     expect(config.isTextField, isFalse);
 
     expect(config.onShowOnScreen, isNull);
