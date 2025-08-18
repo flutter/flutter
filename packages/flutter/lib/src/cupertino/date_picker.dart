@@ -367,8 +367,9 @@ class CupertinoDatePicker extends StatefulWidget {
        ),
        assert(
          selectableDayPredicate == null ||
-             selectableDayPredicate(initialDateTime ?? DateTime.now()),
-         '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
+             initialDateTime == null ||
+             selectableDayPredicate(initialDateTime),
+         '${initialDateTime} must satisfy provided selectableDayPredicate.',
        );
 
   /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
@@ -824,19 +825,22 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // Only reports datetime change when the date time is valid.
   void _onSelectedItemChange(int index) {
-    final DateTime selected = selectedDateTime;
-
     final bool isDateInvalid =
-        (widget.minimumDate?.isAfter(selected) ?? false) ||
-        (widget.maximumDate?.isBefore(selected) ?? false);
+        (widget.minimumDate?.isAfter(selectedDateTime) ?? false) ||
+        (widget.maximumDate?.isBefore(selectedDateTime) ?? false);
 
     if (isDateInvalid) {
       return;
-    } else if (widget.selectableDayPredicate?.call(selected) == false) {
+    } else if (!_isSelectableDate(selectedDateTime)) {
       return;
     }
 
-    widget.onDateTimeChanged(selected);
+    widget.onDateTimeChanged(selectedDateTime);
+  }
+
+  /// Returns whether the given date is selectable.
+  bool _isSelectableDate(DateTime date) {
+    return widget.selectableDayPredicate?.call(date) ?? true;
   }
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
@@ -882,12 +886,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             initialDateTime.day + index + 1,
           );
 
-          final bool isValidDate;
-          if (widget.selectableDayPredicate == null) {
-            isValidDate = true;
-          } else {
-            isValidDate = widget.selectableDayPredicate!.call(rangeStart);
-          }
           final DateTime now = DateTime.now();
 
           if (widget.minimumDate?.isBefore(rangeEnd) == false) {
@@ -903,7 +901,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           return itemPositioningBuilder(
             context,
-            Text(dateText, style: _themeTextStyle(context, isValid: isValidDate)),
+            Text(dateText, style: _themeTextStyle(context, isValid: _isSelectableDate(rangeStart))),
           );
         },
         selectionOverlay: selectionOverlay,
@@ -1124,18 +1122,16 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     );
   }
 
-  void _checkOnCustomDaysDisplay() {
-    final DateTime selectedDate = selectedDateTime;
-    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
-
-    if (widget.selectableDayPredicate?.call(selectedDate) == false) {
+  // Scrolls to the first selectable date if the current date is not selectable.
+  void _scrollToFirstSelectableDate() {
+    if (!_isSelectableDate(selectedDateTime)) {
       const int daysThreshold = 1;
-      final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
+      final DateTime targetDate = selectedDateTime.add(const Duration(days: daysThreshold));
 
       _scrollToDate(
         targetDate,
-        selectedDate,
-        minCheck,
+        selectedDateTime,
+        false,
         focusedIndex: dateController.selectedItem + daysThreshold,
       );
     }
@@ -1157,7 +1153,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
     final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
 
-    _checkOnCustomDaysDisplay();
+    _scrollToFirstSelectableDate();
     if (minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
       final DateTime targetDate = minCheck ? widget.minimumDate! : widget.maximumDate!;
