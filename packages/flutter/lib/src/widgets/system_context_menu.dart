@@ -101,23 +101,8 @@ class SystemContextMenu extends StatefulWidget {
   ///
   /// Defaults to the result of [getDefaultItems].
   ///
-  /// To add custom menu items, use [IOSSystemContextMenuItemCustom]:
-  /// {@tool snippet}
-  /// ```dart
-  /// SystemContextMenu(
-  ///   anchor: anchor,
-  ///   items: <IOSSystemContextMenuItem>[
-  ///     const IOSSystemContextMenuItem.systemItem(type: IOSSystemContextMenuItem.defaultSystemItems.copy),
-  ///     IOSSystemContextMenuItemCustom(
-  ///       title: 'Custom Action',
-  ///       onPressed: () {
-  ///         // Handle custom action
-  ///       },
-  ///     ),
-  ///   ],
-  /// )
-  /// ```
-  /// {@end-tool}
+  /// To add custom menu items, pass [IOSSystemContextMenuItemCustom] instances
+  /// in the [items] list. Each custom item requires a title and an onPressed callback.
   ///
   /// See also:
   ///

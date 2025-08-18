@@ -701,7 +701,7 @@ void main() {
 
     expect(() async {
       final ByteData message = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall('SystemContextMenu.onPerformCustomAction', 'test-id'),
+        const MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, 'test-id']),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',

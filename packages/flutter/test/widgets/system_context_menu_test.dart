@@ -1000,7 +1000,10 @@ void main() {
       final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
 
       ByteData? message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', customItem1.hashCode.toString()),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
+          0,
+          customItem1.hashCode.toString(),
+        ]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
@@ -1011,7 +1014,10 @@ void main() {
       expect(customAction2Called, isFalse);
 
       message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', customItem2.hashCode.toString()),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
+          0,
+          customItem2.hashCode.toString(),
+        ]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
@@ -1082,7 +1088,7 @@ void main() {
       final IOSSystemContextMenuItemCustom item = menu.items[0] as IOSSystemContextMenuItemCustom;
 
       final ByteData message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', item.hashCode.toString()),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
@@ -1169,7 +1175,7 @@ void main() {
       final String callbackId = customItem.hashCode.toString();
 
       final ByteData message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', callbackId),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, callbackId]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
@@ -1265,7 +1271,7 @@ void main() {
       final IOSSystemContextMenuItemCustom item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
 
       ByteData message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', item1.hashCode.toString()),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item1.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
@@ -1298,7 +1304,7 @@ void main() {
       final IOSSystemContextMenuItemCustom item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
 
       message = const StandardMethodCodec().encodeMethodCall(
-        MethodCall('SystemContextMenu.onPerformCustomAction', item2.hashCode.toString()),
+        MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item2.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/platform',
