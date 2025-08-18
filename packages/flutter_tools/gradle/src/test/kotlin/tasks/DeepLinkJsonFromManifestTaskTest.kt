@@ -4,12 +4,15 @@
 
 package com.flutter.gradle.tasks
 
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
 import io.mockk.every
 import io.mockk.mockk
 import org.gradle.api.file.RegularFileProperty
 import org.xml.sax.SAXParseException
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -245,6 +248,20 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun multipleIntentFilters() {
+        val expectedLink1 =
+            Deeplink(
+                "custom",
+                "filter.one",
+                ".*",
+                IntentFilterCheck(hasAutoVerify = false, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+            )
+        val expectedLink2 =
+            Deeplink(
+                "https",
+                "filter.two",
+                "/product.*",
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+            )
         val manifestContent = """
             <?xml version="1.0" encoding="utf-8"?>
             <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -255,13 +272,13 @@ class DeepLinkJsonFromManifestTaskTest {
                             <action android:name="android.intent.action.VIEW" />
                             <category android:name="android.intent.category.DEFAULT" />
                             <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="custom" android:host="filter.one" />
+                            <data android:scheme="${expectedLink1.scheme}" android:host="${expectedLink1.host}" />
                         </intent-filter>
                         <intent-filter android:autoVerify="true">
                             <action android:name="android.intent.action.VIEW" />
                             <category android:name="android.intent.category.DEFAULT" />
                             <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="https" android:host="filter.two" android:pathPrefix="/product"/>
+                            <data android:scheme="${expectedLink2.scheme}" android:host="${expectedLink2.host}" android:pathPrefix="/product"/>
                         </intent-filter>
                     </activity>
                 </application>
@@ -270,6 +287,9 @@ class DeepLinkJsonFromManifestTaskTest {
         val manifestFile = createTempManifestFile(manifestContent)
         val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
         assertEquals(2, appLinkSettings.deeplinks.size)
+        appLinkSettings.deeplinks.forEach { println(it.toJson()) }
+        assertContains(appLinkSettings.deeplinks, expectedLink1)
+        assertContains(appLinkSettings.deeplinks, expectedLink2)
     }
 
     @Test
