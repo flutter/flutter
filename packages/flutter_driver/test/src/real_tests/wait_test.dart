@@ -52,9 +52,7 @@ void main() {
     });
 
     test('WaitForCondition deserialize with missing conditionName', () {
-      final Map<String, String> jsonMap = <String, String>{
-        'command': 'waitForCondition',
-      };
+      final Map<String, String> jsonMap = <String, String>{'command': 'waitForCondition'};
       expect(
         () => WaitForCondition.deserialize(jsonMap),
         throwsA(

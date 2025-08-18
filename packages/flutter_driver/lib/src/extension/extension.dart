@@ -138,7 +138,7 @@ class _DriverBinding extends BindingBase
 ///   String get finderType => 'SomeFinder';
 ///
 ///   @override
-///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory) {
+///   SerializableFinder deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, {String? path}) {
 ///     return SomeFinder(params['title']!);
 ///   }
 ///
@@ -274,13 +274,10 @@ abstract class FinderExtension {
   ///
   /// See also:
   ///   * [Ancestor], a finder that uses other [Finder]s as parameters.
-  ///
-  /// The [path] is the current path to the [params] object from the parent object.
   SerializableFinder deserialize(
     Map<String, String> params,
-    DeserializeFinderFactory finderFactory, {
-    String? path,
-  });
+    DeserializeFinderFactory finderFactory,
+  );
 
   /// Signature for functions that run the given finder and return the [Element]
   /// found, if any, or null otherwise.

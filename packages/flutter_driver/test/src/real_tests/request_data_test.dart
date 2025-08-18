@@ -16,8 +16,7 @@ void main() {
 
     test('serializes and deserializes', () {
       const RequestData data = RequestData('hello');
-      final RequestData roundTrip =
-          RequestData.deserialize(data.serialize());
+      final RequestData roundTrip = RequestData.deserialize(data.serialize());
       expect(roundTrip.message, 'hello');
     });
   });
