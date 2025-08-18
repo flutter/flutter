@@ -367,7 +367,8 @@ class CupertinoDatePicker extends StatefulWidget {
        ),
        assert(
          selectableDayPredicate == null ||
-             selectableDayPredicate(initialDateTime ?? DateTime.now()),
+             initialDateTime == null ||
+             selectableDayPredicate(initialDateTime!),
          '${initialDateTime ?? DateTime.now()} must satisfy provided selectableDayPredicate.',
        );
 
@@ -839,6 +840,11 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     widget.onDateTimeChanged(selected);
   }
 
+  /// Returns whether the given date is selectable.
+  bool _isSelectableDate(DateTime date) {
+    return widget.selectableDayPredicate?.call(date) ?? true;
+  }
+
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
   Widget _buildMediumDatePicker(
     double offAxisFraction,
@@ -882,12 +888,6 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             initialDateTime.day + index + 1,
           );
 
-          final bool isValidDate;
-          if (widget.selectableDayPredicate == null) {
-            isValidDate = true;
-          } else {
-            isValidDate = widget.selectableDayPredicate!.call(rangeStart);
-          }
           final DateTime now = DateTime.now();
 
           if (widget.minimumDate?.isBefore(rangeEnd) == false) {
@@ -903,7 +903,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
           return itemPositioningBuilder(
             context,
-            Text(dateText, style: _themeTextStyle(context, isValid: isValidDate)),
+            Text(dateText, style: _themeTextStyle(context, isValid: _isSelectableDate(rangeStart))),
           );
         },
         selectionOverlay: selectionOverlay,
@@ -1128,7 +1128,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     final DateTime selectedDate = selectedDateTime;
     final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
 
-    if (widget.selectableDayPredicate?.call(selectedDate) == false) {
+    if (!_isSelectableDate(selectedDate)) {
       const int daysThreshold = 1;
       final DateTime targetDate = selectedDate.add(const Duration(days: daysThreshold));
 
