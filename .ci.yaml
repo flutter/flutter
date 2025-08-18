@@ -348,7 +348,8 @@ targets:
       shard: analyze
       dependencies: >-
         [
-          {"dependency": "ktlint", "version": "version_1_5_0"}
+          {"dependency": "ktlint", "version": "version_1_5_0"},
+          {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
         ["framework","hostonly","shard","linux"]
