@@ -730,4 +730,36 @@ void main() {
     final TextField field2 = find.byType(TextField).evaluate().first.widget as TextField;
     expect(field2.controller!.text, textSelection);
   });
+
+  testWidgets('autocomplete options have button semantics', (WidgetTester tester) async {
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: highlightColor),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField), 'aa');
+    await tester.pump();
+    expect(
+      tester.getSemantics(find.text('aardvark')),
+      matchesSemantics(
+        isButton: true,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        label: 'aardvark',
+      ),
+    );
+  });
 }
