@@ -22,7 +22,7 @@ class DefaultTextStyleTransitionExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final styleTween = TextStyleTween(
+    final TextStyleTween styleTween = TextStyleTween(
       begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
       end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
     );
@@ -32,8 +32,8 @@ class DefaultTextStyleTransitionExample extends StatelessWidget {
         tween: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 2),
         reverse: true,
-        builder: (context, value, child) {
-          final curvedValue = Curves.elasticInOut.transform(value);
+        builder: (BuildContext context, double value, Widget? child) {
+          final double curvedValue = Curves.elasticInOut.transform(value);
           return DefaultTextStyleTransition(
             style: styleTween.animate(AlwaysStoppedAnimation<double>(curvedValue)),
             child: const Text('Flutter'),

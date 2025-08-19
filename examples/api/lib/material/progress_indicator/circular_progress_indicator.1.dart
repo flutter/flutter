@@ -44,9 +44,10 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
               tween: Tween<double>(begin: 0.0, end: 1.0),
               duration: const Duration(seconds: 2),
               reverse: true,
+              paused: determinate,
               builder: (BuildContext context, double value, Widget? child) {
                 return CircularProgressIndicator(
-                  value: value,
+                  value: determinate ? value : null,
                   semanticsLabel: 'Circular progress indicator',
                 );
               },

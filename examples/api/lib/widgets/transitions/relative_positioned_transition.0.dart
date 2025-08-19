@@ -47,7 +47,7 @@ class RelativePositionedTransitionExample extends StatelessWidget {
                       smallLogo,
                     ),
                   ).animate(AlwaysStoppedAnimation<double>(value)),
-                  child: child,
+                  child: child!,
                 );
               },
               child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),

@@ -37,7 +37,7 @@ class AlignTransitionExample extends StatelessWidget {
             begin: Alignment.bottomLeft,
             end: Alignment.center,
           ).animate(curvedAnimation);
-          return AlignTransition(alignment: alignmentAnimation, child: child);
+          return AlignTransition(alignment: alignmentAnimation, child: child!);
         },
         child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
       ),

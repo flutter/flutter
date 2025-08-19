@@ -34,7 +34,7 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample> {
         curve: Curves.fastOutSlowIn,
         builder: (BuildContext context, double value, Widget? child) {
           return SizeTransition(
-            sizeFactor: AlwaysStoppedAnimation(value),
+            sizeFactor: AlwaysStoppedAnimation<double>(value),
             axis: Axis.horizontal,
             axisAlignment: -1,
             child: child,
