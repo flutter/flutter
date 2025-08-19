@@ -198,23 +198,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController? _snackBarController;
   Timer? _snackBarTimer;
-  bool? _accessibleNavigation;
+  late bool? _accessibleNavigation;
 
   @protected
   @override
   void didChangeDependencies() {
-    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
-    // If we transition from accessible navigation to non-accessible navigation
-    // and there is a SnackBar that would have timed out that has already
-    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
-    // yet, let it timeout as normal.
-    if ((_accessibleNavigation ?? false) &&
-        !accessibleNavigation &&
-        _snackBarTimer != null &&
-        !_snackBarTimer!.isActive) {
-      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
-    }
-    _accessibleNavigation = accessibleNavigation;
+    _accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     super.didChangeDependencies();
   }
 
@@ -629,7 +618,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
           _snackBarTimer = Timer(snackBar.duration, () {
             assert(_snackBarController!.isForwardOrCompleted);
             // Look up MediaQuery again in case the setting changed.
-            if (snackBar.persist ?? snackBar.action != null) {
+            if (snackBar.persist) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
