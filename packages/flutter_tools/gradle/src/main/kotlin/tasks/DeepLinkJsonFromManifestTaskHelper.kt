@@ -11,6 +11,8 @@ import com.flutter.gradle.IntentFilterCheck
 import groovy.util.Node
 import org.gradle.api.file.RegularFileProperty
 import java.io.File
+import kotlin.collections.forEach
+import kotlin.io.writeText
 
 /**
  * Stateless object to contain the logic used in [FlutterTask]. Any required state should be stored
@@ -104,7 +106,6 @@ object DeepLinkJsonFromManifestTaskHelper {
                     appLinkIntent.children().filterIsInstance<Node>().filter { item ->
                         item.name() == "action"
                     }
-
                 intentFilterCheck.hasActionView =
                     actionItems.any { action ->
                         action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW"
