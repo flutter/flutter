@@ -325,12 +325,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
     }
 
+    shutdownHooks.addShutdownHook(() async {
+      await _widgetPreviewApp?.exitApp();
+      await _previewDetector.dispose();
+    });
+
     final PreviewDependencyGraph graph = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
 
-    shutdownHooks.addShutdownHook(() async {
-      await _widgetPreviewApp?.exitApp();
-    });
     await configureDtd();
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
@@ -339,7 +341,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       throwToolExit('Failed to launch the widget previewer.', exitCode: result);
     }
 
-    await _previewDetector.dispose();
     return FlutterCommandResult.success();
   }
 

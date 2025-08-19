@@ -85,6 +85,7 @@ void main() {
   late Directory originalCwd;
   late Directory tempDir;
   late LoggingProcessManager loggingProcessManager;
+  late ShutdownHooks shutdownHooks;
   late FakeStdio mockStdio;
   late Logger logger;
   // We perform this initialization just so we can build the generated file path for test
@@ -102,6 +103,7 @@ void main() {
     originalCwd = globals.fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
+    shutdownHooks = ShutdownHooks();
     logger = BufferLogger.test();
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
@@ -131,9 +133,10 @@ void main() {
     Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
-  tearDown(() {
+  tearDown(() async {
+    await shutdownHooks.runShutdownHooks(logger);
     tryToDelete(tempDir);
-    fs.dispose();
+    await fs.dispose();
     globals.fs.currentDirectory = originalCwd;
   });
 
@@ -154,7 +157,7 @@ void main() {
         projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
         cache: Cache.test(processManager: loggingProcessManager, platform: platform),
         platform: platform,
-        shutdownHooks: ShutdownHooks(),
+        shutdownHooks: shutdownHooks,
         os: OperatingSystemUtils(
           fileSystem: fs,
           processManager: loggingProcessManager,
