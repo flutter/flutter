@@ -57,14 +57,7 @@ See: https://github.com/flutter/flutter/issues/30701.
 /// [WindowingOwnerWin32.addMessageHandler] to begin receiving messages.
 /// When finished handling messages, implementations should deregister
 /// themselves with [WindowingOwnerWin32.removeMessageHandler].
-///
-/// {@macro flutter.widgets.windowing.experimental}
-///
-/// See also:
-///
-///  * [WindowingOwnerWin32], the class that manages these handlers.
-@internal
-abstract class WindowsMessageHandler {
+abstract class _WindowsMessageHandler {
   /// Handles a window message.
   ///
   /// Returned value, if not null will be returned to the system as LRESULT
@@ -121,7 +114,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     allocator.free(request);
   }
 
-  final List<WindowsMessageHandler> _messageHandlers = <WindowsMessageHandler>[];
+  final List<_WindowsMessageHandler> _messageHandlers = <_WindowsMessageHandler>[];
 
   /// The [Allocator] used for allocating native memory in this owner.
   ///
@@ -166,8 +159,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   ///  * [WindowsMessageHandler], the interface for message handlers.
   ///  * [WindowingOwnerWin32.removeMessageHandler], to remove message handlers.
-  @internal
-  void addMessageHandler(WindowsMessageHandler handler) {
+  void _addMessageHandler(_WindowsMessageHandler handler) {
     if (_messageHandlers.contains(handler)) {
       return;
     }
@@ -185,8 +177,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   ///  * [WindowsMessageHandler], the interface for message handlers.
   ///  * [WindowingOwnerWin32.addMessageHandler], to register message handlers.
-  @internal
-  void removeMessageHandler(WindowsMessageHandler handler) {
+  void _removeMessageHandler(_WindowsMessageHandler handler) {
     _messageHandlers.remove(handler);
   }
 
@@ -196,7 +187,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     );
 
     final int handlesLength = _messageHandlers.length;
-    for (final WindowsMessageHandler handler in _messageHandlers) {
+    for (final _WindowsMessageHandler handler in _messageHandlers) {
       assert(
         _messageHandlers.length == handlesLength,
         'Message handler list changed while processing message: $message',
@@ -223,6 +214,23 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 }
 
+class _RegularWindowMesageHandler implements _WindowsMessageHandler {
+  _RegularWindowMesageHandler({required this.controller});
+
+  final RegularWindowControllerWin32 controller;
+
+  @override
+  int? handleWindowsMessage(
+    FlutterView view,
+    HWND windowHandle,
+    int message,
+    int wParam,
+    int lParam,
+  ) {
+    return controller._handleWindowsMessage(view, windowHandle, message, wParam, lParam);
+  }
+}
+
 /// Implementation of [RegularWindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -230,8 +238,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerWin32 extends RegularWindowController
-    implements WindowsMessageHandler {
+class RegularWindowControllerWin32 extends RegularWindowController {
   /// Creates a new regular window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -256,7 +263,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    owner.addMessageHandler(this);
+    _handler = _RegularWindowMesageHandler(controller: this);
+    owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createWindow(
       _owner.allocator,
       PlatformDispatcher.instance.engineId!,
@@ -272,6 +280,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
 
   final WindowingOwnerWin32 _owner;
   final RegularWindowControllerDelegate _delegate;
+  late final _RegularWindowMesageHandler _handler;
   bool _destroyed = false;
 
   @override
@@ -404,13 +413,11 @@ class RegularWindowControllerWin32 extends RegularWindowController
     }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
-    _owner.removeMessageHandler(this);
+    _owner._removeMessageHandler(_handler);
     _delegate.onWindowDestroyed();
   }
 
-  @override
-  @internal
-  int? handleWindowsMessage(
+  int? _handleWindowsMessage(
     FlutterView view,
     HWND windowHandle,
     int message,
