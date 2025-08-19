@@ -17,7 +17,8 @@ class Deeplink(
     var host: String?,
     @VisibleForTesting
     var path: String?,
-    private var intentFilterCheck: IntentFilterCheck
+    @VisibleForTesting
+    var intentFilterCheck: IntentFilterCheck
 ) {
     // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
     // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.

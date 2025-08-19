@@ -44,22 +44,14 @@ class DeepLinkJsonFromManifestTaskTest {
         val scheme = "http"
         val host = "example.com"
         val pathPrefix = "/profile"
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                    <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
-                        <intent-filter>
-                            <action android:name="android.intent.action.VIEW" />
-                            <data android:scheme="$scheme" android:host="$host" android:pathPrefix="$pathPrefix" />
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
-        val manifestFile = createTempManifestFile(manifestContent)
+        val manifestContent = DeeplinkManifestBuilder()
+            .setNamespace(defaultNamespace)
+            .addActivity(".MainActivity")
+            .addDeeplinks(".MainActivity", listOf(Deeplink(scheme, host, pathPrefix, IntentFilterCheck(hasActionView = true))))
+            .build()
+        println(manifestContent)
+        val manifestFile =
+            createTempManifestFile(manifestContent)
         val manifest = mockk<RegularFileProperty>()
         every { manifest.get().asFile } returns manifestFile
 
@@ -71,7 +63,7 @@ class DeepLinkJsonFromManifestTaskTest {
         DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(defaultNamespace, manifest, json)
         assertEquals(
             DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile).toJson().toString(),
-            jsonFile.readText()
+            jsonFile.readText(),
         )
     }
 
@@ -253,14 +245,14 @@ class DeepLinkJsonFromManifestTaskTest {
                 "custom",
                 "filter.one",
                 ".*",
-                IntentFilterCheck(hasAutoVerify = false, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+                IntentFilterCheck(hasAutoVerify = false, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true),
             )
         val expectedLink2 =
             Deeplink(
                 "https",
                 "filter.two",
                 "/product.*",
-                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true),
             )
         val manifestContent = """
             <?xml version="1.0" encoding="utf-8"?>
@@ -351,6 +343,99 @@ class DeepLinkJsonFromManifestTaskTest {
         val manifestFile = createTempManifestFile("<manifest><application></application><manifest>") // Malformed XML
         assertFailsWith<SAXParseException> {
             DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+        }
+    }
+
+    /**
+     * Helper class for creating valid android manifest file that contains deeplinks.
+     */
+    class DeeplinkManifestBuilder {
+        val activitySectionDefault =
+            """
+            <activity android:name=".MainActivity">
+                    <intent-filter>
+                        <action android:name="android.intent.action.VIEW" />
+                        <category android:name="android.intent.category.DEFAULT" />
+                        <category android:name="android.intent.category.BROWSABLE" />
+                        <data android:scheme="http" />
+                    </intent-filter>
+                </activity>
+            """.trimIndent()
+        private var namespace: String = "dev.flutter.example"
+
+        private var deeplinkEnabled = true
+        private val activitySet: MutableSet<String> = mutableSetOf()
+        private val deeplinkMap: MutableMap<String, List<Deeplink>> = mutableMapOf()
+
+        fun setNamespace(namespace: String): DeeplinkManifestBuilder {
+            this.namespace = namespace
+            return this
+        }
+
+        fun addActivity(activity: String): DeeplinkManifestBuilder {
+            activitySet.add(activity)
+            return this
+        }
+
+        fun addDeeplinks(
+            activity: String,
+            deeplinks: List<Deeplink>,
+        ): DeeplinkManifestBuilder {
+            deeplinkMap[activity] = deeplinks
+            return this
+        }
+
+        fun setDeeplinkEnabled(enabled: Boolean): DeeplinkManifestBuilder {
+            deeplinkEnabled = enabled
+            return this
+        }
+
+        fun build(): String {
+            var activitySection: String
+            if (activitySet.isEmpty()) {
+                activitySection = activitySectionDefault
+            } else {
+                activitySection = ""
+                // Warning: Xml parsing is sensitive to whitespace changes.
+                for (activity in activitySet) {
+                    activitySection += "\t<activity android:name=\"$activity\">\n"
+                    for (deeplink in deeplinkMap[activity]!!) {
+                        if (deeplinkEnabled) {
+                            activitySection +=
+                                """             <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />""" + "\n"
+                        }
+//                        if (deeplink.intentFilterCheck.hasAutoVerify) {
+//                            activitySection += """      <intent-filter android:autoVerify="true">""" + "\n"
+//                        } else {
+//                            activitySection += """      <intent-filter>""" + "\n"
+//                        }
+//                        if (deeplink.intentFilterCheck.hasActionView) {
+//                            activitySection += """          <action android:name="android.intent.action.VIEW" />""" + "\n"
+//                        }
+//                        if (deeplink.intentFilterCheck.hasDefaultCategory) {
+//                            activitySection += """          <category android:name="android.intent.category.DEFAULT" />""" + "\n"
+//                        }
+//                        if (deeplink.intentFilterCheck.hasBrowsableCategory) {
+//                            activitySection += """          <category android:name="android.intent.category.BROWSABLE" />""" + "\n"
+//                        }
+//                        val scheme = deeplink.scheme?.let { scheme -> """android:scheme="$scheme" """ } ?: ""
+//                        val host = deeplink.host?.let { host -> """android:host="$host" """ } ?: ""
+//                        val path = deeplink.path?.let { path -> """android:path="$path" """ } ?: ""
+//                        activitySection += "            <data $scheme $host $path/>\n"
+//                        activitySection += """      </intent-filter>""" + "\n"
+                    }
+                    activitySection += "        </activity>"
+                }
+            }
+
+            return """
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="$namespace">
+    <application android:label="Test App">
+    $activitySection
+    </application>
+</manifest>
+"""
         }
     }
 }
