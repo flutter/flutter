@@ -18,6 +18,11 @@
 namespace flutter {
 
 namespace {
+// The windows API sends pressure as a normalized value between 0 and 1024
+// See
+// https://learn.microsoft.com/en-ca/windows/win32/api/winuser/ns-winuser-pointer_pen_info
+static const int kMaxPenPressure = 1024;
+
 // The maximum duration to block the Windows event loop while waiting
 // for a window resize operation to complete.
 constexpr std::chrono::milliseconds kWindowResizeTimeout{100};
@@ -651,12 +656,12 @@ void FlutterWindowsView::SendPointerEventWithData(
   event.device = state->pointer_id;
   event.buttons = state->buttons;
   event.view_id = view_id_;
-  event.rotation = state->rotation;
+  event.rotation = (double)state->rotation * (M_PI / 180);
   event.pressure = state->pressure;
   if (event.pressure != 0) {
+    // Normalized between 0 and 1024 by the windows API
     event.pressure_min = 0;
-    // The maximum value of the POINTER_PEN_INFO pressure value
-    event.pressure_max = 1024;
+    event.pressure_max = kMaxPenPressure;
   }
 
   // Set metadata that's always the same regardless of the event.
