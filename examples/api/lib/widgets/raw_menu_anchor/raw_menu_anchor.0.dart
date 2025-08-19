@@ -80,8 +80,9 @@ class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
                     });
                     controller.close();
                   },
-                  trailingIcon:
-                      _selectedAnimal == animal ? const Icon(Icons.check, size: 20) : null,
+                  trailingIcon: _selectedAnimal == animal
+                      ? const Icon(Icons.check, size: 20)
+                      : null,
                   child: Text(animal.label),
                 ),
             ],
@@ -142,7 +143,10 @@ class CustomMenu extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: kElevationToShadow[4],
                     ),
-                    child: Shortcuts(shortcuts: _shortcuts, child: Column(children: children)),
+                    child: Shortcuts(
+                      shortcuts: _shortcuts,
+                      child: Column(children: children),
+                    ),
                   ),
                 ),
               ),

@@ -44,9 +44,9 @@ Builds are architecture-specific, and can be controlled by specifying
 ## Testing
 
 The macOS-specific embedder tests are built as the
-`flutter_desktop_darwin_unittests` binary. Like all gtest-based test binaries, a
-subset of tests can be run by applying a filter such as
-`--gtest_filter='FlutterViewControllerTest.*Key*'`.
+`flutter_desktop_darwin_unittests` and `flutter_desktop_darwin_swift_unittests`
+binaries. Like all gtest-based test binaries, a subset of tests can be run by
+applying a filter such as `--gtest_filter='FlutterViewControllerTest.*Key*'`.
 
 More general details on testing can be found on the [Wiki][wiki_engine_testing].
 

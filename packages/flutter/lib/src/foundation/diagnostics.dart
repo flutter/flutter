@@ -1407,8 +1407,10 @@ class TextTreeRenderer {
             builder.write(config.lineBreak);
           }
         } else {
-          final TextTreeConfiguration nextChildStyle =
-              _childTextConfiguration(children[i + 1], config)!;
+          final TextTreeConfiguration nextChildStyle = _childTextConfiguration(
+            children[i + 1],
+            config,
+          )!;
           final String childPrefixLineOne = '$prefixChildrenRaw${childConfig.prefixLineOne}';
           final String childPrefixOtherLines =
               '$prefixChildrenRaw${nextChildStyle.linkCharacter}${childConfig.prefixOtherLines}';
@@ -1645,11 +1647,11 @@ abstract class DiagnosticsNode {
       result = <String, Object?>{
         'description': toDescription(),
         'type': runtimeType.toString(),
-        if (name != null) 'name': name,
+        'name': ?name,
         if (!showSeparator) 'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info) 'level': level.name,
         if (!showName) 'showName': showName,
-        if (emptyBodyDescription != null) 'emptyBodyDescription': emptyBodyDescription,
+        'emptyBodyDescription': ?emptyBodyDescription,
         if (style != DiagnosticsTreeStyle.sparse) 'style': style!.name,
         if (allowTruncate) 'allowTruncate': allowTruncate,
         if (hasChildren) 'hasChildren': hasChildren,
@@ -1712,10 +1714,9 @@ abstract class DiagnosticsNode {
       nodes.add(DiagnosticsNode.message('...'));
       truncated = true;
     }
-    final List<_JsonDiagnosticsNode> json =
-        nodes.map<_JsonDiagnosticsNode>((DiagnosticsNode node) {
-          return node.toJsonMap(delegate.delegateForNode(node));
-        }).toList();
+    final List<_JsonDiagnosticsNode> json = nodes.map<_JsonDiagnosticsNode>((DiagnosticsNode node) {
+      return node.toJsonMap(delegate.delegateForNode(node));
+    }).toList();
     if (truncated) {
       json.last['truncated'] = true;
     }
@@ -1750,10 +1751,9 @@ abstract class DiagnosticsNode {
         if (name == null || name!.isEmpty || !showName) {
           result = description;
         } else {
-          result =
-              description.contains('\n')
-                  ? '$name$_separator\n$description'
-                  : '$name$_separator $description';
+          result = description.contains('\n')
+              ? '$name$_separator\n$description'
+              : '$name$_separator $description';
         }
       }
       return true;
@@ -1833,8 +1833,8 @@ abstract class DiagnosticsNode {
     required DiagnosticsSerializationDelegate delegate,
   }) {
     while (toJsonify.isNotEmpty) {
-      final (DiagnosticsNode nextNode, void Function(_JsonDiagnosticsNode) callback) =
-          toJsonify.removeFirst();
+      final (DiagnosticsNode nextNode, void Function(_JsonDiagnosticsNode) callback) = toJsonify
+          .removeFirst();
       final _JsonDiagnosticsNode nodeAsJson = nextNode._toJson(
         delegate,
         childrenToJsonify: toJsonify,
@@ -1871,8 +1871,9 @@ abstract class DiagnosticsNode {
     }
 
     final String description = toDescription();
-    final String widgetRuntimeType =
-        description == '[root]' ? 'RootWidget' : description.split('-').first;
+    final String widgetRuntimeType = description == '[root]'
+        ? 'RootWidget'
+        : description.split('-').first;
     final bool shouldIndent =
         style != DiagnosticsTreeStyle.flat && style != DiagnosticsTreeStyle.error;
 

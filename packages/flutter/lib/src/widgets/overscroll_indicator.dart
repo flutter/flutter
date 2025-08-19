@@ -23,6 +23,7 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
+import 'stretch_effect.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -222,16 +223,14 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     // before glow disappears, so the current pixels is -190.0,
     // in this case, we should move the glow up 10.0 pixels and should not
     // overflow the scrollable widget's edge. https://github.com/flutter/flutter/issues/64149.
-    _leadingController!._paintOffsetScrollPixels =
-        -math.min(
-          notification.metrics.pixels - notification.metrics.minScrollExtent,
-          _leadingController!._paintOffset,
-        );
-    _trailingController!._paintOffsetScrollPixels =
-        -math.min(
-          notification.metrics.maxScrollExtent - notification.metrics.pixels,
-          _trailingController!._paintOffset,
-        );
+    _leadingController!._paintOffsetScrollPixels = -math.min(
+      notification.metrics.pixels - notification.metrics.minScrollExtent,
+      _leadingController!._paintOffset,
+    );
+    _trailingController!._paintOffsetScrollPixels = -math.min(
+      notification.metrics.maxScrollExtent - notification.metrics.pixels,
+      _trailingController!._paintOffset,
+    );
 
     if (notification is OverscrollNotification) {
       _GlowController? controller;
@@ -521,8 +520,8 @@ class _GlowController extends ChangeNotifier {
 
   void _tickDisplacement(Duration elapsed) {
     if (_displacementTickerLastElapsed != null) {
-      final double t =
-          (elapsed.inMicroseconds - _displacementTickerLastElapsed!.inMicroseconds).toDouble();
+      final double t = (elapsed.inMicroseconds - _displacementTickerLastElapsed!.inMicroseconds)
+          .toDouble();
       _displacement =
           _displacementTarget -
           (_displacementTarget - _displacement) *
@@ -776,20 +775,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     return false;
   }
 
-  AlignmentGeometry _getAlignmentForAxisDirection(_StretchDirection stretchDirection) {
-    // Accounts for reversed scrollables by checking the AxisDirection
-    final AxisDirection direction = switch (stretchDirection) {
-      _StretchDirection.trailing => widget.axisDirection,
-      _StretchDirection.leading => flipAxisDirection(widget.axisDirection),
-    };
-    return switch (direction) {
-      AxisDirection.up => AlignmentDirectional.topCenter,
-      AxisDirection.down => AlignmentDirectional.bottomCenter,
-      AxisDirection.left => Alignment.centerLeft,
-      AxisDirection.right => Alignment.centerRight,
-    };
-  }
-
   @override
   void dispose() {
     _stretchController.dispose();
@@ -804,40 +789,43 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         animation: _stretchController,
         builder: (BuildContext context, Widget? child) {
           final double stretch = _stretchController.value;
-          double x = 1.0;
-          double y = 1.0;
           final double mainAxisSize;
 
           switch (widget.axis) {
             case Axis.horizontal:
-              x += stretch;
               mainAxisSize = MediaQuery.widthOf(context);
             case Axis.vertical:
-              y += stretch;
               mainAxisSize = MediaQuery.heightOf(context);
           }
 
-          final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _stretchController.stretchDirection,
-          );
-
           final double viewportDimension =
               _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-          final Widget transform = Transform(
-            alignment: alignment,
-            transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.medium,
-            child: widget.child,
+
+          double overscroll = stretch;
+
+          if (_stretchController.stretchDirection == _StretchDirection.trailing) {
+            overscroll = -overscroll;
+          }
+
+          // Adjust overscroll for reverse scroll directions.
+          if (widget.axisDirection == AxisDirection.up ||
+              widget.axisDirection == AxisDirection.left) {
+            overscroll = -overscroll;
+          }
+
+          final Widget transform = StretchEffect(
+            stretchStrength: overscroll,
+            axis: widget.axis,
+            child: widget.child!,
           );
 
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
           // screen, overflow from transforming the viewport is irrelevant.
           return ClipRect(
-            clipBehavior:
-                stretch != 0.0 && viewportDimension != mainAxisSize
-                    ? widget.clipBehavior
-                    : Clip.none,
+            clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
+                ? widget.clipBehavior
+                : Clip.none,
             child: transform,
           );
         },
@@ -897,8 +885,9 @@ class _StretchController extends ChangeNotifier {
     );
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
-    _stretchDirection =
-        totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
+    _stretchDirection = totalOverscroll > 0
+        ? _StretchDirection.trailing
+        : _StretchDirection.leading;
   }
 
   /// Handle a user-driven overscroll.
@@ -909,8 +898,9 @@ class _StretchController extends ChangeNotifier {
   void pull(double normalizedOverscroll, double totalOverscroll) {
     assert(normalizedOverscroll >= 0.0);
 
-    final _StretchDirection newStretchDirection =
-        totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
+    final _StretchDirection newStretchDirection = totalOverscroll > 0
+        ? _StretchDirection.trailing
+        : _StretchDirection.leading;
     if (_stretchDirection != newStretchDirection && _state == _StretchState.recede) {
       // When the stretch direction changes while we are in the recede state, we need to ignore the change.
       // If we don't, the stretch will instantly jump to the new direction with the recede animation still playing, which causes

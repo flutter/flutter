@@ -97,11 +97,9 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  thickness: 0,
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'Hello',
-                      elevation: 0,
                       flags: <SemanticsFlag>[SemanticsFlag.isHeader, SemanticsFlag.namesRoute],
                       textDirection: TextDirection.ltr,
                     ),
@@ -245,14 +243,14 @@ void main() {
               title: Text('A'),
             ),
             const SliverAppBar(primary: false, pinned: true, title: Text('B')),
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 Text('C'),
                 Text('D'),
                 SizedBox(height: 500.0),
                 Text('E'),
                 SizedBox(height: 500.0),
-              ]),
+              ],
             ),
           ],
         ),
@@ -314,12 +312,11 @@ void main() {
               controller: controller,
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, floating: true, expandedHeight: 120.0),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    List<Widget>.generate(20, (int i) {
-                      return SizedBox(height: 100.0, child: Text('Tile $i'));
-                    }),
-                  ),
+                SliverList.builder(
+                  itemCount: 20,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(height: 100.0, child: Text('Tile $index'));
+                  },
                 ),
               ],
             ),
@@ -356,7 +353,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, floating: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),
@@ -390,7 +389,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(floating: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),
@@ -424,7 +425,9 @@ void main() {
               physics: const BouncingScrollPhysics(),
               slivers: <Widget>[
                 const SliverAppBar(pinned: true, expandedHeight: 100.0),
-                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(
+                  child: Container(key: anchor, color: Colors.red, height: 100),
+                ),
                 SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
               ],
             ),

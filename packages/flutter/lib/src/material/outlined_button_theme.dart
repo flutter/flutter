@@ -101,7 +101,7 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// The configuration of this theme.
   final OutlinedButtonThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [OutlinedButtonThemeData] from the closest ancestor [OutlinedButtonTheme].
   ///
   /// If there is no enclosing [OutlinedButtonTheme] widget, then
   /// [ThemeData.outlinedButtonTheme] is used.
@@ -112,8 +112,8 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
   static OutlinedButtonThemeData of(BuildContext context) {
-    final OutlinedButtonTheme? buttonTheme =
-        context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
+    final OutlinedButtonTheme? buttonTheme = context
+        .dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 

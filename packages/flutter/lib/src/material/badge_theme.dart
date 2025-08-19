@@ -18,7 +18,7 @@ import 'theme.dart';
 /// Overrides the default properties values for descendant [Badge] widgets.
 ///
 /// Descendant widgets obtain the current [BadgeThemeData] object
-/// using `BadgeTheme.of(context)`. Instances of [BadgeThemeData] can
+/// using [BadgeTheme.of]. Instances of [BadgeThemeData] can
 /// be customized with [BadgeThemeData.copyWith].
 ///
 /// Typically a [BadgeThemeData] is specified as part of the
@@ -171,7 +171,7 @@ class BadgeTheme extends InheritedTheme {
   /// Specifies the default color and size overrides for descendant [Badge] widgets.
   final BadgeThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Retrieves the [BadgeThemeData] from the closest ancestor [BadgeTheme].
   ///
   /// If there is no enclosing [BadgeTheme] widget, then
   /// [ThemeData.badgeTheme] is used.

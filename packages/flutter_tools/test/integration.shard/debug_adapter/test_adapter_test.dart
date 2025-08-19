@@ -38,12 +38,8 @@ void main() {
     test('can run in debug mode', () async {
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
-        launch:
-            () => client.launch(
-              program: project.testFilePath,
-              cwd: project.dir.path,
-              toolArgs: toolArgs,
-            ),
+        launch: () =>
+            client.launch(program: project.testFilePath, cwd: project.dir.path, toolArgs: toolArgs),
       );
 
       // Check the printed output shows that the run finished, and it's exit
@@ -61,13 +57,12 @@ void main() {
     test('can run in noDebug mode', () async {
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
-        launch:
-            () => client.launch(
-              program: project.testFilePath,
-              noDebug: true,
-              cwd: project.dir.path,
-              toolArgs: toolArgs,
-            ),
+        launch: () => client.launch(
+          program: project.testFilePath,
+          noDebug: true,
+          cwd: project.dir.path,
+          toolArgs: toolArgs,
+        ),
       );
 
       // Check the printed output shows that the run finished, and it's exit
@@ -85,22 +80,20 @@ void main() {
     test('can run a single test', () async {
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
-        launch:
-            () => client.launch(
-              program: project.testFilePath,
-              noDebug: true,
-              cwd: project.dir.path,
-              // It's up to the calling IDE to pass the correct args for
-              // 'flutter test' if it wants to run a subset of tests.
-              toolArgs: <String>['--plain-name', 'can pass', ...?toolArgs],
-            ),
+        launch: () => client.launch(
+          program: project.testFilePath,
+          noDebug: true,
+          cwd: project.dir.path,
+          // It's up to the calling IDE to pass the correct args for
+          // 'flutter test' if it wants to run a subset of tests.
+          toolArgs: <String>['--plain-name', 'can pass', ...?toolArgs],
+        ),
       );
 
-      final List<Object> testsNames =
-          outputEvents.testNotifications
-              .where((Map<String, Object?> e) => e['type'] == 'testStart')
-              .map((Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
-              .toList();
+      final List<Object> testsNames = outputEvents.testNotifications
+          .where((Map<String, Object?> e) => e['type'] == 'testStart')
+          .map((Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
+          .toList();
 
       expect(testsNames, contains('Flutter tests can pass'));
       expect(testsNames, isNot(contains('Flutter tests can fail')));
@@ -117,7 +110,7 @@ void main() {
   });
 
   group('integration tests', () {
-    const List<String> toolArgs = <String>['-d', 'flutter-tester'];
+    const toolArgs = <String>['-d', 'flutter-tester'];
 
     setUp(() async {
       project = IntegrationTestsProject();
@@ -129,7 +122,7 @@ void main() {
 }
 
 /// Matchers for the expected console output of [TestsProject].
-final List<Object> _testsProjectExpectedOutput = <Object>[
+final _testsProjectExpectedOutput = <Object>[
   // First test
   '✓ Flutter tests can pass',
   // Second test
@@ -151,8 +144,9 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 void _expectStandardTestsProjectResults(TestEvents events) {
   // Check we received all expected test events passed through from
   // package:test.
-  final List<Object> eventNames =
-      events.testNotifications.map((Map<String, Object?> e) => e['type']!).toList();
+  final List<Object> eventNames = events.testNotifications
+      .map((Map<String, Object?> e) => e['type']!)
+      .toList();
 
   // start/done should always be first/last.
   expect(eventNames.first, equals('start'));

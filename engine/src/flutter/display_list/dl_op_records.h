@@ -13,8 +13,9 @@
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/macros.h"
 
-#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/typographer/text_frame.h"
+
+// NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
 
 namespace flutter {
 
@@ -1070,5 +1071,7 @@ DEFINE_DRAW_SHADOW_OP(ShadowTransparentOccluder, true)
 #pragma pack(pop, DLOpPackLabel)
 
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.CallAndMessage)
 
 #endif  // FLUTTER_DISPLAY_LIST_DL_OP_RECORDS_H_

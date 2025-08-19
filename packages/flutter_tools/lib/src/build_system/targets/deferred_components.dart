@@ -12,10 +12,9 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'android.dart';
 
-/// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and displays the validator
-/// output to the developer if changes are recommended.
+/// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and
+/// displays the validator output to the developer if changes are recommended.
 class DeferredComponentsGenSnapshotValidatorTarget extends Target {
-  /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   DeferredComponentsGenSnapshotValidatorTarget({
     required this.deferredComponentsDependencies,
     required this.nonDeferredComponentsDependencies,
@@ -60,7 +59,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   List<Target> get dependencies {
-    final List<Target> deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
+    final deps = <Target>[CompositeTarget(deferredComponentsDependencies)];
     deps.addAll(nonDeferredComponentsDependencies);
     return deps;
   }

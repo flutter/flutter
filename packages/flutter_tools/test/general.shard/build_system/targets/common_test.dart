@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:test/fake.dart';
 
@@ -20,9 +21,9 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-const String kElfAot = '--snapshot_kind=app-aot-elf';
-const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
+const kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+const kElfAot = '--snapshot_kind=app-aot-elf';
+const kAssemblyAot = '--snapshot_kind=app-aot-assembly';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -440,57 +441,6 @@ void main() {
   );
 
   testUsingContext(
-    "tool exits when $kAppFlavor is already set in user's environment",
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final Future<void> buildResult = const KernelSnapshot().build(
-        androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.android)
-          ..defines[kBuildMode] = BuildMode.debug.cliName
-          ..defines[kFlavor] = 'strawberry'
-          ..defines[kTrackWidgetCreation] = 'false',
-      );
-
-      expect(
-        buildResult,
-        throwsToolExit(
-          message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      Platform: () => FakePlatform(environment: <String, String>{kAppFlavor: 'I was already set'}),
-    },
-  );
-
-  testUsingContext(
-    'tool exits when $kAppFlavor is set in --dart-define or --dart-define-from-file',
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final Future<void> buildResult = const KernelSnapshot().build(
-        androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.android)
-          ..defines[kBuildMode] = BuildMode.debug.cliName
-          ..defines[kFlavor] = 'strawberry'
-          ..defines[kDartDefines] = encodeDartDefines(<String>[kAppFlavor, 'strawberry'])
-          ..defines[kTrackWidgetCreation] = 'false',
-      );
-
-      expect(
-        buildResult,
-        throwsToolExit(
-          message:
-              '$kAppFlavor is used by the framework and cannot be set using --dart-define or --dart-define-from-file',
-        ),
-      );
-    },
-  );
-
-  testUsingContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -543,8 +493,8 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -600,8 +550,65 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      XcodeProjectInterpreter:
-          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
+    },
+  );
+
+  testUsingContext(
+    'KernelSnapshot does not add kAppFlavor twice to Dart defines',
+    () async {
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+      final String build = iosEnvironment.buildDir.path;
+      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: TargetPlatform.darwin,
+        mode: BuildMode.debug,
+      );
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+            '--sdk-root',
+            '$flutterPatchedSdkPath/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-D$kAppFlavor=strawberry',
+            ...buildModeOptions(BuildMode.debug, <String>[]),
+            '--packages',
+            '/.dart_tool/package_config.json',
+            '--output-dill',
+            '$build/app.dill',
+            '--depfile',
+            '$build/kernel_snapshot_program.d',
+            '--incremental',
+            '--initialize-from-dill',
+            '$build/app.dill',
+            '--verbosity=error',
+            'file:///lib/main.dart',
+          ],
+          stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        ),
+      ]);
+
+      await const KernelSnapshot().build(
+        iosEnvironment
+          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kBuildMode] = BuildMode.debug.cliName
+          ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
+          ..defines[kFlavor] = 'strawberry'
+          ..defines[kTrackWidgetCreation] = 'false',
+      );
+
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     },
   );
 
@@ -609,7 +616,7 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-    final Environment testEnvironment = Environment.test(
+    final testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,

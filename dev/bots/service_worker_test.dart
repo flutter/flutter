@@ -30,6 +30,15 @@ final String _targetWithBlockedServiceWorkers = path.join(
 );
 final String _targetPath = path.join(_testAppDirectory, _target);
 
+// Some paths are not guaranteed to actually be requested by the time we finish the test, so we just
+// ignore them and not make them part of the tracked requests or expectations.
+final Set<String> _ignoreRequestPaths = <String>{
+  'canvaskit/canvaskit.js',
+  'canvaskit/canvaskit.wasm',
+  'canvaskit/chromium/canvaskit.js',
+  'canvaskit/chromium/canvaskit.wasm',
+};
+
 enum ServiceWorkerTestType {
   // Mocks how FF disables service workers.
   blockedServiceWorkers,
@@ -176,7 +185,7 @@ Future<void> _rebuildApp({
   ], workingDirectory: _testAppWebDirectory);
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
+    <String>['build', 'web', '--no-web-resources-cdn', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
@@ -222,7 +231,50 @@ void expect(Object? actual, Object? expected) {
   }
   final StringDescription mismatchDescription = StringDescription();
   matcher.describeMismatch(actual, mismatchDescription, matchState, true);
-  throw TestFailure(mismatchDescription.toString());
+
+  //
+  // COPIED FROM pkg:matcher - formatFailure() - 2025-05-21
+  //
+  final String which = mismatchDescription.toString();
+  final StringBuffer buffer = StringBuffer();
+  buffer.writeln(_indent(_prettyPrint(expected), first: 'Expected: '));
+  buffer.writeln(_indent(_prettyPrint(actual), first: '  Actual: '));
+  if (which.isNotEmpty) {
+    buffer.writeln(_indent(which, first: '   Which: '));
+  }
+  //
+  // ENDE pkg:matcher copy
+  //
+
+  foundError(<String>[buffer.toString(), StackTrace.current.toString()]);
+}
+
+/// Returns a pretty-printed representation of [value].
+///
+/// The matcher package doesn't expose its pretty-print function directly, but
+/// we can use it through StringDescription.
+// COPIED FROM pkg:matcher - 2025-05-21
+String _prettyPrint(Object? value) => StringDescription().addDescriptionOf(value).toString();
+
+/// Indent each line in [text] by [first] spaces.
+///
+/// [first] is used in place of the first line's indentation.
+// COPIED FROM pkg:matcher - 2025-05-21
+String _indent(String text, {required String first}) {
+  final String prefix = ' ' * first.length;
+  final List<String> lines = text.split('\n');
+  if (lines.length == 1) {
+    return '$first$text';
+  }
+
+  final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
+
+  // Write out all but the first and last lines with [prefix].
+  for (final String line in lines.skip(1).take(lines.length - 2)) {
+    buffer.writeln('$prefix$line');
+  }
+  buffer.write('$prefix${lines.last}');
+  return buffer.toString();
 }
 
 Future<void> runWebServiceWorkerTest({
@@ -254,6 +306,9 @@ Future<void> runWebServiceWorkerTest({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -466,6 +521,9 @@ Future<void> runWebServiceWorkerTestWithCachingResources({
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'assets/fonts/MaterialIcons-Regular.otf') {
@@ -610,6 +668,9 @@ Future<void> runWebServiceWorkerTestWithBlockedServiceWorkers({required bool hea
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {
@@ -683,6 +744,9 @@ Future<void> runWebServiceWorkerTestWithCustomServiceWorkerVersion({required boo
       additionalRequestHandlers: <Handler>[
         (Request request) {
           final String requestedPath = request.url.path;
+          if (_ignoreRequestPaths.contains(requestedPath)) {
+            return Response.notFound('');
+          }
           requestedPathCounts.putIfAbsent(requestedPath, () => 0);
           requestedPathCounts[requestedPath] = requestedPathCounts[requestedPath]! + 1;
           if (requestedPath == 'CLOSE') {

@@ -19,7 +19,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -58,7 +60,9 @@ void main() {
           drawer: Drawer(
             child: ListView(
               children: <Widget>[
-                DrawerHeader(child: Container(key: containerKey, child: const Text('header'))),
+                DrawerHeader(
+                  child: Container(key: containerKey, child: const Text('header')),
+                ),
                 const ListTile(leading: Icon(Icons.archive), title: Text('Archive')),
               ],
             ),
@@ -179,31 +183,28 @@ void main() {
       );
     }
 
+    Future<void> checkScrim(Color color) async {
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      ColoredBox scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color.withValues(alpha: 0)));
+
+      await tester.pumpAndSettle();
+      scrim = getScrim() as ColoredBox;
+      expect(scrim.color, isSameColorAs(color));
+
+      await tester.tap(find.byType(Drawer));
+      await tester.pumpAndSettle();
+      expect(find.byType(Drawer), findsNothing);
+    }
+
     // Default drawerScrimColor
-
     await tester.pumpWidget(buildFrame());
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    ColoredBox scrim = getScrim() as ColoredBox;
-    expect(scrim.color, Colors.black54);
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(Colors.black54);
 
     // Specific drawerScrimColor
-
     await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pumpAndSettle();
-
-    scrim = getScrim() as ColoredBox;
-    expect(scrim.color, const Color(0xFF323232));
-
-    await tester.tap(find.byType(Drawer));
-    await tester.pumpAndSettle();
-    expect(find.byType(Drawer), findsNothing);
+    await checkScrim(const Color(0xFF323232));
   });
 
   testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
@@ -249,7 +250,12 @@ void main() {
 
   testWidgets('Open/close drawer by dragging', (WidgetTester tester) async {
     final ThemeData draggable = ThemeData(platform: TargetPlatform.android);
-    await tester.pumpWidget(MaterialApp(theme: draggable, home: const Scaffold(drawer: Drawer())));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: draggable,
+        home: const Scaffold(drawer: Drawer()),
+      ),
+    );
 
     final TestGesture gesture = await tester.createGesture();
     final Finder finder = find.byType(Drawer);
@@ -603,7 +609,11 @@ void main() {
   testWidgets('Drawer width can be customized by parameter', (WidgetTester tester) async {
     const double smallWidth = 200;
 
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(drawer: Drawer(width: smallWidth))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(width: smallWidth)),
+      ),
+    );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
@@ -750,7 +760,9 @@ void main() {
 
     // Provide a custom clip behavior.
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias))),
+      const MaterialApp(
+        home: Scaffold(drawer: Drawer(clipBehavior: Clip.antiAlias)),
+      ),
     );
 
     // Open the drawer again.
@@ -761,6 +773,134 @@ void main() {
     // Clip behavior is now updated.
     material = tester.widget<Material>(drawerMaterial);
     expect(material.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('Drawer barrier is dismissible by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
+          ),
+          endDrawer: const Drawer(backgroundColor: Colors.white, width: 300, child: Text('Drawer')),
+          body: Container(
+            color: Colors.white,
+            width: 600,
+            height: 600,
+            child: const Center(child: Text('Drawer Dismissible')),
+          ),
+        ),
+      ),
+    );
+
+    // Check the flag is set at the Scaffold level.
+    final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.drawerBarrierDismissible, true);
+
+    // Open the drawer initially.
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openEndDrawer();
+
+    await tester.pumpAndSettle();
+
+    // Check that the drawer open.
+    expect(find.byType(Drawer), findsExactly(1));
+
+    // Close the drawer programmatically.
+    state.closeEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Drawer), findsExactly(0));
+
+    // Open it again, and make sure the drawer is available.
+    state.openEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Drawer), findsExactly(1));
+
+    // Find the ModalBarrier.
+    final Finder modalBarrierFinder = find.byType(ModalBarrier);
+
+    // Get the RenderBox of the ModalBarrier.
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+
+    // Calculate a point to tap outside the Drawer.
+    // This example taps on the ModalBarrier somewhere outside its boundaries.
+    const Offset modalBarrierCenter = Offset(400, 300);
+    final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
+
+    // Tap on the ModalBarrier.
+    await tester.tapAt(tapPosition);
+    await tester.pumpAndSettle();
+
+    // Make sure the drawer is gone, since the drawerBarrierDismissible flag is set to true by default.
+    expect(find.byType(Drawer), findsExactly(0));
+  });
+
+  testWidgets('Drawer can be configured as not dismissible', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          drawerBarrierDismissible: false,
+          appBar: AppBar(
+            title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
+          ),
+          endDrawer: const Drawer(backgroundColor: Colors.white, width: 300, child: Text('Drawer')),
+          body: Container(
+            color: Colors.white,
+            width: 600,
+            height: 600,
+            child: const Center(child: Text('Drawer Dismissible')),
+          ),
+        ),
+      ),
+    );
+
+    // Make sure the flag is set to false at the Scaffold level.
+    final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.drawerBarrierDismissible, false);
+
+    // Open the drawer initially.
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openEndDrawer();
+
+    await tester.pumpAndSettle();
+
+    // Check that the drawer is open.
+    expect(find.byType(Drawer), findsExactly(1));
+
+    // Close the drawer programmatically.
+    state.closeEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Drawer), findsExactly(0));
+
+    // Open it again, and make sure the drawer is available.
+    state.openEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Drawer), findsExactly(1));
+
+    // Find the ModalBarrier.
+    final Finder modalBarrierFinder = find.byType(ModalBarrier);
+
+    // Get the RenderBox of the ModalBarrier.
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+
+    // Calculate a point to tap outside the Drawer.
+    // This example taps on the ModalBarrier somewhere outside its boundaries.
+    const Offset modalBarrierCenter = Offset(400, 300);
+    final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
+
+    // Tap on the ModalBarrier.
+    await tester.tapAt(tapPosition);
+    await tester.pumpAndSettle();
+
+    // Make sure the drawer is still present, and that tapping on the modal barrier
+    // didn't dismiss it, since the drawerBarrierDismissible property is set to false.
+    expect(find.byType(Drawer), findsExactly(1));
   });
 
   group('Material 2', () {
@@ -808,7 +948,10 @@ void main() {
 
     testWidgets('Material2 - Drawer clip behavior', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: ThemeData(useMaterial3: false), home: const Scaffold(drawer: Drawer())),
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(drawer: Drawer()),
+        ),
       );
 
       final Finder drawerMaterial = find.descendant(

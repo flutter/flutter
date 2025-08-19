@@ -119,11 +119,9 @@ size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
 }
 
 namespace {
-thread_local uint64_t tls_context_count = 0;
+std::atomic_uint64_t context_count = 0;
 uint64_t CalculateHash(void* ptr) {
-  // You could make a context once per nanosecond for 584 years on one thread
-  // before this overflows.
-  return ++tls_context_count;
+  return context_count.fetch_add(1);
 }
 }  // namespace
 
@@ -134,7 +132,9 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  CommandPoolRecyclerVK::DestroyThreadLocalPools(this);
+  if (command_pool_recycler_) {
+    command_pool_recycler_->DestroyThreadLocalPools();
+  }
 }
 
 Context::BackendType ContextVK::GetBackendType() const {
@@ -421,7 +421,7 @@ void ContextVK::Setup(Settings settings) {
   }
 
   auto command_pool_recycler =
-      std::make_shared<CommandPoolRecyclerVK>(weak_from_this());
+      std::make_shared<CommandPoolRecyclerVK>(shared_from_this());
   if (!command_pool_recycler) {
     VALIDATION_LOG << "Could not create command pool recycler.";
     return;
@@ -601,7 +601,7 @@ void ContextVK::Shutdown() {
   // pointers ensures that cleanup happens in a correct order.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_.reset();
+  fence_waiter_->Terminate();
   resource_manager_.reset();
 
   raster_message_loop_->Terminate();
@@ -695,14 +695,15 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         return true;
       });
 
-  if (auto depth = render_target.GetDepthAttachment(); depth.has_value()) {
+  if (const auto& depth = render_target.GetDepthAttachment();
+      depth.has_value()) {
     builder.SetDepthStencilAttachment(
         depth->texture->GetTextureDescriptor().format,        //
         depth->texture->GetTextureDescriptor().sample_count,  //
         depth->load_action,                                   //
         depth->store_action                                   //
     );
-  } else if (auto stencil = render_target.GetStencilAttachment();
+  } else if (const auto& stencil = render_target.GetStencilAttachment();
              stencil.has_value()) {
     builder.SetStencilAttachment(
         stencil->texture->GetTextureDescriptor().format,        //

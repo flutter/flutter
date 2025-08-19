@@ -206,6 +206,7 @@ class CheckboxListTile extends StatelessWidget {
     this.enableFeedback,
     this.checkboxSemanticLabel,
     this.checkboxScaleFactor = 1.0,
+    this.titleAlignment,
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
@@ -252,6 +253,7 @@ class CheckboxListTile extends StatelessWidget {
     this.enableFeedback,
     this.checkboxSemanticLabel,
     this.checkboxScaleFactor = 1.0,
+    this.titleAlignment,
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
@@ -468,6 +470,20 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// Defines how [ListTile.leading] and [ListTile.trailing] are
+  /// vertically aligned relative to the [ListTile]'s titles
+  /// ([ListTile.title] and [ListTile.subtitle]).
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.threeLine]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
   /// Whether to add button:true to the semantics if onTap is provided.
   /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
   ///
@@ -583,6 +599,7 @@ class CheckboxListTile extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        titleAlignment: titleAlignment,
         internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
     );

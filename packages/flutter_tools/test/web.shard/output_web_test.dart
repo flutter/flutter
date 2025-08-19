@@ -7,6 +7,7 @@ library;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 import 'package:vm_service/vm_service.dart';
 
 import '../integration.shard/test_data/basic_project.dart';
@@ -16,7 +17,7 @@ import '../src/common.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProjectWithUnaryMain project = BasicProjectWithUnaryMain();
+  final project = BasicProjectWithUnaryMain();
   late FlutterRunTestDriver flutter;
 
   setUp(() async {
@@ -35,8 +36,8 @@ void main() {
     // No need to start paused as all breakpoint would be eventually reached.
     await flutter.run(
       withDebugger: true,
-      chrome: true,
-      additionalCommandArgs: <String>[if (verbose) '--verbose'],
+      device: GoogleChromeDevice.kChromeDeviceId,
+      additionalCommandArgs: <String>[if (verbose) '--verbose', '--no-web-resources-cdn'],
     );
   }
 
