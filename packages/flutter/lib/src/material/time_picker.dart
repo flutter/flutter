@@ -3021,10 +3021,22 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                 ? localizations.timePickerDialHelpText
                 : localizations.timePickerDialHelpText.toUpperCase());
 
+        // The vertical adjustment used to make both AM/PM buttons accessible.
+        // Because the period selector height is increased based on this value,
+        // the dial padding has to be decreased of the same amount.
+        final double portraitMinInteractiveVerticalAdjustment = math.max(
+          0,
+          2 * kMinInteractiveDimension - defaultTheme.dayPeriodPortraitSize.height,
+        );
         final EdgeInsetsGeometry dialPadding = switch (orientation) {
-          Orientation.portrait => const EdgeInsets.only(left: 12, right: 12, top: 36),
+          Orientation.portrait => EdgeInsets.only(
+            left: 12,
+            right: 12,
+            top: 36 - portraitMinInteractiveVerticalAdjustment / 2,
+          ),
           Orientation.landscape => const EdgeInsetsDirectional.only(start: 64),
         };
+
         final Widget dial = Padding(
           padding: dialPadding,
           child: Semantics(
