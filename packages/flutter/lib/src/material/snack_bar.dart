@@ -289,7 +289,7 @@ class SnackBar extends StatefulWidget {
     this.showCloseIcon,
     this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
-    this.persist,
+    bool? persist,
     this.animation,
     this.onVisible,
     this.dismissDirection,
@@ -300,7 +300,8 @@ class SnackBar extends StatefulWidget {
          actionOverflowThreshold == null ||
              (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
          'Action overflow threshold must be between 0 and 1 inclusive',
-       );
+       ),
+       persist = persist ?? action != null;
 
   /// The primary content of the snack bar.
   ///
@@ -466,7 +467,7 @@ class SnackBar extends StatefulWidget {
   /// user taps the action button or the close icon. If false, the snack bar
   /// will be dismissed after the timeout. If this is null but the snackbar
   /// action is not null, the snackbar will persist as well.
-  final bool? persist;
+  final bool persist;
 
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double>? animation;

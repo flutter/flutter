@@ -1896,7 +1896,10 @@ void main() {
     // disable accessible navigation
     await boilerplate(accessibleNavigation: false);
     await tester.pumpAndSettle(const Duration(milliseconds: 5750));
+    expect(find.text('test'), findsOneWidget);
 
+    await tester.tap(find.text('foo'));
+    await tester.pumpAndSettle();
     expect(find.text('test'), findsNothing);
   });
 
