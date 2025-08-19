@@ -74,20 +74,26 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     _scopedVisitChildren(node, (MethodDeclaration? node) => _currentMethod = node);
   }
 
+  bool hasRequiredParams(FormalParameterList? params) {
+    return params?.parameters.any((p) => p.isRequired) ?? false;
+  }
+
   @override
   void visitAnnotation(Annotation node) {
     if (!node.isPreview) {
       return;
     }
-    assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
-    if (_currentFunction != null) {
-      final returnType = _currentFunction!.returnType! as NamedType;
-      _currentPreview = PreviewDetails(
-        packageName: packageName,
-        functionName: _currentFunction!.name.toString(),
-        isBuilder: returnType.name2.isWidgetBuilder,
-      );
-    } else if (_currentConstructor != null) {
+    if (_currentFunction != null &&
+        !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
+      final Token returnType = (_currentFunction!.returnType! as NamedType).name2;
+      if (returnType.isWidget || returnType.isWidgetBuilder) {
+        _currentPreview = PreviewDetails(
+          packageName: packageName,
+          functionName: _currentFunction!.name.toString(),
+          isBuilder: returnType.isWidgetBuilder,
+        );
+      }
+    } else if (_currentConstructor != null && !hasRequiredParams(_currentConstructor!.parameters)) {
       final returnType = _currentConstructor!.returnType as SimpleIdentifier;
       final Token? name = _currentConstructor!.name;
       _currentPreview = PreviewDetails(
@@ -95,18 +101,22 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
         functionName: '$returnType${name == null ? '' : '.$name'}',
         isBuilder: false,
       );
-    } else if (_currentMethod != null) {
-      final returnType = _currentMethod!.returnType! as NamedType;
-      final parentClass = _currentMethod!.parent! as ClassDeclaration;
-      _currentPreview = PreviewDetails(
-        packageName: packageName,
-        functionName: '${parentClass.name}.${_currentMethod!.name}',
-        isBuilder: returnType.name2.isWidgetBuilder,
-      );
+    } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
+      final Token returnType = (_currentMethod!.returnType! as NamedType).name2;
+      if (returnType.isWidget || returnType.isWidgetBuilder) {
+        final parentClass = _currentMethod!.parent! as ClassDeclaration;
+        _currentPreview = PreviewDetails(
+          packageName: packageName,
+          functionName: '${parentClass.name}.${_currentMethod!.name}',
+          isBuilder: returnType.isWidgetBuilder,
+        );
+      }
     }
     node.visitChildren(this);
-    previewEntries.add(_currentPreview!);
-    _currentPreview = null;
+    if (_currentPreview != null) {
+      previewEntries.add(_currentPreview!);
+      _currentPreview = null;
+    }
   }
 
   @override
