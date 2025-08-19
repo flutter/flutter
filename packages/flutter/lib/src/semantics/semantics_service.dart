@@ -75,7 +75,7 @@ abstract final class SemanticsService {
 
   /// Sends a semantic announcement for a particular view.
   ///
-  /// You can use [View.of] to get the current [FlutterView].
+  /// One can use [View.of] to get the current [FlutterView].
   ///
   /// {@macro flutter.semantics.service.announce}
   static Future<void> sendAnnouncement(
