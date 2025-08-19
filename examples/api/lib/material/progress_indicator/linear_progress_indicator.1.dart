@@ -26,7 +26,6 @@ class ProgressIndicatorExample extends StatefulWidget {
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
   bool determinate = false;
-  bool animationPaused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +41,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
               tween: Tween<double>(begin: 0, end: 1),
               duration: const Duration(seconds: 2),
               reverse: true,
-              paused: animationPaused,
+              paused: determinate, // Pause when determinate to match original behavior
               builder: (BuildContext context, double value, Widget? child) {
                 return LinearProgressIndicator(
                   value: determinate ? value : null,
@@ -63,7 +62,6 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
                   onChanged: (bool value) {
                     setState(() {
                       determinate = value;
-                      animationPaused = !determinate;
                     });
                   },
                 ),
