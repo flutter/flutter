@@ -13,8 +13,8 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
-REM Ensure we are runnng on 64-bit windows (32-bit is not supported)
-IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
+REM Ensure we are running on 64-bit windows (32-bit is not supported)
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" IF "%PROCESSOR_ARCHITEW6432%"=="" (
   ECHO Flutter requires 64-bit versions of Windows
   EXIT 1
 )
