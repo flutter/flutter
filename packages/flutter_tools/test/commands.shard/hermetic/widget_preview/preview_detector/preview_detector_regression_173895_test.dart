@@ -26,7 +26,7 @@ void main() {
     late BufferLogger logger;
 
     setUp(() {
-      fs = MemoryFileSystem.test();
+      fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       previewDetector = PreviewDetector(
@@ -66,7 +66,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
     });
-  });
+  }, skip: const LocalPlatform().isWindows);
 }
 
 class FakeWatcher extends Fake implements Watcher {
