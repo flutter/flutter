@@ -55,6 +55,13 @@ final class TextRange: UITextRange, NSCopying {
 
   override var isEmpty: Bool { range.length == 0 }
 
+  override func isEqual(_ object: Any?) -> Bool {
+    guard let other = object as? TextRange else {
+      return false
+    }
+    return range == other.nsRange
+  }
+
   override var description: String {
     "TextRange(\(range))"
   }
