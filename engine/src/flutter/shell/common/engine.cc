@@ -527,6 +527,10 @@ void Engine::UpdateSemantics(int64_t view_id,
                                     std::move(actions));
 }
 
+void Engine::SetSemanticsTreeEnabled(bool enabled) {
+  delegate_.OnEngineSetSemanticsTreeEnabled(enabled);
+}
+
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
