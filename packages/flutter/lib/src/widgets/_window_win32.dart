@@ -101,6 +101,10 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///  * [WindowingOwner], the abstract class that manages native windows.
   @internal
   WindowingOwnerWin32() : allocator = _CallocAllocator() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     if (!Platform.isWindows) {
       throw UnsupportedError('Only available on the Win32 platform');
     }
