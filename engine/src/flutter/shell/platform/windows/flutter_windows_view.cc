@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
+#include <cmath>
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/make_copyable.h"

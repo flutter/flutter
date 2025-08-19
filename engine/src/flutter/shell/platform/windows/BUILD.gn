@@ -150,7 +150,10 @@ source_set("flutter_windows_source") {
 
   public_configs = [ ":relative_angle_headers" ]
 
-  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+  defines = [
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+    "_USE_MATH_DEFINES",
+  ]
 
   public_deps = [
     "//flutter/fml:string_conversion",
