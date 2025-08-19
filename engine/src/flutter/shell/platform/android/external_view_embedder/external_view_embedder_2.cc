@@ -147,20 +147,17 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     }
   }
   if (overlay_frame != nullptr) {
+    if (!prev_frame_overlay_layer_shown_) {
+      jni_facade_->showOverlaySurface2();
+    }
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
-    overlay_layer_has_content_ = true;
+    prev_frame_overlay_layer_shown_ = true;
   } else {
-    if (overlay_layer_has_content_) {
-      // Submit one frame to clean up the outstanding overlay content.
-      std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
-          context, android_context_, jni_facade_, surface_factory_);
-      overlay_frame = layer->surface->AcquireFrame(frame_size_);
-      overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
-      overlay_frame->set_submit_info({.frame_boundary = false});
-      overlay_frame->Submit();
-      overlay_layer_has_content_ = false;
+    if (prev_frame_overlay_layer_shown_) {
+      jni_facade_->hideOverlaySurface2();
     }
+    prev_frame_overlay_layer_shown_ = false;
   }
   frame->Submit();
 
