@@ -29,7 +29,7 @@ class AnimatedIconExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: TweenAnimationBuilder<double>.repeat(
+        child: RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
           reverse: true,

@@ -9,17 +9,14 @@ class SpinningSquare extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       // We use 3600 milliseconds instead of 1800 milliseconds because 0.0 -> 1.0
       // represents an entire turn of the square whereas in the other examples
       // we used 0.0 -> math.pi, which is only half a turn.
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 3600),
       builder: (BuildContext context, double turns, Widget? child) {
-        return RotationTransition(
-          turns: AlwaysStoppedAnimation(turns),
-          child: child,
-        );
+        return RotationTransition(turns: AlwaysStoppedAnimation(turns), child: child);
       },
       child: Container(width: 200.0, height: 200.0, color: const Color(0xFF00FF00)),
     );

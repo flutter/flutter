@@ -7,26 +7,27 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RepeatingTweenAnimationBuilder].
 
-void main() => runApp(const TweenAnimationBuilderRepeatExampleApp());
+void main() => runApp(const RepeatingTweenAnimationBuilderExampleApp());
 
-class TweenAnimationBuilderRepeatExampleApp extends StatelessWidget {
-  const TweenAnimationBuilderRepeatExampleApp({super.key});
+class RepeatingTweenAnimationBuilderExampleApp extends StatelessWidget {
+  const RepeatingTweenAnimationBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: TweenAnimationBuilderRepeatExample());
+    return const MaterialApp(home: RepeatingTweenAnimationBuilderExample());
   }
 }
 
-class TweenAnimationBuilderRepeatExample extends StatefulWidget {
-  const TweenAnimationBuilderRepeatExample({super.key});
+class RepeatingTweenAnimationBuilderExample extends StatefulWidget {
+  const RepeatingTweenAnimationBuilderExample({super.key});
 
   @override
-  State<TweenAnimationBuilderRepeatExample> createState() =>
-      _TweenAnimationBuilderRepeatExampleState();
+  State<RepeatingTweenAnimationBuilderExample> createState() =>
+      _RepeatingTweenAnimationBuilderExampleState();
 }
 
-class _TweenAnimationBuilderRepeatExampleState extends State<TweenAnimationBuilderRepeatExample> {
+class _RepeatingTweenAnimationBuilderExampleState
+    extends State<RepeatingTweenAnimationBuilderExample> {
   bool _isPaused = false;
   bool _isReversed = false;
 

@@ -27,7 +27,7 @@ class SlideTransitionExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0.0, end: 1.0),
       duration: const Duration(seconds: 2),
       reverse: true,
