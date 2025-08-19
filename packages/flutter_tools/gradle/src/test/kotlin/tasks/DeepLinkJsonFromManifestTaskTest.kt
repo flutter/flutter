@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * Tests for [DeepLinkJsonFromManifestTaskHelper].
@@ -31,6 +32,7 @@ import kotlin.test.assertTrue
  */
 class DeepLinkJsonFromManifestTaskTest {
     private val defaultNamespace = "dev.flutter.example"
+    private val defaultActivity = ".MainActivity"
 
     private fun createTempManifestFile(content: String): File {
         val manifestFile = File.createTempFile("AndroidManifestTest", ".xml")
@@ -44,12 +46,11 @@ class DeepLinkJsonFromManifestTaskTest {
         val scheme = "http"
         val host = "example.com"
         val pathPrefix = "/profile"
-        val manifestContent = DeeplinkManifestBuilder()
-            .setNamespace(defaultNamespace)
-            .addActivity(".MainActivity")
-            .addDeeplinks(".MainActivity", listOf(Deeplink(scheme, host, pathPrefix, IntentFilterCheck(hasActionView = true))))
-            .build()
-        println(manifestContent)
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(defaultActivity)
+                .addDeeplinks(defaultActivity, listOf(Deeplink(scheme, host, pathPrefix, IntentFilterCheck(hasActionView = true))))
+                .build()
         val manifestFile =
             createTempManifestFile(manifestContent)
         val manifest = mockk<RegularFileProperty>()
@@ -60,10 +61,18 @@ class DeepLinkJsonFromManifestTaskTest {
         val json = mockk<RegularFileProperty>()
         every { json.get().asFile } returns jsonFile
 
-        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(defaultNamespace, manifest, json)
+        try {
+            DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(
+                defaultNamespace,
+                manifest,
+                json
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
         assertEquals(
             DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile).toJson().toString(),
-            jsonFile.readText(),
+            jsonFile.readText()
         )
     }
 
@@ -85,68 +94,50 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun applicationNoDeepLinkingElements() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App" android:icon="@mipmap/ic_launcher">
-                </application>
-            </manifest>
-            """
+        val manifestContent = DeeplinkManifestBuilder().build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-
-        assertEquals(defaultNamespace, appLinkSettings.applicationId)
-        assertFalse(appLinkSettings.deeplinkingFlagEnabled)
-        assertTrue(appLinkSettings.deeplinks.isEmpty())
+        try {
+            val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+            assertEquals(defaultNamespace, appLinkSettings.applicationId)
+            assertFalse(appLinkSettings.deeplinkingFlagEnabled)
+            assertTrue(appLinkSettings.deeplinks.isEmpty())
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun metaDataDeepLinkingEnabledTrue() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                <activity
-                    android:name="$defaultNamespace.MainActivity"
-                    android:exported="true"
-                    android:theme="@style/WhiteBackgroundTheme" >
-                    <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
-                </activity>
-                </application>
-            </manifest>
-            """
+        val manifestContent = DeeplinkManifestBuilder().addActivity("$defaultNamespace.MainActivity").setDeeplinkEnabled(true).build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-
-        assertEquals(defaultNamespace, appLinkSettings.applicationId)
-        assertTrue(appLinkSettings.deeplinkingFlagEnabled)
-        assertTrue(appLinkSettings.deeplinks.isEmpty())
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper
+                    .createAppLinkSettings(
+                        defaultNamespace,
+                        manifestFile
+                    )
+            assertEquals(defaultNamespace, appLinkSettings.applicationId)
+            assertTrue(appLinkSettings.deeplinkingFlagEnabled)
+            assertTrue(appLinkSettings.deeplinks.isEmpty())
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun metaDataDeepLinkingEnabledFalse() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                <activity
-                    android:name="$defaultNamespace.MainActivity"
-                    android:exported="true"
-                    android:theme="@style/WhiteBackgroundTheme" >
-                    <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
-                </activity>
-                </application>
-            </manifest>
-            """
+        val manifestContent = DeeplinkManifestBuilder().addActivity("$defaultNamespace.MainActivity").setDeeplinkEnabled(false).build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
 
-        assertEquals(defaultNamespace, appLinkSettings.applicationId)
-        assertFalse(appLinkSettings.deeplinkingFlagEnabled)
-        assertTrue(appLinkSettings.deeplinks.isEmpty())
+        try {
+            val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+            assertEquals(defaultNamespace, appLinkSettings.applicationId)
+            assertFalse(appLinkSettings.deeplinkingFlagEnabled)
+            assertTrue(appLinkSettings.deeplinks.isEmpty())
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
@@ -192,147 +183,173 @@ class DeepLinkJsonFromManifestTaskTest {
         val scheme = "http"
         val host = "example.com"
         val pathPrefix = "/profile"
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                    <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
-                        <intent-filter>
-                            <action android:name="android.intent.action.VIEW" />
-                            <data android:scheme="$scheme" android:host="$host" android:pathPrefix="$pathPrefix" />
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
+        val expectedDeeplink = Deeplink(scheme, host, pathPrefix, IntentFilterCheck(hasActionView = true))
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(
+                    defaultActivity
+                ).addDeeplinks(defaultActivity, listOf(expectedDeeplink))
+                .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
 
-        assertEquals(defaultNamespace, appLinkSettings.applicationId)
-        assertTrue(appLinkSettings.deeplinkingFlagEnabled)
-        assertEquals(1, appLinkSettings.deeplinks.size)
+            assertEquals(defaultNamespace, appLinkSettings.applicationId)
+            assertTrue(appLinkSettings.deeplinkingFlagEnabled)
+            assertEquals(1, appLinkSettings.deeplinks.size)
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedDeeplink,
+                "Did not find $expectedDeeplink in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun deepLinkWithAutoVerify() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                        <intent-filter android:autoVerify="true">
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="https" android:host="secure.example.com" />
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
+        val scheme = "https"
+        val host = "secure.example.com"
+        val expectedDeeplink =
+            Deeplink(scheme, host, "", IntentFilterCheck(hasAutoVerify = true, hasDefaultCategory = true, hasBrowsableCategory = true))
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(
+                    defaultActivity
+                ).addDeeplinks(defaultActivity, listOf(expectedDeeplink))
+                .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-        assertEquals(1, appLinkSettings.deeplinks.size)
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
+            assertEquals(1, appLinkSettings.deeplinks.size)
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedDeeplink,
+                "Did not find $expectedDeeplink in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun multipleIntentFilters() {
+        // TODO start here
         val expectedLink1 =
             Deeplink(
                 "custom",
                 "filter.one",
                 ".*",
-                IntentFilterCheck(hasAutoVerify = false, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true),
+                IntentFilterCheck(hasAutoVerify = false, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
             )
         val expectedLink2 =
             Deeplink(
                 "https",
                 "filter.two",
                 "/product.*",
-                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true),
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
             )
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                        <intent-filter>
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="${expectedLink1.scheme}" android:host="${expectedLink1.host}" />
-                        </intent-filter>
-                        <intent-filter android:autoVerify="true">
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="${expectedLink2.scheme}" android:host="${expectedLink2.host}" android:pathPrefix="/product"/>
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(
+                    defaultActivity
+                ).addDeeplinks(defaultActivity, listOf(expectedLink1, expectedLink2))
+                .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-        assertEquals(2, appLinkSettings.deeplinks.size)
-        appLinkSettings.deeplinks.forEach { println(it.toJson()) }
-        assertContains(appLinkSettings.deeplinks, expectedLink1)
-        assertContains(appLinkSettings.deeplinks, expectedLink2)
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
+            assertEquals(2, appLinkSettings.deeplinks.size)
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedLink1,
+                "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedLink2,
+                "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun multipleActivitiesWithDeepLinks() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                        <intent-filter>
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="app" android:host="main.activity" />
-                        </intent-filter>
-                    </activity>
-                    <activity android:name=".OtherActivity">
-                        <intent-filter android:autoVerify="true">
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="http" android:host="other.activity" android:pathPattern=".*user.*"/>
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
+        val otherActivity = ".OtherActivity"
+        val expectedDeeplink1 =
+            Deeplink(
+                "app",
+                "main.activity",
+                null,
+                IntentFilterCheck(hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+            )
+        val expectedDeeplink2 =
+            Deeplink(
+                "http",
+                "other.activity",
+                ".*user.*",
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasBrowsableCategory = true)
+            )
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(defaultActivity)
+                .addActivity(otherActivity)
+                .addDeeplinks(defaultActivity, listOf(expectedDeeplink1))
+                .addDeeplinks(otherActivity, listOf(expectedDeeplink2))
+                .build()
         val manifestFile = createTempManifestFile(manifestContent)
-        val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
-        assertEquals(2, appLinkSettings.deeplinks.size)
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
+            assertEquals(2, appLinkSettings.deeplinks.size)
+            assertContains(
+                appLinkSettings.deeplinks,
+                // Path when not set is assumed to be ".*"
+                Deeplink(expectedDeeplink1.scheme, expectedDeeplink1.host, ".*", expectedDeeplink1.intentFilterCheck),
+                "Did not find $expectedDeeplink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedDeeplink2,
+                "Did not find $expectedDeeplink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
     }
 
     @Test
     fun intentFilterMissingHostInData() {
-        val manifestContent = """
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-                package="$defaultNamespace">
-                <application android:label="Test App">
-                    <activity android:name=".MainActivity">
-                        <intent-filter>
-                            <action android:name="android.intent.action.VIEW" />
-                            <category android:name="android.intent.category.DEFAULT" />
-                            <category android:name="android.intent.category.BROWSABLE" />
-                            <data android:scheme="http" />
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            """
+        val expectedDeeplink =
+            Deeplink(
+                "http",
+                host = null,
+                path = null,
+                IntentFilterCheck(hasActionView = true, hasBrowsableCategory = true, hasDefaultCategory = true)
+            )
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(
+                    defaultActivity
+                ).addDeeplinks(defaultActivity, listOf(expectedDeeplink))
+                .build()
         val manifestFile = createTempManifestFile(manifestContent)
         val appLinkSettings = DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(defaultNamespace, manifestFile)
         assertTrue(appLinkSettings.deeplinks.isEmpty(), "Intent filter with data missing host should be ignored")
@@ -347,7 +364,7 @@ class DeepLinkJsonFromManifestTaskTest {
     }
 
     /**
-     * Helper class for creating valid android manifest file that contains deeplinks.
+     * Helper class for creating valid android manifest file that contains deep links.
      */
     class DeeplinkManifestBuilder {
         val activitySectionDefault =
@@ -379,7 +396,7 @@ class DeepLinkJsonFromManifestTaskTest {
 
         fun addDeeplinks(
             activity: String,
-            deeplinks: List<Deeplink>,
+            deeplinks: List<Deeplink>
         ): DeeplinkManifestBuilder {
             deeplinkMap[activity] = deeplinks
             return this
@@ -391,19 +408,21 @@ class DeepLinkJsonFromManifestTaskTest {
         }
 
         fun build(): String {
-            var activitySection: String
-            if (activitySet.isEmpty()) {
-                activitySection = activitySectionDefault
-            } else {
-                activitySection = ""
-                // Warning: Xml parsing can be sensitive to whitespace changes.
+            var activitySection = ""
+            // Warning: Xml parsing can be sensitive to whitespace changes.
+            if (activitySet.isNotEmpty()) {
                 for (activity in activitySet) {
-                    activitySection += "\t<activity android:name=\"$activity\">\n"
+                    activitySection += "\t<activity android:name=\"$activity\" android:exported=\"true\">\n"
+                    if (deeplinkEnabled) {
+                        activitySection +=
+                            "\t\t" + """<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />""" + "\n"
+                    }
+                    if (deeplinkMap[activity] == null) {
+                        // Close activity and do not continue to deep link parsing.
+                        activitySection += "\t</activity>"
+                        continue
+                    }
                     for (deeplink in deeplinkMap[activity]!!) {
-                        if (deeplinkEnabled) {
-                            activitySection +=
-                                """             <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />""" + "\n"
-                        }
                         if (deeplink.intentFilterCheck.hasAutoVerify) {
                             activitySection += ("\t\t" + """<intent-filter android:autoVerify="true">""" + "\n")
                         } else {
@@ -418,13 +437,14 @@ class DeepLinkJsonFromManifestTaskTest {
                         if (deeplink.intentFilterCheck.hasBrowsableCategory) {
                             activitySection += "\t\t\t" + """<category android:name="android.intent.category.BROWSABLE" />""" + "\n"
                         }
-                        val scheme = deeplink.scheme?.let { scheme -> """android:scheme="$scheme"""" } ?: ""
+                        val scheme =
+                            deeplink.scheme?.let { scheme -> """android:scheme="$scheme"""" } ?: ""
                         val host = deeplink.host?.let { host -> """android:host="$host"""" } ?: ""
                         val path = deeplink.path?.let { path -> """android:path="$path"""" } ?: ""
                         activitySection += "\t\t\t<data $scheme $host $path/>\n"
                         activitySection += "\t\t" + """</intent-filter>""" + "\n"
                     }
-                    activitySection += "        </activity>"
+                    activitySection += "\t</activity>\n"
                 }
             }
 
