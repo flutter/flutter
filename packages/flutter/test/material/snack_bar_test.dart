@@ -1665,6 +1665,33 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.hide));
 
+    // Remove action to test SnackBarClosedReason.timeout because Snackbar with
+    // action doesn't timeout.
+    await tester.pumpWidget(
+      MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+                        const SnackBar(content: Text('snack'), duration: Duration(seconds: 2)),
+                      )
+                      .closed
+                      .then<void>((SnackBarClosedReason reason) {
+                        closedReason = reason;
+                      });
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
     // Pop up the snack bar and then let it time out.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
@@ -1824,10 +1851,10 @@ void main() {
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
     Future<void> boilerplate({required bool accessibleNavigation}) {
       return tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(accessibleNavigation: accessibleNavigation),
-            child: Scaffold(
+        MediaQuery(
+          data: MediaQueryData(accessibleNavigation: accessibleNavigation),
+          child: MaterialApp(
+            home: Scaffold(
               body: Builder(
                 builder: (BuildContext context) {
                   return GestureDetector(
