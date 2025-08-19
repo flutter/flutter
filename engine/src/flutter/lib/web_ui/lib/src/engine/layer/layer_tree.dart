@@ -38,9 +38,6 @@ class LayerTree {
   }
 
   /// Paints the layer tree into the given [frame].
-  ///
-  /// If [ignoreRasterCache] is `true`, then the raster cache will
-  /// not be used.
   void paint(Frame frame) {
     final NWayCanvas internalNodesCanvas = NWayCanvas();
     final Iterable<LayerCanvas> overlayCanvases = frame.viewEmbedder!.getOptimizedCanvases();
