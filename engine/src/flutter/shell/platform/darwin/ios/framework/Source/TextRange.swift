@@ -95,12 +95,18 @@ final class TextRange: UITextRange, NSCopying {
   ///
   /// This computed property throws if the receiver is not a TextRange.
   /// This is a left closed right open interval.
-  var range: NSRange { (self as! TextRange).nsRange }
+  var range: NSRange {
+    assert(self is TextRange, "Unexpected UITextRange type: \(dynamicType)")
+    (self as! TextRange).nsRange
+  }
 }
 
 @objc extension UITextPosition {
   /// The offset from the start of the document to this TextPosition, in UTF16 code units.
   ///
   /// This computed property throws if the receiver is not a TextPosition.
-  var index: UInt { (self as! TextPosition).offset }
+  var index: UInt {
+    assert(self is TextPosition, "Unexpected UITextPosition type: \(dynamicType)")
+    (self as! TextPosition).offset
+  }
 }
