@@ -64,7 +64,7 @@ class _TextFieldShiftEnterExampleState extends State<TextFieldShiftEnterExample>
         ),
         Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
-            // Mapping the `Shift+Enter` combination to our custom intent.
+            // Map the `Shift+Enter` combination to our custom intent.
             const SingleActivator(LogicalKeyboardKey.enter, shift: true):
                 _InsertNewLineTextIntent(),
           },
