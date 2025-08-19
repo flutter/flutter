@@ -122,7 +122,6 @@ final Map<Pattern, String> extraImportsMap = <Pattern, String>{
   'web_unicode': "import 'dart:_web_unicode';",
   'web_test_fonts': "import 'dart:_web_test_fonts';",
   'web_locale_keymap': "import 'dart:_web_locale_keymap' as locale_keymap;",
-  'canvaskit': "import 'dart:_canvaskit';",
 };
 
 // Rewrites the "package"-style web ui library into a dart:ui implementation.

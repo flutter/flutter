@@ -29,9 +29,6 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
-      },
-      "_canvaskit": {
-        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   },
@@ -63,9 +60,6 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
-      },
-      "_canvaskit": {
-        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   },
@@ -97,9 +91,6 @@
       },
       "_web_test_fonts": {
         "uri": "lib/_web_test_fonts/web_test_fonts.dart"
-      },
-      "_canvaskit": {
-        "uri": "lib/_canvaskit/canvaskit.dart"
       }
     }
   }

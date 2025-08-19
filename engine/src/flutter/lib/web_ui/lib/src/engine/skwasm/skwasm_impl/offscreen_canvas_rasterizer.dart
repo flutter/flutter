@@ -10,20 +10,23 @@ import '../skwasm_impl.dart';
 /// A [Rasterizer] that uses a single GL context in an OffscreenCanvas to do
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
 /// one or many on-screen <canvas> elements to actually display the scene.
-class OffscreenCanvasRasterizer extends Rasterizer {
-  OffscreenCanvasRasterizer(this.offscreenSurface);
+class SkwasmOffscreenCanvasRasterizer extends Rasterizer {
+  SkwasmOffscreenCanvasRasterizer(this.offscreenSurface);
 
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
   final SkwasmSurface offscreenSurface;
 
   @override
-  OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
-    return _viewRasterizers.putIfAbsent(view, () => OffscreenCanvasViewRasterizer(view, this));
+  SkwasmOffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
+    return _viewRasterizers.putIfAbsent(
+      view,
+      () => SkwasmOffscreenCanvasViewRasterizer(view, this),
+    );
   }
 
-  final Map<EngineFlutterView, OffscreenCanvasViewRasterizer> _viewRasterizers =
-      <EngineFlutterView, OffscreenCanvasViewRasterizer>{};
+  final Map<EngineFlutterView, SkwasmOffscreenCanvasViewRasterizer> _viewRasterizers =
+      <EngineFlutterView, SkwasmOffscreenCanvasViewRasterizer>{};
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
@@ -33,16 +36,16 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   @override
   void dispose() {
     offscreenSurface.dispose();
-    for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final SkwasmOffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
       viewRasterizer.dispose();
     }
   }
 }
 
-class OffscreenCanvasViewRasterizer extends ViewRasterizer {
-  OffscreenCanvasViewRasterizer(super.view, this.rasterizer);
+class SkwasmOffscreenCanvasViewRasterizer extends ViewRasterizer {
+  SkwasmOffscreenCanvasViewRasterizer(super.view, this.rasterizer);
 
-  final OffscreenCanvasRasterizer rasterizer;
+  final SkwasmOffscreenCanvasRasterizer rasterizer;
 
   @override
   final DisplayCanvasFactory<RenderCanvas> displayFactory = DisplayCanvasFactory<RenderCanvas>(

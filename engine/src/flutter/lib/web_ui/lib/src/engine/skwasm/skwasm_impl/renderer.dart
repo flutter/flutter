@@ -322,7 +322,7 @@ class SkwasmRenderer extends Renderer {
   @override
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
-    rasterizer = OffscreenCanvasRasterizer(surface);
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
     return super.initialize();
   }
 
@@ -546,6 +546,6 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = OffscreenCanvasRasterizer(surface);
+    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
   }
 }

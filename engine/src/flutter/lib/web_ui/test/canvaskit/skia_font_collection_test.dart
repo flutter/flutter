@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/canvaskit.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/fake_asset_manager.dart';

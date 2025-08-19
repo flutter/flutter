@@ -95,13 +95,6 @@ sdk_rewriter("web_locale_keymap_library") {
   output_dir = "$root_out_dir/flutter_web_sdk/lib/_web_locale_keymap/"
 }
 
-sdk_rewriter("canvaskit_library") {
-  library_name = "canvaskit"
-  api_file = "//flutter/lib/web_ui/lib/src/engine/canvaskit.dart"
-  input_dir = "//flutter/lib/web_ui/lib/src/engine/canvaskit/"
-  output_dir = "$root_out_dir/flutter_web_sdk/lib/_canvaskit/"
-}
-
 copy("web_ui_library") {
   sources = [ "//flutter/web_sdk/libraries.json" ]
 
@@ -267,8 +260,6 @@ template("_compile_platform") {
       "dart:_web_unicode",
       "--source",
       "dart:_web_locale_keymap",
-      "--source",
-      "dart:_canvaskit",
     ]
     if (flutter_prebuilt_dart_sdk) {
       args += [
@@ -345,7 +336,6 @@ template("_compile_ddc_module") {
       "dart:_skwasm_stub",
       "dart:_web_unicode",
       "dart:_web_locale_keymap",
-      "dart:_canvaskit",
       "--no-summarize",
       "--packages",
       "file:///" + rebase_path(dart_sdk_package_config),
