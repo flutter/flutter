@@ -21,6 +21,7 @@ import 'dart:ui' show Display, FlutterView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../foundation/_features.dart';
 import '_window.dart';
 
 /// A Win32 window handle.
@@ -36,6 +37,19 @@ const int _WM_CLOSE = 0x0010;
 const int _SW_RESTORE = 9;
 const int _SW_MAXIMIZE = 3;
 const int _SW_MINIMIZE = 6;
+
+const String _kWindowingDisabledErrorMessage = '''
+Windowing APIs are not enabled.
+
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
+
+See: https://github.com/flutter/flutter/issues/30701.
+''';
 
 /// Abstract handler class for Windows messages.
 ///
@@ -93,7 +107,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   ///
   ///  * [WindowingOwner], the abstract class that manages native windows.
   @internal
-  WindowingOwnerWin32() : allocator = _CallocAllocator._() {
+  WindowingOwnerWin32() : allocator = _CallocAllocator() {
     if (!Platform.isWindows) {
       throw UnsupportedError('Only available on the Win32 platform');
     }
@@ -177,11 +191,16 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 
   void _onMessage(ffi.Pointer<_WindowsMessage> message) {
-    final List<WindowsMessageHandler> handlers = List<WindowsMessageHandler>.from(_messageHandlers);
     final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
       (FlutterView view) => view.viewId == message.ref.viewId,
     );
-    for (final WindowsMessageHandler handler in handlers) {
+
+    final int handlesLength = _messageHandlers.length;
+    for (final WindowsMessageHandler handler in _messageHandlers) {
+      assert(
+        _messageHandlers.length == handlesLength,
+        'Message handler list changed while processing message: $message',
+      );
       final int? result = handler.handleWindowsMessage(
         flutterView,
         message.ref.windowHandle,
@@ -233,16 +252,18 @@ class RegularWindowControllerWin32 extends RegularWindowController
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     owner.addMessageHandler(this);
-    final ffi.Pointer<_WindowCreationRequest> request = owner.allocator<_WindowCreationRequest>()
-      ..ref.preferredSize.from(preferredSize)
-      ..ref.preferredConstraints.from(preferredConstraints)
-      ..ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: _owner.allocator);
     final int viewId = _Win32PlatformInterface.createWindow(
+      _owner.allocator,
       PlatformDispatcher.instance.engineId!,
-      request,
+      preferredSize,
+      preferredConstraints,
+      title,
     );
-    owner.allocator.free(request);
     final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
@@ -266,19 +287,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   String get title {
     _ensureNotDestroyed();
-    final int length = _Win32PlatformInterface.getWindowTextLength(getWindowHandle());
-    if (length == 0) {
-      return '';
-    }
-
-    final ffi.Pointer<ffi.Uint16> data = _owner.allocator<ffi.Uint16>(length + 1);
-    try {
-      final ffi.Pointer<_Utf16> buffer = data.cast<_Utf16>();
-      _Win32PlatformInterface.getWindowText(getWindowHandle(), buffer, length + 1);
-      return buffer.toDartString();
-    } finally {
-      _owner.allocator.free(data);
-    }
+    return _Win32PlatformInterface.getWindowTitle(_owner.allocator, getWindowHandle());
   }
 
   @override
@@ -313,24 +322,14 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   void setSize(Size? size) {
     _ensureNotDestroyed();
-    final ffi.Pointer<_WindowSizeRequest> request = _owner.allocator<_WindowSizeRequest>();
-    request.ref.hasSize = size != null;
-    request.ref.width = size?.width ?? 0;
-    request.ref.height = size?.height ?? 0;
-    _Win32PlatformInterface.setWindowContentSize(getWindowHandle(), request);
-    _owner.allocator.free(request);
+    _Win32PlatformInterface.setWindowContentSize(_owner.allocator, getWindowHandle(), size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    final ffi.Pointer<_WindowConstraintsRequest> request = _owner
-        .allocator<_WindowConstraintsRequest>();
-    request.ref.from(constraints);
-    _Win32PlatformInterface.setWindowConstraints(getWindowHandle(), request);
-    _owner.allocator.free(request);
-
+    _Win32PlatformInterface.setWindowConstraints(_owner.allocator, getWindowHandle(), constraints);
     notifyListeners();
   }
 
@@ -338,10 +337,7 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @internal
   void setTitle(String title) {
     _ensureNotDestroyed();
-    final ffi.Pointer<_Utf16> titlePointer = title.toNativeUtf16(allocator: _owner.allocator);
-    _Win32PlatformInterface.setWindowTitle(getWindowHandle(), titlePointer);
-    _owner.allocator.free(titlePointer);
-
+    _Win32PlatformInterface.setWindowTitle(_owner.allocator, getWindowHandle(), title);
     notifyListeners();
   }
 
@@ -377,13 +373,12 @@ class RegularWindowControllerWin32 extends RegularWindowController
   @override
   @internal
   void setFullscreen(bool fullscreen, {Display? display}) {
-    final ffi.Pointer<_WindowFullscreenRequest> request = _owner
-        .allocator<_WindowFullscreenRequest>();
-    request.ref.hasDisplayId = false;
-    request.ref.displayId = display?.id ?? 0;
-    request.ref.fullscreen = fullscreen;
-    _Win32PlatformInterface.setFullscreen(getWindowHandle(), request);
-    _owner.allocator.free(request);
+    _Win32PlatformInterface.setFullscreen(
+      _owner.allocator,
+      getWindowHandle(),
+      fullscreen,
+      display: display,
+    );
   }
 
   /// Returns HWND pointer to the top level window.
@@ -409,8 +404,8 @@ class RegularWindowControllerWin32 extends RegularWindowController
     }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
-    _delegate.onWindowDestroyed();
     _owner.removeMessageHandler(this);
+    _delegate.onWindowDestroyed();
   }
 
   @override
@@ -450,10 +445,28 @@ class _Win32PlatformInterface {
     ffi.Pointer<_WindowingInitRequest> request,
   );
 
+  static int createWindow(
+    ffi.Allocator allocator,
+    int engineId,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  ) {
+    final ffi.Pointer<_WindowCreationRequest> request = allocator<_WindowCreationRequest>()
+      ..ref.preferredSize.from(preferredSize)
+      ..ref.preferredConstraints.from(preferredConstraints)
+      ..ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+    try {
+      return _createWindow(engineId, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
+
   @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_WindowCreationRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_CreateRegularWindow',
   )
-  external static int createWindow(int engineId, ffi.Pointer<_WindowCreationRequest> request);
+  external static int _createWindow(int engineId, ffi.Pointer<_WindowCreationRequest> request);
 
   @ffi.Native<HWND Function(ffi.Int64, ffi.Int64)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle',
@@ -468,21 +481,53 @@ class _Win32PlatformInterface {
   )
   external static _ActualContentSize getWindowContentSize(HWND windowHandle);
 
+  static void setWindowTitle(ffi.Allocator allocator, HWND windowHandle, String title) {
+    final ffi.Pointer<_Utf16> titlePointer = title.toNativeUtf16(allocator: allocator);
+    try {
+      _setWindowTitle(windowHandle, titlePointer);
+    } finally {
+      allocator.free(titlePointer);
+    }
+  }
+
   @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_Utf16>)>(symbol: 'SetWindowTextW')
-  external static void setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
+  external static void _setWindowTitle(HWND windowHandle, ffi.Pointer<_Utf16> title);
+
+  static void setWindowContentSize(ffi.Allocator allocator, HWND windowHandle, Size? size) {
+    final ffi.Pointer<_WindowSizeRequest> request = allocator<_WindowSizeRequest>()..ref.from(size);
+    try {
+      _setWindowContentSize(windowHandle, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
 
   @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowSizeRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowSize',
   )
-  external static void setWindowContentSize(
+  external static void _setWindowContentSize(
     HWND windowHandle,
     ffi.Pointer<_WindowSizeRequest> size,
   );
 
+  static void setWindowConstraints(
+    ffi.Allocator allocator,
+    HWND windowHandle,
+    BoxConstraints? constraints,
+  ) {
+    final ffi.Pointer<_WindowConstraintsRequest> request = allocator<_WindowConstraintsRequest>()
+      ..ref.from(constraints);
+    try {
+      _setWindowConstraints(windowHandle, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
+
   @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowConstraintsRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetWindowConstraints',
   )
-  external static void setWindowConstraints(
+  external static void _setWindowConstraints(
     HWND windowHandle,
     ffi.Pointer<_WindowConstraintsRequest> constraints,
   );
@@ -496,10 +541,27 @@ class _Win32PlatformInterface {
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'IsZoomed')
   external static int isZoomed(HWND windowHandle);
 
+  static void setFullscreen(
+    ffi.Allocator allocator,
+    HWND windowHandle,
+    bool fullscreen, {
+    Display? display,
+  }) {
+    final ffi.Pointer<_WindowFullscreenRequest> request = allocator<_WindowFullscreenRequest>()
+      ..ref.fullscreen = fullscreen
+      ..ref.hasDisplayId = display != null
+      ..ref.displayId = display?.id ?? 0;
+    try {
+      _setFullscreen(windowHandle, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
+
   @ffi.Native<ffi.Void Function(HWND, ffi.Pointer<_WindowFullscreenRequest>)>(
     symbol: 'InternalFlutterWindows_WindowManager_SetFullscreen',
   )
-  external static void setFullscreen(
+  external static void _setFullscreen(
     HWND windowHandle,
     ffi.Pointer<_WindowFullscreenRequest> request,
   );
@@ -508,10 +570,30 @@ class _Win32PlatformInterface {
   external static bool getFullscreen(HWND windowHandle);
 
   @ffi.Native<ffi.Int32 Function(HWND)>(symbol: 'GetWindowTextLengthW')
-  external static int getWindowTextLength(HWND windowHandle);
+  external static int _getWindowTextLength(HWND windowHandle);
 
   @ffi.Native<ffi.Int32 Function(HWND, ffi.Pointer<_Utf16>, ffi.Int32)>(symbol: 'GetWindowTextW')
-  external static int getWindowText(HWND windowHandle, ffi.Pointer<_Utf16> lpString, int maxLength);
+  external static int _getWindowText(
+    HWND windowHandle,
+    ffi.Pointer<_Utf16> lpString,
+    int maxLength,
+  );
+
+  static String getWindowTitle(ffi.Allocator allocator, HWND windowHandle) {
+    final int length = _getWindowTextLength(windowHandle);
+    if (length == 0) {
+      return '';
+    }
+
+    final ffi.Pointer<ffi.Uint16> data = allocator<ffi.Uint16>(length + 1);
+    try {
+      final ffi.Pointer<_Utf16> buffer = data.cast<_Utf16>();
+      _getWindowText(windowHandle, buffer, length + 1);
+      return buffer.toDartString();
+    } finally {
+      allocator.free(data);
+    }
+  }
 
   @ffi.Native<HWND Function()>(symbol: 'GetForegroundWindow')
   external static HWND getForegroundWindow();
@@ -706,7 +788,7 @@ typedef _WinCoTaskMemFreeNative = ffi.Void Function(ffi.Pointer);
 typedef _WinCoTaskMemFree = void Function(ffi.Pointer);
 
 final class _CallocAllocator implements ffi.Allocator {
-  _CallocAllocator._() {
+  _CallocAllocator() {
     _ole32lib = ffi.DynamicLibrary.open('ole32.dll');
     _winCoTaskMemAlloc = _ole32lib.lookupFunction<_WinCoTaskMemAllocNative, _WinCoTaskMemAlloc>(
       'CoTaskMemAlloc',
