@@ -810,7 +810,6 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// Uses a [SliverChildListDelegate] as the [delegate].
   ///
-  /// The [gridDelegate] argument is required.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
