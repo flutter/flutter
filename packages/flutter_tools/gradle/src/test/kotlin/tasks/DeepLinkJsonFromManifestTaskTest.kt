@@ -396,7 +396,7 @@ class DeepLinkJsonFromManifestTaskTest {
                 activitySection = activitySectionDefault
             } else {
                 activitySection = ""
-                // Warning: Xml parsing is sensitive to whitespace changes.
+                // Warning: Xml parsing can be sensitive to whitespace changes.
                 for (activity in activitySet) {
                     activitySection += "\t<activity android:name=\"$activity\">\n"
                     for (deeplink in deeplinkMap[activity]!!) {
@@ -404,25 +404,25 @@ class DeepLinkJsonFromManifestTaskTest {
                             activitySection +=
                                 """             <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />""" + "\n"
                         }
-//                        if (deeplink.intentFilterCheck.hasAutoVerify) {
-//                            activitySection += """      <intent-filter android:autoVerify="true">""" + "\n"
-//                        } else {
-//                            activitySection += """      <intent-filter>""" + "\n"
-//                        }
-//                        if (deeplink.intentFilterCheck.hasActionView) {
-//                            activitySection += """          <action android:name="android.intent.action.VIEW" />""" + "\n"
-//                        }
-//                        if (deeplink.intentFilterCheck.hasDefaultCategory) {
-//                            activitySection += """          <category android:name="android.intent.category.DEFAULT" />""" + "\n"
-//                        }
-//                        if (deeplink.intentFilterCheck.hasBrowsableCategory) {
-//                            activitySection += """          <category android:name="android.intent.category.BROWSABLE" />""" + "\n"
-//                        }
-//                        val scheme = deeplink.scheme?.let { scheme -> """android:scheme="$scheme" """ } ?: ""
-//                        val host = deeplink.host?.let { host -> """android:host="$host" """ } ?: ""
-//                        val path = deeplink.path?.let { path -> """android:path="$path" """ } ?: ""
-//                        activitySection += "            <data $scheme $host $path/>\n"
-//                        activitySection += """      </intent-filter>""" + "\n"
+                        if (deeplink.intentFilterCheck.hasAutoVerify) {
+                            activitySection += ("\t\t" + """<intent-filter android:autoVerify="true">""" + "\n")
+                        } else {
+                            activitySection += ("\t\t" + """<intent-filter>""" + "\n")
+                        }
+                        if (deeplink.intentFilterCheck.hasActionView) {
+                            activitySection += "\t\t\t" + """<action android:name="android.intent.action.VIEW" />""" + "\n"
+                        }
+                        if (deeplink.intentFilterCheck.hasDefaultCategory) {
+                            activitySection += "\t\t\t" + """<category android:name="android.intent.category.DEFAULT" />""" + "\n"
+                        }
+                        if (deeplink.intentFilterCheck.hasBrowsableCategory) {
+                            activitySection += "\t\t\t" + """<category android:name="android.intent.category.BROWSABLE" />""" + "\n"
+                        }
+                        val scheme = deeplink.scheme?.let { scheme -> """android:scheme="$scheme"""" } ?: ""
+                        val host = deeplink.host?.let { host -> """android:host="$host"""" } ?: ""
+                        val path = deeplink.path?.let { path -> """android:path="$path"""" } ?: ""
+                        activitySection += "\t\t\t<data $scheme $host $path/>\n"
+                        activitySection += "\t\t" + """</intent-filter>""" + "\n"
                     }
                     activitySection += "        </activity>"
                 }
