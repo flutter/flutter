@@ -6,7 +6,6 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show FlutterView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -98,13 +97,13 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   /// on the implicit view
   const AnnounceSemanticsEvent(
     this.message,
-    this.textDirection, {
+    this.textDirection,
+    this.viewId, {
     this.assertiveness = Assertiveness.polite,
-    this.viewId,
   }) : super('announce');
 
   /// The view that this announcement is on.
-  final int? viewId;
+  final int viewId;
 
   /// The message to announce.
   final String message;

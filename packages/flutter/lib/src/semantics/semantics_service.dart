@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'dart:ui' show FlutterView, TextDirection;
+import 'dart:ui' show FlutterView, PlatformDispatcher, TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
@@ -58,9 +58,16 @@ abstract final class SemanticsService {
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {
+    final FlutterView? view = PlatformDispatcher.instance.implicitView;
+    assert(
+      view != null,
+      'SemanticsService.announce is incompatible with multiple windows. '
+      'Use SemanticsService.sendAnnouncement instead.',
+    );
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
       message,
       textDirection,
+      view!.viewId,
       assertiveness: assertiveness,
     );
     await SystemChannels.accessibility.send(event.toMap());
@@ -68,7 +75,7 @@ abstract final class SemanticsService {
 
   /// Sends a semantic announcement for a particular view.
   ///
-  /// Users can use [View.of] to get the current [FlutterView].
+  /// You can use [View.of] to get the current [FlutterView].
   ///
   /// {@macro flutter.semantics.service.announce}
   static Future<void> sendAnnouncement(
@@ -80,8 +87,8 @@ abstract final class SemanticsService {
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
       message,
       textDirection,
+      view.viewId,
       assertiveness: assertiveness,
-      viewId: view.viewId,
     );
     await SystemChannels.accessibility.send(event.toMap());
   }
