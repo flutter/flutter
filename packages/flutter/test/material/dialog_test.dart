@@ -3021,6 +3021,17 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
     expect(find.byType(CloseButton), findsOneWidget);
   });
+
+  testWidgets('Dialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Dialog(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Dialog)).isEmpty, isTrue);
+  });
 }
 
 @pragma('vm:entry-point')
