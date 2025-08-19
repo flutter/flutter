@@ -25,7 +25,6 @@ web_engine_libraries = [
   ":web_unicode_library",
   ":web_test_fonts_library",
   ":web_locale_keymap_library",
-  ":canvaskit_library",
 ]
 
 group("web_sdk") {
