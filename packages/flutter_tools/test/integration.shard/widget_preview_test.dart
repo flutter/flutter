@@ -19,23 +19,22 @@ import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const firstLaunchMessagesWeb = <String>[
+final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
+
+final firstLaunchMessagesWeb = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'Done loading previews.',
 ];
 
-const firstLaunchMessagesWebServer = <String>[
+final firstLaunchMessagesWebServer = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'main.dart is being served at',
   'Done loading previews.',
 ];
 
-const subsequentLaunchMessagesWeb = <String>[
-  'Launching the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
+final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
 
 void main() {
   late Directory tempDir;
@@ -60,7 +59,7 @@ void main() {
   });
 
   Future<void> runWidgetPreview({
-    required List<String> expectedMessages,
+    required List<Pattern> expectedMessages,
     Uri? dtdUri,
     bool useWebServer = false,
   }) async {
