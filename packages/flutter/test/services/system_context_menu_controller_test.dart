@@ -641,9 +641,11 @@ void main() {
     controller1.showWithItems(rect1, items1);
     expect(controller1.isVisible, isTrue);
 
+    controller1.hide();
+    expect(controller1.isVisible, isFalse);
+
     controller2.showWithItems(rect2, items2);
     expect(controller2.isVisible, isTrue);
-    expect(controller1.isVisible, isFalse);
 
     // Get the actual callback ID from the items.
     final String callbackId2 = (items2[0] as IOSSystemContextMenuItemDataCustom).callbackId;
@@ -700,7 +702,7 @@ void main() {
     ServicesBinding.systemContextMenuClient = null;
 
     expect(() async {
-      final ByteData message = const StandardMethodCodec().encodeMethodCall(
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
         const MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, 'test-id']),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(

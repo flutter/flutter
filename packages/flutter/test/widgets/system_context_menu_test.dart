@@ -999,7 +999,7 @@ void main() {
       final IOSSystemContextMenuItemCustom customItem1 = items[1] as IOSSystemContextMenuItemCustom;
       final IOSSystemContextMenuItemCustom customItem2 = items[2] as IOSSystemContextMenuItemCustom;
 
-      ByteData? message = const StandardMethodCodec().encodeMethodCall(
+      ByteData? message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
           0,
           customItem1.hashCode.toString(),
@@ -1013,7 +1013,7 @@ void main() {
       expect(customAction1Called, isTrue);
       expect(customAction2Called, isFalse);
 
-      message = const StandardMethodCodec().encodeMethodCall(
+      message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[
           0,
           customItem2.hashCode.toString(),
@@ -1087,7 +1087,7 @@ void main() {
       );
       final IOSSystemContextMenuItemCustom item = menu.items[0] as IOSSystemContextMenuItemCustom;
 
-      final ByteData message = const StandardMethodCodec().encodeMethodCall(
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -1174,7 +1174,7 @@ void main() {
       final IOSSystemContextMenuItemCustom customItem = items[1] as IOSSystemContextMenuItemCustom;
       final String callbackId = customItem.hashCode.toString();
 
-      final ByteData message = const StandardMethodCodec().encodeMethodCall(
+      final ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, callbackId]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -1270,7 +1270,7 @@ void main() {
       );
       final IOSSystemContextMenuItemCustom item1 = menu1.items[0] as IOSSystemContextMenuItemCustom;
 
-      ByteData message = const StandardMethodCodec().encodeMethodCall(
+      ByteData message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item1.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -1303,7 +1303,7 @@ void main() {
       );
       final IOSSystemContextMenuItemCustom item2 = menu2.items[0] as IOSSystemContextMenuItemCustom;
 
-      message = const StandardMethodCodec().encodeMethodCall(
+      message = const JSONMethodCodec().encodeMethodCall(
         MethodCall('ContextMenu.onPerformCustomAction', <dynamic>[0, item2.hashCode.toString()]),
       );
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
