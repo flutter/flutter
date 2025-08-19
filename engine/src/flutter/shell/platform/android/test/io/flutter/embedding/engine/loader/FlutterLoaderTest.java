@@ -463,9 +463,11 @@ public class FlutterLoaderTest {
       // This check works because the tests run in debug mode. If run in release (or JIT release)
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
+      String canonicalTestPath = testPath.toFile().getCanonicalPath();
+      String canonicalAotSharedLibraryNameArg = aotSharedNameArgPrefix + canonicalTestPath;
       assertTrue(
           "Args sent to FlutterJni.init incorrectly did not include path " + path,
-          actualArgs.contains(aotSharedLibraryNameArg));
+          actualArgs.contains(canonicalAotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
       // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
@@ -538,9 +540,11 @@ public class FlutterLoaderTest {
       // This check works because the tests run in debug mode. If run in release (or JIT release)
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
+      String canonicalTestPath = testPath.toFile().getCanonicalPath();
+      String canonicalAotSharedLibraryNameArg = aotSharedNameArgPrefix + canonicalTestPath;
       assertFalse(
-          "Args sent to FlutterJni.init incorrectly included path " + path,
-          actualArgs.contains(aotSharedLibraryNameArg));
+          "Args sent to FlutterJni.init incorrectly included canonical path " + canonicalTestPath,
+          actualArgs.contains(canonicalAotSharedLibraryNameArg));
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
       // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
