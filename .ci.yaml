@@ -6963,6 +6963,7 @@ targets:
   - name: Windows windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6976,6 +6977,7 @@ targets:
   - name: Windows_arm64 windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
