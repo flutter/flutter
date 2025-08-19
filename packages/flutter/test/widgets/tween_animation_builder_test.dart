@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/scheduler.dart';
 
 void main() {
   testWidgets('Animates forward when built', (WidgetTester tester) async {
@@ -392,5 +393,236 @@ void main() {
     expect(values, <Size>[const Size(10, 10)]);
     await tester.pump(const Duration(seconds: 2));
     expect(values, <Size>[const Size(10, 10)]);
+  });
+
+  group('TweenAnimationBuilder.repeat', () {
+    testWidgets('Repeats animation continuously', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      await tester.pumpWidget(
+        TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 0, end: 100),
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        ),
+      );
+      expect(values, <int>[0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100]);
+
+      await tester.pump();
+      expect(values, <int>[0, 50, 100, 0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100, 0, 50]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100, 0, 50, 100]);
+    });
+
+    testWidgets('Repeats with reverse', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      await tester.pumpWidget(
+        TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 0, end: 100),
+          reverse: true,
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        ),
+      );
+      expect(values, <int>[0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100, 50]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100, 50, 0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100, 50, 0, 50]);
+    });
+
+    testWidgets('Paused animation does not run', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      await tester.pumpWidget(
+        TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 0, end: 100),
+          paused: true,
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        ),
+      );
+      expect(values, <int>[0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0]);
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(values, <int>[0]);
+    });
+
+    testWidgets('Can pause and unpause animation', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      Widget buildWidget({required bool paused}) {
+        return TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 0, end: 100),
+          paused: paused,
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        );
+      }
+
+      await tester.pumpWidget(buildWidget(paused: false));
+      expect(values, <int>[0]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50]);
+      values.clear();
+
+      // Pause the animation
+      await tester.pumpWidget(buildWidget(paused: true));
+      expect(values, <int>[50]);
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(values, <int>[50]);
+      values.clear();
+
+      // Unpause the animation
+      await tester.pumpWidget(buildWidget(paused: false));
+      expect(values, <int>[50]);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values.length, 2);
+      expect(values.first, 50);
+      expect(values.last, closeTo(100, 5));
+    });
+
+    testWidgets('No animation when begin equals end', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      await tester.pumpWidget(
+        TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 100, end: 100),
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        ),
+      );
+      expect(values, <int>[100]);
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(values, <int>[100]);
+    });
+
+    testWidgets('Works with custom curve', (WidgetTester tester) async {
+      final List<double> values = <double>[];
+      await tester.pumpWidget(
+        TweenAnimationBuilder<double>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          curve: Curves.easeInOut,
+          builder: (BuildContext context, double value, Widget? child) {
+            values.add(value);
+            return const Placeholder();
+          },
+        ),
+      );
+      expect(values, <double>[0.0]);
+
+      await tester.pump(const Duration(milliseconds: 250));
+      // With easeInOut, at 25% of the animation we should be less than 0.25
+      expect(values.last, lessThan(0.25));
+      expect(values.last, greaterThan(0.0));
+
+      await tester.pump(const Duration(milliseconds: 250));
+      // At 50% we should be at 0.5
+      expect(values.last, closeTo(0.5, 0.01));
+
+      await tester.pump(const Duration(milliseconds: 250));
+      // At 75% we should be greater than 0.75
+      expect(values.last, greaterThan(0.75));
+      expect(values.last, lessThan(1.0));
+
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(values.last, 1.0);
+    });
+
+    testWidgets('Can switch between reverse modes', (WidgetTester tester) async {
+      final List<int> values = <int>[];
+      Widget buildWidget({required bool reverse}) {
+        return TweenAnimationBuilder<int>.repeat(
+          duration: const Duration(seconds: 1),
+          tween: IntTween(begin: 0, end: 100),
+          reverse: reverse,
+          builder: (BuildContext context, int i, Widget? child) {
+            values.add(i);
+            return const Placeholder();
+          },
+        );
+      }
+
+      await tester.pumpWidget(buildWidget(reverse: false));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(values, <int>[0, 50, 100]);
+
+      await tester.pump();
+      expect(values, <int>[0, 50, 100, 0]);
+      values.clear();
+
+      // Switch to reverse mode
+      await tester.pumpWidget(buildWidget(reverse: true));
+      await tester.pump(const Duration(milliseconds: 500));
+      final int lastValue = values.last;
+
+      // The animation should now be reversing
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(values.last, lessThan(lastValue));
+    });
+
+    testWidgets('Passes child to builder correctly', (WidgetTester tester) async {
+      const Widget childWidget = Text('Child');
+      Widget? receivedChild;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TweenAnimationBuilder<double>.repeat(
+            duration: const Duration(seconds: 1),
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            builder: (BuildContext context, double value, Widget? child) {
+              receivedChild = child;
+              return child ?? const Placeholder();
+            },
+            child: childWidget,
+          ),
+        ),
+      );
+
+      expect(receivedChild, childWidget);
+      expect(find.text('Child'), findsOneWidget);
+    });
   });
 }
