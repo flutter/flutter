@@ -3929,7 +3929,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
 
     throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary("An Element was inside its parent's visitChildren implementation."),
+      ErrorSummary("An Element's visitChildren implementation does not include some children."),
       DiagnosticsProperty<Set<Element>>('The offending child Elements were', activatedChildren),
       ErrorHint(
         "This usually indicates a bug in the parent $runtimeType's implementation. "
@@ -4701,6 +4701,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _deactivateFailedChildSilently(Element child) {
     try {
       child._parent = null;
+      assert(_debugChildren!.remove(child) || true);
       child.detachRenderObject();
       _deactivateFailedSubtreeRecursively(child);
     } catch (_) {
@@ -5592,6 +5593,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }());
     }
     assert(!_dirty);
+    assert(_debugVerifyVisitChildrenImplementation());
   }
 
   /// Cause the widget to update itself.
@@ -5909,7 +5911,9 @@ abstract class ComponentElement extends Element {
       );
       // _Make sure the old child subtree are deactivated and disposed.
       try {
-        _child?.deactivate();
+        if (_child case final Element oldChild? when oldChild._parent == this) {
+          deactivateChild(oldChild);
+        }
       } catch (_) {}
       _child = updateChild(null, built, slot);
     }
