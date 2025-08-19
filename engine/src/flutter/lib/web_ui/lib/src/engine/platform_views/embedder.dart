@@ -624,8 +624,13 @@ class PlatformViewEmbedder {
     _viewsToRecomposite.clear();
     _activeCompositionOrder.clear();
     _compositionOrder.clear();
+    for (final canvas in _activeComposition.canvases) {
+      canvas.displayCanvas?.dispose();
+      canvas.displayCanvas?.hostElement.remove();
+    }
     _activeComposition = Composition();
     debugBoundsCanvas?.dispose();
+    debugBoundsCanvas?.hostElement.remove();
     debugBoundsCanvas = null;
   }
 

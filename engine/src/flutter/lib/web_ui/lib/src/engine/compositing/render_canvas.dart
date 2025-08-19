@@ -33,8 +33,9 @@ class RenderCanvas extends DisplayCanvas {
   /// The root HTML element for this canvas.
   ///
   /// This element contains the canvas used to draw the UI. Unlike the canvas,
-  /// this element is permanent. It is never replaced or deleted, until this
-  /// canvas is disposed of via [dispose].
+  /// this element is permanent. It is never replaced or deleted: any users of
+  /// [RenderCanvas] which append the [hostElement] to the DOM are responsible
+  /// for removing it.
   ///
   /// Conversely, the canvas that lives inside this element can be swapped, for
   /// example, when the screen size changes, or when the WebGL context is lost
@@ -127,6 +128,6 @@ class RenderCanvas extends DisplayCanvas {
 
   @override
   void dispose() {
-    hostElement.remove();
+    // No extra cleanup needed.
   }
 }
