@@ -6,6 +6,7 @@ package com.flutter.gradle.tasks
 
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.IntentFilterCheck
+import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTaskTest.DeeplinkManifestBuilder.PathOverride
 import io.mockk.every
 import io.mockk.mockk
 import org.gradle.api.file.RegularFileProperty
@@ -243,7 +244,6 @@ class DeepLinkJsonFromManifestTaskTest {
 
     @Test
     fun multipleIntentFilters() {
-        // TODO start here
         val expectedLink1 =
             Deeplink(
                 "custom",
@@ -363,26 +363,117 @@ class DeepLinkJsonFromManifestTaskTest {
         }
     }
 
+    @Test
+    fun multiplePathTypes() {
+        val expectedLink1 =
+            Deeplink(
+                "custom",
+                "filter.one",
+                "/product.*",
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true, hasBrowsableCategory = true)
+            )
+        val expectedLink2 =
+            Deeplink(
+                "https",
+                "filter.two",
+                "/product2.*",
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true, hasDefaultCategory = true)
+            )
+        val expectedLink3 =
+            Deeplink(
+                "https",
+                "filter.three",
+                "prefix",
+                IntentFilterCheck(hasAutoVerify = true, hasActionView = true)
+            )
+        val expectedLink4 =
+            Deeplink(
+                "https",
+                "filter.four",
+                "suffix",
+                IntentFilterCheck(hasAutoVerify = true)
+            )
+        // pathOverride requires all links to have a different host
+        val pathOverride =
+            PathOverride { deeplink ->
+                if (expectedLink1.host == deeplink.host) {
+                    return@PathOverride """android:pathAdvancedPattern="${deeplink.path}""""
+                }
+                if (expectedLink2.host == deeplink.host) {
+                    return@PathOverride """android:pathPattern="${deeplink.path}""""
+                }
+                if (expectedLink3.host == deeplink.host) {
+                    return@PathOverride """android:pathPrefix="${deeplink.path}""""
+                }
+                if (expectedLink4.host == deeplink.host) {
+                    return@PathOverride """android:pathSuffix="${deeplink.path}""""
+                }
+                // Same as default.
+                return@PathOverride """android:path="${deeplink.path}""""
+            }
+        val manifestContent =
+            DeeplinkManifestBuilder()
+                .addActivity(defaultActivity)
+                .addDeeplinks(defaultActivity, listOf(expectedLink1, expectedLink2, expectedLink3, expectedLink4))
+                .setDeeplinkPathOverride(pathOverride)
+                .build()
+        val manifestFile = createTempManifestFile(manifestContent)
+        try {
+            val appLinkSettings =
+                DeepLinkJsonFromManifestTaskHelper.createAppLinkSettings(
+                    defaultNamespace,
+                    manifestFile
+                )
+            assertEquals(4, appLinkSettings.deeplinks.size)
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedLink1,
+                "Did not find $expectedLink1 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+            assertContains(
+                appLinkSettings.deeplinks,
+                expectedLink2,
+                "Did not find $expectedLink2 in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+            val prefix = Deeplink(expectedLink3.scheme, expectedLink3.host, "${expectedLink3.path}.*", expectedLink1.intentFilterCheck)
+            assertContains(
+                appLinkSettings.deeplinks,
+                prefix,
+                "Did not find $prefix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+            val suffix = Deeplink(expectedLink4.scheme, expectedLink4.host, ".*${expectedLink4.path}", expectedLink4.intentFilterCheck)
+            assertContains(
+                appLinkSettings.deeplinks,
+                suffix,
+                "Did not find $suffix in ${appLinkSettings.deeplinks.joinToString { it.toJson().toString() }}"
+            )
+        } catch (e: SAXParseException) {
+            fail("Failed to parse Manifest:\n$manifestContent", e)
+        }
+    }
+
     /**
      * Helper class for creating valid android manifest file that contains deep links.
      */
     class DeeplinkManifestBuilder {
-        val activitySectionDefault =
-            """
-            <activity android:name=".MainActivity">
-                    <intent-filter>
-                        <action android:name="android.intent.action.VIEW" />
-                        <category android:name="android.intent.category.DEFAULT" />
-                        <category android:name="android.intent.category.BROWSABLE" />
-                        <data android:scheme="http" />
-                    </intent-filter>
-                </activity>
-            """.trimIndent()
         private var namespace: String = "dev.flutter.example"
 
         private var deeplinkEnabled = true
         private val activitySet: MutableSet<String> = mutableSetOf()
         private val deeplinkMap: MutableMap<String, List<Deeplink>> = mutableMapOf()
+
+        fun interface PathOverride {
+            /**
+             * Allow's for per deeplink override of manifest entry value.
+             */
+            fun generatePath(deeplink: Deeplink): String
+        }
+
+        // By default use android:path with the passed in deeplink.path contents.
+        private var pathOverride =
+            PathOverride { deeplink ->
+                deeplink.path?.let { path -> """android:path="$path"""" } ?: ""
+            }
 
         fun setNamespace(namespace: String): DeeplinkManifestBuilder {
             this.namespace = namespace
@@ -404,6 +495,11 @@ class DeepLinkJsonFromManifestTaskTest {
 
         fun setDeeplinkEnabled(enabled: Boolean): DeeplinkManifestBuilder {
             deeplinkEnabled = enabled
+            return this
+        }
+
+        fun setDeeplinkPathOverride(override: PathOverride): DeeplinkManifestBuilder {
+            pathOverride = override
             return this
         }
 
@@ -440,7 +536,7 @@ class DeepLinkJsonFromManifestTaskTest {
                         val scheme =
                             deeplink.scheme?.let { scheme -> """android:scheme="$scheme"""" } ?: ""
                         val host = deeplink.host?.let { host -> """android:host="$host"""" } ?: ""
-                        val path = deeplink.path?.let { path -> """android:path="$path"""" } ?: ""
+                        val path = pathOverride.generatePath(deeplink)
                         activitySection += "\t\t\t<data $scheme $host $path/>\n"
                         activitySection += "\t\t" + """</intent-filter>""" + "\n"
                     }
