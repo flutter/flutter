@@ -24,6 +24,7 @@
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/layer_raster_cache_item.h"
+#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/backtrace.h"
@@ -5029,6 +5030,170 @@ TEST_F(ShellTest, ReleaseResourceContextWhenIOManagerIsDeleted) {
 
   DestroyShell(std::move(child_shell), task_runners);
   ASSERT_TRUE(called_release_resource_context);
+}
+
+ViewportMetrics* MakeViewportMetrics(double width,
+                                     double height,
+                                     double min_width_constraint,
+                                     double max_width_constraint,
+                                     double min_height_constraint,
+                                     double max_height_constraint) {
+  return new ViewportMetrics(1.0,                    // p_device_pixel_ratio
+                             width,                  // p_physical_width
+                             height,                 // p_physical_height
+                             min_width_constraint,   // p_min_width_constraint,
+                             max_width_constraint,   // p_max_width_constraint,
+                             min_height_constraint,  // p_min_height_constraint,
+                             max_height_constraint,  // p_max_height_constraint,
+                             0,                      // p_physical_padding_top
+                             0,                      // p_physical_padding_right
+                             0,   // p_physical_padding_bottom
+                             0,   // p_physical_padding_left
+                             0,   // p_physical_view_inset_top,
+                             0,   // p_physical_view_inset_right,
+                             0,   // p_physical_view_inset_bottom,
+                             0,   // p_physical_view_inset_left,
+                             0,   // p_physical_system_gesture_inset_top,
+                             0,   // p_physical_system_gesture_inset_right,
+                             0,   // p_physical_system_gesture_inset_bottom,
+                             0,   // p_physical_system_gesture_inset_left,
+                             22,  // p_physical_touch_slop,
+                             {},  // p_physical_display_features_bounds,
+                             {},  // p_physical_display_features_type,
+                             {},  // p_physical_display_features_state,
+                             0    // p_display_id
+  );
+}
+
+TEST_F(ShellTest, InvalidViewportMetricsShouldBeRejected) {
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      -1,   // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Negative width constraint.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      -1,   // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Negative width constraint.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      -1,   // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Negative height constraint.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      -1    // p_max_height_constraint,
+      ));   // Negative height constraint.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      0,    // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Width is 0 and the constraints are tight.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      0,    // p_physical_height
+      0,    // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Height is 0 and constraints are tight.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      50,   // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      0     // p_max_height_constraint,
+      ));   // Width is outside of width constraints.
+  ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
+      100,  // p_physical_width
+      100,  // p_physical_height
+      0,    // p_min_width_constraint,
+      0,    // p_max_width_constraint,
+      0,    // p_min_height_constraint,
+      50    // p_max_height_constraint,
+      ));   // Height is outside of height constraints.
+}
+
+TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
+  Settings settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+        shell->GetPlatformView()->SetViewportMetrics(
+            kImplicitViewId,
+            {
+                1.0,   // p_device_pixel_ratio
+                500,   // p_physical_width
+                800,   // p_physical_height
+                1,     // p_min_width_constraint,
+                1000,  // p_max_width_constraint,
+                1,     // p_min_height_constraint,
+                1000,  // p_max_height_constraint,
+                0,     // p_physical_padding_top
+                0,     // p_physical_padding_right
+                0,     // p_physical_padding_bottom
+                0,     // p_physical_padding_left
+                0,     // p_physical_view_inset_top,
+                0,     // p_physical_view_inset_right,
+                0,     // p_physical_view_inset_bottom,
+                0,     // p_physical_view_inset_left,
+                0,     // p_physical_system_gesture_inset_top,
+                0,     // p_physical_system_gesture_inset_right,
+                0,     // p_physical_system_gesture_inset_bottom,
+                0,     // p_physical_system_gesture_inset_left,
+                22,    // p_physical_touch_slop,
+                {},    // p_physical_display_features_bounds,
+                {},    // p_physical_display_features_type,
+                {},    // p_physical_display_features_state,
+                0      // p_display_id
+            });
+      });
+  auto layer_tree =
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                  /*frame_size=*/DlISize(100, 100));
+  ASSERT_FALSE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
+                                                 *layer_tree));
+  auto over_width =
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                  /*frame_size=*/DlISize(1010, 100));
+  ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
+                                                *over_width));
+  auto over_height =
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                  /*frame_size=*/DlISize(100, 1010));
+  ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
+                                                *over_height));
+  auto min_width = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                               /*frame_size=*/DlISize(1, 100));
+  ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
+                                                *min_width));
+  auto min_height = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                                /*frame_size=*/DlISize(100, 1));
+  ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
+                                                *min_height));
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing

@@ -163,6 +163,17 @@ class ShellTest : public FixtureTest {
 
   static void TurnOffGPU(Shell* shell, bool value);
 
+  static bool ValidateViewportMetrics(double width,
+                                      double height,
+                                      double minWidth,
+                                      double maxWidth,
+                                      double minHeight,
+                                      double maxHeight);
+
+  static bool ShouldDiscardLayerTree(Shell* shell,
+                                     int64_t view_id,
+                                     const flutter::LayerTree& tree);
+
  private:
   ThreadHost thread_host_;
 

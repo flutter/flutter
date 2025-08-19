@@ -446,6 +446,9 @@ class Shell final : public PlatformView::Delegate,
   InferVmInitDataFromSettings(Settings& settings);
 
  private:
+  // Validate Viewport Metrics
+  static bool ValidateViewportMetrics(const ViewportMetrics& metrics);
+
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
                          rapidjson::Document*)>;

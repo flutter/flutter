@@ -1072,24 +1072,59 @@ void Shell::OnPlatformViewScheduleFrame() {
                                     });
 }
 
+bool Shell::ValidateViewportMetrics(const ViewportMetrics& metrics) {
+  // Pixel ratio cannot be zero.
+  if (metrics.device_pixel_ratio <= 0) {
+    return false;
+  }
+
+  // If negative values are passed in.
+  if (metrics.physical_width < 0 || metrics.physical_height < 0 ||
+      metrics.min_width_constraint < 0 || metrics.max_width_constraint < 0 ||
+      metrics.min_height_constraint < 0 || metrics.max_height_constraint < 0) {
+    return false;
+  }
+
+  // If width is zero and the constraints are tight.
+  if (metrics.physical_width == 0 &&
+      metrics.min_width_constraint == metrics.max_width_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the width fits in the constraints
+  if (metrics.min_width_constraint != metrics.max_width_constraint) {
+    if (metrics.min_width_constraint > metrics.physical_width ||
+        metrics.physical_width > metrics.max_width_constraint) {
+      return false;
+    }
+  }
+
+  // If height is zero and the constraints are tight.
+  if (metrics.physical_height == 0 &&
+      metrics.min_height_constraint == metrics.max_height_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the height fits in the constraints
+  if (metrics.min_height_constraint != metrics.max_height_constraint) {
+    if (metrics.min_height_constraint > metrics.physical_height ||
+        metrics.physical_height > metrics.max_height_constraint) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
                                              const ViewportMetrics& metrics) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  if (metrics.device_pixel_ratio <= 0) {
-    return;
-  }
-
-  if (metrics.physical_width == 0 &&
-      !(metrics.min_width_constraint > 0 || metrics.max_width_constraint > 0)) {
-    FML_LOG(ERROR) << "Ignoring invalid viewport metrics width!";
-    return;
-  }
-  if (metrics.physical_height == 0 && !(metrics.min_height_constraint > 0 ||
-                                        metrics.max_height_constraint > 0)) {
-    FML_LOG(ERROR) << "Ignoring invalid viewport metrics height!";
+  if (!Shell::ValidateViewportMetrics(metrics)) {
+    // Ignore invalid view-port metrics.
+    FML_LOG(ERROR) << "Ignoring invalid viewport metrics";
     return;
   }
 
