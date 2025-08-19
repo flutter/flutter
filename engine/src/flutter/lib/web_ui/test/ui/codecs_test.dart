@@ -153,6 +153,11 @@ Future<void> testMain() async {
 
     final List<TestCodec> testCodecs = <TestCodec>[];
     for (final String testFile in testFiles) {
+      if (testFile == 'xOffsetTooBig.gif' && isSafari) {
+        // This file causes Safari to crash with `EncodingError`. See:
+        // https://github.com/flutter/flutter/issues/152709
+        continue;
+      }
       testCodecs.add(
         UrlTestCodec(
           testFile,
