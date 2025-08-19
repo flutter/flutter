@@ -2663,10 +2663,10 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     // 1. Trigger _maybeStartDebouncing, which sets _isDebouncing = true and schedules _doStartDebouncing.
     testElement.dispatchEvent(context.primaryDown());
 
-    // At this point, _isDebouncing is true, but _doStartDebouncing (which sets _state and creates the Timer)
-    // has not yet executed because it was scheduled with Timer.run().
+    // At this point, debouncing has been scheduled but hasn't started yet.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
-    expect(PointerBinding.clickDebouncer.debugState, isNull); // _state is still null
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.started, isFalse);
 
     // 2. Simulate a scenario where reset() is called before _doStartDebouncing gets a chance to run.
     // This could happen due to a hot restart or other lifecycle events.
@@ -2700,11 +2700,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.dispatchEvent(context.primaryDown());
     // ClickDebouncer does not start debouncing right away.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
-    expect(PointerBinding.clickDebouncer.debugState, isNull);
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.started, isFalse);
     // Instead, it waits until the end of the event loop.
     await nextEventLoop();
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.started, isTrue);
 
     final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
       'clientX': testElement.getBoundingClientRect().x,
@@ -2714,6 +2716,48 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+  });
+
+  testWithSemantics('Does not throw when multiple events in the same event loop', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, isTrue);
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+
+    // A `pointerdown` kicks off the debouncing process.
+    testElement.dispatchEvent(context.primaryDown());
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(1));
+
+    // A `pointerup` in the same event loop should not throw.
+    expect(() => testElement.dispatchEvent(context.primaryUp()), returnsNormally);
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(PointerBinding.clickDebouncer.debugState, isNotNull);
+    expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(2));
+
+    // A `click` in the same event loop should cancel debouncing.
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    expect(
+      () => PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true),
+      returnsNormally,
+    );
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
+
+    // The click was sent as a semantics tap.
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+
+    // After the event loop, there should be nothing.
+    await nextEventLoop();
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(PointerBinding.clickDebouncer.debugState, isNull);
   });
 
   testWithSemantics('Accumulates pointer events starting from pointerdown', () async {
