@@ -102,8 +102,8 @@ class WebBuilder {
           defines: <String, String>{
             kTargetFile: target,
             kHasWebPlugins: hasWebPlugins.toString(),
-            if (baseHref != null) kBaseHref: baseHref,
-            if (staticAssetsUrl != null) kStaticAssetsUrl: staticAssetsUrl,
+            kBaseHref: ?baseHref,
+            kStaticAssetsUrl: ?staticAssetsUrl,
             kServiceWorkerStrategy: serviceWorkerStrategy.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
           },
