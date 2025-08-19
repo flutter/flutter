@@ -81,4 +81,6 @@ class FakeWatcher extends Fake implements Watcher {
 
   @override
   Future<void> get ready => Future.value();
+
+  Future<void> close() => controller.close();
 }
