@@ -471,9 +471,9 @@ public class FlutterLoader {
   }
 
   /**
-   * Returns the AOT shared library name flag with the canonical path to the library if the library
-   * that engine will use to load application's Dart code lives within a path we consider safe,
-   * which is a path within the application's internal storage. Otherwise, returns null.
+   * Returns the AOT shared library name flag with the canonical path to the library that the engine
+   * will use to load application's Dart code if it lives within a path we consider safe, which is a
+   * path within the application's internal storage. Otherwise, returns null.
    *
    * <p>If the library lives within the application's internal storage, this means that the
    * application developer either explicitly placed the library there or set the Android Gradle
