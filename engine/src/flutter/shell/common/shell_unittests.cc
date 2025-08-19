@@ -5032,39 +5032,6 @@ TEST_F(ShellTest, ReleaseResourceContextWhenIOManagerIsDeleted) {
   ASSERT_TRUE(called_release_resource_context);
 }
 
-ViewportMetrics* MakeViewportMetrics(double width,
-                                     double height,
-                                     double min_width_constraint,
-                                     double max_width_constraint,
-                                     double min_height_constraint,
-                                     double max_height_constraint) {
-  return new ViewportMetrics(1.0,                    // p_device_pixel_ratio
-                             width,                  // p_physical_width
-                             height,                 // p_physical_height
-                             min_width_constraint,   // p_min_width_constraint,
-                             max_width_constraint,   // p_max_width_constraint,
-                             min_height_constraint,  // p_min_height_constraint,
-                             max_height_constraint,  // p_max_height_constraint,
-                             0,                      // p_physical_padding_top
-                             0,                      // p_physical_padding_right
-                             0,   // p_physical_padding_bottom
-                             0,   // p_physical_padding_left
-                             0,   // p_physical_view_inset_top,
-                             0,   // p_physical_view_inset_right,
-                             0,   // p_physical_view_inset_bottom,
-                             0,   // p_physical_view_inset_left,
-                             0,   // p_physical_system_gesture_inset_top,
-                             0,   // p_physical_system_gesture_inset_right,
-                             0,   // p_physical_system_gesture_inset_bottom,
-                             0,   // p_physical_system_gesture_inset_left,
-                             22,  // p_physical_touch_slop,
-                             {},  // p_physical_display_features_bounds,
-                             {},  // p_physical_display_features_type,
-                             {},  // p_physical_display_features_state,
-                             0    // p_display_id
-  );
-}
-
 TEST_F(ShellTest, InvalidViewportMetricsShouldBeRejected) {
   ASSERT_FALSE(ShellTest::ValidateViewportMetrics(
       100,  // p_physical_width
