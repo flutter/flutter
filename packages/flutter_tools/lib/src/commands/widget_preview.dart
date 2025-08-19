@@ -412,7 +412,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         if (devices.length > 1) {
           // Prefer Google Chrome as the target browser.
           device =
-              devices.singleWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
+              devices.firstWhereOrNull((device) => device is GoogleChromeDevice) ?? devices.first;
 
           logger.printTrace(
             'Detected ${devices.length} web devices (${devices.map((e) => e.displayName).join(', ')}). '
