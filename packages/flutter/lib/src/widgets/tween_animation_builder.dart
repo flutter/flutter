@@ -13,6 +13,8 @@ import 'package:flutter/animation.dart';
 
 import 'framework.dart';
 import 'implicit_animations.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 import 'value_listenable_builder.dart';
 
 /// [Widget] builder that animates a property of a [Widget] to a target value
@@ -57,6 +59,7 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Ownership of the [Tween]
 ///
+/// {@template flutter.widgets.TweenAnimationBuilder.tween.ownership}
 /// The [TweenAnimationBuilder] takes full ownership of the provided [tween]
 /// instance and it will mutate it. Once a [Tween] has been passed to a
 /// [TweenAnimationBuilder], its properties should not be accessed or changed
@@ -65,6 +68,7 @@ import 'value_listenable_builder.dart';
 /// It is good practice to never store a [Tween] provided to a
 /// [TweenAnimationBuilder] in an instance variable to avoid accidental
 /// modifications of the [Tween].
+/// {@endtemplate}
 ///
 /// ## Example Code
 ///
@@ -117,99 +121,7 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     required this.builder,
     super.onEnd,
     this.child,
-  }) : _isRepeating = false,
-       _reverse = false,
-       _paused = false;
-
-  /// Creates a [TweenAnimationBuilder] that repeats its animation.
-  ///
-  /// The animation continuously cycles, restarting from [tween.begin] each time
-  /// it reaches [tween.end]. This is useful for creating animations that need to
-  /// run indefinitely, such as loading spinners, pulsing effects, or continuous
-  /// rotations.
-  ///
-  /// {@template flutter.widgets.TweenAnimationBuilder.repeat.reverse}
-  /// The [reverse] parameter controls the animation direction:
-  ///  * When `false` (default), the animation repeats in one direction, jumping
-  ///    back to the beginning when it completes.
-  ///  * When `true`, the animation reverses direction when it reaches the end,
-  ///    creating a back-and-forth motion.
-  /// {@endtemplate}
-  ///
-  /// {@template flutter.widgets.TweenAnimationBuilder.repeat.paused}
-  /// The [paused] parameter controls whether the animation is running:
-  ///  * When `false` (default), the animation runs continuously.
-  ///  * When `true`, the animation pauses at its current value.
-  ///  * Changing from `true` to `false` resumes the animation from where it paused.
-  /// {@endtemplate}
-  ///
-  /// Unlike the default constructor, [onEnd] is not supported for repeating
-  /// animations since they never end.
-  ///
-  /// {@tool snippet}
-  /// This example shows a spinning square that rotates continuously:
-  ///
-  /// ```dart
-  /// TweenAnimationBuilder<double>.repeat(
-  ///   tween: Tween<double>(begin: 0, end: 1),
-  ///   duration: const Duration(seconds: 2),
-  ///   builder: (BuildContext context, double value, Widget? child) {
-  ///     return Transform.rotate(
-  ///       angle: value * 2 * math.pi,
-  ///       child: Container(
-  ///         width: 100,
-  ///         height: 100,
-  ///         color: Colors.green,
-  ///       ),
-  ///     );
-  ///   },
-  /// )
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// This example shows a pulsing effect using the [reverse] parameter:
-  ///
-  /// ```dart
-  /// TweenAnimationBuilder<double>.repeat(
-  ///   tween: Tween<double>(begin: 0.8, end: 1.2),
-  ///   duration: const Duration(seconds: 1),
-  ///   reverse: true,
-  ///   builder: (BuildContext context, double value, Widget? child) {
-  ///     return Transform.scale(
-  ///       scale: value,
-  ///       child: child,
-  ///     );
-  ///   },
-  ///   child: const Icon(Icons.favorite, color: Colors.red, size: 100),
-  /// )
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [AnimationController.repeat], which this constructor replaces for simple use cases.
-  ///  * [TweenAnimationBuilder], the default constructor for single animations.
-  ///
-  /// ## Ownership
-  ///
-  /// The [TweenAnimationBuilder] takes full ownership of the provided [tween]
-  /// instance and mutates it. Once a [Tween] has been passed to a
-  /// [TweenAnimationBuilder], its properties should not be accessed or changed
-  /// anymore to avoid interference with the [TweenAnimationBuilder].
-  const TweenAnimationBuilder.repeat({
-    super.key,
-    required this.tween,
-    required super.duration,
-    super.curve = Curves.linear,
-    bool reverse = false,
-    bool paused = false,
-    required this.builder,
-    this.child,
-  }) : _isRepeating = true,
-       _reverse = reverse,
-       _paused = paused,
-       super(onEnd: null);
+  });
 
   /// Defines the target value for the animation.
   ///
@@ -263,52 +175,9 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   /// performance significantly in some cases and is therefore a good practice.
   final Widget? child;
 
-  /// Whether this [TweenAnimationBuilder] is configured to repeat.
-  ///
-  /// When true, the widget uses [_RepeatingTweenAnimationBuilderState] which
-  /// implements repeating animation behavior. When false, it uses the standard
-  /// [_TweenAnimationBuilderState] for single animations.
-  ///
-  /// This is set to true when using [TweenAnimationBuilder.repeat] constructor
-  /// and false when using the default constructor.
-  final bool _isRepeating;
-
-  /// Whether the repeating animation should reverse direction.
-  ///
-  /// When true, the animation alternates between playing forward
-  /// (from [tween.begin] to [tween.end]) and backward (from [tween.end]
-  /// to [tween.begin]).
-  ///
-  /// This value is only used when [_isRepeating] is true.
-  ///
-  /// For example, with a [Tween<double>] from 0.0 to 1.0:
-  ///  * When false: animates 0.0 → 1.0, 0.0 → 1.0, 0.0 → 1.0, ...
-  ///  * When true: animates 0.0 → 1.0 → 0.0 → 1.0 → 0.0 → ...
-  ///
-  /// Defaults to false in [TweenAnimationBuilder.repeat].
-  final bool _reverse;
-
-  /// Whether the repeating animation is currently paused.
-  ///
-  /// When true, the animation stops at its current value and does not progress.
-  /// When changed from true to false, the animation resumes from where it was paused.
-  ///
-  /// This value is only used when [_isRepeating] is true.
-  ///
-  /// This is useful for scenarios where you want to conditionally run an animation,
-  /// such as:
-  ///  * A loading spinner that only animates when data is being fetched
-  ///  * A progress indicator that pauses when a process is complete
-  ///  * An attention-grabbing animation that stops when the user interacts
-  ///
-  /// Defaults to false in [TweenAnimationBuilder.repeat].
-  final bool _paused;
-
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
-    return _isRepeating
-        ? _RepeatingTweenAnimationBuilderState<T>()
-        : _TweenAnimationBuilderState<T>();
+    return _TweenAnimationBuilderState<T>();
   }
 }
 
@@ -348,61 +217,197 @@ class _TweenAnimationBuilderState<T extends Object?>
   }
 }
 
+/// A widget that repeats a [Tween] animation indefinitely.
+///
+/// This widget is similar to [TweenAnimationBuilder] but automatically repeats
+/// the animation when it completes. It's useful for creating animations that
+/// need to run continuously, such as loading spinners, pulsing effects, or
+/// rotating widgets.
+///
+/// {@template flutter.widgets.RepeatingTweenAnimationBuilder.reverse}
+/// The [reverse] parameter controls the animation direction:
+///  * When `false` (default), the animation repeats in one direction, jumping
+///    back to the beginning when it completes.
+///  * When `true`, the animation reverses direction when it reaches the end,
+///    creating a back-and-forth motion.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.RepeatingTweenAnimationBuilder.paused}
+/// The [paused] parameter controls whether the animation is running:
+///  * When `false` (default), the animation runs continuously.
+///  * When `true`, the animation pauses at its current value.
+///  * Changing from `true` to `false` resumes the animation from where it paused.
+/// {@endtemplate}
+///
+/// {@macro flutter.widgets.TweenAnimationBuilder.tween.ownership}
+///
+/// {@tool snippet}
+/// This example shows a spinning square that rotates continuously:
+///
+/// ```dart
+/// RepeatingTweenAnimationBuilder<double>(
+///   tween: Tween<double>(begin: 0, end: 1),
+///   duration: const Duration(seconds: 2),
+///   builder: (BuildContext context, double value, Widget? child) {
+///     return Transform.rotate(
+///       angle: value * 2 * math.pi,
+///       child: Container(
+///         width: 100,
+///         height: 100,
+///         color: Colors.green,
+///       ),
+///     );
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows a pulsing effect using the [reverse] parameter:
+///
+/// ```dart
+/// RepeatingTweenAnimationBuilder<double>(
+///   tween: Tween<double>(begin: 0.8, end: 1.2),
+///   duration: const Duration(seconds: 1),
+///   reverse: true,
+///   builder: (BuildContext context, double value, Widget? child) {
+///     return Transform.scale(
+///       scale: value,
+///       child: child,
+///     );
+///   },
+///   child: const Icon(Icons.favorite, color: Colors.red, size: 100),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [TweenAnimationBuilder], for single animations that run once.
+///  * [AnimationController.repeat], which this widget replaces for simple use cases.
+class RepeatingTweenAnimationBuilder<T extends Object?> extends StatefulWidget {
+  /// Creates a [RepeatingTweenAnimationBuilder].
+  ///
+  /// The [tween], [duration], and [builder] arguments are required.
+  const RepeatingTweenAnimationBuilder({
+    super.key,
+    required this.tween,
+    required this.duration,
+    this.curve = Curves.linear,
+    this.reverse = false,
+    this.paused = false,
+    required this.builder,
+    this.child,
+  });
+
+  /// Defines the target value for the animation.
+  ///
+  /// The animation continuously cycles from [Tween.begin] to [Tween.end].
+  final Tween<T> tween;
+
+  /// The duration of the animation.
+  final Duration duration;
+
+  /// The curve to apply when animating the value.
+  final Curve curve;
+
+  /// Called every time the animation value changes.
+  ///
+  /// The current animation value is passed to the builder along with the
+  /// [child]. The builder should build a [Widget] based on the current
+  /// animation value and incorporate the [child] into it, if it is non-null.
+  final ValueWidgetBuilder<T> builder;
+
+  /// The child widget to pass to the builder.
+  ///
+  /// If a builder callback's return value contains a subtree that does not
+  /// depend on the animation, it's more efficient to build that subtree once
+  /// instead of rebuilding it on every animation tick.
+  final Widget? child;
+
+  /// Whether the animation should reverse direction when it reaches the end.
+  ///
+  /// {@macro flutter.widgets.RepeatingTweenAnimationBuilder.reverse}
+  final bool reverse;
+
+  /// Whether the animation is currently paused.
+  ///
+  /// {@macro flutter.widgets.RepeatingTweenAnimationBuilder.paused}
+  final bool paused;
+
+  @override
+  State<RepeatingTweenAnimationBuilder<T>> createState() {
+    return _RepeatingTweenAnimationBuilderState<T>();
+  }
+}
+
 class _RepeatingTweenAnimationBuilderState<T extends Object?>
-    extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
-  Tween<T>? _currentTween;
+    extends State<RepeatingTweenAnimationBuilder<T>>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<T> _animation;
 
   @override
   void initState() {
-    _currentTween = widget.tween;
-    _currentTween!.begin ??= _currentTween!.end;
     super.initState();
-    // After parent initialization, reset to begin value and start repeating
-    if (!widget._paused && _currentTween!.begin != _currentTween!.end) {
-      // Reset the controller to the beginning value to match AnimationController.repeat() behavior
-      controller.value = 0.0;
-      if (widget._reverse) {
-        controller.repeat(reverse: true);
-      } else {
-        controller.repeat();
-      }
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+
+    _animation = widget.tween.animate(CurvedAnimation(parent: _controller, curve: widget.curve));
+
+    // Start the repeating animation
+    if (!widget.paused) {
+      _controller.repeat(reverse: widget.reverse);
     }
   }
 
   @override
-  void didUpdateWidget(TweenAnimationBuilder<T> oldWidget) {
+  void didUpdateWidget(RepeatingTweenAnimationBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget._paused != oldWidget._paused || widget._reverse != oldWidget._reverse) {
-      if (widget._paused) {
-        controller.stop();
-      } else if (_currentTween!.begin != _currentTween!.end) {
-        if (widget._reverse) {
-          controller.repeat(reverse: true);
-        } else {
-          controller.repeat();
-        }
+
+    // Update duration if changed
+    if (widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
+    }
+
+    // Update curve if changed
+    if (widget.curve != oldWidget.curve) {
+      _animation = widget.tween.animate(CurvedAnimation(parent: _controller, curve: widget.curve));
+    }
+
+    // Handle tween changes
+    if (widget.tween != oldWidget.tween) {
+      _animation = widget.tween.animate(CurvedAnimation(parent: _controller, curve: widget.curve));
+    }
+
+    // Handle pause/resume
+    if (widget.paused != oldWidget.paused) {
+      if (widget.paused) {
+        _controller.stop(canceled: false);
+      } else {
+        _controller.repeat(reverse: widget.reverse);
       }
+    }
+
+    // Handle reverse mode change
+    if (!widget.paused && widget.reverse != oldWidget.reverse) {
+      _controller.repeat(reverse: widget.reverse);
     }
   }
 
   @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    assert(
-      widget.tween.end != null,
-      'Tween provided to TweenAnimationBuilder.repeat must have non-null Tween.end value.',
-    );
-    _currentTween =
-        visitor(_currentTween, widget.tween.end, (dynamic value) {
-              assert(false);
-              throw StateError(
-                'Constructor will never be called because null is never provided as current tween.',
-              );
-            })
-            as Tween<T>?;
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget? child) {
+        return widget.builder(context, _animation.value, child);
+      },
+      child: widget.child,
+    );
   }
 }

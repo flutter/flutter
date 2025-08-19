@@ -40,7 +40,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Circular progress indicator', style: Theme.of(context).textTheme.titleLarge),
-            TweenAnimationBuilder<double>.repeat(
+            RepeatingTweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0.0, end: 1.0),
               duration: const Duration(seconds: 2),
               reverse: true,

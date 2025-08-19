@@ -30,7 +30,7 @@ class RelativePositionedTransitionExample extends StatelessWidget {
         final Size biggest = constraints.biggest;
         return Stack(
           children: <Widget>[
-            TweenAnimationBuilder<double>.repeat(
+            RepeatingTweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0.0, end: 1.0),
               duration: const Duration(seconds: 2),
               reverse: true,

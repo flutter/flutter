@@ -85,7 +85,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator> {
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(seconds: 1),
       paused: !widget.animating,
