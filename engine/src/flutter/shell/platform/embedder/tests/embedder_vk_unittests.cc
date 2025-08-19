@@ -27,7 +27,7 @@ namespace testing {
 using EmbedderTest = testing::EmbedderTest;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Notice: Vulkan-specific tests live here; GL-only tests are in embedder_gl_unittests.cc.
+// Notice: Other Vulkan unit tests exist in embedder_gl_unittests.cc.
 //         See https://github.com/flutter/flutter/issues/134322
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -131,5 +131,3 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
 
 }  // namespace testing
 }  // namespace flutter
-
-// NOLINTEND(clang-analyzer-core.StackAddressEscape)
