@@ -31,7 +31,7 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: TweenAnimationBuilder<double>.repeat(
+        child: RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0, end: 1),
           duration: const Duration(seconds: 2),
           curve: Curves.linear,

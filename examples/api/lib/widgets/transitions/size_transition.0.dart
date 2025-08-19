@@ -28,7 +28,7 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: TweenAnimationBuilder<double>.repeat(
+      body: RepeatingTweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: 1),
         duration: const Duration(seconds: 3),
         curve: Curves.fastOutSlowIn,

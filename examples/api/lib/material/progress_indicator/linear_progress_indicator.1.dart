@@ -38,7 +38,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Linear progress indicator', style: TextStyle(fontSize: 20)),
-            TweenAnimationBuilder<double>.repeat(
+            RepeatingTweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: 1),
               duration: const Duration(seconds: 2),
               reverse: true,

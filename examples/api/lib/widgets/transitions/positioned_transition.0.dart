@@ -28,7 +28,7 @@ class PositionedTransitionExample extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
-        return TweenAnimationBuilder<double>.repeat(
+        return RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
           reverse: true,

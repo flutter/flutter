@@ -492,7 +492,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
     final TextDirection textDirection = Directionality.of(context);
     final bool isDeterminate = widget.value != null;
 
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       paused: isDeterminate,
@@ -926,19 +926,17 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
   }
 
   Widget _buildAnimation() {
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       paused: widget.value != null,
       builder: (BuildContext context, double animationValue, Widget? child) {
-        // Create a linear animation that matches the original controller
-        final Animation<double> animation = AlwaysStoppedAnimation<double>(animationValue);
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.evaluate(animation),
-          _strokeTailTween.evaluate(animation),
-          _offsetTween.evaluate(animation),
-          _rotationTween.evaluate(animation),
+          _strokeHeadTween.transform(animationValue),
+          _strokeTailTween.transform(animationValue),
+          _offsetTween.transform(animationValue),
+          _rotationTween.transform(animationValue),
         );
       },
     );
@@ -1141,20 +1139,19 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildAnimation() {
-    return TweenAnimationBuilder<double>.repeat(
+    return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       builder: (BuildContext context, double animationValue, Widget? child) {
         // Use the stored value when widget.value is not null, otherwise use the animation
         final double effectiveValue = _currentAnimationValue ?? animationValue;
-        final Animation<double> animation = AlwaysStoppedAnimation<double>(effectiveValue);
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(animation),
-          _CircularProgressIndicatorState._strokeTailTween.evaluate(animation),
-          _CircularProgressIndicatorState._offsetTween.evaluate(animation),
-          _CircularProgressIndicatorState._rotationTween.evaluate(animation),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.transform(effectiveValue),
+          _CircularProgressIndicatorState._strokeTailTween.transform(effectiveValue),
+          _CircularProgressIndicatorState._offsetTween.transform(effectiveValue),
+          _CircularProgressIndicatorState._rotationTween.transform(effectiveValue),
         );
       },
     );

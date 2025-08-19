@@ -395,11 +395,11 @@ void main() {
     expect(values, <Size>[const Size(10, 10)]);
   });
 
-  group('TweenAnimationBuilder.repeat', () {
+  group('RepeatingTweenAnimationBuilder', () {
     testWidgets('Repeats animation continuously', (WidgetTester tester) async {
       final List<int> values = <int>[];
       await tester.pumpWidget(
-        TweenAnimationBuilder<int>.repeat(
+        RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           builder: (BuildContext context, int i, Widget? child) {
@@ -429,7 +429,7 @@ void main() {
     testWidgets('Repeats with reverse', (WidgetTester tester) async {
       final List<int> values = <int>[];
       await tester.pumpWidget(
-        TweenAnimationBuilder<int>.repeat(
+        RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           reverse: true,
@@ -460,7 +460,7 @@ void main() {
     testWidgets('Paused animation does not run', (WidgetTester tester) async {
       final List<int> values = <int>[];
       await tester.pumpWidget(
-        TweenAnimationBuilder<int>.repeat(
+        RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           paused: true,
@@ -482,7 +482,7 @@ void main() {
     testWidgets('Can pause and unpause animation', (WidgetTester tester) async {
       final List<int> values = <int>[];
       Widget buildWidget({required bool paused}) {
-        return TweenAnimationBuilder<int>.repeat(
+        return RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           paused: paused,
@@ -521,7 +521,7 @@ void main() {
     testWidgets('No animation when begin equals end', (WidgetTester tester) async {
       final List<int> values = <int>[];
       await tester.pumpWidget(
-        TweenAnimationBuilder<int>.repeat(
+        RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 100, end: 100),
           builder: (BuildContext context, int i, Widget? child) {
@@ -539,7 +539,7 @@ void main() {
     testWidgets('Works with custom curve', (WidgetTester tester) async {
       final List<double> values = <double>[];
       await tester.pumpWidget(
-        TweenAnimationBuilder<double>.repeat(
+        RepeatingTweenAnimationBuilder<double>(
           duration: const Duration(seconds: 1),
           tween: Tween<double>(begin: 0.0, end: 1.0),
           curve: Curves.easeInOut,
@@ -572,7 +572,7 @@ void main() {
     testWidgets('Can switch between reverse modes', (WidgetTester tester) async {
       final List<int> values = <int>[];
       Widget buildWidget({required bool reverse}) {
-        return TweenAnimationBuilder<int>.repeat(
+        return RepeatingTweenAnimationBuilder<int>(
           duration: const Duration(seconds: 1),
           tween: IntTween(begin: 0, end: 100),
           reverse: reverse,
@@ -609,7 +609,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: TweenAnimationBuilder<double>.repeat(
+          child: RepeatingTweenAnimationBuilder<double>(
             duration: const Duration(seconds: 1),
             tween: Tween<double>(begin: 0.0, end: 1.0),
             builder: (BuildContext context, double value, Widget? child) {

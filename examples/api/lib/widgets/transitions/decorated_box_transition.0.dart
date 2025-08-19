@@ -47,7 +47,7 @@ class DecoratedBoxTransitionExample extends StatelessWidget {
     return ColoredBox(
       color: Colors.white,
       child: Center(
-        child: TweenAnimationBuilder<double>.repeat(
+        child: RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 3),
           reverse: true,

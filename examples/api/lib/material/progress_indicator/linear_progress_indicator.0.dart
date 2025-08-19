@@ -37,7 +37,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
           const Text('Determinate LinearProgressIndicator'),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TweenAnimationBuilder<double>.repeat(
+            child: RepeatingTweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0.0, end: 1.0),
               duration: const Duration(seconds: 5),
               reverse: true,

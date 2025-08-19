@@ -69,7 +69,7 @@ class ListTileExample extends StatelessWidget {
               ),
             ),
           ),
-          TweenAnimationBuilder<double>.repeat(
+          RepeatingTweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0.0, end: 1.0),
             duration: const Duration(seconds: 1),
             reverse: true,
@@ -93,7 +93,7 @@ class ListTileExample extends StatelessWidget {
           SizedBox(
             height: 100,
             child: Center(
-              child: TweenAnimationBuilder<double>.repeat(
+              child: RepeatingTweenAnimationBuilder<double>(
                 tween: Tween<double>(begin: 0.0, end: 1.0),
                 duration: const Duration(milliseconds: 850),
                 reverse: true,
