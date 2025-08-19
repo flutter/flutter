@@ -463,10 +463,13 @@ class SnackBar extends StatefulWidget {
 
   /// Whether the snack bar will stay or auto-dismiss after timeout.
   ///
-  /// If true, the snack bar is still there even after the timeout, until the
-  /// user taps the action button or the close icon. If false, the snack bar
-  /// will be dismissed after the timeout. If this is null but the snackbar
-  /// action is not null, the snackbar will persist as well.
+  /// If true, the snack bar remains visible even after the timeout, until the
+  /// user taps the action button or the close icon.
+  ///
+  /// If false, the snack bar will be dismissed after the timeout.
+  ///
+  /// If not provided, but the snackbar action is not null, the snackbar will
+  /// persist as well.
   final bool persist;
 
   /// The animation driving the entrance and exit of the snack bar.
