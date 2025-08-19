@@ -4680,6 +4680,25 @@ void main() {
     expect(buttonFocusNode.hasFocus, isTrue);
   });
 
+  testWidgets(
+    'Throw assertion error when showTrailingIcon is false and trailingIconFocusNode is provided',
+    (WidgetTester tester) async {
+      expect(() {
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              showTrailingIcon: false,
+              trailingIconFocusNode: focusNode,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        );
+      }, throwsAssertionError);
+    },
+  );
+
   testWidgets('DropdownMenu can set cursorHeight', (WidgetTester tester) async {
     const double cursorHeight = 4.0;
     await tester.pumpWidget(

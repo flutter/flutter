@@ -203,6 +203,7 @@ class DropdownMenu<T> extends StatefulWidget {
              (inputDecorationTheme is InputDecorationTheme ||
                  inputDecorationTheme is InputDecorationThemeData),
        ),
+       assert(trailingIconFocusNode == null || showTrailingIcon),
        _inputDecorationTheme = inputDecorationTheme;
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -246,10 +247,14 @@ class DropdownMenu<T> extends StatefulWidget {
   /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
   /// otherwise a default trailing icon will be created.
   ///
+  /// If [showTrailingIcon] is false, [trailingIconFocusNode] must be null.
+  ///
   /// Defaults to true.
   final bool showTrailingIcon;
 
   /// Defines the FocusNode for the trailing icon.
+  ///
+  /// If [showTrailingIcon] is false, [trailingIconFocusNode] must be null.
   ///
   /// The [focusNode] is a long-lived object that's typically managed by a
   /// [StatefulWidget] parent. See [FocusNode] for more information.
