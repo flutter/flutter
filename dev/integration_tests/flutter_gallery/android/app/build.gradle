@@ -21,8 +21,11 @@ if (flutterRoot == null) {
 }
 
 // The Gallery app's version is defined by the Flutter framework's version.
-def flutterVersion = file("$flutterRoot/version").text
+def flutterVersionFile = file("$flutterRoot/bin/cache/flutter.version.json")
+def flutterVersionJson = new groovy.json.JsonSlurper().parse(flutterVersionFile)
+def flutterVersion = flutterVersionJson.frameworkVersion
 def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
+
 // Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
 int flutterVersionNumber = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
 flutterVersionNumber += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000

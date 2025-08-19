@@ -6,8 +6,6 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element2.dart' as analyzer;
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
-// ignore: implementation_imports, can be removed when package:analyzer 8.1.0 is released.
-import 'package:analyzer/src/dart/constant/value.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
@@ -254,7 +252,6 @@ class PreviewCodeGenerator {
 
 extension on DartObject {
   cb.Expression toExpression() {
-    final objectImpl = this as DartObjectImpl;
     final DartType type = this.type!;
     return switch (type) {
       DartType(isDartCoreBool: true) => cb.literalBool(toBoolValue()!),
@@ -262,27 +259,27 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement2()) => _createEnumInstance(objectImpl),
-      InterfaceType() => _createInstance(type, objectImpl),
-      FunctionType() => _createTearoff(toFunctionValue2()!),
+      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
+      InterfaceType() => _createInstance(type, this),
+      FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
     };
   }
 
-  cb.Expression _createTearoff(ExecutableElement2 element) {
+  cb.Expression _createTearoff(ExecutableElement element) {
     return cb.refer(element.displayName, _elementToLibraryIdentifier(element));
   }
 
-  cb.Expression _createEnumInstance(DartObjectImpl object) {
-    final VariableElement2 variable = object.variable2!;
+  cb.Expression _createEnumInstance(DartObject object) {
+    final VariableElement variable = object.variable!;
     return switch (variable) {
-      FieldElement2(
+      FieldElement(
         isEnumConstant: true,
         displayName: final enumValue,
-        enclosingElement2: EnumElement2(displayName: final enumName),
+        enclosingElement: EnumElement(displayName: final enumName),
       ) =>
         cb.refer('$enumName.$enumValue', _elementToLibraryIdentifier(variable)),
-      PropertyInducingElement2(:final displayName) => cb.refer(
+      PropertyInducingElement(:final displayName) => cb.refer(
         displayName,
         _elementToLibraryIdentifier(variable),
       ),
@@ -290,9 +287,9 @@ extension on DartObject {
     };
   }
 
-  cb.Expression _createInstance(InterfaceType dartType, DartObjectImpl object) {
-    final ConstructorInvocation constructorInvocation = object.getInvocation()!;
-    final ConstructorElement2 constructor = constructorInvocation.constructor2;
+  cb.Expression _createInstance(InterfaceType dartType, DartObject object) {
+    final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
+    final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
       dartType.element3.name3!,
       _elementToLibraryIdentifier(dartType.element3),
@@ -317,6 +314,6 @@ extension on DartObject {
     );
   }
 
-  /// Returns the import URI for the [analyzer.LibraryElement2] containing [element].
-  String? _elementToLibraryIdentifier(analyzer.Element2? element) => element?.library2!.identifier;
+  /// Returns the import URI for the [analyzer.LibraryElement] containing [element].
+  String? _elementToLibraryIdentifier(analyzer.Element? element) => element?.library!.identifier;
 }

@@ -50,6 +50,7 @@ PreviewDetector createTestPreviewDetector() {
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   return PreviewDetector(
+    platform: FakePlatform(),
     previewAnalytics: WidgetPreviewAnalytics(
       analytics: getInitializedFakeAnalyticsInstance(
         fakeFlutterVersion: FakeFlutterVersion(),

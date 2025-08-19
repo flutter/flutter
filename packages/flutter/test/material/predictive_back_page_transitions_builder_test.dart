@@ -63,7 +63,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -173,7 +173,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -326,7 +326,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -488,7 +488,7 @@ void main() {
       }
 
       // Start a system pop gesture, which will switch to using
-      // _PredictiveBackPageTransition for the page transition.
+      // _PredictiveBackSharedElementPageTransition for the page transition.
       final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
         const MethodCall('startBackGesture', <String, dynamic>{
           'touchOffset': <double>[5.0, 300.0],

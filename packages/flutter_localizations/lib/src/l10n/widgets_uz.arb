@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish",
   "pasteButtonLabel": "Joylash",
-  "selectAllButtonLabel": "Hammasi"
+  "selectAllButtonLabel": "Hammasi",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

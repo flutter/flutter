@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "Интернеттен издөө",
   "shareButtonLabel": "Бөлүшүү",
   "pasteButtonLabel": "Чаптоо",
-  "selectAllButtonLabel": "Баарын тандоо"
+  "selectAllButtonLabel": "Баарын тандоо",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

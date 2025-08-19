@@ -403,13 +403,9 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    if (fullRestart) {
-      webAssetServer.performRestart(
-        modules,
-        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
-      );
-    } else {
-      webAssetServer.performReload(modules);
+    webAssetServer.updateModulesAndDigests(modules);
+    if (!bundleFirstUpload && ddcModuleSystem) {
+      webAssetServer.writeReloadedSources(modules);
     }
     return UpdateFSReport(
       success: true,

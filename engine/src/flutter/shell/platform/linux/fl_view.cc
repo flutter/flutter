@@ -99,11 +99,16 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
 
-// Emit the first frame signal in the main thread.
-static gboolean first_frame_idle_cb(gpointer user_data) {
+// Redraw the view from the GTK thread.
+static gboolean redraw_cb(gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
+  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
+
+  if (!self->have_first_frame) {
+    self->have_first_frame = TRUE;
+    g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
+  }
 
   return FALSE;
 }
@@ -247,14 +252,8 @@ static void fl_view_present_layers(FlRenderable* renderable,
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
-  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
-
-  if (!self->have_first_frame) {
-    self->have_first_frame = TRUE;
-    // This is not the main thread, so the signal needs to be done via an idle
-    // callback.
-    g_idle_add(first_frame_idle_cb, self);
-  }
+  // Perform the redraw in the GTK thead.
+  g_idle_add(redraw_cb, self);
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.

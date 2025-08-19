@@ -43,7 +43,7 @@ sealed class WebCompilerConfig {
   String get buildKey;
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
-    if (optimizationLevel != null) 'optimizationLevel': optimizationLevel!,
+    'optimizationLevel': ?optimizationLevel,
   };
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{

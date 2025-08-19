@@ -1044,7 +1044,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
-          return Size(math.min(widget.width!, effectiveMaximumWidth ?? 0.0), 0.0);
+          return Size(math.min(widget.width!, effectiveMaximumWidth ?? widget.width!), 0.0);
         }),
       );
     } else if (anchorWidth != null) {
@@ -1053,7 +1053,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
-          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? 0.0), 0.0);
+          return Size(math.min(anchorWidth, effectiveMaximumWidth ?? anchorWidth), 0.0);
         }),
       );
     }
@@ -1404,16 +1404,16 @@ class _RenderDropdownMenuBody extends RenderBox
         child = childParentData.nextSibling;
         continue;
       }
-      final double maxIntrinsicWidth = child.getMinIntrinsicWidth(height);
+      final double minIntrinsicWidth = child.getMinIntrinsicWidth(height);
       // Add the width of leading icon.
       if (child == lastChild) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
       // Add the width of trailing icon.
       if (child == childBefore(lastChild!)) {
-        width += maxIntrinsicWidth;
+        width += minIntrinsicWidth;
       }
-      width = math.max(width, maxIntrinsicWidth);
+      width = math.max(width, minIntrinsicWidth);
       final _DropdownMenuBodyParentData childParentData =
           child.parentData! as _DropdownMenuBodyParentData;
       child = childParentData.nextSibling;

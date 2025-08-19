@@ -2059,7 +2059,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(child._parent == this);
     assert(child.attached == attached);
     assert(child.parentData != null);
-    if (!(_isRelayoutBoundary ?? true)) {
+    if (!(child._isRelayoutBoundary ?? true)) {
       child._isRelayoutBoundary = null;
     }
     child.parentData!.detach();
@@ -4857,7 +4857,7 @@ mixin SemanticsAnnotationsMixin on RenderObject {
       config.isFocusable = _properties.focusable!;
     }
     if (_properties.focused != null) {
-      config.isFocused = _properties.focused!;
+      config.isFocused = _properties.focused;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;

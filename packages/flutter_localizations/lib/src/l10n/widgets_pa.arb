@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
   "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ",
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
-  "selectAllButtonLabel": "ਸਭ ਚੁਣੋ"
+  "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }
