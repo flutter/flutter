@@ -1472,6 +1472,11 @@ class SemanticsProperties extends DiagnosticableTree {
     this.slider,
     this.keyboardKey,
     this.readOnly,
+    @Deprecated(
+      'Use focused instead. '
+      'Setting focused automatically set focusable. '
+      'This feature was deprecated after v3.36.0-0.0.pre.',
+    )
     this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
@@ -1656,9 +1661,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// to be confused with accessibility focus. Accessibility focus is the
   /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
   /// element it is reading, and is separate from input focus.
+  @Deprecated(
+    'Use focused instead. '
+    'Setting focused automatically set focusable. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   final bool? focusable;
 
   /// If non-null, whether the node currently holds input focus.
+  ///
+  /// If null, the node is not fosusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -5589,16 +5601,30 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
+  @Deprecated(
+    'Check if isFocused is null instead. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   bool get isFocusable => _flags.isFocusable;
+
+  @Deprecated(
+    'Setting isFocused automatically set this to true. '
+    'This feature was deprecated after v3.36.0-0.0.pre.',
+  )
   set isFocusable(bool value) {
     _flags = _flags.copyWith(isFocusable: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
-  bool get isFocused => _flags.isFocused;
-  set isFocused(bool value) {
-    _flags = _flags.copyWith(isFocused: value);
+  /// If the value is `null`, it's not focusable.
+  bool? get isFocused => _flags.isFocusable ? _flags.isFocused : null;
+  set isFocused(bool? value) {
+    if (value != null) {
+      _flags = _flags.copyWith(isFocusable: true, isFocused: value);
+    } else {
+      _flags = _flags.copyWith(isFocusable: false, isFocused: false);
+    }
     _hasBeenAnnotated = true;
   }
 
