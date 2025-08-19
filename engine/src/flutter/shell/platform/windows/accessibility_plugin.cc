@@ -62,16 +62,20 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
       return;
     }
 
-    FlutterViewId view_id = kImplicitViewId;
     const auto& view_itr = data->find(EncodableValue{kViewIdKey});
-    if (view_itr != data->end()) {
-      const auto* view_id_val = std::get_if<FlutterViewId>(&view_itr->second);
-      if (view_id_val) {
-        view_id = *view_id_val;
-      }
+    if (view_itr == data->end()) {
+      FML_LOG(ERROR) << "Announce message 'viewId' property is missing.";
+      return;
     }
 
-    plugin->Announce(view_id, *message);
+    const auto* view_id_val = std::get_if<FlutterViewId>(&view_itr->second);
+    if (!view_id_val) {
+      FML_LOG(ERROR)
+          << "Announce message 'viewId' property must be a FlutterViewId.";
+      return;
+    }
+
+    plugin->Announce(*view_id_val, *message);
   } else {
     FML_LOG(WARNING) << "Accessibility message type '" << *type
                      << "' is not supported.";
