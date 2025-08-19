@@ -630,7 +630,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
             assert(_snackBarController!.isForwardOrCompleted);
             // Look up MediaQuery again in case the setting changed.
             if (snackBar.persist ??
-                (snackBar.action != null && MediaQuery.accessibleNavigationOf(context))) {
+                snackBar.action != null) {
               return;
             }
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
