@@ -13,7 +13,10 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
-REM Ensure we are running on 64-bit windows (32-bit is not supported)
+REM Ensure we are running on 64-bit Windows (32-bit is not supported).
+REM If this is a 32-bit process emulated by WOW64,
+REM PROCESSOR_ARCHITECTURE is the process architecture and
+REM PROCESSOR_ARCHITEW6432 is the processor architecture.
 IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
   IF "%PROCESSOR_ARCHITEW6432%"=="" (
     ECHO Flutter requires 64-bit versions of Windows
