@@ -51,6 +51,7 @@ void main() {
 
     tearDown(() async {
       await previewDetector.dispose();
+      await watcher.close();
     });
 
     test('regression test https://github.com/flutter/flutter/issues/173895', () async {
@@ -80,4 +81,6 @@ class FakeWatcher extends Fake implements Watcher {
 
   @override
   Future<void> get ready => Future.value();
+
+  Future<void> close() => controller.close();
 }
