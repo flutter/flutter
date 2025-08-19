@@ -16,7 +16,7 @@ class SpinningSquare extends StatelessWidget {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 3600),
       builder: (BuildContext context, double turns, Widget? child) {
-        return RotationTransition(turns: AlwaysStoppedAnimation(turns), child: child);
+        return RotationTransition(turns: AlwaysStoppedAnimation<double>(turns), child: child);
       },
       child: Container(width: 200.0, height: 200.0, color: const Color(0xFF00FF00)),
     );

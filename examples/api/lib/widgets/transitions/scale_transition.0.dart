@@ -34,7 +34,7 @@ class ScaleTransitionExample extends StatelessWidget {
                 parent: AlwaysStoppedAnimation<double>(value),
                 curve: Curves.fastOutSlowIn,
               ),
-              child: child!,
+              child: child,
             );
           },
           child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),

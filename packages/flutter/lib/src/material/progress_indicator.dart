@@ -1201,6 +1201,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      paused: widget.value != null,
       builder: (BuildContext context, double animationValue, Widget? child) {
         // Use the stored value when widget.value is not null, otherwise use the animation
         final double effectiveValue = _currentAnimationValue ?? animationValue;

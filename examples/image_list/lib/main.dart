@@ -211,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
             tween: Tween<double>(begin: 0, end: 1),
             duration: const Duration(milliseconds: 3600),
             builder: (BuildContext context, double turns, Widget? child) {
-              return RotationTransition(turns: AlwaysStoppedAnimation(turns), child: child);
+              return RotationTransition(turns: AlwaysStoppedAnimation<double>(turns), child: child);
             },
             child: createImage(i + 1, completers[i]),
           ),

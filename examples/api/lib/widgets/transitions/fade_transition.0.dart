@@ -40,7 +40,7 @@ class FadeTransitionExample extends StatelessWidget {
         builder: (BuildContext context, double value, Widget? child) {
           return FadeTransition(
             opacity: CurvedAnimation(parent: AlwaysStoppedAnimation<double>(value), curve: curve),
-            child: child!,
+            child: child,
           );
         },
         child: const Padding(padding: EdgeInsets.all(8), child: FlutterLogo()),

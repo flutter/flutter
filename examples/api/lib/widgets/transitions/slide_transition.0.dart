@@ -41,7 +41,7 @@ class SlideTransitionExample extends StatelessWidget {
             begin: Offset.zero,
             end: const Offset(1.5, 0.0),
           ).animate(animation),
-          child: child!,
+          child: child,
         );
       },
       child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
