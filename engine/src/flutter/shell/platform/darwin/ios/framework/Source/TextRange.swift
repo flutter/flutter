@@ -8,21 +8,14 @@ import UIKit
 /// a Flutter text field.
 @objc(FlutterTextPosition)
 final class TextPosition: UITextPosition, NSCopying {
-  // offset is exposed as `range` in an extension on UITextPosition.
+  // UITextInput implementations should access the offset via the `index`
+  // computed property instead.
   fileprivate let offset: UInt
   @objc let affinity: UITextStorageDirection
 
   init(index: UInt, affinity: UITextStorageDirection = .forward) {
     self.offset = index
     self.affinity = affinity
-  }
-
-  override func isEqual(_ object: Any?) -> Bool {
-    guard let other = object as? TextPosition else {
-      return false
-    }
-    // Affinity is only visual.
-    return offset == other.offset
   }
 
   func copy(with zone: NSZone? = nil) -> Any {
@@ -38,7 +31,7 @@ final class TextPosition: UITextPosition, NSCopying {
 /// a Flutter text field.
 ///
 /// Similar to the dart:ui TextRange class, this class represents a right open
-/// interval consists of two `TextPosition`s.
+/// interval of two `TextPosition`s.
 @objc(FlutterTextRange)
 final class TextRange: UITextRange, NSCopying {
   // nsRange is exposed as `range` in an extension on UITextPosition.
@@ -61,13 +54,6 @@ final class TextRange: UITextRange, NSCopying {
   }
 
   override var isEmpty: Bool { range.length == 0 }
-
-  override func isEqual(_ object: Any?) -> Bool {
-    guard let other = object as? TextRange else {
-      return false
-    }
-    return range == other.nsRange
-  }
 
   override var description: String {
     "TextRange(\(range))"
@@ -98,16 +84,16 @@ final class TextRange: UITextRange, NSCopying {
 // MARK: Convenience extensions on UITextRange and UITextPosition
 
 @objc extension UITextRange {
-  /// The UTF16 range this FlutterTextRange represents.
+  /// The UTF16 range this TextRange represents.
   ///
-  /// This computed property throws if the receiver is not a FlutterTextRange.
+  /// This computed property throws if the receiver is not a TextRange.
   /// This is a left closed right open interval.
   var range: NSRange { (self as! TextRange).nsRange }
 }
 
 @objc extension UITextPosition {
-  /// The offset from the start of the document to this FlutterTextPosition, in UTF16 code units.
+  /// The offset from the start of the document to this TextPosition, in UTF16 code units.
   ///
-  /// This computed property throws if the receiver is not a FlutterTextPosition.
+  /// This computed property throws if the receiver is not a TextPosition.
   var index: UInt { (self as! TextPosition).offset }
 }
