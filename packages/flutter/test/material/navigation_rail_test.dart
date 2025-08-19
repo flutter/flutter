@@ -6201,7 +6201,7 @@ TestSemantics _expectedSemantics({bool scrollable = false}) {
               TestSemantics(
                 flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  ...destinations,
+                  TestSemantics(children: destinations),
                   TestSemantics(label: 'body', textDirection: TextDirection.ltr),
                 ],
               ),
