@@ -3131,6 +3131,42 @@ void main() {
       expect(count, 2);
     },
   );
+
+  testWidgets('Sliver nav bar middle can be updated', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
+    String middle = 'First';
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar(
+                  largeTitle: const Text('Large title'),
+                  middle: Text(middle),
+                ),
+                const SliverFillRemaining(child: SizedBox(height: 1000.0)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsNothing);
+
+    setState(() {
+      middle = 'Second';
+    });
+    await tester.pump();
+
+    expect(find.text('First'), findsNothing);
+    expect(find.text('Second'), findsOneWidget);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
