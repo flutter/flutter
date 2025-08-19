@@ -24,32 +24,22 @@ class SizeTransitionExample extends StatefulWidget {
   State<SizeTransitionExample> createState() => _SizeTransitionExampleState();
 }
 
-/// [AnimationController]s can be created with `vsync: this` because of
-/// [TickerProviderStateMixin].
-class _SizeTransitionExampleState extends State<SizeTransitionExample>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 3),
-    vsync: this,
-  )..repeat();
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.fastOutSlowIn,
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _SizeTransitionExampleState extends State<SizeTransitionExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizeTransition(
-        sizeFactor: _animation,
-        axis: Axis.horizontal,
-        axisAlignment: -1,
+      body: TweenAnimationBuilder<double>.repeat(
+        tween: Tween<double>(begin: 0, end: 1),
+        duration: const Duration(seconds: 3),
+        curve: Curves.fastOutSlowIn,
+        builder: (BuildContext context, double value, Widget? child) {
+          return SizeTransition(
+            sizeFactor: AlwaysStoppedAnimation(value),
+            axis: Axis.horizontal,
+            axisAlignment: -1,
+            child: child,
+          );
+        },
         child: const Center(child: FlutterLogo(size: 200.0)),
       ),
     );
