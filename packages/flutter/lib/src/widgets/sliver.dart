@@ -806,6 +806,8 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
   ///
+  /// _To learn more about slivers, see [CustomScrollView.slivers]._
+  ///
   /// Uses a [SliverChildListDelegate] as the [delegate].
   ///
   /// The [gridDelegate] argument is required.
