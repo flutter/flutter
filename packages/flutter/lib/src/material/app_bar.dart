@@ -876,9 +876,9 @@ class _AppBarState extends State<AppBar> {
     Color? themeColor,
     Color defaultColor,
   ) {
-    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states) ??
-        MaterialStateProperty.resolveAs<Color?>(themeColor, states) ??
-        MaterialStateProperty.resolveAs<Color>(defaultColor, states);
+    return WidgetStateProperty.resolveAs<Color?>(widgetColor, states) ??
+        WidgetStateProperty.resolveAs<Color?>(themeColor, states) ??
+        WidgetStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(
