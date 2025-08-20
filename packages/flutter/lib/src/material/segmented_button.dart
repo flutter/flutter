@@ -11,6 +11,7 @@ library;
 
 import 'dart:math' as math;
 import 'dart:math';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -570,44 +571,59 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       );
       controller.update(WidgetState.selected, segmentSelected);
 
-      final Widget button = icon != null
-          ? TextButton.icon(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              icon: icon,
-              label: label,
-            )
-          : TextButton(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              child: label,
-            );
+      Widget content = label;
+      ButtonStyle effectiveSegmentStyle = segmentStyle;
+      if (icon != null) {
+        // This logic is needed to get the exact same rendering as using TextButton.icon.
+        // It is duplicated from _TextButtonWithIcon and _TextButtonWithIconChild.
+        // TODO(bleroux): remove once https://github.com/flutter/flutter/issues/173944 is fixed.
+        final bool useMaterial3 = Theme.of(context).useMaterial3;
+        final double defaultFontSize =
+            segmentStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+        final double effectiveTextScale =
+            MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+        final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+          useMaterial3
+              ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8)
+              : const EdgeInsets.all(8),
+          const EdgeInsets.symmetric(horizontal: 4),
+          const EdgeInsets.symmetric(horizontal: 4),
+          effectiveTextScale,
+        );
+        effectiveSegmentStyle = segmentStyle.copyWith(
+          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+        );
+        final double scale = clampDouble(effectiveTextScale, 1.0, 2.0) - 1.0;
+        final TextButtonThemeData textButtonTheme = TextButtonTheme.of(context);
+        final IconAlignment effectiveIconAlignment =
+            textButtonTheme.style?.iconAlignment ??
+            segmentStyle.iconAlignment ??
+            IconAlignment.start;
+        content = Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: lerpDouble(8, 4, scale)!,
+          children: effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
+        );
+      }
+
+      final Widget button = TextButton(
+        style: effectiveSegmentStyle,
+        statesController: controller,
+        onHover: (bool hovering) {
+          setState(() {
+            _hovering = hovering;
+          });
+        },
+        onFocusChange: (bool focused) {
+          setState(() {
+            _focused = focused;
+          });
+        },
+        onPressed: (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
+        child: content,
+      );
 
       final Widget buttonWithTooltip = segment.tooltip != null
           ? Tooltip(message: segment.tooltip, child: button)
