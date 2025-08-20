@@ -67,7 +67,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
     });
-  }, skip: const LocalPlatform().isWindows);
+  }, skip: !const LocalPlatform().isWindows);
 }
 
 class FakeWatcher extends Fake implements Watcher {
