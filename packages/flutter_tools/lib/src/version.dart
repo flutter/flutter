@@ -1049,8 +1049,7 @@ class GitTagVersion {
       }
     }
 
-    // If we're not currently on a tag, use git describe to find the most
-    // recent tag and number of commits past.
+    // If we don't exist in a tag, use git to find the latest tag.
     return _useNewestTagAndCommitsPastFallback(
       git: git,
       workingDirectory: workingDirectory,
