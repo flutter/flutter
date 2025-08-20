@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -248,7 +249,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('ExpansionTile can accept a new controller', (WidgetTester tester) async {
+  testWidgets('Expansible can accept a new controller', (WidgetTester tester) async {
     final ExpansibleController controller1 = ExpansibleController();
     final ExpansibleController controller2 = ExpansibleController();
     addTearDown(() {
@@ -363,4 +364,94 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsNothing);
   });
+
+  testWidgets(
+    'Expansible Semantics announcement',
+    (WidgetTester tester) async {
+      final ExpansibleController controller = ExpansibleController();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Expansible(
+              controller: controller,
+              headerBuilder: (_, _) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (_, _) => const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // There is no semantics announcement without tap action.
+      expect(tester.takeAnnouncements(), isEmpty);
+
+      // Tap the header to expand Expansible.
+      await tester.tap(find.text('Header'));
+      await tester.pumpAndSettle();
+
+      // The announcement should be the opposite of the current state.
+      // The Expansible is expanded, so the announcement should be
+      // "Expanded".
+      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+      // Tap the header to collapse Expansible.
+      await tester.tap(find.text('Header'));
+      await tester.pumpAndSettle();
+
+      // The announcement should be the opposite of the current state.
+      // The Expansile is collapsed, so the announcement should be
+      // "Collapsed".
+      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      handle.dispose();
+      controller.dispose();
+    },
+    // [intended] https://github.com/flutter/flutter/issues/122101.
+    skip: defaultTargetPlatform == TargetPlatform.iOS,
+  );
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/132264.
+  testWidgets(
+    'Expansible Semantics announcement is delayed on iOS',
+    (WidgetTester tester) async {
+      final ExpansibleController controller = ExpansibleController();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Expansible(
+              controller: controller,
+              headerBuilder: (_, _) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
+              ),
+              bodyBuilder: (_, _) => const Text('Body'),
+            ),
+          ),
+        ),
+      );
+
+      // There is no semantics announcement without tap action.
+      expect(tester.takeAnnouncements(), isEmpty);
+
+      // Tap the header to expand Expansible.
+      await tester.tap(find.text('Header'));
+      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+      // Tap the header to collapse Expansible.
+      await tester.tap(find.text('Header'));
+      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      handle.dispose();
+      controller.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
