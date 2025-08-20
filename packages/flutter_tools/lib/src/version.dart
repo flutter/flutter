@@ -1074,22 +1074,21 @@ class GitTagVersion {
         .stdout
         .trim();
 
-    final String shortHash = git
-        .runSync(['rev-parse', '--short', gitRef], workingDirectory: workingDirectory)
-        .stdout
-        .trim();
-
     final String ancestorRef = git
         .runSync(['merge-base', gitRef, latestTag], workingDirectory: workingDirectory)
         .stdout
         .trim();
 
     final String commitCount = git
-        .runSync(['rev-list', '--count', '$ancestorRef..HEAD'], workingDirectory: workingDirectory)
+        .runSync([
+          'rev-list',
+          '--count',
+          '$ancestorRef..$gitRef',
+        ], workingDirectory: workingDirectory)
         .stdout
         .trim();
 
-    return parse('$latestTag-$commitCount-g$shortHash');
+    return parse('$latestTag-$commitCount');
   }
 
   /// Parse a version string.
@@ -1135,6 +1134,7 @@ class GitTagVersion {
     );
   }
 
+  @visibleForTesting
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
