@@ -101,6 +101,7 @@ class PreviewDetector {
     // processing the latest file updates to avoid throwing an exception.
     await _mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
+      _fileWatcher = null;
       await collection.dispose();
     });
   }
