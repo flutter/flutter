@@ -13,5 +13,7 @@
   "pasteButtonLabel": "Vložit",
   "selectAllButtonLabel": "Vybrat vše",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

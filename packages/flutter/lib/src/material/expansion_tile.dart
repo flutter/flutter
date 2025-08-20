@@ -527,24 +527,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
   }
 
   void _onExpansionChanged() {
-    final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint = _tileController.isExpanded
-        ? localizations.collapsedHint
-        : localizations.expandedHint;
-
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
-      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
-      _timer?.cancel();
-      _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
-        _timer?.cancel();
-        _timer = null;
-      });
-    } else {
-      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
-    }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
 

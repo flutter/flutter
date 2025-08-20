@@ -5,11 +5,19 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
+
 import 'basic.dart';
 import 'framework.dart';
+import 'localizations.dart';
+import 'media_query.dart';
 import 'page_storage.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import 'view.dart';
 
 /// The type of the callback that returns the header or body of an [Expansible].
 ///
@@ -292,6 +300,7 @@ class Expansible extends StatefulWidget {
 class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -340,7 +349,32 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     widget.controller.removeListener(_toggleExpansion);
     _animationController.dispose();
     _heightFactor.dispose();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
+  }
+
+  void _announceSemantics() {
+    if (!MediaQuery.supportsAnnounceOf(context)) {
+      return;
+    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final String stateHint = widget.controller.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
+      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), () {
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, localizations.textDirection);
+        _timer?.cancel();
+        _timer = null;
+      });
+    } else {
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, localizations.textDirection);
+    }
   }
 
   void _toggleExpansion() {
@@ -359,6 +393,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         });
       }
       PageStorage.maybeOf(context)?.writeState(context, widget.controller.isExpanded);
+      _announceSemantics();
     });
   }
 

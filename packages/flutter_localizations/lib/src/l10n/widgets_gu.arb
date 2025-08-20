@@ -13,5 +13,7 @@
   "pasteButtonLabel": "પેસ્ટ કરો",
   "selectAllButtonLabel": "બધા પસંદ કરો",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

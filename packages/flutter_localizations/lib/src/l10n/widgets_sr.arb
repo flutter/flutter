@@ -13,5 +13,7 @@
   "pasteButtonLabel": "Налепи",
   "selectAllButtonLabel": "Изабери све",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
