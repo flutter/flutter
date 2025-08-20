@@ -106,13 +106,7 @@ final List<Replacer> stripMetaPatterns = <Replacer>[
   AllReplacer('@visibleForTesting', ''),
 ];
 
-const Set<String> rootLibraryNames = <String>{
-  'ui_web',
-  'engine',
-  'skwasm_stub',
-  'skwasm_impl',
-  'canvaskit',
-};
+const Set<String> rootLibraryNames = <String>{'ui_web', 'engine', 'skwasm_stub', 'skwasm_impl'};
 
 final Map<Pattern, String> extraImportsMap = <Pattern, String>{
   RegExp('skwasm_(stub|impl)'):
