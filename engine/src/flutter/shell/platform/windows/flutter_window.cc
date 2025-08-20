@@ -318,9 +318,11 @@ FlutterEngineDisplay FlutterWindow::GetDisplay() {
     }
   }
 
-  FML_LOG(ERROR) << "This window is not associated with any monitor";
+  FML_LOG(WARNING)
+      << "Current monitor not found in display list, falling back.";
   const auto display = display_monitor_->FromMonitor(monitor);
-  FML_CHECK(display != std::nullopt);
+  FML_CHECK(display.has_value())
+      << "Failed to get display information for the current monitor.";
   return display.value();
 }
 
