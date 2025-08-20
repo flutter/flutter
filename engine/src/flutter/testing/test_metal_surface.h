@@ -5,6 +5,7 @@
 #ifndef FLUTTER_TESTING_TEST_METAL_SURFACE_H_
 #define FLUTTER_TESTING_TEST_METAL_SURFACE_H_
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/test_metal_context.h"
 #include "third_party/skia/include/core/SkSize.h"
@@ -23,12 +24,12 @@ class TestMetalSurface {
 
   static std::unique_ptr<TestMetalSurface> Create(
       const TestMetalContext& test_metal_context,
-      SkISize surface_size = SkISize::MakeEmpty());
+      DlISize surface_size = DlISize());
 
   static std::unique_ptr<TestMetalSurface> Create(
       const TestMetalContext& test_metal_context,
       int64_t texture_id,
-      SkISize surface_size = SkISize::MakeEmpty());
+      DlISize surface_size = DlISize());
 
   virtual ~TestMetalSurface();
 

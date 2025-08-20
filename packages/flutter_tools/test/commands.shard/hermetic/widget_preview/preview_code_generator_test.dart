@@ -171,6 +171,7 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary);
       project = FlutterProject.fromDirectoryTest(projectDir);
       previewDetector = PreviewDetector(
+        platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
             // We don't care about anything written to the file system by analytics, so we're safe
@@ -255,10 +256,10 @@ List<_i1.WidgetPreview> previews() => [
         packageName: 'foo_project',
         name: 'Foo',
         size: const _i5.Size(
-          123,
-          456,
+          123.0,
+          456.0,
         ),
-        textScaleFactor: 50,
+        textScaleFactor: 50.0,
         theme: _i6.myThemeData(),
         brightness: _i5.Brightness.dark,
         localizations: _i7.myLocalizations(),
