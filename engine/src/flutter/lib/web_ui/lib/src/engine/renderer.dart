@@ -45,9 +45,11 @@ abstract class Renderer {
   late Rasterizer rasterizer;
 
   /// Resets the [Rasterizer] to the default value. Used in tests.
+  @visibleForTesting
   void debugResetRasterizer();
 
   /// Override the rasterizer with the given [_rasterizer]. Used in tests.
+  @visibleForTesting
   void debugOverrideRasterizer(Rasterizer testRasterizer) {
     rasterizer = testRasterizer;
   }
