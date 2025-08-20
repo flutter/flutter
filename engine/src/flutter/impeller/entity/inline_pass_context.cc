@@ -108,7 +108,7 @@ const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
   bool is_msaa = color0.resolve_texture != nullptr;
 
   if (pass_count_ > 0) {
-    color0.load_action = LoadAction::kLoad;
+    color0.load_action = is_msaa ? LoadAction::kClear : LoadAction::kLoad;
   } else {
     color0.load_action = LoadAction::kClear;
   }
