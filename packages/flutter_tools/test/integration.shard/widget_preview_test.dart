@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
@@ -20,23 +19,22 @@ import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-const firstLaunchMessagesWeb = <String>[
+final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
+
+final firstLaunchMessagesWeb = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'Done loading previews.',
 ];
 
-const firstLaunchMessagesWebServer = <String>[
+final firstLaunchMessagesWebServer = <Pattern>[
   'Creating widget preview scaffolding at:',
-  'Launching the Widget Preview Scaffold...',
+  launchingOnDeviceRegExp,
   'main.dart is being served at',
   'Done loading previews.',
 ];
 
-const subsequentLaunchMessagesWeb = <String>[
-  'Launching the Widget Preview Scaffold...',
-  'Done loading previews.',
-];
+final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
 
 void main() {
   late Directory tempDir;
@@ -61,7 +59,7 @@ void main() {
   });
 
   Future<void> runWidgetPreview({
-    required List<String> expectedMessages,
+    required List<Pattern> expectedMessages,
     Uri? dtdUri,
     bool useWebServer = false,
   }) async {
@@ -74,7 +72,7 @@ void main() {
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
-      if (dtdUri != null) '--${FlutterGlobalOptions.kDtdUrl}=$dtdUri',
+      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     ], workingDirectory: tempDir.path);
 
     final completer = Completer<void>();
