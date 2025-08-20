@@ -889,7 +889,7 @@ void main() {
       await tester.tap(find.byType(TextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(tester.takeException(), isAssertionError);
     },
