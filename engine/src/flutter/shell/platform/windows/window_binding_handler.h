@@ -89,9 +89,9 @@ class WindowBindingHandler {
   // Returns true if the window was successfully focused.
   virtual bool Focus() = 0;
 
-  // Retrieve information about the display that this window has the largest
+  // Retrieve the display ID of the display that this window has the largest
   // area of intersection with.
-  virtual FlutterEngineDisplay GetDisplay() = 0;
+  virtual FlutterEngineDisplayId GetDisplayId() = 0;
 };
 
 }  // namespace flutter

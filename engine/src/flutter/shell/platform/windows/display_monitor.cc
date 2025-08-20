@@ -93,6 +93,17 @@ bool DisplayMonitor::HandleWindowMessage(HWND hwnd,
   return false;
 }
 
+std::optional<FlutterEngineDisplay> DisplayMonitor::FindById(
+    FlutterEngineDisplayId id) {
+  for (auto const& display : GetDisplays()) {
+    if (display.display_id == id) {
+      return display;
+    }
+  }
+
+  return std::nullopt;
+}
+
 std::vector<FlutterEngineDisplay> DisplayMonitor::GetDisplays() const {
   std::vector<FlutterEngineDisplay> displays;
   MonitorEnumState state = {this, &displays};

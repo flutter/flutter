@@ -173,7 +173,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual PointerLocation GetPrimaryPointerLocation() override;
 
   // [FlutterWindowBindingHandler]
-  virtual FlutterEngineDisplay GetDisplay() override;
+  virtual FlutterEngineDisplayId GetDisplayId() override;
 
   // Called when a theme change message is issued.
   virtual void OnThemeChange();

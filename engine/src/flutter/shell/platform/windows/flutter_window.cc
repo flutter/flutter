@@ -308,22 +308,16 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
   return {(size_t)point.x, (size_t)point.y};
 }
 
-FlutterEngineDisplay FlutterWindow::GetDisplay() {
-  HMONITOR monitor =
-      MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST);
-  for (auto const& display : display_monitor_->GetDisplays()) {
-    if (display.display_id ==
-        reinterpret_cast<FlutterEngineDisplayId>(monitor)) {
-      return display;
-    }
+FlutterEngineDisplayId FlutterWindow::GetDisplayId() {
+  FlutterEngineDisplayId const display_id =
+      reinterpret_cast<FlutterEngineDisplayId>(
+          MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
+  if (auto const display = display_monitor_->FindById(display_id)) {
+    return display->display_id;
   }
 
-  FML_LOG(WARNING)
-      << "Current monitor not found in display list, falling back.";
-  const auto display = display_monitor_->FromMonitor(monitor);
-  FML_CHECK(display.has_value())
-      << "Failed to get display information for the current monitor.";
-  return display.value();
+  FML_LOG(ERROR) << "Current monitor not found in display list.";
+  return display_id;
 }
 
 void FlutterWindow::OnThemeChange() {

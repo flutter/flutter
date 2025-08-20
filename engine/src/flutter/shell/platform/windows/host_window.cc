@@ -627,11 +627,9 @@ void HostWindow::SetFullscreen(
     HMONITOR monitor =
         MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
     if (display_id) {
-      for (auto const& display : engine_->display_monitor()->GetDisplays()) {
-        if (display.display_id == display_id) {
-          monitor = reinterpret_cast<HMONITOR>(display.display_id);
-          break;
-        }
+      if (auto const display =
+              engine_->display_monitor()->FindById(display_id.value())) {
+        monitor = reinterpret_cast<HMONITOR>(display->display_id);
       }
     }
 
