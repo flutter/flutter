@@ -270,7 +270,7 @@ mixin RendererBinding
         // update to platform synchronously if UI and platform threads are
         // merged.
         //
-        // Doing this let's OS to read the semantics tree synchronously even if
+        // Doing this let OS to read the semantics tree synchronously even if
         // semantics has not been built before.
         if (root.child?.hasSize ?? false) {
           pipelineOwner.flushSemantics();
