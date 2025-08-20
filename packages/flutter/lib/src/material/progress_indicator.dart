@@ -221,16 +221,25 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       canvas.drawCircle(position, radius, indicatorPaint);
     }
 
+    // Calculates a track gap fraction that grows smoothly with the indicator's
+    // value until it reaches the full `trackGapFraction`. This prevents an
+    // abrupt gap from appearing when the indicator length is less than the
+    // track gap.
+    double getEffectiveTrackGapFraction(double currentValue, double trackGapFraction) {
+      return math.min(currentValue, trackGapFraction);
+    }
+
     final double trackGapFraction = effectiveTrackGap / size.width;
     final double? effectiveValue = value == null ? null : clampDouble(value!, 0.0, 1.0);
 
+    // Determinate progress indicator.
     if (effectiveValue != null) {
       final double trackStartFraction = trackGapFraction > 0
-          ? effectiveValue + math.min(effectiveValue, trackGapFraction)
+          ? effectiveValue + getEffectiveTrackGapFraction(effectiveValue, trackGapFraction)
           : 0;
 
-      // Draw the track.
-      if (trackStartFraction <= 1) {
+      // Draw the track when there is still space.
+      if (trackStartFraction < 1) {
         drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
       }
 
@@ -247,15 +256,19 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       return;
     }
 
+    // Indeterminate progress indicator.
+    // For LTR text direction the `head` is the right endpoint and the `tail` is
+    // the left endpoint.
     final double firstLineHead = line1Head.transform(animationValue);
     final double firstLineTail = line1Tail.transform(animationValue);
     final double secondLineHead = line2Head.transform(animationValue);
     final double secondLineTail = line2Tail.transform(animationValue);
 
-    // Draw the track before line 1.
+    // Draw the track before line 1. Assuming text direction is LTR, this track
+    // appears on the right side of line 1.
     if (firstLineHead < 1 - trackGapFraction) {
       final double trackStartFraction = firstLineHead > 0
-          ? firstLineHead + math.min(firstLineHead, trackGapFraction)
+          ? firstLineHead + getEffectiveTrackGapFraction(firstLineHead, trackGapFraction)
           : 0;
       drawLinearIndicator(startFraction: trackStartFraction, endFraction: 1, color: trackColor);
     }
@@ -272,10 +285,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     // Draw the track between line 1 and line 2.
     if (firstLineTail > trackGapFraction) {
       final double trackStartFraction = secondLineHead > 0
-          ? secondLineHead + math.min(secondLineHead, trackGapFraction)
+          ? secondLineHead + getEffectiveTrackGapFraction(secondLineHead, trackGapFraction)
           : 0;
       final double trackEndFraction = firstLineTail < 1
-          ? firstLineTail - math.min(1 - firstLineTail, trackGapFraction)
+          ? firstLineTail - getEffectiveTrackGapFraction(1 - firstLineTail, trackGapFraction)
           : 1;
       drawLinearIndicator(
         startFraction: trackStartFraction,
@@ -293,10 +306,11 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
       );
     }
 
-    // Draw the track after line 2.
+    // Draw the track after line 2. Assuming text direction is LTR, this track
+    // appears on the left side of line 2.
     if (secondLineTail > trackGapFraction) {
       final double trackEndFraction = secondLineTail < 1
-          ? secondLineTail - math.min(1 - secondLineTail, trackGapFraction)
+          ? secondLineTail - getEffectiveTrackGapFraction(1 - secondLineTail, trackGapFraction)
           : 1;
       drawLinearIndicator(startFraction: 0, endFraction: trackEndFraction, color: trackColor);
     }
