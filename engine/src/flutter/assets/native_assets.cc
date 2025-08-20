@@ -17,6 +17,10 @@ namespace flutter {
 #define kTargetArchitectureName "ia32"
 #elif defined(FML_ARCH_CPU_X86_64)
 #define kTargetArchitectureName "x64"
+#elif defined(FML_ARCH_CPU_RISCV32)
+#define kTargetArchitectureName "riscv32"
+#elif defined(FML_ARCH_CPU_RISCV64)
+#define kTargetArchitectureName "riscv64"
 #else
 #error Target architecture detection failed.
 #endif
