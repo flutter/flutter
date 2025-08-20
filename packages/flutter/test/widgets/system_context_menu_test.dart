@@ -1186,8 +1186,15 @@ void main() {
       expect(customActionCalled, isTrue);
 
       // Verify menu closes after custom action.
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      state.hideToolbar();
+      // Simulate platform dismiss message for consistency.
+      final ByteData? dismissMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        dismissMessage,
+        (_) {},
+      );
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsNothing);
     },

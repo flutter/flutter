@@ -113,7 +113,18 @@ void main() {
       expect(controller.text, '');
       expect(find.text('Text cleared'), findsOneWidget);
 
-      // Verify menu auto-closes after custom action (iOS behavior).
+      // iOS system menus auto-close after custom actions on real devices.
+      // Simulate this by sending the platform dismiss message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'ContextMenu.onDismissSystemContextMenu',
+      });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/platform',
+        messageBytes,
+        (_) {},
+      );
+      await tester.pump();
+
       expect(find.byType(SystemContextMenu), findsNothing);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
