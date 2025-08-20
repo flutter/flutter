@@ -1167,7 +1167,7 @@ class _DayState extends State<_Day> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
       Set<MaterialState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
@@ -1195,7 +1195,7 @@ class _DayState extends State<_Day> {
           widget.isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
     );
@@ -1420,7 +1420,7 @@ class _YearPickerState extends State<YearPicker> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
       Set<MaterialState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
@@ -1456,7 +1456,7 @@ class _YearPickerState extends State<YearPicker> {
           isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
+    final WidgetStateProperty<Color?> overlayColor = WidgetStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) =>
           effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
     );
