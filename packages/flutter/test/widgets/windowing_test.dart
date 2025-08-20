@@ -12,6 +12,7 @@ import 'package:flutter/src/widgets/_window.dart'
         RegularWindowControllerDelegate,
         WindowScope,
         WindowingOwner;
+import 'package:flutter/src/widgets/_window_owner_creator.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,7 +74,7 @@ void main() {
       });
 
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
-        final WindowingOwner owner = WindowingOwner.createDefaultOwner();
+        final WindowingOwner owner = createDefaultOwner();
         expect(
           () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
           throwsUnsupportedError,
@@ -81,7 +82,7 @@ void main() {
       });
 
       test('default WindowingOwner throws when accessing hasTopLevelWindows', () {
-        final WindowingOwner owner = WindowingOwner.createDefaultOwner();
+        final WindowingOwner owner = createDefaultOwner();
         expect(() => owner.hasTopLevelWindows(), throwsUnsupportedError);
       });
 
@@ -106,7 +107,7 @@ void main() {
       });
 
       test('createDefaultOwner returns a WindowingOwner', () {
-        final WindowingOwner owner = WindowingOwner.createDefaultOwner();
+        final WindowingOwner owner = createDefaultOwner();
         expect(owner, isA<WindowingOwner>());
       });
 

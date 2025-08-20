@@ -20,7 +20,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../foundation/_features.dart';
-import '_window_ffi.dart' if (dart.library.js_util) '_window_web.dart' as window_impl;
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
@@ -394,45 +393,6 @@ abstract class WindowingOwner {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   bool hasTopLevelWindows();
-
-  /// Creates default windowing owner for standard desktop embedders.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  static WindowingOwner createDefaultOwner() {
-    if (!isWindowingEnabled) {
-      return _WindowingOwnerUnsupported(errorMessage: _kWindowingDisabledErrorMessage);
-    }
-
-    final WindowingOwner? owner = window_impl.createDefaultOwner();
-    if (owner != null) {
-      return owner;
-    }
-
-    return _WindowingOwnerUnsupported(errorMessage: 'Windowing is unsupported on this platform.');
-  }
-}
-
-/// Windowing delegate used on platforms that do not support windowing.
-class _WindowingOwnerUnsupported extends WindowingOwner {
-  _WindowingOwnerUnsupported({required this.errorMessage});
-
-  final String errorMessage;
-
-  @override
-  RegularWindowController createRegularWindowController({
-    required RegularWindowControllerDelegate delegate,
-    Size? preferredSize,
-    BoxConstraints? preferredConstraints,
-    String? title,
-  }) {
-    throw UnsupportedError(errorMessage);
-  }
-
-  @override
-  bool hasTopLevelWindows() {
-    throw UnsupportedError(errorMessage);
-  }
 }
 
 /// The [RegularWindow] widget provides a way to render a regular window in the
