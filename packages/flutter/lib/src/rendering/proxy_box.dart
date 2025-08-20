@@ -100,7 +100,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return child?.getDryBaseline(constraints, baseline);
+  final double? result = child?.getDryBaseline(constraints, baseline);
+  return result ?? super.computeDryBaseline(constraints, baseline);
   }
 
   @override

@@ -86,8 +86,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
       return null;
     }
 
-    // The base RenderShiftedBox implementation doesn't apply any offset transformation
-    // Subclasses override this method to account for their specific positioning logic
+    // Base class doesn't apply transforms; subclasses override to add offsets.
     return childBaseline;
   }
 
@@ -244,9 +243,11 @@ class RenderPadding extends RenderShiftedBox {
     }
     final EdgeInsets padding = _resolvedPadding;
     final BoxConstraints innerConstraints = constraints.deflate(padding);
-    final BaselineOffset result =
-        BaselineOffset(child.getDryBaseline(innerConstraints, baseline)) + padding.top;
-    return result.offset;
+    final double? childBaseline = child.getDryBaseline(innerConstraints, baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+    return childBaseline + padding.top;
   }
 
   @override
@@ -1084,8 +1085,16 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child?.getDistanceToActualBaseline(baseline) ??
-        super.computeDistanceToActualBaseline(baseline);
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return super.computeDistanceToActualBaseline(baseline);
+    }
+    final double? result = child.getDistanceToActualBaseline(baseline);
+    if (result == null) {
+      return super.computeDistanceToActualBaseline(baseline);
+    }
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    return result + childParentData.offset.dy;
   }
 
   @override

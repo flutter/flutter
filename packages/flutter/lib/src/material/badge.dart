@@ -357,6 +357,44 @@ class _RenderBadge extends RenderAligningShiftedBox {
     }
     childParentData.offset = badgeLocation;
   }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    // Mirrors performLayout: size is the tightest allowed (biggest) under bounded constraints.
+    // Callers (e.g., Stack) pass in tight constraints for Positioned.fill; otherwise, this
+    // is still consistent with performLayout which asserts bounded constraints.
+    return constraints.biggest;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+
+    // Child is laid out with unconstrained BoxConstraints in performLayout.
+    const BoxConstraints childConstraints = BoxConstraints();
+    final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+
+    // Mirror the paint offset logic from performLayout using dry sizes only.
+    final Size mySize = getDryLayout(constraints);
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Size childSize = child.getDryLayout(childConstraints);
+
+    Offset badgeLocation =
+        offset + resolvedAlignment.alongOffset(Offset(mySize.width - widthOffset, mySize.height));
+    if (hasLabel) {
+      // Subtract half of the badge height when we have a label (as in performLayout).
+      badgeLocation -= Offset(0, childSize.height / 2);
+    }
+
+    return childBaseline + badgeLocation.dy;
+  }
 }
 
 /// A widget size itself to the smallest horizontal stadium rect that can still
