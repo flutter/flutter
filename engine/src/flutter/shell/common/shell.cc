@@ -1080,35 +1080,41 @@ bool Shell::ValidateViewportMetrics(const ViewportMetrics& metrics) {
 
   // If negative values are passed in.
   if (metrics.physical_width < 0 || metrics.physical_height < 0 ||
-      metrics.min_width_constraint < 0 || metrics.max_width_constraint < 0 ||
-      metrics.min_height_constraint < 0 || metrics.max_height_constraint < 0) {
+      metrics.physical_min_width_constraint < 0 ||
+      metrics.physical_max_width_constraint < 0 ||
+      metrics.physical_min_height_constraint < 0 ||
+      metrics.physical_max_height_constraint < 0) {
     return false;
   }
 
   // If width is zero and the constraints are tight.
   if (metrics.physical_width == 0 &&
-      metrics.min_width_constraint == metrics.max_width_constraint) {
+      metrics.physical_min_width_constraint ==
+          metrics.physical_max_width_constraint) {
     return false;
   }
 
   // If not tight constraints, check the width fits in the constraints
-  if (metrics.min_width_constraint != metrics.max_width_constraint) {
-    if (metrics.min_width_constraint > metrics.physical_width ||
-        metrics.physical_width > metrics.max_width_constraint) {
+  if (metrics.physical_min_width_constraint !=
+      metrics.physical_max_width_constraint) {
+    if (metrics.physical_min_width_constraint > metrics.physical_width ||
+        metrics.physical_width > metrics.physical_max_width_constraint) {
       return false;
     }
   }
 
   // If height is zero and the constraints are tight.
   if (metrics.physical_height == 0 &&
-      metrics.min_height_constraint == metrics.max_height_constraint) {
+      metrics.physical_min_height_constraint ==
+          metrics.physical_max_height_constraint) {
     return false;
   }
 
   // If not tight constraints, check the height fits in the constraints
-  if (metrics.min_height_constraint != metrics.max_height_constraint) {
-    if (metrics.min_height_constraint > metrics.physical_height ||
-        metrics.physical_height > metrics.max_height_constraint) {
+  if (metrics.physical_min_height_constraint !=
+      metrics.physical_max_height_constraint) {
+    if (metrics.physical_min_height_constraint > metrics.physical_height ||
+        metrics.physical_height > metrics.physical_max_height_constraint) {
       return false;
     }
   }
@@ -1152,9 +1158,11 @@ void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
   {
     std::scoped_lock<std::mutex> lock(resize_mutex_);
 
-    expected_frame_constraints_[view_id] = BoxConstraints(
-        Size(metrics.min_width_constraint, metrics.min_height_constraint),
-        Size(metrics.max_width_constraint, metrics.max_height_constraint));
+    expected_frame_constraints_[view_id] =
+        BoxConstraints(Size(metrics.physical_min_width_constraint,
+                            metrics.physical_min_height_constraint),
+                       Size(metrics.physical_max_width_constraint,
+                            metrics.physical_max_height_constraint));
     device_pixel_ratio_ = metrics.device_pixel_ratio;
   }
 }
