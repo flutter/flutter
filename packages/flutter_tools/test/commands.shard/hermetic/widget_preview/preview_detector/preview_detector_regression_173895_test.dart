@@ -63,16 +63,11 @@ void main() {
         // encountered on Windows.
         await previewDetector.initialize();
         watcher.controller.addError(
-          const FileSystemException(
-            PreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix,
-          ),
+          const FileSystemException(PreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix),
         );
         // Insert an asynchronous gap so the onError handler for the Watcher can be invoked.
         await Future<void>.delayed(Duration.zero);
-        expect(
-          logger.traceText,
-          contains(PreviewDetector.kWindowsFileWatcherRestartedMessage),
-        );
+        expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
       },
       skip: !const LocalPlatform().isWindows, // Test is only valid on Windows.
     );
