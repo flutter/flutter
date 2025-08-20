@@ -96,7 +96,7 @@ final class TextRange: UITextRange, NSCopying {
   /// This computed property throws if the receiver is not a TextRange.
   /// This is a left closed right open interval.
   var range: NSRange {
-    assert(self is TextRange, "Unexpected UITextRange type: \(dynamicType)")
+    assert(self is TextRange, "Unexpected UITextRange type: \(type(of: self))")
     (self as! TextRange).nsRange
   }
 }
@@ -106,7 +106,7 @@ final class TextRange: UITextRange, NSCopying {
   ///
   /// This computed property throws if the receiver is not a TextPosition.
   var index: UInt {
-    assert(self is TextPosition, "Unexpected UITextPosition type: \(dynamicType)")
+    assert(self is TextPosition, "Unexpected UITextPosition type: \(type(of: self))")
     (self as! TextPosition).offset
   }
 }
