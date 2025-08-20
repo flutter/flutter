@@ -9,6 +9,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
+import '../util.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
