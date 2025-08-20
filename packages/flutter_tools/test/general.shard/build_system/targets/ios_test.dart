@@ -263,7 +263,6 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
-      expect(assetDirectory.childFile('AssetManifest.json'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
     },
@@ -454,7 +453,6 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
-      expect(assetDirectory.childFile('AssetManifest.json'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
     },
@@ -537,7 +535,6 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
-      expect(assetDirectory.childFile('AssetManifest.json'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
       expect(usage.events, isEmpty);

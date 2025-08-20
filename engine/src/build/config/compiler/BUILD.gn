@@ -682,6 +682,9 @@ if (is_win) {
 
       # Needed for nlohmann/json.
       "-Wno-deprecated-literal-operator",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
 } else {
@@ -738,6 +741,9 @@ if (is_win) {
     default_warning_flags += [
       # Unqualified std::move is pretty common.
       "-Wno-unqualified-std-cast-call",
+
+      # Needed by skia, imgui, swiftshader, and angle
+      "-Wno-nontrivial-memcall",
     ]
   }
   if (!is_fuchsia && is_clang) {

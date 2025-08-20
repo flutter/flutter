@@ -111,8 +111,8 @@ class Context {
   EGLDisplay display_ = EGL_NO_DISPLAY;
   EGLContext context_ = EGL_NO_CONTEXT;
   mutable RWMutex listeners_mutex_;
-  std::map<UniqueID, LifecycleListener> listeners_ IPLR_GUARDED_BY(
-      listeners_mutex_);
+  std::map<UniqueID, LifecycleListener> listeners_
+      IPLR_GUARDED_BY(listeners_mutex_);
 
   Context(EGLDisplay display, EGLContext context);
 

@@ -96,7 +96,7 @@ const vulkan::VulkanProcTable& EmbedderSurfaceVulkanImpeller::vk() {
 
 // |GPUSurfaceVulkanDelegate|
 FlutterVulkanImage EmbedderSurfaceVulkanImpeller::AcquireImage(
-    const SkISize& size) {
+    const DlISize& size) {
   return vulkan_dispatch_table_.get_next_image(size);
 }
 

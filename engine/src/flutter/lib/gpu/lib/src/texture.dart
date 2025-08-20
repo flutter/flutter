@@ -24,7 +24,8 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
-  ) : _coordinateSystem = coordinateSystem {
+  ) : _gpuContext = gpuContext,
+      _coordinateSystem = coordinateSystem {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
     }
@@ -41,6 +42,8 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage,
     );
   }
+
+  GpuContext _gpuContext;
 
   final StorageMode storageMode;
   final PixelFormat format;
@@ -99,7 +102,7 @@ base class Texture extends NativeFieldWrapperClass1 {
         'The length of sourceBytes (bytes: ${sourceBytes.lengthInBytes}) must exactly match the size of the base mip level (bytes: ${baseMipSize})',
       );
     }
-    bool success = _overwrite(sourceBytes);
+    bool success = _overwrite(_gpuContext, sourceBytes);
     if (!success) {
       throw Exception("Texture overwrite failed");
     }
@@ -153,10 +156,10 @@ base class Texture extends NativeFieldWrapperClass1 {
   )
   external int _bytesPerTexel();
 
-  @Native<Bool Function(Pointer<Void>, Handle)>(
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',
   )
-  external bool _overwrite(ByteData bytes);
+  external bool _overwrite(GpuContext gpuContext, ByteData bytes);
 
   @Native<Handle Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Texture_AsImage',

@@ -11,5 +11,7 @@
   "searchWebButtonLabel": "ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ",
   "shareButtonLabel": "ସେୟାର କରନ୍ତୁ",
   "pasteButtonLabel": "ପେଷ୍ଟ କରନ୍ତୁ",
-  "selectAllButtonLabel": "ସବୁ ଚୟନ କରନ୍ତୁ"
+  "selectAllButtonLabel": "ସବୁ ଚୟନ କରନ୍ତୁ",
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found"
 }

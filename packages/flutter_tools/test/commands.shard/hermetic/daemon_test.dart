@@ -1300,7 +1300,7 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
-class TestIOOverrides extends io.IOOverrides {
+final class TestIOOverrides extends io.IOOverrides {
   late Future<io.Socket> Function(Object? host, int port) connectCallback;
 
   @override

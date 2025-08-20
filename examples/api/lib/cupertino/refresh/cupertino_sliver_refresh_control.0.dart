@@ -57,11 +57,9 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
               });
             },
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => items[index],
-              childCount: items.length,
-            ),
+          SliverList.builder(
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) => items[index],
           ),
         ],
       ),

@@ -28,13 +28,13 @@ class EmbedderTestContextSoftware : public EmbedderTestContext {
 
  private:
   // |EmbedderTestContext|
-  void SetSurface(SkISize surface_size) override;
+  void SetSurface(DlISize surface_size) override;
 
   // |EmbedderTestContext|
   void SetupCompositor() override;
 
   sk_sp<SkSurface> surface_;
-  SkISize surface_size_;
+  DlISize surface_size_;
   size_t software_surface_present_count_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContextSoftware);

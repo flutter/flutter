@@ -223,12 +223,7 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _git
-        .logSync([
-          '-n',
-          '1',
-          '--pretty=format:%ar',
-          if (revision != null) revision,
-        ], workingDirectory: flutterRoot)
+        .logSync(['-n', '1', '--pretty=format:%ar', ?revision], workingDirectory: flutterRoot)
         .stdout
         .trim();
   }
@@ -276,9 +271,9 @@ abstract class FlutterVersion {
     'frameworkRevision': frameworkRevision,
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
-    if (engineCommitDate != null) 'engineCommitDate': engineCommitDate!,
-    if (engineContentHash != null) 'engineContentHash': engineContentHash!,
-    if (engineBuildDate != null) 'engineBuildDate': engineBuildDate!,
+    'engineCommitDate': ?engineCommitDate,
+    'engineContentHash': ?engineContentHash,
+    'engineBuildDate': ?engineBuildDate,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
     'flutterVersion': frameworkVersion,

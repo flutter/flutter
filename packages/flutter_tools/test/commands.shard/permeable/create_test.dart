@@ -4819,7 +4819,8 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
   testUsingContext('suggests cd ... after creating a directory', () async {
     final CommandRunner<void> runner = createTestCommandRunner(CreateCommand());
     await runner.run(['create', '--no-pub', projectDir.path]);
-    expect(logger.statusText, contains(r'  $ cd'));
+    final cdLine = RegExp(r'^  \$ cd .*flutter_project$', multiLine: true);
+    expect(cdLine.hasMatch(logger.statusText), isTrue);
   }, overrides: {Logger: () => logger});
 
   testUsingContext('omits suggesting cd ... if flutter create . was run', () async {
@@ -4911,7 +4912,7 @@ Future<void> _runFlutterTest(Directory workingDir, {String? target}) async {
 
   await _getPackages(workingDir);
 
-  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', if (target != null) target];
+  final args = <String>[flutterToolsSnapshotPath, 'test', '--no-color', ?target];
 
   final ProcessResult exec = await Process.run(
     globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
