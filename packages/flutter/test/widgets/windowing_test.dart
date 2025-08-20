@@ -73,6 +73,11 @@ void main() {
         isWindowingEnabled = false;
       });
 
+      test('createDefaultOwner returns a WindowingOwner', () {
+        final WindowingOwner owner = createDefaultOwner();
+        expect(owner, isA<WindowingOwner>());
+      });
+
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = createDefaultOwner();
         expect(
@@ -104,11 +109,6 @@ void main() {
     group('isWindowingEnabled is true', () {
       setUp(() {
         isWindowingEnabled = true;
-      });
-
-      test('createDefaultOwner returns a WindowingOwner', () {
-        final WindowingOwner owner = createDefaultOwner();
-        expect(owner, isA<WindowingOwner>());
       });
 
       testWidgets('RegularWindow does not throw', (WidgetTester tester) async {
