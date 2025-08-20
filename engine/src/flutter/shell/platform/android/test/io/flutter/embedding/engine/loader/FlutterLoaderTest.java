@@ -30,6 +30,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -420,16 +421,18 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living within internal storage.
-    Path pathWithDirectInternalStoragePath = internalStorageDirAsPathObj.resolve("library.so");
+    String librarySoFileName = "library.so";
+    Path pathWithDirectInternalStoragePath = internalStorageDirAsPathObj.resolve(librarySoFileName);
     Path pathWithNestedInternalStoragePath =
-        internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", "library.so"));
+        internalStorageDirAsPathObj.resolve(Paths.get("some", "directories", librarySoFileName));
     Path pathWithIndirectInternalStoragePath1 =
-        internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", "library.so"));
+        internalStorageDirAsPathObj.resolve(Paths.get("someDirectory", "..", librarySoFileName));
     Path pathWithIndirectInternalStoragePath2 =
         internalStorageDirAsPathObj.resolve(
-            Paths.get("some", "directory", "..", "..", "library.so"));
+            Paths.get("some", "directory", "..", "..", librarySoFileName));
     Path pathWithIndirectInternalStoragePath3 =
-        internalStorageDirAsPathObj.resolve(Paths.get("some", "directory", "..", "library.so"));
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("some", "directory", "..", librarySoFileName));
 
     Path[] pathsToTest = {
       pathWithDirectInternalStoragePath,
@@ -438,11 +441,10 @@ public class FlutterLoaderTest {
       pathWithIndirectInternalStoragePath2,
       pathWithIndirectInternalStoragePath3
     };
-    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
       shadowOf(getMainLooper()).idle();
@@ -464,7 +466,8 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg = aotSharedNameArgPrefix + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg =
+          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
       assertTrue(
           "Args sent to FlutterJni.init incorrectly did not include path " + path,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -491,20 +494,22 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx);
 
     // Test paths for library living outside internal storage.
-    Path pathThatIsCompletelyUnrelated = Paths.get("please", "dont", "fail");
+    String librarySoFileName = "library.so";
+    Path pathThatIsCompletelyUnrelated = Paths.get("please", "do", "fail");
     Path pathWithIndirectOutsideInternalStorage =
-        internalStorageDirAsPathObj.resolve(Paths.get("..", "library.so"));
+        internalStorageDirAsPathObj.resolve(Paths.get("..", librarySoFileName));
     Path pathWithMoreIndirectOutsideInternalStorage =
         internalStorageDirAsPathObj.resolve(
-            Paths.get("some", "directory", "..", "..", "..", "library.so"));
+            Paths.get("some", "directory", "..", "..", "..", librarySoFileName));
     Path pathWithoutSoFile =
         internalStorageDirAsPathObj.resolve(Paths.get("library.somethingElse"));
     Path pathWithPartialInternalStoragePath =
-        internalStorageDirAsPathObj.getParent().resolve("library.so");
+        internalStorageDirAsPathObj.getParent().resolve(librarySoFileName);
     String sneakyDirectoryName =
         internalStorageDirAsPathObj.getFileName().toString() + "extraChars";
     Path pathWithSneakyPartialInternalStoragePath =
-        internalStorageDirAsPathObj.resolve(Paths.get("..", sneakyDirectoryName, "library.so"));
+        internalStorageDirAsPathObj.resolve(
+            Paths.get("..", sneakyDirectoryName, librarySoFileName));
 
     Path[] pathsToTest = {
       pathThatIsCompletelyUnrelated,
@@ -514,12 +519,10 @@ public class FlutterLoaderTest {
       pathWithPartialInternalStoragePath,
       pathWithSneakyPartialInternalStoragePath
     };
-    String aotSharedNameArgPrefix = "--aot-shared-library-name=";
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      System.out.println(path);
-      String aotSharedLibraryNameArg = aotSharedNameArgPrefix + path;
+      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
       String[] args = {aotSharedLibraryNameArg};
       flutterLoader.ensureInitializationComplete(ctx, args);
       shadowOf(getMainLooper()).idle();
@@ -541,10 +544,128 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg = aotSharedNameArgPrefix + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg =
+          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonical path " + canonicalTestPath,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
+
+      // Reset FlutterLoader and mockFlutterJNI to make more calls to
+      // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+      flutterLoader.initialized = false;
+      clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itSetsAotSharedLibraryNameAsExpectedIfSymlinkPointsToInternalStorage()
+      throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Context mockApplicationContext = mock(Context.class);
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    File realSoFile = File.createTempFile("real", ".so", internalStorageDir);
+    File symlinkFile = new File(internalStorageDir, "symlink_to_real.so");
+    Files.deleteIfExists(symlinkFile.toPath());
+    Files.createSymbolicLink(symlinkFile.toPath(), realSoFile.toPath());
+
+    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + symlinkFile.getAbsolutePath();
+    String[] args = {symlinkArg};
+    flutterLoader.ensureInitializationComplete(ctx, args);
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI)
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+
+    List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+    String canonicalSymlinkCanonicalizedPath = realSoFile.getCanonicalPath();
+    String canonicalAotSharedLibraryNameArg =
+        FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+    assertFalse(
+        "Args sent to FlutterJni.init incorrectly included absolute symlink path: "
+            + symlinkFile.getAbsolutePath(),
+        actualArgs.contains(symlinkArg));
+    assertTrue(
+        "Args sent to FlutterJni.init incorrectly did not include canonicalized path of symlink: "
+            + canonicalSymlinkCanonicalizedPath,
+        actualArgs.contains(canonicalAotSharedLibraryNameArg));
+
+    // Clean up created files.
+    symlinkFile.delete();
+    realSoFile.delete();
+  }
+
+  @Test
+  public void itSetsAotSharedLibraryNameAsExpectedIfSymlinkIsNotSafe() throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    Context mockApplicationContext = mock(Context.class);
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    File nonSoFile = File.createTempFile("real", ".somethingElse", internalStorageDir);
+    File fileJustOutsideInternalStorage =
+        new File(internalStorageDir.getParentFile(), "not_in_internal_storage.so");
+    File symlinkFile = new File(internalStorageDir, "symlink.so");
+    List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
+    Files.deleteIfExists(symlinkFile.toPath());
+
+    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + symlinkFile.getAbsolutePath();
+    String[] args = {symlinkArg};
+
+    for (File unsafeFile : unsafeFiles) {
+      Files.createSymbolicLink(symlinkFile.toPath(), unsafeFile.toPath());
+
+      flutterLoader.ensureInitializationComplete(ctx, args);
+
+      ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+      verify(mockFlutterJNI)
+          .init(
+              eq(ctx),
+              shellArgsCaptor.capture(),
+              anyString(),
+              anyString(),
+              anyString(),
+              anyLong(),
+              anyInt());
+
+      List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
+
+      String canonicalSymlinkCanonicalizedPath = unsafeFile.getCanonicalPath();
+      String canonicalAotSharedLibraryNameArg =
+          FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+      assertFalse(
+          "Args sent to FlutterJni.init incorrectly incorrectly included canonicalized path of symlink: "
+              + canonicalSymlinkCanonicalizedPath,
+          actualArgs.contains(canonicalAotSharedLibraryNameArg));
+      assertFalse(
+          "Args sent to FlutterJni.init incorrectly incorrectly included absolute path of symlink: "
+              + symlinkFile.getAbsolutePath(),
+          actualArgs.contains(symlinkArg));
+
+      // Clean up created files.
+      symlinkFile.delete();
+      unsafeFile.delete();
 
       // Reset FlutterLoader and mockFlutterJNI to make more calls to
       // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.

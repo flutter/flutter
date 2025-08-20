@@ -89,6 +89,9 @@ public class FlutterLoader {
 
   private static FlutterLoader instance;
 
+  @VisibleForTesting
+  static final String aotSharedLibraryNameFlag = "--" + AOT_SHARED_LIBRARY_NAME + "=";
+
   /**
    * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
    * ExecutorService}.
@@ -316,12 +319,11 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
-      String aotSharedLibraryNameFlagPrefix = "--" + AOT_SHARED_LIBRARY_NAME + "=";
       if (args != null) {
         for (String arg : args) {
           // Perform security check for path containing application's compiled Dart code and
           // potentially user-provided compiled native code.
-          if (arg.contains(aotSharedLibraryNameFlagPrefix)) {
+          if (arg.startsWith(aotSharedLibraryNameFlag)) {
             String safeAotSharedLibraryNameFlag =
                 getSafeAotSharedLibraryNameFlag(applicationContext, arg);
             if (safeAotSharedLibraryNameFlag != null) {
@@ -355,13 +357,13 @@ public class FlutterLoader {
             "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg.
-        shellArgs.add(aotSharedLibraryNameFlagPrefix + flutterApplicationInfo.aotSharedLibraryName);
+        shellArgs.add(aotSharedLibraryNameFlag + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            aotSharedLibraryNameFlagPrefix
+            aotSharedLibraryNameFlag
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -485,12 +487,12 @@ public class FlutterLoader {
       @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
       throws IOException {
     // Isolate AOT shared library path.
-    String prefix = "--aot-shared-library-name=";
-    if (!aotSharedLibraryNameArg.startsWith(prefix)) {
+    if (!aotSharedLibraryNameArg.startsWith(aotSharedLibraryNameFlag)) {
       throw new IllegalArgumentException(
           "AOT shared library name flag was not specified correctly; please use --aot-shared-library-name=<path>.");
     }
-    String aotSharedLibraryPath = aotSharedLibraryNameArg.substring(prefix.length());
+    String aotSharedLibraryPath =
+        aotSharedLibraryNameArg.substring(aotSharedLibraryNameFlag.length());
 
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = new File(aotSharedLibraryPath);
@@ -505,9 +507,14 @@ public class FlutterLoader {
     boolean isSoFile = aotSharedLibraryPathCanonicalPath.endsWith(".so");
 
     if (livesWithinInternalStorage && isSoFile) {
-      return prefix + aotSharedLibraryPathCanonicalPath;
+      return aotSharedLibraryNameFlag + aotSharedLibraryPathCanonicalPath;
     }
     // If the library does not live within the application's internal storage, we will not use it.
+    Log.e(
+        TAG,
+        "External path "
+            + aotSharedLibraryPathCanonicalPath
+            + " rejected; not overriding aot-shared-library-name.");
     return null;
   }
 
