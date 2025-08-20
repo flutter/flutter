@@ -316,6 +316,14 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
   });
+
+  testWidgets('CircleAvatar renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SizedBox.shrink(child: CircleAvatar(child: Text('X'))),
+      ),
+    );
+  });
 }
 
 Widget wrap({required Widget child}) {
