@@ -112,8 +112,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
-  // If the overlay layer has content that should be displayed. Determines the visibility of
-  // the overlay layer in combination with previous_frame_view_count_.
+  // If the overlay layer has content that should be displayed. Determines the
+  // visibility of the overlay layer in combination with
+  // previous_frame_view_count_.
   bool overlay_layer_has_content_ = false;
 
   // The size of the root canvas.
