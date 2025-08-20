@@ -1886,19 +1886,14 @@ class _ViewConfiguration {
     this.gestureSettings = const GestureSettings(),
     this.displayFeatures = const <DisplayFeature>[],
     this.displayId = 0,
-    this.viewConstraints = const ViewConstraints(
-      minHeight: 0,
-      maxHeight: 0,
-      minWidth: 0,
-      maxWidth: 0,
-    ),
+    this.viewConstraints = const ViewConstraints(maxWidth: 0, maxHeight: 0),
   });
 
   /// The identifier for a display for this view, in
   /// [PlatformDispatcher._displays].
   final int displayId;
 
-  /// The sizing constraints for this view.
+  /// The sizing constraints for this view in physical pixels.
   final ViewConstraints viewConstraints;
 
   /// The pixel density of the output surface.
