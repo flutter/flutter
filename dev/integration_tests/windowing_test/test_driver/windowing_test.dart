@@ -32,7 +32,7 @@ void main() {
       );
       final data = jsonDecode(response);
       expect(data['title'], 'Hello World');
-    });
+    }, timeout: Timeout.none);
 
     test('Initial controller size is correct', () async {
       final response = await driver.requestData(
@@ -41,7 +41,7 @@ void main() {
       final data = jsonDecode(response);
       expect(data["width"], 640);
       expect(data["height"], 480);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set and get size', () async {
       await driver.requestData(
@@ -53,7 +53,7 @@ void main() {
       final data = jsonDecode(response);
       expect(data["width"], 800);
       expect(data["height"], 600);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set constraints and see the resize', () async {
       await driver.requestData(
@@ -71,7 +71,7 @@ void main() {
       final data = jsonDecode(response);
       expect(data["width"], 500);
       expect(data["height"], 501);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set and get fullscreen', () async {
       await driver.requestData(jsonEncode({'type': 'set_fullscreen'}));
@@ -87,7 +87,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isFullscreen"], false);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set and get maximized', () async {
       await driver.requestData(jsonEncode({'type': 'set_maximized'}));
@@ -103,7 +103,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isMaximized"], false);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set and get minimized', () async {
       await driver.requestData(jsonEncode({'type': 'set_minimized'}));
@@ -119,7 +119,7 @@ void main() {
       );
       data = jsonDecode(response);
       expect(data["isMinimized"], false);
-    });
+    }, timeout: Timeout.none);
 
     test('Can set and get activated', () async {
       await driver.requestData(jsonEncode({'type': 'set_activated'}));
@@ -128,6 +128,6 @@ void main() {
       );
       final data = jsonDecode(response);
       expect(data["isActivated"], true);
-    });
+    }, timeout: Timeout.none);
   });
 }

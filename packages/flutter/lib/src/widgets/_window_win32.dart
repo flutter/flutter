@@ -109,6 +109,11 @@ class WindowingOwnerWin32 extends WindowingOwner {
       throw UnsupportedError('Only available on the Win32 platform');
     }
 
+    assert(
+      PlatformDispatcher.instance.engineId != null,
+      'WindowingOwnerWin32 must be created after the engine has been initialized.',
+    );
+
     final ffi.Pointer<_WindowingInitRequest> request = allocator<_WindowingInitRequest>()
       ..ref.onMessage =
           ffi.NativeCallable<ffi.Void Function(ffi.Pointer<_WindowsMessage>)>.isolateLocal(

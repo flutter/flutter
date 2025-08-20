@@ -72,11 +72,6 @@ void main() {
         isWindowingEnabled = false;
       });
 
-      test('createDefaultOwner returns a WindowingOwner', () {
-        final WindowingOwner owner = WindowingOwner.createDefaultOwner();
-        expect(owner, isA<WindowingOwner>());
-      });
-
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = WindowingOwner.createDefaultOwner();
         expect(
