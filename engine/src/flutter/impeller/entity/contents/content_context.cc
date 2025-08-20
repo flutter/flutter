@@ -147,6 +147,7 @@ class Variants : public GenericVariants {
     }
     SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
                                              context, desc_, /*async=*/false));
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return Get(default_options_.value());
   }
 

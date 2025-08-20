@@ -2476,6 +2476,17 @@ void main() {
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
   });
+
+  testWidgets('Checkbox renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: Checkbox(value: true, onChanged: null))),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

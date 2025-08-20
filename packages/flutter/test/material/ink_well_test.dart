@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -34,6 +35,9 @@ void main() {
               },
               onLongPress: () {
                 log.add('long-press');
+              },
+              onLongPressUp: () {
+                log.add('long-press-up');
               },
               onTapDown: (TapDownDetails details) {
                 log.add('tap-down');
@@ -68,7 +72,7 @@ void main() {
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
 
-    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press']));
+    expect(log, equals(<String>['tap-down', 'tap-cancel', 'long-press', 'long-press-up']));
 
     log.clear();
     TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
@@ -142,6 +146,31 @@ void main() {
     expect(log, equals(<String>['tap']));
   });
 
+  testWidgets('InkWell onLongPressUp callback is triggered', (WidgetTester tester) async {
+    bool wasCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: InkWell(
+            onLongPress: () {},
+            onLongPressUp: () {
+              wasCalled = true;
+            },
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(wasCalled, isTrue);
+  });
+
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
@@ -173,6 +202,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -220,6 +250,7 @@ void main() {
                 }),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -260,6 +291,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -312,6 +344,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -495,6 +528,7 @@ void main() {
                     highlightColor: const Color(0xf00fffff),
                     onTap: () {},
                     onLongPress: () {},
+                    onLongPressUp: () {},
                     onHover: (bool hover) {},
                   ),
                 ),
@@ -553,6 +587,7 @@ void main() {
                     }),
                     onTap: () {},
                     onLongPress: () {},
+                    onLongPressUp: () {},
                     onHover: (bool hover) {},
                   ),
                 ),
@@ -1110,6 +1145,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),
@@ -1263,7 +1299,7 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: InkWell(onTap: () {}, onLongPress: () {}),
+              child: InkWell(onTap: () {}, onLongPress: () {}, onLongPressUp: () {}),
             ),
           ),
         ),
@@ -1290,7 +1326,12 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: InkWell(onTap: () {}, onLongPress: () {}, enableFeedback: false),
+              child: InkWell(
+                onTap: () {},
+                onLongPress: () {},
+                onLongPressUp: () {},
+                enableFeedback: false,
+              ),
             ),
           ),
         ),
@@ -1411,6 +1452,7 @@ void main() {
             autofocus: true,
             onTap: () {},
             onLongPress: () {},
+            onLongPressUp: () {},
             onHover: (bool hover) {},
             focusNode: focusNode,
             child: Container(key: childKey),
@@ -1452,6 +1494,7 @@ void main() {
               autofocus: true,
               onTap: () {},
               onLongPress: () {},
+              onLongPressUp: () {},
               onHover: (bool hover) {},
               focusNode: focusNode,
               child: Container(key: childKey),
@@ -2175,7 +2218,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: InkWell(onLongPress: () {}, child: const Text('Foo')),
+              child: InkWell(onLongPress: () {}, onLongPressUp: () {}, child: const Text('Foo')),
             ),
           ),
         ),
@@ -2198,7 +2241,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Material(
             child: Center(
-              child: InkWell(onLongPress: () {}, onTap: () {}, child: const Text('Foo')),
+              child: InkWell(
+                onLongPress: () {},
+                onLongPressUp: () {},
+                onTap: () {},
+                child: const Text('Foo'),
+              ),
             ),
           ),
         ),
@@ -2382,6 +2430,7 @@ void main() {
                 }),
                 onTap: () {},
                 onLongPress: () {},
+                onLongPressUp: () {},
                 onHover: (bool hover) {},
               ),
             ),

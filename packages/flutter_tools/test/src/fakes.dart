@@ -503,6 +503,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
+    this.isLLDBDebuggingEnabled = false,
   });
 
   @override
@@ -545,6 +546,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
+  final bool isLLDBDebuggingEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -557,8 +561,10 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
+      lldbDebugging => isLLDBDebuggingEnabled,
       _ => false,
     };
   }
@@ -578,6 +584,7 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    lldbDebugging,
   ];
 
   @override
@@ -719,7 +726,7 @@ class FakeJava extends Fake implements Java {
   }) : binaryPath = binary,
        version = version ?? const Version.withText(19, 0, 2, 'openjdk 19.0.2 2023-01-17'),
        _environment = <String, String>{
-         if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
+         Java.javaHomeEnvironmentVariable: ?javaHome,
          'PATH': '/android-studio/jbr/bin',
        },
        _canRun = canRun;
