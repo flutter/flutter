@@ -4646,23 +4646,32 @@ base class Shader extends NativeFieldWrapperClass1 {
   }
 }
 
-/// Defines what happens at the edge of a gradient or the sampling of a source image
-/// in an [ImageFilter].
+/// Defines how to handle areas outside the defined bounds of a gradient or image filter.
 ///
-/// A gradient is defined along a finite inner area. In the case of a linear
-/// gradient, it's between the parallel lines that are orthogonal to the line
-/// drawn between two points. In the case of radial gradients, it's the disc
-/// that covers the circle centered on a particular point up to a given radius.
+/// ## For Gradients
 ///
-/// An image filter reads source samples from a source image and performs operations
-/// on those samples to produce a result image. An image defines color samples only
-/// for pixels within the bounds of the image but some filter operations, such as a blur
-/// filter, read samples over a wide area to compute the output for a given pixel. Such
-/// a filter would need to combine samples from inside the image with hypothetical
-/// color values from outside the image.
+/// Gradients are defined with some specific bounds creating an inner area and an outer area, and `TileMode` controls how colors
+/// are determined for areas outside these bounds:
 ///
-/// This enum is used to define how the gradient or image filter should treat the regions
-/// outside that defined inner area.
+/// - **Linear gradients**: The inner area is the area between two points
+///   (typically referred to as `start` and `end` in the gradient API), or more precisely,
+///   it's the area between the parallel lines that are orthogonal to the line drawn between the two points.
+///   Colors outside this area are determined by the `TileMode`.
+///
+/// - **Radial gradients**: The inner area is the disc defined by a center and radius.
+///   Colors outside this disc are determined by the `TileMode`.
+///
+/// - **Sweep gradients**: The inner area is the angular sector between `startAngle`
+///   and `endAngle`. Colors outside this sector are determined by the `TileMode`.
+///
+/// ## For Image Filters
+///
+/// When applying filters (like blur) that sample colors from outside an image's bounds,
+/// `TileMode` defines how those out-of-bounds samples are determined:
+///
+/// - It controls what color values are used when the filter needs to sample
+///   from areas outside the original image.
+/// - This is particularly important for effects like blurring near image edges.
 ///
 /// See also:
 ///
@@ -4680,8 +4689,12 @@ base class Shader extends NativeFieldWrapperClass1 {
 enum TileMode {
   /// Samples beyond the edge are clamped to the nearest color in the defined inner area.
   ///
-  /// A gradient will paint all the regions outside the inner area with the
-  /// color at the end of the color stop list closest to that region.
+  /// For gradients, this means the region outside the inner area is painted with
+  /// the color at the end of the color stop list closest to that region.
+  ///
+  /// For sweep gradients specifically, the entire area outside the angular sector
+  /// defined by [startAngle] and [endAngle] will be painted with the color at the
+  /// end of the color stop list closest to that region.
   ///
   /// An image filter will substitute the nearest edge pixel for any samples taken from
   /// outside its source image.
@@ -4696,6 +4709,9 @@ enum TileMode {
   /// For a gradient, this technique is as if the stop points from 0.0 to 1.0 were then
   /// repeated from 1.0 to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly
   /// from -1.0 to 0.0, -2.0 to -1.0, etc).
+  ///
+  /// For sweep gradients, the gradient pattern is repeated in the same direction
+  /// (clockwise) for angles beyond [endAngle] and before [startAngle].
   ///
   /// An image filter will treat its source image as if it were tiled across the enlarged
   /// sample space from which it reads, each tile in the same orientation as the base image.
@@ -4712,6 +4728,9 @@ enum TileMode {
   /// again from 4.0 to 3.0, and so forth (and for linear gradients, similarly in the
   /// negative direction).
   ///
+  /// For sweep gradients, the gradient pattern is mirrored back and forth as the angle
+  /// increases beyond [endAngle] or decreases below [startAngle].
+  ///
   /// An image filter will treat its source image as tiled in an alternating forwards and
   /// backwards or upwards and downwards direction across the sample space from which
   /// it is reading.
@@ -4724,8 +4743,11 @@ enum TileMode {
   /// Samples beyond the edge are treated as transparent black.
   ///
   /// A gradient will render transparency over any region that is outside the circle of a
-  /// radial gradient or outside the parallel lines that define the inner area of a linear
-  /// gradient.
+  /// radial gradient, outside the parallel lines that define the inner area of a linear
+  /// gradient, or outside the angular sector of a sweep gradient.
+  ///
+  /// For sweep gradients, only the sector between [startAngle] and [endAngle] will be
+  /// painted; all other areas will be transparent.
   ///
   /// An image filter will substitute transparent black for any sample it must read from
   /// outside its source image.
@@ -4933,16 +4955,38 @@ base class Gradient extends Shader {
   /// positive angles going clockwise around the `center`.
   ///
   /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
-  /// that specifies where `color[i]` begins in the gradient. If `colorStops` is
-  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
-  /// `color` must therefore only have two entries). Stop values less than 0.0
-  /// will be rounded up to 0.0 and stop values greater than 1.0 will be rounded
-  /// down to 1.0. Each stop value must be greater than or equal to the previous
-  /// stop value. Stop values that do not meet this criteria will be rounded up
-  /// to the previous stop value.
+  /// that specifies where `colors[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied
+  /// (and `colors` must therefore only have two entries). Stop values less than
+  /// 0.0 will be rounded up to 0.0 and stop values greater than 1.0 will be
+  /// rounded down to 1.0. Each stop value must be greater than or equal to the
+  /// previous stop value. Stop values that do not meet this criteria will be
+  /// rounded up to the previous stop value.
+  ///
+  /// The `startAngle` and `endAngle` parameters define the angular sector to be
+  /// painted. Angles are measured in radians clockwise from the positive x-axis.
+  /// Values outside the range `[0, 2π]` are normalized to this range using modulo
+  /// arithmetic. The gradient is only painted in the sector between `startAngle`
+  /// and `endAngle`. The `tileMode` determines how the gradient behaves outside
+  /// this sector.
+  ///
+  /// The `tileMode` argument specifies how the gradient should handle areas
+  /// outside the angular sector defined by `startAngle` and `endAngle`:
   ///
   /// The behavior before `startAngle` and after `endAngle` is described by the
   /// `tileMode` argument. For details, see the [TileMode] enum.
+  ///
+  /// * [TileMode.clamp]: The edge colors are extended to infinity.
+  /// * [TileMode.mirror]: The gradient is repeated, alternating direction each time.
+  /// * [TileMode.repeated]: The gradient is repeated in the same direction.
+  /// * [TileMode.decal]: Only the colors within the gradient's angular sector are
+  ///   drawn, with transparent black elsewhere.
+  ///
+  /// The [colorStops] argument must have the same number of values as [colors],
+  /// if specified. It specifies the position of each color stop between 0.0 and
+  /// 1.0. If it is null, a uniform distribution is assumed. The stop values must
+  /// be in ascending order. A stop value of 0.0 corresponds to [startAngle], and
+  /// a stop value of 1.0 corresponds to [endAngle].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_sweep.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_decal_sweep.png)
