@@ -142,11 +142,11 @@ class TextLayout {
             blockTextMetrics.fontBoundingBoxAscent,
             blockTextMetrics.fontBoundingBoxDescent,
             TextRange(
-              start: cluster.begin + styledBlock.start,
+              start: cluster.start + styledBlock.start,
               end: cluster.end + styledBlock.start,
             ),
-            blockTextMetrics.getBounds(TextRange(start: cluster.begin, end: cluster.end)),
-            blockTextMetrics.getAdvance(TextRange(start: cluster.begin, end: cluster.end)),
+            blockTextMetrics.getBounds(TextRange(start: cluster.start, end: cluster.end)),
+            blockTextMetrics.getAdvance(TextRange(start: cluster.start, end: cluster.end)),
             blockStart,
             styledBlock.isPlaceholder,
           ),
@@ -220,10 +220,10 @@ class TextLayout {
     WebParagraphDebug.log('TextMetrics "$text": ${clusters.length}');
     int index = 0;
     for (final cluster in clusters) {
-      final advance = textMetrics.getSelectionRects(cluster.begin, cluster.end);
+      final advance = textMetrics.getSelectionRects(cluster.start, cluster.end);
       assert(advance.length == 1);
       WebParagraphDebug.log(
-        '$index: [${cluster.begin}:${cluster.end}) [${advance.first.left}:${advance.first.right})',
+        '$index: [${cluster.start}:${cluster.end}) [${advance.first.left}:${advance.first.right})',
       );
       index++;
     }
@@ -834,7 +834,7 @@ class ExtendedTextCluster {
     this.advance,
     this.shift,
     this.placeholder,
-  ) : start = cluster == null ? 0 : cluster.begin,
+  ) : start = cluster == null ? 0 : cluster.start,
       end = cluster == null ? 0 : cluster.end;
 
   ExtendedTextCluster.fromLast(ExtendedTextCluster lastCluster)
