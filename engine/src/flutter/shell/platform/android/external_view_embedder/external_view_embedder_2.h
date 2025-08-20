@@ -112,8 +112,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The task runners.
   const TaskRunners task_runners_;
 
-  // If there the overlay frame was displayed in the last frame.
-  bool prev_frame_overlay_layer_shown_ = false;
+  // If the overlay layer has content that should be displayed. Determines the visibility of
+  // the overlay layer in combination with previous_frame_view_count_.
+  bool overlay_layer_has_content_ = false;
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -148,6 +149,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
+
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter
