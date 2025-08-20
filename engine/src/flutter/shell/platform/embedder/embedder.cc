@@ -2950,6 +2950,7 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
   MessageData* message_data =
       new MessageData{.callback = callback, .user_data = user_data};
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return InternalSendPlatformMessage(
       engine, kFlutterKeyDataChannel, packet->data().data(),
       packet->data().size(),

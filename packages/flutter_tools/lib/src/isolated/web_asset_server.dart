@@ -28,10 +28,12 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
+import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
 import '../web_template.dart';
-
+import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
 import 'web_server_utlities.dart';
 
@@ -95,21 +97,7 @@ class WebAssetServer implements AssetReader {
 
   /// Given a list of [modules] that need to be loaded, compute module names and
   /// digests.
-  ///
-  /// If [writeRestartScripts] is true, writes a list of sources mapped to their
-  /// ids to the file system that can then be consumed by the hot restart
-  /// callback.
-  ///
-  /// For example:
-  /// ```json
-  /// [
-  ///   {
-  ///     "src": "<file_name>",
-  ///     "id": "<id>",
-  ///   },
-  /// ]
-  /// ```
-  void performRestart(List<String> modules, {required bool writeRestartScripts}) {
+  void updateModulesAndDigests(List<String> modules) {
     for (final module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
@@ -120,18 +108,13 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts) {
-      final srcIdsList = <Map<String, String>>[
-        for (final String src in modules) <String, String>{'src': '$baseUri/$src', 'id': src},
-      ];
-      writeFile('restart_scripts.json', json.encode(srcIdsList));
-    }
   }
 
-  static const _reloadScriptsFileName = 'reload_scripts.json';
+  static const _reloadedSourcesFileName = 'reloaded_sources.json';
 
-  /// Given a list of [modules] that need to be reloaded, writes a file that
-  /// contains a list of objects each with three fields:
+  /// Given a list of [modules] that need to be reloaded during a hot restart or
+  /// hot reload, writes a file that contains a list of objects each with three
+  /// fields:
   ///
   /// `src`: A string that corresponds to the file path containing a DDC library
   /// bundle. To support embedded libraries, the path should include the
@@ -153,7 +136,7 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void performReload(List<String> modules) {
+  void writeReloadedSources(List<String> modules) {
     final moduleToLibrary = <Map<String, Object>>[];
     for (final module in modules) {
       final metadata = ModuleMetadata.fromJson(
@@ -168,7 +151,7 @@ class WebAssetServer implements AssetReader {
         'libraries': libraries,
       });
     }
-    writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
+    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -179,7 +162,7 @@ class WebAssetServer implements AssetReader {
   Uri get baseUri => _baseUri;
   late Uri _baseUri;
 
-  /// Start the web asset server on a [hostname] and [port].
+  /// Start the web asset server with configuration provided by [webDevServerConfig].
   ///
   /// If [testMode] is true, do not actually initialize dwds or the shelf static
   /// server.
@@ -188,10 +171,6 @@ class WebAssetServer implements AssetReader {
   /// trace.
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
-    String hostname,
-    int port,
-    String? tlsCertPath,
-    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -200,8 +179,8 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     bool enableDds,
     Uri entrypoint,
-    ExpressionCompiler? expressionCompiler,
-    Map<String, String> extraHeaders, {
+    ExpressionCompiler? expressionCompiler, {
+    required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
@@ -216,6 +195,13 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
   }) async {
+    final String hostname = webDevServerConfig.host;
+    final int port = webDevServerConfig.port;
+    final String? tlsCertPath = webDevServerConfig.https?.certPath;
+    final String? tlsCertKeyPath = webDevServerConfig.https?.certKeyPath;
+    final Map<String, String> extraHeaders = webDevServerConfig.headers;
+    final List<ProxyRule> proxy = webDevServerConfig.proxy;
+
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -351,9 +337,9 @@ class WebAssetServer implements AssetReader {
                   ),
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                hotReloadSourcesUri: server._baseUri.replace(
+                reloadedSourcesUri: server._baseUri.replace(
                   pathSegments: List<String>.from(server._baseUri.pathSegments)
-                    ..add(_reloadScriptsFileName),
+                    ..add(_reloadedSourcesFileName),
                 ),
               ).strategy
             : FrontendServerRequireStrategyProvider(
@@ -386,6 +372,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
     }
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     runZonedGuarded(
@@ -648,6 +635,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       indexHtml.withSubstitutions(
         // Currently, we don't support --base-href for the "run" command.
         baseHref: '/',
+        // Currently, we don't support --static-assets-url for the "run" command.
+        staticAssetsUrl: '/',
         serviceWorkerVersion: null,
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,

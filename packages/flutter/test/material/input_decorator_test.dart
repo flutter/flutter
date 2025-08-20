@@ -2951,6 +2951,71 @@ void main() {
       // TODO(bleroux): fix input decorator to not rely on forcing the label text line height to 1.0.
     });
 
+    testWidgets('When the label appears within the input its padding is correct', (
+      WidgetTester tester,
+    ) async {
+      // Define a label larger than the available decorator, the label will fill
+      // all the available space (decorator width minus padding and affixes).
+      const Widget largeLabel = SizedBox(key: customLabelKey, width: 1000, height: 16);
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(filled: true, label: largeLabel),
+        ),
+      );
+
+      // For filled and/or outlined decoration, the horizontal padding is 16.
+      const double horizontalPadding = 16.0;
+      expect(getCustomLabelRect(tester).left, horizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - horizontalPadding);
+
+      // Outlined decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(border: OutlineInputBorder(), label: largeLabel),
+        ),
+      );
+
+      expect(getCustomLabelRect(tester).left, horizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - horizontalPadding);
+
+      // Rebuild with affixes.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            filled: true,
+            label: largeLabel,
+            suffixIcon: Icon(Icons.align_horizontal_left_sharp),
+            prefixIcon: Icon(Icons.align_horizontal_right_sharp),
+          ),
+        ),
+      );
+
+      // When suffixIcon and/or prefixIcon are set, the corresponding horizontal
+      // padding is 52 (48 for the icon + 4 input gap based on M3 spec).
+      const double affixesHorizontalPadding = 52.0;
+      expect(getCustomLabelRect(tester).left, affixesHorizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - affixesHorizontalPadding);
+
+      // Outlined decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            label: largeLabel,
+            suffixIcon: Icon(Icons.align_horizontal_left_sharp),
+            prefixIcon: Icon(Icons.align_horizontal_right_sharp),
+          ),
+        ),
+      );
+
+      expect(getCustomLabelRect(tester).left, affixesHorizontalPadding);
+      expect(getCustomLabelRect(tester).right, 800 - affixesHorizontalPadding);
+    });
+
     testWidgets(
       'The label appears above the input when there is no content and floatingLabelBehavior is always',
       (WidgetTester tester) async {
@@ -8770,15 +8835,19 @@ void main() {
           'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
       Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
-        home: Material(
-          child: SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(borderSide: BorderSide(color: Colors.greenAccent)),
-                suffixIcon: const Icon(Icons.arrow_drop_down),
-                floatingLabelBehavior: floatingLabelBehavior,
-                labelText: labelText,
+        home: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: TextField(
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.greenAccent),
+                  ),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
+                  floatingLabelBehavior: floatingLabelBehavior,
+                  labelText: labelText,
+                ),
               ),
             ),
           ),

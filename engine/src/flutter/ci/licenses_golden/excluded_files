@@ -287,6 +287,7 @@
 ../../../flutter/runtime/fixtures
 ../../../flutter/runtime/no_dart_plugin_registrant_unittests.cc
 ../../../flutter/runtime/platform_isolate_manager_unittests.cc
+../../../flutter/runtime/runtime_controller_unittests.cc
 ../../../flutter/runtime/type_conversions_unittests.cc
 ../../../flutter/shell/common/animator_unittests.cc
 ../../../flutter/shell/common/base64_unittests.cc
@@ -421,6 +422,7 @@
 ../../../flutter/shell/platform/windows/fixtures
 ../../../flutter/shell/platform/windows/flutter_project_bundle_unittests.cc
 ../../../flutter/shell/platform/windows/flutter_window_unittests.cc
+../../../flutter/shell/platform/windows/display_monitor_unittests.cc
 ../../../flutter/shell/platform/windows/flutter_windows_engine_unittests.cc
 ../../../flutter/shell/platform/windows/flutter_windows_texture_registrar_unittests.cc
 ../../../flutter/shell/platform/windows/flutter_windows_unittests.cc

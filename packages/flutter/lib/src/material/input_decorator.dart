@@ -13,6 +13,7 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1011,16 +1012,15 @@ class _RenderDecoration extends RenderBox
     final double topHeight;
     if (label != null) {
       final double suffixIconSpace = decoration.border.isOutline
-          ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+          ? lerpDouble(suffixIconSize.width, contentPadding.end, decoration.floatingLabelProgress)!
           : suffixIconSize.width;
       final double labelWidth = math.max(
         0.0,
         constraints.maxWidth -
             (decoration.inputGap * 2 +
                 iconWidth +
-                contentPadding.horizontal +
-                prefixIconSize.width +
-                suffixIconSpace),
+                (prefixIcon == null ? contentPadding.start : prefixIconSize.width) +
+                (suffixIcon == null ? contentPadding.end : suffixIconSpace)),
       );
 
       // Increase the available width for the label when it is scaled down.
@@ -1685,25 +1685,28 @@ class _RenderDecoration extends RenderBox
   ) {
     final ChildSemanticsConfigurationsResultBuilder builder =
         ChildSemanticsConfigurationsResultBuilder();
-    List<SemanticsConfiguration>? prefixMergeGroup;
-    List<SemanticsConfiguration>? suffixMergeGroup;
+
+    final Map<SemanticsTag, List<SemanticsConfiguration>> mergeGroups =
+        <SemanticsTag, List<SemanticsConfiguration>>{};
+    final Set<SemanticsTag> tags = <SemanticsTag>{
+      _InputDecoratorState._kPrefixSemanticsTag,
+      _InputDecoratorState._kPrefixIconSemanticsTag,
+      _InputDecoratorState._kSuffixSemanticsTag,
+      _InputDecoratorState._kSuffixIconSemanticsTag,
+    };
+
     for (final SemanticsConfiguration childConfig in childConfigs) {
-      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
-        prefixMergeGroup ??= <SemanticsConfiguration>[];
-        prefixMergeGroup.add(childConfig);
-      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
-        suffixMergeGroup ??= <SemanticsConfiguration>[];
-        suffixMergeGroup.add(childConfig);
+      final SemanticsTag? tag = tags.firstWhereOrNull(
+        (SemanticsTag tag) => childConfig.tagsChildrenWith(tag),
+      );
+      if (tag != null) {
+        mergeGroups.putIfAbsent(tag, () => <SemanticsConfiguration>[]).add(childConfig);
       } else {
         builder.markAsMergeUp(childConfig);
       }
     }
-    if (prefixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(prefixMergeGroup);
-    }
-    if (suffixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(suffixMergeGroup);
-    }
+
+    mergeGroups.values.forEach(builder.markAsSiblingMergeGroup);
     return builder.build();
   }
 
@@ -1985,7 +1988,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     name: hashCode.toString(),
   );
   static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
+  static const SemanticsTag _kPrefixIconSemanticsTag = SemanticsTag(
+    '_InputDecoratorState.prefixIcon',
+  );
   static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
+  static const SemanticsTag _kSuffixIconSemanticsTag = SemanticsTag(
+    '_InputDecoratorState.suffixIcon',
+  );
 
   @override
   void initState() {
@@ -2466,7 +2475,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         iconSize: WidgetStatePropertyAll<double>(iconSize),
                       ).merge(iconButtonTheme.style),
                     ),
-                    child: Semantics(child: decoration.prefixIcon),
+                    child: Semantics(
+                      tagForChildren: _kPrefixIconSemanticsTag,
+                      child: decoration.prefixIcon,
+                    ),
                   ),
                 ),
               ),
@@ -2503,7 +2515,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                         iconSize: WidgetStatePropertyAll<double>(iconSize),
                       ).merge(iconButtonTheme.style),
                     ),
-                    child: Semantics(child: decoration.suffixIcon),
+                    child: Semantics(
+                      tagForChildren: _kSuffixIconSemanticsTag,
+                      child: decoration.suffixIcon,
+                    ),
                   ),
                 ),
               ),
