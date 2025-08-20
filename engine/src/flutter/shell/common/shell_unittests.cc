@@ -5137,6 +5137,8 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
                 0      // p_display_id
             });
       });
+  PumpOneFrame(shell.get());
+
   auto layer_tree =
       std::make_unique<LayerTree>(/*root_layer=*/nullptr,
                                   /*frame_size=*/DlISize(100, 100));
@@ -5153,11 +5155,11 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *over_height));
   auto min_width = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
-                                               /*frame_size=*/DlISize(1, 100));
+                                               /*frame_size=*/DlISize(0, 100));
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *min_width));
   auto min_height = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
-                                                /*frame_size=*/DlISize(100, 1));
+                                                /*frame_size=*/DlISize(100, 0));
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *min_height));
   DestroyShell(std::move(shell), task_runners);
