@@ -22,7 +22,7 @@ class MaterialDemoThemeData {
     ),
     bottomAppBarTheme: BottomAppBarThemeData(color: _colorScheme.primary),
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
         }
@@ -30,7 +30,7 @@ class MaterialDemoThemeData {
       }),
     ),
     radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      fillColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
         }
@@ -39,13 +39,13 @@ class MaterialDemoThemeData {
     ),
     snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      thumbColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
         }
         return states.contains(MaterialState.selected) ? _colorScheme.primary : null;
       }),
-      trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      trackColor: WidgetStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return null;
         }
