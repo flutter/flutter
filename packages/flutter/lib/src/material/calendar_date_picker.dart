@@ -1566,9 +1566,11 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
     final int scaledYearPickerColumnCount = textScaleFactor > 1.65
         ? _yearPickerColumnCount - 1
         : _yearPickerColumnCount;
-    final double tileWidth =
-        (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) /
-        scaledYearPickerColumnCount;
+    final double tileWidth = math.max(
+      (constraints.crossAxisExtent - (scaledYearPickerColumnCount - 1) * _yearPickerRowSpacing) /
+          scaledYearPickerColumnCount,
+      0.0,
+    );
     final double scaledYearPickerRowHeight = textScaleFactor > 1
         ? _yearPickerRowHeight + ((textScaleFactor - 1) * 9)
         : _yearPickerRowHeight;
