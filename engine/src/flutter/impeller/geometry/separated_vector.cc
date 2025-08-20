@@ -9,10 +9,10 @@ namespace impeller {
 SeparatedVector2::SeparatedVector2() = default;
 
 SeparatedVector2::SeparatedVector2(Vector2 direction, Scalar magnitude)
-    : direction(direction), magnitude(magnitude){};
+    : direction(direction), magnitude(magnitude) {};
 
 SeparatedVector2::SeparatedVector2(Vector2 vector)
-    : direction(vector.Normalize()), magnitude(vector.GetLength()){};
+    : direction(vector.Normalize()), magnitude(vector.GetLength()) {};
 
 Vector2 SeparatedVector2::GetVector() const {
   return direction * magnitude;

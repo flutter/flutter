@@ -430,6 +430,34 @@ void testMain() {
       });
     });
 
+    group('parseBrowserLanguages', () {
+      test('returns the default locale when no browser languages are present', () {
+        EnginePlatformDispatcher.debugOverrideBrowserLanguages([]);
+        addTearDown(() => EnginePlatformDispatcher.debugOverrideBrowserLanguages(null));
+
+        expect(EnginePlatformDispatcher.parseBrowserLanguages(), const [ui.Locale('en', 'US')]);
+      });
+
+      test('returns locales list parsed from browser languages', () {
+        EnginePlatformDispatcher.debugOverrideBrowserLanguages([
+          'uk-UA',
+          'en',
+          'ar-Arab-SA',
+          'zh-Hant-HK',
+          'de-DE',
+        ]);
+        addTearDown(() => EnginePlatformDispatcher.debugOverrideBrowserLanguages(null));
+
+        expect(EnginePlatformDispatcher.parseBrowserLanguages(), const [
+          ui.Locale('uk', 'UA'),
+          ui.Locale('en'),
+          ui.Locale.fromSubtags(languageCode: 'ar', scriptCode: 'Arab', countryCode: 'SA'),
+          ui.Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+          ui.Locale('de', 'DE'),
+        ]);
+      });
+    });
+
     group('AT Focus Handler Integration', () {
       test('navigation focus handler is registered during initialization', () {
         final DomElement navButton = createDomHTMLButtonElement();

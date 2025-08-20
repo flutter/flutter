@@ -181,6 +181,7 @@ TEST(ConditionVariableTest, TestsCriticalSectionAfterWaitForUntil) {
     mtx.Unlock();
   };
   // Launch all threads. They will wait for the start CV to be signaled.
+  threads.reserve(kThreadCount);
   for (size_t i = 0; i < kThreadCount; i++) {
     threads.emplace_back(thread_main);
   }
@@ -226,6 +227,7 @@ TEST(ConditionVariableTest, TestsCriticalSectionAfterWait) {
     mtx.Unlock();
   };
   // Launch all threads. They will wait for the start CV to be signaled.
+  threads.reserve(kThreadCount);
   for (size_t i = 0; i < kThreadCount; i++) {
     threads.emplace_back(thread_main);
   }

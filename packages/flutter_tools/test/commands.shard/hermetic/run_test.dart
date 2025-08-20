@@ -15,18 +15,21 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
@@ -396,7 +399,7 @@ void main() {
             isNull,
           );
 
-          final DebuggingOptions options = await command.createDebuggingOptions(false);
+          final DebuggingOptions options = await command.createDebuggingOptions();
           expect(options.uninstallFirst, isTrue);
         },
         overrides: <Type, Generator>{
@@ -931,7 +934,11 @@ void main() {
     });
 
     group('--web-header', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
       setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
         fileSystem.file('.dart_tool/package_config.json')
@@ -942,7 +949,11 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
         testDeviceManager.devices = <Device>[device];
       });
 
@@ -950,21 +961,23 @@ void main() {
         'can accept simple, valid values',
         () async {
           final command = RunCommand();
-          await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo = bar']),
-            throwsToolExit(),
-          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
-          final DebuggingOptions options = await command.createDebuggingOptions(true);
-          expect(options.webHeaders, <String, String>{'foo': 'bar'});
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
+            'foo': 'bar',
+          });
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -975,17 +988,17 @@ void main() {
           await expectLater(
             () => createTestCommandRunner(
               command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo']),
+            ).run(<String>['run', '--no-pub', '--no-hot', '--no-resident', '--web-header', 'foo']),
             throwsToolExit(message: 'Invalid web headers: foo'),
           );
-
-          await expectLater(() => command.createDebuggingOptions(true), throwsToolExit());
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1002,14 +1015,10 @@ void main() {
               'run',
               '--no-pub',
               '--no-hot',
+              '--no-resident',
               '--web-header',
               'hurray/headers=flutter',
             ]),
-            throwsToolExit(),
-          );
-
-          await expectLater(
-            () => command.createDebuggingOptions(true),
             throwsToolExit(message: 'Invalid web headers: hurray/headers=flutter'),
           );
         },
@@ -1018,15 +1027,20 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'throws a ToolExit when using --wasm on a non-web platform',
         () async {
+          testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
           final command = RunCommand();
           await expectLater(
-            () => createTestCommandRunner(command).run(<String>['run', '--no-pub', '--wasm']),
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
             throwsToolExit(message: '--wasm is only supported on the web platform'),
           );
         },
@@ -1035,6 +1049,8 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1043,9 +1059,12 @@ void main() {
         () async {
           final command = RunCommand();
           await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', ...WebRendererMode.skwasm.toCliDartDefines]),
+            () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-resident',
+              ...WebRendererMode.skwasm.toCliDartDefines,
+            ]),
             throwsToolExit(message: 'Skwasm renderer requires --wasm'),
           );
         },
@@ -1054,6 +1073,8 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1061,25 +1082,27 @@ void main() {
         'accepts headers with commas in them',
         () async {
           final command = RunCommand();
-          await expectLater(
-            () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--no-hot',
-              '--web-header',
-              'hurray=flutter,flutter=hurray',
-            ]),
-            throwsToolExit(),
-          );
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--web-header',
+            'hurray=flutter,flutter=hurray',
+          ]);
 
-          final DebuggingOptions options = await command.createDebuggingOptions(true);
-          expect(options.webHeaders, <String, String>{'hurray': 'flutter,flutter=hurray'});
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
+            'hurray': 'flutter,flutter=hurray',
+          });
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1241,7 +1264,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(true);
+      final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.webUseSseForDebugBackend, false);
       expect(options.webUseSseForDebugProxy, false);
@@ -1284,7 +1307,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
@@ -1321,7 +1344,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.usingCISystem, true);
     },
@@ -1342,7 +1365,7 @@ void main() {
         throwsToolExit(),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(false);
+      final DebuggingOptions options = await command.createDebuggingOptions();
 
       expect(options.webUseWasm, true);
       expect(options.webRenderer, WebRendererMode.skwasm);
@@ -1371,7 +1394,7 @@ void main() {
         ),
       );
 
-      final DebuggingOptions options = await command.createDebuggingOptions(true);
+      final DebuggingOptions options = await command.createDebuggingOptions();
       expect(options.webLaunchUrl, 'http://flutter.dev');
 
       final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
@@ -1484,6 +1507,7 @@ class FakeDevice extends Fake implements Device {
   @override
   String get displayName => name;
 
+  // THIS IS A KEY FIX
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
@@ -1694,4 +1718,42 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
 
   @override
   bool get singleCharMode => setSingleCharModeHistory.last;
+}
+
+/// A Fake that implements FeatureFlags and enables web.
+class FakeFeatureFlags extends Fake implements FeatureFlags {
+  @override
+  bool get isWebEnabled => true;
+
+  @override
+  bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[];
+}
+
+/// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
+class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
+  DebuggingOptions? lastOptions;
+
+  @override
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    String? target,
+    required bool stayResident,
+    required DebuggingOptions debuggingOptions,
+    required analytics.Analytics analytics,
+    required FileSystem fileSystem,
+    required FlutterProject flutterProject,
+    required Logger logger,
+    required OutputPreferences outputPreferences,
+    required Platform platform,
+    required SystemClock systemClock,
+    required Terminal terminal,
+    bool machine = false,
+    Future<String> Function(String)? urlTunneller,
+  }) {
+    lastOptions = debuggingOptions;
+    return FakeResidentRunner();
+  }
 }
