@@ -3514,22 +3514,22 @@ class _MenuBarDefaultsM3 extends MenuStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<Color?> get backgroundColor {
+  WidgetStateProperty<Color?> get backgroundColor {
     return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
-  MaterialStateProperty<Color?>? get shadowColor {
+  WidgetStateProperty<Color?>? get shadowColor {
     return MaterialStatePropertyAll<Color?>(_colors.shadow);
   }
 
   @override
-  MaterialStateProperty<Color?>? get surfaceTintColor {
+  WidgetStateProperty<Color?>? get surfaceTintColor {
     return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
+  WidgetStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
         horizontal: _kTopLevelMenuHorizontalMinPadding
@@ -3555,7 +3555,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor {
+  WidgetStateProperty<Color?>? get backgroundColor {
     return ButtonStyleButton.allOrNull<Color>(Colors.transparent);
   }
 
@@ -3564,13 +3564,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   // No default surface tint color
 
   @override
-  MaterialStateProperty<double>? get elevation {
+  WidgetStateProperty<double>? get elevation {
     return ButtonStyleButton.allOrNull<double>(0.0);
   }
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get foregroundColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -3588,8 +3588,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Color?>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<Color?>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -3609,23 +3609,23 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize {
+  WidgetStateProperty<double>? get iconSize {
     return const MaterialStatePropertyAll<double>(24.0);
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize {
+  WidgetStateProperty<Size>? get maximumSize {
     return ButtonStyleButton.allOrNull<Size>(Size.infinite);
   }
 
   @override
-  MaterialStateProperty<Size>? get minimumSize {
+  WidgetStateProperty<Size>? get minimumSize {
     return ButtonStyleButton.allOrNull<Size>(const Size(64.0, 48.0));
   }
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor {
-    return MaterialStateProperty.resolveWith(
+  WidgetStateProperty<MouseCursor?>? get mouseCursor {
+    return WidgetStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return SystemMouseCursors.basic;
@@ -3636,8 +3636,8 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor {
-    return MaterialStateProperty.resolveWith(
+  WidgetStateProperty<Color?>? get overlayColor {
+    return WidgetStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.onSurface.withOpacity(0.1);
@@ -3654,14 +3654,14 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding {
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding {
     return ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context));
   }
 
   // No default side
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape {
+  WidgetStateProperty<OutlinedBorder>? get shape {
     return ButtonStyleButton.allOrNull<OutlinedBorder>(const RoundedRectangleBorder());
   }
 
@@ -3672,7 +3672,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialTapTargetSize? get tapTargetSize => Theme.of(context).materialTapTargetSize;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle {
+  WidgetStateProperty<TextStyle?> get textStyle {
     // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
     // Update this when the token is available.
     return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
@@ -3728,22 +3728,22 @@ class _MenuDefaultsM3 extends MenuStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<Color?> get backgroundColor {
+  WidgetStateProperty<Color?> get backgroundColor {
     return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
-  MaterialStateProperty<Color?>? get surfaceTintColor {
+  WidgetStateProperty<Color?>? get surfaceTintColor {
     return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override
-  MaterialStateProperty<Color?>? get shadowColor {
+  WidgetStateProperty<Color?>? get shadowColor {
     return MaterialStatePropertyAll<Color?>(_colors.shadow);
   }
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
+  WidgetStateProperty<EdgeInsetsGeometry?>? get padding {
     return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
