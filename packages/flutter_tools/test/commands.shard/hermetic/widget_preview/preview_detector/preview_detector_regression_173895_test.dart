@@ -54,20 +54,29 @@ void main() {
       await watcher.close();
     });
 
-    test('regression test https://github.com/flutter/flutter/issues/173895', () async {
-      // The Windows directory watcher sometimes decides to shutdown on its own. It's
-      // automatically restarted by package:watcher, but the FileSystemException is rethrown and
-      // needs to be handled. This test verifies that we no longer crash if this exception is
-      // encountered on Windows.
-      await previewDetector.initialize();
-      watcher.controller.addError(
-        const FileSystemException(PreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix),
-      );
-      // Insert an asynchronous gap so the onError handler for the Watcher can be invoked.
-      await Future<void>.delayed(Duration.zero);
-      expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
-    });
-  }, skip: !const LocalPlatform().isWindows);
+    test(
+      'regression test https://github.com/flutter/flutter/issues/173895',
+      () async {
+        // The Windows directory watcher sometimes decides to shutdown on its own. It's
+        // automatically restarted by package:watcher, but the FileSystemException is rethrown and
+        // needs to be handled. This test verifies that we no longer crash if this exception is
+        // encountered on Windows.
+        await previewDetector.initialize();
+        watcher.controller.addError(
+          const FileSystemException(
+            PreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix,
+          ),
+        );
+        // Insert an asynchronous gap so the onError handler for the Watcher can be invoked.
+        await Future<void>.delayed(Duration.zero);
+        expect(
+          logger.traceText,
+          contains(PreviewDetector.kWindowsFileWatcherRestartedMessage),
+        );
+      },
+      skip: !const LocalPlatform().isWindows, // Test is only valid on Windows.
+    );
+  });
 }
 
 class FakeWatcher extends Fake implements Watcher {
