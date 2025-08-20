@@ -1862,7 +1862,6 @@ String nextPlatform(String currentPlatform) {
     'windows',
     'macOS',
     'linux',
-    'fuchsia',
   ];
   // dart format on
   final int index = platforms.indexOf(currentPlatform);
