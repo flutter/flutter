@@ -76,6 +76,10 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     _scopedVisitChildren(node, (MethodDeclaration? node) => _currentMethod = node);
   }
 
+  bool hasRequiredParams(FormalParameterList? params) {
+    return params?.parameters.any((p) => p.isRequired) ?? false;
+  }
+
   @override
   void visitAnnotation(Annotation node) {
     final previewsToProcess = <DartObject>[];
@@ -88,18 +92,24 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     }
 
     for (final preview in previewsToProcess) {
-      assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
-      if (_currentFunction != null) {
-        final returnType = _currentFunction!.returnType! as NamedType;
-        previewEntries.add(
-          PreviewDetails(
-            packageName: packageName,
-            functionName: _currentFunction!.name.toString(),
-            isBuilder: returnType.name.isWidgetBuilder,
-            previewAnnotation: preview,
-          ),
-        );
-      } else if (_currentConstructor != null) {
+      if (_currentFunction != null &&
+          !hasRequiredParams(_currentFunction!.functionExpression.parameters)) {
+        final TypeAnnotation? returnTypeAnnotation = _currentFunction!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            previewEntries.add(
+              PreviewDetails(
+                packageName: packageName,
+                functionName: _currentFunction!.name.toString(),
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
+        }
+      } else if (_currentConstructor != null &&
+          !hasRequiredParams(_currentConstructor!.parameters)) {
         final returnType = _currentConstructor!.returnType as SimpleIdentifier;
         final Token? name = _currentConstructor!.name;
         previewEntries.add(
@@ -110,17 +120,22 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
             previewAnnotation: preview,
           ),
         );
-      } else if (_currentMethod != null) {
-        final returnType = _currentMethod!.returnType! as NamedType;
-        final parentClass = _currentMethod!.parent! as ClassDeclaration;
-        previewEntries.add(
-          PreviewDetails(
-            packageName: packageName,
-            functionName: '${parentClass.name}.${_currentMethod!.name}',
-            isBuilder: returnType.name.isWidgetBuilder,
-            previewAnnotation: preview,
-          ),
-        );
+      } else if (_currentMethod != null && !hasRequiredParams(_currentMethod!.parameters)) {
+        final TypeAnnotation? returnTypeAnnotation = _currentMethod!.returnType;
+        if (returnTypeAnnotation is NamedType) {
+          final Token returnType = returnTypeAnnotation.name;
+          if (returnType.isWidget || returnType.isWidgetBuilder) {
+            final parentClass = _currentMethod!.parent! as ClassDeclaration;
+            previewEntries.add(
+              PreviewDetails(
+                packageName: packageName,
+                functionName: '${parentClass.name}.${_currentMethod!.name}',
+                isBuilder: returnType.isWidgetBuilder,
+                previewAnnotation: preview,
+              ),
+            );
+          }
+        }
       }
     }
   }

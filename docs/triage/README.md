@@ -271,7 +271,7 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
-- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios+sort%3Acreated-asc+-is%3Adraft)
+- [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
 
