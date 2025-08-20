@@ -36,7 +36,7 @@ class TextPaint {
   // TODO(jlavrova): painting the entire block could require a really big canvas
   // Answer: we only do blocks for background and decorations which we do not draw on canvas
   // but rather implement ourselves via CanvasKit API
-  void paintByBlocks(
+  void _paintByBlocks(
     StyleElements styleElement,
     ui.Canvas canvas,
     TextLayout layout,
@@ -76,7 +76,7 @@ class TextPaint {
     }
   }
 
-  void paintByClusters(
+  void _paintByClusters(
     StyleElements styleElement,
     ui.Canvas canvas,
     TextLayout layout,
@@ -223,37 +223,17 @@ class TextPaint {
     }
   }
 
-  void paintLineOnCanvasKit(
-    CanvasKitCanvas canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
-    WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
-    paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
-
-    WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
-    paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
-
-    WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    paintByClusters(StyleElements.text, canvas, layout, line, x, y);
-
-    WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
-    paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
-  }
-
   void paintLine(ui.Canvas canvas, TextLayout layout, TextLine line, double x, double y) {
     WebParagraphDebug.log('paintLineOnCanvasKit.Background: ${line.textRange}');
-    paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
+    _paintByBlocks(StyleElements.background, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Shadows: ${line.textRange}');
-    paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
+    _paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    paintByClusters(StyleElements.text, canvas, layout, line, x, y);
+    _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
-    paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
+    _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
   }
 }

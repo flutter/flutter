@@ -7,9 +7,10 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
+import '../text/paragraph.dart';
 import '../util.dart';
+import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
@@ -306,43 +307,10 @@ class WebTextStyle implements ui.TextStyle {
     return result;
   }
 
-  String fontWeightIndexToCss({int fontWeightIndex = 3}) {
-    switch (fontWeightIndex) {
-      case 0:
-        return '100';
-      case 1:
-        return '200';
-      case 2:
-        return '300';
-      case 3:
-        return 'normal';
-      case 4:
-        return '500';
-      case 5:
-        return '600';
-      case 6:
-        return 'bold';
-      case 7:
-        return '800';
-      case 8:
-        return '900';
-    }
-
-    assert(() {
-      throw AssertionError('Failed to convert font weight $fontWeightIndex to CSS.');
-    }());
-
-    return '';
-  }
-
   String buildCssFontString() {
-    final String cssFontStyle = (fontStyle == null || fontStyle == ui.FontStyle.normal)
-        ? 'normal'
-        : 'italic';
-    final String cssFontWeight = fontWeight == null
-        ? 'normal'
-        : fontWeightIndexToCss(fontWeightIndex: fontWeight!.index);
-    final int cssFontSize = fontSize == null ? 14 : fontSize!.floor();
+    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
+    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
     final String cssFontFamily = canonicalizeFontFamily(originalFontFamily)!;
 
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
@@ -356,17 +324,16 @@ class WebTextStyle implements ui.TextStyle {
     return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
-  void buildFontFeatures(DomCanvasRenderingContext2D context) {
+  void applyFontFeatures(DomCanvasRenderingContext2D context) {
     if (fontFeatures == null) {
       return;
     }
 
+    final fontFeatureSettings = <ui.FontFeature>[];
+    bool optimizeLegibility = false;
+
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
-        case 'liga':
-          context.textRendering = feature.value != 0 ? 'auto' : 'optimizeSpeed';
-          context.canvas!.style.fontFeatureSettings = '"liga" ${feature.value} ';
-          printWarning('"liga" font feature (most probably) will not work.');
         case 'smcp':
           context.fontVariantCaps = feature.value != 0 ? 'small-caps' : 'normal';
         case 'c2sc':
@@ -380,18 +347,17 @@ class WebTextStyle implements ui.TextStyle {
         case 'titl':
           context.fontVariantCaps = feature.value != 0 ? 'titling-caps' : 'normal';
         default:
-          throw UnimplementedError(
-            'FontFeature "${feature.feature}" not supported by WebParagraph',
-          );
+          fontFeatureSettings.add(feature);
+          if (feature.value != 0) {
+            optimizeLegibility = true;
+          }
       }
     }
-  }
 
-  String buildFontVariations() {
-    if (fontVariations == null) {
-      return '';
+    if (fontFeatureSettings.isNotEmpty) {
+      context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
+      context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }
-    throw UnimplementedError('FontVariations not supported by WebParagraph');
   }
 
   bool hasElement(StyleElements element) {
@@ -664,21 +630,6 @@ class WebParagraph implements ui.Paragraph {
   @override
   void layout(ui.ParagraphConstraints constraints) {
     _layout.performLayout(constraints.width);
-  }
-
-  /// Paints this paragraph instance on a [canvas] at the given [offset].
-  // TODO(jlavrova): Delete.
-  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
-    for (final line in _layout.lines) {
-      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
-    }
-  }
-
-  // TODO(jlavrova): Delete.
-  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
-    for (final line in _layout.lines) {
-      _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
-    }
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {

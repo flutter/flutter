@@ -122,7 +122,7 @@ class TextLayout {
       layoutContext.font = styledBlock.style.buildCssFontString();
       layoutContext.letterSpacing = styledBlock.style.buildLetterSpacingString();
       layoutContext.wordSpacing = styledBlock.style.buildWordSpacingString();
-      styledBlock.style.buildFontFeatures(layoutContext);
+      styledBlock.style.applyFontFeatures(layoutContext);
 
       WebParagraphDebug.log(
         'font: ${layoutContext.font} '
