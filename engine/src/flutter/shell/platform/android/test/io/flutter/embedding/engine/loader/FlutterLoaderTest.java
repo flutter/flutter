@@ -655,11 +655,11 @@ public class FlutterLoaderTest {
       String canonicalAotSharedLibraryNameArg =
           FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
       assertFalse(
-          "Args sent to FlutterJni.init incorrectly incorrectly included canonicalized path of symlink: "
+          "Args sent to FlutterJni.init incorrectly included canonicalized path of symlink: "
               + canonicalSymlinkCanonicalizedPath,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
       assertFalse(
-          "Args sent to FlutterJni.init incorrectly incorrectly included absolute path of symlink: "
+          "Args sent to FlutterJni.init incorrectly included absolute path of symlink: "
               + symlinkFile.getAbsolutePath(),
           actualArgs.contains(symlinkArg));
 
