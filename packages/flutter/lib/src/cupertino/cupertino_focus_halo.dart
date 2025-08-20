@@ -7,15 +7,18 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 
-/// {@template flutter.cupertino.CupertinoFocusHalo}
 /// Applies a Cupertino-style focus border around its child when any of child focus nodes gain focus.
+/// 
+/// The shape of the focus halo does not automatically adapt to the child widget
+/// it encloses. You are responsible for specifying a shape that correctly
+/// matches the child's geometry by using the appropriate constructor, such as
+/// [CupertinoFocusHalo.onRect] or [CupertinoFocusHalo.onRRect].
 ///
 /// See also:
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
-/// {@endtemplate}
 class CupertinoFocusHalo extends StatefulWidget {
-  /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  /// Creates a rectangular [CupertinoFocusHalo] around the child
   /// 
   /// For example, to highlight a rectangular section of the widget tree when any button inside that
   /// section has focus, one could write:
@@ -33,7 +36,7 @@ class CupertinoFocusHalo extends StatefulWidget {
   const CupertinoFocusHalo.onRect({required this.child, super.key})
     : _borderRadius = BorderRadius.zero;
 
-  /// {@macro flutter.cupertino.CupertinoFocusHalo}
+  /// Creates a rounded rectangular [CupertinoFocusHalo] around the child
   /// 
   /// For example, to highlight a rounded rectangular section of the widget tree when any button inside that
   /// section has focus, one could write:
