@@ -1,5 +1,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found in the LICENSE file.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -29,14 +30,8 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   String pageTitle = getUseCaseName(SnackBarUseCase());
 
-  /// Shows a SnackBar with accessibility announcement support.
-  /// This method checks if the device supports announcements and announces
-  /// the SnackBar message to assistive technologies after the frame is rendered.
   void showAccessibleSnackBar(BuildContext context, String message, {SnackBarAction? action}) {
-    final SnackBar snackBar = SnackBar(
-      content: Text(message),
-      action: action,
-    );
+    final SnackBar snackBar = SnackBar(content: Text(message), action: action);
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
