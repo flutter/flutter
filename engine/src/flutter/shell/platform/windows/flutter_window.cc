@@ -12,6 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/display_monitor.h"
 #include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -76,9 +77,11 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
 FlutterWindow::FlutterWindow(
     int width,
     int height,
+    std::shared_ptr<DisplayMonitor> const& display_monitor,
     std::shared_ptr<WindowsProcTable> windows_proc_table,
     std::unique_ptr<TextInputManager> text_input_manager)
     : touch_id_generator_(kMinTouchDeviceId, kMaxTouchDeviceId),
+      display_monitor_(display_monitor),
       windows_proc_table_(std::move(windows_proc_table)),
       text_input_manager_(std::move(text_input_manager)),
       ax_fragment_root_(nullptr) {
@@ -303,6 +306,22 @@ PointerLocation FlutterWindow::GetPrimaryPointerLocation() {
   GetCursorPos(&point);
   ScreenToClient(GetWindowHandle(), &point);
   return {(size_t)point.x, (size_t)point.y};
+}
+
+FlutterEngineDisplay FlutterWindow::GetDisplay() {
+  HMONITOR monitor =
+      MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST);
+  for (auto const& display : display_monitor_->GetDisplays()) {
+    if (display.display_id ==
+        reinterpret_cast<FlutterEngineDisplayId>(monitor)) {
+      return display;
+    }
+  }
+
+  FML_LOG(ERROR) << "This window is not associated with any monitor";
+  const auto display = display_monitor_->FromMonitor(monitor);
+  FML_CHECK(display != std::nullopt);
+  return display.value();
 }
 
 void FlutterWindow::OnThemeChange() {

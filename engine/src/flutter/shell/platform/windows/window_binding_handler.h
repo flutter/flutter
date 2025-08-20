@@ -12,6 +12,7 @@
 
 #include "flutter/shell/platform/common/alert_platform_node_delegate.h"
 #include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
@@ -87,6 +88,10 @@ class WindowBindingHandler {
   // Focuses the current window.
   // Returns true if the window was successfully focused.
   virtual bool Focus() = 0;
+
+  // Retrieve information about the display that this window has the largest
+  // area of intersection with.
+  virtual FlutterEngineDisplay GetDisplay() = 0;
 };
 
 }  // namespace flutter

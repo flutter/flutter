@@ -28,6 +28,8 @@
 
 namespace flutter {
 
+class DisplayMonitor;
+
 // A win32 flutter child window used as implementations for flutter view.  In
 // the future, there will likely be a CoreWindow-based FlutterWindow as well.
 // At the point may make sense to dependency inject the native window rather
@@ -38,6 +40,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Create flutter Window for use as child window
   FlutterWindow(int width,
                 int height,
+                std::shared_ptr<DisplayMonitor> const& display_monitor,
                 std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr,
                 std::unique_ptr<TextInputManager> text_input_manager = nullptr);
 
@@ -168,6 +171,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // |FlutterWindowBindingHandler|
   virtual PointerLocation GetPrimaryPointerLocation() override;
+
+  // [FlutterWindowBindingHandler]
+  virtual FlutterEngineDisplay GetDisplay() override;
 
   // Called when a theme change message is issued.
   virtual void OnThemeChange();
@@ -355,6 +361,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // Generates touch point IDs for touch events.
   SequentialIdGenerator touch_id_generator_;
+
+  // Provides access to the list of available displays.
+  std::shared_ptr<DisplayMonitor> display_monitor_;
 
   // Abstracts Windows APIs that may not be available on all supported versions
   // of Windows.

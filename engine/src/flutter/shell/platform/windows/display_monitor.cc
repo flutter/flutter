@@ -26,31 +26,19 @@ DisplayMonitor::DisplayMonitor(FlutterWindowsEngine* engine)
 
 DisplayMonitor::~DisplayMonitor() {}
 
-BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
-                                                  HDC hdc,
-                                                  LPRECT rect,
-                                                  LPARAM data) {
-  MonitorEnumState* state = reinterpret_cast<MonitorEnumState*>(data);
-  const DisplayMonitor* self = state->display_monitor;
-  std::vector<FlutterEngineDisplay>* displays = state->displays;
-
+std::optional<FlutterEngineDisplay> DisplayMonitor::FromMonitor(
+    HMONITOR monitor) const {
   MONITORINFOEXW monitor_info = {};
   monitor_info.cbSize = sizeof(monitor_info);
-  if (self->win32_->GetMonitorInfoW(monitor, &monitor_info) == 0) {
-    // Return TRUE to continue enumeration and skip this monitor.
-    // Returning FALSE would stop the entire enumeration process,
-    // potentially missing other valid monitors.
-    return TRUE;
+  if (win32_->GetMonitorInfoW(monitor, &monitor_info) == 0) {
+    return std::nullopt;
   }
 
   DEVMODEW dev_mode = {};
   dev_mode.dmSize = sizeof(dev_mode);
-  if (!self->win32_->EnumDisplaySettingsW(monitor_info.szDevice,
-                                          ENUM_CURRENT_SETTINGS, &dev_mode)) {
-    // Return TRUE to continue enumeration and skip this monitor.
-    // Returning FALSE would stop the entire enumeration process,
-    // potentially missing other valid monitors.
-    return TRUE;
+  if (!win32_->EnumDisplaySettingsW(monitor_info.szDevice,
+                                    ENUM_CURRENT_SETTINGS, &dev_mode)) {
+    return std::nullopt;
   }
 
   UINT dpi = GetDpiForMonitor(monitor);
@@ -64,8 +52,25 @@ BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
   display.height = monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top;
   display.device_pixel_ratio =
       static_cast<double>(dpi) / static_cast<double>(kDefaultDpi);
+  return display;
+}
 
-  displays->push_back(display);
+BOOL CALLBACK DisplayMonitor::EnumMonitorCallback(HMONITOR monitor,
+                                                  HDC hdc,
+                                                  LPRECT rect,
+                                                  LPARAM data) {
+  MonitorEnumState* state = reinterpret_cast<MonitorEnumState*>(data);
+  const DisplayMonitor* self = state->display_monitor;
+  std::vector<FlutterEngineDisplay>* displays = state->displays;
+  const std::optional<FlutterEngineDisplay> display =
+      self->FromMonitor(monitor);
+  if (!display) {
+    // Return TRUE to continue enumeration and skip this monitor.
+    // Returning FALSE would stop the entire enumeration process,
+    // potentially missing other valid monitors.
+    return TRUE;
+  }
+  displays->push_back(*display);
   return TRUE;
 }
 

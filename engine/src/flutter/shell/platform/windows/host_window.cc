@@ -283,7 +283,7 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
       initial_window_rect.width(), initial_window_rect.height(),
-      engine->windows_proc_table());
+      engine->display_monitor(), engine->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(view_window));
