@@ -8,10 +8,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvaskit_api.dart';
-import 'native_memory.dart';
-import 'path.dart';
-
 class CkPathMetrics extends IterableBase<ui.PathMetric> implements DisposablePathMetrics {
   CkPathMetrics(this._path, this._forceClosed);
 

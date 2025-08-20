@@ -30,7 +30,7 @@ class LayerTree {
   /// tree. This paint pass is just used to measure the bounds for each picture
   /// so we can optimize the total number of canvases required.
   void measure(Frame frame, BitmapSize size) {
-    final MeasureVisitor measureVisitor = MeasureVisitor(size, frame.viewEmbedder!);
+    final MeasureVisitor measureVisitor = MeasureVisitor(size, frame.viewEmbedder);
     if (rootLayer.needsPainting) {
       rootLayer.accept(measureVisitor);
     }

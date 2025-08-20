@@ -15,10 +15,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvaskit_api.dart';
-import 'image.dart';
-import 'native_memory.dart';
-
 /// The CanvasKit implementation of [ui.Codec].
 ///
 /// Wraps `SkAnimatedImage`.

@@ -12,22 +12,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'canvas.dart';
-import 'canvaskit_api.dart';
-import 'color_filter.dart';
-import 'fonts.dart';
-import 'image.dart';
-import 'image_filter.dart';
-import 'multi_surface_rasterizer.dart';
-import 'offscreen_canvas_rasterizer.dart';
-import 'painting.dart';
-import 'path.dart';
-import 'picture_recorder.dart';
-import 'shader.dart';
-import 'surface.dart';
-import 'text.dart';
-import 'vertices.dart';
-
 bool get isExperimentalWebParagraph =>
     configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
 

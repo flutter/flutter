@@ -8,18 +8,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvaskit_api.dart';
-import 'color_filter.dart';
-import 'image.dart';
-import 'image_filter.dart';
-import 'painting.dart';
-import 'path.dart';
-import 'picture.dart';
-import 'picture_recorder.dart';
-import 'text.dart';
-import 'util.dart';
-import 'vertices.dart';
-
 /// Memoized value for ClipOp.Intersect, so we don't have to hit JS-interop
 /// every time we need it.
 final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;

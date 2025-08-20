@@ -9,12 +9,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'canvaskit_api.dart';
-import 'native_memory.dart';
-import 'painting.dart';
-import 'renderer.dart';
-import 'util.dart';
-
 final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];

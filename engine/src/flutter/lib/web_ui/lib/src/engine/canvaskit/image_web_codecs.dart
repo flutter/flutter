@@ -16,9 +16,6 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvaskit_api.dart';
-import 'image.dart';
-
 /// Image decoder backed by the browser's `ImageDecoder`.
 class CkBrowserImageDecoder extends BrowserImageDecoder {
   CkBrowserImageDecoder._({

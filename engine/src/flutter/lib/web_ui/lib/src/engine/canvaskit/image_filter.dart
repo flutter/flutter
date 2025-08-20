@@ -4,11 +4,8 @@
 
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../../engine.dart';
-import 'canvaskit_api.dart';
-import 'color_filter.dart';
 
 typedef SkImageFilterBorrow = void Function(SkImageFilter);
 

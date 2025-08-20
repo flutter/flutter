@@ -5,9 +5,6 @@
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvas.dart';
-import 'surface.dart';
-
 /// A Rasterizer which uses one or many on-screen WebGL contexts to display the
 /// scene. This way of rendering is prone to bugs because there is a limit to
 /// how many WebGL contexts can be live at one time as well as bugs in sharing

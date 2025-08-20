@@ -12,17 +12,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'canvas.dart';
-import 'canvaskit_api.dart';
-import 'image_wasm_codecs.dart';
-import 'image_web_codecs.dart';
-import 'native_memory.dart';
-import 'painting.dart';
-import 'picture.dart';
-import 'picture_recorder.dart';
-import 'renderer.dart';
-import 'surface.dart';
-
 /// Instantiates a [ui.Codec] backed by an `SkAnimatedImage` from Skia.
 Future<ui.Codec> skiaInstantiateImageCodec(
   Uint8List list, [
