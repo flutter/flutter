@@ -93,6 +93,16 @@
 #define FML_ARCH_CPU_ARM64 1
 #define FML_ARCH_CPU_64_BITS 1
 #define FML_ARCH_CPU_LITTLE_ENDIAN 1
+#elif defined(__riscv) && __SIZEOF_POINTER__ == 4
+#define FML_ARCH_CPU_RISCV_FAMILY 1
+#define FML_ARCH_CPU_RISCV32 1
+#define FML_ARCH_CPU_32_BITS 1
+#define FML_ARCH_CPU_LITTLE_ENDIAN 1
+#elif defined(__riscv) && __SIZEOF_POINTER__ == 8
+#define FML_ARCH_CPU_RISCV_FAMILY 1
+#define FML_ARCH_CPU_RISCV64 1
+#define FML_ARCH_CPU_64_BITS 1
+#define FML_ARCH_CPU_LITTLE_ENDIAN 1
 #elif defined(__pnacl__)
 #define FML_ARCH_CPU_32_BITS 1
 #define FML_ARCH_CPU_LITTLE_ENDIAN 1
