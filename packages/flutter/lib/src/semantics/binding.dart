@@ -171,7 +171,16 @@ mixin SemanticsBinding on BindingBase {
     try {
       // Use dynamic invocation to avoid compilation errors
       if (dispatcher.runtimeType.toString().contains('Test')) {
-        dispatcher.setSemanticsTreeEnabled(semanticsEnabled);
+        // Prefer a property-style setter if available.
+        try {
+          // ignore: avoid_dynamic_calls
+          dispatcher.semanticsTreeEnabled = semanticsEnabled;
+        } catch (_) {
+          // Fallback to the legacy method form if provided by the spy.
+
+          // ignore: avoid_dynamic_calls
+          dispatcher.setSemanticsTreeEnabled(semanticsEnabled);
+        }
       }
     } catch (e) {
       // Method not available or failed, ignore

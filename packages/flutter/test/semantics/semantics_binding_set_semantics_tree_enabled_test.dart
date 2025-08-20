@@ -27,9 +27,6 @@ class SemanticsTestBinding extends AutomatedTestWidgetsFlutterBinding {
 
 class TestPlatformDispatcherSpy extends TestPlatformDispatcher {
   TestPlatformDispatcherSpy({required super.platformDispatcher});
+  // A plain public field is sufficient; the framework writes to it via a property assignment.
   bool semanticsTreeEnabled = false;
-  @override
-  void setSemanticsTreeEnabled(bool enabled) {
-    semanticsTreeEnabled = enabled;
-  }
 }
