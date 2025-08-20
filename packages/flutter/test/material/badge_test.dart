@@ -445,6 +445,18 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -7, 30 + 8, 23, badgeRadius)));
   });
 
+  testWidgets('Badge renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Badge(label: Text('X'))),
+        ),
+      ),
+    );
+    final Finder label = find.text('X');
+    expect(tester.getSize(label), Size.zero);
+  });
+
   testWidgets('Badge.count maxCount limits displayed value', (WidgetTester tester) async {
     Widget buildFrame(int count, [int maxCount = 999]) {
       return MaterialApp(
