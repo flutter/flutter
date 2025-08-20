@@ -213,6 +213,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _previewDetector = PreviewDetector(
+    platform: platform,
     previewAnalytics: previewAnalytics,
     projectRoot: rootProject.directory,
     logger: logger,
