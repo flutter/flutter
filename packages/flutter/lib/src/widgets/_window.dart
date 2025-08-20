@@ -17,9 +17,14 @@
 import 'dart:ui' show Display, FlutterView;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import '../foundation/_features.dart';
+import 'basic.dart';
+import 'binding.dart';
+import 'framework.dart';
+import 'inherited_model.dart';
+import 'transitions.dart';
+import 'view.dart';
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.

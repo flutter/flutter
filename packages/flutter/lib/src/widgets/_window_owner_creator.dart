@@ -15,11 +15,11 @@
 // See: https://github.com/flutter/flutter/issues/30701.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import '../foundation/_features.dart';
 import '_window.dart';
 
 import '_window_ffi.dart' if (dart.library.js_util) '_window_web.dart' as window_impl;
+import 'basic.dart';
 
 const String _kWindowingDisabledErrorMessage = '''
 Windowing APIs are not enabled.
