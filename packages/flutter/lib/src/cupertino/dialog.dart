@@ -1500,21 +1500,20 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
             child: Semantics(
               button: true,
               onTap: widget.onPressed,
-              child:
-                  _isFocused
-                      ? DecoratedBox(
-                        decoration: BoxDecoration(color: effectiveFocusBackgroundColor),
-                        child: _ActionSheetActionContent(
-                          isDestructiveAction: widget.isDestructiveAction,
-                          isDefaultAction: widget.isDefaultAction,
-                          child: widget.child,
-                        ),
-                      )
-                      : _ActionSheetActionContent(
+              child: _isFocused
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(color: effectiveFocusBackgroundColor),
+                      child: _ActionSheetActionContent(
                         isDestructiveAction: widget.isDestructiveAction,
                         isDefaultAction: widget.isDefaultAction,
                         child: widget.child,
                       ),
+                    )
+                  : _ActionSheetActionContent(
+                      isDestructiveAction: widget.isDestructiveAction,
+                      isDefaultAction: widget.isDefaultAction,
+                      child: widget.child,
+                    ),
             ),
           ),
         ),
