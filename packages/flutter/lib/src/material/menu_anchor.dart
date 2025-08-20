@@ -148,6 +148,9 @@ class _MenuAnchorScope extends InheritedWidget {
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.3.dart **
 /// {@end-tool}
+///
+/// The [MenuStyle.visualDensity] setting only affects horizontal padding,
+/// and it will never make it negative. Vertical padding is not affected at all.
 class MenuAnchor extends StatefulWidget {
   /// Creates a const [MenuAnchor].
   ///
@@ -3173,11 +3176,11 @@ class _MenuPanelState extends State<_MenuPanel> {
     // Per the Material Design team: don't allow the VisualDensity
     // adjustment to reduce the width of the left/right padding. If we
     // did, VisualDensity.compact, the default for desktop/web, would
-    // reduce the horizontal padding to zero.
-    final double dy = densityAdjustment.dy;
+    // reduce the horizontal padding to zero. Vertical padding
+    // is not affected at all.
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
+        .add(EdgeInsets.symmetric(horizontal: dx))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
@@ -3333,16 +3336,15 @@ class _Submenu extends StatelessWidget {
     // adjustment to reduce the width of the left/right padding. If we
     // did, VisualDensity.compact, the default for desktop/web, would
     // reduce the horizontal padding to zero.
-    final double dy = densityAdjustment.dy;
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
-        .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
+        .add(EdgeInsets.fromLTRB(dx, 0, dx, 0))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     final Rect anchorRect = layerLink == null
         ? Rect.fromLTRB(
             menuPosition.anchorRect.left + dx,
-            menuPosition.anchorRect.top - dy,
+            menuPosition.anchorRect.top,
             menuPosition.anchorRect.right,
             menuPosition.anchorRect.bottom,
           )
