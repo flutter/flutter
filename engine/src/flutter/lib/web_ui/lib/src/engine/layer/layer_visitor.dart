@@ -174,9 +174,14 @@ class PrerollVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     picture.paintBounds = picture.picture.cullRect.shift(picture.offset);
-    // The picture may have been culled on a previous frame, but has since
-    // scrolled back into the clip region. Reset the `isCulled` flag.
-    picture.isCulled = false;
+    if (picture.paintBounds.overlaps(cullRect)) {
+      // The picture may have been culled on a previous frame, but has since
+      // scrolled back into the clip region. Reset the `isCulled` flag.
+      picture.isCulled = false;
+    } else {
+      picture.paintBounds = ui.Rect.zero;
+      picture.isCulled = true;
+    }
   }
 
   @override
@@ -232,7 +237,7 @@ class MeasureVisitor extends LayerVisitor<void> {
   late final LayerCanvas measuringCanvas;
 
   /// A compositor for embedded HTML views.
-  final PlatformViewEmbedder viewEmbedder;
+  final PlatformViewEmbedder? viewEmbedder;
 
   /// Clean up the measuring picture recorder and the picture it recorded.
   void dispose() {
@@ -253,7 +258,11 @@ class MeasureVisitor extends LayerVisitor<void> {
 
   @override
   void visitRoot(RootLayer root) {
-    measureChildren(root);
+    // If all children of the root are clipped out, then `measureChildren` will
+    // crash since the root doesn't need painting.
+    if (root.needsPainting) {
+      measureChildren(root);
+    }
   }
 
   @override
@@ -423,7 +432,7 @@ class MeasureVisitor extends LayerVisitor<void> {
 
     measuringCanvas.restore();
 
-    viewEmbedder.addPictureToUnoptimizedScene(picture);
+    viewEmbedder?.addPictureToUnoptimizedScene(picture);
   }
 
   @override
@@ -452,7 +461,7 @@ class MeasureVisitor extends LayerVisitor<void> {
   void visitPlatformView(PlatformViewLayer platformView) {
     // TODO(harryterkelsen): Warn if we are a child of a backdrop filter or
     // shader mask.
-    viewEmbedder.compositeEmbeddedView(platformView.viewId);
+    viewEmbedder?.compositeEmbeddedView(platformView.viewId);
   }
 }
 
