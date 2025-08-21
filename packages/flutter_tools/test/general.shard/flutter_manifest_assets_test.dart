@@ -98,7 +98,7 @@ flutter:
 
       expect(assets, <AssetsEntry>[
         AssetsEntry(uri: Uri.parse('lib/gallery/abc#xyz')),
-        AssetsEntry(uri: Uri.parse('lib/gallery/abc?Fxyz')),
+        AssetsEntry(uri: Uri.parse('lib/gallery/abc?xyz')),
         AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
       ]);
     });
