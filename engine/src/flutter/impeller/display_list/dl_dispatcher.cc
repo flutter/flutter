@@ -369,8 +369,8 @@ void DlDispatcherBase::skew(DlScalar sx, DlScalar sy) {
 // clang-format off
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::transform2DAffine(
-  DlScalar mxx, DlScalar mxy, DlScalar mxt,
-  DlScalar myx, DlScalar myy, DlScalar myt) {
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
   AUTO_DEPTH_WATCHER(0u);
 
   transformFullPerspective(
@@ -385,10 +385,10 @@ void DlDispatcherBase::transform2DAffine(
 // clang-format off
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::transformFullPerspective(
-  DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
-  DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
-  DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
-  DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   AUTO_DEPTH_WATCHER(0u);
 
   // The order of arguments is row-major but Impeller matrices are
@@ -1045,8 +1045,8 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 // clang-format off
 // 2x3 2D affine subset of a 4x4 transform in row major order
 void FirstPassDispatcher::transform2DAffine(
-  DlScalar mxx, DlScalar mxy, DlScalar mxt,
-  DlScalar myx, DlScalar myy, DlScalar myt) {
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
   matrix_ = matrix_ * Matrix::MakeColumn(
       mxx,  myx,  0.0f, 0.0f,
       mxy,  myy,  0.0f, 0.0f,
@@ -1059,10 +1059,10 @@ void FirstPassDispatcher::transform2DAffine(
 // clang-format off
 // full 4x4 transform in row major order
 void FirstPassDispatcher::transformFullPerspective(
-  DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
-  DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
-  DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
-  DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   matrix_ = matrix_ * Matrix::MakeColumn(
       mxx, myx, mzx, mwx,
       mxy, myy, mzy, mwy,
