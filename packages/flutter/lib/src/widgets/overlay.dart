@@ -887,6 +887,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       }
     }
     return _Theater(
+      overlay: this,
       skipCount: children.length - onstageCount,
       clipBehavior: widget.clipBehavior,
       children: children.reversed.toList(growable: false),
@@ -948,14 +949,15 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 /// The first [skipCount] children are considered "offstage".
 class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
-    this.skipCount = 0,
-    this.clipBehavior = Clip.hardEdge,
+    required this.skipCount,
+    required this.overlay,
+    required this.clipBehavior,
     required List<_OverlayEntryWidget> super.children,
   }) : assert(skipCount >= 0),
        assert(children.length >= skipCount);
 
   final int skipCount;
-
+  final OverlayState overlay;
   final Clip clipBehavior;
 
   @override
@@ -966,12 +968,14 @@ class _Theater extends MultiChildRenderObjectWidget {
     return _RenderTheater(
       skipCount: skipCount,
       textDirection: Directionality.of(context),
+      overlay: overlay,
       clipBehavior: clipBehavior,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderTheater renderObject) {
+    assert(overlay == renderObject.overlay);
     renderObject
       ..skipCount = skipCount
       ..textDirection = Directionality.of(context)
@@ -1155,16 +1159,14 @@ class _TheaterParentData extends StackParentData {
 class _RenderTheater extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
   _RenderTheater({
-    List<RenderBox>? children,
     required TextDirection textDirection,
-    int skipCount = 0,
-    Clip clipBehavior = Clip.hardEdge,
+    required this.overlay,
+    required int skipCount,
+    required Clip clipBehavior,
   }) : assert(skipCount >= 0),
        _textDirection = textDirection,
        _skipCount = skipCount,
-       _clipBehavior = clipBehavior {
-    addAll(children);
-  }
+       _clipBehavior = clipBehavior;
 
   @override
   _RenderTheater get theater => this;
@@ -1216,6 +1218,8 @@ class _RenderTheater extends RenderBox
     _alignmentCache = null;
     markNeedsLayout();
   }
+
+  final OverlayState overlay;
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
@@ -1789,18 +1793,24 @@ class OverlayPortal extends StatefulWidget {
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
+    this.targetsOverlay,
     this.child,
   }) : _targetRootOverlay = false;
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the root [Overlay] when [OverlayPortalController.show] is
   /// called.
+  @Deprecated(
+    'Use OverlayPortal(targetsOverlay: Overlay.of(context, rootOverlay: true)) '
+    'instead. This feature was deprecated after v3.33.0-0.0.pre.',
+  )
   const OverlayPortal.targetsRootOverlay({
     super.key,
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
-  }) : _targetRootOverlay = true;
+  }) : _targetRootOverlay = true,
+       targetsOverlay = null;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
@@ -1828,10 +1838,12 @@ class OverlayPortal extends StatefulWidget {
     required OverlayPortalController controller,
     required OverlayChildLayoutBuilder overlayChildBuilder,
     required Widget? child,
+    OverlayState? targetsOverlay,
   }) : this(
          key: key,
          controller: controller,
          overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
+         targetsOverlay: targetsOverlay,
          child: child,
        );
 
@@ -1859,6 +1871,11 @@ class OverlayPortal extends StatefulWidget {
   /// A widget below this widget in the tree.
   final Widget? child;
 
+  /// The [Overlay] this overlay portal will be attached to.
+  final OverlayState? targetsOverlay;
+
+  // TODO(chunhtai): remove this once OverlayPortal.targetsRootOverlay is
+  // removed.
   final bool _targetRootOverlay;
 
   @override
@@ -1884,12 +1901,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
         locationCache._theater == marker.theater;
   }
 
-  _OverlayEntryLocation _getLocation(int zOrderIndex, bool targetRootOverlay) {
+  OverlayState _getOverlayState() {
+    return widget.targetsOverlay ?? Overlay.of(context, rootOverlay: widget._targetRootOverlay);
+  }
+
+  _OverlayEntryLocation _getLocation(int zOrderIndex) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
-    late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(
-      context,
-      targetRootOverlay: targetRootOverlay,
-    );
+    late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(context, _getOverlayState());
     final bool isCacheValid =
         cachedLocation != null &&
         (!_childModelMayHaveChanged || _isTheSameLocation(cachedLocation, marker));
@@ -1991,7 +2009,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       return _OverlayPortal(overlayLocation: null, overlayChild: null, child: widget.child);
     }
     return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex, widget._targetRootOverlay),
+      overlayLocation: _getLocation(zOrderIndex),
       overlayChild: _DeferredLayout(child: Builder(builder: widget.overlayChildBuilder)),
       child: widget.child,
     );
@@ -2161,22 +2179,19 @@ class _RenderTheaterMarker extends InheritedWidget {
         oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
   }
 
-  static _RenderTheaterMarker of(BuildContext context, {bool targetRootOverlay = false}) {
-    final _RenderTheaterMarker? marker;
-    if (targetRootOverlay) {
-      final InheritedElement? ancestor = _rootRenderTheaterMarkerOf(
-        context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>(),
-      );
-      assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
-      marker = ancestor != null
-          ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker?
-          : null;
-    } else {
-      marker = context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
+  static _RenderTheaterMarker of(BuildContext context, OverlayState targetsOverlay) {
+    InheritedElement? element = context
+        .getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+    _RenderTheaterMarker? marker = element?.widget as _RenderTheaterMarker?;
+    while (marker != null && marker.theater.overlay != targetsOverlay) {
+      element = context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
+      marker = element?.widget as _RenderTheaterMarker?;
     }
     if (marker != null) {
+      context.dependOnInheritedElement(element!);
       return marker;
     }
+
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('No Overlay widget found.'),
       ErrorDescription(
@@ -2190,19 +2205,6 @@ class _RenderTheaterMarker extends InheritedWidget {
       ),
       ...context.describeMissingAncestor(expectedAncestorType: Overlay),
     ]);
-  }
-
-  static InheritedElement? _rootRenderTheaterMarkerOf(InheritedElement? theaterMarkerElement) {
-    assert(theaterMarkerElement == null || theaterMarkerElement.widget is _RenderTheaterMarker);
-    if (theaterMarkerElement == null) {
-      return null;
-    }
-    InheritedElement? ancestor;
-    theaterMarkerElement.visitAncestorElements((Element element) {
-      ancestor = element.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>();
-      return false;
-    });
-    return ancestor == null ? theaterMarkerElement : _rootRenderTheaterMarkerOf(ancestor);
   }
 }
 
