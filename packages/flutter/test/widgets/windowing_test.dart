@@ -119,10 +119,11 @@ void main() {
       });
 
       testWidgets('Can access WindowScope.of', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final BaseWindowController scope = WindowScope.of(context);
@@ -132,13 +133,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final BaseWindowController? scope = WindowScope.maybeOf(context);
@@ -148,13 +152,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.contentSizeOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final Size size = WindowScope.contentSizeOf(context);
@@ -164,13 +171,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeContentSizeOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final Size? size = WindowScope.maybeContentSizeOf(context);
@@ -180,13 +190,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.titleOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final String title = WindowScope.titleOf(context);
@@ -196,13 +209,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeTitleOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final String? title = WindowScope.maybeTitleOf(context);
@@ -212,13 +228,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isActivatedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool isActivated = WindowScope.isActivatedOf(context);
@@ -228,13 +247,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsActivatedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool? isActivated = WindowScope.maybeIsActivatedOf(context);
@@ -244,13 +266,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isMinimizedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool isMinimized = WindowScope.isMinimizedOf(context);
@@ -260,13 +285,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsMinimizedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool? isMinimized = WindowScope.maybeIsMinimizedOf(context);
@@ -276,13 +304,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isMaximizedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool isMaximized = WindowScope.isMaximizedOf(context);
@@ -292,13 +323,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsMaximizedOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool? isMaximized = WindowScope.maybeIsMaximizedOf(context);
@@ -308,13 +342,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.isFullscreenOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool isFullscreen = WindowScope.isFullscreenOf(context);
@@ -324,13 +361,16 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.maybeIsFullscreenOf', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
           RegularWindow(
-            controller: _StubWindowController(tester),
+            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
                 final bool? isFullscreen = WindowScope.maybeIsFullscreenOf(context);
@@ -340,6 +380,8 @@ void main() {
             ),
           ),
         );
+
+        addTearDown(controller.dispose);
       });
     });
   });
