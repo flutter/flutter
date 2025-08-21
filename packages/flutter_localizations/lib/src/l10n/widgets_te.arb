@@ -13,5 +13,7 @@
   "pasteButtonLabel": "పేస్ట్ చేయండి",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
