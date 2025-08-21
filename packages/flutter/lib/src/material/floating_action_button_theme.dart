@@ -13,8 +13,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-
-import 'material_state.dart';
+import 'package:flutter/widgets.dart';
 
 /// Defines default property values for descendant [FloatingActionButton]
 /// widgets.
@@ -142,7 +141,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
   /// If specified, overrides the default value of [FloatingActionButton.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -167,7 +166,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     double? extendedIconLabelSpacing,
     EdgeInsetsGeometry? extendedPadding,
     TextStyle? extendedTextStyle,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -359,7 +358,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
       DiagnosticsProperty<TextStyle>('extendedTextStyle', extendedTextStyle, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>(
         'mouseCursor',
         mouseCursor,
         defaultValue: null,

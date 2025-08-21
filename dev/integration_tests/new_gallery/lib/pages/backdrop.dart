@@ -264,7 +264,8 @@ class _SettingsIcon extends AnimatedWidget {
             child: InkWell(
               onTap: () {
                 toggleSettings();
-                SemanticsService.announce(
+                SemanticsService.sendAnnouncement(
+                  View.of(context),
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
                   GalleryOptions.of(context).resolvedTextDirection()!,
                 );

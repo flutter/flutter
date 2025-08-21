@@ -179,6 +179,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// [TextField] to ensure proper scroll coordination for [TextField] and its
 /// components like [TextSelectionOverlay].
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [Shortcuts] and [Actions] widgets
+/// to create a custom `Shift+Enter` keyboard shortcut for inserting a new line
+/// in a [TextField].
+///
+/// ** See code in examples/api/lib/material/text_field/text_field.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.

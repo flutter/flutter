@@ -718,7 +718,7 @@ class _SwitchRowState extends State<SwitchRow> {
   bool value0 = false;
   bool value1 = true;
 
-  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((
+  final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((
     Set<MaterialState> states,
   ) {
     if (states.contains(MaterialState.selected)) {
@@ -1251,7 +1251,7 @@ ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
         : colors.onSurface.withOpacity(0.12),
     side: BorderSide(color: colors.outline),
   ).copyWith(
-    foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    foregroundColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return colors.onInverseSurface;
       }
