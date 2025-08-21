@@ -203,7 +203,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
-    required int? overlayPortalParent,
+    required int? traversalOwner,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
