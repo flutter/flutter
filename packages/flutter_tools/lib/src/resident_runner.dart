@@ -1855,7 +1855,7 @@ class DebugConnectionInfo {
 /// `packages/flutter/lib/src/foundation/platform.dart`.
 String nextPlatform(String currentPlatform) {
   // The following lines are read by a script, which expects a certain format.
-  // maybe?
+  // maybe? 2
   const platforms = <String>[
     'android',
     'iOS',
