@@ -597,15 +597,18 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    final bool isDeterminate = widget.value != null;
 
+    if (widget.value != null) {
+      // For determinate progress, just build directly without animation
+      return _buildIndicator(context, 0, textDirection);
+    }
+
+    // For indeterminate progress, use repeating animation
     return RepeatingTweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
-      paused: isDeterminate,
       builder: (BuildContext context, Animation<double> animation, Widget? child) {
-        final double effectiveValue = isDeterminate ? 0 : animation.value;
-        return _buildIndicator(context, effectiveValue, textDirection);
+        return _buildIndicator(context, animation.value, textDirection);
       },
     );
   }
@@ -1281,7 +1284,8 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   State<CircularProgressIndicator> createState() => _RefreshProgressIndicatorState();
 }
 
-class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
+class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState
+    with SingleTickerProviderStateMixin {
   static const double _indicatorSize = 41.0;
 
   /// Interval for arrow head to fully grow.
@@ -1308,12 +1312,41 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   // Last value received from the widget before null.
   double? _lastValue;
-  // Store the converted animation value when widget.value is not null
-  double? _currentAnimationValue;
+
+  // Controller to manage the animation state when switching between modes
+  late AnimationController _controller;
 
   /// Force casting the widget as [RefreshProgressIndicator].
   @override
   RefreshProgressIndicator get widget => super.widget as RefreshProgressIndicator;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
+      vsync: this,
+    );
+    if (widget.value == null) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(RefreshProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (widget.value != null && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   // Always show the indeterminate version of the circular progress indicator.
   //
@@ -1326,7 +1359,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
-      _currentAnimationValue =
+      _controller.value =
           _convertTween.transform(value) * (1333 / 2 / _kIndeterminateCircularDuration);
     }
     return _buildAnimation();
@@ -1334,20 +1367,16 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildAnimation() {
-    return RepeatingTweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
-      paused: widget.value != null,
-      builder: (BuildContext context, Animation<double> animation, Widget? child) {
-        // Use the stored value when widget.value is not null, otherwise use the animation
-        final double effectiveValue = _currentAnimationValue ?? animation.value;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
-          1.05 * _CircularProgressIndicatorState._strokeHeadTween.transform(effectiveValue),
-          _CircularProgressIndicatorState._strokeTailTween.transform(effectiveValue),
-          _CircularProgressIndicatorState._offsetTween.transform(effectiveValue),
-          _CircularProgressIndicatorState._rotationTween.transform(effectiveValue),
+          1.05 * _CircularProgressIndicatorState._strokeHeadTween.evaluate(_controller),
+          _CircularProgressIndicatorState._strokeTailTween.evaluate(_controller),
+          _CircularProgressIndicatorState._offsetTween.evaluate(_controller),
+          _CircularProgressIndicatorState._rotationTween.evaluate(_controller),
         );
       },
     );

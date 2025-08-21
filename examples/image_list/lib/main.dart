@@ -210,8 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
           child: RepeatingTweenAnimationBuilder<double>(
             tween: Tween<double>(begin: 0, end: 1),
             duration: const Duration(milliseconds: 3600),
-            builder: (BuildContext context, double turns, Widget? child) {
-              return RotationTransition(turns: AlwaysStoppedAnimation<double>(turns), child: child);
+            builder: (BuildContext context, Animation<double> animation, Widget? child) {
+              return RotationTransition(turns: animation, child: child);
             },
             child: createImage(i + 1, completers[i]),
           ),

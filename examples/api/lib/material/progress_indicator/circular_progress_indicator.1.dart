@@ -45,9 +45,9 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> {
               duration: const Duration(seconds: 2),
               reverse: true,
               paused: determinate,
-              builder: (BuildContext context, double value, Widget? child) {
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
                 return CircularProgressIndicator(
-                  value: determinate ? value : null,
+                  value: determinate ? animation.value : null,
                   semanticsLabel: 'Circular progress indicator',
                 );
               },
