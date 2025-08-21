@@ -1015,7 +1015,7 @@ class ManifestAssetBundle implements AssetBundle {
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
     directoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
@@ -1175,7 +1175,7 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
-  void ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
     if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
       throwToolExit(
         'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
@@ -1207,7 +1207,7 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> flavors,
     required List<AssetTransformerEntry> transformers,
   }) {
-    ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
+    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),
