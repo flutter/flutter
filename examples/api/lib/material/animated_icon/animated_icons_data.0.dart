@@ -49,7 +49,7 @@ class AnimatedIconExample extends StatelessWidget {
         tween: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 2),
         reverse: true,
-        builder: (BuildContext context, double animationValue, Widget? child) {
+        builder: (BuildContext context, Animation<double> animation, Widget? child) {
           return GridView(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
             children: iconsList.entries.map((MapEntry<String, AnimatedIconData> entry) {
@@ -60,7 +60,7 @@ class AnimatedIconExample extends StatelessWidget {
                     children: <Widget>[
                       AnimatedIcon(
                         icon: entry.value,
-                        progress: AlwaysStoppedAnimation<double>(animationValue),
+                        progress: animation,
                         size: 72.0,
                         semanticLabel: entry.key,
                       ),

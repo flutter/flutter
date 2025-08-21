@@ -33,10 +33,10 @@ class AnimatedIconExample extends StatelessWidget {
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
           reverse: true,
-          builder: (BuildContext context, double value, Widget? child) {
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return AnimatedIcon(
               icon: AnimatedIcons.menu_arrow,
-              progress: AlwaysStoppedAnimation<double>(value),
+              progress: animation,
               size: 72.0,
               semanticLabel: 'Show menu',
             );

@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(const example.RotationTransitionExampleApp());
 
     // Find RotationTransition widgets (there may be multiple due to Material transitions)
-    final rotationTransitions = find.byType(RotationTransition);
+    final Finder rotationTransitions = find.byType(RotationTransition);
     expect(rotationTransitions, findsWidgets);
 
     expect(find.byType(FlutterLogo), findsOneWidget);

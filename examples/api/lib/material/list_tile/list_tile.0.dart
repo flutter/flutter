@@ -74,9 +74,9 @@ class ListTileExample extends StatelessWidget {
             duration: const Duration(seconds: 1),
             reverse: true,
             curve: Curves.easeInOut,
-            builder: (BuildContext context, double fadeValue, Widget? child) {
+            builder: (BuildContext context, Animation<double> animation, Widget? child) {
               return FadeTransition(
-                opacity: AlwaysStoppedAnimation<double>(fadeValue),
+                opacity: animation,
                 // Wrap the ListTile in a Material widget so the ListTile has someplace
                 // to draw the animated colors during the fade transition.
                 child: const Material(
@@ -98,9 +98,9 @@ class ListTileExample extends StatelessWidget {
                 duration: const Duration(milliseconds: 850),
                 reverse: true,
                 curve: Curves.easeOut,
-                builder: (BuildContext context, double sizeValue, Widget? child) {
+                builder: (BuildContext context, Animation<double> animation, Widget? child) {
                   return SizeTransition(
-                    sizeFactor: AlwaysStoppedAnimation<double>(sizeValue),
+                    sizeFactor: animation,
                     axisAlignment: -1.0,
                     // Wrap the ListTile in a Material widget so the ListTile has someplace
                     // to draw the animated colors during the size transition.
