@@ -284,7 +284,7 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
       initial_window_rect.width(), initial_window_rect.height(),
-      engine->windows_proc_table());
+      engine->display_monitor(), engine->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
       engine->CreateView(std::move(view_window));
@@ -628,11 +628,9 @@ void HostWindow::SetFullscreen(
     HMONITOR monitor =
         MonitorFromWindow(window_handle_, MONITOR_DEFAULTTONEAREST);
     if (display_id) {
-      for (auto const& display : engine_->display_monitor()->GetDisplays()) {
-        if (display.display_id == display_id) {
-          monitor = reinterpret_cast<HMONITOR>(display.display_id);
-          break;
-        }
+      if (auto const display =
+              engine_->display_monitor()->FindById(display_id.value())) {
+        monitor = reinterpret_cast<HMONITOR>(display->display_id);
       }
     }
 
