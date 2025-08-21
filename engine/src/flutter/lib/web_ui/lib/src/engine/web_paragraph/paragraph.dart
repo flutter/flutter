@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../canvaskit/canvaskit_canvas.dart';
 import '../dom.dart';
 import '../util.dart';
 import 'debug.dart';
@@ -618,6 +617,8 @@ class WebParagraph implements ui.Paragraph {
 
   List<TextLine> get lines => _layout.lines;
 
+  Stopwatch fillByLine = Stopwatch();
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();
 
@@ -683,17 +684,15 @@ class WebParagraph implements ui.Paragraph {
     }
   }
 
-  // TODO(jlavrova): Delete.
-  void paintOnCanvasKit(CanvasKitCanvas canvas, ui.Offset offset) {
-    for (final line in _layout.lines) {
-      _paint.paintLineOnCanvasKit(canvas, _layout, line, offset.dx, offset.dy);
-    }
-  }
-
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    fillByLine.reset();
+    fillByLine.start();
+    _paint.reset(width, height);
     for (final line in _layout.lines) {
-      _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+      _paint.fillByLine(StyleElements.text, _layout, line, offset.dx, offset.dy);
     }
+    fillByLine.stop();
+    _paint.paintAll(canvas, offset.dx, offset.dy);
   }
 
   @override
@@ -779,6 +778,28 @@ class WebParagraph implements ui.Paragraph {
     assert(textRange.end <= text.length);
     return text.substring(textRange.start, textRange.end);
   }
+
+  (
+    Duration d1,
+    Duration d2,
+    Duration d3,
+    Duration d4,
+    Duration d5,
+    Duration d6,
+    Duration d7,
+    Duration d8,
+  )
+  getLayoutDurations() {
+    return _layout.getDurations();
+  }
+
+  (Duration d1, Duration d2, Duration d3, Duration d4) getPaintDurations() {
+    final (Duration d2, Duration d3, Duration d4) = _paint.painter.getDurations();
+    return (fillByLine.elapsed, d2, d3, d4);
+  }
+
+  Duration skiaDuration = Duration.zero;
+  Duration chromeDuration = Duration.zero;
 
   late final TextLayout _layout = TextLayout(this);
   late final TextPaint _paint = TextPaint(this, CanvasKitPainter());

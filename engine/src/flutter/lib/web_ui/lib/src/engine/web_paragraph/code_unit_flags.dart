@@ -10,22 +10,27 @@ class CodeUnitFlags {
   CodeUnitFlags(this._value);
 
   static List<CodeUnitFlags> extractForParagraph(WebParagraph paragraph) {
+    final Stopwatch skiaTimer = Stopwatch()..start();
     final List<CodeUnitInfo> ckFlags = canvasKit.CodeUnits.compute(paragraph.text);
     assert(ckFlags.length == (paragraph.text.length + 1));
 
     final codeUnitFlags = ckFlags.map((info) => CodeUnitFlags(info.flags)).toList();
-
+    skiaTimer.stop();
+    paragraph.skiaDuration = skiaTimer.elapsed;
+    final Stopwatch chromeTimer = Stopwatch()..start();
     // Get text segmentation resuls using browser APIs.
     final SegmentationResult result = segmentText(paragraph.text);
-
+    /*
     // Fill out grapheme flags
     for (final grapheme in result.graphemes) {
       codeUnitFlags[grapheme].graphemeStart = true;
     }
+
     // Fill out word flags
     for (final word in result.words) {
       codeUnitFlags[word].wordBreak = true;
     }
+    */
     // Fill out line break flags
     for (int index = 0; index < result.breaks.length; index += 2) {
       final int lineBreak = result.breaks[index];
@@ -35,6 +40,8 @@ class CodeUnitFlags {
         codeUnitFlags[lineBreak].hardLineBreak = true;
       }
     }
+    chromeTimer.stop();
+    paragraph.chromeDuration = chromeTimer.elapsed;
     return codeUnitFlags;
   }
 

@@ -36,12 +36,22 @@ class TextLayout {
   final WebParagraph paragraph;
 
   final List<CodeUnitFlags> codeUnitFlags;
-  final List<ExtendedTextCluster> textClusters;
+  List<ExtendedTextCluster> textClusters;
   final List<BidiRun> bidiRuns;
   final List<StyledTextBlock> styledTextBlocks;
   final List<TextLine> lines;
 
   Map<int, int> textToClusterMap = <int, int>{};
+
+  Stopwatch timer = Stopwatch();
+  Duration codeUnitFlagsDuration = Duration.zero;
+  Duration textClustersDuration = Duration.zero;
+  Duration bidiRunsDuration = Duration.zero;
+  Duration lineBreaksDuration = Duration.zero;
+  Duration measureTextDuration = Duration.zero;
+  Duration getTextClustersDuration = Duration.zero;
+  Duration queryTextMetricsDuration = Duration.zero;
+  Duration mappingDuration = Duration.zero;
 
   bool hasFlag(ui.TextRange cluster, int flag) {
     return codeUnitFlags[cluster.start].hasFlag(flag);
@@ -57,19 +67,68 @@ class TextLayout {
       return;
     }
 
+    // Clear all the data
+    codeUnitFlags.clear();
+    bidiRuns.clear();
+    styledTextBlocks.clear();
+    lines.clear();
+    textToClusterMap.clear();
+
+    timer.reset();
+    timer.start();
     codeUnitFlags.addAll(CodeUnitFlags.extractForParagraph(paragraph));
+    timer.stop();
+    codeUnitFlagsDuration = timer.elapsed;
 
+    timer.reset();
+    timer.start();
     extractClusterTexts();
+    timer.stop();
+    textClustersDuration = timer.elapsed;
 
+    timer.reset();
+    timer.start();
     extractBidiRuns();
+    timer.stop();
+    bidiRunsDuration = timer.elapsed;
 
+    timer.reset();
+    timer.start();
     wrapText(width);
+    timer.stop();
+    lineBreaksDuration = timer.elapsed;
 
     formatLines(width);
   }
 
+  (
+    Duration d1,
+    Duration d2,
+    Duration d3,
+    Duration d4,
+    Duration d5,
+    Duration d6,
+    Duration d7,
+    Duration d8,
+  )
+  getDurations() {
+    return (
+      codeUnitFlagsDuration,
+      textClustersDuration,
+      bidiRunsDuration,
+      lineBreaksDuration,
+      measureTextDuration,
+      getTextClustersDuration,
+      queryTextMetricsDuration,
+      mappingDuration,
+    );
+  }
+
   void extractClusterTexts() {
+    final Stopwatch timer = Stopwatch();
     // Walk through all the styled text ranges
+    final List<List<DomTextCluster>> allClusters = <List<DomTextCluster>>[];
+    int clustersCount = 0;
     double blockStart = 0.0;
     layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
@@ -80,7 +139,6 @@ class TextLayout {
 
       if (styledBlock.isPlaceholder) {
         assert(styledBlock.size == 1);
-
         styledTextBlocks.add(
           StyledTextBlock.fromPlaceholder(
             styledBlock.start,
@@ -89,26 +147,61 @@ class TextLayout {
             styledBlock.placeholder!,
           ),
         );
+        clustersCount += 1;
+      } else {
+        // Setup all the font affecting attributes
+        // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
+        layoutContext.font = styledBlock.style.buildCssFontString();
+        layoutContext.letterSpacing = styledBlock.style.buildLetterSpacingString();
+        layoutContext.wordSpacing = styledBlock.style.buildWordSpacingString();
+        styledBlock.style.buildFontFeatures(layoutContext);
 
+        WebParagraphDebug.log(
+          'font: ${layoutContext.font} '
+          'featureSettings ${layoutContext.textRendering} ${layoutContext.canvas!.style.fontFeatureSettings} ',
+        );
+
+        timer.reset();
+        timer.start();
+        final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
+        timer.stop();
+        measureTextDuration = timer.elapsed;
+
+        styledTextBlocks.add(
+          StyledTextBlock(styledBlock.start, styledBlock.end, styledBlock.style, blockTextMetrics),
+        );
+        timer.reset();
+        timer.start();
+        allClusters.add(blockTextMetrics.getTextClusters());
+        clustersCount += allClusters.last.length;
+        timer.stop();
+        getTextClustersDuration = timer.elapsed;
+      }
+    }
+    clustersCount += 1; // For the fake last element
+
+    textClusters = List<ExtendedTextCluster>.filled(clustersCount, ExtendedTextCluster.empty());
+    int allClustersIndex = 0;
+    for (int i = 0; i < styledTextBlocks.length; i += 1) {
+      final styledBlock = styledTextBlocks[i];
+
+      if (styledBlock.isPlaceholder) {
         final ui.Rect advance = ui.Rect.fromLTWH(
           0,
           0,
           styledBlock.placeholder!.width,
           styledBlock.placeholder!.height,
         );
-        textClusters.add(
-          ExtendedTextCluster(
-            null,
-            styledBlock.style,
-            0.0,
-            0.0,
-            styledBlock as TextRange,
-            advance,
-            // For placeholders bounds == advance
-            advance,
-            blockStart,
-            styledBlock.isPlaceholder,
-          ),
+        textClusters[allClustersIndex++] = ExtendedTextCluster(
+          null,
+          styledBlock.style,
+          0.0,
+          0.0,
+          styledBlock as TextRange,
+          advance,
+          blockStart,
+          styledBlock.isPlaceholder,
+          '',
         );
         WebParagraphDebug.log(
           'placeholder#${textClusters.length}: [${styledBlock.start}:${styledBlock.end}) [${advance.left}:${advance.right})',
@@ -117,67 +210,87 @@ class TextLayout {
         continue;
       }
 
-      // Setup all the font affecting attributes
-      // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
-      layoutContext.font = styledBlock.style.buildCssFontString();
-      layoutContext.letterSpacing = styledBlock.style.buildLetterSpacingString();
-      layoutContext.wordSpacing = styledBlock.style.buildWordSpacingString();
-      styledBlock.style.buildFontFeatures(layoutContext);
-
-      WebParagraphDebug.log(
-        'font: ${layoutContext.font} '
-        'featureSettings ${layoutContext.textRendering} ${layoutContext.canvas!.style.fontFeatureSettings} ',
-      );
-
-      final DomTextMetrics blockTextMetrics = layoutContext.measureText(text);
-      styledTextBlocks.add(
-        StyledTextBlock(styledBlock.start, styledBlock.end, styledBlock.style, blockTextMetrics),
-      );
-
-      for (final DomTextCluster cluster in blockTextMetrics.getTextClusters()) {
-        textClusters.add(
-          ExtendedTextCluster(
-            cluster,
-            styledBlock.style,
-            blockTextMetrics.fontBoundingBoxAscent,
-            blockTextMetrics.fontBoundingBoxDescent,
-            TextRange(
-              start: cluster.begin + styledBlock.start,
-              end: cluster.end + styledBlock.start,
-            ),
-            blockTextMetrics.getBounds(TextRange(start: cluster.begin, end: cluster.end)),
-            blockTextMetrics.getAdvance(TextRange(start: cluster.begin, end: cluster.end)),
-            blockStart,
-            styledBlock.isPlaceholder,
-          ),
-        );
-      }
+      final blockTextMetrics = styledBlock.textMetrics!;
+      final fontBoundingBoxAscent = blockTextMetrics.fontBoundingBoxAscent;
+      final fontBoundingBoxDescent = blockTextMetrics.fontBoundingBoxDescent;
+      final clusters = allClusters[i];
+      timer.reset();
+      timer.start();
+      double x = 0.0;
+      double y = 0.0;
+      bool firstCluster = true;
       final ui.Rect blockAdvance = blockTextMetrics.getAdvance(
-        TextRange(start: 0, end: text.length),
+        TextRange(start: 0, end: styledBlock.size),
       );
+      for (final cluster in clusters) {
+        final textRange = TextRange(
+          start: cluster.begin + styledBlock.start,
+          end: cluster.end + styledBlock.start,
+        );
+        if (firstCluster) {
+          firstCluster = false;
+        } else {
+          textClusters[allClustersIndex - 1].advance = ui.Rect.fromLTWH(
+            x,
+            y,
+            cluster.x - x,
+            blockAdvance.height,
+          );
+        }
+
+        textClusters[allClustersIndex++] = ExtendedTextCluster(
+          cluster,
+          styledBlock.style,
+          fontBoundingBoxAscent,
+          fontBoundingBoxDescent,
+          TextRange(start: cluster.begin + styledBlock.start, end: cluster.end + styledBlock.start),
+          //blockTextMetrics.getBounds(TextRange(start: cluster.begin, end: cluster.end)),
+          ui.Rect.zero,
+          //blockTextMetrics.getAdvance(TextRange(start: cluster.begin, end: cluster.end)),
+          blockStart,
+          false, // This is not a placeholder
+          paragraph.getText(textRange),
+        );
+        x = cluster.x;
+        y = cluster.y;
+      }
+      textClusters[allClustersIndex - 1].advance = ui.Rect.fromLTWH(
+        x,
+        y,
+        blockAdvance.width - x,
+        blockAdvance.height,
+      );
+      //debugPrintTextMetrics('blockTextMetrics', blockTextMetrics);
+      timer.stop();
+      queryTextMetricsDuration = timer.elapsed;
       blockStart += blockAdvance.width;
     }
-
+    timer.reset();
+    timer.start();
     if (paragraph.text.isNotEmpty) {
-      textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
+      // We need one more "fake" cluster so we can loop through clusters
+      // without checking indexes for being outside of the range
+      textClusters[allClustersIndex] = ExtendedTextCluster.fromLast(
+        textClusters[allClustersIndex - 1],
+      );
+      //textClusters.sort((a, b) => a.textRange.start.compareTo(b.textRange.start));
       for (int i = 0; i < textClusters.length; ++i) {
         final ExtendedTextCluster textCluster = textClusters[i];
         for (int j = textCluster.textRange.start; j < textCluster.textRange.end; j += 1) {
           textToClusterMap[j] = i;
         }
       }
+      textToClusterMap[paragraph.text.length] = textClusters.length - 1;
 
-      // We need one more "fake" cluster so we can loop through clusters
-      // without checking indexes for being outside of the range
-      textToClusterMap[paragraph.text.length] = textClusters.length;
-      textClusters.add(ExtendedTextCluster.fromLast(textClusters.last));
       if (WebParagraphDebug.logging) {
-        debugPrintClusters('Full text');
+        debugPrintClusters('Full text $allClustersIndex');
       }
     } else {
       textToClusterMap[paragraph.text.length] = 0;
-      textClusters.add(ExtendedTextCluster.empty());
+      textClusters[allClustersIndex] = ExtendedTextCluster.empty();
     }
+    timer.stop();
+    mappingDuration = timer.elapsed;
   }
 
   void extractBidiRuns() {
@@ -209,7 +322,7 @@ class TextLayout {
     for (final ExtendedTextCluster cluster in textClusters) {
       final String clusterText = paragraph.getText(cluster.textRange);
       WebParagraphDebug.log(
-        'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width} ${cluster.bounds.left}:${cluster.bounds.right}=${cluster.bounds.width}',
+        'cluster[$i]: "$clusterText" ${cluster.textRange} @${cluster.shift} ${cluster.advance.left}:${cluster.advance.right}=${cluster.advance.width}',
       );
       i += 1;
     }
@@ -241,7 +354,7 @@ class TextLayout {
         final ExtendedTextCluster cluster = textClusters[i];
         final String clusterText = paragraph.getText(cluster.textRange);
         WebParagraphDebug.log(
-          '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.bounds.left}:${cluster.bounds.right} ${cluster.bounds.width}*${cluster.bounds.height} "$clusterText"',
+          '$i: [${cluster.textRange.start}:${cluster.textRange.end}) ${cluster.advance.left}:${cluster.advance.right} ${cluster.advance.width}*${cluster.advance.height} "$clusterText"',
         );
       }
       runIndex += 1;
@@ -440,6 +553,8 @@ class TextLayout {
           line.visualBlocks.add(
             LineClusterBlock(
               styledTextBlock.textMetrics,
+              this,
+              line,
               bidiRun.bidiLevel,
               styledTextBlock.style,
               styleClusterRange,
@@ -830,10 +945,10 @@ class ExtendedTextCluster {
     this.fontBoundingBoxAscent,
     this.fontBoundingBoxDescent,
     this.textRange, // Global indexes
-    this.bounds,
     this.advance,
     this.shift,
     this.placeholder,
+    this.cacheId,
   ) : start = cluster == null ? 0 : cluster.begin,
       end = cluster == null ? 0 : cluster.end;
 
@@ -845,12 +960,6 @@ class ExtendedTextCluster {
       textRange = TextRange(start: lastCluster.textRange.end, end: lastCluster.textRange.end),
       start = lastCluster.start,
       end = lastCluster.end,
-      bounds = ui.Rect.fromLTWH(
-        lastCluster.bounds.right,
-        lastCluster.bounds.top,
-        0,
-        lastCluster.bounds.height,
-      ),
       advance = ui.Rect.fromLTWH(
         lastCluster.advance.right,
         lastCluster.advance.top,
@@ -858,18 +967,19 @@ class ExtendedTextCluster {
         lastCluster.advance.height,
       ),
       shift = lastCluster.shift,
-      placeholder = false;
+      placeholder = false,
+      cacheId = '';
 
   ExtendedTextCluster.empty()
     : shift = 0.0,
       fontBoundingBoxAscent = 0.0,
       fontBoundingBoxDescent = 0.0,
-      bounds = ui.Rect.zero,
       advance = ui.Rect.zero,
       textRange = TextRange(start: 0, end: 0),
       start = 0,
       end = 0,
-      placeholder = false;
+      placeholder = false,
+      cacheId = '';
 
   double absolutePositionX() {
     return /*style block shift*/ shift + /*cluster advance inside the style block*/ advance.left;
@@ -882,10 +992,10 @@ class ExtendedTextCluster {
   TextRange textRange;
   int start;
   int end;
-  ui.Rect bounds;
   ui.Rect advance;
   double shift;
   bool placeholder;
+  String cacheId;
 }
 
 class BidiRun {
@@ -974,6 +1084,8 @@ abstract class LineBlock {
 class LineClusterBlock extends LineBlock {
   LineClusterBlock(
     this.textMetrics,
+    this.layout,
+    this.line,
     super.bidiLevel,
     super.textStyle,
     super.clusterRange,
@@ -1013,6 +1125,8 @@ class LineClusterBlock extends LineBlock {
   }
 
   final DomTextMetrics? textMetrics;
+  final TextLayout? layout;
+  final TextLine line;
 }
 
 class LinePlaceholdeBlock extends LineBlock {
