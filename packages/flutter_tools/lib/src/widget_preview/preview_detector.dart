@@ -55,6 +55,8 @@ class PreviewDetector {
   StreamSubscription<WatchEvent>? _fileWatcher;
   final _mutex = PreviewDetectorMutex();
 
+  var _disposed = false;
+
   @visibleForTesting
   PreviewDependencyGraph get dependencyGraph => _dependencyGraph;
   final PreviewDependencyGraph _dependencyGraph = PreviewDependencyGraph();
@@ -97,6 +99,10 @@ class PreviewDetector {
   }
 
   Future<void> dispose() async {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
     // Guard disposal behind a mutex to make sure the analyzer has finished
     // processing the latest file updates to avoid throwing an exception.
     await _mutex.runGuarded(() async {

@@ -28,6 +28,9 @@ typedef ShutdownHook = FutureOr<void> Function();
 abstract class ShutdownHooks {
   factory ShutdownHooks() = _DefaultShutdownHooks;
 
+  /// Indicates whether the shutdown hooks have been run.
+  bool get isShuttingDown;
+
   /// Registers a [ShutdownHook] to be executed before the VM exits.
   void addShutdownHook(ShutdownHook shutdownHook);
 
@@ -53,6 +56,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   @override
   final registeredHooks = <ShutdownHook>[];
 
+  @override
+  bool get isShuttingDown => _isShuttingDown;
+  var _isShuttingDown = false;
+
   var _shutdownHooksRunning = false;
 
   @override
@@ -63,6 +70,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
 
   @override
   Future<void> runShutdownHooks(Logger logger) async {
+    if (_isShuttingDown) {
+      return;
+    }
+    _isShuttingDown = true;
     logger.printTrace(
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );

@@ -72,6 +72,7 @@ class FlutterDevice {
              logger: globals.logger,
              platform: globals.platform,
              fileSystem: globals.fs,
+             shutdownHooks: globals.shutdownHooks,
            );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -152,6 +153,7 @@ class FlutterDevice {
         logger: globals.logger,
         fileSystem: globals.fs,
         platform: platform,
+        shutdownHooks: globals.shutdownHooks,
       );
     } else {
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
@@ -187,6 +189,7 @@ class FlutterDevice {
         logger: globals.logger,
         platform: platform,
         fileSystem: globals.fs,
+        shutdownHooks: globals.shutdownHooks,
       );
     }
 

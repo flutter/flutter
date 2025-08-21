@@ -591,6 +591,7 @@ void main() {
       platform: FakePlatform(),
       fileSystem: fileSystem,
       stdoutHandler: generatorStdoutHandler,
+      shutdownHooks: FakeShutdownHooks(),
     );
 
     fileSystem.file('lib/foo.txt.dill').createSync(recursive: true);
