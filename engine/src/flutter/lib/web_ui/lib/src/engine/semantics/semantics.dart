@@ -1715,6 +1715,12 @@ class SemanticsObject {
     }
 
     if (_overlayPortalParent != update.overlayPortalParent) {
+      if (_overlayPortalParent != null && _overlayPortalParent != -1 && update.overlayPortalParent == -1) {
+        SemanticsObject? parent = owner._semanticsTree[_overlayPortalParent!];
+        if (parent != null && parent.semanticRole != null) {
+          parent.element.removeAttribute('aria-owns');
+        }
+      }
       _overlayPortalParent = update.overlayPortalParent;
       _markOverlayPortalParentDirty();
     }
@@ -1821,7 +1827,7 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    // Set up aria-owns relationship for overlay portal children
+    // Set up aria-owns relationship for overlay portal children.
     if (overlayPortalParent != -1) {
       SemanticsObject? parent = owner._semanticsTree[overlayPortalParent!];
       if (parent != null && parent.semanticRole != null) {
