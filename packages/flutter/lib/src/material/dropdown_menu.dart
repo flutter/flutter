@@ -1076,7 +1076,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final double? anchorWidth = getWidth(_anchorKey);
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;
@@ -1085,7 +1085,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     } else if (anchorWidth != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(
-        minimumSize: MaterialStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
+        minimumSize: WidgetStateProperty.resolveWith<Size?>((Set<MaterialState> states) {
           final double? effectiveMaximumWidth = effectiveMenuStyle!.maximumSize
               ?.resolve(states)
               ?.width;

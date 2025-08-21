@@ -1176,4 +1176,52 @@ void main() {
 
     expect(formFieldState.currentState!.value, MenuItem.menuItem2);
   });
+
+  testWidgets('onSelect is called exactly once when a selection is made.', (
+    WidgetTester tester,
+  ) async {
+    int onSelectedCallCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            dropdownMenuEntries: menuEntries,
+            initialSelection: MenuItem.menuItem0,
+            onSelected: (MenuItem? value) {
+              onSelectedCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+    // Select a different item than the initial one.
+    await tester.tap(find.byType(DropdownMenu<MenuItem>));
+    await tester.pump();
+    await tester.tap(findMenuItem(MenuItem.menuItem2));
+    await tester.pump();
+
+    expect(onSelectedCallCount, 1);
+  });
+
+  testWidgets('onSelect is called exactly once when reseted', (WidgetTester tester) async {
+    int onSelectedCallCount = 0;
+    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            key: fieldKey,
+            dropdownMenuEntries: menuEntries,
+            onSelected: (MenuItem? value) {
+              onSelectedCallCount++;
+            },
+          ),
+        ),
+      ),
+    );
+
+    fieldKey.currentState!.reset();
+    await tester.pump();
+    expect(onSelectedCallCount, 1);
+  });
 }

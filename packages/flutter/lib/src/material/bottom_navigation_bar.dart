@@ -1050,7 +1050,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       };
 
       final MouseCursor effectiveMouseCursor =
-          MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+          WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
           bottomTheme.mouseCursor?.resolve(states) ??
           MaterialStateMouseCursor.clickable.resolve(states);
 
