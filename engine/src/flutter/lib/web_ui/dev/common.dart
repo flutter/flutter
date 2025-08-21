@@ -255,7 +255,7 @@ final String contentHash = () {
   final result = io.Process.runSync(
     executable,
     args,
-    workingDirectory: environment.flutterRootDir,
+    workingDirectory: environment.flutterRootDir.path,
     stderrEncoding: utf8,
     stdoutEncoding: utf8,
   );
