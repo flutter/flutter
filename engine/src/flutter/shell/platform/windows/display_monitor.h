@@ -31,7 +31,7 @@ class DisplayMonitor {
                            LPARAM lparam,
                            LRESULT* result);
 
-  // Finds the display infomration associated with the id.
+  // Finds the display information associated with the id.
   std::optional<FlutterEngineDisplay> FindById(FlutterEngineDisplayId id);
 
   // Get the display information for all displays

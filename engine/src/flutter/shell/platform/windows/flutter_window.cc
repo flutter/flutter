@@ -312,11 +312,9 @@ FlutterEngineDisplayId FlutterWindow::GetDisplayId() {
   FlutterEngineDisplayId const display_id =
       reinterpret_cast<FlutterEngineDisplayId>(
           MonitorFromWindow(GetWindowHandle(), MONITOR_DEFAULTTONEAREST));
-  if (auto const display = display_monitor_->FindById(display_id)) {
-    return display->display_id;
+  if (!display_monitor_->FindById(display_id)) {
+    FML_LOG(ERROR) << "Current monitor not found in display list.";
   }
-
-  FML_LOG(ERROR) << "Current monitor not found in display list.";
   return display_id;
 }
 
