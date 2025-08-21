@@ -1013,7 +1013,7 @@ struct DrawTextOp final : DrawOpBase {
   void dispatch(DlOpReceiver& receiver) const { receiver.drawText(text, x, y); }
 
   DisplayListCompare equals(const DrawTextOp* other) const {
-    return *text == *other->text && x == other->x && y == other->y
+    return Equals(text, other->text) && x == other->x && y == other->y
                ? DisplayListCompare::kEqual
                : DisplayListCompare::kNotEqual;
   }
