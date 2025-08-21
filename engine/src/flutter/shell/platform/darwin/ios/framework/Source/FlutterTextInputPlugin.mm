@@ -1386,13 +1386,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (_originalAutocapitalizationType == UITextAutocapitalizationTypeWords) {
     NSRange selection = ((FlutterTextRange*)_selectedTextRange).range;
     BOOL shouldCapitalize = NO;
-    if (self.text.length == 0 || selection.location == 0) {
+    if (selection.location == 0) {
       shouldCapitalize = YES;
     } else if (selection.location <= self.text.length) {
       unichar previousChar = [self.text characterAtIndex:selection.location - 1];
-      if ([[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:previousChar]) {
-        shouldCapitalize = YES;
-      }
+      shouldCapitalize =
+          [[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:previousChar];
     }
 
     UITextAutocapitalizationType newCapitalizationType =
