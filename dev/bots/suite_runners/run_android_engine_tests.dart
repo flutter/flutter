@@ -109,8 +109,8 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
     if (impellerBackend == ImpellerBackend.vulkan) {
       androidManifestXml.writeAsStringSync(
         androidManifestXml.readAsStringSync().replaceFirst(
-          kSurfaceControlMetadataDisabled,
-          kSurfaceControlMetadataEnabled,
+          kHCPPMetadataDisabled,
+          kHCPPMetadataEnabled,
         ),
       );
       for (final FileSystemEntity file in mains) {
@@ -129,10 +129,10 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
   }
 }
 
-const String kSurfaceControlMetadataDisabled =
-    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="false" />';
-const String kSurfaceControlMetadataEnabled =
-    '<meta-data android:name="io.flutter.embedding.android.EnableSurfaceControl" android:value="true" />';
+const String kHCPPMetadataDisabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableHCPP" android:value="false" />';
+const String kHCPPMetadataEnabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableHCPP" android:value="true" />';
 
 String _impellerBackendMetadata({required String value}) {
   return '<meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="$value" />';
