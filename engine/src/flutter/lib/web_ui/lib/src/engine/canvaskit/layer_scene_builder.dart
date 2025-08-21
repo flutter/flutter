@@ -44,12 +44,11 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     // Not implemented on Web. Avoid crashing; warn once to guide developers.
     if (!_webPerfOverlayWarned) {
       _webPerfOverlayWarned = true;
-      print(
+      printWarning(
         'showPerformanceOverlay is not supported on Flutter Web. '
-        'Use DevTools Performance (Timeline) instead.'
+        'See: https://docs.flutter.dev/perf/web-performance'
       );
     }
-    // No-op on Web.
   }
 
   @override
