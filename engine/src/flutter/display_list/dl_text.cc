@@ -6,6 +6,9 @@
 
 namespace flutter {
 
-bool DlText::operator==(const DlText& other) const {}
+bool DlText::operator==(const DlText& other) const {
+  return GetTextBlob() == other.GetTextBlob() &&
+         GetTextFrame() == other.GetTextFrame();
+}
 
 }  // namespace flutter
