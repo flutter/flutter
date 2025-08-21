@@ -12,9 +12,9 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
@@ -219,7 +219,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // Notifies the delegate of the updated the cursor rect in Flutter root view
   // coordinates.
-  virtual void OnCursorRectUpdated(const Rect& rect);
+  virtual void OnCursorRectUpdated(const fml::Rect& rect);
 
   // Notifies the delegate that the system IME composing state should be reset.
   virtual void OnResetImeComposing();

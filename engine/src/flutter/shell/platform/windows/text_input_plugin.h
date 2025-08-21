@@ -9,10 +9,10 @@
 #include <map>
 #include <memory>
 
+#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
@@ -91,7 +91,7 @@ class TextInputPlugin {
 
   // Returns the composing rect, or if IME composing mode is not active, the
   // cursor rect in the PipelineOwner root coordinate system.
-  Rect GetCursorRect() const;
+  fml::Rect GetCursorRect() const;
 
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
@@ -126,7 +126,7 @@ class TextInputPlugin {
   // range, or of the caret in the case where there is no current composing
   // range. This value is updated via `TextInput.setMarkedTextRect` messages
   // over the text input channel.
-  Rect composing_rect_;
+  fml::Rect composing_rect_;
 
   // A 4x4 matrix that maps from `EditableText` local coordinates to the
   // coordinate system of `PipelineOwner.rootNode`.

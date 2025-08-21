@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
+#include "flutter/fml/geometry.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/alert_platform_node_delegate.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -129,7 +129,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual void OnComposeChange(const std::u16string& text, int cursor_pos);
 
   // |FlutterWindowBindingHandler|
-  virtual void OnCursorRectUpdated(const Rect& rect) override;
+  virtual void OnCursorRectUpdated(const fml::Rect& rect) override;
 
   // |FlutterWindowBindingHandler|
   virtual void OnResetImeComposing() override;
@@ -253,7 +253,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Called when the cursor rect has been updated.
   //
   // |rect| is in Win32 window coordinates.
-  virtual void UpdateCursorRect(const Rect& rect);
+  virtual void UpdateCursorRect(const fml::Rect& rect);
 
   UINT GetCurrentDPI();
 
