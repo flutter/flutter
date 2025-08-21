@@ -258,6 +258,30 @@ final String gitRevision = () {
   return (result.stdout as String).trim();
 }();
 
+final String contentHash = () {
+  final String executable;
+  final List<String> args;
+  if (io.Platform.isWindows) {
+    executable = 'powershell';
+    args = <String>[path.join('bin', 'internal', 'content_aware_hash.ps1')];
+  } else {
+    executable = path.join('bin', 'internal', 'content_aware_hash.sh');
+  }
+  final result = io.Process.runSync(
+    executable
+    args,
+    workingDirectory: environment.flutterRoot,
+    stderrEncoding: utf8,
+    stdoutEncoding: utf8,
+  );
+  if (result.exitCode != 0) {
+    throw ToolExit(
+      'Failed to get cotnent hash. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
+  }
+  return (result.stdout as String).trim();
+}();
+
 const String kChrome = 'chrome';
 const String kEdge = 'edge';
 const String kFirefox = 'firefox';
