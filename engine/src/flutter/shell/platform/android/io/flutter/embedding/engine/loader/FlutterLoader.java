@@ -51,7 +51,7 @@ public class FlutterLoader {
   private static final String DISABLE_MERGED_PLATFORM_UI_THREAD_KEY =
       "io.flutter.embedding.android.DisableMergedPlatformUIThread";
   private static final String ENABLE_SURFACE_CONTROL =
-      "io.flutter.embedding.android.EnableSurfaceControl";
+      "io.flutter.embedding.android.EnableHCPP";
   private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
   private static final String IMPELLER_LAZY_SHADER_MODE =
       "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
