@@ -1405,7 +1405,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   }
 }
 
-
 - (void)setSelectedTextRange:(UITextRange*)selectedTextRange {
   if (!_enableInteractiveSelection) {
     return;
