@@ -2833,13 +2833,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// If this node indicates an overlay portal child, this is its overlay portal
   /// parent node in traversal order. Otherwise, it is the same as [parent].
-  SemanticsNode? get semanticsParent => _semanticsParent ?? parent;
-  SemanticsNode? _semanticsParent;
-  set semanticsParent(SemanticsNode? value) {
-    if (_semanticsParent == value) {
+  SemanticsNode? get traversalOwner => _traversalOwner ?? parent;
+  SemanticsNode? _traversalOwner;
+  set traversalOwner(SemanticsNode? value) {
+    if (_traversalOwner == value) {
       return;
     }
-    _semanticsParent = value;
+    _traversalOwner = value;
     _markDirty();
   }
 
@@ -3630,7 +3630,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         );
         childToCommonAncestorTransform ??= Matrix4.identity();
         childToCommonAncestorTransform.multiply(childSemanticsNode.transform ?? Matrix4.identity());
-        childSemanticsNode = childSemanticsNode.semanticsParent!;
+        childSemanticsNode = childSemanticsNode.traversalOwner!;
       }
       if (fromDepth <= toDepth) {
         assert(
@@ -3642,7 +3642,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         parentToCommonAncestorTransform.multiply(
           parentSemanticsNode.transform ?? Matrix4.identity(),
         );
-        parentSemanticsNode = parentSemanticsNode.semanticsParent!;
+        parentSemanticsNode = parentSemanticsNode.traversalOwner!;
       }
     }
 
@@ -3705,12 +3705,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     if (_isOverlayPortalChild) {
-      semanticsParent = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
+      traversalOwner = owner!._overlayPortalParentNodes[identifier.split(' ')[0]];
       transform = _computeChildGeometry(
-        parentPaintClipRect: semanticsParent!.parentPaintClipRect,
-        parentSemanticsClipRect: semanticsParent!.parentSemanticsClipRect,
+        parentPaintClipRect: traversalOwner!.parentPaintClipRect,
+        parentSemanticsClipRect: traversalOwner!.parentSemanticsClipRect,
         parentTransform: null,
-        parent: semanticsParent!,
+        parent: traversalOwner!,
         child: this,
       );
     }
@@ -3751,7 +3751,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       transform: kIsWeb
           ? data.transform?.storage ?? _kIdentityTransform
           : transform?.storage ?? data.transform?.storage ?? _kIdentityTransform,
-      overlayPortalParent: overlayPortalParent ?? -1,
+      traversalOwner: overlayPortalParent ?? -1,
       hitTestTransform: data.transform?.storage ?? _kIdentityTransform,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
