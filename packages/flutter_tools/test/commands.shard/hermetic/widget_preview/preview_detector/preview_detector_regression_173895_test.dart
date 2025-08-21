@@ -69,7 +69,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         expect(logger.traceText, contains(PreviewDetector.kWindowsFileWatcherRestartedMessage));
       },
-      skip: !const LocalPlatform().isWindows, // Test is only valid on Windows.
+      skip: !const LocalPlatform().isWindows, // [intended] Test is only valid on Windows.
     );
   });
 }
