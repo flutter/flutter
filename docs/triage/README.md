@@ -291,7 +291,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+no%3Aassignee+-label%3A%22triaged-design%22+-label%3A%22triaged-framework%22+-label%3A%22triaged-linux%22+-label%3A%22triaged-macos%22+-label%3A%22triaged-windows%22+-label%3A%22triaged-android%22+-label%3A%22triaged-ios%22+-label%3A%22triaged-web%22+-label%3A%22triaged-ecosystem%22+-label%3A%22triaged-engine%22+-label%3A%22triaged-tool%22+-label%3A%22triaged-text-input%22+-project%3Aflutter%2F111+)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input)
 
 ### Flutter Tool team (`team-tool`)
 

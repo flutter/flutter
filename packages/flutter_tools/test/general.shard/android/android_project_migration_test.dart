@@ -118,6 +118,55 @@ dependencies {}
 ''';
 }
 
+String sampleKotlinDslModuleGradleBuildFile(String minSdkVersionString) {
+  return r'''
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("dev.flutter.flutter-gradle-plugin")
+}
+
+android {
+    namespace = "com.example.telasdka"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.example.asset_sample"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        $minSdkVersionString
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+''';
+}
+
 final androidStudioDolphin = Version(2021, 3, 1);
 
 const _javaVersion17 = Version.withText(17, 0, 2, 'openjdk 17.0.2');
@@ -391,8 +440,8 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 22', () async {
-        const minSdkVersion20 = 'minSdkVersion = 22';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
+        const minSdkVersion22 = 'minSdkVersion 22';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion22));
         await migration.migrate();
         expect(
           project.appGradleFile.readAsStringSync(),
@@ -401,8 +450,8 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('replace when api 23', () async {
-        const minSdkVersion20 = 'minSdk = 23';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
+        const minSdkVersion23 = 'minSdkVersion 23';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion23));
         await migration.migrate();
         expect(
           project.appGradleFile.readAsStringSync(),
@@ -474,7 +523,50 @@ tasks.register("clean", Delete) {
         await migration.migrate();
         expect(
           project.appGradleFile.readAsStringSync(),
-          sampleModuleGradleBuildFile(replacementMinSdkText),
+          sampleModuleGradleBuildFile(groovyReplacementWithEquals),
+        );
+      });
+    });
+
+    group('migrate min sdk versions less than 24 to flutter.minSdkVersion - kotlin dsl', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late MinSdkVersionMigration migration;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        memoryFileSystem.currentDirectory.childDirectory('android').createSync();
+        bufferLogger = BufferLogger.test();
+        project = FakeKotlinDslAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
+        );
+        project.appGradleFile.parent.createSync(recursive: true);
+        migration = MinSdkVersionMigration(project, bufferLogger);
+      });
+
+      testWithoutContext('do nothing when already using '
+          'flutter.minSdkVersion', () async {
+        project.appGradleFile.writeAsStringSync(
+          sampleKotlinDslModuleGradleBuildFile(kotlinReplacementMinSdkText),
+        );
+        await migration.migrate();
+        expect(
+          project.appGradleFile.readAsStringSync(),
+          sampleKotlinDslModuleGradleBuildFile(kotlinReplacementMinSdkText),
+        );
+      });
+
+      testWithoutContext('migrate when minSdkVersion is set '
+          'using = syntax', () async {
+        const equalsSyntaxMinSdkVersion19 = 'minSdk = 19';
+        project.appGradleFile.writeAsStringSync(
+          sampleKotlinDslModuleGradleBuildFile(equalsSyntaxMinSdkVersion19),
+        );
+        await migration.migrate();
+        expect(
+          project.appGradleFile.readAsStringSync(),
+          sampleKotlinDslModuleGradleBuildFile(kotlinReplacementMinSdkText),
         );
       });
     });
@@ -547,6 +639,13 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
   @override
   File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+}
+
+class FakeKotlinDslAndroidProject extends FakeAndroidProject {
+  FakeKotlinDslAndroidProject({required super.root, super.module, super.plugin});
+
+  @override
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle.kts');
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
