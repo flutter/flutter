@@ -124,7 +124,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       if (overlay_frame == nullptr) {
         std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
             context, android_context_, jni_facade_, surface_factory_);
-        overlay_frame = layer->surface->AcquireFrame(ToSkISize(frame_size_));
+        overlay_frame = layer->surface->AcquireFrame(frame_size_);
         overlay_frame->Canvas()->Clear(flutter::DlColor::kTransparent());
       }
 
@@ -219,7 +219,7 @@ void AndroidExternalViewEmbedder2::PrepareFlutterView(
   if (frame_size_ != frame_size) {
     DestroySurfaces();
   }
-  surface_pool_->SetFrameSize(ToSkISize(frame_size));
+  surface_pool_->SetFrameSize(frame_size);
 
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;

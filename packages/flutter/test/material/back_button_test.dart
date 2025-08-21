@@ -348,4 +348,16 @@ void main() {
     final Finder closeButtonIcon = find.byType(CloseButtonIcon);
     expect(tester.getSize(closeButtonIcon).isEmpty, isTrue);
   });
+
+  testWidgets('BackButton renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scaffold(body: BackButton())),
+        ),
+      ),
+    );
+    final Finder backButtonIcon = find.byType(BackButtonIcon);
+    expect(tester.getSize(backButtonIcon).isEmpty, isTrue);
+  });
 }

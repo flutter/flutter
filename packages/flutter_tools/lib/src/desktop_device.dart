@@ -255,6 +255,9 @@ abstract class DesktopDevice extends Device {
 
     addFlag('enable-dart-profiling=true');
 
+    if (debuggingOptions.profileStartup) {
+      addFlag('profile-startup=true');
+    }
     if (traceStartup) {
       addFlag('trace-startup=true');
     }

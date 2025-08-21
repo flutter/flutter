@@ -41,11 +41,24 @@ flutter/flutter repository. It is based on the more comprehensive official
 
 - All public members should have documentation.
 - **Answer your own questions**: If you have a question, find the answer, and then document it where you first looked.
-- **Avoid useless documentation**: If the documentation just repeats the member's name, it's useless. Explain the *why* and the *how*.
-- **Introduce terms**: Don't assume the reader knows everything. Link to definitions.
+- **Documentation should be useful**: Explain the *why* and the *how*.
+- **Introduce terms**: Assume the reader does not know everything. Link to definitions.
 - **Provide sample code**: Use `{@tool dartpad}` for runnable examples.
+  - Inline code samples are contained within `{@tool dartpad}` and `{@end-tool}`, and use the format of the following example to insert the code sample:
+    - `/// ** See code in examples/api/lib/widgets/sliver/sliver_list.0.dart **`
+    - Do not confuse this format with `/// See also:` sections of the documentation, which provide helpful breadcrumbs to developers.
 - **Provide illustrations or screenshots** for widgets.
 - Use `///` for public-quality documentation, even on private members.
+
+## Review Agent Guidelines
+
+When providing a summary, the review agent must adhere to the following principles:
+- **Be Objective:** Focus on a neutral, descriptive summary of the changes. Avoid subjective value judgments
+  like "good," "bad," "positive," or "negative." The goal is to report what the code does, not to evaluate it.
+- **Use Code as the Source of Truth:** Base all summaries on the code diff. Do not trust or rephrase the PR
+  description, which may be outdated or inaccurate. A summary must reflect the actual changes in the code.
+- **Be Concise:** Generate summaries that are brief and to the point. Focus on the most significant changes,
+  and avoid unnecessary details or verbose explanations. This ensures the feedback is easy to scan and understand.
 
 ## Further Reading
 

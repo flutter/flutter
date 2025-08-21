@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
+  BadgeUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'Badge';
 

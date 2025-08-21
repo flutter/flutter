@@ -191,9 +191,9 @@ class NavigationDrawer extends StatelessWidget {
         bottom: false,
         child: Column(
           children: <Widget>[
-            if (header != null) header!,
+            ?header,
             Expanded(child: ListView(children: wrappedChildren)),
-            if (footer != null) footer!,
+            ?footer,
           ],
         ),
       ),
@@ -745,8 +745,8 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   Color? get indicatorColor => _colors.secondaryContainer;
 
   @override
-  MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<IconThemeData?>? get iconTheme {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
@@ -759,8 +759,8 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   }
 
   @override
-  MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  WidgetStateProperty<TextStyle?>? get labelTextStyle {
+    return WidgetStateProperty.resolveWith((Set<MaterialState> states) {
       final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
         color: states.contains(MaterialState.disabled)

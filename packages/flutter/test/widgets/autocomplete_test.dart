@@ -3270,4 +3270,108 @@ void main() {
     expect(lastOptions, altEleOptions);
     expect(find.byKey(optionsKey), findsOneWidget);
   });
+
+  testWidgets('Autocomplete Semantics announcement', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, kOptions.length);
+    expect(tester.takeAnnouncements().first.message, localizations.searchResultsFound);
+
+    await tester.enterText(find.byKey(fieldKey), 'a');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, greaterThan(0));
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    await tester.enterText(find.byKey(fieldKey), 'zzzz');
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(tester.takeAnnouncements().first.message, localizations.noResultsFound);
+
+    handle.dispose();
+  });
+
+  testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: Scaffold(
+              body: RawAutocomplete<String>(
+                initialValue: const TextEditingValue(text: 'X'),
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback voidCallBack,
+                    ) => TextField(controller: textEditingController),
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => Container(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Finder xText = find.text('X');
+    expect(tester.getSize(xText).isEmpty, isTrue);
+  });
 }

@@ -31,7 +31,7 @@ Surface::SurfaceData GPUSurfaceNoop::GetSurfaceData() const {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceNoop::AcquireFrame(const SkISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceNoop::AcquireFrame(const DlISize& frame_size) {
   auto callback = [](const SurfaceFrame&, DlCanvas*) { return true; };
   auto submit_callback = [](const SurfaceFrame&) { return true; };
   SurfaceFrame::FramebufferInfo framebuffer_info;
@@ -47,7 +47,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceNoop::AcquireFrame(const SkISize& frame_
 }
 
 std::unique_ptr<SurfaceFrame> GPUSurfaceNoop::AcquireFrameFromMTLTexture(
-    const SkISize& frame_size) {
+    const DlISize& frame_size) {
   auto callback = [](const SurfaceFrame&, DlCanvas*) { return true; };
   auto submit_callback = [](const SurfaceFrame&) { return true; };
   SurfaceFrame::FramebufferInfo framebuffer_info;
@@ -63,7 +63,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceNoop::AcquireFrameFromMTLTexture(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceNoop::GetRootTransformation() const {
+DlMatrix GPUSurfaceNoop::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};
