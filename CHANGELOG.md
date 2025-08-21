@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ### [3.35.2](https://github.com/flutter/flutter/releases/tag/3.35.2)
 
-- [flutter/173823](https://github.com/flutter/flutter/issues/173823) - Fixes an issue where Android fails to build when `minSdk` was less than `24` in `build.gradle.kts`.
+- [flutter/173823](https://github.com/flutter/flutter/issues/173823) - On Android builds that do not use flutter.minSdkVersion and do use a value lower than 24 in a kotlin build file, correct flutters auto migration to update value with kotlin syntax. https://github.com/flutter/flutter/pull/173825.
 - [flutter/173741](https://github.com/flutter/flutter/issues/173741) - Fixes an issue that prevents (web) screen readers from pressing buttons through keyboard shortcuts.
 - [flutter/173960](https://github.com/flutter/flutter/issues/173960) - Fixes an issue where starting a widget preview fails if Chrome or Edge is not installed.
 - [flutter/174017](https://github.com/flutter/flutter/issues/174017) - Fixes an issue when running a 32-bit process on a 64-bit Windows system.
