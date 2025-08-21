@@ -143,20 +143,28 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       overlay_canvas->RestoreToCount(restore_count);
     }
   }
+  bool overlay_layer_has_content_this_frame_;
   if (overlay_frame != nullptr) {
-    ShowOverlayLayerIfNeeded();
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
+    overlay_layer_has_content_this_frame_ = true;
   } else {
-    HideOverlayLayerIfNeeded();
+    overlay_layer_has_content_this_frame_ = false;
   }
   frame->Submit();
 
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_)]() -> void {
+       slices = std::move(slices_),
+       overlay_layer_has_content_this_frame_]() -> void {
         jni_facade->swapTransaction();
+
+        if (overlay_layer_has_content_this_frame_) {
+          ShowOverlayLayerIfNeeded();
+        } else {
+          HideOverlayLayerIfNeeded();
+        }
 
         for (int64_t view_id : composition_order) {
           DlRect view_rect = GetViewRect(view_id, view_params);
