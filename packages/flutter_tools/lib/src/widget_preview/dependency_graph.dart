@@ -86,7 +86,11 @@ class _PreviewVisitor extends RecursiveAstVisitor<void> {
     if (node.isMultiPreview) {
       previewsToProcess.addAll(node.findMultiPreviewPreviewNodes(context: _context));
     } else if (node.isPreview) {
-      previewsToProcess.add(node.elementAnnotation!.computeConstantValue()!);
+      final DartObject? evaluatedAnnotation = node.elementAnnotation!.computeConstantValue();
+      if (evaluatedAnnotation == null) {
+        return;
+      }
+      previewsToProcess.add(evaluatedAnnotation);
     } else {
       return;
     }
