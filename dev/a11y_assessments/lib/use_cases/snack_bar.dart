@@ -37,8 +37,9 @@ class MainWidgetState extends State<MainWidget> {
 
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     if (mediaQuery.supportsAnnounce) {
+      FlutterView view = View.of(context);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        SemanticsService.announce(message, TextDirection.ltr);
+        SemanticsService.sendAnnouncement(view, message, TextDirection.ltr);
       });
     }
   }
