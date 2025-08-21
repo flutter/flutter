@@ -1727,6 +1727,14 @@ class OverlayPortalController {
 /// widget rebuilds. Stateful descendants in the overlay child subtree may lose
 /// states as a result.
 ///
+/// {@template flutter.widgets.overlayPortal.targetsOverlay}
+/// Use [targetsOverlay] to choose which [Overlay] this overlay portal
+/// attaches to. Consider using [GlobalKey] or [Overlay.of] with appropriate
+/// [BuildContext] to get the [OverlayState]. One can also use
+/// `Overlay.of(context, rootOverlay: true)` to pick the root [Overlay]. If
+/// not provided, the closest ancestor [Overlay] is chosen.
+/// {@endtemplate}
+///
 /// {@tool dartpad}
 /// This example uses an [OverlayPortal] to build a tooltip that becomes visible
 /// when the user taps on the [child] widget. There's a [DefaultTextStyle] above
@@ -1789,6 +1797,8 @@ class OverlayPortal extends StatefulWidget {
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the closest [Overlay] when [OverlayPortalController.show] is
   /// called.
+  ///
+  /// {@macro flutter.widgets.overlayPortal.targetsOverlay}
   const OverlayPortal({
     super.key,
     required this.controller,
@@ -1833,6 +1843,8 @@ class OverlayPortal extends StatefulWidget {
   /// [CompositedTransformFollower] between the [OverlayPortal] and the [Overlay]
   /// may resulting in an incorrect child paint transform being provided to the
   /// `overlayChildBuilder` and will cause an assertion in debug mode.
+  ///
+  /// {@macro flutter.widgets.overlayPortal.targetsOverlay}
   OverlayPortal.overlayChildLayoutBuilder({
     Key? key,
     required OverlayPortalController controller,
