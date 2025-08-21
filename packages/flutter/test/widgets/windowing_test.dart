@@ -112,10 +112,13 @@ void main() {
       });
 
       testWidgets('RegularWindow does not throw', (WidgetTester tester) async {
+        final _StubWindowController controller = _StubWindowController(tester);
         await tester.pumpWidget(
           wrapWithView: false,
-          RegularWindow(controller: _StubWindowController(tester), child: Container()),
+          RegularWindow(controller: controller, child: Container()),
         );
+
+        addTearDown(controller.dispose);
       });
 
       testWidgets('Can access WindowScope.of', (WidgetTester tester) async {
