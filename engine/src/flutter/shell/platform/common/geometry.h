@@ -96,6 +96,13 @@ class BoxConstraints {
   Size biggest() const { return biggest_; }
   Size smallest() const { return smallest_; }
 
+  bool IsSatisfiedBy(Size size) {
+    return smallest().width() <= size.width() &&
+           size.width() <= biggest().width() &&
+           smallest().height() <= size.height() &&
+           size.height() <= biggest().height();
+  }
+
  private:
   Size smallest_ = Size(0, 0);
   Size biggest_ = Size(std::numeric_limits<double>::infinity(),

@@ -149,6 +149,56 @@ void PerformInitializationTasks(Settings& settings) {
 #endif  //  !SLIMPELLER
 }
 
+bool ValidateViewportMetrics(const ViewportMetrics& metrics) {
+  // Pixel ratio cannot be zero.
+  if (metrics.device_pixel_ratio <= 0) {
+    return false;
+  }
+
+  // If negative values are passed in.
+  if (metrics.physical_width < 0 || metrics.physical_height < 0 ||
+      metrics.physical_min_width_constraint < 0 ||
+      metrics.physical_max_width_constraint < 0 ||
+      metrics.physical_min_height_constraint < 0 ||
+      metrics.physical_max_height_constraint < 0) {
+    return false;
+  }
+
+  // If width is zero and the constraints are tight.
+  if (metrics.physical_width == 0 &&
+      metrics.physical_min_width_constraint ==
+          metrics.physical_max_width_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the width fits in the constraints
+  if (metrics.physical_min_width_constraint !=
+      metrics.physical_max_width_constraint) {
+    if (metrics.physical_min_width_constraint > metrics.physical_width ||
+        metrics.physical_width > metrics.physical_max_width_constraint) {
+      return false;
+    }
+  }
+
+  // If height is zero and the constraints are tight.
+  if (metrics.physical_height == 0 &&
+      metrics.physical_min_height_constraint ==
+          metrics.physical_max_height_constraint) {
+    return false;
+  }
+
+  // If not tight constraints, check the height fits in the constraints
+  if (metrics.physical_min_height_constraint !=
+      metrics.physical_max_height_constraint) {
+    if (metrics.physical_min_height_constraint > metrics.physical_height ||
+        metrics.physical_height > metrics.physical_max_height_constraint) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 }  // namespace
 
 std::pair<DartVMRef, fml::RefPtr<const DartSnapshot>>
@@ -1072,63 +1122,13 @@ void Shell::OnPlatformViewScheduleFrame() {
                                     });
 }
 
-bool Shell::ValidateViewportMetrics(const ViewportMetrics& metrics) {
-  // Pixel ratio cannot be zero.
-  if (metrics.device_pixel_ratio <= 0) {
-    return false;
-  }
-
-  // If negative values are passed in.
-  if (metrics.physical_width < 0 || metrics.physical_height < 0 ||
-      metrics.physical_min_width_constraint < 0 ||
-      metrics.physical_max_width_constraint < 0 ||
-      metrics.physical_min_height_constraint < 0 ||
-      metrics.physical_max_height_constraint < 0) {
-    return false;
-  }
-
-  // If width is zero and the constraints are tight.
-  if (metrics.physical_width == 0 &&
-      metrics.physical_min_width_constraint ==
-          metrics.physical_max_width_constraint) {
-    return false;
-  }
-
-  // If not tight constraints, check the width fits in the constraints
-  if (metrics.physical_min_width_constraint !=
-      metrics.physical_max_width_constraint) {
-    if (metrics.physical_min_width_constraint > metrics.physical_width ||
-        metrics.physical_width > metrics.physical_max_width_constraint) {
-      return false;
-    }
-  }
-
-  // If height is zero and the constraints are tight.
-  if (metrics.physical_height == 0 &&
-      metrics.physical_min_height_constraint ==
-          metrics.physical_max_height_constraint) {
-    return false;
-  }
-
-  // If not tight constraints, check the height fits in the constraints
-  if (metrics.physical_min_height_constraint !=
-      metrics.physical_max_height_constraint) {
-    if (metrics.physical_min_height_constraint > metrics.physical_height ||
-        metrics.physical_height > metrics.physical_max_height_constraint) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewSetViewportMetrics(int64_t view_id,
                                              const ViewportMetrics& metrics) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  if (!Shell::ValidateViewportMetrics(metrics)) {
+  if (!ValidateViewportMetrics(metrics)) {
     // Ignore invalid view-port metrics.
     FML_LOG(ERROR) << "Ignoring invalid viewport metrics";
     return;
@@ -1810,9 +1810,9 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
 bool Shell::ShouldDiscardLayerTree(int64_t view_id,
                                    const flutter::LayerTree& tree) {
   std::scoped_lock<std::mutex> lock(resize_mutex_);
-  auto expected_frame_constraints = ExpectedFrameSize(view_id);
-  return !IsSizeWithinConstraints(tree.frame_size(),
-                                  expected_frame_constraints);
+  auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
+  return !(expected_frame_constraints.IsSatisfiedBy(
+      Size(tree.frame_size().width, tree.frame_size().height)));
 }
 
 // |ServiceProtocol::Handler|
@@ -2221,8 +2221,10 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
   FML_DCHECK(view_id != kFlutterImplicitViewId)
       << "Unexpected request to remove the implicit view #"
       << kFlutterImplicitViewId << ". This view should never be removed.";
-
-  expected_frame_constraints_.erase(view_id);
+  {
+    std::scoped_lock<std::mutex> lock(resize_mutex_);
+    expected_frame_constraints_.erase(view_id);
+  }
   task_runners_.GetUITaskRunner()->RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
       [&task_runners = task_runners_,           //
@@ -2415,7 +2417,7 @@ Shell::GetConcurrentWorkerTaskRunner() const {
   return vm_->GetConcurrentWorkerTaskRunner();
 }
 
-BoxConstraints Shell::ExpectedFrameSize(int64_t view_id) {
+BoxConstraints Shell::ExpectedFrameConstraints(int64_t view_id) {
   auto found = expected_frame_constraints_.find(view_id);
 
   if (found == expected_frame_constraints_.end()) {
@@ -2423,31 +2425,6 @@ BoxConstraints Shell::ExpectedFrameSize(int64_t view_id) {
   }
 
   return found->second;
-}
-
-bool Shell::IsSizeWithinConstraints(const DlISize& size,
-                                    const BoxConstraints& constraints) {
-  if (constraints.smallest().width() > 0.0 &&
-      size.width < constraints.smallest().width()) {
-    return false;
-  }
-
-  if (constraints.biggest().width() > 0.0 &&
-      size.width > constraints.biggest().width()) {
-    return false;
-  }
-
-  if (constraints.smallest().height() > 0.0 &&
-      size.height < constraints.smallest().height()) {
-    return false;
-  }
-
-  if (constraints.biggest().height() > 0.0 &&
-      size.height > constraints.biggest().height()) {
-    return false;
-  }
-
-  return true;
 }
 
 }  // namespace flutter

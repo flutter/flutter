@@ -429,40 +429,6 @@ void ShellTest::TurnOffGPU(Shell* shell, bool value) {
   shell->is_gpu_disabled_sync_switch_->SetSwitch(value);
 }
 
-bool ShellTest::ValidateViewportMetrics(double width,
-                                        double height,
-                                        double min_width,
-                                        double max_width,
-                                        double min_height,
-                                        double max_height) {
-  return Shell::ValidateViewportMetrics(ViewportMetrics(
-      1.0,         // p_device_pixel_ratio
-      width,       // p_physical_width
-      height,      // p_physical_height
-      min_width,   // p_min_width_constraint,
-      max_width,   // p_max_width_constraint,
-      min_height,  // p_min_height_constraint,
-      max_height,  // p_max_height_constraint,
-      0,           // p_physical_padding_top
-      0,           // p_physical_padding_right
-      0,           // p_physical_padding_bottom
-      0,           // p_physical_padding_left
-      0,           // p_physical_view_inset_top,
-      0,           // p_physical_view_inset_right,
-      0,           // p_physical_view_inset_bottom,
-      0,           // p_physical_view_inset_left,
-      0,           // p_physical_system_gesture_inset_top,
-      0,           // p_physical_system_gesture_inset_right,
-      0,           // p_physical_system_gesture_inset_bottom,
-      0,           // p_physical_system_gesture_inset_left,
-      22,          // p_physical_touch_slop,
-      {},          // p_physical_display_features_bounds,
-      {},          // p_physical_display_features_type,
-      {},          // p_physical_display_features_state,
-      0            // p_display_id
-      ));
-}
-
 bool ShellTest::ShouldDiscardLayerTree(Shell* shell,
                                        int64_t view_id,
                                        const flutter::LayerTree& tree) {

@@ -446,9 +446,6 @@ class Shell final : public PlatformView::Delegate,
   InferVmInitDataFromSettings(Settings& settings);
 
  private:
-  // Validate Viewport Metrics
-  static bool ValidateViewportMetrics(const ViewportMetrics& metrics);
-
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
                          rapidjson::Document*)>;
@@ -520,7 +517,7 @@ class Shell final : public PlatformView::Delegate,
   std::mutex resize_mutex_;
 
   // used to discard wrong size layer tree produced during interactive
-  // resizing
+  // reszing
   std::unordered_map<int64_t, BoxConstraints> expected_frame_constraints_;
 
   // Used to communicate the right frame bounds via service protocol.
@@ -808,10 +805,7 @@ class Shell final : public PlatformView::Delegate,
   // directory.
   std::unique_ptr<DirectoryAssetBundle> RestoreOriginalAssetResolver();
 
-  BoxConstraints ExpectedFrameSize(int64_t view_id);
-
-  bool IsSizeWithinConstraints(const DlISize& size,
-                               const BoxConstraints& constraints);
+  BoxConstraints ExpectedFrameConstraints(int64_t view_id);
 
   // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
