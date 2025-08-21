@@ -371,6 +371,10 @@ static void SetViewportMetrics(JNIEnv* env,
       static_cast<double>(devicePixelRatio),
       static_cast<double>(physicalWidth),
       static_cast<double>(physicalHeight),
+      static_cast<double>(physicalWidth),   // minWidth
+      static_cast<double>(physicalWidth),   // maxWidth
+      static_cast<double>(physicalHeight),  // minHeight
+      static_cast<double>(physicalHeight),  // maxHeight
       static_cast<double>(physicalPaddingTop),
       static_cast<double>(physicalPaddingRight),
       static_cast<double>(physicalPaddingBottom),

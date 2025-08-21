@@ -817,9 +817,9 @@ void hooksTests() async {
       <int>[], // display features states
       0, // Display ID
       0.0, // minWidth
-      0.0, // maxWidth
+      1000.0, // maxWidth
       0.0, // minHeight
-      0.0, // maxHeight
+      1000.0, // maxHeight
     );
 
     expectEquals(window.viewInsets.bottom, 0.0);
