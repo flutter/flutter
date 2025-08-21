@@ -253,12 +253,12 @@ void FlutterWindow::OnScroll(double delta_x,
                                       device_id);
 }
 
-void FlutterWindow::OnCursorRectUpdated(const Rect& rect) {
+void FlutterWindow::OnCursorRectUpdated(const fml::Rect& rect) {
   // Convert the rect from Flutter logical coordinates to device coordinates.
   auto scale = GetDpiScale();
-  Point origin(rect.left() * scale, rect.top() * scale);
-  Size size(rect.width() * scale, rect.height() * scale);
-  UpdateCursorRect(Rect(origin, size));
+  fml::Point origin(rect.left() * scale, rect.top() * scale);
+  fml::Size size(rect.width() * scale, rect.height() * scale);
+  UpdateCursorRect(fml::Rect(origin, size));
 }
 
 void FlutterWindow::OnResetImeComposing() {
@@ -874,7 +874,7 @@ void FlutterWindow::AbortImeComposing() {
   text_input_manager_->AbortComposing();
 }
 
-void FlutterWindow::UpdateCursorRect(const Rect& rect) {
+void FlutterWindow::UpdateCursorRect(const fml::Rect& rect) {
   text_input_manager_->UpdateCaretRect(rect);
 }
 

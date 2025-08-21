@@ -19,12 +19,12 @@ constexpr wchar_t kWindowClassName[] = L"FLUTTER_HOST_WINDOW";
 
 // Clamps |size| to the size of the virtual screen. Both the parameter and
 // return size are in physical coordinates.
-flutter::Size ClampToVirtualScreen(flutter::Size size) {
+fml::Size ClampToVirtualScreen(fml::Size size) {
   double const virtual_screen_width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
   double const virtual_screen_height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
-  return flutter::Size(std::clamp(size.width(), 0.0, virtual_screen_width),
-                       std::clamp(size.height(), 0.0, virtual_screen_height));
+  return fml::Size(std::clamp(size.width(), 0.0, virtual_screen_width),
+                   std::clamp(size.height(), 0.0, virtual_screen_height));
 }
 
 void EnableTransparentWindowBackground(HWND hwnd,
@@ -97,11 +97,11 @@ std::string GetLastErrorAsString() {
 // used for the calculation; otherwise, the primary display's DPI is used. The
 // resulting size includes window borders, non-client areas, and drop shadows.
 // On error, returns std::nullopt and logs an error message.
-std::optional<flutter::Size> GetWindowSizeForClientSize(
+std::optional<fml::Size> GetWindowSizeForClientSize(
     flutter::WindowsProcTable const& win32,
-    flutter::Size const& client_size,
-    std::optional<flutter::Size> smallest,
-    std::optional<flutter::Size> biggest,
+    fml::Size const& client_size,
+    std::optional<fml::Size> smallest,
+    std::optional<fml::Size> biggest,
     DWORD window_style,
     DWORD extended_window_style,
     HWND owner_hwnd) {
@@ -127,21 +127,21 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
   double const non_client_height =
       height - (client_size.height() * scale_factor);
   if (smallest) {
-    flutter::Size min_physical_size = ClampToVirtualScreen(
-        flutter::Size(smallest->width() * scale_factor + non_client_width,
-                      smallest->height() * scale_factor + non_client_height));
+    fml::Size min_physical_size = ClampToVirtualScreen(
+        fml::Size(smallest->width() * scale_factor + non_client_width,
+                  smallest->height() * scale_factor + non_client_height));
     width = std::max(width, min_physical_size.width());
     height = std::max(height, min_physical_size.height());
   }
   if (biggest) {
-    flutter::Size max_physical_size = ClampToVirtualScreen(
-        flutter::Size(biggest->width() * scale_factor + non_client_width,
-                      biggest->height() * scale_factor + non_client_height));
+    fml::Size max_physical_size = ClampToVirtualScreen(
+        fml::Size(biggest->width() * scale_factor + non_client_width,
+                  biggest->height() * scale_factor + non_client_height));
     width = std::min(width, max_physical_size.width());
     height = std::min(height, max_physical_size.height());
   }
 
-  return flutter::Size{width, height};
+  return fml::Size{width, height};
 }
 
 // Checks whether the window class of name |class_name| is registered for the
@@ -233,20 +233,20 @@ RECT AdjustToFit(const RECT& parent, const RECT& child) {
   return result;
 }
 
-flutter::BoxConstraints FromWindowConstraints(
+fml::BoxConstraints FromWindowConstraints(
     const flutter::WindowConstraints& preferred_constraints) {
-  std::optional<flutter::Size> smallest, biggest;
+  std::optional<fml::Size> smallest, biggest;
   if (preferred_constraints.has_view_constraints) {
-    smallest = flutter::Size(preferred_constraints.view_min_width,
-                             preferred_constraints.view_min_height);
+    smallest = fml::Size(preferred_constraints.view_min_width,
+                         preferred_constraints.view_min_height);
     if (preferred_constraints.view_max_width > 0 &&
         preferred_constraints.view_max_height > 0) {
-      biggest = flutter::Size(preferred_constraints.view_max_width,
-                              preferred_constraints.view_max_height);
+      biggest = fml::Size(preferred_constraints.view_max_width,
+                          preferred_constraints.view_max_height);
     }
   }
 
-  return flutter::BoxConstraints(smallest, biggest);
+  return fml::BoxConstraints(smallest, biggest);
 }
 
 }  // namespace

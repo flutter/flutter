@@ -88,7 +88,7 @@ void TextInputManager::UpdateImeWindow() {
   }
 }
 
-void TextInputManager::UpdateCaretRect(const Rect& rect) {
+void TextInputManager::UpdateCaretRect(const fml::Rect& rect) {
   caret_rect_ = rect;
 
   if (window_handle_ == nullptr) {
