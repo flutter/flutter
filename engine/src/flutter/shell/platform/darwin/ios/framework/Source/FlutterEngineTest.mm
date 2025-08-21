@@ -195,7 +195,8 @@ FLUTTER_ASSERT_ARC
   id mockEngine = OCMPartialMock(engine);
   NSObject<FlutterPluginRegistrar>* registrar = [mockEngine registrarForPlugin:@"plugin"];
 
-  registrar.viewController;
+  // Verify accessing the viewController getter calls FlutterEngine.viewController.
+  (void)[registrar viewController];
   OCMVerify(times(1), [mockEngine viewController]);
 }
 
