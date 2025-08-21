@@ -951,6 +951,9 @@ void main() {
       controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
       await tester.pump();
 
+      // Nit: ensure no platform message sent before showing toolbar.
+      expect(itemsReceived, isEmpty);
+
       // Show the context menu.
       expect(state.showToolbar(), true);
       await tester.pump();
