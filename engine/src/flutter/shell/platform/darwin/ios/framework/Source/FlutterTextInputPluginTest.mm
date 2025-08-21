@@ -3918,6 +3918,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     id mockPlatformChannel = OCMClassMock([FlutterMethodChannel class]);
     OCMStub([mockEngine platformChannel]).andReturn(mockPlatformChannel);
 
+    OCMStub([mockEngine flutterTextInputView:[OCMArg any]
+                performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                           textInputClient:123])
+        .andDo(^(NSInvocation* invocation) {
+          [mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                                  arguments:@[ @(123), @"test-callback-id" ]];
+        });
+
     FlutterTextInputPlugin* myInputPlugin =
         [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine];
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
