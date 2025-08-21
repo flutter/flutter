@@ -120,8 +120,10 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     }
     std::shared_ptr<DlText> text;
     if (impeller_enabled_) {
+#if IMPELLER_SUPPORTS_RENDERING
       text =
           DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
+#endif
     } else {
       text = DlTextSkia::Make(blob);
     }
