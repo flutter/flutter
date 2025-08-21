@@ -31,11 +31,8 @@ class SlideTransitionExample extends StatelessWidget {
       tween: Tween<double>(begin: 0.0, end: 1.0),
       duration: const Duration(seconds: 2),
       reverse: true,
-      builder: (BuildContext context, double value, Widget? child) {
-        final Animation<double> animation = CurvedAnimation(
-          parent: AlwaysStoppedAnimation<double>(value),
-          curve: Curves.elasticIn,
-        );
+      curve: Curves.elasticIn,
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         return SlideTransition(
           position: Tween<Offset>(
             begin: Offset.zero,

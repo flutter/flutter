@@ -37,9 +37,12 @@ class FadeTransitionExample extends StatelessWidget {
         tween: Tween<double>(begin: 0.0, end: 1.0),
         duration: duration,
         reverse: true,
-        builder: (BuildContext context, double value, Widget? child) {
+        builder: (BuildContext context, Animation<double> animation, Widget? child) {
           return FadeTransition(
-            opacity: CurvedAnimation(parent: AlwaysStoppedAnimation<double>(value), curve: curve),
+            opacity: CurvedAnimation(
+              parent: AlwaysStoppedAnimation<double>(animation.value),
+              curve: curve,
+            ),
             child: child,
           );
         },

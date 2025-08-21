@@ -27,15 +27,10 @@ class RotationTransitionExample extends StatelessWidget {
         child: RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
+          curve: Curves.elasticOut,
           reverse: true,
-          builder: (BuildContext context, double value, Widget? child) {
-            return RotationTransition(
-              turns: CurvedAnimation(
-                parent: AlwaysStoppedAnimation<double>(value),
-                curve: Curves.elasticOut,
-              ),
-              child: child,
-            );
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
+            return RotationTransition(turns: animation, child: child);
           },
           child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
         ),

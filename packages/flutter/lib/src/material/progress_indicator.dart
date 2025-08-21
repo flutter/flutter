@@ -496,8 +496,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       paused: isDeterminate,
-      builder: (BuildContext context, double animationValue, Widget? child) {
-        final double effectiveValue = isDeterminate ? 0 : animationValue;
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
+        final double effectiveValue = isDeterminate ? 0 : animation.value;
         return _buildIndicator(context, effectiveValue, textDirection);
       },
     );
@@ -930,13 +930,13 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       paused: widget.value != null,
-      builder: (BuildContext context, double animationValue, Widget? child) {
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         return _buildMaterialIndicator(
           context,
-          _strokeHeadTween.transform(animationValue),
-          _strokeTailTween.transform(animationValue),
-          _offsetTween.transform(animationValue),
-          _rotationTween.transform(animationValue),
+          _strokeHeadTween.transform(animation.value),
+          _strokeTailTween.transform(animation.value),
+          _offsetTween.transform(animation.value),
+          _rotationTween.transform(animation.value),
         );
       },
     );
@@ -1143,9 +1143,9 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       paused: widget.value != null,
-      builder: (BuildContext context, double animationValue, Widget? child) {
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         // Use the stored value when widget.value is not null, otherwise use the animation
-        final double effectiveValue = _currentAnimationValue ?? animationValue;
+        final double effectiveValue = _currentAnimationValue ?? animation.value;
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little

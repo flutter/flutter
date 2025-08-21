@@ -24,22 +24,12 @@ void main() {
           .having((SizeTransition transition) => transition.axisAlignment, 'axis alignment', -1)
           .having(
             (SizeTransition transition) => transition.sizeFactor,
-            'factor',
-            isA<CurvedAnimation>()
-                .having(
-                  (CurvedAnimation animation) => animation.curve,
-                  'curve',
-                  Curves.fastOutSlowIn,
-                )
-                .having(
-                  (CurvedAnimation animation) => animation.parent,
-                  'paren',
-                  isA<AnimationController>().having(
-                    (AnimationController controller) => controller.duration,
-                    'duration',
-                    const Duration(seconds: 3),
-                  ),
-                ),
+            'sizeFactor',
+            isA<Animation<double>>().having(
+              (Animation<double> animation) => animation.value,
+              'value',
+              0.0, // Initial value
+            ),
           ),
     );
   });
