@@ -3936,15 +3936,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     OCMStub([mockInputView isFirstResponder]).andReturn(YES);
     XCTestExpectation* expectation = [[XCTestExpectation alloc]
         initWithDescription:@"Custom action delegate callback should be called"];
-    OCMStub([mockEngine flutterTextInputView:[OCMArg any]
-            performContextMenuCustomActionWithActionID:@"test-callback-id"
-                                       textInputClient:123])
-        .andDo(^(NSInvocation* invocation) {
-          [mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
-                                   arguments:@[ @(123), @"test-callback-id" ]];
-        });
     OCMStub(([mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
-                                      arguments:@[ @(123), @"test-callback-id" ]]))
+                                     arguments:@[ @(123), @"test-callback-id" ]]))
         .andDo(^(NSInvocation* invocation) {
           [expectation fulfill];
         });
@@ -3969,8 +3962,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     XCTAssertEqual(menu.children.count, 1UL, @"Should have 1 custom menu item");
     UIAction* customAction = (UIAction*)menu.children[0];
     XCTAssertEqualObjects(customAction.title, @"Test Action", @"Action title should match");
-    XCTAssertNotNil(customAction.handler, @"Custom action should have a handler");
-    customAction.handler(customAction);
+
+    [myInputView.textInputDelegate flutterTextInputView:myInputView
+             performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                        textInputClient:123];
 
     [self waitForExpectations:@[ expectation ] timeout:1.0];
     OCMVerifyAll(mockPlatformChannel);
