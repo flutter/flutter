@@ -44,8 +44,8 @@ class _RepeatingTweenAnimationBuilderExampleState
               duration: const Duration(seconds: 2),
               paused: _isPaused,
               reverse: _isReversed,
-              builder: (BuildContext context, double rotation, Widget? child) {
-                return Transform.rotate(angle: math.pi * rotation * 2, child: child);
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
+                return Transform.rotate(angle: math.pi * animation.value * 2, child: child);
               },
               child: Container(width: 100, height: 100, color: Colors.green),
             ),

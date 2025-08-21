@@ -31,11 +31,11 @@ class DefaultTextStyleTransitionExample extends StatelessWidget {
       child: RepeatingTweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 2),
+        curve: Curves.elasticInOut,
         reverse: true,
-        builder: (BuildContext context, double value, Widget? child) {
-          final double curvedValue = Curves.elasticInOut.transform(value);
+        builder: (BuildContext context, Animation<double> animation, Widget? child) {
           return DefaultTextStyleTransition(
-            style: styleTween.animate(AlwaysStoppedAnimation<double>(curvedValue)),
+            style: styleTween.animate(animation),
             child: const Text('Flutter'),
           );
         },

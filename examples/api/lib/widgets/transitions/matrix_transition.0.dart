@@ -34,9 +34,9 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample> {
         child: RepeatingTweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0, end: 1),
           duration: const Duration(seconds: 2),
-          builder: (BuildContext context, double value, Widget? child) {
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return MatrixTransition(
-              animation: AlwaysStoppedAnimation<double>(value),
+              animation: animation,
               onTransform: (double animationValue) {
                 return Matrix4.identity()
                   ..setEntry(3, 2, 0.004)

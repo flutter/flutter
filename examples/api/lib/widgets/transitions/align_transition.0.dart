@@ -28,15 +28,12 @@ class AlignTransitionExample extends StatelessWidget {
         tween: Tween<double>(begin: 0.0, end: 1.0),
         duration: const Duration(seconds: 2),
         reverse: true,
-        builder: (BuildContext context, double value, Widget? child) {
-          final Animation<double> curvedAnimation = CurvedAnimation(
-            parent: AlwaysStoppedAnimation<double>(value),
-            curve: Curves.decelerate,
-          );
+        curve: Curves.decelerate,
+        builder: (BuildContext context, Animation<double> animation, Widget? child) {
           final Animation<AlignmentGeometry> alignmentAnimation = Tween<AlignmentGeometry>(
             begin: Alignment.bottomLeft,
             end: Alignment.center,
-          ).animate(curvedAnimation);
+          ).animate(animation);
           return AlignTransition(alignment: alignmentAnimation, child: child!);
         },
         child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),

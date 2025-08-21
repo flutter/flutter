@@ -89,13 +89,13 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(seconds: 1),
       paused: !widget.animating,
-      builder: (BuildContext context, double position, Widget? child) {
+      builder: (BuildContext context, Animation<double> animation, Widget? child) {
         return SizedBox(
           height: widget.radius * 2,
           width: widget.radius * 2,
           child: CustomPaint(
             painter: _CupertinoActivityIndicatorPainter(
-              position: position,
+              position: animation.value,
               activeColor:
                   widget.color ?? CupertinoDynamicColor.resolve(_kActiveTickColor, context),
               radius: widget.radius,

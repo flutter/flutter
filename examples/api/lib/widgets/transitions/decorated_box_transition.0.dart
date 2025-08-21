@@ -51,9 +51,9 @@ class DecoratedBoxTransitionExample extends StatelessWidget {
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 3),
           reverse: true,
-          builder: (BuildContext context, double value, Widget? child) {
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return DecoratedBoxTransition(
-              decoration: decorationTween.animate(AlwaysStoppedAnimation<double>(value)),
+              decoration: decorationTween.animate(AlwaysStoppedAnimation<double>(animation.value)),
               child: child!,
             );
           },
