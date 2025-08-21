@@ -64,6 +64,7 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
       .is_link = source.isLink,
       .is_slider = source.isSlider,
       .is_keyboard_key = source.isKeyboardKey,
+      .is_combo_box = source.isComboBox,
   });
 }
 
@@ -189,6 +190,9 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   }
   if (flags.isRequired) {
     result |= (1 << 30);
+  }
+  if (flags.isComboBox) {
+    result |= (1 << 31);
   }
 
   return static_cast<FlutterSemanticsFlag>(result);

@@ -48,7 +48,8 @@ void NativeSemanticsFlags::initSemanticsFlags(
     bool isExpanded,
     bool hasSelectedState,
     bool hasRequiredState,
-    bool isRequired) {
+    bool isRequired,
+    bool isComboBox) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto native_semantics_flags = fml::MakeRefCounted<NativeSemanticsFlags>();
   native_semantics_flags->AssociateWithDartWrapper(semantics_flags_handle);
@@ -85,6 +86,7 @@ void NativeSemanticsFlags::initSemanticsFlags(
       .hasSelectedState = hasSelectedState,
       .hasRequiredState = hasRequiredState,
       .isRequired = isRequired,
+      .isComboBox = isComboBox,
   };
 }
 
