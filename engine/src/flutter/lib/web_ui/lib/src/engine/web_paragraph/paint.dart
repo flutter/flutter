@@ -3,24 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-import '../dom.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'painter.dart';
 import 'paragraph.dart';
-
-typedef PaintBlock =
-    void Function(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect);
-
-// TODO(jlavrova): switch to abstract
-typedef PaintCluster =
-    void Function(
-      ui.Canvas canvas,
-      ExtendedTextCluster cluster,
-      bool isDefaultLtr,
-      ui.Rect sourceRect,
-      ui.Rect targetRect,
-    );
 
 /// Paints on a [WebParagraph].
 ///
@@ -203,22 +189,6 @@ class TextPaint {
     );
 
     return (sourceRect, targetRect);
-  }
-
-  void paintLineOnCanvas2D(
-    DomHTMLCanvasElement canvas,
-    TextLayout layout,
-    TextLine line,
-    double x,
-    double y,
-  ) {
-    for (int i = line.textRange.start; i < line.textRange.end; i++) {
-      final clusterText = layout.textClusters[i];
-      final DomCanvasRenderingContext2D context = canvas.context2D;
-      context.font = '50px arial';
-      context.fillStyle = 'black';
-      context.fillTextCluster(clusterText.cluster!, x, y);
-    }
   }
 
   void paintLine(ui.Canvas canvas, TextLayout layout, TextLine line, double x, double y) {
