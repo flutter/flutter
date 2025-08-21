@@ -32,31 +32,25 @@ class PositionedTransitionExample extends StatelessWidget {
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
           reverse: true,
-          builder: (BuildContext context, double value, Widget? child) {
+          builder: (BuildContext context, Animation<double> animation, Widget? child) {
             return Stack(
               children: <Widget>[
                 PositionedTransition(
-                  rect:
-                      RelativeRectTween(
-                        begin: RelativeRect.fromSize(
-                          const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
-                          biggest,
-                        ),
-                        end: RelativeRect.fromSize(
-                          Rect.fromLTWH(
-                            biggest.width - bigLogo,
-                            biggest.height - bigLogo,
-                            bigLogo,
-                            bigLogo,
-                          ),
-                          biggest,
-                        ),
-                      ).animate(
-                        CurvedAnimation(
-                          parent: AlwaysStoppedAnimation<double>(value),
-                          curve: Curves.elasticInOut,
-                        ),
+                  rect: RelativeRectTween(
+                    begin: RelativeRect.fromSize(
+                      const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
+                      biggest,
+                    ),
+                    end: RelativeRect.fromSize(
+                      Rect.fromLTWH(
+                        biggest.width - bigLogo,
+                        biggest.height - bigLogo,
+                        bigLogo,
+                        bigLogo,
                       ),
+                      biggest,
+                    ),
+                  ).animate(CurvedAnimation(parent: animation, curve: Curves.elasticInOut)),
                   child: child!,
                 ),
               ],

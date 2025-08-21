@@ -278,8 +278,9 @@ class RepeatingTweenAnimationBuilder<T extends Object> extends StatefulWidget {
 
   /// Called every time the animation value changes.
   ///
-  /// The current animation value and the [child] are passed to the builder.
-  final ValueWidgetBuilder<T> builder;
+  /// The builder receives the animation object and the optional child.
+  /// The current value can be accessed via animation.value.
+  final Widget Function(BuildContext context, Animation<T> animation, Widget? child) builder;
 
   /// The child widget to pass to the builder.
   ///
@@ -317,8 +318,7 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   void initState() {
     super.initState();
     // Validate inputs early to provide clear error messages
-    assert(
-      widget.tween.begin != null && widget.tween.end != null,
+    assert(widget.tween.begin != null && widget.tween.end != null,
       'Tween provided to RepeatingTweenAnimationBuilder must have non-null begin and end values.',
     );
 
@@ -327,9 +327,10 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
     _updateAnimation();
     _controller.addStatusListener(_handleAnimationStatus);
 
-    // Start the animation only if begin != end
+    // Start the animation if not paused and begin != end
     if (!widget.paused && widget.tween.begin != widget.tween.end) {
-      _controller.forward();
+      // Use .repeat() for proper repeating behavior with reverse
+      _controller.repeat(reverse: widget.reverse);
     }
   }
 
@@ -344,20 +345,11 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
       return;
     }
 
-    switch (status) {
-      case AnimationStatus.completed:
-        if (widget.reverse) {
-          _controller.reverse();
-        } else {
-          _controller.forward(from: 0);
-        }
-      case AnimationStatus.dismissed:
-        if (widget.reverse) {
-          _controller.forward();
-        }
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-      // Do nothing for these states
+    // Only handle status changes when we're manually animating (after resume from pause)
+    // This allows us to continue one cycle manually, then switch back to .repeat()
+    if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+      // After completing one manual cycle, switch back to .repeat() for efficiency
+      _controller.repeat(reverse: widget.reverse);
     }
   }
 
@@ -375,18 +367,27 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
       _updateAnimation();
     }
 
-    // Handle pause/resume
-    if (widget.paused != oldWidget.paused) {
+    // Handle pause/resume or reverse change
+    if (widget.paused != oldWidget.paused || widget.reverse != oldWidget.reverse) {
       if (widget.paused) {
         _controller.stop(canceled: false);
       } else if (widget.tween.begin != widget.tween.end) {
-        // Resume animation based on current status
-        if (_controller.status == AnimationStatus.reverse) {
-          _controller.reverse();
-        } else if (_controller.status == AnimationStatus.completed && widget.reverse) {
-          _controller.reverse();
-        } else {
-          _controller.forward();
+        // If we're resuming or changing reverse
+        if (oldWidget.paused && !widget.paused) {
+          // Resuming from pause - continue from current position
+          // The status listener will switch back to .repeat() after one cycle
+          if (_controller.status == AnimationStatus.forward ||
+              _controller.status == AnimationStatus.completed) {
+            _controller.forward();
+          } else if (_controller.status == AnimationStatus.reverse ||
+              _controller.status == AnimationStatus.dismissed) {
+            _controller.reverse();
+          } else {
+            _controller.forward();
+          }
+        } else if (widget.reverse != oldWidget.reverse) {
+          // Reverse changed while running - restart with .repeat()
+          _controller.repeat(reverse: widget.reverse);
         }
       }
     }
@@ -404,13 +405,13 @@ class _RepeatingTweenAnimationBuilderState<T extends Object>
   Widget build(BuildContext context) {
     // If paused or no animation needed, just build with current value
     if (widget.paused || widget.tween.begin == widget.tween.end) {
-      return widget.builder(context, _animation.value, widget.child);
+      return widget.builder(context, _animation, widget.child);
     }
 
     return AnimatedBuilder(
       animation: _animation,
       builder: (BuildContext context, Widget? child) {
-        return widget.builder(context, _animation.value, child);
+        return widget.builder(context, _animation, child);
       },
       child: widget.child,
     );

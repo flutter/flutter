@@ -35,7 +35,7 @@ class RelativePositionedTransitionExample extends StatelessWidget {
               duration: const Duration(seconds: 2),
               reverse: true,
               curve: Curves.elasticInOut,
-              builder: (BuildContext context, double value, Widget? child) {
+              builder: (BuildContext context, Animation<double> animation, Widget? child) {
                 return RelativePositionedTransition(
                   size: biggest,
                   rect: RectTween(
@@ -46,7 +46,7 @@ class RelativePositionedTransitionExample extends StatelessWidget {
                       smallLogo,
                       smallLogo,
                     ),
-                  ).animate(AlwaysStoppedAnimation<double>(value)),
+                  ).animate(animation),
                   child: child!,
                 );
               },
